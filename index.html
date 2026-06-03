@@ -14,6 +14,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;col
 .brand-sub{font-size:12px;color:#666}
 .week-pill{font-size:11px;background:#e8eaf0;padding:4px 11px;border-radius:20px;color:#555}
 .save-ind{font-size:11px;color:#888;min-width:60px;text-align:right}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;margin-right:4px}
+.sync-dot.live{background:#43A047}
+.sync-dot.saving{background:#FB8C00}
+.sync-dot.error{background:#E53935}
 .who-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.9rem;align-items:center;background:#fff;padding:.75rem 1rem;border-radius:12px;border:1px solid #dde1e7}
 .who-label{font-size:12px;color:#888;margin-right:2px;font-weight:500}
 .who-btn{padding:7px 16px;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#555}
@@ -92,13 +96,17 @@ tr:hover td{background:#fafbfc}
 .welcome-logo{background:#1F4E79;color:#fff;font-weight:800;font-size:20px;padding:10px 20px;border-radius:10px;display:inline-block;margin-bottom:1rem;letter-spacing:.04em}
 .welcome h2{font-size:19px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
 .welcome p{font-size:13px;max-width:360px;margin:0 auto;line-height:1.7;color:#888}
+.loading{text-align:center;padding:2rem;color:#888;font-size:13px}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="app-header">
   <div class="brand"><div class="brand-logo">CORE TEAM</div><div class="brand-sub">Agent Tracker</div></div>
-  <div style="display:flex;gap:8px;align-items:center"><span class="week-pill" id="weekPill"></span><span class="save-ind" id="saveInd"></span></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span class="week-pill" id="weekPill"></span>
+    <span class="save-ind"><span class="sync-dot" id="syncDot"></span><span id="saveInd">Connecting...</span></span>
+  </div>
 </div>
 <div class="who-bar">
   <span class="who-label">I am:</span>
@@ -114,7 +122,7 @@ tr:hover td{background:#fafbfc}
   <div class="welcome">
     <div class="welcome-logo">CORE TEAM</div>
     <h2>Agent Tracker</h2>
-    <p>Select your name above to see your 15 calls for this week, or select Daniel for the manager dashboard.</p>
+    <p>Select your name above to see your 15 calls for this week. All updates sync in real time across the team.</p>
   </div>
 </div>
 <div id="view-lp" class="view">
@@ -128,7 +136,7 @@ tr:hover td{background:#fafbfc}
   <div id="lp-call-list"></div>
 </div>
 <div id="view-daniel" class="view">
-  <div class="section-head">This week's LP performance</div>
+  <div class="section-head">This week's LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(renderDaniel)" style="text-transform:none;font-size:11px">Refresh</button></div>
   <div class="d-grid" id="d-grid"></div>
   <div class="section-head">Going cold <span style="font-size:11px;font-weight:400;text-transform:none;color:#aaa">(14+ days since LP last called)</span></div>
   <div id="d-cold"></div>
@@ -145,8 +153,8 @@ tr:hover td{background:#fafbfc}
 <div id="view-admin" class="view">
   <div class="admin-section">
     <h3>Upload Power BI export</h3>
-    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Upload your weekly Power BI .xlsx to refresh levels and activity dates. Agents with no activity in 90+ days are flagged and removed from rotation.</p>
-    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">Click to upload Power BI .xlsx<br><span style="font-size:11px;color:#aaa">Agents inactive 90+ days flagged automatically</span></div>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Upload your weekly Power BI .xlsx to refresh levels and activity dates.</p>
+    <div class="upload-zone" onclick="loadXLSX()">Click to upload Power BI .xlsx<br><span style="font-size:11px;color:#aaa">Agents inactive 90+ days flagged automatically</span></div>
     <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleUpload(this)">
     <div id="upload-result" style="margin-top:8px;font-size:12px"></div>
   </div>
@@ -180,170 +188,214 @@ tr:hover td{background:#fafbfc}
 </div>
 </div>
 <script>
-var STORAGE_KEY = "ct_v5";
+var SUPABASE_URL = "https://uclucbdkjqyqdvifyptx.supabase.co";
+var SUPABASE_KEY = "sb_publishable_gjEeEFwnF_cWhGoT6IRKoQ_dP33ijwH";
+var STORAGE_KEY = "ct_agents_v1";
 var LPS = ["Gavin","Karen","Osgood","Jordan","Said"];
 var LP_COLORS = {Gavin:"#4CAF50",Karen:"#2196F3",Osgood:"#FF9800",Jordan:"#E91E63",Said:"#9C27B0"};
 var TODAY = new Date(); TODAY.setHours(0,0,0,0);
 var CUTOFF = new Date(TODAY); CUTOFF.setDate(TODAY.getDate()-90);
 var SEED = [["TIARA VILLATORO", "A", "Karen", "2026-05-08", "2026-05-08", "2026-04-10", "2026-05-22"], ["BRANDON THOMPSON", "A", "Osgood", "2026-06-01", "2026-05-26", "2026-05-04", "2026-06-01"], ["TODD STONE", "A", "Said", "2026-05-22", "2026-04-30", "2026-04-13", "2026-05-08"], ["MEGAN LYNCH", "A", "Gavin", "2026-05-30", "2026-05-30", "2026-06-01", "2026-04-01"], ["TINA HOFFMAN", "A", "Gavin", "2023-10-10", "2026-05-06", "2026-05-27", "2026-02-10"], ["DUSTIN GOLDMAN", "A", "Osgood", "2026-04-20", "2026-04-24", "2026-03-30", "2026-03-27"], ["KEVIN SPEERT", "A", "Gavin", "2026-05-08", "2026-05-28", "2026-06-01", "2026-05-22"], ["OSCAR MARTINEZ", "A", "Karen", "2026-05-15", "2026-06-01", "2026-05-05", "2026-06-15"], ["RACQUEL LUDAWAY", "A", "Gavin", "2026-05-29", "2026-05-19", "2026-04-16", "2026-06-04"], ["CHRIS REED", "A", "Said", "2026-05-13", "2026-05-13", "2026-05-08", "2026-05-27"], ["DERON BENDER", "A", "Gavin", "2025-08-11", "2026-04-24", "2026-04-28", "2026-05-08"], ["MICHELLE ERICKSON", "A", "Gavin", "2025-08-04", "2026-03-25", "2026-04-20", "2026-04-10"], ["SAHAR SHALASH", "A", "Said", "2026-05-31", "2026-05-31", "2026-05-09", "2026-05-29"], ["CINDA ERICKSON", "B", "Gavin", "2026-04-23", "2026-04-21", "2026-02-24", "2026-03-26"], ["CONNER KOCHANSKY", "B", "Gavin", "2026-05-30", "2026-05-19", "2026-05-21", "2026-05-20"], ["INGRID CORREIA", "B", "Gavin", "2026-05-08", "2026-05-08", "2025-12-11", "2026-01-05"], ["JOHN BRUNNER", "B", "Osgood", "2026-06-01", "2026-06-01", "2025-10-06", "2025-11-17"], ["KANDIS HALL", "B", "Osgood", "2026-01-04", "2026-01-31", "2026-02-25", "2026-03-17"], ["KRISTINA MURPHY", "B", "Osgood", "2026-05-29", "2026-05-11", "2025-10-03", "2025-10-21"], ["MARK BOYD", "B", "Gavin", null, "2026-03-28", "2026-04-08", "2026-02-02"], ["MATTHEW MONTALVO", "B", "Karen", "2026-04-09", "2026-04-09", "2026-05-29", "2025-11-20"], ["SETH COLBURN", "B", "Said", "2025-04-23", "2026-03-31", "2026-04-06", "2026-04-30"], ["DAN MANLEY", "B", "Gavin", "2025-11-23", "2026-04-29", "2026-05-01", "2026-05-19"], ["DEANNE RHYNEHARDT", "B", "Osgood", "2026-05-22", "2026-05-28", "2026-05-05", "2025-09-17"], ["ERIKA WEHNER", "B", "Gavin", null, "2026-04-13", "2026-05-28", "2026-05-11"], ["HEATHER HENRY-MINOR", "B", "Jordan", "2026-04-07", "2026-04-15", "2026-05-05", "2026-05-28"], ["KATIE SUMMERS", "B", "Gavin", null, "2026-04-22", "2026-02-26", "2026-05-29"], ["KHADIJA FARAH", "B", "Jordan", "2026-05-16", "2026-05-17", "2026-02-09", "2026-03-06"], ["KISHMA JAMES", "B", "Said", "2026-03-16", "2026-03-12", "2025-06-09", "2025-07-14"], ["MARIA COMAS", "B", "Karen", "2026-04-27", "2026-03-02", "2025-06-19", "2025-07-21"], ["MARTIN HOPKINS", "B", "Karen", "2026-02-12", "2026-04-28", "2026-01-29", "2026-02-20"], ["MARY MCMICHAEL", "B", "Said", "2026-04-13", "2026-04-13", "2025-09-11", "2025-10-10"], ["MATT PIPER", "B", "Osgood", "2026-05-19", "2026-05-19", "2025-11-11", "2025-12-01"], ["NATALIE ESTRELLA", "B", "Karen", "2026-05-25", "2026-05-25", "2025-10-08", "2025-11-03"], ["STACEY LAMBRIGHT", "B", "Jordan", null, "2026-03-25", "2026-03-26", "2026-04-07"], ["TRACY BERARD", "B", "Jordan", null, "2026-04-04", "2026-04-14", "2026-05-27"], ["AIMEE WHITLOCK", "C", "Gavin", null, "2025-01-14", "2026-02-10", "2026-04-15"], ["ALEXIS REED", "C", "Said", "2026-03-25", "2026-05-12", "2026-01-30", "2026-02-27"], ["AMY AGRESTA", "C", "Gavin", "2026-05-23", "2026-05-28", "2025-07-08", "2025-08-05"], ["ANGELA PEREZ", "C", "Gavin", "2026-04-27", "2026-05-06", "2026-04-06", "2026-04-24"], ["ANNIE MORENO", "C", "Karen", "2026-06-01", "2026-06-02", "2026-05-11", "2026-03-04"], ["BRIAN NANTHAVONGDOUANGSY", "C", "Osgood", "2025-10-23", "2025-11-19", "2025-12-18", "2026-03-20"], ["BRITNEY DODDS", "C", "Gavin", "2026-03-26", "2026-03-26", "2026-03-02", "2026-04-08"], ["CAROLE MCMAHON", "C", "Osgood", "2026-05-31", "2026-05-31", "2026-05-08", "2026-05-26"], ["CESIA ESPINOZA YOUNG", "C", "Karen", "2026-03-11", "2026-03-10", "2026-03-26", "2026-04-17"], ["CHELSEA ANDERSON", "C", "Osgood", "2026-02-07", "2026-02-06", "2026-03-28", "2026-04-17"], ["COURTNEY HAMILTON", "C", "Osgood", "2026-05-27", "2026-05-27", "2026-06-02", "2025-06-26"], ["DEVIN JOHNSON", "C", "Said", "2026-03-29", "2026-04-15", "2025-05-30", "2025-07-09"], ["DIANNA JENKINS", "C", "Said", null, "2026-03-24", "2026-02-23", "2026-04-06"], ["ELIZABETH ELLINGER", "C", "Jordan", "2026-03-16", "2026-04-01", "2026-05-18", "2026-01-30"], ["HAIFA BRUNNEY", "C", "Karen", "2026-05-21", "2026-05-22", "2026-03-26", "2026-04-27"], ["HANNA PARDI", "C", "Karen", "2025-10-15", "2026-03-04", "2025-10-10", "2025-11-07"], ["JASMINE MCKENZIE", "C", "Osgood", "2026-05-03", "2026-05-04", "2026-05-06", "2026-05-29"], ["JESSE MCCRERRY", "C", "Said", null, "2026-04-06", "2026-04-13", "2026-05-26"], ["JOHN LUBINSKY", "C", "Said", "2025-12-17", "2025-12-19", "2026-02-17", "2026-03-20"], ["JORDAN HOLLIBAUGH", "C", "Gavin", null, "2026-05-12", "2026-04-29", "2026-04-16"], ["KATHERINE DE LA ROSA", "C", "Karen", "2026-05-28", "2026-06-02", "2026-04-01", "2026-04-29"], ["KELSY YODER", "C", "Said", "2026-04-28", "2026-01-09", "2026-01-12", "2026-02-05"], ["KINSIE HUSKINS", "C", "Jordan", null, "2026-03-17", "2026-04-28", "2026-06-01"], ["KRISTEN VALENTY", "C", "Jordan", null, "2026-01-21", "2026-02-24", "2026-03-25"], ["LETIKA WHITE", "C", "Osgood", "2026-05-11", "2026-05-12", "2025-07-31", "2025-08-29"], ["LISA SIMMONS", "C", "Osgood", null, "2026-03-19", "2026-04-14", "2026-05-27"], ["LUIS GIL", "C", "Karen", "2026-05-20", "2026-05-10", "2025-09-02", "2025-09-26"], ["LYNDSEY LANE", "C", "Osgood", "2026-03-16", "2025-09-23", "2025-12-23", "2026-01-23"], ["MARYCHRIS WILLIAMS", "C", "Osgood", "2026-03-04", "2026-03-04", "2025-06-02", "2025-06-26"], ["MIKE WHITEMAN", "C", "Osgood", null, "2025-07-24", "2025-07-31", "2026-05-11"], ["NANCY PRICE", "C", "Jordan", "2026-01-03", "2026-01-02", "2026-05-08", "2026-01-30"], ["PAIGE LUDWIG", "C", "Said", "2026-03-06", "2026-03-05", "2026-03-17", "2026-04-14"], ["PATRICK ARQUETTE", "C", "Said", "2026-04-22", "2026-01-14", "2025-09-09", "2025-10-07"], ["PAULA PALLESCHI", "C", "Said", null, "2026-04-21", "2026-04-27", "2026-05-26"], ["PILAR BENNETT", "C", "Karen", "2026-04-15", "2026-04-15", "2025-07-23", "2025-08-15"], ["RACHELLE PARSLEY", "C", "Said", "2024-09-03", "2026-04-15", "2026-04-22", "2026-05-13"], ["RAMI TAMIMI", "C", "Jordan", "2026-03-27", "2026-04-20", "2026-05-07", "2026-03-27"], ["ROBERT HAYNER", "C", "Jordan", null, "2026-04-20", "2026-04-23", "2026-05-15"], ["ROBIN BLAKE", "C", "Gavin", null, "2025-12-19", "2025-12-27", "2026-03-17"], ["ROSS DIGIORGIO", "C", "Osgood", null, "2025-06-24", "2025-07-14", "2026-04-30"], ["RUTH ESPINOZA", "C", "Karen", null, "2026-02-27", "2026-03-26", "2026-04-17"], ["SAM BAMRICK", "C", "Jordan", null, "2026-04-14", "2026-04-20", "2026-05-15"], ["SARA BUSH", "C", "Said", null, "2026-03-27", "2026-04-13", "2026-05-27"], ["SLAVI JORDANOV", "C", "Said", "2026-05-30", "2025-10-06", "2025-10-10", "2025-11-07"], ["STAN GORKSI", "C", "Jordan", null, "2026-03-07", "2026-03-09", "2026-04-07"], ["THAER AHMED", "C", "Said", "2026-03-31", "2026-03-31", "2025-08-26", "2025-09-30"], ["TRACI WILLIAMS-JONES", "C", "Jordan", null, "2026-04-09", "2026-03-23", "2026-05-21"], ["TROY BORDEN", "C", "Gavin", "2026-04-28", "2026-04-30", "2026-04-22", "2026-05-13"], ["YASMIN DE JESUS", "C", "Karen", "2024-03-27", "2025-11-18", "2026-04-01", "2026-04-29"], ["ALI SWEAZY", "C", "Osgood", "2026-05-09", "2026-05-09", null, null], ["ALINA ILKAEVA", "C", "Said", null, "2026-03-20", null, null], ["ANA SORIA", "C", "Karen", "2026-04-19", null, null, null], ["ANGELA POTTS", "C", "Osgood", "2026-05-10", "2026-05-10", null, null], ["ANGELIQUE SOTONDJI", "C", "Jordan", "2026-03-27", "2026-03-27", null, null], ["ASHLEY HENRY", "C", "Osgood", "2026-04-22", "2026-04-21", null, null], ["AVA LAIRD", "C", "Jordan", "2026-05-26", "2026-05-25", null, null], ["BAILEY STRATHIE", "C", "Osgood", "2026-05-30", "2026-05-30", "2024-11-21", null], ["BENJAMIN GAYTAN", "C", "Gavin", "2026-05-16", "2026-05-22", null, null], ["BRAD GILLIAM", "C", "Gavin", "2026-05-14", null, null, null], ["BRANDON KIDD", "C", "Said", "2026-05-01", null, null, null], ["BRANDON MCCLENDON", "C", "Said", "2026-03-12", "2026-03-12", null, null], ["CELINE WILLIAMS", "C", "Jordan", "2026-06-01", null, null, null], ["CHERYL KINSEY", "C", "Jordan", "2026-05-05", "2026-05-04", null, null], ["CHRISTIAN CHALKIAS", "C", "Osgood", "2026-04-08", "2026-04-08", null, null], ["CHRISTINA COUGHLIN", "C", "Osgood", "2026-05-29", "2026-05-29", "2024-09-11", null], ["CHUCK KINSEY", "C", "Jordan", "2026-03-16", "2026-03-26", null, null], ["CODA GAHRIS", "C", "Jordan", "2026-04-29", "2026-04-29", "2026-05-25", null], ["CRAIG MAURER", "C", "Osgood", "2026-05-13", "2026-05-19", null, null], ["DAIRDRE SCRIVEN", "C", "Said", "2026-05-19", "2026-05-19", null, null], ["DARREN HOGG", "C", "Said", "2026-04-22", "2026-04-28", null, null], ["ELIAS PAPPAN", "C", "Karen", "2026-04-30", null, null, null], ["ELIZABETH BONAUDI", "C", "Osgood", "2026-04-17", "2026-04-17", null, null], ["ELIZABETH HOWARD", "C", "Osgood", "2026-04-04", "2026-04-03", "2024-11-08", null], ["ERIC RUSSELL", "C", "Jordan", "2026-03-09", "2025-01-22", null, null], ["ERIKA BRUNNER", "C", "Gavin", "2026-04-13", "2026-04-15", "2025-11-07", null], ["GLADIS CHAVEZ", "C", "Karen", "2026-05-15", "2026-05-05", null, null], ["HYPATIA ESPINAL", "C", "Karen", "2026-04-07", "2026-04-08", null, null], ["IZXEL MARTINEZ", "C", "Karen", "2026-05-20", "2026-05-20", null, null], ["JACOB ENGLISH", "C", "Jordan", null, "2026-03-18", "2026-04-23", null], ["JASMIN ARCOS", "C", "Karen", "2026-03-19", "2026-03-26", null, null], ["JASMIN MONTOYA", "C", "Karen", "2026-05-31", "2026-05-31", null, null], ["JEFF MESSMER", "C", "Gavin", "2026-05-12", "2026-05-12", "2025-10-01", null], ["JENNIFER BLACKMORE", "C", "Jordan", "2026-05-02", null, null, null], ["JENNIFER HOWISON", "C", "Jordan", "2026-03-15", "2026-03-30", "2026-04-06", null], ["JESSICA TOWER", "C", "Jordan", "2026-05-27", "2026-05-31", "2023-04-03", null], ["JONNATHAN AGUDELO", "C", "Karen", "2026-05-23", "2026-05-19", null, null], ["JUSTIN BIERY", "C", "Karen", "2026-05-27", "2026-05-28", null, null], ["KATHY HAYES", "C", "Jordan", "2026-05-30", "2026-05-29", "2024-12-09", null], ["KATIE MANSOR", "C", "Jordan", "2026-04-27", "2026-04-26", null, null], ["KERWIN HEATH", "C", "Said", null, "2026-04-12", null, null], ["KYLA AHO", "C", "Said", "2026-03-12", "2025-11-03", "2025-03-28", null], ["LAUREN MCCLINTON", "C", "Said", null, "2026-04-29", null, null], ["LESLIE HERNANDEZ", "C", "Karen", "2026-05-07", "2026-05-08", "2026-05-19", null], ["LILIAN FUENTES", "C", "Karen", "2026-04-21", "2026-04-21", null, null], ["LIZBEL CONTRERAS", "C", "Karen", "2026-04-30", "2026-05-11", "2024-09-18", null], ["MANDY WILSON", "C", "Jordan", null, "2026-03-28", null, null], ["MARIA LUX", "C", "Karen", null, "2026-03-09", null, null], ["MARK GARCIA", "C", "Jordan", "2026-03-09", "2025-10-15", "2023-11-28", null], ["MARK VENNITTI", "C", "Jordan", "2026-04-08", "2026-04-08", "2026-06-01", null], ["MARLA SEWELL", "C", "Osgood", null, "2026-03-19", null, null], ["MATHEA ARUDDA", "C", "Karen", null, "2026-03-16", "2026-03-23", null], ["NANCY BAKER", "C", "Unassigned", "2026-04-30", null, null, null], ["NIA HARRINGTON", "C", "Said", "2026-05-13", "2026-05-05", "2024-10-17", null], ["NICK ZATEZALO", "C", "Osgood", "2026-05-16", "2026-03-19", "2024-03-12", null], ["NIKEHA HAYES", "C", "Osgood", "2026-04-15", "2025-09-28", "2024-09-25", null], ["NINA AVERY", "C", "Jordan", null, "2026-04-23", null, null], ["NORA KERELIUK", "C", "Said", "2026-04-24", null, null, null], ["PIERINA MANTILLA", "C", "Karen", null, "2026-03-15", null, null], ["ROSALIA PABLO", "C", "Karen", "2026-04-08", "2026-04-08", "2024-11-08", null], ["RUTH GONZALEZ", "C", "Karen", "2026-05-19", "2026-05-19", null, null], ["SAHEL ALAM", "C", "Said", "2026-05-10", "2026-05-08", null, null], ["SAM COOPER", "C", "Gavin", "2026-03-10", "2025-07-11", "2024-09-06", null], ["SARAH HERNANDEZ", "C", "Osgood", "2026-05-28", "2026-05-29", "2024-10-21", null], ["SASHA ANTONOVA", "C", "Said", "2026-03-31", "2026-03-31", null, null], ["SHANE STINER", "C", "Jordan", null, "2026-04-08", null, null], ["SHARON PANTELIS", "C", "Jordan", "2026-04-28", "2025-03-21", "2025-04-01", null], ["SHAYNE D. BOYD", "C", "Said", "2026-05-04", "2026-05-07", null, null], ["SHIRRELL BURNSIDE", "C", "Osgood", "2026-04-08", "2025-07-14", null, null], ["STEVEN OSBORN", "C", "Jordan", "2026-04-30", "2026-02-03", null, null], ["SUMMER DURHAM", "C", "Osgood", null, "2026-03-23", null, null], ["SUNI RIVAS", "C", "Karen", "2026-05-27", "2026-05-28", null, null], ["SUSAN PURNAMA", "C", "Said", "2026-03-03", "2026-03-06", null, null], ["TAMARA CHARLTON", "C", "Osgood", "2025-07-27", "2026-04-16", "2025-04-14", null], ["TAMMY GORDON", "C", "Jordan", null, "2026-03-04", null, null], ["TATIANA GRIGORITA", "C", "Jordan", "2026-04-23", null, null, null], ["THOMAS NEWMAN", "C", "Gavin", "2026-03-02", "2026-03-25", "2022-08-22", null], ["TINA-DUTT-HIREN", "C", "Osgood", null, "2026-05-11", null, null], ["TONY AMOS", "C", "Osgood", "2026-04-19", "2026-04-01", "2024-02-27", null], ["WENDY RAMIREZ", "C", "Karen", "2026-03-25", "2026-03-25", null, null], ["WHITNEY SCHMIDT", "C", "Said", "2026-03-18", "2024-01-12", "2024-01-18", null], ["YVETTA HARRISON", "C", "Osgood", "2026-05-29", null, null, null]];
-var agents = [], callLog = {}, currentUser = null;
+var agents = [];
+var callLogs = {};
+var currentUser = null;
 var weekKey = getWeekKey(TODAY);
+var noteTimers = {};
 
-function getWeekKey(d) {
-  var dt = new Date(d); dt.setHours(0,0,0,0);
-  var day = dt.getDay(), mon = new Date(dt);
-  mon.setDate(dt.getDate() - (day===0?6:day-1));
-  return mon.toISOString().split("T")[0];
+function getWeekKey(d){var dt=new Date(d);dt.setHours(0,0,0,0);var day=dt.getDay(),mon=new Date(dt);mon.setDate(dt.getDate()-(day===0?6:day-1));return mon.toISOString().split("T")[0];}
+function getWeekLabel(k){var mon=new Date(k),sun=new Date(mon);sun.setDate(mon.getDate()+6);var o={month:"short",day:"numeric"};return "Week of "+mon.toLocaleDateString("en-US",o)+" - "+sun.toLocaleDateString("en-US",o);}
+function fmt(d){if(!d)return "--";return new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"2-digit"});}
+function mostRecent(a){return[a[3],a[4],a[5],a[6]].filter(Boolean).sort().reverse()[0]||null;}
+function isActive(a){var d=mostRecent(a);return d?new Date(d)>=CUTOFF:false;}
+function calledThisWeek(name){return !!(callLogs[name] && callLogs[name].week_key===weekKey);}
+function lpDays(name){
+  var log=callLogs[name];
+  if(!log||!log.call_date) return null;
+  var dt=new Date(log.call_date); dt.setHours(0,0,0,0);
+  return Math.floor((TODAY-dt)/86400000);
 }
-function getWeekLabel(k) {
-  var mon = new Date(k), sun = new Date(mon); sun.setDate(mon.getDate()+6);
-  var o = {month:"short",day:"numeric"};
-  return "Week of "+mon.toLocaleDateString("en-US",o)+" - "+sun.toLocaleDateString("en-US",o);
-}
-function fmt(d) { if(!d) return "--"; return new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"2-digit"}); }
-function mostRecent(a) { var d=[a[3],a[4],a[5],a[6]].filter(Boolean).sort().reverse(); return d[0]||null; }
-function isActive(a) { var d=mostRecent(a); return d ? new Date(d)>=CUTOFF : false; }
-function ck(n,w) { return n+"__"+w; }
-function calledThisWeek(n) { return !!callLog[ck(n,weekKey)]; }
-function lpDays(n) {
-  var keys = Object.keys(callLog).filter(function(k){ return k.indexOf(n+"__")===0; }).sort().reverse();
-  if(!keys.length) return null;
-  return Math.floor((TODAY - new Date(keys[0].split("__")[1])) / 86400000);
-}
-function getRotation(lp) {
-  var active = agents.filter(function(a){ return a[2]===lp && isActive(a); });
-  if(!active.length) return [];
-  var wn = Math.floor((TODAY - new Date("2024-01-01")) / (7*86400000));
-  var pw = Math.min(15, active.length);
-  var si = (wn*pw) % active.length;
-  var base = [];
-  for(var i=0;i<pw;i++) base.push(active[(si+i)%active.length]);
-  var overdue = active.filter(function(a){
-    var ds=lpDays(a[0]); return ds!==null && ds>=14 && base.indexOf(a)<0;
-  });
-  var all = overdue.slice(0,2).concat(base), seen={}, res=[];
-  for(var j=0;j<all.length;j++){ if(!seen[all[j][0]]){seen[all[j][0]]=true;res.push(all[j]);} }
+function getRotation(lp){
+  var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+  if(!active.length)return[];
+  var wn=Math.floor((TODAY-new Date("2024-01-01"))/(7*86400000));
+  var pw=Math.min(15,active.length);
+  var si=(wn*pw)%active.length;
+  var base=[];for(var i=0;i<pw;i++)base.push(active[(si+i)%active.length]);
+  var overdue=active.filter(function(a){var ds=lpDays(a[0]);return ds!==null&&ds>=14&&base.indexOf(a)<0;});
+  var all=overdue.slice(0,2).concat(base),seen={},res=[];
+  for(var j=0;j<all.length;j++){if(!seen[all[j][0]]){seen[all[j][0]]=true;res.push(all[j]);}}
   return res.slice(0,15);
 }
-function loadData() {
-  agents = SEED.map(function(r){ return [r[0],r[1],r[2],r[3],r[4],r[5],r[6]]; });
+
+// Supabase API calls
+function sbFetch(method, path, body) {
+  var opts = {
+    method: method,
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json",
+      "Prefer": method==="POST" ? "resolution=merge-duplicates,return=minimal" : "return=representation"
+    }
+  };
+  if(body) opts.body = JSON.stringify(body);
+  return fetch(SUPABASE_URL + "/rest/v1/" + path, opts).then(function(r){
+    if(!r.ok) return r.text().then(function(t){throw new Error(t);});
+    return r.status===204 ? null : r.json();
+  });
+}
+
+function loadCallLogs() {
+  setSyncStatus("saving");
+  return sbFetch("GET", "call_logs?week_key=eq."+weekKey+"&select=*")
+    .then(function(rows){
+      callLogs = {};
+      if(rows) rows.forEach(function(r){ callLogs[r.agent_name] = r; });
+      setSyncStatus("live");
+      return rows;
+    })
+    .catch(function(e){
+      setSyncStatus("error");
+      console.log("Load error:", e);
+    });
+}
+
+function upsertCallLog(agentName, lp, note) {
+  var id = agentName + "__" + weekKey;
+  var data = {id:id, agent_name:agentName, lp:lp, week_key:weekKey, call_date:TODAY.toISOString().split("T")[0], note:note||""};
+  callLogs[agentName] = data;
+  setSyncStatus("saving");
+  return sbFetch("POST", "call_logs", data)
+    .then(function(){ setSyncStatus("live"); })
+    .catch(function(e){ setSyncStatus("error"); console.log("Save error:", e); });
+}
+
+function deleteCallLog(agentName) {
+  var id = agentName + "__" + weekKey;
+  delete callLogs[agentName];
+  setSyncStatus("saving");
+  return sbFetch("DELETE", "call_logs?id=eq."+encodeURIComponent(id))
+    .then(function(){ setSyncStatus("live"); })
+    .catch(function(e){ setSyncStatus("error"); console.log("Delete error:", e); });
+}
+
+function setSyncStatus(status) {
+  var dot = document.getElementById("syncDot");
+  var ind = document.getElementById("saveInd");
+  if(status==="live"){dot.className="sync-dot live";ind.textContent="Live";}
+  else if(status==="saving"){dot.className="sync-dot saving";ind.textContent="Syncing...";}
+  else{dot.className="sync-dot error";ind.textContent="Offline";}
+}
+
+function loadAgents() {
+  agents = SEED.map(function(r){return[r[0],r[1],r[2],r[3],r[4],r[5],r[6]];});
   try {
     var s = localStorage.getItem(STORAGE_KEY);
-    if(s) {
+    if(s){
       var d = JSON.parse(s);
-      if(d.cl) callLog = d.cl;
-      if(d.ov) d.ov.forEach(function(o){
-        var a = agents.find(function(x){return x[0]===o.n;});
-        if(a){a[2]=o.lp;} else if(o.added){agents.push([o.n,o.lv,o.lp,null,null,null,null]);}
-      });
-      if(d.rm) d.rm.forEach(function(n){ agents=agents.filter(function(a){return a[0]!==n;}); });
-      if(d.up) d.up.forEach(function(u){
-        var a=agents.find(function(x){return x[0]===u[0];});
-        if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];}
-        else agents.push(u);
-      });
+      if(d.ov) d.ov.forEach(function(o){var a=agents.find(function(x){return x[0]===o.n;});if(a){a[2]=o.lp;}else if(o.added){agents.push([o.n,o.lv,o.lp,null,null,null,null]);}});
+      if(d.rm) d.rm.forEach(function(n){agents=agents.filter(function(a){return a[0]!==n;});});
+      if(d.up) d.up.forEach(function(u){var a=agents.find(function(x){return x[0]===u[0];});if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];}else{agents.push(u);}});
     }
-  } catch(e){ console.log("load err",e); }
+  } catch(e){}
 }
-function getState() {
-  var ov = agents.filter(function(a){
-    var s=SEED.find(function(x){return x[0]===a[0];}); return !s||s[2]!==a[2];
-  }).map(function(a){ return {n:a[0],lp:a[2],lv:a[1],added:!SEED.find(function(s){return s[0]===a[0];})}; });
-  var rm = SEED.map(function(s){return s[0];}).filter(function(n){return !agents.find(function(a){return a[0]===n;});});
-  return {cl:callLog, ov:ov, rm:rm};
+
+function saveAgents() {
+  var ov=agents.filter(function(a){var s=SEED.find(function(x){return x[0]===a[0];});return!s||s[2]!==a[2];}).map(function(a){return{n:a[0],lp:a[2],lv:a[1],added:!SEED.find(function(s){return s[0]===a[0];})};});
+  var rm=SEED.map(function(s){return s[0];}).filter(function(n){return!agents.find(function(a){return a[0]===n;});});
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify({ov:ov,rm:rm}));}catch(e){}
 }
-function save() {
-  setSave("Saving...");
-  try { localStorage.setItem(STORAGE_KEY,JSON.stringify(getState())); setSave("Saved"); setTimeout(function(){setSave("");},2000); }
-  catch(e){ setSave("Error"); }
-}
-function setSave(m){ document.getElementById("saveInd").textContent=m; }
 
 function selectUser(btn, u) {
-  currentUser = u;
+  currentUser=u;
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  if(u==="Daniel"){ document.getElementById("view-daniel").classList.add("active"); renderDaniel(); }
-  else if(u==="Admin"){ document.getElementById("view-admin").classList.add("active"); renderAdmin(); }
-  else { document.getElementById("view-lp").classList.add("active"); renderLP(u); }
+  if(u==="Daniel"){document.getElementById("view-daniel").classList.add("active");loadCallLogs().then(renderDaniel);}
+  else if(u==="Admin"){document.getElementById("view-admin").classList.add("active");renderAdmin();}
+  else{document.getElementById("view-lp").classList.add("active");loadCallLogs().then(function(){renderLP(u);});}
 }
 
 function renderLP(lp) {
-  var all = agents.filter(function(a){return a[2]===lp;});
-  var ac = all.filter(isActive).length, ic = all.filter(function(a){return!isActive(a);}).length;
-  document.getElementById("lp-hero-name").textContent = lp + "s calls this week";
-  document.getElementById("lp-hero-sub").textContent = ac + " active / " + ic + " inactive";
-  var rot = getRotation(lp);
-  var done = rot.filter(function(a){return calledThisWeek(a[0]);}).length;
-  var pct = rot.length ? Math.round(done/rot.length*100) : 0;
-  var bar = document.getElementById("lp-prog");
-  bar.style.width = pct+"%";
-  bar.style.background = pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
-  document.getElementById("lp-prog-txt").textContent = done+" / "+rot.length+" done";
-  var banner = document.getElementById("inactive-banner");
-  if(ic>0){ banner.style.display="flex"; document.getElementById("inactive-banner-txt").textContent=ic+" agents inactive (90+ days) - removed from rotation."; }
+  var all=agents.filter(function(a){return a[2]===lp;});
+  var ac=all.filter(isActive).length, ic=all.filter(function(a){return!isActive(a);}).length;
+  document.getElementById("lp-hero-name").textContent=lp+"s calls this week";
+  document.getElementById("lp-hero-sub").textContent=ac+" active / "+ic+" inactive";
+  var rot=getRotation(lp);
+  var done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
+  var pct=rot.length?Math.round(done/rot.length*100):0;
+  var bar=document.getElementById("lp-prog");
+  bar.style.width=pct+"%";bar.style.background=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
+  document.getElementById("lp-prog-txt").textContent=done+" / "+rot.length+" done";
+  var banner=document.getElementById("inactive-banner");
+  if(ic>0){banner.style.display="flex";document.getElementById("inactive-banner-txt").textContent=ic+" agents inactive (90+ days) - removed from rotation.";}
   else banner.style.display="none";
-  var el = document.getElementById("lp-call-list");
-  if(!rot.length){ el.innerHTML='<div class="no-data">No active agents in rotation yet.</div>'; return; }
-  var html = "";
-  rot.forEach(function(a) {
-    var called = calledThisWeek(a[0]);
-    var ds = lpDays(a[0]);
-    var act = mostRecent(a);
-    var entry = callLog[ck(a[0],weekKey)];
-    var chk = called
-      ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
-      : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
-    var dsText = ds===null ? "Never called" : ds===0 ? "Called this week" : ds+"d since last call";
-    html += '<div class="call-card'+(called?" done":"")+'">';
-    html += '<button class="check-btn'+(called?" checked":"")+'" data-name="'+a[0]+'" onclick="toggleCall(this)">'+chk+'</button>';
-    html += '<div class="call-info">';
-    html += '<div class="call-name'+(called?" striked":"")+'">'+a[0]+'</div>';
-    html += '<div class="call-meta">';
-    html += '<span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
-    html += '<span'+(ds===null?' style="color:#E53935"':'')+'>'+dsText+'</span>';
-    if(ds!==null && ds>=14) html += '<span style="color:#E53935">overdue</span>';
-    if(act) html += '<span>Last activity: '+fmt(act)+'</span>';
-    html += '</div>';
-    if(called) html += '<textarea class="note-field" data-name="'+a[0]+'" placeholder="Quick note... (optional)" onchange="saveNote(this)">'+(entry&&entry.note?entry.note:'')+'</textarea>';
-    html += '</div></div>';
+  var el=document.getElementById("lp-call-list");
+  if(!rot.length){el.innerHTML='<div class="no-data">No active agents in rotation yet.</div>';return;}
+  var html="";
+  rot.forEach(function(a){
+    var called=calledThisWeek(a[0]);
+    var ds=lpDays(a[0]);
+    var act=mostRecent(a);
+    var log=callLogs[a[0]];
+    var note=log?log.note:"";
+    var chk=called
+      ?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+      :'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
+    var dsText=ds===null?"Never called":ds===0?"Called this week":ds+"d since last call";
+    html+='<div class="call-card'+(called?" done":"")+'">';
+    html+='<button class="check-btn'+(called?" checked":"")+'" data-name="'+a[0]+'" onclick="toggleCall(this)">'+chk+'</button>';
+    html+='<div class="call-info">';
+    html+='<div class="call-name'+(called?" striked":"")+'">'+a[0]+'</div>';
+    html+='<div class="call-meta">';
+    html+='<span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
+    html+='<span'+(ds===null?' style="color:#E53935"':'')+'>'+dsText+'</span>';
+    if(ds!==null&&ds>=14)html+='<span style="color:#E53935">overdue</span>';
+    if(act)html+='<span>Last activity: '+fmt(act)+'</span>';
+    html+='</div>';
+    if(called)html+='<textarea class="note-field" data-name="'+a[0]+'" placeholder="Quick note... (optional)" onchange="queueNote(this)">'+note+'</textarea>';
+    html+='</div></div>';
   });
-  el.innerHTML = html;
+  el.innerHTML=html;
 }
 
 function toggleCall(btn) {
-  var name = btn.getAttribute("data-name");
-  var k = ck(name, weekKey);
-  if(callLog[k]) delete callLog[k]; else callLog[k] = {lp:currentUser, date:TODAY.toISOString().split("T")[0], note:""};
-  save(); renderLP(currentUser);
+  var name=btn.getAttribute("data-name");
+  if(calledThisWeek(name)){
+    deleteCallLog(name).then(function(){renderLP(currentUser);});
+  } else {
+    upsertCallLog(name, currentUser, "").then(function(){renderLP(currentUser);});
+  }
 }
-function saveNote(ta) {
-  var name = ta.getAttribute("data-name");
-  var k = ck(name, weekKey);
-  if(callLog[k]) callLog[k].note = ta.value;
-  save();
+
+function queueNote(ta) {
+  var name=ta.getAttribute("data-name");
+  var val=ta.value;
+  if(noteTimers[name]) clearTimeout(noteTimers[name]);
+  noteTimers[name]=setTimeout(function(){
+    upsertCallLog(name, currentUser, val);
+  }, 800);
 }
 
 function renderDaniel() {
-  var flp=document.getElementById("d-lp").value, flv=document.getElementById("d-lvl").value;
-  var fst=document.getElementById("d-status").value, q=document.getElementById("d-q").value.toLowerCase();
-  var gh = "";
+  var flp=document.getElementById("d-lp").value,flv=document.getElementById("d-lvl").value;
+  var fst=document.getElementById("d-status").value,q=document.getElementById("d-q").value.toLowerCase();
+  var gh="";
   LPS.forEach(function(lp){
-    var rot=getRotation(lp), done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
+    var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
     var pct=rot.length?Math.round(done/rot.length*100):0;
-    var all=agents.filter(function(a){return a[2]===lp;}), ic=all.filter(function(a){return!isActive(a);}).length;
+    var all=agents.filter(function(a){return a[2]===lp;}),ic=all.filter(function(a){return!isActive(a);}).length;
     var col=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
     gh+='<div class="d-card"><div class="d-name"><span style="width:10px;height:10px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block;flex-shrink:0"></span><span class="lp-c-'+lp+'">'+lp+'</span></div>';
     gh+='<div class="d-pct" style="color:'+col+'">'+pct+'%</div>';
     gh+='<div class="d-bar-track"><div class="d-bar-fill bar-'+lp+'" style="width:'+pct+'%"></div></div>';
     gh+='<div class="d-meta"><span>'+done+'/'+rot.length+' this week</span><span>'+all.length+' agents</span></div>';
-    if(ic) gh+='<div style="font-size:11px;color:#E53935;margin-top:4px">'+ic+' inactive</div>';
+    if(ic)gh+='<div style="font-size:11px;color:#E53935;margin-top:4px">'+ic+' inactive</div>';
     gh+='</div>';
   });
   document.getElementById("d-grid").innerHTML=gh;
   var cold=agents.filter(function(a){if(!isActive(a)||a[2]==="Unassigned")return false;var ds=lpDays(a[0]);return ds===null||ds>=14;}).sort(function(a,b){return(lpDays(b[0])||999)-(lpDays(a[0])||999);}).slice(0,8);
-  var ch=cold.length?cold.map(function(a){var ds=lpDays(a[0]);return '<div class="alert-item"><span class="adot '+(!ds||ds>=30?"adot-red":"adot-amber")+'"></span><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:12px;color:#888">'+(ds===null?"Never called":ds+"d since LP called")+'</span></div>';}).join(""):'<div class="alert-item"><span class="adot adot-green"></span><span style="color:#43A047">All agents contacted within 14 days!</span></div>';
+  var ch=cold.length?cold.map(function(a){var ds=lpDays(a[0]);return'<div class="alert-item"><span class="adot '+(!ds||ds>=30?"adot-red":"adot-amber")+'"></span><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:12px;color:#888">'+(ds===null?"Never called":ds+"d since LP called")+'</span></div>';}).join(""):'<div class="alert-item"><span class="adot adot-green"></span><span style="color:#43A047">All agents contacted within 14 days!</span></div>';
   document.getElementById("d-cold").innerHTML=ch;
   var list=agents.filter(function(a){return a[2]!=="Unassigned";});
   if(flp)list=list.filter(function(a){return a[2]===flp;});
@@ -355,68 +407,77 @@ function renderDaniel() {
   var tb=list.map(function(a){
     var act=isActive(a),ds=lpDays(a[0]),mr=mostRecent(a),cal=calledThisWeek(a[0]);
     var dsc=ds===null?"color:#E53935":ds>=14?"color:#FB8C00":"color:#43A047";
-    return '<tr><td style="font-weight:600">'+a[0]+'</td><td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td><td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td><td>'+(act?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td style="font-size:12px;'+dsc+'">'+(ds===null?"Never":ds+"d ago")+'</td><td style="font-size:12px;color:#888">'+(mr?fmt(mr):"--")+'</td><td style="text-align:center">'+(cal?'<b style="color:#43A047">Yes</b>':'<span style="color:#ccc">-</span>')+'</td></tr>';
+    var log=callLogs[a[0]];
+    var notePreview=log&&log.note?'<div style="font-size:11px;color:#888;margin-top:2px;font-style:italic">'+log.note+'</div>':"";
+    return'<tr><td style="font-weight:600">'+a[0]+notePreview+'</td><td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td><td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td><td>'+(act?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td style="font-size:12px;'+dsc+'">'+(ds===null?"Never":ds+"d ago")+'</td><td style="font-size:12px;color:#888">'+(mr?fmt(mr):"--")+'</td><td style="text-align:center">'+(cal?'<b style="color:#43A047">Yes</b>':'<span style="color:#ccc">-</span>')+'</td></tr>';
   }).join("");
   document.getElementById("d-tbody").innerHTML=tb;
 }
 
-function renderAdmin() {
-  renderReassign(); renderRemoveList();
+function renderAdmin(){
+  renderReassign();renderRemoveList();
   var inactive=agents.filter(function(a){return!isActive(a);});
   document.getElementById("inactive-count-label").textContent="- "+inactive.length+" agents";
-  var ih=inactive.length?inactive.map(function(a){return '<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
+  var ih=inactive.length?inactive.map(function(a){return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
   document.getElementById("inactive-list").innerHTML=ih;
 }
-function renderReassign() {
+function renderReassign(){
   var q=document.getElementById("reassign-q").value.toLowerCase();
   var flp=document.getElementById("reassign-filter-lp").value;
   var list=agents.filter(function(a){return(!q||a[0].toLowerCase().indexOf(q)>=0)&&(!flp||a[2]===flp);});
   var html=list.map(function(a){
     var idx=agents.indexOf(a);
-    var opts=["Unassigned"].concat(LPS).map(function(lp){return '<option'+(a[2]===lp?" selected":"")+' value="'+lp+'">'+lp+'</option>';}).join("");
-    return '<tr><td style="font-weight:600">'+a[0]+'</td><td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td><td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td><td><select data-idx="'+idx+'" onchange="reassign(this)" style="font-size:12px">'+opts+'</select></td></tr>';
+    var opts=["Unassigned"].concat(LPS).map(function(lp){return'<option'+(a[2]===lp?" selected":"")+' value="'+lp+'">'+lp+'</option>';}).join("");
+    return'<tr><td style="font-weight:600">'+a[0]+'</td><td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td><td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td><td><select data-idx="'+idx+'" onchange="reassign(this)" style="font-size:12px">'+opts+'</select></td></tr>';
   }).join("");
   document.getElementById("admin-tbody").innerHTML=html;
 }
-function renderRemoveList() {
+function renderRemoveList(){
   var q=document.getElementById("remove-q").value.toLowerCase();
   var list=agents.filter(function(a){return!q||a[0].toLowerCase().indexOf(q)>=0;}).slice(0,12);
-  document.getElementById("remove-list").innerHTML=list.map(function(a){return '<div class="alert-item"><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
+  document.getElementById("remove-list").innerHTML=list.map(function(a){return'<div class="alert-item"><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
 }
-function reassign(sel) { var idx=parseInt(sel.getAttribute("data-idx")); agents[idx][2]=sel.value; save(); renderAdmin(); }
-function addAgent() {
+function reassign(sel){var idx=parseInt(sel.getAttribute("data-idx"));agents[idx][2]=sel.value;saveAgents();renderAdmin();}
+function addAgent(){
   var name=document.getElementById("add-name").value.trim().toUpperCase();
-  var lv=document.getElementById("add-level").value, lp=document.getElementById("add-lp").value;
+  var lv=document.getElementById("add-level").value,lp=document.getElementById("add-lp").value;
   if(!name){alert("Enter a name.");return;}
   if(agents.find(function(a){return a[0]===name;})){alert("Already exists.");return;}
   agents.push([name,lv,lp,null,null,null,null]);
-  document.getElementById("add-name").value=""; save(); renderAdmin(); alert(name+" added!");
+  document.getElementById("add-name").value="";saveAgents();renderAdmin();alert(name+" added!");
 }
-function removeAgent(btn) {
+function removeAgent(btn){
   var name=btn.getAttribute("data-name");
-  if(!confirm("Remove "+name+"?")) return;
-  agents=agents.filter(function(a){return a[0]!==name;}); save(); renderAdmin();
+  if(!confirm("Remove "+name+"?"))return;
+  agents=agents.filter(function(a){return a[0]!==name;});saveAgents();renderAdmin();
 }
-function reactivate(btn) {
+function reactivate(btn){
   var name=btn.getAttribute("data-name");
   var a=agents.find(function(x){return x[0]===name;});
-  if(a) a[3]=TODAY.toISOString().split("T")[0];
-  save(); renderAdmin();
+  if(a)a[3]=TODAY.toISOString().split("T")[0];
+  saveAgents();renderAdmin();
 }
-function handleUpload(input) {
-  var file=input.files[0]; if(!file) return;
-  var res=document.getElementById("upload-result"); res.textContent="Reading..."; res.style.color="";
+function loadXLSX(){
+  if(typeof XLSX!=="undefined"){document.getElementById("fileInput").click();return;}
+  var res=document.getElementById("upload-result");res.textContent="Loading...";res.style.color="#888";
+  var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+  s.onload=function(){res.textContent="";document.getElementById("fileInput").click();};
+  s.onerror=function(){res.style.color="#E53935";res.textContent="Could not load Excel library. Check internet connection.";};
+  document.head.appendChild(s);
+}
+function handleUpload(input){
+  var file=input.files[0];if(!file)return;
+  var res=document.getElementById("upload-result");res.textContent="Reading...";res.style.color="";
   var reader=new FileReader();
   reader.onload=function(e){
     try{
-      if(typeof XLSX==="undefined"){res.style.color="#E53935";res.textContent="XLSX library not available.";return;}
       var wb=XLSX.read(new Uint8Array(e.target.result),{type:"array",cellDates:true});
       var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null});
-      var up=[]; var added=0,updated=0,flagged=0;
+      var up=[];var added=0,updated=0,flagged=0;
       rows.forEach(function(row){
         var n=(row["Agent"]||"").toString().trim().toUpperCase();
         var lv=(row["Level"]||"").toString().trim();
-        if(!n||n==="AGENT"||n==="NAN") return;
+        if(!n||n==="AGENT"||n==="NAN")return;
         var gd=function(c){var v=row[c];if(!v)return null;try{var d=new Date(v);return isNaN(d)?null:d.toISOString().split("T")[0];}catch(e){return null;}};
         var u=[n,lv||"C","Unassigned",gd("Latest Lead (In Velocify)"),gd("Latest File Started"),gd("Latest Contract"),gd("Latest Close")];
         up.push(u);
@@ -424,16 +485,22 @@ function handleUpload(input) {
         if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];if(!isActive(a))flagged++;updated++;}
         else{agents.push(u);added++;}
       });
-      var st=getState(); st.up=up; localStorage.setItem(STORAGE_KEY,JSON.stringify(st));
-      res.style.color="#43A047"; res.textContent="Done - "+updated+" updated, "+added+" new, "+flagged+" flagged.";
+      try{var st=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");st.up=up;localStorage.setItem(STORAGE_KEY,JSON.stringify(st));}catch(e){}
+      res.style.color="#43A047";res.textContent="Done - "+updated+" updated, "+added+" new, "+flagged+" flagged.";
       renderAdmin();
     }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
   };
-  reader.readAsArrayBuffer(file); input.value="";
+  reader.readAsArrayBuffer(file);input.value="";
 }
-(function(){var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";document.head.appendChild(s);})();
-document.getElementById("weekPill").textContent = getWeekLabel(weekKey);
-loadData();
+
+// Auto-refresh every 30 seconds when Daniel is viewing
+setInterval(function(){
+  if(currentUser==="Daniel") loadCallLogs().then(renderDaniel);
+}, 30000);
+
+document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
+loadAgents();
+loadCallLogs();
 </script>
 </body>
 </html>
