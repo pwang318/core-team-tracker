@@ -13,11 +13,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;col
 .brand-logo{background:#1F4E79;color:#fff;font-weight:700;font-size:13px;padding:6px 13px;border-radius:8px;letter-spacing:.05em}
 .brand-sub{font-size:12px;color:#666}
 .week-pill{font-size:11px;background:#e8eaf0;padding:4px 11px;border-radius:20px;color:#555}
-.save-ind{font-size:11px;color:#888;min-width:60px;text-align:right}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;margin-right:4px}
-.sync-dot.live{background:#43A047}
-.sync-dot.saving{background:#FB8C00}
-.sync-dot.error{background:#E53935}
+.save-ind{font-size:11px;color:#888;min-width:60px;text-align:right;display:flex;align-items:center;gap:4px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
+.sync-dot.live{background:#43A047}.sync-dot.saving{background:#FB8C00}.sync-dot.error{background:#E53935}
 .who-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.9rem;align-items:center;background:#fff;padding:.75rem 1rem;border-radius:12px;border:1px solid #dde1e7}
 .who-label{font-size:12px;color:#888;margin-right:2px;font-weight:500}
 .who-btn{padding:7px 16px;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#555}
@@ -38,14 +36,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;col
 .prog-track{flex:1;background:#e8eaf0;border-radius:20px;height:9px;overflow:hidden;min-width:130px}
 .prog-fill{height:9px;border-radius:20px}
 .prog-txt{font-size:12px;color:#888;white-space:nowrap;font-weight:500}
+.priority-banner{background:#FFEBEE;border:1px solid #EF9A9A;border-radius:8px;padding:9px 12px;font-size:12px;color:#C62828;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:500}
 .call-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.call-card.priority{border-color:#EF9A9A;border-width:2px;background:#FFFAFA}
 .call-card.done{opacity:.45}
 .check-btn{width:44px;height:44px;border-radius:50%;border:2px solid #ccc;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .check-btn.checked{background:#EAF3DE;border-color:#4CAF50}
 .check-btn:hover:not(.checked){background:#f5f5f5}
 .call-info{flex:1;min-width:0}
-.call-name{font-weight:600;font-size:14px;margin-bottom:3px}
+.call-name{font-weight:600;font-size:14px;margin-bottom:3px;display:flex;align-items:center;gap:6px}
 .call-name.striked{text-decoration:line-through;color:#aaa}
+.priority-tag{background:#FFEBEE;color:#C62828;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700;flex-shrink:0}
 .call-meta{font-size:12px;color:#888;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .note-field{width:100%;margin-top:7px;padding:6px 10px;border:1px solid #dde1e7;border-radius:8px;background:#fafafa;color:#333;font-size:12px;font-family:inherit;resize:none;height:46px}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
@@ -64,6 +65,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;col
 .alert-item{background:#fff;border:1px solid #dde1e7;border-radius:8px;padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
 .adot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .adot-red{background:#E53935}.adot-amber{background:#FB8C00}.adot-green{background:#43A047}
+.weekly-summary{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.weekly-summary h3{font-size:14px;font-weight:700;margin-bottom:.75rem;color:#1a1a1a;display:flex;align-items:center;gap:6px}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f5;font-size:13px}
+.summary-row:last-child{border-bottom:none}
+.summary-lp{font-weight:600;display:flex;align-items:center;gap:6px}
+.summary-stats{display:flex;gap:12px;align-items:center}
+.summary-pct{font-weight:700;font-size:15px}
+.missed-agents{font-size:11px;color:#E53935;margin-top:3px}
+.grade{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.grade-a{background:#C6EFCE;color:#1B5E20}
+.grade-b{background:#FFF2CC;color:#7D5A00}
+.grade-c{background:#FFCDD2;color:#B71C1C}
 .admin-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
 .admin-section h3{font-size:14px;font-weight:700;margin-bottom:.75rem;color:#1a1a1a}
 .form-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end}
@@ -96,7 +109,6 @@ tr:hover td{background:#fafbfc}
 .welcome-logo{background:#1F4E79;color:#fff;font-weight:800;font-size:20px;padding:10px 20px;border-radius:10px;display:inline-block;margin-bottom:1rem;letter-spacing:.04em}
 .welcome h2{font-size:19px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
 .welcome p{font-size:13px;max-width:360px;margin:0 auto;line-height:1.7;color:#888}
-.loading{text-align:center;padding:2rem;color:#888;font-size:13px}
 </style>
 </head>
 <body>
@@ -132,11 +144,40 @@ tr:hover td{background:#fafbfc}
       <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="lp-prog" style="width:0%"></div></div><span class="prog-txt" id="lp-prog-txt">0 / 0</span></div>
     </div>
   </div>
+  <div id="monday-banner" style="display:none;background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:9px 12px;font-size:12px;color:#1565C0;margin-bottom:.75rem;font-weight:500">&#128197; New week, new rotation! Your 15 agents for this week are ready. Let's go!</div>
+  <div id="priority-banner" class="priority-banner" style="display:none">&#9888; You have priority agents that need to be called ASAP!</div>
   <div id="inactive-banner" class="inactive-banner" style="display:none">&#9888; <span id="inactive-banner-txt"></span></div>
+  <div id="streak-bar" style="display:none;background:var(--color-background-primary);border:1px solid #FFE082;border-radius:8px;padding:8px 12px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#E65100"></div>
   <div id="lp-call-list"></div>
 </div>
 <div id="view-daniel" class="view">
-  <div class="section-head">This week's LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(renderDaniel)" style="text-transform:none;font-size:11px">Refresh</button></div>
+  <div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;margin-bottom:1rem;overflow:hidden">
+    <div onclick="toggleScorecard('this')" style="padding:.9rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:15px;font-weight:700">&#128200; This week</span>
+        <span style="font-size:11px;color:#888" id="this-week-label"></span>
+        <span id="this-week-pills" style="display:flex;gap:5px"></span>
+      </div>
+      <span id="this-chevron" style="font-size:18px;color:#888;transition:transform .2s">&#9660;</span>
+    </div>
+    <div id="this-week-section" style="display:none;border-top:1px solid #f0f2f5;padding:1rem 1.25rem">
+      <div id="this-week-content"></div>
+    </div>
+  </div>
+  <div id="last-week-scorecard" style="display:none;background:#fff;border:1px solid #dde1e7;border-radius:12px;margin-bottom:1rem;overflow:hidden">
+    <div onclick="toggleScorecard('last')" style="padding:.9rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:15px;font-weight:700">&#128197; Last week</span>
+        <span style="font-size:11px;color:#888" id="last-week-label"></span>
+        <span id="last-week-pills" style="display:flex;gap:5px"></span>
+      </div>
+      <span id="last-chevron" style="font-size:18px;color:#888;transition:transform .2s">&#9660;</span>
+    </div>
+    <div id="last-week-section" style="display:none;border-top:1px solid #f0f2f5;padding:1rem 1.25rem">
+      <div id="last-week-content"></div>
+    </div>
+  </div>
+  <div class="section-head">This week's LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
   <div class="d-grid" id="d-grid"></div>
   <div class="section-head">Going cold <span style="font-size:11px;font-weight:400;text-transform:none;color:#aaa">(14+ days since LP last called)</span></div>
   <div id="d-cold"></div>
@@ -149,11 +190,29 @@ tr:hover td{background:#fafbfc}
     </div>
   </div>
   <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Last LP call</th><th>Last activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
+
+  <div class="section-head" style="margin-top:1rem">&#127942; All-time leaderboard <span style="font-size:11px;font-weight:400;text-transform:none;color:var(--color-text-secondary)">since tracker launched</span></div>
+  <div id="leaderboard"></div>
+
+  <div class="section-head" style="margin-top:1rem">&#128229; Weekly Teams summary</div>
+  <div style="background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem">
+    <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:.75rem">Copy and paste this into your Core Team channel every Monday.</p>
+    <div id="teams-message" style="background:var(--color-background-secondary);border-radius:8px;padding:.75rem 1rem;font-size:12px;line-height:1.7;white-space:pre-wrap;font-family:inherit"></div>
+    <button class="btn btn-primary btn-sm" onclick="copyTeamsMessage()" style="margin-top:.75rem">Copy message</button>
+    <span id="copy-confirm" style="font-size:12px;color:var(--color-text-success);margin-left:8px;display:none">Copied!</span>
+  </div>
+</div>
+<div id="view-lp-summary" class="view">
+  <div class="weekly-summary">
+    <h3>&#128200; Your scorecard <span style="font-size:11px;font-weight:400;color:#888" id="lp-last-week-label"></span></h3>
+    <div id="lp-summary-content"></div>
+  </div>
+  <button class="btn btn-primary" onclick="selectUser(document.querySelector('.who-btn.active'), currentUser)" style="margin-top:1rem">Back to this week</button>
 </div>
 <div id="view-admin" class="view">
   <div class="admin-section">
     <h3>Upload Power BI export</h3>
-    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Upload your weekly Power BI .xlsx to refresh levels and activity dates.</p>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Upload your weekly Power BI .xlsx to refresh levels and activity dates. Agents inactive 90+ days are flagged automatically.</p>
     <div class="upload-zone" onclick="loadXLSX()">Click to upload Power BI .xlsx<br><span style="font-size:11px;color:#aaa">Agents inactive 90+ days flagged automatically</span></div>
     <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleUpload(this)">
     <div id="upload-result" style="margin-top:8px;font-size:12px"></div>
@@ -164,7 +223,7 @@ tr:hover td{background:#fafbfc}
       <input type="text" id="reassign-q" placeholder="Search agent..." oninput="renderReassign()" style="flex:1;min-width:140px">
       <select id="reassign-filter-lp" onchange="renderReassign()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
     </div>
-    <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>Status</th><th>Current LP</th><th>Reassign to</th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
+    <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign to</th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
   </div>
   <div class="admin-section">
     <h3>Add agent manually</h3>
@@ -172,6 +231,7 @@ tr:hover td{background:#fafbfc}
       <div class="form-group"><label>Name</label><input type="text" id="add-name" placeholder="Full name" style="width:180px"></div>
       <div class="form-group"><label>Level</label><select id="add-level"><option>A</option><option>B</option><option selected>C</option></select></div>
       <div class="form-group"><label>LP</label><select id="add-lp"><option value="Unassigned">Unassigned</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option></select></div>
+      <div class="form-group"><label>Priority</label><select id="add-priority"><option value="false">No</option><option value="true">Yes</option></select></div>
       <div class="form-group"><label>&nbsp;</label><button class="btn btn-primary" onclick="addAgent()">Add</button></div>
     </div>
   </div>
@@ -189,166 +249,463 @@ tr:hover td{background:#fafbfc}
 </div>
 <script>
 var SUPABASE_URL = "https://uclucbdkjqyqdvifyptx.supabase.co";
-var SUPABASE_KEY = "sb_publishable_gjEeEFwnF_cWhGoT6IRKoQ_dP33ijwH";
-var STORAGE_KEY = "ct_agents_v1";
+var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
+var STORAGE_KEY = "ct_agents_v2";
 var LPS = ["Gavin","Karen","Osgood","Jordan","Said"];
 var LP_COLORS = {Gavin:"#4CAF50",Karen:"#2196F3",Osgood:"#FF9800",Jordan:"#E91E63",Said:"#9C27B0"};
 var TODAY = new Date(); TODAY.setHours(0,0,0,0);
 var CUTOFF = new Date(TODAY); CUTOFF.setDate(TODAY.getDate()-90);
-var SEED = [["TIARA VILLATORO", "A", "Karen", "2026-05-08", "2026-05-08", "2026-04-10", "2026-05-22"], ["BRANDON THOMPSON", "A", "Osgood", "2026-06-01", "2026-05-26", "2026-05-04", "2026-06-01"], ["TODD STONE", "A", "Said", "2026-05-22", "2026-04-30", "2026-04-13", "2026-05-08"], ["MEGAN LYNCH", "A", "Gavin", "2026-05-30", "2026-05-30", "2026-06-01", "2026-04-01"], ["TINA HOFFMAN", "A", "Gavin", "2023-10-10", "2026-05-06", "2026-05-27", "2026-02-10"], ["DUSTIN GOLDMAN", "A", "Osgood", "2026-04-20", "2026-04-24", "2026-03-30", "2026-03-27"], ["KEVIN SPEERT", "A", "Gavin", "2026-05-08", "2026-05-28", "2026-06-01", "2026-05-22"], ["OSCAR MARTINEZ", "A", "Karen", "2026-05-15", "2026-06-01", "2026-05-05", "2026-06-15"], ["RACQUEL LUDAWAY", "A", "Gavin", "2026-05-29", "2026-05-19", "2026-04-16", "2026-06-04"], ["CHRIS REED", "A", "Said", "2026-05-13", "2026-05-13", "2026-05-08", "2026-05-27"], ["DERON BENDER", "A", "Gavin", "2025-08-11", "2026-04-24", "2026-04-28", "2026-05-08"], ["MICHELLE ERICKSON", "A", "Gavin", "2025-08-04", "2026-03-25", "2026-04-20", "2026-04-10"], ["SAHAR SHALASH", "A", "Said", "2026-05-31", "2026-05-31", "2026-05-09", "2026-05-29"], ["CINDA ERICKSON", "B", "Gavin", "2026-04-23", "2026-04-21", "2026-02-24", "2026-03-26"], ["CONNER KOCHANSKY", "B", "Gavin", "2026-05-30", "2026-05-19", "2026-05-21", "2026-05-20"], ["INGRID CORREIA", "B", "Gavin", "2026-05-08", "2026-05-08", "2025-12-11", "2026-01-05"], ["JOHN BRUNNER", "B", "Osgood", "2026-06-01", "2026-06-01", "2025-10-06", "2025-11-17"], ["KANDIS HALL", "B", "Osgood", "2026-01-04", "2026-01-31", "2026-02-25", "2026-03-17"], ["KRISTINA MURPHY", "B", "Osgood", "2026-05-29", "2026-05-11", "2025-10-03", "2025-10-21"], ["MARK BOYD", "B", "Gavin", null, "2026-03-28", "2026-04-08", "2026-02-02"], ["MATTHEW MONTALVO", "B", "Karen", "2026-04-09", "2026-04-09", "2026-05-29", "2025-11-20"], ["SETH COLBURN", "B", "Said", "2025-04-23", "2026-03-31", "2026-04-06", "2026-04-30"], ["DAN MANLEY", "B", "Gavin", "2025-11-23", "2026-04-29", "2026-05-01", "2026-05-19"], ["DEANNE RHYNEHARDT", "B", "Osgood", "2026-05-22", "2026-05-28", "2026-05-05", "2025-09-17"], ["ERIKA WEHNER", "B", "Gavin", null, "2026-04-13", "2026-05-28", "2026-05-11"], ["HEATHER HENRY-MINOR", "B", "Jordan", "2026-04-07", "2026-04-15", "2026-05-05", "2026-05-28"], ["KATIE SUMMERS", "B", "Gavin", null, "2026-04-22", "2026-02-26", "2026-05-29"], ["KHADIJA FARAH", "B", "Jordan", "2026-05-16", "2026-05-17", "2026-02-09", "2026-03-06"], ["KISHMA JAMES", "B", "Said", "2026-03-16", "2026-03-12", "2025-06-09", "2025-07-14"], ["MARIA COMAS", "B", "Karen", "2026-04-27", "2026-03-02", "2025-06-19", "2025-07-21"], ["MARTIN HOPKINS", "B", "Karen", "2026-02-12", "2026-04-28", "2026-01-29", "2026-02-20"], ["MARY MCMICHAEL", "B", "Said", "2026-04-13", "2026-04-13", "2025-09-11", "2025-10-10"], ["MATT PIPER", "B", "Osgood", "2026-05-19", "2026-05-19", "2025-11-11", "2025-12-01"], ["NATALIE ESTRELLA", "B", "Karen", "2026-05-25", "2026-05-25", "2025-10-08", "2025-11-03"], ["STACEY LAMBRIGHT", "B", "Jordan", null, "2026-03-25", "2026-03-26", "2026-04-07"], ["TRACY BERARD", "B", "Jordan", null, "2026-04-04", "2026-04-14", "2026-05-27"], ["AIMEE WHITLOCK", "C", "Gavin", null, "2025-01-14", "2026-02-10", "2026-04-15"], ["ALEXIS REED", "C", "Said", "2026-03-25", "2026-05-12", "2026-01-30", "2026-02-27"], ["AMY AGRESTA", "C", "Gavin", "2026-05-23", "2026-05-28", "2025-07-08", "2025-08-05"], ["ANGELA PEREZ", "C", "Gavin", "2026-04-27", "2026-05-06", "2026-04-06", "2026-04-24"], ["ANNIE MORENO", "C", "Karen", "2026-06-01", "2026-06-02", "2026-05-11", "2026-03-04"], ["BRIAN NANTHAVONGDOUANGSY", "C", "Osgood", "2025-10-23", "2025-11-19", "2025-12-18", "2026-03-20"], ["BRITNEY DODDS", "C", "Gavin", "2026-03-26", "2026-03-26", "2026-03-02", "2026-04-08"], ["CAROLE MCMAHON", "C", "Osgood", "2026-05-31", "2026-05-31", "2026-05-08", "2026-05-26"], ["CESIA ESPINOZA YOUNG", "C", "Karen", "2026-03-11", "2026-03-10", "2026-03-26", "2026-04-17"], ["CHELSEA ANDERSON", "C", "Osgood", "2026-02-07", "2026-02-06", "2026-03-28", "2026-04-17"], ["COURTNEY HAMILTON", "C", "Osgood", "2026-05-27", "2026-05-27", "2026-06-02", "2025-06-26"], ["DEVIN JOHNSON", "C", "Said", "2026-03-29", "2026-04-15", "2025-05-30", "2025-07-09"], ["DIANNA JENKINS", "C", "Said", null, "2026-03-24", "2026-02-23", "2026-04-06"], ["ELIZABETH ELLINGER", "C", "Jordan", "2026-03-16", "2026-04-01", "2026-05-18", "2026-01-30"], ["HAIFA BRUNNEY", "C", "Karen", "2026-05-21", "2026-05-22", "2026-03-26", "2026-04-27"], ["HANNA PARDI", "C", "Karen", "2025-10-15", "2026-03-04", "2025-10-10", "2025-11-07"], ["JASMINE MCKENZIE", "C", "Osgood", "2026-05-03", "2026-05-04", "2026-05-06", "2026-05-29"], ["JESSE MCCRERRY", "C", "Said", null, "2026-04-06", "2026-04-13", "2026-05-26"], ["JOHN LUBINSKY", "C", "Said", "2025-12-17", "2025-12-19", "2026-02-17", "2026-03-20"], ["JORDAN HOLLIBAUGH", "C", "Gavin", null, "2026-05-12", "2026-04-29", "2026-04-16"], ["KATHERINE DE LA ROSA", "C", "Karen", "2026-05-28", "2026-06-02", "2026-04-01", "2026-04-29"], ["KELSY YODER", "C", "Said", "2026-04-28", "2026-01-09", "2026-01-12", "2026-02-05"], ["KINSIE HUSKINS", "C", "Jordan", null, "2026-03-17", "2026-04-28", "2026-06-01"], ["KRISTEN VALENTY", "C", "Jordan", null, "2026-01-21", "2026-02-24", "2026-03-25"], ["LETIKA WHITE", "C", "Osgood", "2026-05-11", "2026-05-12", "2025-07-31", "2025-08-29"], ["LISA SIMMONS", "C", "Osgood", null, "2026-03-19", "2026-04-14", "2026-05-27"], ["LUIS GIL", "C", "Karen", "2026-05-20", "2026-05-10", "2025-09-02", "2025-09-26"], ["LYNDSEY LANE", "C", "Osgood", "2026-03-16", "2025-09-23", "2025-12-23", "2026-01-23"], ["MARYCHRIS WILLIAMS", "C", "Osgood", "2026-03-04", "2026-03-04", "2025-06-02", "2025-06-26"], ["MIKE WHITEMAN", "C", "Osgood", null, "2025-07-24", "2025-07-31", "2026-05-11"], ["NANCY PRICE", "C", "Jordan", "2026-01-03", "2026-01-02", "2026-05-08", "2026-01-30"], ["PAIGE LUDWIG", "C", "Said", "2026-03-06", "2026-03-05", "2026-03-17", "2026-04-14"], ["PATRICK ARQUETTE", "C", "Said", "2026-04-22", "2026-01-14", "2025-09-09", "2025-10-07"], ["PAULA PALLESCHI", "C", "Said", null, "2026-04-21", "2026-04-27", "2026-05-26"], ["PILAR BENNETT", "C", "Karen", "2026-04-15", "2026-04-15", "2025-07-23", "2025-08-15"], ["RACHELLE PARSLEY", "C", "Said", "2024-09-03", "2026-04-15", "2026-04-22", "2026-05-13"], ["RAMI TAMIMI", "C", "Jordan", "2026-03-27", "2026-04-20", "2026-05-07", "2026-03-27"], ["ROBERT HAYNER", "C", "Jordan", null, "2026-04-20", "2026-04-23", "2026-05-15"], ["ROBIN BLAKE", "C", "Gavin", null, "2025-12-19", "2025-12-27", "2026-03-17"], ["ROSS DIGIORGIO", "C", "Osgood", null, "2025-06-24", "2025-07-14", "2026-04-30"], ["RUTH ESPINOZA", "C", "Karen", null, "2026-02-27", "2026-03-26", "2026-04-17"], ["SAM BAMRICK", "C", "Jordan", null, "2026-04-14", "2026-04-20", "2026-05-15"], ["SARA BUSH", "C", "Said", null, "2026-03-27", "2026-04-13", "2026-05-27"], ["SLAVI JORDANOV", "C", "Said", "2026-05-30", "2025-10-06", "2025-10-10", "2025-11-07"], ["STAN GORKSI", "C", "Jordan", null, "2026-03-07", "2026-03-09", "2026-04-07"], ["THAER AHMED", "C", "Said", "2026-03-31", "2026-03-31", "2025-08-26", "2025-09-30"], ["TRACI WILLIAMS-JONES", "C", "Jordan", null, "2026-04-09", "2026-03-23", "2026-05-21"], ["TROY BORDEN", "C", "Gavin", "2026-04-28", "2026-04-30", "2026-04-22", "2026-05-13"], ["YASMIN DE JESUS", "C", "Karen", "2024-03-27", "2025-11-18", "2026-04-01", "2026-04-29"], ["ALI SWEAZY", "C", "Osgood", "2026-05-09", "2026-05-09", null, null], ["ALINA ILKAEVA", "C", "Said", null, "2026-03-20", null, null], ["ANA SORIA", "C", "Karen", "2026-04-19", null, null, null], ["ANGELA POTTS", "C", "Osgood", "2026-05-10", "2026-05-10", null, null], ["ANGELIQUE SOTONDJI", "C", "Jordan", "2026-03-27", "2026-03-27", null, null], ["ASHLEY HENRY", "C", "Osgood", "2026-04-22", "2026-04-21", null, null], ["AVA LAIRD", "C", "Jordan", "2026-05-26", "2026-05-25", null, null], ["BAILEY STRATHIE", "C", "Osgood", "2026-05-30", "2026-05-30", "2024-11-21", null], ["BENJAMIN GAYTAN", "C", "Gavin", "2026-05-16", "2026-05-22", null, null], ["BRAD GILLIAM", "C", "Gavin", "2026-05-14", null, null, null], ["BRANDON KIDD", "C", "Said", "2026-05-01", null, null, null], ["BRANDON MCCLENDON", "C", "Said", "2026-03-12", "2026-03-12", null, null], ["CELINE WILLIAMS", "C", "Jordan", "2026-06-01", null, null, null], ["CHERYL KINSEY", "C", "Jordan", "2026-05-05", "2026-05-04", null, null], ["CHRISTIAN CHALKIAS", "C", "Osgood", "2026-04-08", "2026-04-08", null, null], ["CHRISTINA COUGHLIN", "C", "Osgood", "2026-05-29", "2026-05-29", "2024-09-11", null], ["CHUCK KINSEY", "C", "Jordan", "2026-03-16", "2026-03-26", null, null], ["CODA GAHRIS", "C", "Jordan", "2026-04-29", "2026-04-29", "2026-05-25", null], ["CRAIG MAURER", "C", "Osgood", "2026-05-13", "2026-05-19", null, null], ["DAIRDRE SCRIVEN", "C", "Said", "2026-05-19", "2026-05-19", null, null], ["DARREN HOGG", "C", "Said", "2026-04-22", "2026-04-28", null, null], ["ELIAS PAPPAN", "C", "Karen", "2026-04-30", null, null, null], ["ELIZABETH BONAUDI", "C", "Osgood", "2026-04-17", "2026-04-17", null, null], ["ELIZABETH HOWARD", "C", "Osgood", "2026-04-04", "2026-04-03", "2024-11-08", null], ["ERIC RUSSELL", "C", "Jordan", "2026-03-09", "2025-01-22", null, null], ["ERIKA BRUNNER", "C", "Gavin", "2026-04-13", "2026-04-15", "2025-11-07", null], ["GLADIS CHAVEZ", "C", "Karen", "2026-05-15", "2026-05-05", null, null], ["HYPATIA ESPINAL", "C", "Karen", "2026-04-07", "2026-04-08", null, null], ["IZXEL MARTINEZ", "C", "Karen", "2026-05-20", "2026-05-20", null, null], ["JACOB ENGLISH", "C", "Jordan", null, "2026-03-18", "2026-04-23", null], ["JASMIN ARCOS", "C", "Karen", "2026-03-19", "2026-03-26", null, null], ["JASMIN MONTOYA", "C", "Karen", "2026-05-31", "2026-05-31", null, null], ["JEFF MESSMER", "C", "Gavin", "2026-05-12", "2026-05-12", "2025-10-01", null], ["JENNIFER BLACKMORE", "C", "Jordan", "2026-05-02", null, null, null], ["JENNIFER HOWISON", "C", "Jordan", "2026-03-15", "2026-03-30", "2026-04-06", null], ["JESSICA TOWER", "C", "Jordan", "2026-05-27", "2026-05-31", "2023-04-03", null], ["JONNATHAN AGUDELO", "C", "Karen", "2026-05-23", "2026-05-19", null, null], ["JUSTIN BIERY", "C", "Karen", "2026-05-27", "2026-05-28", null, null], ["KATHY HAYES", "C", "Jordan", "2026-05-30", "2026-05-29", "2024-12-09", null], ["KATIE MANSOR", "C", "Jordan", "2026-04-27", "2026-04-26", null, null], ["KERWIN HEATH", "C", "Said", null, "2026-04-12", null, null], ["KYLA AHO", "C", "Said", "2026-03-12", "2025-11-03", "2025-03-28", null], ["LAUREN MCCLINTON", "C", "Said", null, "2026-04-29", null, null], ["LESLIE HERNANDEZ", "C", "Karen", "2026-05-07", "2026-05-08", "2026-05-19", null], ["LILIAN FUENTES", "C", "Karen", "2026-04-21", "2026-04-21", null, null], ["LIZBEL CONTRERAS", "C", "Karen", "2026-04-30", "2026-05-11", "2024-09-18", null], ["MANDY WILSON", "C", "Jordan", null, "2026-03-28", null, null], ["MARIA LUX", "C", "Karen", null, "2026-03-09", null, null], ["MARK GARCIA", "C", "Jordan", "2026-03-09", "2025-10-15", "2023-11-28", null], ["MARK VENNITTI", "C", "Jordan", "2026-04-08", "2026-04-08", "2026-06-01", null], ["MARLA SEWELL", "C", "Osgood", null, "2026-03-19", null, null], ["MATHEA ARUDDA", "C", "Karen", null, "2026-03-16", "2026-03-23", null], ["NANCY BAKER", "C", "Unassigned", "2026-04-30", null, null, null], ["NIA HARRINGTON", "C", "Said", "2026-05-13", "2026-05-05", "2024-10-17", null], ["NICK ZATEZALO", "C", "Osgood", "2026-05-16", "2026-03-19", "2024-03-12", null], ["NIKEHA HAYES", "C", "Osgood", "2026-04-15", "2025-09-28", "2024-09-25", null], ["NINA AVERY", "C", "Jordan", null, "2026-04-23", null, null], ["NORA KERELIUK", "C", "Said", "2026-04-24", null, null, null], ["PIERINA MANTILLA", "C", "Karen", null, "2026-03-15", null, null], ["ROSALIA PABLO", "C", "Karen", "2026-04-08", "2026-04-08", "2024-11-08", null], ["RUTH GONZALEZ", "C", "Karen", "2026-05-19", "2026-05-19", null, null], ["SAHEL ALAM", "C", "Said", "2026-05-10", "2026-05-08", null, null], ["SAM COOPER", "C", "Gavin", "2026-03-10", "2025-07-11", "2024-09-06", null], ["SARAH HERNANDEZ", "C", "Osgood", "2026-05-28", "2026-05-29", "2024-10-21", null], ["SASHA ANTONOVA", "C", "Said", "2026-03-31", "2026-03-31", null, null], ["SHANE STINER", "C", "Jordan", null, "2026-04-08", null, null], ["SHARON PANTELIS", "C", "Jordan", "2026-04-28", "2025-03-21", "2025-04-01", null], ["SHAYNE D. BOYD", "C", "Said", "2026-05-04", "2026-05-07", null, null], ["SHIRRELL BURNSIDE", "C", "Osgood", "2026-04-08", "2025-07-14", null, null], ["STEVEN OSBORN", "C", "Jordan", "2026-04-30", "2026-02-03", null, null], ["SUMMER DURHAM", "C", "Osgood", null, "2026-03-23", null, null], ["SUNI RIVAS", "C", "Karen", "2026-05-27", "2026-05-28", null, null], ["SUSAN PURNAMA", "C", "Said", "2026-03-03", "2026-03-06", null, null], ["TAMARA CHARLTON", "C", "Osgood", "2025-07-27", "2026-04-16", "2025-04-14", null], ["TAMMY GORDON", "C", "Jordan", null, "2026-03-04", null, null], ["TATIANA GRIGORITA", "C", "Jordan", "2026-04-23", null, null, null], ["THOMAS NEWMAN", "C", "Gavin", "2026-03-02", "2026-03-25", "2022-08-22", null], ["TINA-DUTT-HIREN", "C", "Osgood", null, "2026-05-11", null, null], ["TONY AMOS", "C", "Osgood", "2026-04-19", "2026-04-01", "2024-02-27", null], ["WENDY RAMIREZ", "C", "Karen", "2026-03-25", "2026-03-25", null, null], ["WHITNEY SCHMIDT", "C", "Said", "2026-03-18", "2024-01-12", "2024-01-18", null], ["YVETTA HARRISON", "C", "Osgood", "2026-05-29", null, null, null]];
-var agents = [];
-var callLogs = {};
-var currentUser = null;
+var SEED = [
+["TIARA VILLATORO", "A", "Karen", "2026-05-08", "2026-05-08", "2026-06-04", "2026-05-22", false],
+["BRANDON THOMPSON", "A", "Osgood", "2026-06-01", "2026-06-01", "2026-05-04", "2026-06-01", false],
+["MEGAN LYNCH", "A", "Gavin", "2026-06-03", "2026-06-05", "2026-06-01", "2026-06-22", false],
+["TODD STONE", "A", "Said", "2026-06-05", "2026-06-04", "2026-04-13", "2026-05-08", false],
+["DUSTIN GOLDMAN", "A", "Osgood", "2026-04-20", "2026-04-24", "2026-03-30", "2026-03-27", false],
+["KEVIN SPEERT", "A", "Gavin", "2026-05-08", "2026-05-28", "2026-06-01", "2026-06-12", false],
+["TINA HOFFMAN", "A", "Gavin", "2023-10-10", "2026-05-06", "2026-05-27", "2026-02-10", false],
+["OSCAR MARTINEZ", "A", "Karen", "2026-06-03", "2026-06-01", "2026-05-05", "2026-06-15", false],
+["RACQUEL LUDAWAY", "A", "Gavin", "2026-05-29", "2026-05-19", "2026-04-16", "2026-06-04", false],
+["CHRIS REED", "A", "Said", "2026-06-03", "2026-06-02", "2026-05-08", "2026-05-27", false],
+["MICHELLE ERICKSON", "A", "Gavin", "2025-08-04", "2026-03-25", "2026-04-20", "2026-04-10", false],
+["SAHAR SHALASH", "A", "Said", "2026-06-05", "2026-05-31", "2026-05-09", "2026-05-29", false],
+["CINDA ERICKSON", "B", "Gavin", "2026-04-23", "2026-04-21", "2026-02-24", "2026-03-26", false],
+["CONNER KOCHANSKY", "B", "Gavin", "2026-05-30", "2026-05-19", "2026-05-20", "2026-05-20", false],
+["DEANNE RHYNEHARDT", "B", "Osgood", "2026-05-22", "2026-05-28", "2026-05-05", "2026-06-05", false],
+["DERON BENDER", "B", "Gavin", "2025-08-11", "2026-04-24", "2026-04-28", "2026-05-08", true],
+["INGRID CORREIA", "B", "Gavin", "2026-05-08", "2026-05-08", "2025-12-11", "2026-01-05", false],
+["JOHN BRUNNER", "B", "Osgood", "2026-06-01", "2026-06-01", "2026-06-05", "2025-11-17", false],
+["KANDIS HALL", "B", "Osgood", "2026-01-04", "2026-01-31", "2026-02-25", "2026-03-17", false],
+["KRISTINA MURPHY", "B", "Osgood", "2026-06-02", "2026-05-11", "2025-10-03", "2025-10-21", false],
+["MARK BOYD", "B", "Gavin", null, "2026-03-28", "2026-04-08", "2026-02-02", false],
+["MATTHEW MONTALVO", "B", "Karen", "2026-04-09", "2026-04-09", "2026-05-29", "2025-11-20", false],
+["SETH COLBURN", "B", "Said", "2025-04-23", "2026-03-31", "2026-04-06", "2026-04-30", false],
+["ANNIE MORENO", "B", "Karen", "2026-06-06", "2026-06-02", "2026-05-11", "2026-06-05", false],
+["DAN MANLEY", "B", "Gavin", "2025-11-23", "2026-04-29", "2026-05-01", "2026-05-19", false],
+["ELIZABETH ELLINGER", "B", "Jordan", "2026-03-16", "2026-04-01", "2026-05-18", "2026-06-10", false],
+["ERIKA WEHNER", "B", "Gavin", null, "2026-04-14", "2026-05-28", "2026-05-11", false],
+["HEATHER HENRY-MINOR", "B", "Jordan", "2026-04-07", "2026-04-15", "2026-05-05", "2026-05-28", false],
+["KATIE SUMMERS", "B", "Gavin", null, "2026-04-22", "2026-02-26", "2026-05-29", false],
+["KHADIJA FARAH", "B", "Jordan", "2026-05-16", "2026-05-17", "2026-02-09", "2026-03-06", false],
+["KISHMA JAMES", "B", "Said", "2026-03-16", "2026-03-12", "2025-06-09", "2025-07-14", false],
+["MARIA COMAS", "B", "Karen", "2026-04-27", "2026-03-02", "2025-06-19", "2025-07-21", false],
+["MARTIN HOPKINS", "B", "Karen", "2026-02-12", "2026-04-28", "2026-01-29", "2026-02-20", false],
+["MARY MCMICHAEL", "B", "Said", "2026-04-13", "2026-04-13", "2025-09-11", "2025-10-10", false],
+["MATT PIPER", "B", "Osgood", "2026-05-19", "2026-05-19", "2025-11-11", "2025-12-01", false],
+["NATALIE ESTRELLA", "B", "Karen", "2026-05-25", "2026-05-25", "2025-10-08", "2025-11-03", false],
+["RAMI TAMIMI", "B", "Jordan", "2026-03-27", "2026-04-20", "2026-05-07", "2026-06-30", false],
+["STACEY LAMBRIGHT", "B", "Jordan", null, "2026-03-25", "2026-03-26", "2026-04-07", false],
+["TRACY BERARD", "B", "Jordan", null, "2026-04-04", "2026-04-14", "2026-05-27", false],
+["AIMEE WHITLOCK", "C", "Gavin", null, "2025-01-14", "2026-02-10", "2026-04-15", false],
+["ALEXIS REED", "C", "Said", "2026-03-25", "2026-05-12", "2026-01-30", "2026-02-27", false],
+["AMY AGRESTA", "C", "Gavin", "2026-05-23", "2026-05-28", "2025-07-08", "2025-08-05", false],
+["ANGELA PEREZ", "C", "Gavin", "2026-04-27", "2026-05-06", "2026-04-06", "2026-04-24", false],
+["BRIAN NANTHAVONGDOUANGSY", "C", "Osgood", "2025-10-23", "2025-11-19", "2025-12-18", "2026-03-20", false],
+["BRITNEY DODDS", "C", "Gavin", "2026-03-26", "2026-03-26", "2026-03-02", "2026-04-08", false],
+["CAROLE MCMAHON", "C", "Osgood", "2026-05-31", "2026-05-31", "2026-05-08", "2026-05-26", false],
+["CESIA ESPINOZA YOUNG", "C", "Karen", "2026-03-11", "2026-03-10", "2026-03-26", "2026-04-17", false],
+["CHELSEA ANDERSON", "C", "Osgood", "2026-02-07", "2026-02-06", "2026-03-28", "2026-04-17", false],
+["COURTNEY HAMILTON", "C", "Osgood", "2026-05-27", "2026-05-27", "2026-06-02", "2025-06-26", false],
+["DEVIN JOHNSON", "C", "Said", "2026-03-29", "2026-04-15", "2025-05-30", "2025-07-09", false],
+["DIANNA JENKINS", "C", "Said", null, "2026-03-24", "2026-02-23", "2026-04-06", false],
+["HAIFA BRUNNEY", "C", "Karen", "2026-05-21", "2026-06-01", "2026-03-26", "2026-04-27", false],
+["JASMINE MCKENZIE", "C", "Osgood", "2026-05-03", "2026-05-04", "2026-05-06", "2026-05-29", false],
+["JESSE MCCRERRY", "C", "Said", null, "2026-04-06", "2026-04-13", "2026-05-26", false],
+["JOHN LUBINSKY", "C", "Said", "2025-12-17", "2025-12-19", "2026-02-17", "2026-03-20", false],
+["JORDAN HOLLIBAUGH", "C", "Gavin", null, "2026-05-12", "2026-04-29", "2026-04-16", false],
+["KATHERINE DE LA ROSA", "C", "Karen", "2026-05-28", "2026-06-02", "2026-04-01", "2026-04-29", false],
+["KELSY YODER", "C", "Said", "2026-04-28", "2026-01-09", "2026-01-12", "2026-02-05", false],
+["KINSIE HUSKINS", "C", "Jordan", null, "2026-03-17", "2026-04-28", "2026-06-01", false],
+["KRISTEN VALENTY", "C", "Jordan", null, "2026-01-21", "2026-02-24", "2026-03-25", false],
+["LETIKA WHITE", "C", "Osgood", "2026-05-11", "2026-05-12", "2025-07-31", "2025-08-29", false],
+["LISA SIMMONS", "C", "Osgood", null, "2026-03-19", "2026-04-14", "2026-05-27", false],
+["LUIS GIL", "C", "Karen", "2026-06-02", "2026-06-02", "2026-06-02", "2025-09-26", false],
+["LYNDSEY LANE", "C", "Osgood", "2026-03-16", "2025-09-23", "2025-12-23", "2026-01-23", false],
+["MARK VENNITTI", "C", "Jordan", "2026-04-08", "2026-04-08", "2026-06-01", "2026-06-19", false],
+["MIKE WHITEMAN", "C", "Osgood", null, "2025-07-24", "2025-07-31", "2026-05-11", false],
+["NANCY PRICE", "C", "Jordan", "2026-01-03", "2026-01-02", "2026-05-08", "2026-01-30", false],
+["PAIGE LUDWIG", "C", "Said", "2026-03-06", "2026-03-05", "2026-03-17", "2026-04-14", false],
+["PATRICK ARQUETTE", "C", "Said", "2026-04-22", "2026-01-14", "2025-09-09", "2025-10-07", false],
+["PAULA PALLESCHI", "C", "Said", null, "2026-04-21", "2026-04-27", "2026-05-26", false],
+["PILAR BENNETT", "C", "Karen", "2026-04-15", "2026-04-15", "2025-07-23", "2025-08-15", false],
+["RACHELLE PARSLEY", "C", "Said", "2024-09-03", "2026-04-15", "2026-04-22", "2026-05-13", false],
+["ROBERT HAYNER", "C", "Jordan", null, "2026-04-20", "2026-04-23", "2026-05-15", false],
+["ROBIN BLAKE", "C", "Gavin", null, "2025-12-19", "2025-12-27", "2026-03-17", false],
+["ROSS DIGIORGIO", "C", "Osgood", null, "2025-06-24", "2025-07-14", "2026-04-30", false],
+["RUTH ESPINOZA", "C", "Karen", null, "2026-02-27", "2026-03-26", "2026-04-17", false],
+["SAM BAMRICK", "C", "Jordan", null, "2026-04-14", "2026-04-20", "2026-05-15", false],
+["SARA BUSH", "C", "Said", null, "2026-03-27", "2026-04-13", "2026-05-27", false],
+["SLAVI JORDANOV", "C", "Said", "2026-05-30", "2025-10-06", "2025-10-10", "2025-11-07", false],
+["STAN GORKSI", "C", "Jordan", null, "2026-03-07", "2026-03-09", "2026-04-07", false],
+["THAER AHMED", "C", "Said", "2026-03-31", "2026-03-31", "2025-08-26", "2025-09-30", false],
+["TRACI WILLIAMS-JONES", "C", "Jordan", null, "2026-04-09", "2026-03-23", "2026-05-21", false],
+["TROY BORDEN", "C", "Gavin", "2026-04-28", "2026-04-30", "2026-04-22", "2026-05-13", false],
+["YASMIN DE JESUS", "C", "Karen", "2024-03-27", "2025-11-18", "2026-04-01", "2026-04-29", false],
+["ALI SWEAZY", "C", "Osgood", "2026-05-09", "2026-05-09", null, null, false],
+["ALINA ILKAEVA", "C", "Said", null, "2026-03-20", null, null, false],
+["ANA SORIA", "C", "Karen", "2026-04-19", null, null, null, false],
+["ANGELA POTTS", "C", "Osgood", "2026-05-10", "2026-05-10", null, null, false],
+["ANGELIQUE SOTONDJI", "C", "Jordan", "2026-03-27", "2026-03-27", null, null, false],
+["ASHLEY HENRY", "C", "Osgood", "2026-04-22", "2026-04-21", null, null, false],
+["AVA LAIRD", "C", "Jordan", "2026-05-26", "2026-05-25", null, null, false],
+["BAILEY STRATHIE", "C", "Osgood", "2026-05-30", "2026-05-30", "2024-11-21", null, false],
+["BENJAMIN GAYTAN", "C", "Gavin", "2026-05-16", "2026-05-22", null, null, false],
+["BRAD GILLIAM", "C", "Gavin", "2026-05-14", null, null, null, false],
+["BRANDON KIDD", "C", "Said", "2026-05-01", null, null, null, false],
+["BRANDON MCCLENDON", "C", "Said", "2026-03-12", "2026-03-12", null, null, false],
+["BRIAN ZINN", "C", "Jordan", "2026-06-06", null, null, null, false],
+["CELINE WILLIAMS", "C", "Jordan", "2026-06-01", null, null, null, false],
+["CHERYL KINSEY", "C", "Jordan", "2026-05-05", "2026-05-04", null, null, false],
+["CHRISTIAN CHALKIAS", "C", "Osgood", "2026-04-08", "2026-04-08", null, null, false],
+["CHRISTINA COUGHLIN", "C", "Osgood", "2026-05-29", "2026-05-29", "2024-09-11", null, false],
+["CHUCK KINSEY", "C", "Jordan", "2026-03-16", "2026-03-26", null, null, false],
+["CODA GAHRIS", "C", "Jordan", "2026-04-29", "2026-04-29", "2026-05-25", null, false],
+["CRAIG MAURER", "C", "Osgood", "2026-05-13", "2026-05-19", null, null, false],
+["DAIRDRE SCRIVEN", "C", "Said", "2026-05-19", "2026-05-19", null, null, false],
+["DARREN HOGG", "C", "Said", "2026-04-22", "2026-04-28", null, null, false],
+["DONALD PAYNE JR", "C", "Osgood", "2026-06-04", null, null, null, false],
+["ELIAS PAPPAN", "C", "Karen", "2026-04-30", null, null, null, false],
+["ELIZABETH BONAUDI", "C", "Osgood", "2026-04-17", "2026-04-17", null, null, false],
+["ELIZABETH HOWARD", "C", "Osgood", "2026-04-04", "2026-04-03", "2024-11-08", null, false],
+["ERIKA BRUNNER", "C", "Gavin", "2026-04-13", "2026-04-15", "2025-11-07", null, false],
+["GLADIS CHAVEZ", "C", "Karen", "2026-05-15", "2026-05-05", null, null, false],
+["HYPATIA ESPINAL", "C", "Karen", "2026-06-02", "2026-06-02", null, null, false],
+["IZXEL MARTINEZ", "C", "Karen", "2026-05-20", "2026-05-20", "2026-06-02", null, false],
+["JACOB ENGLISH", "C", "Jordan", null, "2026-03-18", "2026-04-23", null, false],
+["JAIDEN BALLAH", "C", "Said", "2026-06-02", "2026-06-03", null, null, false],
+["JASMIN ARCOS", "C", "Karen", "2026-03-19", "2026-03-26", null, null, false],
+["JASMIN MONTOYA", "C", "Karen", "2026-05-31", "2026-05-30", null, null, false],
+["JEFF MESSMER", "C", "Gavin", "2026-05-12", "2026-05-12", "2025-10-01", null, false],
+["JENNIFER BLACKMORE", "C", "Jordan", "2026-05-02", null, null, null, false],
+["JENNIFER HOWISON", "C", "Jordan", "2026-03-15", "2026-03-30", "2026-04-06", null, false],
+["JESSICA TOWER", "C", "Jordan", "2026-05-27", "2026-05-30", "2023-04-03", null, false],
+["JONNATHAN AGUDELO", "C", "Karen", "2026-05-23", "2026-05-19", null, null, false],
+["JUSTIN BIERY", "C", "Karen", "2026-05-27", "2026-05-28", null, null, false],
+["KATHY HAYES", "C", "Jordan", "2026-05-30", "2026-05-29", "2024-12-09", null, false],
+["KATIE MANSOR", "C", "Jordan", "2026-04-27", "2026-04-26", null, null, false],
+["KERWIN HEATH", "C", "Said", null, "2026-04-12", null, null, false],
+["KYLA AHO", "C", "Said", "2026-03-12", "2025-11-03", "2025-03-28", null, false],
+["LAUREN MCCLINTON", "C", "Said", null, "2026-04-29", null, null, false],
+["LESLIE HERNANDEZ", "C", "Karen", "2026-05-07", "2026-05-08", "2026-05-19", null, false],
+["LILIAN FUENTES", "C", "Karen", "2026-04-21", "2026-04-21", null, null, false],
+["LIZBEL CONTRERAS", "C", "Karen", "2026-04-30", "2026-05-11", "2024-09-18", null, false],
+["MANDY WILSON", "C", "Jordan", null, "2026-03-28", null, null, false],
+["MARLA SEWELL", "C", "Osgood", null, "2026-03-19", null, null, false],
+["MATHEA ARUDDA", "C", "Karen", null, "2026-03-16", "2026-03-23", null, false],
+["MICHELE FREDERICK", "C", "Osgood", null, "2026-05-31", null, null, false],
+["NANCY BAKER", "C", "Unassigned", "2026-04-30", null, null, null, false],
+["NIA HARRINGTON", "C", "Said", "2026-05-13", "2026-05-05", "2024-10-17", null, false],
+["NICK ZATEZALO", "C", "Osgood", "2026-05-16", "2026-03-19", "2024-03-12", null, false],
+["NIKEHA HAYES", "C", "Osgood", "2026-04-15", "2025-09-28", "2024-09-25", null, false],
+["NINA AVERY", "C", "Jordan", null, "2026-04-23", null, null, false],
+["NORA KERELIUK", "C", "Said", "2026-04-24", null, null, null, false],
+["PIERINA MANTILLA", "C", "Karen", null, "2026-03-15", null, null, false],
+["ROSALIA PABLO", "C", "Karen", "2026-06-04", "2026-06-04", "2024-11-08", null, false],
+["RUTH GONZALEZ", "C", "Karen", "2026-05-19", "2026-05-19", null, null, false],
+["SAHEL ALAM", "C", "Said", "2026-05-10", "2026-05-08", null, null, false],
+["SAM COOPER", "C", "Gavin", "2026-03-10", "2025-07-11", "2024-09-06", null, true],
+["SARAH HERNANDEZ", "C", "Osgood", "2026-05-28", "2026-05-29", "2024-10-21", null, false],
+["SASHA ANTONOVA", "C", "Said", "2026-03-31", "2026-03-31", null, null, false],
+["SHANE STINER", "C", "Jordan", null, "2026-04-08", null, null, false],
+["SHARON PANTELIS", "C", "Jordan", "2026-04-28", "2025-03-21", "2025-04-01", null, false],
+["SHAYNE D. BOYD", "C", "Said", "2026-05-04", "2026-05-07", null, null, false],
+["SHIRRELL BURNSIDE", "C", "Osgood", "2026-04-08", "2025-07-14", null, null, false],
+["STEVEN OSBORN", "C", "Jordan", "2026-04-30", "2026-02-03", null, null, false],
+["SUMMER DURHAM", "C", "Osgood", null, "2026-03-23", null, null, false],
+["SUNI RIVAS", "C", "Karen", "2026-05-27", "2026-05-28", null, null, false],
+["TAMARA CHARLTON", "C", "Osgood", "2025-07-27", "2026-04-16", "2025-04-14", null, false],
+["TATIANA GRIGORITA", "C", "Jordan", "2026-04-23", null, null, null, false],
+["THOMAS NEWMAN", "C", "Gavin", "2026-03-02", "2026-03-25", "2022-08-22", null, false],
+["TINA-DUTT-HIREN", "C", "Osgood", null, "2026-05-11", null, null, false],
+["TONY AMOS", "C", "Osgood", "2026-04-19", "2026-04-01", "2024-02-27", null, false],
+["WENDY RAMIREZ", "C", "Karen", "2026-03-25", "2026-03-25", null, null, false],
+["WHITNEY SCHMIDT", "C", "Said", "2026-03-18", "2024-01-12", "2024-01-18", null, false],
+["YVETTA HARRISON", "C", "Osgood", "2026-06-04", null, null, null, false]
+];
+var agents = [], callLogs = {}, lastWeekLogs = {}, currentUser = null;
 var weekKey = getWeekKey(TODAY);
+var lastWeekKey = getLastWeekKey(TODAY);
 var noteTimers = {};
 
 function getWeekKey(d){var dt=new Date(d);dt.setHours(0,0,0,0);var day=dt.getDay(),mon=new Date(dt);mon.setDate(dt.getDate()-(day===0?6:day-1));return mon.toISOString().split("T")[0];}
+function getLastWeekKey(d){var dt=new Date(d);dt.setDate(dt.getDate()-7);return getWeekKey(dt);}
 function getWeekLabel(k){var mon=new Date(k),sun=new Date(mon);sun.setDate(mon.getDate()+6);var o={month:"short",day:"numeric"};return "Week of "+mon.toLocaleDateString("en-US",o)+" - "+sun.toLocaleDateString("en-US",o);}
 function fmt(d){if(!d)return "--";return new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"2-digit"});}
 function mostRecent(a){return[a[3],a[4],a[5],a[6]].filter(Boolean).sort().reverse()[0]||null;}
 function isActive(a){var d=mostRecent(a);return d?new Date(d)>=CUTOFF:false;}
-function calledThisWeek(name){return !!(callLogs[name] && callLogs[name].week_key===weekKey);}
-function lpDays(name){
-  var log=callLogs[name];
-  if(!log||!log.call_date) return null;
-  var dt=new Date(log.call_date); dt.setHours(0,0,0,0);
-  return Math.floor((TODAY-dt)/86400000);
-}
+function calledThisWeek(name){return !!(callLogs[name]&&callLogs[name].week_key===weekKey);}
+function calledLastWeek(name){return !!(lastWeekLogs[name]&&lastWeekLogs[name].week_key===lastWeekKey);}
+function lpDays(name){var log=callLogs[name];if(!log||!log.call_date)return null;var dt=new Date(log.call_date);dt.setHours(0,0,0,0);return Math.floor((TODAY-dt)/86400000);}
+function isPriority(a){return a[7]===true||a[7]==="true";}
+
 function getRotation(lp){
   var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
   if(!active.length)return[];
+  // Priority agents always first
+  var priority=active.filter(isPriority);
+  var normal=active.filter(function(a){return!isPriority(a);});
   var wn=Math.floor((TODAY-new Date("2024-01-01"))/(7*86400000));
-  var pw=Math.min(15,active.length);
-  var si=(wn*pw)%active.length;
-  var base=[];for(var i=0;i<pw;i++)base.push(active[(si+i)%active.length]);
-  var overdue=active.filter(function(a){var ds=lpDays(a[0]);return ds!==null&&ds>=14&&base.indexOf(a)<0;});
-  var all=overdue.slice(0,2).concat(base),seen={},res=[];
-  for(var j=0;j<all.length;j++){if(!seen[all[j][0]]){seen[all[j][0]]=true;res.push(all[j]);}}
+  var remaining=Math.max(0,15-priority.length);
+  var pw=Math.min(remaining,normal.length);
+  var si=normal.length?((wn*pw)%normal.length):0;
+  var base=[];for(var i=0;i<pw;i++)base.push(normal[(si+i)%normal.length]);
+  var overdue=normal.filter(function(a){var ds=lpDays(a[0]);return ds!==null&&ds>=14&&base.indexOf(a)<0;});
+  var combined=priority.concat(overdue.slice(0,2)).concat(base);
+  var seen={},res=[];
+  for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
   return res.slice(0,15);
 }
 
-// Supabase API calls
-function sbFetch(method, path, body) {
-  var opts = {
-    method: method,
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": "Bearer " + SUPABASE_KEY,
-      "Content-Type": "application/json",
-      "Prefer": method==="POST" ? "resolution=merge-duplicates,return=minimal" : "return=representation"
-    }
-  };
-  if(body) opts.body = JSON.stringify(body);
-  return fetch(SUPABASE_URL + "/rest/v1/" + path, opts).then(function(r){
-    if(!r.ok) return r.text().then(function(t){throw new Error(t);});
-    return r.status===204 ? null : r.json();
-  });
+function getLastWeekRotation(lp){
+  var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+  if(!active.length)return[];
+  var wn=Math.floor((TODAY-new Date("2024-01-01"))/(7*86400000))-1;
+  var priority=active.filter(isPriority);
+  var normal=active.filter(function(a){return!isPriority(a);});
+  var remaining=Math.max(0,15-priority.length);
+  var pw=Math.min(remaining,normal.length);
+  var si=normal.length?((wn*pw)%normal.length):0;
+  var base=[];for(var i=0;i<pw;i++)base.push(normal[(si+i)%normal.length]);
+  var combined=priority.concat(base);
+  var seen={},res=[];
+  for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
+  return res.slice(0,15);
 }
 
-function loadCallLogs() {
+function sbFetch(method,path,body){
+  var opts={method:method,headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
+  if(body)opts.body=JSON.stringify(body);
+  return fetch(SUPABASE_URL+"/rest/v1/"+path,opts).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});return r.status===204?null:r.json();});
+}
+
+function loadCallLogs(){
   setSyncStatus("saving");
-  return sbFetch("GET", "call_logs?week_key=eq."+weekKey+"&select=*")
-    .then(function(rows){
-      callLogs = {};
-      if(rows) rows.forEach(function(r){ callLogs[r.agent_name] = r; });
-      setSyncStatus("live");
-      return rows;
-    })
-    .catch(function(e){
-      setSyncStatus("error");
-      console.log("Load error:", e);
-    });
+  // Load this week and last week in parallel
+  return Promise.all([
+    sbFetch("GET","call_logs?week_key=eq."+weekKey+"&select=*"),
+    sbFetch("GET","call_logs?week_key=eq."+lastWeekKey+"&select=*")
+  ]).then(function(results){
+    callLogs={};lastWeekLogs={};
+    if(results[0])results[0].forEach(function(r){callLogs[r.agent_name]=r;});
+    if(results[1])results[1].forEach(function(r){lastWeekLogs[r.agent_name]=r;});
+    setSyncStatus("live");
+  }).catch(function(e){setSyncStatus("error");console.log("Load error:",e);});
 }
 
-function upsertCallLog(agentName, lp, note) {
-  var id = agentName + "__" + weekKey;
-  var data = {id:id, agent_name:agentName, lp:lp, week_key:weekKey, call_date:TODAY.toISOString().split("T")[0], note:note||""};
-  callLogs[agentName] = data;
+function upsertCallLog(agentName,lp,note){
+  var id=agentName+"__"+weekKey;
+  var data={id:id,agent_name:agentName,lp:lp,week_key:weekKey,call_date:TODAY.toISOString().split("T")[0],note:note||""};
+  callLogs[agentName]=data;
   setSyncStatus("saving");
-  return sbFetch("POST", "call_logs", data)
-    .then(function(){ setSyncStatus("live"); })
-    .catch(function(e){ setSyncStatus("error"); console.log("Save error:", e); });
+  return sbFetch("POST","call_logs",data).then(function(){setSyncStatus("live");}).catch(function(e){setSyncStatus("error");});
 }
 
-function deleteCallLog(agentName) {
-  var id = agentName + "__" + weekKey;
+function deleteCallLog(agentName){
+  var id=agentName+"__"+weekKey;
   delete callLogs[agentName];
   setSyncStatus("saving");
-  return sbFetch("DELETE", "call_logs?id=eq."+encodeURIComponent(id))
-    .then(function(){ setSyncStatus("live"); })
-    .catch(function(e){ setSyncStatus("error"); console.log("Delete error:", e); });
+  return sbFetch("DELETE","call_logs?id=eq."+encodeURIComponent(id)).then(function(){setSyncStatus("live");}).catch(function(e){setSyncStatus("error");});
 }
 
-function setSyncStatus(status) {
-  var dot = document.getElementById("syncDot");
-  var ind = document.getElementById("saveInd");
-  if(status==="live"){dot.className="sync-dot live";ind.textContent="Live";}
-  else if(status==="saving"){dot.className="sync-dot saving";ind.textContent="Syncing...";}
+function setSyncStatus(s){
+  var dot=document.getElementById("syncDot"),ind=document.getElementById("saveInd");
+  if(s==="live"){dot.className="sync-dot live";ind.textContent="Live";}
+  else if(s==="saving"){dot.className="sync-dot saving";ind.textContent="Syncing...";}
   else{dot.className="sync-dot error";ind.textContent="Offline";}
 }
 
-function loadAgents() {
-  agents = SEED.map(function(r){return[r[0],r[1],r[2],r[3],r[4],r[5],r[6]];});
-  try {
-    var s = localStorage.getItem(STORAGE_KEY);
-    if(s){
-      var d = JSON.parse(s);
-      if(d.ov) d.ov.forEach(function(o){var a=agents.find(function(x){return x[0]===o.n;});if(a){a[2]=o.lp;}else if(o.added){agents.push([o.n,o.lv,o.lp,null,null,null,null]);}});
-      if(d.rm) d.rm.forEach(function(n){agents=agents.filter(function(a){return a[0]!==n;});});
-      if(d.up) d.up.forEach(function(u){var a=agents.find(function(x){return x[0]===u[0];});if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];}else{agents.push(u);}});
+function isMonday(){return TODAY.getDay()===1;}
+
+function getStreakWeeks(lp){
+  var weeks=[];
+  var dt=new Date(TODAY);
+  for(var i=0;i<12;i++){
+    var wk=getWeekKey(dt);
+    var rot=getRotation(lp);
+    if(i>0){
+      var wn=Math.floor((new Date(wk)-new Date("2024-01-01"))/(7*86400000));
+      var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+      var pw=Math.min(15,active.length);
+      var si=active.length?((wn*pw)%active.length):0;
+      var base=[];for(var j=0;j<pw;j++)base.push(active[(si+j)%active.length]);
+      rot=base;
     }
-  } catch(e){}
+    weeks.push({wk:wk,rot:rot});
+    dt.setDate(dt.getDate()-7);
+  }
+  return weeks;
 }
 
-function saveAgents() {
-  var ov=agents.filter(function(a){var s=SEED.find(function(x){return x[0]===a[0];});return!s||s[2]!==a[2];}).map(function(a){return{n:a[0],lp:a[2],lv:a[1],added:!SEED.find(function(s){return s[0]===a[0];})};});
+function calcStreak(lp){
+  // Count consecutive weeks at 100% going back from last completed week
+  var streak=0;
+  var dt=new Date(TODAY); dt.setDate(dt.getDate()-7);
+  for(var i=0;i<52;i++){
+    var wk=getWeekKey(dt);
+    var wn=Math.floor((new Date(wk)-new Date("2024-01-01"))/(7*86400000));
+    var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+    if(!active.length) break;
+    var pw=Math.min(15,active.length);
+    var si=active.length?((wn*pw)%active.length):0;
+    var rot=[];for(var j=0;j<pw;j++)rot.push(active[(si+j)%active.length]);
+    var done=rot.filter(function(a){return !!(callLogs[a[0]]&&callLogs[a[0]].week_key===wk);}).length;
+    if(done===rot.length&&rot.length>0) streak++;
+    else break;
+    dt.setDate(dt.getDate()-7);
+  }
+  return streak;
+}
+
+function calcAllTimeStats(lp){
+  // Get all call logs for this LP from Supabase data we have
+  var totalCalled=Object.values(callLogs).filter(function(l){return l.lp===lp;}).length;
+  var totalLastWeek=Object.values(lastWeekLogs).filter(function(l){return l.lp===lp;}).length;
+  return {totalCalled:totalCalled+totalLastWeek};
+}
+
+function renderLeaderboard(){
+  var stats=LPS.map(function(lp){
+    var allCalls=Object.values(callLogs).filter(function(l){return l.lp===lp;}).length +
+                 Object.values(lastWeekLogs).filter(function(l){return l.lp===lp;}).length;
+    var thisWeekRot=getRotation(lp);
+    var thisWeekDone=thisWeekRot.filter(function(a){return calledThisWeek(a[0]);}).length;
+    var thisWeekPct=thisWeekRot.length?Math.round(thisWeekDone/thisWeekRot.length*100):0;
+    var streak=calcStreak(lp);
+    return {lp:lp,allCalls:allCalls,thisWeekPct:thisWeekPct,streak:streak};
+  }).sort(function(a,b){return b.allCalls-a.allCalls;});
+
+  var medals=["&#127947;","&#129352;","&#129353;","4.","5."];
+  var lbHtml=stats.map(function(s,i){
+    var col={Gavin:"#2E7D32",Karen:"#1565C0",Osgood:"#E65100",Jordan:"#880E4F",Said:"#4527A0"}[s.lp];
+    var bg={Gavin:"#E8F5E9",Karen:"#E3F2FD",Osgood:"#FFF8E1",Jordan:"#FCE4EC",Said:"#EDE7F6"}[s.lp];
+    return '<div style="background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:10px;padding:.75rem 1rem;margin-bottom:6px;display:flex;align-items:center;gap:12px">'+
+      '<span style="font-size:18px;width:28px;text-align:center">'+medals[i]+'</span>'+
+      '<div style="flex:1">'+
+        '<div style="font-weight:700;font-size:14px;color:'+col+'">'+s.lp+'</div>'+
+        '<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">'+
+          s.allCalls+' total calls'+
+          (s.streak>0?'  &#128293; '+s.streak+' week streak':"")+ 
+        '</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div style="font-size:18px;font-weight:800;color:'+(s.thisWeekPct===100?"#43A047":s.thisWeekPct>50?"#FB8C00":"#E53935")+'">'+s.thisWeekPct+'%</div>'+
+        '<div style="font-size:10px;color:var(--color-text-secondary)">this week</div>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+  document.getElementById("leaderboard").innerHTML=lbHtml;
+}
+
+function renderTeamsMessage(){
+  var lines=["&#9889; Core Team Weekly Update - "+getWeekLabel(weekKey),""];
+  LPS.forEach(function(lp){
+    var rot=getRotation(lp);
+    var done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
+    var pct=rot.length?Math.round(done/rot.length*100):0;
+    var emoji=pct===100?"✅":pct>=80?"🟡":"🔴";
+    lines.push(emoji+" "+lp+": "+pct+"% ("+done+"/"+rot.length+" calls done)");
+  });
+  lines.push("");
+  var allDone=LPS.every(function(lp){var rot=getRotation(lp);var done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;return done===rot.length;});
+  if(allDone){lines.push("&#127881; Everyone hit 100% this week. Let's keep it up!");}
+  else{
+    var behind=LPS.filter(function(lp){var rot=getRotation(lp);var done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;return done<rot.length;});
+    lines.push("&#128680; Still outstanding: "+behind.join(", ")+" — finish strong!");
+  }
+  lines.push("");
+  lines.push("Tracker: https://pwang318.github.io/core-team-tracker");
+  document.getElementById("teams-message").textContent=lines.join("\n");
+}
+
+function copyTeamsMessage(){
+  var txt=document.getElementById("teams-message").textContent;
+  navigator.clipboard.writeText(txt).then(function(){
+    var c=document.getElementById("copy-confirm");
+    c.style.display="inline";
+    setTimeout(function(){c.style.display="none";},2000);
+  });
+}
+
+function renderStreakAndMonday(lp){
+  var monday=document.getElementById("monday-banner");
+  if(monday) monday.style.display=isMonday()?"flex":"none";
+  var streak=calcStreak(lp);
+  var bar=document.getElementById("streak-bar");
+  if(bar){
+    if(streak>=2){
+      bar.style.display="flex";
+      bar.innerHTML="&#128293; "+streak+" week streak! Keep it going "+lp+"!";
+    } else if(streak===1){
+      bar.style.display="flex";
+      bar.innerHTML="&#128293; 1 week streak! Hit 100% again this week to keep it going!";
+    } else {
+      bar.style.display="none";
+    }
+  }
+}
+
+function loadAgents(){
+  agents=SEED.map(function(r){return[r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7]];});
+  try{
+    var s=localStorage.getItem(STORAGE_KEY);
+    if(s){
+      var d=JSON.parse(s);
+      if(d.ov)d.ov.forEach(function(o){var a=agents.find(function(x){return x[0]===o.n;});if(a){a[2]=o.lp;if(o.pr!==undefined)a[7]=o.pr;}else if(o.added){agents.push([o.n,o.lv,o.lp,null,null,null,null,o.pr||false]);}});
+      if(d.rm)d.rm.forEach(function(n){agents=agents.filter(function(a){return a[0]!==n;});});
+      if(d.up)d.up.forEach(function(u){var a=agents.find(function(x){return x[0]===u[0];});if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];}else{agents.push(u);}});
+    }
+  }catch(e){}
+}
+
+function saveAgents(){
+  var ov=agents.filter(function(a){var s=SEED.find(function(x){return x[0]===a[0];});return!s||s[2]!==a[2]||s[7]!==a[7];}).map(function(a){return{n:a[0],lp:a[2],lv:a[1],pr:a[7],added:!SEED.find(function(s){return s[0]===a[0];})};});
   var rm=SEED.map(function(s){return s[0];}).filter(function(n){return!agents.find(function(a){return a[0]===n;});});
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify({ov:ov,rm:rm}));}catch(e){}
 }
 
-function selectUser(btn, u) {
+function selectUser(btn,u){
   currentUser=u;
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
-  btn.classList.add("active");
+  if(btn)btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  if(u==="Daniel"){document.getElementById("view-daniel").classList.add("active");loadCallLogs().then(renderDaniel);}
+  if(u==="Daniel"){document.getElementById("view-daniel").classList.add("active");loadCallLogs().then(function(){renderDaniel();});}
   else if(u==="Admin"){document.getElementById("view-admin").classList.add("active");renderAdmin();}
   else{document.getElementById("view-lp").classList.add("active");loadCallLogs().then(function(){renderLP(u);});}
 }
 
-function renderLP(lp) {
+function renderLP(lp){
   var all=agents.filter(function(a){return a[2]===lp;});
-  var ac=all.filter(isActive).length, ic=all.filter(function(a){return!isActive(a);}).length;
+  var ac=all.filter(isActive).length,ic=all.filter(function(a){return!isActive(a);}).length;
+  var pcount=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
   document.getElementById("lp-hero-name").textContent=lp+"s calls this week";
-  document.getElementById("lp-hero-sub").textContent=ac+" active / "+ic+" inactive";
+  document.getElementById("lp-hero-sub").textContent=ac+" active / "+ic+" inactive"+(pcount?" / "+pcount+" priority":"");
   var rot=getRotation(lp);
   var done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
   var pct=rot.length?Math.round(done/rot.length*100):0;
   var bar=document.getElementById("lp-prog");
   bar.style.width=pct+"%";bar.style.background=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
   document.getElementById("lp-prog-txt").textContent=done+" / "+rot.length+" done";
+  var pb=document.getElementById("priority-banner");
+  var hasPriority=rot.some(function(a){return isPriority(a)&&!calledThisWeek(a[0]);});
+  pb.style.display=hasPriority?"flex":"none";
   var banner=document.getElementById("inactive-banner");
   if(ic>0){banner.style.display="flex";document.getElementById("inactive-banner-txt").textContent=ic+" agents inactive (90+ days) - removed from rotation.";}
   else banner.style.display="none";
+  renderStreakAndMonday(lp);
   var el=document.getElementById("lp-call-list");
   if(!rot.length){el.innerHTML='<div class="no-data">No active agents in rotation yet.</div>';return;}
   var html="";
   rot.forEach(function(a){
-    var called=calledThisWeek(a[0]);
-    var ds=lpDays(a[0]);
-    var act=mostRecent(a);
-    var log=callLogs[a[0]];
-    var note=log?log.note:"";
+    var called=calledThisWeek(a[0]),ds=lpDays(a[0]),act=mostRecent(a),pri=isPriority(a);
+    var log=callLogs[a[0]],note=log?log.note:"";
     var chk=called
       ?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
       :'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
     var dsText=ds===null?"Never called":ds===0?"Called this week":ds+"d since last call";
-    html+='<div class="call-card'+(called?" done":"")+'">';
+    html+='<div class="call-card'+(pri?" priority":"")+(called?" done":"")+'">';
     html+='<button class="check-btn'+(called?" checked":"")+'" data-name="'+a[0]+'" onclick="toggleCall(this)">'+chk+'</button>';
     html+='<div class="call-info">';
-    html+='<div class="call-name'+(called?" striked":"")+'">'+a[0]+'</div>';
-    html+='<div class="call-meta">';
-    html+='<span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
+    html+='<div class="call-name'+(called?" striked":"")+'">'+a[0]+(pri&&!called?'<span class="priority-tag">PRIORITY</span>':"")+' </div>';
+    html+='<div class="call-meta"><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
     html+='<span'+(ds===null?' style="color:#E53935"':'')+'>'+dsText+'</span>';
     if(ds!==null&&ds>=14)html+='<span style="color:#E53935">overdue</span>';
     if(act)html+='<span>Last activity: '+fmt(act)+'</span>';
@@ -359,43 +716,88 @@ function renderLP(lp) {
   el.innerHTML=html;
 }
 
-function toggleCall(btn) {
+function toggleCall(btn){
   var name=btn.getAttribute("data-name");
-  if(calledThisWeek(name)){
-    deleteCallLog(name).then(function(){renderLP(currentUser);});
-  } else {
-    upsertCallLog(name, currentUser, "").then(function(){renderLP(currentUser);});
-  }
+  if(calledThisWeek(name)){deleteCallLog(name).then(function(){renderLP(currentUser);});}
+  else{upsertCallLog(name,currentUser,"").then(function(){renderLP(currentUser);});}
 }
 
-function queueNote(ta) {
-  var name=ta.getAttribute("data-name");
-  var val=ta.value;
-  if(noteTimers[name]) clearTimeout(noteTimers[name]);
-  noteTimers[name]=setTimeout(function(){
-    upsertCallLog(name, currentUser, val);
-  }, 800);
+function queueNote(ta){
+  var name=ta.getAttribute("data-name"),val=ta.value;
+  if(noteTimers[name])clearTimeout(noteTimers[name]);
+  noteTimers[name]=setTimeout(function(){upsertCallLog(name,currentUser,val);},800);
 }
 
-function renderDaniel() {
+function toggleScorecard(which){
+  var secId=which==="last"?"last-week-section":"this-week-section";
+  var chevId=which==="last"?"last-chevron":"this-chevron";
+  var section=document.getElementById(secId);
+  var chevron=document.getElementById(chevId);
+  var isOpen=section.style.display!=="none";
+  section.style.display=isOpen?"none":"block";
+  chevron.style.transform=isOpen?"":"rotate(180deg)";
+}
+function renderWeeklySummary(targetEl,labelEl,pillsElId,weekLogs,weekRotFn,weekLbl){
+  var lel=document.getElementById(labelEl); if(lel)lel.textContent=weekLbl;
+  var html="";
+  var pills="";
+  LPS.forEach(function(lp){
+    var rot=weekRotFn(lp);
+    var done=rot.filter(function(a){return !!(weekLogs[a[0]]);}).length;
+    var missed=rot.filter(function(a){return !(weekLogs[a[0]]);});
+    var pct=rot.length?Math.round(done/rot.length*100):0;
+    var col=pct===100?"#43A047":pct>=80?"#FB8C00":"#E53935";
+    var bg=pct===100?"#E8F5E9":pct>=80?"#FFF8E1":"#FFEBEE";
+    // pill for collapsed view
+    pills+='<span style="background:'+bg+';color:'+col+';font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px">'+lp+' '+pct+'%</span>';
+    // full row
+    html+='<div style="padding:10px 0;border-bottom:1px solid #f0f2f5">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(missed.length&&pct<100?"6px":"0")+'">';
+    html+='<div style="display:flex;align-items:center;gap:8px">';
+    html+='<span style="width:10px;height:10px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block"></span>';
+    html+='<span style="font-weight:700;font-size:14px" class="lp-c-'+lp+'">'+lp+'</span></div>';
+    html+='<div style="display:flex;align-items:center;gap:10px">';
+    html+='<span style="font-size:22px;font-weight:800;color:'+col+'">'+pct+'%</span>';
+    html+='<span style="font-size:12px;color:#888">'+done+"/"+rot.length+" agents</span></div></div>";
+    if(missed.length&&pct<100){
+      html+='<div style="background:#FFEBEE;border-radius:8px;padding:7px 10px;font-size:12px;color:#C62828">';
+      html+='<b>Did not call:</b> '+missed.map(function(a){return a[0];}).join(", ")+'</div>';
+    } else if(pct===100) {
+      html+='<div style="font-size:12px;color:#43A047;font-weight:500">&#10003; Called all agents!</div>';
+    }
+    html+='</div>';
+  });
+  document.getElementById(targetEl).innerHTML=html||'<div style="font-size:13px;color:#888">No calls logged yet this week.</div>';
+  var pillsEl=document.getElementById(pillsElId);
+  if(pillsEl)pillsEl.innerHTML=pills;
+}
+
+function renderDaniel(){
   var flp=document.getElementById("d-lp").value,flv=document.getElementById("d-lvl").value;
   var fst=document.getElementById("d-status").value,q=document.getElementById("d-q").value.toLowerCase();
+  renderWeeklySummary("this-week-content","this-week-label","this-week-pills",callLogs,getRotation,getWeekLabel(weekKey));
+  renderWeeklySummary("last-week-content","last-week-label","last-week-pills",lastWeekLogs,getLastWeekRotation,getWeekLabel(lastWeekKey));
+  var hasLastWeekData=Object.keys(lastWeekLogs).length>0;
+  var lwCard=document.getElementById("last-week-scorecard");
+  if(lwCard)lwCard.style.display=hasLastWeekData?"block":"none";
   var gh="";
   LPS.forEach(function(lp){
     var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
     var pct=rot.length?Math.round(done/rot.length*100):0;
     var all=agents.filter(function(a){return a[2]===lp;}),ic=all.filter(function(a){return!isActive(a);}).length;
+    var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
     var col=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
     gh+='<div class="d-card"><div class="d-name"><span style="width:10px;height:10px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block;flex-shrink:0"></span><span class="lp-c-'+lp+'">'+lp+'</span></div>';
     gh+='<div class="d-pct" style="color:'+col+'">'+pct+'%</div>';
     gh+='<div class="d-bar-track"><div class="d-bar-fill bar-'+lp+'" style="width:'+pct+'%"></div></div>';
     gh+='<div class="d-meta"><span>'+done+'/'+rot.length+' this week</span><span>'+all.length+' agents</span></div>';
-    if(ic)gh+='<div style="font-size:11px;color:#E53935;margin-top:4px">'+ic+' inactive</div>';
+    if(pc)gh+='<div style="font-size:11px;color:#C62828;margin-top:4px">'+pc+' priority agent'+(pc>1?"s":"")+'</div>';
+    if(ic)gh+='<div style="font-size:11px;color:#E53935;margin-top:2px">'+ic+' inactive</div>';
     gh+='</div>';
   });
   document.getElementById("d-grid").innerHTML=gh;
   var cold=agents.filter(function(a){if(!isActive(a)||a[2]==="Unassigned")return false;var ds=lpDays(a[0]);return ds===null||ds>=14;}).sort(function(a,b){return(lpDays(b[0])||999)-(lpDays(a[0])||999);}).slice(0,8);
-  var ch=cold.length?cold.map(function(a){var ds=lpDays(a[0]);return'<div class="alert-item"><span class="adot '+(!ds||ds>=30?"adot-red":"adot-amber")+'"></span><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:12px;color:#888">'+(ds===null?"Never called":ds+"d since LP called")+'</span></div>';}).join(""):'<div class="alert-item"><span class="adot adot-green"></span><span style="color:#43A047">All agents contacted within 14 days!</span></div>';
+  var ch=cold.length?cold.map(function(a){var ds=lpDays(a[0]);return'<div class="alert-item"><span class="adot '+(!ds||ds>=30?"adot-red":"adot-amber")+'"></span><span style="font-weight:600;flex:1">'+a[0]+(isPriority(a)?'<span class="priority-tag" style="margin-left:5px">PRIORITY</span>':"")+' </span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:12px;color:#888">'+(ds===null?"Never called":ds+"d since LP called")+'</span></div>';}).join(""):'<div class="alert-item"><span class="adot adot-green"></span><span style="color:#43A047">All agents contacted within 14 days!</span></div>';
   document.getElementById("d-cold").innerHTML=ch;
   var list=agents.filter(function(a){return a[2]!=="Unassigned";});
   if(flp)list=list.filter(function(a){return a[2]===flp;});
@@ -403,13 +805,25 @@ function renderDaniel() {
   if(fst==="active")list=list.filter(isActive);
   if(fst==="inactive")list=list.filter(function(a){return!isActive(a);});
   if(q)list=list.filter(function(a){return a[0].toLowerCase().indexOf(q)>=0;});
-  list.sort(function(a,b){return(lpDays(b[0])||9999)-(lpDays(a[0])||9999);});
+  list.sort(function(a,b){
+    if(isPriority(a)&&!isPriority(b))return -1;
+    if(!isPriority(a)&&isPriority(b))return 1;
+    return(lpDays(b[0])||9999)-(lpDays(a[0])||9999);
+  });
+  renderLeaderboard();
+  renderTeamsMessage();
   var tb=list.map(function(a){
-    var act=isActive(a),ds=lpDays(a[0]),mr=mostRecent(a),cal=calledThisWeek(a[0]);
+    var act=isActive(a),ds=lpDays(a[0]),mr=mostRecent(a),cal=calledThisWeek(a[0]),pri=isPriority(a);
+    var log=callLogs[a[0]],notePreview=log&&log.note?'<div style="font-size:11px;color:#888;margin-top:2px;font-style:italic">'+log.note+'</div>':"";
     var dsc=ds===null?"color:#E53935":ds>=14?"color:#FB8C00":"color:#43A047";
-    var log=callLogs[a[0]];
-    var notePreview=log&&log.note?'<div style="font-size:11px;color:#888;margin-top:2px;font-style:italic">'+log.note+'</div>':"";
-    return'<tr><td style="font-weight:600">'+a[0]+notePreview+'</td><td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td><td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td><td>'+(act?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td style="font-size:12px;'+dsc+'">'+(ds===null?"Never":ds+"d ago")+'</td><td style="font-size:12px;color:#888">'+(mr?fmt(mr):"--")+'</td><td style="text-align:center">'+(cal?'<b style="color:#43A047">Yes</b>':'<span style="color:#ccc">-</span>')+'</td></tr>';
+    return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
+      '<td style="font-weight:600">'+a[0]+(pri?'<span class="priority-tag" style="margin-left:5px">PRIORITY</span>':"")+' '+notePreview+'</td>'+
+      '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
+      '<td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td>'+
+      '<td>'+(act?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
+      '<td style="font-size:12px;'+dsc+'">'+(ds===null?"Never":ds+"d ago")+'</td>'+
+      '<td style="font-size:12px;color:#888">'+(mr?fmt(mr):"--")+'</td>'+
+      '<td style="text-align:center">'+(cal?'<b style="color:#43A047">Yes</b>':'<span style="color:#ccc">-</span>')+'</td></tr>';
   }).join("");
   document.getElementById("d-tbody").innerHTML=tb;
 }
@@ -421,42 +835,44 @@ function renderAdmin(){
   var ih=inactive.length?inactive.map(function(a){return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
   document.getElementById("inactive-list").innerHTML=ih;
 }
+
 function renderReassign(){
   var q=document.getElementById("reassign-q").value.toLowerCase();
   var flp=document.getElementById("reassign-filter-lp").value;
   var list=agents.filter(function(a){return(!q||a[0].toLowerCase().indexOf(q)>=0)&&(!flp||a[2]===flp);});
   var html=list.map(function(a){
-    var idx=agents.indexOf(a);
+    var idx=agents.indexOf(a),pri=isPriority(a);
     var opts=["Unassigned"].concat(LPS).map(function(lp){return'<option'+(a[2]===lp?" selected":"")+' value="'+lp+'">'+lp+'</option>';}).join("");
-    return'<tr><td style="font-weight:600">'+a[0]+'</td><td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td><td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td><td><select data-idx="'+idx+'" onchange="reassign(this)" style="font-size:12px">'+opts+'</select></td></tr>';
+    return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
+      '<td style="font-weight:600">'+a[0]+'</td>'+
+      '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
+      '<td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
+      '<td><button class="btn btn-sm'+(pri?" btn-danger":" btn-success")+'" data-idx="'+idx+'" onclick="togglePriority(this)">'+(pri?"Remove":"Set Priority")+'</button></td>'+
+      '<td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td>'+
+      '<td><select data-idx="'+idx+'" onchange="reassign(this)" style="font-size:12px">'+opts+'</select></td></tr>';
   }).join("");
   document.getElementById("admin-tbody").innerHTML=html;
 }
+
 function renderRemoveList(){
   var q=document.getElementById("remove-q").value.toLowerCase();
   var list=agents.filter(function(a){return!q||a[0].toLowerCase().indexOf(q)>=0;}).slice(0,12);
   document.getElementById("remove-list").innerHTML=list.map(function(a){return'<div class="alert-item"><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
 }
+
 function reassign(sel){var idx=parseInt(sel.getAttribute("data-idx"));agents[idx][2]=sel.value;saveAgents();renderAdmin();}
+function togglePriority(btn){var idx=parseInt(btn.getAttribute("data-idx"));agents[idx][7]=!agents[idx][7];saveAgents();renderAdmin();}
 function addAgent(){
   var name=document.getElementById("add-name").value.trim().toUpperCase();
   var lv=document.getElementById("add-level").value,lp=document.getElementById("add-lp").value;
+  var pri=document.getElementById("add-priority").value==="true";
   if(!name){alert("Enter a name.");return;}
   if(agents.find(function(a){return a[0]===name;})){alert("Already exists.");return;}
-  agents.push([name,lv,lp,null,null,null,null]);
+  agents.push([name,lv,lp,null,null,null,null,pri]);
   document.getElementById("add-name").value="";saveAgents();renderAdmin();alert(name+" added!");
 }
-function removeAgent(btn){
-  var name=btn.getAttribute("data-name");
-  if(!confirm("Remove "+name+"?"))return;
-  agents=agents.filter(function(a){return a[0]!==name;});saveAgents();renderAdmin();
-}
-function reactivate(btn){
-  var name=btn.getAttribute("data-name");
-  var a=agents.find(function(x){return x[0]===name;});
-  if(a)a[3]=TODAY.toISOString().split("T")[0];
-  saveAgents();renderAdmin();
-}
+function removeAgent(btn){var name=btn.getAttribute("data-name");if(!confirm("Remove "+name+"?"))return;agents=agents.filter(function(a){return a[0]!==name;});saveAgents();renderAdmin();}
+function reactivate(btn){var name=btn.getAttribute("data-name");var a=agents.find(function(x){return x[0]===name;});if(a)a[3]=TODAY.toISOString().split("T")[0];saveAgents();renderAdmin();}
 function loadXLSX(){
   if(typeof XLSX!=="undefined"){document.getElementById("fileInput").click();return;}
   var res=document.getElementById("upload-result");res.textContent="Loading...";res.style.color="#888";
@@ -479,7 +895,7 @@ function handleUpload(input){
         var lv=(row["Level"]||"").toString().trim();
         if(!n||n==="AGENT"||n==="NAN")return;
         var gd=function(c){var v=row[c];if(!v)return null;try{var d=new Date(v);return isNaN(d)?null:d.toISOString().split("T")[0];}catch(e){return null;}};
-        var u=[n,lv||"C","Unassigned",gd("Latest Lead (In Velocify)"),gd("Latest File Started"),gd("Latest Contract"),gd("Latest Close")];
+        var u=[n,lv||"C","Unassigned",gd("Latest Lead (In Velocify)"),gd("Latest File Started"),gd("Latest Contract"),gd("Latest Close"),false];
         up.push(u);
         var a=agents.find(function(x){return x[0]===n;});
         if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];if(!isActive(a))flagged++;updated++;}
@@ -492,12 +908,7 @@ function handleUpload(input){
   };
   reader.readAsArrayBuffer(file);input.value="";
 }
-
-// Auto-refresh every 30 seconds when Daniel is viewing
-setInterval(function(){
-  if(currentUser==="Daniel") loadCallLogs().then(renderDaniel);
-}, 30000);
-
+setInterval(function(){if(currentUser==="Daniel")loadCallLogs().then(function(){renderDaniel();});},30000);
 document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 loadAgents();
 loadCallLogs();
