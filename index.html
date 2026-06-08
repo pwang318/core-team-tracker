@@ -777,9 +777,8 @@ function renderDaniel(){
   var fst=document.getElementById("d-status").value,q=document.getElementById("d-q").value.toLowerCase();
   renderWeeklySummary("this-week-content","this-week-label","this-week-pills",callLogs,getRotation,getWeekLabel(weekKey));
   renderWeeklySummary("last-week-content","last-week-label","last-week-pills",lastWeekLogs,getLastWeekRotation,getWeekLabel(lastWeekKey));
-  var hasLastWeekData=Object.keys(lastWeekLogs).length>0;
   var lwCard=document.getElementById("last-week-scorecard");
-  if(lwCard)lwCard.style.display=hasLastWeekData?"block":"none";
+  if(lwCard)lwCard.style.display="none";
   var gh="";
   LPS.forEach(function(lp){
     var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
