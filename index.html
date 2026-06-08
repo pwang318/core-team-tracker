@@ -224,8 +224,9 @@ tr:hover td{background:#fafbfc}
     </div>
   </div>
   <div class="admin-section">
-    <h3>Remove departed agents</h3>
-    <div style="margin-bottom:8px"><input type="text" id="remove-q" placeholder="Search agent to remove..." oninput="renderRemoveList()" style="width:100%"></div>
+    <h3>Remove agent from tracker</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Only use this if an agent is no longer working with the team. Search by name to find them.</p>
+    <div style="margin-bottom:8px"><input type="text" id="remove-q" placeholder="Search agent name to remove..." oninput="renderRemoveList()" style="width:100%"></div>
     <div id="remove-list" style="max-height:220px;overflow-y:auto"></div>
   </div>
   <div class="admin-section">
@@ -838,8 +839,11 @@ function renderReassign(){
 
 function renderRemoveList(){
   var q=document.getElementById("remove-q").value.toLowerCase();
-  var list=agents.filter(function(a){return!q||a[0].toLowerCase().indexOf(q)>=0;}).slice(0,12);
-  document.getElementById("remove-list").innerHTML=list.map(function(a){return'<div class="alert-item"><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
+  var el=document.getElementById("remove-list");
+  if(!q){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">Type an agent name above to search.</div>';return;}
+  var list=agents.filter(function(a){return a[0].toLowerCase().indexOf(q)>=0;}).slice(0,8);
+  if(!list.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">No agents found.</div>';return;}
+  el.innerHTML=list.map(function(a){return'<div class="alert-item"><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
 }
 
 function reassign(sel){var idx=parseInt(sel.getAttribute("data-idx"));agents[idx][2]=sel.value;saveAgents();renderAdmin();}
