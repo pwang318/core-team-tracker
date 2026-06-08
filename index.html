@@ -164,19 +164,7 @@ tr:hover td{background:#fafbfc}
       <div id="this-week-content"></div>
     </div>
   </div>
-  <div id="last-week-scorecard" style="display:none;background:#fff;border:1px solid #dde1e7;border-radius:12px;margin-bottom:1rem;overflow:hidden">
-    <div onclick="toggleScorecard('last')" style="padding:.9rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:15px;font-weight:700">&#128197; Last week</span>
-        <span style="font-size:11px;color:#888" id="last-week-label"></span>
-        <span id="last-week-pills" style="display:flex;gap:5px"></span>
-      </div>
-      <span id="last-chevron" style="font-size:18px;color:#888;transition:transform .2s">&#9660;</span>
-    </div>
-    <div id="last-week-section" style="display:none;border-top:1px solid #f0f2f5;padding:1rem 1.25rem">
-      <div id="last-week-content"></div>
-    </div>
-  </div>
+
   <div class="section-head">This week's LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
   <div class="d-grid" id="d-grid"></div>
   <div class="section-head">Going cold <span style="font-size:11px;font-weight:400;text-transform:none;color:#aaa">(14+ days since LP last called)</span></div>
@@ -480,15 +468,12 @@ function sbFetch(method,path,body){
 function loadCallLogs(){
   setSyncStatus("saving");
   // Load this week and last week in parallel
-  return Promise.all([
-    sbFetch("GET","call_logs?week_key=eq."+weekKey+"&select=*"),
-    sbFetch("GET","call_logs?week_key=eq."+lastWeekKey+"&select=*")
-  ]).then(function(results){
-    callLogs={};lastWeekLogs={};
-    if(results[0])results[0].forEach(function(r){callLogs[r.agent_name]=r;});
-    if(results[1])results[1].forEach(function(r){lastWeekLogs[r.agent_name]=r;});
-    setSyncStatus("live");
-  }).catch(function(e){setSyncStatus("error");console.log("Load error:",e);});
+  return sbFetch("GET","call_logs?week_key=eq."+weekKey+"&select=*")
+    .then(function(rows){
+      callLogs={};
+      if(rows)rows.forEach(function(r){callLogs[r.agent_name]=r;});
+      setSyncStatus("live");
+    }).catch(function(e){setSyncStatus("error");console.log("Load error:",e);});
 }
 
 function upsertCallLog(agentName,lp,note){
@@ -776,9 +761,7 @@ function renderDaniel(){
   var flp=document.getElementById("d-lp").value,flv=document.getElementById("d-lvl").value;
   var fst=document.getElementById("d-status").value,q=document.getElementById("d-q").value.toLowerCase();
   renderWeeklySummary("this-week-content","this-week-label","this-week-pills",callLogs,getRotation,getWeekLabel(weekKey));
-  renderWeeklySummary("last-week-content","last-week-label","last-week-pills",lastWeekLogs,getLastWeekRotation,getWeekLabel(lastWeekKey));
-  var lwCard=document.getElementById("last-week-scorecard");
-  if(lwCard)lwCard.style.display="none";
+
   var gh="";
   LPS.forEach(function(lp){
     var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
