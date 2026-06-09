@@ -110,6 +110,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;col
 .autocomplete-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #dde1e7;border-radius:8px;max-height:200px;overflow-y:auto;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .autocomplete-item{padding:8px 10px;cursor:pointer;font-size:13px}
 .autocomplete-item:hover{background:#f5f6fa}
+.growth-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1rem}
+.growth-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem;position:relative;overflow:hidden}
+.growth-card.highlight{border-color:#1F4E79;border-width:2px}
+.growth-label{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.growth-val{font-size:28px;font-weight:800;margin-bottom:2px}
+.growth-goal{font-size:11px;color:#888}
+.growth-bar-track{background:#eee;border-radius:20px;height:4px;margin-top:6px;overflow:hidden}
+.growth-bar{height:4px;border-radius:20px}
+.growth-trend{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.trend-up{background:#EAF3DE;color:#3B6D11;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600}
+.trend-down{background:#FFEBEE;color:#C62828;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600}
+.trend-same{background:#F5F5F5;color:#555;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600}
+.channel-badge{background:#FFF9C4;color:#F57F17;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+.edit-btn{border:1px solid #dde1e7;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:#555;font-family:inherit}
+.edit-btn:hover{background:#f5f6fa}
+.save-btn{border:1px solid #1F4E79;background:#1F4E79;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:#fff;font-family:inherit}
+.profile-field{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.profile-field label{font-size:10px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.profile-field input{padding:6px 9px;border:1px solid #dde1e7;border-radius:7px;font-size:13px;color:#1a1a1a;background:#fff;font-family:inherit;width:100%}
+.profile-field .val{font-size:13px;color:#1a1a1a;padding:4px 0}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:.85rem 1.1rem;border-top:1px solid #f0f2f5}
+.badge-inactive{background:#FFCDD2;color:#B71C1C;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
 </style>
 </head>
 <body>
@@ -132,6 +154,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;col
 </div>
 
 <div id="view-overview" class="view active">
+
+<!-- GROWTH TRACKER -->
+<div class="section-title" style="margin-bottom:.6rem">&#127942; Growth scoreboard</div>
+<div class="growth-grid" id="growth-grid">
+  <div class="growth-card" style="text-align:center;color:#aaa;padding:1.5rem;grid-column:1/-1">Loading...</div>
+</div>
+<div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.85rem 1.1rem;margin-bottom:1rem">
+  <div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem">Level breakdown</div>
+  <div id="level-breakdown" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
+</div>
+
+<hr style="border:none;border-top:1px solid #dde1e7;margin:1.25rem 0">
 
 <!-- AMANDA NEVER LOGGED ALERT -->
 <div class="never-logged-banner" id="never-logged-banner">
@@ -212,312 +246,5 @@ body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;col
 <script>
 var SUPABASE_URL = "https://uclucbdkjqyqdvifyptx.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
-var ALL_AGENTS = ["TIARA VILLATORO", "BRANDON THOMPSON", "MEGAN LYNCH", "TODD STONE", "DUSTIN GOLDMAN", "KEVIN SPEERT", "TINA HOFFMAN", "OSCAR MARTINEZ", "RACQUEL LUDAWAY", "CHRIS REED", "MICHELLE ERICKSON", "SAHAR SHALASH", "CINDA ERICKSON", "CONNER KOCHANSKY", "DEANNE RHYNEHARDT", "DERON BENDER", "INGRID CORREIA", "JOHN BRUNNER", "KANDIS HALL", "KRISTINA MURPHY", "MARK BOYD", "MATTHEW MONTALVO", "SETH COLBURN", "ANNIE MORENO", "DAN MANLEY", "ELIZABETH ELLINGER", "ERIKA WEHNER", "HEATHER HENRY-MINOR", "KATIE SUMMERS", "KHADIJA FARAH", "KISHMA JAMES", "MARIA COMAS", "MARTIN HOPKINS", "MARY MCMICHAEL", "MATT PIPER", "NATALIE ESTRELLA", "RAMI TAMIMI", "STACEY LAMBRIGHT", "TRACY BERARD", "AIMEE WHITLOCK", "ALEXIS REED", "AMY AGRESTA", "ANGELA PEREZ", "BRIAN NANTHAVONGDOUANGSY", "BRITNEY DODDS", "CAROLE MCMAHON", "CESIA ESPINOZA YOUNG", "CHELSEA ANDERSON", "COURTNEY HAMILTON", "DEVIN JOHNSON", "DIANNA JENKINS", "HAIFA BRUNNEY", "JASMINE MCKENZIE", "JESSE MCCRERRY", "JOHN LUBINSKY", "JORDAN HOLLIBAUGH", "KATHERINE DE LA ROSA", "KELSY YODER", "KINSIE HUSKINS", "KRISTEN VALENTY", "LETIKA WHITE", "LISA SIMMONS", "LUIS GIL", "LYNDSEY LANE", "MARK VENNITTI", "MIKE WHITEMAN", "NANCY PRICE", "PAIGE LUDWIG", "PATRICK ARQUETTE", "PAULA PALLESCHI", "PILAR BENNETT", "RACHELLE PARSLEY", "ROBERT HAYNER", "ROBIN BLAKE", "ROSS DIGIORGIO", "RUTH ESPINOZA", "SAM BAMRICK", "SARA BUSH", "SLAVI JORDANOV", "STAN GORKSI", "THAER AHMED", "TRACI WILLIAMS-JONES", "TROY BORDEN", "YASMIN DE JESUS", "ALI SWEAZY", "ALINA ILKAEVA", "ANA SORIA", "ANGELA POTTS", "ANGELIQUE SOTONDJI", "ASHLEY HENRY", "AVA LAIRD", "BAILEY STRATHIE", "BENJAMIN GAYTAN", "BRAD GILLIAM", "BRANDON KIDD", "BRANDON MCCLENDON", "BRIAN ZINN", "CELINE WILLIAMS", "CHERYL KINSEY", "CHRISTIAN CHALKIAS", "CHRISTINA COUGHLIN", "CHUCK KINSEY", "CODA GAHRIS", "CRAIG MAURER", "DAIRDRE SCRIVEN", "DARREN HOGG", "DONALD PAYNE JR", "ELIAS PAPPAN", "ELIZABETH BONAUDI", "ELIZABETH HOWARD", "ERIKA BRUNNER", "GLADIS CHAVEZ", "HYPATIA ESPINAL", "IZXEL MARTINEZ", "JACOB ENGLISH", "JAIDEN BALLAH", "JASMIN ARCOS", "JASMIN MONTOYA", "JEFF MESSMER", "JENNIFER BLACKMORE", "JENNIFER HOWISON", "JESSICA TOWER", "JONNATHAN AGUDELO", "JUSTIN BIERY", "KATHY HAYES", "KATIE MANSOR", "KERWIN HEATH", "KYLA AHO", "LAUREN MCCLINTON", "LESLIE HERNANDEZ", "LILIAN FUENTES", "LIZBEL CONTRERAS", "MANDY WILSON", "MARLA SEWELL", "MATHEA ARUDDA", "MICHELE FREDERICK", "NANCY BAKER", "NIA HARRINGTON", "NICK ZATEZALO", "NIKEHA HAYES", "NINA AVERY", "NORA KERELIUK", "PIERINA MANTILLA", "ROSALIA PABLO", "RUTH GONZALEZ", "SAHEL ALAM", "SAM COOPER", "SARAH HERNANDEZ", "SASHA ANTONOVA", "SHANE STINER", "SHARON PANTELIS", "SHAYNE D. BOYD", "SHIRRELL BURNSIDE", "STEVEN OSBORN", "SUMMER DURHAM", "SUNI RIVAS", "TAMARA CHARLTON", "TATIANA GRIGORITA", "THOMAS NEWMAN", "TINA-DUTT-HIREN", "TONY AMOS", "WENDY RAMIREZ", "WHITNEY SCHMIDT", "YVETTA HARRISON"];
-var SEED = [["TIARA VILLATORO", "A", "Karen", "2026-05-08", "2026-05-08", "2026-06-04", "2026-05-22", false], ["BRANDON THOMPSON", "A", "Osgood", "2026-06-01", "2026-06-01", "2026-05-04", "2026-06-01", false], ["MEGAN LYNCH", "A", "Gavin", "2026-06-03", "2026-06-05", "2026-06-01", "2026-06-22", false], ["TODD STONE", "A", "Said", "2026-06-05", "2026-06-04", "2026-04-13", "2026-05-08", false], ["DUSTIN GOLDMAN", "A", "Osgood", "2026-04-20", "2026-04-24", "2026-03-30", "2026-03-27", false], ["KEVIN SPEERT", "A", "Gavin", "2026-05-08", "2026-05-28", "2026-06-01", "2026-06-12", false], ["TINA HOFFMAN", "A", "Gavin", "2023-10-10", "2026-05-06", "2026-05-27", "2026-02-10", false], ["OSCAR MARTINEZ", "A", "Karen", "2026-06-03", "2026-06-01", "2026-05-05", "2026-06-15", false], ["RACQUEL LUDAWAY", "A", "Gavin", "2026-05-29", "2026-05-19", "2026-04-16", "2026-06-04", false], ["CHRIS REED", "A", "Said", "2026-06-03", "2026-06-02", "2026-05-08", "2026-05-27", false], ["MICHELLE ERICKSON", "A", "Gavin", "2025-08-04", "2026-03-25", "2026-04-20", "2026-04-10", false], ["SAHAR SHALASH", "A", "Said", "2026-06-05", "2026-05-31", "2026-05-09", "2026-05-29", false], ["CINDA ERICKSON", "B", "Gavin", "2026-04-23", "2026-04-21", "2026-02-24", "2026-03-26", false], ["CONNER KOCHANSKY", "B", "Gavin", "2026-05-30", "2026-05-19", "2026-05-20", "2026-05-20", false], ["DEANNE RHYNEHARDT", "B", "Osgood", "2026-05-22", "2026-05-28", "2026-05-05", "2026-06-05", false], ["DERON BENDER", "B", "Gavin", "2025-08-11", "2026-04-24", "2026-04-28", "2026-05-08", true], ["INGRID CORREIA", "B", "Gavin", "2026-05-08", "2026-05-08", "2025-12-11", "2026-01-05", false], ["JOHN BRUNNER", "B", "Osgood", "2026-06-01", "2026-06-01", "2026-06-05", "2025-11-17", false], ["KANDIS HALL", "B", "Osgood", "2026-01-04", "2026-01-31", "2026-02-25", "2026-03-17", false], ["KRISTINA MURPHY", "B", "Osgood", "2026-06-02", "2026-05-11", "2025-10-03", "2025-10-21", false], ["MARK BOYD", "B", "Gavin", null, "2026-03-28", "2026-04-08", "2026-02-02", false], ["MATTHEW MONTALVO", "B", "Karen", "2026-04-09", "2026-04-09", "2026-05-29", "2025-11-20", false], ["SETH COLBURN", "B", "Said", "2025-04-23", "2026-03-31", "2026-04-06", "2026-04-30", false], ["ANNIE MORENO", "B", "Karen", "2026-06-06", "2026-06-02", "2026-05-11", "2026-06-05", false], ["DAN MANLEY", "B", "Gavin", "2025-11-23", "2026-04-29", "2026-05-01", "2026-05-19", false], ["ELIZABETH ELLINGER", "B", "Jordan", "2026-03-16", "2026-04-01", "2026-05-18", "2026-06-10", false], ["ERIKA WEHNER", "B", "Gavin", null, "2026-04-14", "2026-05-28", "2026-05-11", false], ["HEATHER HENRY-MINOR", "B", "Jordan", "2026-04-07", "2026-04-15", "2026-05-05", "2026-05-28", false], ["KATIE SUMMERS", "B", "Gavin", null, "2026-04-22", "2026-02-26", "2026-05-29", false], ["KHADIJA FARAH", "B", "Jordan", "2026-05-16", "2026-05-17", "2026-02-09", "2026-03-06", false], ["KISHMA JAMES", "B", "Said", "2026-03-16", "2026-03-12", "2025-06-09", "2025-07-14", false], ["MARIA COMAS", "B", "Karen", "2026-04-27", "2026-03-02", "2025-06-19", "2025-07-21", false], ["MARTIN HOPKINS", "B", "Karen", "2026-02-12", "2026-04-28", "2026-01-29", "2026-02-20", false], ["MARY MCMICHAEL", "B", "Said", "2026-04-13", "2026-04-13", "2025-09-11", "2025-10-10", false], ["MATT PIPER", "B", "Osgood", "2026-05-19", "2026-05-19", "2025-11-11", "2025-12-01", false], ["NATALIE ESTRELLA", "B", "Karen", "2026-05-25", "2026-05-25", "2025-10-08", "2025-11-03", false], ["RAMI TAMIMI", "B", "Jordan", "2026-03-27", "2026-04-20", "2026-05-07", "2026-06-30", false], ["STACEY LAMBRIGHT", "B", "Jordan", null, "2026-03-25", "2026-03-26", "2026-04-07", false], ["TRACY BERARD", "B", "Jordan", null, "2026-04-04", "2026-04-14", "2026-05-27", false], ["AIMEE WHITLOCK", "C", "Gavin", null, "2025-01-14", "2026-02-10", "2026-04-15", false], ["ALEXIS REED", "C", "Said", "2026-03-25", "2026-05-12", "2026-01-30", "2026-02-27", false], ["AMY AGRESTA", "C", "Gavin", "2026-05-23", "2026-05-28", "2025-07-08", "2025-08-05", false], ["ANGELA PEREZ", "C", "Gavin", "2026-04-27", "2026-05-06", "2026-04-06", "2026-04-24", false], ["BRIAN NANTHAVONGDOUANGSY", "C", "Osgood", "2025-10-23", "2025-11-19", "2025-12-18", "2026-03-20", false], ["BRITNEY DODDS", "C", "Gavin", "2026-03-26", "2026-03-26", "2026-03-02", "2026-04-08", false], ["CAROLE MCMAHON", "C", "Osgood", "2026-05-31", "2026-05-31", "2026-05-08", "2026-05-26", false], ["CESIA ESPINOZA YOUNG", "C", "Karen", "2026-03-11", "2026-03-10", "2026-03-26", "2026-04-17", false], ["CHELSEA ANDERSON", "C", "Osgood", "2026-02-07", "2026-02-06", "2026-03-28", "2026-04-17", false], ["COURTNEY HAMILTON", "C", "Osgood", "2026-05-27", "2026-05-27", "2026-06-02", "2025-06-26", false], ["DEVIN JOHNSON", "C", "Said", "2026-03-29", "2026-04-15", "2025-05-30", "2025-07-09", false], ["DIANNA JENKINS", "C", "Said", null, "2026-03-24", "2026-02-23", "2026-04-06", false], ["HAIFA BRUNNEY", "C", "Karen", "2026-05-21", "2026-06-01", "2026-03-26", "2026-04-27", false], ["JASMINE MCKENZIE", "C", "Osgood", "2026-05-03", "2026-05-04", "2026-05-06", "2026-05-29", false], ["JESSE MCCRERRY", "C", "Said", null, "2026-04-06", "2026-04-13", "2026-05-26", false], ["JOHN LUBINSKY", "C", "Said", "2025-12-17", "2025-12-19", "2026-02-17", "2026-03-20", false], ["JORDAN HOLLIBAUGH", "C", "Gavin", null, "2026-05-12", "2026-04-29", "2026-04-16", false], ["KATHERINE DE LA ROSA", "C", "Karen", "2026-05-28", "2026-06-02", "2026-04-01", "2026-04-29", false], ["KELSY YODER", "C", "Said", "2026-04-28", "2026-01-09", "2026-01-12", "2026-02-05", false], ["KINSIE HUSKINS", "C", "Jordan", null, "2026-03-17", "2026-04-28", "2026-06-01", false], ["KRISTEN VALENTY", "C", "Jordan", null, "2026-01-21", "2026-02-24", "2026-03-25", false], ["LETIKA WHITE", "C", "Osgood", "2026-05-11", "2026-05-12", "2025-07-31", "2025-08-29", false], ["LISA SIMMONS", "C", "Osgood", null, "2026-03-19", "2026-04-14", "2026-05-27", false], ["LUIS GIL", "C", "Karen", "2026-06-02", "2026-06-02", "2026-06-02", "2025-09-26", false], ["LYNDSEY LANE", "C", "Osgood", "2026-03-16", "2025-09-23", "2025-12-23", "2026-01-23", false], ["MARK VENNITTI", "C", "Jordan", "2026-04-08", "2026-04-08", "2026-06-01", "2026-06-19", false], ["MIKE WHITEMAN", "C", "Osgood", null, "2025-07-24", "2025-07-31", "2026-05-11", false], ["NANCY PRICE", "C", "Jordan", "2026-01-03", "2026-01-02", "2026-05-08", "2026-01-30", false], ["PAIGE LUDWIG", "C", "Said", "2026-03-06", "2026-03-05", "2026-03-17", "2026-04-14", false], ["PATRICK ARQUETTE", "C", "Said", "2026-04-22", "2026-01-14", "2025-09-09", "2025-10-07", false], ["PAULA PALLESCHI", "C", "Said", null, "2026-04-21", "2026-04-27", "2026-05-26", false], ["PILAR BENNETT", "C", "Karen", "2026-04-15", "2026-04-15", "2025-07-23", "2025-08-15", false], ["RACHELLE PARSLEY", "C", "Said", "2024-09-03", "2026-04-15", "2026-04-22", "2026-05-13", false], ["ROBERT HAYNER", "C", "Jordan", null, "2026-04-20", "2026-04-23", "2026-05-15", false], ["ROBIN BLAKE", "C", "Gavin", null, "2025-12-19", "2025-12-27", "2026-03-17", false], ["ROSS DIGIORGIO", "C", "Osgood", null, "2025-06-24", "2025-07-14", "2026-04-30", false], ["RUTH ESPINOZA", "C", "Karen", null, "2026-02-27", "2026-03-26", "2026-04-17", false], ["SAM BAMRICK", "C", "Jordan", null, "2026-04-14", "2026-04-20", "2026-05-15", false], ["SARA BUSH", "C", "Said", null, "2026-03-27", "2026-04-13", "2026-05-27", false], ["SLAVI JORDANOV", "C", "Said", "2026-05-30", "2025-10-06", "2025-10-10", "2025-11-07", false], ["STAN GORKSI", "C", "Jordan", null, "2026-03-07", "2026-03-09", "2026-04-07", false], ["THAER AHMED", "C", "Said", "2026-03-31", "2026-03-31", "2025-08-26", "2025-09-30", false], ["TRACI WILLIAMS-JONES", "C", "Jordan", null, "2026-04-09", "2026-03-23", "2026-05-21", false], ["TROY BORDEN", "C", "Gavin", "2026-04-28", "2026-04-30", "2026-04-22", "2026-05-13", false], ["YASMIN DE JESUS", "C", "Karen", "2024-03-27", "2025-11-18", "2026-04-01", "2026-04-29", false], ["ALI SWEAZY", "C", "Osgood", "2026-05-09", "2026-05-09", null, null, false], ["ALINA ILKAEVA", "C", "Said", null, "2026-03-20", null, null, false], ["ANA SORIA", "C", "Karen", "2026-04-19", null, null, null, false], ["ANGELA POTTS", "C", "Osgood", "2026-05-10", "2026-05-10", null, null, false], ["ANGELIQUE SOTONDJI", "C", "Jordan", "2026-03-27", "2026-03-27", null, null, false], ["ASHLEY HENRY", "C", "Osgood", "2026-04-22", "2026-04-21", null, null, false], ["AVA LAIRD", "C", "Jordan", "2026-05-26", "2026-05-25", null, null, false], ["BAILEY STRATHIE", "C", "Osgood", "2026-05-30", "2026-05-30", "2024-11-21", null, false], ["BENJAMIN GAYTAN", "C", "Gavin", "2026-05-16", "2026-05-22", null, null, false], ["BRAD GILLIAM", "C", "Gavin", "2026-05-14", null, null, null, false], ["BRANDON KIDD", "C", "Said", "2026-05-01", null, null, null, false], ["BRANDON MCCLENDON", "C", "Said", "2026-03-12", "2026-03-12", null, null, false], ["BRIAN ZINN", "C", "Jordan", "2026-06-06", null, null, null, false], ["CELINE WILLIAMS", "C", "Jordan", "2026-06-01", null, null, null, false], ["CHERYL KINSEY", "C", "Jordan", "2026-05-05", "2026-05-04", null, null, false], ["CHRISTIAN CHALKIAS", "C", "Osgood", "2026-04-08", "2026-04-08", null, null, false], ["CHRISTINA COUGHLIN", "C", "Osgood", "2026-05-29", "2026-05-29", "2024-09-11", null, false], ["CHUCK KINSEY", "C", "Jordan", "2026-03-16", "2026-03-26", null, null, false], ["CODA GAHRIS", "C", "Jordan", "2026-04-29", "2026-04-29", "2026-05-25", null, false], ["CRAIG MAURER", "C", "Osgood", "2026-05-13", "2026-05-19", null, null, false], ["DAIRDRE SCRIVEN", "C", "Said", "2026-05-19", "2026-05-19", null, null, false], ["DARREN HOGG", "C", "Said", "2026-04-22", "2026-04-28", null, null, false], ["DONALD PAYNE JR", "C", "Osgood", "2026-06-04", null, null, null, false], ["ELIAS PAPPAN", "C", "Karen", "2026-04-30", null, null, null, false], ["ELIZABETH BONAUDI", "C", "Osgood", "2026-04-17", "2026-04-17", null, null, false], ["ELIZABETH HOWARD", "C", "Osgood", "2026-04-04", "2026-04-03", "2024-11-08", null, false], ["ERIKA BRUNNER", "C", "Gavin", "2026-04-13", "2026-04-15", "2025-11-07", null, false], ["GLADIS CHAVEZ", "C", "Karen", "2026-05-15", "2026-05-05", null, null, false], ["HYPATIA ESPINAL", "C", "Karen", "2026-06-02", "2026-06-02", null, null, false], ["IZXEL MARTINEZ", "C", "Karen", "2026-05-20", "2026-05-20", "2026-06-02", null, false], ["JACOB ENGLISH", "C", "Jordan", null, "2026-03-18", "2026-04-23", null, false], ["JAIDEN BALLAH", "C", "Said", "2026-06-02", "2026-06-03", null, null, false], ["JASMIN ARCOS", "C", "Karen", "2026-03-19", "2026-03-26", null, null, false], ["JASMIN MONTOYA", "C", "Karen", "2026-05-31", "2026-05-30", null, null, false], ["JEFF MESSMER", "C", "Gavin", "2026-05-12", "2026-05-12", "2025-10-01", null, false], ["JENNIFER BLACKMORE", "C", "Jordan", "2026-05-02", null, null, null, false], ["JENNIFER HOWISON", "C", "Jordan", "2026-03-15", "2026-03-30", "2026-04-06", null, false], ["JESSICA TOWER", "C", "Jordan", "2026-05-27", "2026-05-30", "2023-04-03", null, false], ["JONNATHAN AGUDELO", "C", "Karen", "2026-05-23", "2026-05-19", null, null, false], ["JUSTIN BIERY", "C", "Karen", "2026-05-27", "2026-05-28", null, null, false], ["KATHY HAYES", "C", "Jordan", "2026-05-30", "2026-05-29", "2024-12-09", null, false], ["KATIE MANSOR", "C", "Jordan", "2026-04-27", "2026-04-26", null, null, false], ["KERWIN HEATH", "C", "Said", null, "2026-04-12", null, null, false], ["KYLA AHO", "C", "Said", "2026-03-12", "2025-11-03", "2025-03-28", null, false], ["LAUREN MCCLINTON", "C", "Said", null, "2026-04-29", null, null, false], ["LESLIE HERNANDEZ", "C", "Karen", "2026-05-07", "2026-05-08", "2026-05-19", null, false], ["LILIAN FUENTES", "C", "Karen", "2026-04-21", "2026-04-21", null, null, false], ["LIZBEL CONTRERAS", "C", "Karen", "2026-04-30", "2026-05-11", "2024-09-18", null, false], ["MANDY WILSON", "C", "Jordan", null, "2026-03-28", null, null, false], ["MARLA SEWELL", "C", "Osgood", null, "2026-03-19", null, null, false], ["MATHEA ARUDDA", "C", "Karen", null, "2026-03-16", "2026-03-23", null, false], ["MICHELE FREDERICK", "C", "Osgood", null, "2026-05-31", null, null, false], ["NANCY BAKER", "C", "Unassigned", "2026-04-30", null, null, null, false], ["NIA HARRINGTON", "C", "Said", "2026-05-13", "2026-05-05", "2024-10-17", null, false], ["NICK ZATEZALO", "C", "Osgood", "2026-05-16", "2026-03-19", "2024-03-12", null, false], ["NIKEHA HAYES", "C", "Osgood", "2026-04-15", "2025-09-28", "2024-09-25", null, false], ["NINA AVERY", "C", "Jordan", null, "2026-04-23", null, null, false], ["NORA KERELIUK", "C", "Said", "2026-04-24", null, null, null, false], ["PIERINA MANTILLA", "C", "Karen", null, "2026-03-15", null, null, false], ["ROSALIA PABLO", "C", "Karen", "2026-06-04", "2026-06-04", "2024-11-08", null, false], ["RUTH GONZALEZ", "C", "Karen", "2026-05-19", "2026-05-19", null, null, false], ["SAHEL ALAM", "C", "Said", "2026-05-10", "2026-05-08", null, null, false], ["SAM COOPER", "C", "Gavin", "2026-03-10", "2025-07-11", "2024-09-06", null, true], ["SARAH HERNANDEZ", "C", "Osgood", "2026-05-28", "2026-05-29", "2024-10-21", null, false], ["SASHA ANTONOVA", "C", "Said", "2026-03-31", "2026-03-31", null, null, false], ["SHANE STINER", "C", "Jordan", null, "2026-04-08", null, null, false], ["SHARON PANTELIS", "C", "Jordan", "2026-04-28", "2025-03-21", "2025-04-01", null, false], ["SHAYNE D. BOYD", "C", "Said", "2026-05-04", "2026-05-07", null, null, false], ["SHIRRELL BURNSIDE", "C", "Osgood", "2026-04-08", "2025-07-14", null, null, false], ["STEVEN OSBORN", "C", "Jordan", "2026-04-30", "2026-02-03", null, null, false], ["SUMMER DURHAM", "C", "Osgood", null, "2026-03-23", null, null, false], ["SUNI RIVAS", "C", "Karen", "2026-05-27", "2026-05-28", null, null, false], ["TAMARA CHARLTON", "C", "Osgood", "2025-07-27", "2026-04-16", "2025-04-14", null, false], ["TATIANA GRIGORITA", "C", "Jordan", "2026-04-23", null, null, null, false], ["THOMAS NEWMAN", "C", "Gavin", "2026-03-02", "2026-03-25", "2022-08-22", null, false], ["TINA-DUTT-HIREN", "C", "Osgood", null, "2026-05-11", null, null, false], ["TONY AMOS", "C", "Osgood", "2026-04-19", "2026-04-01", "2024-02-27", null, false], ["WENDY RAMIREZ", "C", "Karen", "2026-03-25", "2026-03-25", null, null, false], ["WHITNEY SCHMIDT", "C", "Said", "2026-03-18", "2024-01-12", "2024-01-18", null, false], ["YVETTA HARRISON", "C", "Osgood", "2026-06-04", null, null, null, false]];
-var LPS = ["Gavin","Karen","Osgood","Jordan","Said"];
-var LP_COLORS = {Gavin:"#4CAF50",Karen:"#2196F3",Osgood:"#FF9800",Jordan:"#E91E63",Said:"#9C27B0"};
-var AMANDA_GOALS = {"Cold Call":25,"First Meeting":5,"Break Bread":5,"Active Check-in":10,"Realtor Buddy Referral Ask":3};
-var TODAY = new Date(); TODAY.setHours(0,0,0,0);
-var CUTOFF = new Date(TODAY); CUTOFF.setDate(TODAY.getDate()-90);
-var weekKey = getWeekKey(TODAY);
-var lastWeekKey = getLastWeekKey(TODAY);
-var callLogs = {}, lastWeekCallLogs = {}, amandaActivities = [], amandaLastWeek = [];
-var agents = [];
-
-function getWeekKey(d){var dt=new Date(d);dt.setHours(0,0,0,0);var day=dt.getDay(),mon=new Date(dt);mon.setDate(dt.getDate()-(day===0?6:day-1));return mon.toISOString().split("T")[0];}
-function getLastWeekKey(d){var dt=new Date(d);dt.setDate(dt.getDate()-7);return getWeekKey(dt);}
-function getWeekLabel(k){var mon=new Date(k),sun=new Date(mon);sun.setDate(mon.getDate()+6);var o={month:"short",day:"numeric"};return "Week of "+mon.toLocaleDateString("en-US",o)+" - "+sun.toLocaleDateString("en-US",o);}
-function fmt(d){if(!d)return "--";return new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"2-digit"});}
-function mostRecent(a){return[a[3],a[4],a[5],a[6]].filter(Boolean).sort().reverse()[0]||null;}
-function isActive(a){var d=mostRecent(a);return d?new Date(d)>=CUTOFF:false;}
-function calledThisWeek(name){return !!(callLogs[name]&&callLogs[name].week_key===weekKey);}
-function lpDays(name){var log=callLogs[name];if(!log||!log.call_date)return null;var dt=new Date(log.call_date);dt.setHours(0,0,0,0);return Math.floor((TODAY-dt)/86400000);}
-function isPriority(a){return a[7]===true;}
-function setSyncStatus(s){var dot=document.getElementById("syncDot"),txt=document.getElementById("syncTxt");if(s==="live"){dot.className="sync-dot live";txt.textContent="Live";}else if(s==="saving"){dot.className="sync-dot saving";txt.textContent="Loading...";}else{dot.className="sync-dot error";txt.textContent="Error";}}
-
-function sbFetch(method,path){
-  return fetch(SUPABASE_URL+"/rest/v1/"+path,{method:method,headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"}}).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});return r.status===204?null:r.json();});
-}
-
-function getRotation(lp,wkKey){
-  var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
-  if(!active.length)return[];
-  var wn=Math.floor((new Date(wkKey)-new Date("2024-01-01"))/(7*86400000));
-  var pw=Math.min(15,active.length);
-  var si=(wn*pw)%active.length;
-  var priority=active.filter(isPriority);
-  var normal=active.filter(function(a){return!isPriority(a);});
-  var remaining=Math.max(0,15-priority.length);
-  var pw2=Math.min(remaining,normal.length);
-  var si2=normal.length?((wn*pw2)%normal.length):0;
-  var base=[];for(var i=0;i<pw2;i++)base.push(normal[(si2+i)%normal.length]);
-  var combined=priority.concat(base);
-  var seen={},res=[];
-  for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
-  return res.slice(0,15);
-}
-
-function loadAll(){
-  setSyncStatus("saving");
-  agents=SEED.map(function(r){return[r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7]];});
-  return Promise.all([
-    sbFetch("GET","call_logs?week_key=eq."+weekKey+"&select=*"),
-    sbFetch("GET","call_logs?week_key=eq."+lastWeekKey+"&select=*"),
-    sbFetch("GET","amanda_activities?select=*&order=act_date.desc,created_at.desc")
-  ]).then(function(res){
-    callLogs={};lastWeekCallLogs={};
-    if(res[0])res[0].forEach(function(r){callLogs[r.agent_name]=r;});
-    if(res[1])res[1].forEach(function(r){lastWeekCallLogs[r.agent_name]=r;});
-    amandaActivities=res[2]||[];
-    amandaLastWeek=amandaActivities.filter(function(a){return getWeekKey(new Date(a.act_date+"T12:00:00"))===lastWeekKey;});
-    setSyncStatus("live");
-    renderAll();
-  }).catch(function(e){setSyncStatus("error");console.log(e);});
-}
-
-function renderAll(){
-  document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
-  document.getElementById("this-week-lbl").textContent=getWeekLabel(weekKey);
-  document.getElementById("last-week-lbl").textContent=getWeekLabel(lastWeekKey);
-  renderLPGrid();
-  renderLPScorecard("this",callLogs,weekKey);
-  renderLPScorecard("last",lastWeekCallLogs,lastWeekKey);
-  renderAmandaGrid();
-  renderAmandaScorecard("this",amandaActivities.filter(function(a){return getWeekKey(new Date(a.act_date+"T12:00:00"))===weekKey;}));
-  renderAmandaScorecard("last",amandaLastWeek);
-  checkNeverLogged();
-}
-
-function renderLPGrid(){
-  document.getElementById("lp-grid").innerHTML=LPS.map(function(lp){
-    var rot=getRotation(lp,weekKey);
-    var done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
-    var pct=rot.length?Math.round(done/rot.length*100):0;
-    var all=agents.filter(function(a){return a[2]===lp;});
-    var ic=all.filter(function(a){return!isActive(a);}).length;
-    var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
-    var col=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
-    return '<div class="lp-card">'+
-      '<div class="lp-name"><span style="width:10px;height:10px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block"></span><span style="color:'+LP_COLORS[lp]+'">'+lp+'</span></div>'+
-      '<div class="lp-pct" style="color:'+col+'">'+pct+'%</div>'+
-      '<div class="lp-bar-track"><div class="lp-bar" style="width:'+pct+'%;background:'+col+'"></div></div>'+
-      '<div class="lp-meta"><span>'+done+"/"+rot.length+" this week</span><span>"+all.length+" agents</span></div>"+
-      '<div class="lp-flags">'+(pc?'<span style="background:#FFEBEE;color:#C62828;font-size:10px;padding:1px 6px;border-radius:20px;font-weight:600">'+pc+' priority</span>':"")+
-        (ic?'<span style="background:#FFF8E1;color:#E65100;font-size:10px;padding:1px 6px;border-radius:20px;font-weight:600">'+ic+' inactive</span>':"")+"</div>"+
-    '</div>';
-  }).join("");
-}
-
-function renderLPScorecard(which,logs,wkKey){
-  var pills="",content="";
-  var hasData=Object.keys(logs).length>0;
-  if(which==="last"){document.getElementById("lp-last-scorecard").style.display="none";return;}
-  LPS.forEach(function(lp){
-    var rot=getRotation(lp,wkKey);
-    var done=rot.filter(function(a){return !!(logs[a[0]]&&logs[a[0]].week_key===wkKey);}).length;
-    var missed=rot.filter(function(a){return !(logs[a[0]]&&logs[a[0]].week_key===wkKey);});
-    var pct=rot.length?Math.round(done/rot.length*100):0;
-    var col=pct===100?"#43A047":pct>=80?"#FB8C00":"#E53935";
-    var bg=pct===100?"pill-green":pct>=80?"pill-amber":"pill-red";
-    pills+='<span class="pill '+bg+'">'+lp+" "+pct+'%</span>';
-    content+='<div class="sc-row"><div class="sc-top"><div class="sc-name"><span style="width:9px;height:9px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block"></span>'+lp+'</div>'+
-      '<div class="sc-right"><span class="sc-pct" style="color:'+col+'">'+pct+'%</span><span class="sc-sub">'+done+"/"+rot.length+"</span></div></div>"+
-      (pct===100?'<div class="won-box">&#10003; Called all agents!</div>':
-       '<div class="missed-box"><b>Did not call:</b> '+missed.map(function(a){return a[0];}).join(", ")+'</div>')+
-    '</div>';
-  });
-  document.getElementById("lp-"+which+"-pills").innerHTML=pills;
-  document.getElementById("lp-"+which+"-content").innerHTML=content;
-}
-
-
-
-function renderAmandaGrid(){
-  var thisWeekActs=amandaActivities.filter(function(a){return getWeekKey(new Date(a.act_date+"T12:00:00"))===weekKey;});
-  var goals=Object.keys(AMANDA_GOALS);
-  var counts={};thisWeekActs.forEach(function(a){counts[a.act_type]=(counts[a.act_type]||0)+1;});
-  var total=Object.values(counts).reduce(function(s,v){return s+v;},0);
-  var goalTotal=Object.values(AMANDA_GOALS).reduce(function(s,v){return s+v;},0);
-  var overallPct=goalTotal?Math.min(100,Math.round(total/goalTotal*100)):0;
-  var cards=[
-    {label:"Overall progress",val:overallPct+"%",sub:total+" of "+goalTotal+" activities",pct:overallPct},
-    {label:"New meetings",val:(counts["First Meeting"]||0)+"/5",sub:"weekly goal",pct:Math.min(100,((counts["First Meeting"]||0)/5)*100)},
-    {label:"Break breads",val:(counts["Break Bread"]||0)+"/5",sub:"weekly goal",pct:Math.min(100,((counts["Break Bread"]||0)/5)*100)},
-    {label:"Check-ins",val:(counts["Active Check-in"]||0)+"/10",sub:"weekly goal",pct:Math.min(100,((counts["Active Check-in"]||0)/10)*100)},
-    {label:"Cold calls",val:(counts["Cold Call"]||0)+"/25",sub:"weekly goal",pct:Math.min(100,((counts["Cold Call"]||0)/25)*100)},
-  ];
-  document.getElementById("amanda-grid").innerHTML=cards.map(function(c){
-    var col=c.pct>=100?"#43A047":c.pct>=60?"#FB8C00":"#E53935";
-    return '<div class="a-card"><div class="a-label">'+c.label+'</div>'+
-      '<div class="a-val" style="color:'+col+'">'+c.val+'</div>'+
-      '<div class="a-bar-track"><div class="a-bar" style="width:'+c.pct+'%;background:'+col+'"></div></div>'+
-      '<div class="a-sub">'+c.sub+'</div></div>';
-  }).join("");
-}
-
-function renderAmandaScorecard(which,acts){
-  var hasData=acts.length>0;
-  if(which==="last"){document.getElementById("amanda-last-scorecard").style.display="none";return;}
-  var counts={};acts.forEach(function(a){counts[a.act_type]=(counts[a.act_type]||0)+1;});
-  var pills="",content="";
-  Object.keys(AMANDA_GOALS).forEach(function(t){
-    var done=counts[t]||0,goal=AMANDA_GOALS[t];
-    var pct=Math.min(100,Math.round(done/goal*100));
-    var col=pct>=100?"#43A047":pct>=60?"#FB8C00":"#E53935";
-    var bg=pct>=100?"pill-green":pct>=60?"pill-amber":"pill-red";
-    pills+='<span class="pill '+bg+'">'+t.split(" ")[0]+" "+pct+'%</span>';
-    content+='<div class="sc-row"><div class="sc-top"><div class="sc-name">'+t+'</div>'+
-      '<div class="sc-right"><span class="sc-pct" style="color:'+col+'">'+pct+'%</span><span class="sc-sub">'+done+"/"+goal+"</span></div></div>"+
-      (pct>=100?'<div class="won-box">&#10003; Goal hit!</div>':
-       '<div class="missed-box"><b>Short by '+( goal-done)+'</b> this week</div>')+
-    '</div>';
-  });
-  document.getElementById("amanda-"+which+"-pills").innerHTML=pills;
-  document.getElementById("amanda-"+which+"-content").innerHTML=content;
-}
-
-function checkNeverLogged(){
-  var banner=document.getElementById("never-logged-banner");
-  if(!amandaActivities.length){banner.style.display="flex";document.getElementById("last-logged-date").textContent="Never";return;}
-  var last=amandaActivities[0];
-  var lastDate=new Date(last.act_date+"T12:00:00");lastDate.setHours(0,0,0,0);
-  var days=Math.floor((TODAY-lastDate)/86400000);
-  if(days>=3){banner.style.display="flex";document.getElementById("last-logged-date").textContent=fmt(last.act_date)+" ("+days+" days ago)";}
-  else banner.style.display="none";
-}
-
-function toggleSection(bodyId,chevId){
-  var body=document.getElementById(bodyId);
-  var chev=document.getElementById(chevId);
-  var isOpen=body.style.display!=="none";
-  body.style.display=isOpen?"none":"block";
-  chev.style.transform=isOpen?"":"rotate(180deg)";
-}
-
-function switchDashTab(t){
-  document.querySelectorAll(".tab").forEach(function(el,i){el.classList.toggle("active",["overview","search"][i]===t);});
-  document.getElementById("view-overview").classList.toggle("active",t==="overview");
-  document.getElementById("view-search").classList.toggle("active",t==="search");
-}
-
-function searchAgent(){
-  var val=document.getElementById("agent-search-input").value.toLowerCase();
-  var sugg=document.getElementById("agent-suggestions");
-  if(!val||val.length<2){sugg.style.display="none";return;}
-  var matches=ALL_AGENTS.filter(function(a){return a.toLowerCase().indexOf(val)>=0;}).slice(0,8);
-  if(!matches.length){sugg.style.display="none";return;}
-  sugg.innerHTML=matches.map(function(a){return '<div class="autocomplete-item" data-name="'+a+'" onmousedown="selectAgentSearch(this)">'+a+'</div>';}).join("");
-  sugg.style.display="block";
-}
-
-function hideAgentSuggestions(){setTimeout(function(){document.getElementById("agent-suggestions").style.display="none";},200);}
-
-function selectAgentSearch(el){
-  var name=el.getAttribute("data-name");
-  document.getElementById("agent-search-input").value=name;
-  document.getElementById("agent-suggestions").style.display="none";
-  renderAgentProfile(name);
-}
-
-function renderAgentProfile(name){
-  var el=document.getElementById("agent-search-result");
-  var agent=agents.find(function(a){return a[0]===name;});
-  if(!agent){el.innerHTML='<div style="text-align:center;padding:2rem;color:#aaa">Agent not found.</div>';return;}
-
-  // Get all LP call logs for this agent across all weeks
-  var lpCalls=Object.values(callLogs).filter(function(l){return l.agent_name===name;});
-  // Get Amanda activities for this agent
-  var amandaTouches=amandaActivities.filter(function(a){return a.agent_name===name;});
-
-  // Merge and sort by date descending
-  var history=[];
-  lpCalls.forEach(function(l){history.push({date:l.call_date,who:l.lp,type:"LP Call",note:l.note||"",source:"lp"});});
-  amandaTouches.forEach(function(a){history.push({date:a.act_date,who:"Amanda",type:a.act_type,note:a.notes||"",source:"amanda"});});
-  history.sort(function(a,b){return b.date.localeCompare(a.date);});
-
-  var lp=agent[2]||"Unassigned";
-  var level=agent[1]||"C";
-  var active=isActive(agent);
-  var lastLPCall=lpCalls.sort(function(a,b){return(b.call_date||"").localeCompare(a.call_date||"");});
-  var lastLP=lastLPCall.length?lastLPCall[0].call_date:null;
-  var lastLPDays=lastLP?Math.floor((TODAY-new Date(lastLP+"T12:00:00"))/86400000):null;
-  var mr=mostRecent(agent);
-
-  var lpTagColors={Gavin:"#E8F5E9,#2E7D32",Karen:"#E3F2FD,#1565C0",Osgood:"#FFF8E1,#E65100",Jordan:"#FCE4EC,#880E4F",Said:"#EDE7F6,#4527A0",Unassigned:"#EEE,#555"};
-  var lpColors=(lpTagColors[lp]||"#EEE,#555").split(",");
-  var lvlColors={A:"#C6EFCE,#1B5E20",B:"#BBDEFB,#0D47A1",C:"#EEE,#424242"};
-  var lvlC=(lvlColors[level]||"#EEE,#424242").split(",");
-
-  var amandaCount=amandaTouches.length;
-  var lpCount=lpCalls.length;
-  var fuCount=amandaTouches.filter(function(a){return a.follow_up_date&&a.follow_up_date>=TODAY.toISOString().split("T")[0];}).length;
-
-  var html='<div class="agent-card">';
-  html+='<div class="agent-header">';
-  html+='<div><div class="agent-name-big">'+name+'</div>';
-  html+='<div class="agent-meta">';
-  html+='<span style="background:'+lvlC[0]+';color:'+lvlC[1]+';font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px">'+level+'</span>';
-  html+='<span style="background:'+lpColors[0]+';color:'+lpColors[1]+';font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px">'+lp+'</span>';
-  html+='<span class="'+(active?"active-pill":"badge-inactive")+'">'+(active?"Active":"Inactive")+'</span>';
-  if(mr)html+='<span class="stat-pill">Last activity: '+fmt(mr)+'</span>';
-  html+='</div></div>';
-  html+='<div style="text-align:right"><div style="font-size:11px;color:#888;margin-bottom:4px">Last LP call</div>';
-  html+='<div style="font-weight:700;font-size:13px;color:'+(lastLPDays===null?"#E53935":lastLPDays>14?"#FB8C00":"#43A047")+'">'+(lastLP?fmt(lastLP)+" ("+lastLPDays+"d ago)":"Never called")+'</div></div>';
-  html+='</div>';
-
-  html+='<div class="stats-row">';
-  html+='<div class="stat-box"><div class="stat-num" style="color:#1F4E79">'+(lpCount+amandaCount)+'</div><div class="stat-lbl">Total touches</div></div>';
-  html+='<div class="stat-box"><div class="stat-num" style="color:#43A047">'+lpCount+'</div><div class="stat-lbl">LP calls</div></div>';
-  html+='<div class="stat-box"><div class="stat-num" style="color:#7B1FA2">'+amandaCount+'</div><div class="stat-lbl">Amanda visits</div></div>';
-  html+='<div class="stat-box"><div class="stat-num" style="color:#FB8C00">'+fuCount+'</div><div class="stat-lbl">Follow-ups</div></div>';
-  html+='</div>';
-
-  html+='<div class="history-section">';
-  html+='<div class="history-label">Full contact history</div>';
-
-  if(!history.length){
-    html+='<div style="text-align:center;padding:1.5rem;color:#aaa;font-size:13px">No contact history yet.</div>';
-  } else {
-    var TYPE_ICONS={"Cold Call":"📞","Cold Outreach":"✉️","First Meeting":"🤝","Office Visit":"🏢","Break Bread":"🍞","Lunch & Learn":"🎓","Event / Networking":"🎪","Value-Add Touch":"💡","Marketing Support":"📣","Active Check-in":"💬","Pipeline Update":"📊","Thank You":"🙏","Birthday / Milestone":"🎂","Realtor Buddy Referral Ask":"🌟","Text / Email Touch":"📱","Re-engagement":"🔄","Agent Appreciation":"🏆","Business Planning Session":"📋","Co-Marketing Setup":"🤝","LP Call":"📱"};
-    html+=history.map(function(h){
-      var icon=TYPE_ICONS[h.type]||"📌";
-      var bg=h.source==="lp"?"#E3F2FD":"#F3E5F5";
-      return '<div class="history-item">'+
-        '<div class="h-icon" style="background:'+bg+'">'+icon+'</div>'+
-        '<div class="h-body">'+
-          '<div class="h-top">'+
-            '<div><span class="h-who">'+h.who+'</span>'+
-            '<span class="'+(h.source==="lp"?"lp-source":"amanda-source")+'" style="margin-left:5px">'+(h.source==="lp"?"LP Call":"RM Visit")+'</span></div>'+
-            '<span class="h-date">'+fmt(h.date)+'</span>'+
-          '</div>'+
-          '<span class="h-type" style="background:'+bg+';color:#333">'+h.type+'</span>'+
-          (h.note?'<div class="h-note">&ldquo;'+h.note+'&rdquo;</div>':'')+
-        '</div>'+
-      '</div>';
-    }).join("");
-  }
-
-  html+='</div></div>';
-  el.innerHTML=html;
-}
-
-setInterval(function(){loadAll();},60000);
-document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
-loadAll();
-</script>
-
-</div><!-- end view-overview -->
-
-<!-- SEARCH VIEW HTML -->
-<div id="view-search" class="view" style="display:none">
-  <div class="autocomplete-wrap">
-    <input class="search-box" type="text" id="agent-search-input" placeholder="Search any agent by name..." oninput="searchAgent()" onblur="hideAgentSuggestions()" autocomplete="off">
-    <div class="autocomplete-list" id="agent-suggestions" style="display:none"></div>
-  </div>
-  <div id="agent-search-result">
-    <div style="text-align:center;padding:3rem;color:#aaa;font-size:13px">Type an agent name to see their full contact history across all LP calls and Amanda visits.</div>
-  </div>
-</div>
-
-</body>
-</html>
+var ALL_AGENTS = ["TIARA VILLATORO", "BRANDON THOMPSON", "MEGAN LYNCH", "TODD STONE", "DUSTIN GOLDMAN", "TINA HOFFMAN", "KEVIN SPEERT", "OSCAR MARTINEZ", "RACQUEL LUDAWAY", "CHRIS REED", "MICHELLE ERICKSON", "SAHAR SHALASH", "CINDA ERICKSON", "CONNER KOCHANSKY", "DEANNE RHYNEHARDT", "DERON BENDER", "INGRID CORREIA", "JOHN BRUNNER", "KANDIS HALL", "KRISTINA MURPHY", "MARK BOYD", "MATTHEW MONTALVO", "SETH COLBURN", "ANNIE MORENO", "DAN MANLEY", "ELIZABETH ELLINGER", "ERIKA WEHNER", "HEATHER HENRY-MINOR", "KATIE SUMMERS", "KHADIJA FARAH", "KISHMA JAMES", "MARIA COMAS", "MARTIN HOPKINS", "MARY MCMICHAEL", "MATT PIPER", "NATALIE ESTRELLA", "RAMI TAMIMI", "STACEY LAMBRIGHT", "TRACY BERARD", "AIMEE WHITLOCK", "ALEXIS REED", "AMY AGRESTA", "ANGELA PEREZ", "BRIAN NANTHAVONGDOUANGSY", "BRITNEY DODDS", "CAROLE MCMAHON", "CESIA ESPINOZA YOUNG", "CHELSEA ANDERSON", "COURTNEY HAMILTON", "DEVIN JOHNSON", "DIANNA JENKINS", "HAIFA BRUNNEY", "JACOB ENGLISH", "JASMINE MCKENZIE", "JESSE MCCRERRY", "JOHN LUBINSKY", "JORDAN HOLLIBAUGH", "KATHERINE DE LA ROSA", "KELSY YODER", "KINSIE HUSKINS", "KRISTEN VALENTY", "LETIKA WHITE", "LISA SIMMONS", "LUIS GIL", "LYNDSEY LANE", "MIKE WHITEMAN", "NANCY PRICE", "PAIGE LUDWIG", "PATRICK ARQUETTE", "PAULA PALLESCHI", "PILAR BENNETT", "RACHELLE PARSLEY", "ROBERT HAYNER", "ROBIN BLAKE", "ROSS DIGIORGIO", "RUTH ESPINOZA", "SAM BAMRICK", "SARA BUSH", "SLAVI JORDANOV", "STAN GORKSI", "THAER AHMED", "TRACI WILLIAMS-JONES", "TROY BORDEN", "YASMIN DE JESUS", "ALI SWEAZY", "ALINA ILKAEVA", "ANA SORIA", "ANGELA POTTS", "ANGELIQUE SOTONDJI", "ASHLEY HENRY", "AVA LAIRD", "BAILEY STRATHIE", "BENJAMIN GAYTAN", "BRAD GILLIAM", "BRANDON KIDD", "BRANDON MCCLENDON", "BRIAN ZINN", "CELINE WILLIAMS", "CHERYL KINSEY", "CHRISTIAN CHALKIAS", "CHRISTINA COUGHLIN", "CHUCK KINSEY", "CLAUDIA CHUECO", "CODA GAHRIS", "CRAIG MAURER", "DAIRDRE SCRIVEN", "DARREN HOGG", "DONALD PAYNE", "DONALD PAYNE JR", "ELIAS PAPPAN", "ELIZABETH BONAUDI", "ELIZABETH HOWARD", "ERIKA BRUNNER", "GLADIS CHAVEZ", "HYPATIA ESPINAL", "IZXEL MARTINEZ", "JAIDEN BALLAH", "JASMIN ARCOS", "JASMIN MONTOYA", "JEFF MESSMER", "JENNIFER BLACKMORE", "JENNIFER HOWISON", "JESSICA TOWER", "JONNATHAN AGUDELO", "JUSTIN BIERY", "KATHY HAYES", "KATIE MANSOR", "KERWIN HEATH", "KYLA AHO", "LAUREN MCCLINTON", "LESLIE HERNANDEZ", "LILIAN FUENTES", "LIZBEL CONTRERAS", "MANDY WILSON", "MARK VENNITTI", "MARLA SEWELL", "MATHEA ARUDDA", "MICHELE FREDERICK", "NANCY BAKER", "NIA HARRINGTON", "NICK ZATEZALO", "NIKEHA HAYES", "NINA AVERY", "NORA KERELIUK", "PIERINA MANTILLA", "ROSALIA PABLO", "RUTH GONZALEZ", "SAHEL ALAM", "SARAH HERNANDEZ", "SASHA ANTONOVA", "SHANE STINER", "SHARON PANTELIS", "SHAYNE D. BOYD", "SHIRRELL BURNSIDE", "STEVEN OSBORN", "SUMMER DURHAM", "SUNI RIVAS", "TAMARA CHARLTON", "TATIANA GRIGORITA", "THOMAS NEWMAN", "TINA-DUTT-HIREN", "TOM NEWMAN", "TONY AMOS", "WENDY RAMIREZ", "WHITNEY SCHMIDT", "YVETTA HARRISON"]
+var SEED = [["TIARA VILLATORO", "A", "Karen", "2026-05-08", "2026-05-08", "2026-06-04", "2026-05-22", false, 10], ["BRANDON THOMPSON", "A", "Osgood", "2026-06-01", "2026-06-01", "2026-05-04", "2026-06-01", false, 9], ["MEGAN LYNCH", "A", "Gavin", "2026-06-03", "2026-06-05", "2026-06-01", "2026-06-22", false, 9], ["TODD STONE", "A", "Said", "2026-06-05", "2026-06-09", "2026-04-13", "2026-05-08", false, 9], ["DUSTIN GOLDMAN", "A", "Osgood", "2026-04-20", "2026-04-24", "2026-03-30", "2026-03-27", false, 7], ["TINA HOFFMAN", "A", "Gavin", "2023-10-10", "2026-05-06", "2026-05-27", "2026-02-10", false, 7], ["KEVIN SPEERT", "A", "Gavin", "2026-05-08", "2026-05-27", "2026-06-01", "2026-05-22", false, 6], ["OSCAR MARTINEZ", "A", "Karen", "2026-06-08", "2026-06-08", "2026-05-05", "2026-06-15", false, 6], ["RACQUEL LUDAWAY", "A", "Gavin", "2026-05-29", "2026-05-19", "2026-04-16", "2026-06-04", false, 5], ["CHRIS REED", "A", "Said", "2026-06-03", "2026-06-02", "2026-05-08", "2026-05-27", false, 4], ["MICHELLE ERICKSON", "A", "Gavin", "2025-08-04", "2026-03-25", "2026-04-20", "2026-04-10", false, 4], ["SAHAR SHALASH", "A", "Said", "2026-06-05", "2026-06-05", "2026-05-09", "2026-05-29", false, 4], ["CINDA ERICKSON", "B", "Gavin", "2026-04-23", "2026-04-21", "2026-02-24", "2026-03-26", false, 3], ["CONNER KOCHANSKY", "B", "Gavin", "2026-05-30", "2026-05-19", "2026-05-20", "2026-05-20", false, 3], ["DEANNE RHYNEHARDT", "B", "Osgood", "2026-05-22", "2026-05-28", "2026-05-05", "2026-06-05", false, 3], ["DERON BENDER", "A", "Gavin", "2025-08-11", "2026-04-24", "2026-04-28", "2026-05-08", true, 3], ["INGRID CORREIA", "B", "Gavin", "2026-05-08", "2026-05-08", "2025-12-11", "2026-01-05", false, 3], ["JOHN BRUNNER", "B", "Osgood", "2026-06-01", "2026-06-01", "2026-06-05", "2025-11-17", false, 3], ["KANDIS HALL", "B", "Osgood", "2026-01-04", "2026-01-31", "2026-02-25", "2026-03-17", false, 3], ["KRISTINA MURPHY", "B", "Osgood", "2026-06-02", "2026-05-11", "2025-10-03", "2025-10-21", false, 3], ["MARK BOYD", "B", "Gavin", null, "2026-03-28", "2026-04-08", "2026-02-02", false, 3], ["MATTHEW MONTALVO", "B", "Karen", "2026-04-09", "2026-04-08", "2026-05-29", "2025-11-20", false, 3], ["SETH COLBURN", "B", "Said", "2025-04-23", "2026-03-31", "2026-04-06", "2026-04-30", false, 3], ["ANNIE MORENO", "B", "Karen", "2026-06-06", "2026-06-08", "2026-05-11", "2026-06-05", false, 2], ["DAN MANLEY", "B", "Gavin", "2025-11-23", "2026-04-29", "2026-05-01", "2026-05-19", false, 2], ["ELIZABETH ELLINGER", "B", "Jordan", "2026-03-16", "2026-04-01", "2026-05-18", "2026-06-10", false, 2], ["ERIKA WEHNER", "B", "Gavin", null, "2026-04-13", "2026-05-28", "2026-05-11", false, 2], ["HEATHER HENRY-MINOR", "B", "Jordan", "2026-04-07", "2026-04-15", "2026-05-05", "2026-05-28", false, 2], ["KATIE SUMMERS", "B", "Gavin", null, "2026-04-22", "2026-02-26", "2026-05-29", false, 2], ["KHADIJA FARAH", "B", "Jordan", "2026-05-16", "2026-05-17", "2026-02-09", "2026-03-06", false, 2], ["KISHMA JAMES", "B", "Said", "2026-03-16", "2026-03-12", "2025-06-09", "2025-07-14", false, 2], ["MARIA COMAS", "B", "Karen", "2026-04-27", "2026-03-02", "2025-06-19", "2025-07-21", false, 2], ["MARTIN HOPKINS", "B", "Karen", "2026-02-12", "2026-04-28", "2026-01-29", "2026-02-20", false, 2], ["MARY MCMICHAEL", "B", "Said", "2026-04-13", "2026-04-13", "2025-09-11", "2025-10-10", false, 2], ["MATT PIPER", "B", "Osgood", "2026-05-19", "2026-05-19", "2025-11-11", "2025-12-01", false, 2], ["NATALIE ESTRELLA", "B", "Karen", "2026-05-25", "2026-05-25", "2025-10-08", "2025-11-03", false, 2], ["RAMI TAMIMI", "B", "Jordan", "2026-03-27", "2026-04-20", "2026-05-07", "2026-06-30", false, 2], ["STACEY LAMBRIGHT", "B", "Jordan", null, "2026-03-25", "2026-03-26", "2026-04-07", false, 2], ["TRACY BERARD", "B", "Jordan", null, "2026-04-04", "2026-04-14", "2026-05-27", false, 2], ["AIMEE WHITLOCK", "C", "Gavin", null, "2025-01-14", "2026-02-10", "2026-04-15", false, 1], ["ALEXIS REED", "C", "Said", "2026-03-25", "2026-05-12", "2026-01-30", "2026-02-27", false, 1], ["AMY AGRESTA", "C", "Gavin", "2026-05-23", "2026-05-28", "2025-07-08", "2025-08-05", false, 1], ["ANGELA PEREZ", "C", "Gavin", "2026-04-27", "2026-05-06", "2026-04-06", "2026-04-24", false, 1], ["BRIAN NANTHAVONGDOUANGSY", "C", "Osgood", "2025-10-23", "2025-11-19", "2025-12-18", "2026-03-20", false, 1], ["BRITNEY DODDS", "C", "Gavin", "2026-03-26", "2026-03-26", "2026-03-02", "2026-04-08", false, 1], ["CAROLE MCMAHON", "C", "Osgood", "2026-05-31", "2026-05-31", "2026-05-08", "2026-05-26", false, 1], ["CESIA ESPINOZA YOUNG", "C", "Karen", "2026-03-11", "2026-03-10", "2026-03-26", "2026-04-17", false, 1], ["CHELSEA ANDERSON", "C", "Osgood", "2026-02-07", "2026-02-06", "2026-03-28", "2026-04-17", false, 1], ["COURTNEY HAMILTON", "C", "Osgood", "2026-05-27", "2026-05-27", "2026-06-02", "2025-06-26", false, 1], ["DEVIN JOHNSON", "C", "Said", "2026-03-29", "2026-04-15", "2025-05-30", "2025-07-09", false, 1], ["DIANNA JENKINS", "C", "Said", null, "2026-03-24", "2026-02-23", "2026-04-06", false, 1], ["HAIFA BRUNNEY", "C", "Karen", "2026-05-21", "2026-06-01", "2026-03-26", "2026-04-27", false, 1], ["JACOB ENGLISH", "C", "Jordan", null, "2026-03-18", "2026-04-23", "2026-06-12", false, 1], ["JASMINE MCKENZIE", "C", "Osgood", "2026-05-03", "2026-05-04", "2026-05-06", "2026-05-29", false, 1], ["JESSE MCCRERRY", "C", "Said", null, "2026-04-06", "2026-04-13", "2026-05-26", false, 1], ["JOHN LUBINSKY", "C", "Said", "2025-12-17", "2025-12-19", "2026-02-17", "2026-03-20", false, 1], ["JORDAN HOLLIBAUGH", "C", "Gavin", null, "2026-05-12", "2026-04-29", "2026-04-16", false, 1], ["KATHERINE DE LA ROSA", "C", "Karen", "2026-05-28", "2026-06-02", "2026-04-01", "2026-04-29", false, 1], ["KELSY YODER", "C", "Said", "2026-04-28", "2026-01-09", "2026-01-12", "2026-02-05", false, 1], ["KINSIE HUSKINS", "C", "Jordan", null, "2026-03-17", "2026-04-28", "2026-06-01", false, 1], ["KRISTEN VALENTY", "C", "Jordan", null, "2026-01-21", "2026-02-24", "2026-03-25", false, 1], ["LETIKA WHITE", "C", "Osgood", "2026-05-11", "2026-05-12", "2025-07-31", "2025-08-29", false, 1], ["LISA SIMMONS", "C", "Osgood", null, "2026-03-19", "2026-04-14", "2026-05-27", false, 1], ["LUIS GIL", "C", "Karen", "2026-06-02", "2026-06-02", "2026-06-02", "2025-09-26", false, 1], ["LYNDSEY LANE", "C", "Osgood", "2026-03-16", "2025-09-23", "2025-12-23", "2026-01-23", false, 1], ["MIKE WHITEMAN", "C", "Osgood", null, "2025-07-24", "2025-07-31", "2026-05-11", false, 1], ["NANCY PRICE", "C", "Jordan", "2026-01-03", "2026-01-02", "2026-05-08", "2026-01-30", false, 1], ["PAIGE LUDWIG", "C", "Said", "2026-06-08", "2026-03-05", "2026-03-17", "2026-04-14", false, 1], ["PATRICK ARQUETTE", "C", "Said", "2026-04-22", "2026-01-14", "2025-09-09", "2025-10-07", false, 1], ["PAULA PALLESCHI", "C", "Said", null, "2026-04-21", "2026-04-27", "2026-05-26", false, 1], ["PILAR BENNETT", "C", "Karen", "2026-04-15", "2026-04-15", "2025-07-23", "2025-08-15", false, 1], ["RACHELLE PARSLEY", "C", "Said", "2024-09-03", "2026-04-15", "2026-04-22", "2026-05-13", false, 1], ["ROBERT HAYNER", "C", "Jordan", null, "2026-04-20", "2026-04-23", "2026-05-15", false, 1], ["ROBIN BLAKE", "C", "Gavin", null, "2025-12-19", "2025-12-27", "2026-03-17", false, 1], ["ROSS DIGIORGIO", "C", "Osgood", null, "2025-06-24", "2025-07-14", "2026-04-30", false, 1], ["RUTH ESPINOZA", "C", "Karen", null, "2026-02-26", "2026-03-26", "2026-04-17", false, 1], ["SAM BAMRICK", "C", "Jordan", null, "2026-04-14", "2026-04-20", "2026-05-15", false, 1], ["SARA BUSH", "C", "Said", null, "2026-03-27", "2026-04-13", "2026-05-27", false, 1], ["SLAVI JORDANOV", "C", "Said", "2026-05-30", "2025-10-06", "2025-10-10", "2025-11-07", false, 1], ["STAN GORKSI", "C", "Jordan", null, "2026-03-07", "2026-03-09", "2026-04-07", false, 1], ["THAER AHMED", "C", "Said", "2026-03-31", "2026-03-31", "2025-08-26", "2025-09-30", false, 1], ["TRACI WILLIAMS-JONES", "C", "Jordan", null, "2026-04-09", "2026-03-23", "2026-05-21", false, 1], ["TROY BORDEN", "C", "Gavin", "2026-04-28", "2026-04-30", "2026-04-22", "2026-05-13", false, 1], ["YASMIN DE JESUS", "C", "Karen", "2024-03-27", "2025-11-18", "2026-04-01", "2026-04-29", false, 1], ["ALI SWEAZY", "C", "Osgood", "2026-05-09", "2026-05-09", null, null, false, 0], ["ALINA ILKAEVA", "C", "Said", null, "2026-03-20", null, null, false, 0], ["ANA SORIA", "C", "Karen", "2026-04-19", null, null, null, false, 0], ["ANGELA POTTS", "C", "Osgood", "2026-05-10", "2026-05-10", null, null, false, 0], ["ANGELIQUE SOTONDJI", "C", "Jordan", "2026-03-27", "2026-03-27", null, null, false, 0], ["ASHLEY HENRY", "C", "Osgood", "2026-04-22", "2026-04-21", null, null, false, 0], ["AVA LAIRD", "C", "Jordan", "2026-05-26", "2026-05-25", null, null, false, 0], ["BAILEY STRATHIE", "C", "Osgood", "2026-05-30", "2026-05-30", "2024-11-21", null, false, 0], ["BENJAMIN GAYTAN", "C", "Gavin", "2026-05-16", "2026-05-22", null, null, false, 0], ["BRAD GILLIAM", "C", "Gavin", "2026-05-14", null, null, null, false, 0], ["BRANDON KIDD", "C", "Said", "2026-05-01", null, null, null, false, 0], ["BRANDON MCCLENDON", "C", "Said", "2026-06-08", "2026-06-08", null, null, false, 0], ["BRIAN ZINN", "C", "Jordan", "2026-06-06", "2026-06-07", null, null, false, 0], ["CELINE WILLIAMS", "C", "Jordan", "2026-06-01", null, null, null, false, 0], ["CHERYL KINSEY", "C", "Jordan", "2026-05-05", "2026-05-04", null, null, false, 0], ["CHRISTIAN CHALKIAS", "C", "Osgood", "2026-04-08", "2026-04-08", null, null, false, 0], ["CHRISTINA COUGHLIN", "C", "Osgood", "2026-05-29", "2026-05-29", "2024-09-11", null, false, 0], ["CHUCK KINSEY", "C", "Jordan", "2026-03-16", "2026-03-26", null, null, false, 0], ["CLAUDIA CHUECO", "C", "Karen", "2026-06-08", null, null, null, false, 0], ["CODA GAHRIS", "C", "Jordan", "2026-04-29", "2026-04-29", "2026-05-25", null, false, 0], ["CRAIG MAURER", "C", "Osgood", "2026-05-13", "2026-05-19", null, null, false, 0], ["DAIRDRE SCRIVEN", "C", "Said", "2026-05-19", "2026-05-19", null, null, false, 0], ["DARREN HOGG", "C", "Said", "2026-04-22", "2026-04-28", null, null, false, 0], ["DONALD PAYNE", "C", "Osgood", null, "2026-06-07", "2021-08-11", null, false, 0], ["DONALD PAYNE JR", "C", "Osgood", "2026-06-04", null, null, null, false, 0], ["ELIAS PAPPAN", "C", "Karen", "2026-04-30", null, null, null, false, 0], ["ELIZABETH BONAUDI", "C", "Osgood", "2026-04-17", "2026-04-17", null, null, false, 0], ["ELIZABETH HOWARD", "C", "Osgood", "2026-04-04", "2026-04-03", "2024-11-08", null, false, 0], ["ERIKA BRUNNER", "C", "Gavin", "2026-04-13", "2026-04-15", "2025-11-07", null, false, 0], ["GLADIS CHAVEZ", "C", "Karen", "2026-05-15", "2026-05-05", null, null, false, 0], ["HYPATIA ESPINAL", "C", "Karen", "2026-06-02", "2026-06-02", null, null, false, 0], ["IZXEL MARTINEZ", "C", "Karen", "2026-05-20", "2026-05-20", "2026-06-02", null, false, 0], ["JAIDEN BALLAH", "C", "Said", "2026-06-02", "2026-06-03", null, null, false, 0], ["JASMIN ARCOS", "C", "Karen", "2026-03-19", "2026-03-26", null, null, false, 0], ["JASMIN MONTOYA", "C", "Karen", "2026-05-31", "2026-05-30", null, null, false, 0], ["JEFF MESSMER", "C", "Gavin", "2026-05-12", "2026-05-12", "2025-10-01", null, false, 0], ["JENNIFER BLACKMORE", "C", "Jordan", "2026-05-02", null, null, null, false, 0], ["JENNIFER HOWISON", "C", "Jordan", "2026-03-15", "2026-03-30", "2026-04-06", null, false, 0], ["JESSICA TOWER", "C", "Jordan", "2026-05-27", "2026-05-30", "2023-04-03", null, false, 0], ["JONNATHAN AGUDELO", "C", "Karen", "2026-05-23", "2026-05-19", null, null, false, 0], ["JUSTIN BIERY", "C", "Karen", "2026-05-27", "2026-05-28", null, null, false, 0], ["KATHY HAYES", "C", "Jordan", "2026-05-30", "2026-05-29", "2024-12-09", null, false, 0], ["KATIE MANSOR", "C", "Jordan", "2026-04-27", "2026-04-26", null, null, false, 0], ["KERWIN HEATH", "C", "Said", null, "2026-04-12", null, null, false, 0], ["KYLA AHO", "C", "Said", "2026-03-12", "2025-11-03", "2025-03-28", null, false, 0], ["LAUREN MCCLINTON", "C", "Said", null, "2026-04-29", null, null, false, 0], ["LESLIE HERNANDEZ", "C", "Karen", "2026-05-07", "2026-05-08", "2026-05-19", null, false, 0], ["LILIAN FUENTES", "C", "Karen", "2026-04-21", "2026-04-21", null, null, false, 0], ["LIZBEL CONTRERAS", "C", "Karen", "2026-04-30", "2026-05-11", "2024-09-18", null, false, 0], ["MANDY WILSON", "C", "Jordan", null, "2026-03-28", null, null, false, 0], ["MARK VENNITTI", "C", "Jordan", "2026-04-08", "2026-04-08", "2026-06-01", null, false, 0], ["MARLA SEWELL", "C", "Osgood", null, "2026-03-19", null, null, false, 0], ["MATHEA ARUDDA", "C", "Karen", null, "2026-03-16", "2026-03-23", null, false, 0], ["MICHELE FREDERICK", "C", "Osgood", null, "2026-05-31", null, null, false, 0], ["NANCY BAKER", "C", "Osgood", "2026-04-30", null, null, null, false, 0], ["NIA HARRINGTON", "C", "Said", "2026-05-13", "2026-05-05", "2024-10-17", null, false, 0], ["NICK ZATEZALO", "C", "Osgood", "2026-05-16", "2026-03-19", "2024-03-12", null, false, 0], ["NIKEHA HAYES", "C", "Osgood", "2026-04-15", "2025-09-28", "2024-09-25", null, false, 0], ["NINA AVERY", "C", "Jordan", null, "2026-04-23", null, null, false, 0], ["NORA KERELIUK", "C", "Said", "2026-04-24", null, null, null, false, 0], ["PIERINA MANTILLA", "C", "Karen", null, "2026-03-15", null, null, false, 0], ["ROSALIA PABLO", "C", "Karen", "2026-06-08", "2026-06-04", "2024-11-08", null, false, 0], ["RUTH GONZALEZ", "C", "Karen", "2026-05-19", "2026-05-19", null, null, false, 0], ["SAHEL ALAM", "C", "Said", "2026-05-10", "2026-05-08", null, null, false, 0], ["SARAH HERNANDEZ", "C", "Osgood", "2026-05-28", "2026-05-29", "2024-10-21", null, false, 0], ["SASHA ANTONOVA", "C", "Said", "2026-03-31", "2026-03-31", null, null, false, 0], ["SHANE STINER", "C", "Jordan", null, "2026-04-08", null, null, false, 0], ["SHARON PANTELIS", "C", "Jordan", "2026-04-28", "2025-03-21", "2025-04-01", null, false, 0], ["SHAYNE D. BOYD", "C", "Said", "2026-05-04", "2026-05-07", null, null, false, 0], ["SHIRRELL BURNSIDE", "C", "Osgood", "2026-04-08", "2025-07-14", null, null, false, 0], ["STEVEN OSBORN", "C", "Jordan", "2026-04-30", "2026-02-03", null, null, false, 0], ["SUMMER DURHAM", "C", "Osgood", null, "2026-03-23", null, null, false, 0], ["SUNI RIVAS", "C", "Karen", "2026-05-27", "2026-05-28", null, null, false, 0], ["TAMARA CHARLTON", "C", "Osgood", "2025-07-27", "2026-04-16", "2025-04-14", null, false, 0], ["TATIANA GRIGORITA", "C", "Jordan", "2026-06-08", "2026-06-08", null, null, false, 0], ["THOMAS NEWMAN", "C", "Gavin", "2026-03-02", "2026-03-25", "2022-08-22", null, false, 0], ["TINA-DUTT-HIREN", "C", "Osgood", null, "2026-05-11", null, null, false, 0], ["TOM NEWMAN", "C", "Gavin", "2026-06-08", "2026-06-08", "2024-01-08", null, false, 0], ["TONY AMOS", "C", "Osgood", "2026-04-19", "2026-04-01", "2024-02-27", null, false, 0], ["WENDY RAMIREZ", "C", "Karen", "2026-03-25", "2026-03-25", null, null, false, 0], ["WHITNEY SCHMIDT", "C", "Said", "2026-03-18", "2024-01-12", "2024-01-18", null, false, 0], ["YVETTA HARRISON", "C", "Osgood", "2026-06-04", null, null, null, false, 0]]>
