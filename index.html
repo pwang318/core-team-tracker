@@ -3,248 +3,245 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Core Team Master Dashboard</title>
+<title>Core Team Agent Tracker</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#1a1a1a;font-size:14px;background:#f0f2f5;min-height:100vh}
-.app{max-width:1100px;margin:0 auto;padding:1rem 1rem 3rem}
-.header{padding:.9rem 0 .7rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #dde1e7;margin-bottom:1rem}
+.app{max-width:940px;margin:0 auto;padding:1rem 1rem 3rem}
+.app-header{padding:.9rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #dde1e7;margin-bottom:.75rem}
 .brand{display:flex;align-items:center;gap:10px}
-.brand-logo{background:#1F4E79;color:#fff;font-weight:700;font-size:14px;padding:7px 14px;border-radius:8px;letter-spacing:.05em}
+.brand-logo{background:#1F4E79;color:#fff;font-weight:700;font-size:13px;padding:6px 13px;border-radius:8px;letter-spacing:.05em}
 .brand-sub{font-size:12px;color:#666}
 .week-pill{font-size:11px;background:#e8eaf0;padding:4px 11px;border-radius:20px;color:#555}
-.sync{display:flex;align-items:center;gap:4px;font-size:11px;color:#888}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc}
+.save-ind{font-size:11px;color:#888;min-width:60px;text-align:right;display:flex;align-items:center;gap:4px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
 .sync-dot.live{background:#43A047}.sync-dot.saving{background:#FB8C00}.sync-dot.error{background:#E53935}
-.refresh-btn{border:1px solid #dde1e7;background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;color:#555;font-family:inherit}
-.refresh-btn:hover{background:#f5f6fa}
-.section-title{font-size:15px;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
-.section-divider{border:none;border-top:1px solid #dde1e7;margin:1.5rem 0}
-
-/* LP GRID */
-.lp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:1rem}
-.lp-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem}
-.lp-name{font-weight:700;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.lp-pct{font-size:26px;font-weight:800;margin-bottom:4px}
-.lp-bar-track{background:#eee;border-radius:20px;height:5px;margin-bottom:5px;overflow:hidden}
-.lp-bar{height:5px;border-radius:20px}
-.lp-meta{font-size:11px;color:#888;display:flex;justify-content:space-between}
-.lp-flags{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap}
-
-/* SCORECARD */
-.scorecard{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
-.sc-header{padding:.85rem 1.1rem;cursor:default;display:flex;justify-content:space-between;align-items:center}
-.sc-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.pills{display:flex;gap:5px;flex-wrap:wrap}
-.pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;cursor:pointer}
-.pill-green{background:#EAF3DE;color:#3B6D11}
-.pill-amber{background:#FAEEDA;color:#854F0B}
-.pill-red{background:#FCEBEB;color:#A32D2D}
-.sc-body{border-top:1px solid #f0f2f5;padding:.9rem 1.1rem}
-.sc-row{padding:9px 0;border-bottom:1px solid #f0f2f5}
-.sc-row:last-child{border-bottom:none}
-.sc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.sc-name{font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px}
-.sc-right{display:flex;align-items:center;gap:10px}
-.sc-pct{font-size:20px;font-weight:800}
-.sc-sub{font-size:11px;color:#888}
-.missed-box{background:#FFEBEE;border-radius:6px;padding:5px 9px;font-size:11px;color:#C62828;margin-top:4px}
-.won-box{font-size:11px;color:#43A047;font-weight:500;margin-top:2px}
-.chevron{font-size:14px;color:#888;transition:transform .2s;cursor:pointer}
-
-/* AMANDA SECTION */
-.amanda-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-bottom:1rem}
-.a-card{background:#fff;border:1px solid #dde1e7;border-radius:10px;padding:.75rem .9rem;border-left:3px solid #7B1FA2}
-.a-label{font-size:10px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
-.a-val{font-size:20px;font-weight:700}
-.a-sub{font-size:10px;color:#888;margin-top:2px}
-.a-bar-track{background:#eee;border-radius:20px;height:3px;margin-top:5px;overflow:hidden}
-.a-bar{height:3px;border-radius:20px;background:#7B1FA2}
-
-/* ALERTS */
-.alert-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.1rem;margin-bottom:1rem}
-.alert-section h3{font-size:13px;font-weight:700;margin-bottom:.6rem;display:flex;align-items:center;gap:6px}
-.alert-item{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid #f0f2f5;font-size:13px;flex-wrap:wrap}
-.alert-item:last-child{border-bottom:none}
-.adot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.who-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.9rem;align-items:center;background:#fff;padding:.75rem 1rem;border-radius:12px;border:1px solid #dde1e7}
+.who-label{font-size:12px;color:#888;margin-right:2px;font-weight:500}
+.who-btn{padding:7px 16px;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#555}
+.who-btn:hover{background:#f5f6fa}
+.wb-Gavin.active{background:#E8F5E9;border-color:#2E7D32;color:#2E7D32}
+.wb-Karen.active{background:#E3F2FD;border-color:#1565C0;color:#1565C0}
+.wb-Osgood.active{background:#FFF8E1;border-color:#E65100;color:#E65100}
+.wb-Jordan.active{background:#FCE4EC;border-color:#880E4F;color:#880E4F}
+.wb-Said.active{background:#EDE7F6;border-color:#4527A0;color:#4527A0}
+.wb-Daniel.active{background:#F3E5F5;border-color:#6A1B9A;color:#6A1B9A}
+.wb-Admin.active{background:#FBE9E7;border-color:#BF360C;color:#BF360C}
+.view{display:none}.view.active{display:block}
+.lp-hero{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:.9rem}
+.lp-hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.lp-hero-name{font-size:17px;font-weight:700}
+.lp-hero-sub{font-size:12px;color:#888;margin-top:2px}
+.prog-wrap{display:flex;align-items:center;gap:10px}
+.prog-track{flex:1;background:#e8eaf0;border-radius:20px;height:9px;overflow:hidden;min-width:130px}
+.prog-fill{height:9px;border-radius:20px}
+.prog-txt{font-size:12px;color:#888;white-space:nowrap;font-weight:500}
+.priority-banner{background:#FFEBEE;border:1px solid #EF9A9A;border-radius:8px;padding:9px 12px;font-size:12px;color:#C62828;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:500}
+.call-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.call-card.priority{border-color:#EF9A9A;border-width:2px;background:#FFFAFA}
+.call-card.done{opacity:.45}
+.check-btn{width:44px;height:44px;border-radius:50%;border:2px solid #ccc;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.check-btn.checked{background:#EAF3DE;border-color:#4CAF50}
+.check-btn:hover:not(.checked){background:#f5f5f5}
+.call-info{flex:1;min-width:0}
+.call-name{font-weight:600;font-size:14px;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.call-name.striked{text-decoration:line-through;color:#aaa}
+.priority-tag{background:#FFEBEE;color:#C62828;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700;flex-shrink:0}
+.call-meta{font-size:12px;color:#888;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note-field{width:100%;margin-top:7px;padding:6px 10px;border:1px solid #dde1e7;border-radius:8px;background:#fafafa;color:#333;font-size:12px;font-family:inherit;resize:none;height:46px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-a{background:#C6EFCE;color:#1B5E20}
+.badge-b{background:#BBDEFB;color:#0D47A1}
+.badge-c{background:#EEE;color:#424242}
+.badge-inactive{background:#FFCDD2;color:#B71C1C}
+.section-head{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:1rem 0 .5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-bottom:1rem}
+.d-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem}
+.d-name{font-weight:700;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.d-pct{font-size:24px;font-weight:800;margin-bottom:4px}
+.d-bar-track{background:#eee;border-radius:20px;height:5px;margin-bottom:6px;overflow:hidden}
+.d-bar-fill{height:5px;border-radius:20px}
+.d-meta{font-size:11px;color:#888;display:flex;justify-content:space-between}
+.alert-item{background:#fff;border:1px solid #dde1e7;border-radius:8px;padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.adot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .adot-red{background:#E53935}.adot-amber{background:#FB8C00}.adot-green{background:#43A047}
-.lp-tag{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:600}
+.weekly-summary{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.weekly-summary h3{font-size:14px;font-weight:700;margin-bottom:.75rem;color:#1a1a1a;display:flex;align-items:center;gap:6px}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f5;font-size:13px}
+.summary-row:last-child{border-bottom:none}
+.summary-lp{font-weight:600;display:flex;align-items:center;gap:6px}
+.summary-stats{display:flex;gap:12px;align-items:center}
+.summary-pct{font-weight:700;font-size:15px}
+.missed-agents{font-size:11px;color:#E53935;margin-top:3px}
+.grade{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.grade-a{background:#C6EFCE;color:#1B5E20}
+.grade-b{background:#FFF2CC;color:#7D5A00}
+.grade-c{background:#FFCDD2;color:#B71C1C}
+.admin-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.admin-section h3{font-size:14px;font-weight:700;margin-bottom:.75rem;color:#1a1a1a}
+.form-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end}
+.form-group{display:flex;flex-direction:column;gap:3px}
+.form-group label{font-size:11px;color:#888;font-weight:500}
+input[type=text],select{padding:7px 10px;border:1px solid #dde1e7;border-radius:8px;font-size:13px;color:#1a1a1a;background:#fff;font-family:inherit}
+.upload-zone{border:2px dashed #ccc;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;color:#888;font-size:13px}
+.upload-zone:hover{background:#f8f9fc}
+.btn{border:1.5px solid #dde1e7;background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;color:#333;font-weight:500;font-family:inherit}
+.btn:hover{background:#f5f6fa}
+.btn-primary{background:#1F4E79;color:#fff;border-color:#1F4E79}
+.btn-danger{background:#FFEBEE;color:#C62828;border-color:#EF9A9A}
+.btn-success{background:#E8F5E9;color:#2E7D32;border-color:#A5D6A7}
+.btn-sm{padding:3px 10px;font-size:12px}
+.tbl-wrap{max-height:360px;overflow-y:auto;border:1px solid #dde1e7;border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;font-weight:700;font-size:11px;color:#888;border-bottom:1px solid #e8eaf0;background:#f8f9fc;position:sticky;top:0;z-index:2;text-transform:uppercase;letter-spacing:.04em}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f5;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbfc}
+.no-data{text-align:center;padding:2.5rem;color:#aaa;font-size:13px}
+.inactive-banner{background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:9px 12px;font-size:12px;color:#E65100;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.lp-tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
 .lp-tag-Gavin{background:#E8F5E9;color:#2E7D32}.lp-tag-Karen{background:#E3F2FD;color:#1565C0}
 .lp-tag-Osgood{background:#FFF8E1;color:#E65100}.lp-tag-Jordan{background:#FCE4EC;color:#880E4F}
-.lp-tag-Said{background:#EDE7F6;color:#4527A0}
-.badge-a{background:#C6EFCE;color:#1B5E20;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px}
-.badge-b{background:#BBDEFB;color:#0D47A1;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px}
-.badge-c{background:#EEE;color:#424242;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px}
-
-/* NEVER LOGGED */
-.never-logged-banner{background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:#854F0B;display:none;align-items:center;gap:8px}
-.tabs{display:flex;gap:0;border-bottom:1px solid #dde1e7;margin-bottom:1rem;flex-wrap:wrap}
-.tab{padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500;color:#888;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tab.active{color:#1F4E79;border-bottom-color:#1F4E79}
-.tab:hover:not(.active){color:#555}
-.view{display:none}.view.active{display:block}
-.search-box{width:100%;padding:10px 14px;border:1.5px solid #1F4E79;border-radius:12px;font-size:14px;color:#1a1a1a;background:#fff;font-family:inherit;margin-bottom:1rem}
-.agent-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
-.agent-header{padding:.9rem 1.1rem;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px}
-.agent-name-big{font-size:18px;font-weight:700;margin-bottom:4px}
-.agent-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.active-pill{background:#EAF3DE;color:#3B6D11;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:.85rem 1.1rem;border-bottom:1px solid #f0f2f5}
-.stat-box{text-align:center}
-.stat-num{font-size:18px;font-weight:700;margin-bottom:2px}
-.stat-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.04em}
-.history-section{padding:.85rem 1.1rem}
-.history-label{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
-.history-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f5}
-.history-item:last-child{border-bottom:none}
-.h-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.h-body{flex:1}
-.h-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;flex-wrap:wrap;gap:4px}
-.h-who{font-weight:600;font-size:12px}
-.h-date{font-size:11px;color:#888}
-.h-type{font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;margin-bottom:3px;display:inline-block}
-.h-note{font-size:12px;color:#555;font-style:italic}
-.lp-source{background:#E3F2FD;color:#1565C0;font-size:10px;padding:1px 6px;border-radius:20px;font-weight:600}
-.amanda-source{background:#F3E5F5;color:#6A1B9A;font-size:10px;padding:1px 6px;border-radius:20px;font-weight:600}
-.autocomplete-wrap{position:relative}
-.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #dde1e7;border-radius:8px;max-height:200px;overflow-y:auto;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.autocomplete-item{padding:8px 10px;cursor:pointer;font-size:13px}
-.autocomplete-item:hover{background:#f5f6fa}
-.growth-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1rem}
-.growth-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem;position:relative;overflow:hidden}
-.growth-card.highlight{border-color:#1F4E79;border-width:2px}
-.growth-label{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
-.growth-val{font-size:28px;font-weight:800;margin-bottom:2px}
-.growth-goal{font-size:11px;color:#888}
-.growth-bar-track{background:#eee;border-radius:20px;height:4px;margin-top:6px;overflow:hidden}
-.growth-bar{height:4px;border-radius:20px}
-.growth-trend{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
-.trend-up{background:#EAF3DE;color:#3B6D11;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600}
-.trend-down{background:#FFEBEE;color:#C62828;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600}
-.trend-same{background:#F5F5F5;color:#555;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600}
-.channel-badge{background:#FFF9C4;color:#F57F17;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
-.edit-btn{border:1px solid #dde1e7;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:#555;font-family:inherit}
-.edit-btn:hover{background:#f5f6fa}
-.save-btn{border:1px solid #1F4E79;background:#1F4E79;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:#fff;font-family:inherit}
-.profile-field{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
-.profile-field label{font-size:10px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-.profile-field input{padding:6px 9px;border:1px solid #dde1e7;border-radius:7px;font-size:13px;color:#1a1a1a;background:#fff;font-family:inherit;width:100%}
-.profile-field .val{font-size:13px;color:#1a1a1a;padding:4px 0}
-.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:.85rem 1.1rem;border-top:1px solid #f0f2f5}
-.badge-inactive{background:#FFCDD2;color:#B71C1C;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+.lp-tag-Said{background:#EDE7F6;color:#4527A0}.lp-tag-Unassigned{background:#EEE;color:#555}
+.lp-c-Gavin{color:#2E7D32}.lp-c-Karen{color:#1565C0}.lp-c-Osgood{color:#E65100}.lp-c-Jordan{color:#880E4F}.lp-c-Said{color:#4527A0}
+.bar-Gavin{background:#4CAF50}.bar-Karen{background:#2196F3}.bar-Osgood{background:#FF9800}.bar-Jordan{background:#E91E63}.bar-Said{background:#9C27B0}
+.welcome{text-align:center;padding:3.5rem 1rem}
+.welcome-logo{background:#1F4E79;color:#fff;font-weight:800;font-size:20px;padding:10px 20px;border-radius:10px;display:inline-block;margin-bottom:1rem;letter-spacing:.04em}
+.welcome h2{font-size:19px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
+.welcome p{font-size:13px;max-width:360px;margin:0 auto;line-height:1.7;color:#888}
 </style>
 </head>
 <body>
 <div class="app">
-<div class="header">
-  <div class="brand">
-    <div class="brand-logo">CORE TEAM</div>
-    <div class="brand-sub">Management Dashboard</div>
-  </div>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<div class="app-header">
+  <div class="brand"><div class="brand-logo">CORE TEAM</div><div class="brand-sub">Agent Tracker</div></div>
+  <div style="display:flex;gap:8px;align-items:center">
     <span class="week-pill" id="weekPill"></span>
-    <div class="sync"><span class="sync-dot" id="syncDot"></span><span id="syncTxt">Loading...</span></div>
-    <button class="refresh-btn" onclick="loadAll()">&#8635; Refresh</button>
+    <span class="save-ind"><span class="sync-dot" id="syncDot"></span><span id="saveInd">Connecting...</span></span>
   </div>
 </div>
-
-<div class="tabs">
-  <div class="tab active" onclick="switchDashTab('overview')">Overview</div>
-  <div class="tab" onclick="switchDashTab('search')">Agent Search</div>
+<div class="who-bar">
+  <span class="who-label">I am:</span>
+  <button class="who-btn wb-Gavin" onclick="selectUser(this,'Gavin')">Gavin</button>
+  <button class="who-btn wb-Karen" onclick="selectUser(this,'Karen')">Karen</button>
+  <button class="who-btn wb-Osgood" onclick="selectUser(this,'Osgood')">Osgood</button>
+  <button class="who-btn wb-Jordan" onclick="selectUser(this,'Jordan')">Jordan</button>
+  <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
+  <button class="who-btn wb-Daniel" onclick="selectUser(this,'Daniel')">Daniel</button>
+  <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button>
 </div>
-
-<div id="view-overview" class="view active">
-
-<!-- GROWTH TRACKER -->
-<div class="section-title" style="margin-bottom:.6rem">&#127942; Growth scoreboard</div>
-<div class="growth-grid" id="growth-grid">
-  <div class="growth-card" style="text-align:center;color:#aaa;padding:1.5rem;grid-column:1/-1">Loading...</div>
+<div id="view-welcome" class="view active">
+  <div class="welcome">
+    <div class="welcome-logo">CORE TEAM</div>
+    <h2>Agent Tracker</h2>
+    <p>Select your name above to see your 15 calls for this week. All updates sync in real time across the team.</p>
+  </div>
 </div>
-<div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.85rem 1.1rem;margin-bottom:1rem">
-  <div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem">Level breakdown</div>
-  <div id="level-breakdown" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
-</div>
-
-<hr style="border:none;border-top:1px solid #dde1e7;margin:1.25rem 0">
-
-<!-- AMANDA NEVER LOGGED ALERT -->
-<div class="never-logged-banner" id="never-logged-banner">
-  &#9888; Amanda has not logged any activity in the last 3+ days. Last logged: <span id="last-logged-date">--</span>
-</div>
-
-<!-- LP PERFORMANCE -->
-<div class="section-title">&#128198; LP weekly performance</div>
-<div class="lp-grid" id="lp-grid"></div>
-
-<!-- LP SCORECARD THIS WEEK -->
-<div class="scorecard" id="lp-this-scorecard">
-  <div class="sc-header" onclick="toggleSection('lp-this-body','lp-this-chev')">
-    <div class="sc-title">
-      &#128200; This week
-      <span style="font-size:11px;font-weight:400;color:#888" id="this-week-lbl"></span>
-      <div class="pills" id="lp-this-pills"></div>
+<div id="view-lp" class="view">
+  <div class="lp-hero">
+    <div class="lp-hero-top">
+      <div><div class="lp-hero-name" id="lp-hero-name"></div><div class="lp-hero-sub" id="lp-hero-sub"></div></div>
+      <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="lp-prog" style="width:0%"></div></div><span class="prog-txt" id="lp-prog-txt">0 / 0</span></div>
     </div>
-    <span class="chevron" id="lp-this-chev">&#9660;</span>
   </div>
-  <div id="lp-this-body" style="display:none;border-top:1px solid #f0f2f5;padding:.9rem 1.1rem">
-    <div id="lp-this-content"></div>
-  </div>
+  <div id="monday-banner" style="display:none;background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:9px 12px;font-size:12px;color:#1565C0;margin-bottom:.75rem;font-weight:500">&#128197; New week, new rotation! Your 15 agents for this week are ready. Let's go!</div>
+  <div id="priority-banner" class="priority-banner" style="display:none">&#9888; You have priority agents that need to be called ASAP!</div>
+  <div id="inactive-banner" class="inactive-banner" style="display:none">&#9888; <span id="inactive-banner-txt"></span></div>
+  <div id="streak-bar" style="display:none;background:var(--color-background-primary);border:1px solid #FFE082;border-radius:8px;padding:8px 12px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#E65100"></div>
+  <div id="lp-call-list"></div>
 </div>
-
-<!-- LP SCORECARD LAST WEEK -->
-<div class="scorecard" id="lp-last-scorecard" style="display:none">
-  <div class="sc-header" onclick="toggleSection('lp-last-body','lp-last-chev')">
-    <div class="sc-title">
-      &#128197; Last week
-      <span style="font-size:11px;font-weight:400;color:#888" id="last-week-lbl"></span>
-      <div class="pills" id="lp-last-pills"></div>
+<div id="view-daniel" class="view">
+  <div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;margin-bottom:1rem;overflow:hidden">
+    <div onclick="toggleScorecard('this')" style="padding:.9rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:15px;font-weight:700">&#128200; This week</span>
+        <span style="font-size:11px;color:#888" id="this-week-label"></span>
+        <span id="this-week-pills" style="display:flex;gap:5px"></span>
+      </div>
+      <span id="this-chevron" style="font-size:18px;color:#888;transition:transform .2s">&#9660;</span>
     </div>
-    <span class="chevron" id="lp-last-chev">&#9660;</span>
-  </div>
-  <div id="lp-last-body" style="display:none;border-top:1px solid #f0f2f5;padding:.9rem 1.1rem">
-    <div id="lp-last-content"></div>
-  </div>
-</div>
-
-
-
-<hr class="section-divider">
-
-<!-- AMANDA PERFORMANCE -->
-<div class="section-title">&#128101; Amanda — Relationship Manager</div>
-<div class="amanda-grid" id="amanda-grid"></div>
-
-<!-- AMANDA SCORECARD THIS WEEK -->
-<div class="scorecard">
-  <div class="sc-header" onclick="toggleSection('amanda-this-body','amanda-this-chev')">
-    <div class="sc-title">
-      &#128200; Amanda this week
-      <div class="pills" id="amanda-this-pills"></div>
+    <div id="this-week-section" style="display:none;border-top:1px solid #f0f2f5;padding:1rem 1.25rem">
+      <div id="this-week-content"></div>
     </div>
-    <span class="chevron" id="amanda-this-chev">&#9660;</span>
   </div>
-  <div id="amanda-this-body" style="display:none;border-top:1px solid #f0f2f5;padding:.9rem 1.1rem">
-    <div id="amanda-this-content"></div>
-  </div>
-</div>
 
-<!-- AMANDA LAST WEEK -->
-<div class="scorecard" id="amanda-last-scorecard" style="display:none">
-  <div class="sc-header" onclick="toggleSection('amanda-last-body','amanda-last-chev')">
-    <div class="sc-title">
-      &#128197; Amanda last week
-      <div class="pills" id="amanda-last-pills"></div>
+  <div class="section-head">This week's LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
+  <div class="d-grid" id="d-grid"></div>
+  <div class="section-head">Going cold <span style="font-size:11px;font-weight:400;text-transform:none;color:#aaa">(14+ days since LP last called)</span></div>
+  <div id="d-cold"></div>
+  <div class="section-head" style="margin-top:1rem">Full roster
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option></select>
+      <select id="d-lvl" onchange="renderDaniel()"><option value="">All levels</option><option>A</option><option>B</option><option>C</option></select>
+      <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+      <input type="text" id="d-q" placeholder="Search..." oninput="renderDaniel()" style="width:120px">
     </div>
-    <span class="chevron" id="amanda-last-chev">&#9660;</span>
   </div>
-  <div id="amanda-last-body" style="display:none;border-top:1px solid #f0f2f5;padding:.9rem 1.1rem">
-    <div id="amanda-last-content"></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Last LP call</th><th>Last activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
+
+  <div class="section-head" style="margin-top:1rem">&#127942; All-time leaderboard <span style="font-size:11px;font-weight:400;text-transform:none;color:var(--color-text-secondary)">since tracker launched</span></div>
+  <div id="leaderboard"></div>
+
+  <div class="section-head" style="margin-top:1rem">&#128229; Weekly Teams summary</div>
+  <div style="background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem">
+    <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:.75rem">Copy and paste this into your Core Team channel every Monday.</p>
+    <div id="teams-message" style="background:var(--color-background-secondary);border-radius:8px;padding:.75rem 1rem;font-size:12px;line-height:1.7;white-space:pre-wrap;font-family:inherit"></div>
+    <button class="btn btn-primary btn-sm" onclick="copyTeamsMessage()" style="margin-top:.75rem">Copy message</button>
+    <span id="copy-confirm" style="font-size:12px;color:var(--color-text-success);margin-left:8px;display:none">Copied!</span>
   </div>
 </div>
-
+<div id="view-lp-summary" class="view">
+  <div class="weekly-summary">
+    <h3>&#128200; Your scorecard <span style="font-size:11px;font-weight:400;color:#888" id="lp-last-week-label"></span></h3>
+    <div id="lp-summary-content"></div>
+  </div>
+  <button class="btn btn-primary" onclick="selectUser(document.querySelector('.who-btn.active'), currentUser)" style="margin-top:1rem">Back to this week</button>
+</div>
+<div id="view-admin" class="view">
+  <div class="admin-section">
+    <h3>Upload Power BI export</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Upload your weekly Power BI .xlsx to refresh levels and activity dates. Agents inactive 90+ days are flagged automatically.</p>
+    <div class="upload-zone" onclick="loadXLSX()">Click to upload Power BI .xlsx<br><span style="font-size:11px;color:#aaa">Agents inactive 90+ days flagged automatically</span></div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleUpload(this)">
+    <div id="upload-result" style="margin-top:8px;font-size:12px"></div>
+  </div>
+  <div class="admin-section">
+    <h3>Reassign agents</h3>
+    <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <input type="text" id="reassign-q" placeholder="Search agent..." oninput="renderReassign()" style="flex:1;min-width:140px">
+      <select id="reassign-filter-lp" onchange="renderReassign()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
+    </div>
+    <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign to</th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
+  </div>
+  <div class="admin-section">
+    <h3>Add agent manually</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Name</label><input type="text" id="add-name" placeholder="Full name" style="width:180px"></div>
+      <div class="form-group"><label>Level</label><select id="add-level"><option>A</option><option>B</option><option selected>C</option></select></div>
+      <div class="form-group"><label>LP</label><select id="add-lp"><option value="Unassigned">Unassigned</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option></select></div>
+      <div class="form-group"><label>Priority</label><select id="add-priority"><option value="false">No</option><option value="true">Yes</option></select></div>
+      <div class="form-group"><label>&nbsp;</label><button class="btn btn-primary" onclick="addAgent()">Add</button></div>
+    </div>
+  </div>
+  <div class="admin-section">
+    <h3>Remove agent from tracker</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Only use this if an agent is no longer working with the team. Search by name to find them.</p>
+    <div style="margin-bottom:8px"><input type="text" id="remove-q" placeholder="Search agent name to remove..." oninput="renderRemoveList()" style="width:100%"></div>
+    <div id="remove-list" style="max-height:220px;overflow-y:auto"></div>
+  </div>
+  <div class="admin-section">
+    <h3>Flagged inactive <span style="font-weight:400;font-size:12px;color:#888" id="inactive-count-label"></span></h3>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">No lead activity in 90+ days -- removed from LP rotation automatically.</p>
+    <div id="inactive-list"></div>
+  </div>
+</div>
 </div>
 <script>
 var SUPABASE_URL = "https://uclucbdkjqyqdvifyptx.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
-var ALL_AGENTS = ["TIARA VILLATORO", "BRANDON THOMPSON", "MEGAN LYNCH", "TODD STONE", "DUSTIN GOLDMAN", "TINA HOFFMAN", "KEVIN SPEERT", "OSCAR MARTINEZ", "RACQUEL LUDAWAY", "CHRIS REED", "MICHELLE ERICKSON", "SAHAR SHALASH", "CINDA ERICKSON", "CONNER KOCHANSKY", "DEANNE RHYNEHARDT", "DERON BENDER", "INGRID CORREIA", "JOHN BRUNNER", "KANDIS HALL", "KRISTINA MURPHY", "MARK BOYD", "MATTHEW MONTALVO", "SETH COLBURN", "ANNIE MORENO", "DAN MANLEY", "ELIZABETH ELLINGER", "ERIKA WEHNER", "HEATHER HENRY-MINOR", "KATIE SUMMERS", "KHADIJA FARAH", "KISHMA JAMES", "MARIA COMAS", "MARTIN HOPKINS", "MARY MCMICHAEL", "MATT PIPER", "NATALIE ESTRELLA", "RAMI TAMIMI", "STACEY LAMBRIGHT", "TRACY BERARD", "AIMEE WHITLOCK", "ALEXIS REED", "AMY AGRESTA", "ANGELA PEREZ", "BRIAN NANTHAVONGDOUANGSY", "BRITNEY DODDS", "CAROLE MCMAHON", "CESIA ESPINOZA YOUNG", "CHELSEA ANDERSON", "COURTNEY HAMILTON", "DEVIN JOHNSON", "DIANNA JENKINS", "HAIFA BRUNNEY", "JACOB ENGLISH", "JASMINE MCKENZIE", "JESSE MCCRERRY", "JOHN LUBINSKY", "JORDAN HOLLIBAUGH", "KATHERINE DE LA ROSA", "KELSY YODER", "KINSIE HUSKINS", "KRISTEN VALENTY", "LETIKA WHITE", "LISA SIMMONS", "LUIS GIL", "LYNDSEY LANE", "MIKE WHITEMAN", "NANCY PRICE", "PAIGE LUDWIG", "PATRICK ARQUETTE", "PAULA PALLESCHI", "PILAR BENNETT", "RACHELLE PARSLEY", "ROBERT HAYNER", "ROBIN BLAKE", "ROSS DIGIORGIO", "RUTH ESPINOZA", "SAM BAMRICK", "SARA BUSH", "SLAVI JORDANOV", "STAN GORKSI", "THAER AHMED", "TRACI WILLIAMS-JONES", "TROY BORDEN", "YASMIN DE JESUS", "ALI SWEAZY", "ALINA ILKAEVA", "ANA SORIA", "ANGELA POTTS", "ANGELIQUE SOTONDJI", "ASHLEY HENRY", "AVA LAIRD", "BAILEY STRATHIE", "BENJAMIN GAYTAN", "BRAD GILLIAM", "BRANDON KIDD", "BRANDON MCCLENDON", "BRIAN ZINN", "CELINE WILLIAMS", "CHERYL KINSEY", "CHRISTIAN CHALKIAS", "CHRISTINA COUGHLIN", "CHUCK KINSEY", "CLAUDIA CHUECO", "CODA GAHRIS", "CRAIG MAURER", "DAIRDRE SCRIVEN", "DARREN HOGG", "DONALD PAYNE", "DONALD PAYNE JR", "ELIAS PAPPAN", "ELIZABETH BONAUDI", "ELIZABETH HOWARD", "ERIKA BRUNNER", "GLADIS CHAVEZ", "HYPATIA ESPINAL", "IZXEL MARTINEZ", "JAIDEN BALLAH", "JASMIN ARCOS", "JASMIN MONTOYA", "JEFF MESSMER", "JENNIFER BLACKMORE", "JENNIFER HOWISON", "JESSICA TOWER", "JONNATHAN AGUDELO", "JUSTIN BIERY", "KATHY HAYES", "KATIE MANSOR", "KERWIN HEATH", "KYLA AHO", "LAUREN MCCLINTON", "LESLIE HERNANDEZ", "LILIAN FUENTES", "LIZBEL CONTRERAS", "MANDY WILSON", "MARK VENNITTI", "MARLA SEWELL", "MATHEA ARUDDA", "MICHELE FREDERICK", "NANCY BAKER", "NIA HARRINGTON", "NICK ZATEZALO", "NIKEHA HAYES", "NINA AVERY", "NORA KERELIUK", "PIERINA MANTILLA", "ROSALIA PABLO", "RUTH GONZALEZ", "SAHEL ALAM", "SARAH HERNANDEZ", "SASHA ANTONOVA", "SHANE STINER", "SHARON PANTELIS", "SHAYNE D. BOYD", "SHIRRELL BURNSIDE", "STEVEN OSBORN", "SUMMER DURHAM", "SUNI RIVAS", "TAMARA CHARLTON", "TATIANA GRIGORITA", "THOMAS NEWMAN", "TINA-DUTT-HIREN", "TOM NEWMAN", "TONY AMOS", "WENDY RAMIREZ", "WHITNEY SCHMIDT", "YVETTA HARRISON"]
+var STORAGE_KEY = "ct_agents_v2";
+var LPS = ["Gavin","Karen","Osgood","Jordan","Said"];
+var LP_COLORS = {Gavin:"#4CAF50",Karen:"#2196F3",Osgood:"#FF9800",Jordan:"#E91E63",Said:"#9C27B0"};
+var TODAY = new Date(); TODAY.setHours(0,0,0,0);
+var CUTOFF = new Date(TODAY); CUTOFF.setDate(TODAY.getDate()-90);
 var SEED = [["TIARA VILLATORO", "A", "Karen", "2026-05-08", "2026-05-08", "2026-06-04", "2026-05-22", false, 10], ["BRANDON THOMPSON", "A", "Osgood", "2026-06-01", "2026-06-01", "2026-05-04", "2026-06-01", false, 9], ["MEGAN LYNCH", "A", "Gavin", "2026-06-03", "2026-06-05", "2026-06-01", "2026-06-22", false, 9], ["TODD STONE", "A", "Said", "2026-06-05", "2026-06-09", "2026-04-13", "2026-05-08", false, 9], ["DUSTIN GOLDMAN", "A", "Osgood", "2026-04-20", "2026-04-24", "2026-03-30", "2026-03-27", false, 7], ["TINA HOFFMAN", "A", "Gavin", "2023-10-10", "2026-05-06", "2026-05-27", "2026-02-10", false, 7], ["KEVIN SPEERT", "A", "Gavin", "2026-05-08", "2026-05-27", "2026-06-01", "2026-05-22", false, 6], ["OSCAR MARTINEZ", "A", "Karen", "2026-06-08", "2026-06-08", "2026-05-05", "2026-06-15", false, 6], ["RACQUEL LUDAWAY", "A", "Gavin", "2026-05-29", "2026-05-19", "2026-04-16", "2026-06-04", false, 5], ["CHRIS REED", "A", "Said", "2026-06-03", "2026-06-02", "2026-05-08", "2026-05-27", false, 4], ["MICHELLE ERICKSON", "A", "Gavin", "2025-08-04", "2026-03-25", "2026-04-20", "2026-04-10", false, 4], ["SAHAR SHALASH", "A", "Said", "2026-06-05", "2026-06-05", "2026-05-09", "2026-05-29", false, 4], ["CINDA ERICKSON", "B", "Gavin", "2026-04-23", "2026-04-21", "2026-02-24", "2026-03-26", false, 3], ["CONNER KOCHANSKY", "B", "Gavin", "2026-05-30", "2026-05-19", "2026-05-20", "2026-05-20", false, 3], ["DEANNE RHYNEHARDT", "B", "Osgood", "2026-05-22", "2026-05-28", "2026-05-05", "2026-06-05", false, 3], ["DERON BENDER", "A", "Gavin", "2025-08-11", "2026-04-24", "2026-04-28", "2026-05-08", true, 3], ["INGRID CORREIA", "B", "Gavin", "2026-05-08", "2026-05-08", "2025-12-11", "2026-01-05", false, 3], ["JOHN BRUNNER", "B", "Osgood", "2026-06-01", "2026-06-01", "2026-06-05", "2025-11-17", false, 3], ["KANDIS HALL", "B", "Osgood", "2026-01-04", "2026-01-31", "2026-02-25", "2026-03-17", false, 3], ["KRISTINA MURPHY", "B", "Osgood", "2026-06-02", "2026-05-11", "2025-10-03", "2025-10-21", false, 3], ["MARK BOYD", "B", "Gavin", null, "2026-03-28", "2026-04-08", "2026-02-02", false, 3], ["MATTHEW MONTALVO", "B", "Karen", "2026-04-09", "2026-04-08", "2026-05-29", "2025-11-20", false, 3], ["SETH COLBURN", "B", "Said", "2025-04-23", "2026-03-31", "2026-04-06", "2026-04-30", false, 3], ["ANNIE MORENO", "B", "Karen", "2026-06-06", "2026-06-08", "2026-05-11", "2026-06-05", false, 2], ["DAN MANLEY", "B", "Gavin", "2025-11-23", "2026-04-29", "2026-05-01", "2026-05-19", false, 2], ["ELIZABETH ELLINGER", "B", "Jordan", "2026-03-16", "2026-04-01", "2026-05-18", "2026-06-10", false, 2], ["ERIKA WEHNER", "B", "Gavin", null, "2026-04-13", "2026-05-28", "2026-05-11", false, 2], ["HEATHER HENRY-MINOR", "B", "Jordan", "2026-04-07", "2026-04-15", "2026-05-05", "2026-05-28", false, 2], ["KATIE SUMMERS", "B", "Gavin", null, "2026-04-22", "2026-02-26", "2026-05-29", false, 2], ["KHADIJA FARAH", "B", "Jordan", "2026-05-16", "2026-05-17", "2026-02-09", "2026-03-06", false, 2], ["KISHMA JAMES", "B", "Said", "2026-03-16", "2026-03-12", "2025-06-09", "2025-07-14", false, 2], ["MARIA COMAS", "B", "Karen", "2026-04-27", "2026-03-02", "2025-06-19", "2025-07-21", false, 2], ["MARTIN HOPKINS", "B", "Karen", "2026-02-12", "2026-04-28", "2026-01-29", "2026-02-20", false, 2], ["MARY MCMICHAEL", "B", "Said", "2026-04-13", "2026-04-13", "2025-09-11", "2025-10-10", false, 2], ["MATT PIPER", "B", "Osgood", "2026-05-19", "2026-05-19", "2025-11-11", "2025-12-01", false, 2], ["NATALIE ESTRELLA", "B", "Karen", "2026-05-25", "2026-05-25", "2025-10-08", "2025-11-03", false, 2], ["RAMI TAMIMI", "B", "Jordan", "2026-03-27", "2026-04-20", "2026-05-07", "2026-06-30", false, 2], ["STACEY LAMBRIGHT", "B", "Jordan", null, "2026-03-25", "2026-03-26", "2026-04-07", false, 2], ["TRACY BERARD", "B", "Jordan", null, "2026-04-04", "2026-04-14", "2026-05-27", false, 2], ["AIMEE WHITLOCK", "C", "Gavin", null, "2025-01-14", "2026-02-10", "2026-04-15", false, 1], ["ALEXIS REED", "C", "Said", "2026-03-25", "2026-05-12", "2026-01-30", "2026-02-27", false, 1], ["AMY AGRESTA", "C", "Gavin", "2026-05-23", "2026-05-28", "2025-07-08", "2025-08-05", false, 1], ["ANGELA PEREZ", "C", "Gavin", "2026-04-27", "2026-05-06", "2026-04-06", "2026-04-24", false, 1], ["BRIAN NANTHAVONGDOUANGSY", "C", "Osgood", "2025-10-23", "2025-11-19", "2025-12-18", "2026-03-20", false, 1], ["BRITNEY DODDS", "C", "Gavin", "2026-03-26", "2026-03-26", "2026-03-02", "2026-04-08", false, 1], ["CAROLE MCMAHON", "C", "Osgood", "2026-05-31", "2026-05-31", "2026-05-08", "2026-05-26", false, 1], ["CESIA ESPINOZA YOUNG", "C", "Karen", "2026-03-11", "2026-03-10", "2026-03-26", "2026-04-17", false, 1], ["CHELSEA ANDERSON", "C", "Osgood", "2026-02-07", "2026-02-06", "2026-03-28", "2026-04-17", false, 1], ["COURTNEY HAMILTON", "C", "Osgood", "2026-05-27", "2026-05-27", "2026-06-02", "2025-06-26", false, 1], ["DEVIN JOHNSON", "C", "Said", "2026-03-29", "2026-04-15", "2025-05-30", "2025-07-09", false, 1], ["DIANNA JENKINS", "C", "Said", null, "2026-03-24", "2026-02-23", "2026-04-06", false, 1], ["HAIFA BRUNNEY", "C", "Karen", "2026-05-21", "2026-06-01", "2026-03-26", "2026-04-27", false, 1], ["JACOB ENGLISH", "C", "Jordan", null, "2026-03-18", "2026-04-23", "2026-06-12", false, 1], ["JASMINE MCKENZIE", "C", "Osgood", "2026-05-03", "2026-05-04", "2026-05-06", "2026-05-29", false, 1], ["JESSE MCCRERRY", "C", "Said", null, "2026-04-06", "2026-04-13", "2026-05-26", false, 1], ["JOHN LUBINSKY", "C", "Said", "2025-12-17", "2025-12-19", "2026-02-17", "2026-03-20", false, 1], ["JORDAN HOLLIBAUGH", "C", "Gavin", null, "2026-05-12", "2026-04-29", "2026-04-16", false, 1], ["KATHERINE DE LA ROSA", "C", "Karen", "2026-05-28", "2026-06-02", "2026-04-01", "2026-04-29", false, 1], ["KELSY YODER", "C", "Said", "2026-04-28", "2026-01-09", "2026-01-12", "2026-02-05", false, 1], ["KINSIE HUSKINS", "C", "Jordan", null, "2026-03-17", "2026-04-28", "2026-06-01", false, 1], ["KRISTEN VALENTY", "C", "Jordan", null, "2026-01-21", "2026-02-24", "2026-03-25", false, 1], ["LETIKA WHITE", "C", "Osgood", "2026-05-11", "2026-05-12", "2025-07-31", "2025-08-29", false, 1], ["LISA SIMMONS", "C", "Osgood", null, "2026-03-19", "2026-04-14", "2026-05-27", false, 1], ["LUIS GIL", "C", "Karen", "2026-06-02", "2026-06-02", "2026-06-02", "2025-09-26", false, 1], ["LYNDSEY LANE", "C", "Osgood", "2026-03-16", "2025-09-23", "2025-12-23", "2026-01-23", false, 1], ["MIKE WHITEMAN", "C", "Osgood", null, "2025-07-24", "2025-07-31", "2026-05-11", false, 1], ["NANCY PRICE", "C", "Jordan", "2026-01-03", "2026-01-02", "2026-05-08", "2026-01-30", false, 1], ["PAIGE LUDWIG", "C", "Said", "2026-06-08", "2026-03-05", "2026-03-17", "2026-04-14", false, 1], ["PATRICK ARQUETTE", "C", "Said", "2026-04-22", "2026-01-14", "2025-09-09", "2025-10-07", false, 1], ["PAULA PALLESCHI", "C", "Said", null, "2026-04-21", "2026-04-27", "2026-05-26", false, 1], ["PILAR BENNETT", "C", "Karen", "2026-04-15", "2026-04-15", "2025-07-23", "2025-08-15", false, 1], ["RACHELLE PARSLEY", "C", "Said", "2024-09-03", "2026-04-15", "2026-04-22", "2026-05-13", false, 1], ["ROBERT HAYNER", "C", "Jordan", null, "2026-04-20", "2026-04-23", "2026-05-15", false, 1], ["ROBIN BLAKE", "C", "Gavin", null, "2025-12-19", "2025-12-27", "2026-03-17", false, 1], ["ROSS DIGIORGIO", "C", "Osgood", null, "2025-06-24", "2025-07-14", "2026-04-30", false, 1], ["RUTH ESPINOZA", "C", "Karen", null, "2026-02-26", "2026-03-26", "2026-04-17", false, 1], ["SAM BAMRICK", "C", "Jordan", null, "2026-04-14", "2026-04-20", "2026-05-15", false, 1], ["SARA BUSH", "C", "Said", null, "2026-03-27", "2026-04-13", "2026-05-27", false, 1], ["SLAVI JORDANOV", "C", "Said", "2026-05-30", "2025-10-06", "2025-10-10", "2025-11-07", false, 1], ["STAN GORKSI", "C", "Jordan", null, "2026-03-07", "2026-03-09", "2026-04-07", false, 1], ["THAER AHMED", "C", "Said", "2026-03-31", "2026-03-31", "2025-08-26", "2025-09-30", false, 1], ["TRACI WILLIAMS-JONES", "C", "Jordan", null, "2026-04-09", "2026-03-23", "2026-05-21", false, 1], ["TROY BORDEN", "C", "Gavin", "2026-04-28", "2026-04-30", "2026-04-22", "2026-05-13", false, 1], ["YASMIN DE JESUS", "C", "Karen", "2024-03-27", "2025-11-18", "2026-04-01", "2026-04-29", false, 1], ["ALI SWEAZY", "C", "Osgood", "2026-05-09", "2026-05-09", null, null, false, 0], ["ALINA ILKAEVA", "C", "Said", null, "2026-03-20", null, null, false, 0], ["ANA SORIA", "C", "Karen", "2026-04-19", null, null, null, false, 0], ["ANGELA POTTS", "C", "Osgood", "2026-05-10", "2026-05-10", null, null, false, 0], ["ANGELIQUE SOTONDJI", "C", "Jordan", "2026-03-27", "2026-03-27", null, null, false, 0], ["ASHLEY HENRY", "C", "Osgood", "2026-04-22", "2026-04-21", null, null, false, 0], ["AVA LAIRD", "C", "Jordan", "2026-05-26", "2026-05-25", null, null, false, 0], ["BAILEY STRATHIE", "C", "Osgood", "2026-05-30", "2026-05-30", "2024-11-21", null, false, 0], ["BENJAMIN GAYTAN", "C", "Gavin", "2026-05-16", "2026-05-22", null, null, false, 0], ["BRAD GILLIAM", "C", "Gavin", "2026-05-14", null, null, null, false, 0], ["BRANDON KIDD", "C", "Said", "2026-05-01", null, null, null, false, 0], ["BRANDON MCCLENDON", "C", "Said", "2026-06-08", "2026-06-08", null, null, false, 0], ["BRIAN ZINN", "C", "Jordan", "2026-06-06", "2026-06-07", null, null, false, 0], ["CELINE WILLIAMS", "C", "Jordan", "2026-06-01", null, null, null, false, 0], ["CHERYL KINSEY", "C", "Jordan", "2026-05-05", "2026-05-04", null, null, false, 0], ["CHRISTIAN CHALKIAS", "C", "Osgood", "2026-04-08", "2026-04-08", null, null, false, 0], ["CHRISTINA COUGHLIN", "C", "Osgood", "2026-05-29", "2026-05-29", "2024-09-11", null, false, 0], ["CHUCK KINSEY", "C", "Jordan", "2026-03-16", "2026-03-26", null, null, false, 0], ["CLAUDIA CHUECO", "C", "Karen", "2026-06-08", null, null, null, false, 0], ["CODA GAHRIS", "C", "Jordan", "2026-04-29", "2026-04-29", "2026-05-25", null, false, 0], ["CRAIG MAURER", "C", "Osgood", "2026-05-13", "2026-05-19", null, null, false, 0], ["DAIRDRE SCRIVEN", "C", "Said", "2026-05-19", "2026-05-19", null, null, false, 0], ["DARREN HOGG", "C", "Said", "2026-04-22", "2026-04-28", null, null, false, 0], ["DONALD PAYNE", "C", "Osgood", null, "2026-06-07", "2021-08-11", null, false, 0], ["DONALD PAYNE JR", "C", "Osgood", "2026-06-04", null, null, null, false, 0], ["ELIAS PAPPAN", "C", "Karen", "2026-04-30", null, null, null, false, 0], ["ELIZABETH BONAUDI", "C", "Osgood", "2026-04-17", "2026-04-17", null, null, false, 0], ["ELIZABETH HOWARD", "C", "Osgood", "2026-04-04", "2026-04-03", "2024-11-08", null, false, 0], ["ERIKA BRUNNER", "C", "Gavin", "2026-04-13", "2026-04-15", "2025-11-07", null, false, 0], ["GLADIS CHAVEZ", "C", "Karen", "2026-05-15", "2026-05-05", null, null, false, 0], ["HYPATIA ESPINAL", "C", "Karen", "2026-06-02", "2026-06-02", null, null, false, 0], ["IZXEL MARTINEZ", "C", "Karen", "2026-05-20", "2026-05-20", "2026-06-02", null, false, 0], ["JAIDEN BALLAH", "C", "Said", "2026-06-02", "2026-06-03", null, null, false, 0], ["JASMIN ARCOS", "C", "Karen", "2026-03-19", "2026-03-26", null, null, false, 0], ["JASMIN MONTOYA", "C", "Karen", "2026-05-31", "2026-05-30", null, null, false, 0], ["JEFF MESSMER", "C", "Gavin", "2026-05-12", "2026-05-12", "2025-10-01", null, false, 0], ["JENNIFER BLACKMORE", "C", "Jordan", "2026-05-02", null, null, null, false, 0], ["JENNIFER HOWISON", "C", "Jordan", "2026-03-15", "2026-03-30", "2026-04-06", null, false, 0], ["JESSICA TOWER", "C", "Jordan", "2026-05-27", "2026-05-30", "2023-04-03", null, false, 0], ["JONNATHAN AGUDELO", "C", "Karen", "2026-05-23", "2026-05-19", null, null, false, 0], ["JUSTIN BIERY", "C", "Karen", "2026-05-27", "2026-05-28", null, null, false, 0], ["KATHY HAYES", "C", "Jordan", "2026-05-30", "2026-05-29", "2024-12-09", null, false, 0], ["KATIE MANSOR", "C", "Jordan", "2026-04-27", "2026-04-26", null, null, false, 0], ["KERWIN HEATH", "C", "Said", null, "2026-04-12", null, null, false, 0], ["KYLA AHO", "C", "Said", "2026-03-12", "2025-11-03", "2025-03-28", null, false, 0], ["LAUREN MCCLINTON", "C", "Said", null, "2026-04-29", null, null, false, 0], ["LESLIE HERNANDEZ", "C", "Karen", "2026-05-07", "2026-05-08", "2026-05-19", null, false, 0], ["LILIAN FUENTES", "C", "Karen", "2026-04-21", "2026-04-21", null, null, false, 0], ["LIZBEL CONTRERAS", "C", "Karen", "2026-04-30", "2026-05-11", "2024-09-18", null, false, 0], ["MANDY WILSON", "C", "Jordan", null, "2026-03-28", null, null, false, 0], ["MARK VENNITTI", "C", "Jordan", "2026-04-08", "2026-04-08", "2026-06-01", null, false, 0], ["MARLA SEWELL", "C", "Osgood", null, "2026-03-19", null, null, false, 0], ["MATHEA ARUDDA", "C", "Karen", null, "2026-03-16", "2026-03-23", null, false, 0], ["MICHELE FREDERICK", "C", "Osgood", null, "2026-05-31", null, null, false, 0], ["NANCY BAKER", "C", "Osgood", "2026-04-30", null, null, null, false, 0], ["NIA HARRINGTON", "C", "Said", "2026-05-13", "2026-05-05", "2024-10-17", null, false, 0], ["NICK ZATEZALO", "C", "Osgood", "2026-05-16", "2026-03-19", "2024-03-12", null, false, 0], ["NIKEHA HAYES", "C", "Osgood", "2026-04-15", "2025-09-28", "2024-09-25", null, false, 0], ["NINA AVERY", "C", "Jordan", null, "2026-04-23", null, null, false, 0], ["NORA KERELIUK", "C", "Said", "2026-04-24", null, null, null, false, 0], ["PIERINA MANTILLA", "C", "Karen", null, "2026-03-15", null, null, false, 0], ["ROSALIA PABLO", "C", "Karen", "2026-06-08", "2026-06-04", "2024-11-08", null, false, 0], ["RUTH GONZALEZ", "C", "Karen", "2026-05-19", "2026-05-19", null, null, false, 0], ["SAHEL ALAM", "C", "Said", "2026-05-10", "2026-05-08", null, null, false, 0], ["SARAH HERNANDEZ", "C", "Osgood", "2026-05-28", "2026-05-29", "2024-10-21", null, false, 0], ["SASHA ANTONOVA", "C", "Said", "2026-03-31", "2026-03-31", null, null, false, 0], ["SHANE STINER", "C", "Jordan", null, "2026-04-08", null, null, false, 0], ["SHARON PANTELIS", "C", "Jordan", "2026-04-28", "2025-03-21", "2025-04-01", null, false, 0], ["SHAYNE D. BOYD", "C", "Said", "2026-05-04", "2026-05-07", null, null, false, 0], ["SHIRRELL BURNSIDE", "C", "Osgood", "2026-04-08", "2025-07-14", null, null, false, 0], ["STEVEN OSBORN", "C", "Jordan", "2026-04-30", "2026-02-03", null, null, false, 0], ["SUMMER DURHAM", "C", "Osgood", null, "2026-03-23", null, null, false, 0], ["SUNI RIVAS", "C", "Karen", "2026-05-27", "2026-05-28", null, null, false, 0], ["TAMARA CHARLTON", "C", "Osgood", "2025-07-27", "2026-04-16", "2025-04-14", null, false, 0], ["TATIANA GRIGORITA", "C", "Jordan", "2026-06-08", "2026-06-08", null, null, false, 0], ["THOMAS NEWMAN", "C", "Gavin", "2026-03-02", "2026-03-25", "2022-08-22", null, false, 0], ["TINA-DUTT-HIREN", "C", "Osgood", null, "2026-05-11", null, null, false, 0], ["TOM NEWMAN", "C", "Gavin", "2026-06-08", "2026-06-08", "2024-01-08", null, false, 0], ["TONY AMOS", "C", "Osgood", "2026-04-19", "2026-04-01", "2024-02-27", null, false, 0], ["WENDY RAMIREZ", "C", "Karen", "2026-03-25", "2026-03-25", null, null, false, 0], ["WHITNEY SCHMIDT", "C", "Said", "2026-03-18", "2024-01-12", "2024-01-18", null, false, 0], ["YVETTA HARRISON", "C", "Osgood", "2026-06-04", null, null, null, false, 0]]>
