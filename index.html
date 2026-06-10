@@ -438,9 +438,8 @@ function renderScorecard(which,logs,wkKey,rotFn){
   var pills="",content="";
   var hasData=Object.keys(logs).length>0;
   if(which==="lw"){
-    document.getElementById("lw-scorecard").style.display=hasData?"block":"none";
-    if(!hasData)return;
-    document.getElementById("lw-lbl").textContent=getWeekLabel(wkKey);
+    document.getElementById("lw-scorecard").style.display="none";
+    return;
   } else {
     document.getElementById("tw-lbl").textContent=getWeekLabel(wkKey);
   }
