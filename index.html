@@ -1,1 +1,701 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Core Team Agent Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#1a1a1a;font-size:14px;background:#f0f2f5;min-height:100vh}
+.app{max-width:940px;margin:0 auto;padding:1rem 1rem 3rem}
+.app-header{padding:.9rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #dde1e7;margin-bottom:.75rem}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-logo{background:#1F4E79;color:#fff;font-weight:700;font-size:13px;padding:6px 13px;border-radius:8px;letter-spacing:.05em}
+.brand-sub{font-size:12px;color:#666}
+.week-pill{font-size:11px;background:#e8eaf0;padding:4px 11px;border-radius:20px;color:#555}
+.save-ind{font-size:11px;color:#888;min-width:60px;text-align:right;display:flex;align-items:center;gap:4px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
+.sync-dot.live{background:#43A047}.sync-dot.saving{background:#FB8C00}.sync-dot.error{background:#E53935}
+.who-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.9rem;align-items:center;background:#fff;padding:.75rem 1rem;border-radius:12px;border:1px solid #dde1e7}
+.who-label{font-size:12px;color:#888;margin-right:2px;font-weight:500}
+.who-btn{padding:7px 16px;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#555}
+.who-btn:hover{background:#f5f6fa}
+.wb-Gavin.active{background:#E8F5E9;border-color:#2E7D32;color:#2E7D32}
+.wb-Karen.active{background:#E3F2FD;border-color:#1565C0;color:#1565C0}
+.wb-Osgood.active{background:#FFF8E1;border-color:#E65100;color:#E65100}
+.wb-Jordan.active{background:#FCE4EC;border-color:#880E4F;color:#880E4F}
+.wb-Said.active{background:#EDE7F6;border-color:#4527A0;color:#4527A0}
+.wb-Daniel.active{background:#F3E5F5;border-color:#6A1B9A;color:#6A1B9A}
+.wb-Admin.active{background:#FBE9E7;border-color:#BF360C;color:#BF360C}
+.view{display:none}.view.active{display:block}
+.lp-hero{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:.9rem}
+.lp-hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.lp-hero-name{font-size:17px;font-weight:700}
+.lp-hero-sub{font-size:12px;color:#888;margin-top:2px}
+.prog-wrap{display:flex;align-items:center;gap:10px}
+.prog-track{flex:1;background:#e8eaf0;border-radius:20px;height:9px;overflow:hidden;min-width:130px}
+.prog-fill{height:9px;border-radius:20px}
+.prog-txt{font-size:12px;color:#888;white-space:nowrap;font-weight:500}
+.priority-banner{background:#FFEBEE;border:1px solid #EF9A9A;border-radius:8px;padding:9px 12px;font-size:12px;color:#C62828;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:500}
+.monday-banner{background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:9px 12px;font-size:12px;color:#1565C0;margin-bottom:.75rem;font-weight:500}
+.streak-bar{background:#fff;border:1px solid #FFE082;border-radius:8px;padding:8px 12px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#E65100}
+.call-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+.call-card.priority{border-color:#EF9A9A;border-width:2px;background:#FFFAFA}
+.call-card.done{opacity:.45}
+.check-btn{width:44px;height:44px;border-radius:50%;border:2px solid #ccc;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.check-btn.checked{background:#EAF3DE;border-color:#4CAF50}
+.call-info{flex:1;min-width:0}
+.call-name{font-weight:600;font-size:14px;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.priority-tag{background:#FFEBEE;color:#C62828;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700}
+.call-meta{font-size:12px;color:#888;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note-field{width:100%;margin-top:7px;padding:6px 10px;border:1px solid #dde1e7;border-radius:8px;background:#fafafa;color:#333;font-size:12px;font-family:inherit;resize:none;height:46px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-a{background:#C6EFCE;color:#1B5E20}.badge-b{background:#BBDEFB;color:#0D47A1}.badge-c{background:#EEE;color:#424242}.badge-inactive{background:#FFCDD2;color:#B71C1C}
+.section-head{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:1rem 0 .5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-bottom:1rem}
+.d-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem}
+.d-name{font-weight:700;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.d-pct{font-size:24px;font-weight:800;margin-bottom:4px}
+.d-bar-track{background:#eee;border-radius:20px;height:5px;margin-bottom:6px;overflow:hidden}
+.d-bar-fill{height:5px;border-radius:20px}
+.d-meta{font-size:11px;color:#888;display:flex;justify-content:space-between}
+.scorecard{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.sc-header{padding:.85rem 1.1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sc-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.pill-green{background:#EAF3DE;color:#3B6D11}.pill-amber{background:#FFF2CC;color:#7D5A00}.pill-red{background:#FFEBEE;color:#C62828}
+.sc-body{border-top:1px solid #f0f2f5;padding:.9rem 1.1rem}
+.sc-row{padding:9px 0;border-bottom:1px solid #f0f2f5}
+.sc-row:last-child{border-bottom:none}
+.sc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.sc-pct{font-size:20px;font-weight:800}
+.missed-box{background:#FFEBEE;border-radius:6px;padding:5px 9px;font-size:11px;color:#C62828;margin-top:4px}
+.won-box{font-size:11px;color:#43A047;font-weight:500;margin-top:2px}
+.leaderboard-row{background:#fff;border:1px solid #dde1e7;border-radius:10px;padding:.75rem 1rem;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.alert-item{background:#fff;border:1px solid #dde1e7;border-radius:8px;padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.adot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.adot-red{background:#E53935}.adot-amber{background:#FB8C00}.adot-green{background:#43A047}
+.admin-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.admin-section h3{font-size:14px;font-weight:700;margin-bottom:.75rem}
+.form-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end}
+.form-group{display:flex;flex-direction:column;gap:3px}
+.form-group label{font-size:11px;color:#888;font-weight:500}
+input[type=text],select{padding:7px 10px;border:1px solid #dde1e7;border-radius:8px;font-size:13px;color:#1a1a1a;background:#fff;font-family:inherit}
+.upload-zone{border:2px dashed #ccc;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;color:#888;font-size:13px}
+.upload-zone:hover{background:#f8f9fc}
+.btn{border:1.5px solid #dde1e7;background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;color:#333;font-weight:500;font-family:inherit}
+.btn:hover{background:#f5f6fa}
+.btn-primary{background:#1F4E79;color:#fff;border-color:#1F4E79}
+.btn-danger{background:#FFEBEE;color:#C62828;border-color:#EF9A9A}
+.btn-success{background:#E8F5E9;color:#2E7D32;border-color:#A5D6A7}
+.btn-sm{padding:3px 10px;font-size:12px}
+.tbl-wrap{max-height:360px;overflow-y:auto;border:1px solid #dde1e7;border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;font-weight:700;font-size:11px;color:#888;border-bottom:1px solid #e8eaf0;background:#f8f9fc;position:sticky;top:0;z-index:2;text-transform:uppercase;letter-spacing:.04em}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f5;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbfc}
+.no-data{text-align:center;padding:2.5rem;color:#aaa;font-size:13px}
+.inactive-banner{background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:9px 12px;font-size:12px;color:#E65100;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.lp-tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.lp-tag-Gavin{background:#E8F5E9;color:#2E7D32}.lp-tag-Karen{background:#E3F2FD;color:#1565C0}
+.lp-tag-Osgood{background:#FFF8E1;color:#E65100}.lp-tag-Jordan{background:#FCE4EC;color:#880E4F}
+.lp-tag-Said{background:#EDE7F6;color:#4527A0}.lp-tag-Unassigned{background:#EEE;color:#555}
+.lp-c-Gavin{color:#2E7D32}.lp-c-Karen{color:#1565C0}.lp-c-Osgood{color:#E65100}.lp-c-Jordan{color:#880E4F}.lp-c-Said{color:#4527A0}
+.bar-Gavin{background:#4CAF50}.bar-Karen{background:#2196F3}.bar-Osgood{background:#FF9800}.bar-Jordan{background:#E91E63}.bar-Said{background:#9C27B0}
+.welcome{text-align:center;padding:3.5rem 1rem}
+.welcome-logo{background:#1F4E79;color:#fff;font-weight:800;font-size:20px;padding:10px 20px;border-radius:10px;display:inline-block;margin-bottom:1rem;letter-spacing:.04em}
+.welcome h2{font-size:19px;font-weight:700;margin-bottom:8px}
+.welcome p{font-size:13px;max-width:360px;margin:0 auto;line-height:1.7;color:#888}
+.teams-msg-box{background:#f8f9fc;border-radius:8px;padding:.75rem 1rem;font-size:12px;line-height:1.7;white-space:pre-wrap;font-family:inherit;border:1px solid #dde1e7}
+.contact-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;padding:20px}
+.contact-modal-overlay.open{display:flex}
+.contact-modal-box{background:#fff;border-radius:14px;padding:22px 24px;width:100%;max-width:420px}
+.cm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.cm-title{font-size:14px;font-weight:700;color:#1a1a1a}
+.cm-close{background:none;border:none;font-size:20px;cursor:pointer;color:#aaa}
+.cm-field{margin-bottom:12px}
+.cm-field label{display:block;font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.cm-field input{width:100%;padding:8px 10px;border:1px solid #dde1e7;border-radius:8px;font-size:13px;font-family:inherit;color:#1a1a1a;background:#fff}
+.cm-field input:focus{outline:none;border-color:#1F4E79}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="app-header">
+  <div class="brand"><div class="brand-logo">CORE TEAM</div><div class="brand-sub">Agent Tracker</div></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span class="week-pill" id="weekPill"></span>
+    <span class="save-ind"><span class="sync-dot" id="syncDot"></span><span id="saveInd">Connecting...</span></span>
+  </div>
+</div>
+<div class="who-bar">
+  <span class="who-label">I am:</span>
+  <button class="who-btn wb-Gavin" onclick="selectUser(this,'Gavin')">Gavin</button>
+  <button class="who-btn wb-Karen" onclick="selectUser(this,'Karen')">Karen</button>
+  <button class="who-btn wb-Osgood" onclick="selectUser(this,'Osgood')">Osgood</button>
+  <button class="who-btn wb-Jordan" onclick="selectUser(this,'Jordan')">Jordan</button>
+  <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
+  <button class="who-btn wb-Daniel" onclick="selectUser(this,'Daniel')">Daniel</button>
+  <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button>
+</div>
+<div class="contact-modal-overlay" id="lpContactModal">
+  <div class="contact-modal-box">
+    <div class="cm-header"><span class="cm-title">Edit contact info</span><button class="cm-close" onclick="closeLpContactModal()">×</button></div>
+    <div style="font-size:12px;color:#888;margin-bottom:14px" id="lpContactModalName"></div>
+    <div class="cm-field"><label>Phone</label><input type="text" id="lp-cm-phone" placeholder="Phone number"></div>
+    <div class="cm-field"><label>Email</label><input type="email" id="lp-cm-email" placeholder="Email address"></div>
+    <div class="cm-field"><label>Birthday</label><input type="text" id="lp-cm-birthday" placeholder="e.g. Mar 14"></div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="btn btn-primary" onclick="saveLpContactModal()">Save</button>
+      <button class="btn" onclick="closeLpContactModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div id="view-welcome" class="view active">
+  <div class="welcome"><div class="welcome-logo">CORE TEAM</div><h2>Agent Tracker</h2><p>Select your name to see your 15 calls for this week. All updates sync in real time.</p></div>
+</div>
+<div id="view-lp" class="view">
+  <div class="lp-hero">
+    <div class="lp-hero-top">
+      <div><div class="lp-hero-name" id="lp-hero-name"></div><div class="lp-hero-sub" id="lp-hero-sub"></div></div>
+      <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="lp-prog" style="width:0%"></div></div><span class="prog-txt" id="lp-prog-txt">0/0</span></div>
+    </div>
+  </div>
+  <div id="monday-banner-el" class="monday-banner" style="display:none">&#128197; New week! Your 15 agents for this week are ready. Let&#39;s go!</div>
+  <div id="streak-bar-el" class="streak-bar" style="display:none"></div>
+  <div id="priority-banner" class="priority-banner" style="display:none">&#9888; You have priority agents that need to be called ASAP!</div>
+  <div id="inactive-banner" class="inactive-banner" style="display:none">&#9888; <span id="inactive-banner-txt"></span></div>
+  <div id="lp-call-list"></div>
+</div>
+<div id="view-daniel" class="view">
+  <div class="scorecard">
+    <div class="sc-header" onclick="toggleSC('tw-body','tw-chev')">
+      <div class="sc-title">&#128200; This week <span style="font-size:11px;font-weight:400;color:#888" id="tw-lbl"></span><div class="pills" id="tw-pills"></div></div>
+      <span id="tw-chev" style="font-size:14px;color:#888">&#9660;</span>
+    </div>
+    <div id="tw-body" style="display:none;border-top:1px solid #f0f2f5;padding:.9rem 1.1rem"><div id="tw-content"></div></div>
+  </div>
+  <div class="scorecard">
+    <div class="sc-header" onclick="toggleSC('lw-body','lw-chev')">
+      <div class="sc-title">&#128197; Last week <span style="font-size:11px;font-weight:400;color:#888" id="lw-lbl"></span><div class="pills" id="lw-pills"></div></div>
+      <span id="lw-chev" style="font-size:14px;color:#888">&#9660;</span>
+    </div>
+    <div id="lw-body" style="display:none;border-top:1px solid #f0f2f5;padding:.9rem 1.1rem"><div id="lw-content"></div></div>
+  </div>
+  <div class="section-head">This week&#39;s LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
+  <div class="d-grid" id="d-grid"></div>
+  <div class="section-head" style="margin-top:1rem">&#127942; All-time leaderboard</div>
+  <div id="leaderboard"></div>
+  <div class="section-head" style="margin-top:1rem">&#128229; Weekly Teams summary</div>
+  <div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem">
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Copy and paste into your Core Team channel every Monday.</p>
+    <div class="teams-msg-box" id="teams-message"></div>
+    <button class="btn btn-primary btn-sm" onclick="copyTeamsMsg()" style="margin-top:.75rem">Copy message</button>
+    <span id="copy-confirm" style="font-size:12px;color:#43A047;margin-left:8px;display:none">Copied!</span>
+  </div>
+  <div class="section-head" style="margin-top:1rem">Full roster
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option></select>
+      <select id="d-lvl" onchange="renderDaniel()"><option value="">All levels</option><option>A</option><option>B</option><option>C</option></select>
+      <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+      <input type="text" id="d-q" placeholder="Search..." oninput="renderDaniel()" style="width:120px">
+    </div>
+  </div>
+  <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last LP call</th><th>Last activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
+</div>
+<div id="view-admin" class="view">
+  <div class="admin-section">
+    <h3>Upload Power BI export</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Upload weekly Power BI .xlsx to refresh levels and activity dates.</p>
+    <div class="upload-zone" onclick="loadXLSX()">Click to upload Power BI .xlsx</div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleUpload(this)">
+    <div id="upload-result" style="margin-top:8px;font-size:12px"></div>
+  </div>
+  <div class="admin-section">
+    <h3>Reassign agents</h3>
+    <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <input type="text" id="reassign-q" placeholder="Search agent..." oninput="renderReassign()" style="flex:1;min-width:140px">
+      <select id="reassign-filter-lp" onchange="renderReassign()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
+    </div>
+    <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign to</th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
+  </div>
+  <div class="admin-section">
+    <h3>Add agent manually</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Name</label><input type="text" id="add-name" placeholder="Full name" style="width:180px"></div>
+      <div class="form-group"><label>Level</label><select id="add-level"><option>A</option><option>B</option><option selected>C</option></select></div>
+      <div class="form-group"><label>LP</label><select id="add-lp"><option value="Unassigned">Unassigned</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option></select></div>
+      <div class="form-group"><label>Priority</label><select id="add-priority"><option value="false">No</option><option value="true">Yes</option></select></div>
+      <div class="form-group"><label>&nbsp;</label><button class="btn btn-primary" onclick="addAgent()">Add</button></div>
+    </div>
+  </div>
+  <div class="admin-section">
+    <h3>Remove agent from tracker</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Only use this if an agent is no longer working with the team.</p>
+    <div style="margin-bottom:8px"><input type="text" id="remove-q" placeholder="Search agent name to remove..." oninput="renderRemoveList()" style="width:100%"></div>
+    <div id="remove-list" style="max-height:220px;overflow-y:auto"></div>
+  </div>
+  <div class="admin-section">
+    <h3>Flagged inactive <span style="font-weight:400;font-size:12px;color:#888" id="inactive-count-label"></span></h3>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">No lead activity in 90+ days.</p>
+    <div id="inactive-list"></div>
+  </div>
+</div>
+</div>
+<script>
+var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
+var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
+var STORAGE_KEY="ct_agents_v3";
+var LPS=["Gavin","Karen","Osgood","Jordan","Said"];
+var LP_COLORS={Gavin:"#4CAF50",Karen:"#2196F3",Osgood:"#FF9800",Jordan:"#E91E63",Said:"#9C27B0"};
+var TODAY=new Date();TODAY.setHours(0,0,0,0);
+var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
+
+// ── LOCAL DATE HELPER — avoids UTC timezone shift for EST users ──
+function localDateStr(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
+
+// ── WEEK KEY uses local date, Mon–Sun weeks, Sunday rolls to NEXT Monday ──
+function getWeekKey(d){var dt=new Date(d);dt.setHours(0,0,0,0);var day=dt.getDay();dt.setDate(dt.getDate()-(day===0?6:day-1));return localDateStr(dt);}
+function getLastWeekKey(d){var dt=new Date(d);dt.setDate(dt.getDate()-7);return getWeekKey(dt);}
+function getWeekLabel(k){var mon=new Date(k+'T12:00:00'),sun=new Date(mon);sun.setDate(mon.getDate()+6);var o={month:'short',day:'numeric'};return 'Week of '+mon.toLocaleDateString('en-US',o)+' - '+sun.toLocaleDateString('en-US',o);}
+function fmt(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
+function mostRecent(a){return[a[3],a[4],a[5],a[6]].filter(Boolean).sort().reverse()[0]||null;}
+function isActive(a){var d=mostRecent(a);return d?new Date(d+'T12:00:00')>=CUTOFF:false;}
+function calledThisWeek(name){return !!(callLogs[name]&&callLogs[name].week_key===weekKey);}
+function lpDays(name){var log=callLogs[name];if(!log||!log.call_date)return null;var dt=new Date(log.call_date+'T12:00:00');dt.setHours(0,0,0,0);return Math.floor((TODAY-dt)/86400000);}
+function isPriority(a){return a[7]===true;}
+function isMonday(){return TODAY.getDay()===1;}
+
+var weekKey=getWeekKey(TODAY);
+var lastWeekKey=getLastWeekKey(TODAY);
+var agents=[],callLogs={},lastWeekLogs={},currentUser=null,noteTimers={},contactCache={},editingLpContact=null;
+
+var SEED=[["TIARA VILLATORO","A","Karen","2026-05-08","2026-05-08","2026-06-04","2026-05-22",false,10],["BRANDON THOMPSON","A","Osgood","2026-06-01","2026-06-01","2026-05-04","2026-06-01",false,9],["MEGAN LYNCH","A","Gavin","2026-06-03","2026-06-05","2026-06-01","2026-06-22",false,9],["TODD STONE","A","Said","2026-06-05","2026-06-09","2026-04-13","2026-05-08",false,9],["DUSTIN GOLDMAN","A","Osgood","2026-04-20","2026-04-24","2026-03-30","2026-03-27",false,7],["TINA HOFFMAN","A","Gavin","2023-10-10","2026-05-06","2026-05-27","2026-02-10",false,7],["KEVIN SPEERT","A","Gavin","2026-05-08","2026-05-27","2026-06-01","2026-05-22",false,6],["OSCAR MARTINEZ","A","Karen","2026-06-08","2026-06-08","2026-05-05","2026-06-15",false,6],["RACQUEL LUDAWAY","A","Gavin","2026-05-29","2026-05-19","2026-04-16","2026-06-04",false,5],["CHRIS REED","A","Said","2026-06-03","2026-06-02","2026-05-08","2026-05-27",false,4],["MICHELLE ERICKSON","A","Gavin","2025-08-04","2026-03-25","2026-04-20","2026-04-10",false,4],["SAHAR SHALASH","A","Said","2026-06-05","2026-06-05","2026-05-09","2026-05-29",false,4],["CINDA ERICKSON","B","Gavin","2026-04-23","2026-04-21","2026-02-24","2026-03-26",false,3],["CONNER KOCHANSKY","B","Gavin","2026-05-30","2026-05-19","2026-05-20","2026-05-20",false,3],["DEANNE RHYNEHARDT","B","Osgood","2026-05-22","2026-05-28","2026-05-05","2026-06-05",false,3],["DERON BENDER","A","Gavin","2025-08-11","2026-04-24","2026-04-28","2026-05-08",true,3],["INGRID CORREIA","B","Gavin","2026-05-08","2026-05-08","2025-12-11","2026-01-05",false,3],["JOHN BRUNNER","B","Osgood","2026-06-01","2026-06-01","2026-06-05","2025-11-17",false,3],["KANDIS HALL","B","Osgood","2026-01-04","2026-01-31","2026-02-25","2026-03-17",false,3],["KRISTINA MURPHY","B","Osgood","2026-06-02","2026-05-11","2025-10-03","2025-10-21",false,3],["MARK BOYD","B","Gavin",null,"2026-03-28","2026-04-08","2026-02-02",false,3],["MATTHEW MONTALVO","B","Karen","2026-04-09","2026-04-08","2026-05-29","2025-11-20",false,3],["SETH COLBURN","B","Said","2025-04-23","2026-03-31","2026-04-06","2026-04-30",false,3],["ANNIE MORENO","B","Karen","2026-06-06","2026-06-08","2026-05-11","2026-06-05",false,2],["DAN MANLEY","B","Gavin","2025-11-23","2026-04-29","2026-05-01","2026-05-19",false,2],["ELIZABETH ELLINGER","B","Jordan","2026-03-16","2026-04-01","2026-05-18","2026-06-10",false,2],["ERIKA WEHNER","B","Gavin",null,"2026-04-13","2026-05-28","2026-05-11",false,2],["HEATHER HENRY-MINOR","B","Jordan","2026-04-07","2026-04-15","2026-05-05","2026-05-28",false,2],["KATIE SUMMERS","B","Gavin",null,"2026-04-22","2026-02-26","2026-05-29",false,2],["KHADIJA FARAH","B","Jordan","2026-05-16","2026-05-17","2026-02-09","2026-03-06",false,2],["KISHMA JAMES","B","Said","2026-03-16","2026-03-12","2025-06-09","2025-07-14",false,2],["MARIA COMAS","B","Karen","2026-04-27","2026-03-02","2025-06-19","2025-07-21",false,2],["MARTIN HOPKINS","B","Karen","2026-02-12","2026-04-28","2026-01-29","2026-02-20",false,2],["MARY MCMICHAEL","B","Said","2026-04-13","2026-04-13","2025-09-11","2025-10-10",false,2],["MATT PIPER","B","Osgood","2026-05-19","2026-05-19","2025-11-11","2025-12-01",false,2],["NATALIE ESTRELLA","B","Karen","2026-05-25","2026-05-25","2025-10-08","2025-11-03",false,2],["RAMI TAMIMI","B","Jordan","2026-03-27","2026-04-20","2026-05-07","2026-06-30",false,2],["STACEY LAMBRIGHT","B","Jordan",null,"2026-03-25","2026-03-26","2026-04-07",false,2],["TRACY BERARD","B","Jordan",null,"2026-04-04","2026-04-14","2026-05-27",false,2],["AIMEE WHITLOCK","C","Gavin",null,"2025-01-14","2026-02-10","2026-04-15",false,1],["ALEXIS REED","C","Said","2026-03-25","2026-05-12","2026-01-30","2026-02-27",false,1],["AMY AGRESTA","C","Gavin","2026-05-23","2026-05-28","2025-07-08","2025-08-05",false,1],["ANGELA PEREZ","C","Gavin","2026-04-27","2026-05-06","2026-04-06","2026-04-24",false,1],["BRIAN NANTHAVONGDOUANGSY","C","Osgood","2025-10-23","2025-11-19","2025-12-18","2026-03-20",false,1],["BRITNEY DODDS","C","Gavin","2026-03-26","2026-03-26","2026-03-02","2026-04-08",false,1],["CAROLE MCMAHON","C","Osgood","2026-05-31","2026-05-31","2026-05-08","2026-05-26",false,1],["CESIA ESPINOZA YOUNG","C","Karen","2026-03-11","2026-03-10","2026-03-26","2026-04-17",false,1],["CHELSEA ANDERSON","C","Osgood","2026-02-07","2026-02-06","2026-03-28","2026-04-17",false,1],["COURTNEY HAMILTON","C","Osgood","2026-05-27","2026-05-27","2026-06-02","2025-06-26",false,1],["DEVIN JOHNSON","C","Said","2026-03-29","2026-04-15","2025-05-30","2025-07-09",false,1],["DIANNA JENKINS","C","Said",null,"2026-03-24","2026-02-23","2026-04-06",false,1],["HAIFA BRUNNEY","C","Karen","2026-05-21","2026-06-01","2026-03-26","2026-04-27",false,1],["JACOB ENGLISH","C","Jordan",null,"2026-03-18","2026-04-23","2026-06-12",false,1],["JASMINE MCKENZIE","C","Osgood","2026-05-03","2026-05-04","2026-05-06","2026-05-29",false,1],["JESSE MCCRERRY","C","Said",null,"2026-04-06","2026-04-13","2026-05-26",false,1],["JOHN LUBINSKY","C","Said","2025-12-17","2025-12-19","2026-02-17","2026-03-20",false,1],["JORDAN HOLLIBAUGH","C","Gavin",null,"2026-05-12","2026-04-29","2026-04-16",false,1],["KATHERINE DE LA ROSA","C","Karen","2026-05-28","2026-06-02","2026-04-01","2026-04-29",false,1],["KELSY YODER","C","Said","2026-04-28","2026-01-09","2026-01-12","2026-02-05",false,1],["KINSIE HUSKINS","C","Jordan",null,"2026-03-17","2026-04-28","2026-06-01",false,1],["KRISTEN VALENTY","C","Jordan",null,"2026-01-21","2026-02-24","2026-03-25",false,1],["LETIKA WHITE","C","Osgood","2026-05-11","2026-05-12","2025-07-31","2025-08-29",false,1],["LISA SIMMONS","C","Osgood",null,"2026-03-19","2026-04-14","2026-05-27",false,1],["LUIS GIL","C","Karen","2026-06-02","2026-06-02","2026-06-02","2025-09-26",false,1],["LYNDSEY LANE","C","Osgood","2026-03-16","2025-09-23","2025-12-23","2026-01-23",false,1],["MIKE WHITEMAN","C","Osgood",null,"2025-07-24","2025-07-31","2026-05-11",false,1],["NANCY PRICE","C","Jordan","2026-01-03","2026-01-02","2026-05-08","2026-01-30",false,1],["PAIGE LUDWIG","C","Said","2026-06-08","2026-03-05","2026-03-17","2026-04-14",false,1],["PATRICK ARQUETTE","C","Said","2026-04-22","2026-01-14","2025-09-09","2025-10-07",false,1],["PAULA PALLESCHI","C","Said",null,"2026-04-21","2026-04-27","2026-05-26",false,1],["PILAR BENNETT","C","Karen","2026-04-15","2026-04-15","2025-07-23","2025-08-15",false,1],["RACHELLE PARSLEY","C","Said","2024-09-03","2026-04-15","2026-04-22","2026-05-13",false,1],["ROBERT HAYNER","C","Jordan",null,"2026-04-20","2026-04-23","2026-05-15",false,1],["ROBIN BLAKE","C","Gavin",null,"2025-12-19","2025-12-27","2026-03-17",false,1],["ROSS DIGIORGIO","C","Osgood",null,"2025-06-24","2025-07-14","2026-04-30",false,1],["RUTH ESPINOZA","C","Karen",null,"2026-02-26","2026-03-26","2026-04-17",false,1],["SAM BAMRICK","C","Jordan",null,"2026-04-14","2026-04-20","2026-05-15",false,1],["SARA BUSH","C","Said",null,"2026-03-27","2026-04-13","2026-05-27",false,1],["SLAVI JORDANOV","C","Said","2026-05-30","2025-10-06","2025-10-10","2025-11-07",false,1],["STAN GORKSI","C","Jordan",null,"2026-03-07","2026-03-09","2026-04-07",false,1],["THAER AHMED","C","Said","2026-03-31","2026-03-31","2025-08-26","2025-09-30",false,1],["TRACI WILLIAMS-JONES","C","Jordan",null,"2026-04-09","2026-03-23","2026-05-21",false,1],["TROY BORDEN","C","Gavin","2026-04-28","2026-04-30","2026-04-22","2026-05-13",false,1],["YASMIN DE JESUS","C","Karen","2024-03-27","2025-11-18","2026-04-01","2026-04-29",false,1],["ALI SWEAZY","C","Osgood","2026-05-09","2026-05-09",null,null,false,0],["ALINA ILKAEVA","C","Said",null,"2026-03-20",null,null,false,0],["ANA SORIA","C","Karen","2026-04-19",null,null,null,false,0],["ANGELA POTTS","C","Osgood","2026-05-10","2026-05-10",null,null,false,0],["ANGELIQUE SOTONDJI","C","Jordan","2026-03-27","2026-03-27",null,null,false,0],["ASHLEY HENRY","C","Osgood","2026-04-22","2026-04-21",null,null,false,0],["AVA LAIRD","C","Jordan","2026-05-26","2026-05-25",null,null,false,0],["BAILEY STRATHIE","C","Osgood","2026-05-30","2026-05-30","2024-11-21",null,false,0],["BENJAMIN GAYTAN","C","Gavin","2026-05-16","2026-05-22",null,null,false,0],["BRAD GILLIAM","C","Gavin","2026-05-14",null,null,null,false,0],["BRANDON KIDD","C","Said","2026-05-01",null,null,null,false,0],["BRANDON MCCLENDON","C","Said","2026-06-08","2026-06-08",null,null,false,0],["BRIAN ZINN","C","Jordan","2026-06-06","2026-06-07",null,null,false,0],["CELINE WILLIAMS","C","Jordan","2026-06-01",null,null,null,false,0],["CHERYL KINSEY","C","Jordan","2026-05-05","2026-05-04",null,null,false,0],["CHRISTIAN CHALKIAS","C","Osgood","2026-04-08","2026-04-08",null,null,false,0],["CHRISTINA COUGHLIN","C","Osgood","2026-05-29","2026-05-29","2024-09-11",null,false,0],["CHUCK KINSEY","C","Jordan","2026-03-16","2026-03-26",null,null,false,0],["CLAUDIA CHUECO","C","Karen","2026-06-08",null,null,null,false,0],["CODA GAHRIS","C","Jordan","2026-04-29","2026-04-29","2026-05-25",null,false,0],["CRAIG MAURER","C","Osgood","2026-05-13","2026-05-19",null,null,false,0],["DAIRDRE SCRIVEN","C","Said","2026-05-19","2026-05-19",null,null,false,0],["DARREN HOGG","C","Said","2026-04-22","2026-04-28",null,null,false,0],["DONALD PAYNE","C","Osgood",null,"2026-06-07","2021-08-11",null,false,0],["DONALD PAYNE JR","C","Osgood","2026-06-04",null,null,null,false,0],["ELIAS PAPPAN","C","Karen","2026-04-30",null,null,null,false,0],["ELIZABETH BONAUDI","C","Osgood","2026-04-17","2026-04-17",null,null,false,0],["ELIZABETH HOWARD","C","Osgood","2026-04-04","2026-04-03","2024-11-08",null,false,0],["ERIKA BRUNNER","C","Gavin","2026-04-13","2026-04-15","2025-11-07",null,false,0],["GLADIS CHAVEZ","C","Karen","2026-05-15","2026-05-05",null,null,false,0],["HYPATIA ESPINAL","C","Karen","2026-06-02","2026-06-02",null,null,false,0],["IZXEL MARTINEZ","C","Karen","2026-05-20","2026-05-20","2026-06-02",null,false,0],["JAIDEN BALLAH","C","Said","2026-06-02","2026-06-03",null,null,false,0],["JASMIN ARCOS","C","Karen","2026-03-19","2026-03-26",null,null,false,0],["JASMIN MONTOYA","C","Karen","2026-05-31","2026-05-30",null,null,false,0],["JEFF MESSMER","C","Gavin","2026-05-12","2026-05-12","2025-10-01",null,false,0],["JENNIFER BLACKMORE","C","Jordan","2026-05-02",null,null,null,false,0],["JENNIFER HOWISON","C","Jordan","2026-03-15","2026-03-30","2026-04-06",null,false,0],["JESSICA TOWER","C","Jordan","2026-05-27","2026-05-30","2023-04-03",null,false,0],["JONNATHAN AGUDELO","C","Karen","2026-05-23","2026-05-19",null,null,false,0],["JUSTIN BIERY","C","Karen","2026-05-27","2026-05-28",null,null,false,0],["KATHY HAYES","C","Jordan","2026-05-30","2026-05-29","2024-12-09",null,false,0],["KATIE MANSOR","C","Jordan","2026-04-27","2026-04-26",null,null,false,0],["KERWIN HEATH","C","Said",null,"2026-04-12",null,null,false,0],["KYLA AHO","C","Said","2026-03-12","2025-11-03","2025-03-28",null,false,0],["LAUREN MCCLINTON","C","Said",null,"2026-04-29",null,null,false,0],["LESLIE HERNANDEZ","C","Karen","2026-05-07","2026-05-08","2026-05-19",null,false,0],["LILIAN FUENTES","C","Karen","2026-04-21","2026-04-21",null,null,false,0],["LIZBEL CONTRERAS","C","Karen","2026-04-30","2026-05-11","2024-09-18",null,false,0],["MANDY WILSON","C","Jordan",null,"2026-03-28",null,null,false,0],["MARK VENNITTI","C","Jordan","2026-04-08","2026-04-08","2026-06-01",null,false,0],["MARLA SEWELL","C","Osgood",null,"2026-03-19",null,null,false,0],["MATHEA ARUDDA","C","Karen",null,"2026-03-16","2026-03-23",null,false,0],["MICHELE FREDERICK","C","Osgood",null,"2026-05-31",null,null,false,0],["NANCY BAKER","C","Osgood","2026-04-30",null,null,null,false,0],["NIA HARRINGTON","C","Said","2026-05-13","2026-05-05","2024-10-17",null,false,0],["NICK ZATEZALO","C","Osgood","2026-05-16","2026-03-19","2024-03-12",null,false,0],["NIKEHA HAYES","C","Osgood","2026-04-15","2025-09-28","2024-09-25",null,false,0],["NINA AVERY","C","Jordan",null,"2026-04-23",null,null,false,0],["NORA KERELIUK","C","Said","2026-04-24",null,null,null,false,0],["PIERINA MANTILLA","C","Karen",null,"2026-03-15",null,null,false,0],["ROSALIA PABLO","C","Karen","2026-06-08","2026-06-04","2024-11-08",null,false,0],["RUTH GONZALEZ","C","Karen","2026-05-19","2026-05-19",null,null,false,0],["SAHEL ALAM","C","Said","2026-05-10","2026-05-08",null,null,false,0],["SARAH HERNANDEZ","C","Osgood","2026-05-28","2026-05-29","2024-10-21",null,false,0],["SASHA ANTONOVA","C","Said","2026-03-31","2026-03-31",null,null,false,0],["SHANE STINER","C","Jordan",null,"2026-04-08",null,null,false,0],["SHARON PANTELIS","C","Jordan","2026-04-28","2025-03-21","2025-04-01",null,false,0],["SHAYNE D. BOYD","C","Said","2026-05-04","2026-05-07",null,null,false,0],["SHIRRELL BURNSIDE","C","Osgood","2026-04-08","2025-07-14",null,null,false,0],["STEVEN OSBORN","C","Jordan","2026-04-30","2026-02-03",null,null,false,0],["SUMMER DURHAM","C","Osgood",null,"2026-03-23",null,null,false,0],["SUNI RIVAS","C","Karen","2026-05-27","2026-05-28",null,null,false,0],["TAMARA CHARLTON","C","Osgood","2025-07-27","2026-04-16","2025-04-14",null,false,0],["TATIANA GRIGORITA","C","Jordan","2026-06-08","2026-06-08",null,null,false,0],["THOMAS NEWMAN","C","Gavin","2026-03-02","2026-03-25","2022-08-22",null,false,0],["TINA-DUTT-HIREN","C","Osgood",null,"2026-05-11",null,null,false,0],["TOM NEWMAN","C","Gavin","2026-06-08","2026-06-08","2024-01-08",null,false,0],["TONY AMOS","C","Osgood","2026-04-19","2026-04-01","2024-02-27",null,false,0],["WENDY RAMIREZ","C","Karen","2026-03-25","2026-03-25",null,null,false,0],["WHITNEY SCHMIDT","C","Said","2026-03-18","2024-01-12","2024-01-18",null,false,0],["YVETTA HARRISON","C","Osgood","2026-06-04",null,null,null,false,0]];
+
+function getRotation(lp){
+  var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+  if(!active.length)return[];
+  var priority=active.filter(isPriority);
+  var normal=active.filter(function(a){return!isPriority(a);});
+  var wn=Math.floor((TODAY-new Date("2024-01-01T12:00:00"))/(7*86400000));
+  var remaining=Math.max(0,15-priority.length);
+  var pw=Math.min(remaining,normal.length);
+  var si=normal.length?((wn*pw)%normal.length):0;
+  var base=[];for(var i=0;i<pw;i++)base.push(normal[(si+i)%normal.length]);
+  var overdue=normal.filter(function(a){var ds=lpDays(a[0]);return ds!==null&&ds>=14&&base.indexOf(a)<0;});
+  var combined=priority.concat(overdue.slice(0,2)).concat(base);
+  var seen={},res=[];
+  for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
+  return res.slice(0,15);
+}
+
+function getLastWeekRotation(lp){
+  var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+  if(!active.length)return[];
+  var wn=Math.floor((TODAY-new Date("2024-01-01T12:00:00"))/(7*86400000))-1;
+  var priority=active.filter(isPriority);
+  var normal=active.filter(function(a){return!isPriority(a);});
+  var remaining=Math.max(0,15-priority.length);
+  var pw=Math.min(remaining,normal.length);
+  var si=normal.length?((wn*pw)%normal.length):0;
+  var base=[];for(var i=0;i<pw;i++)base.push(normal[(si+i)%normal.length]);
+  var combined=priority.concat(base);
+  var seen={},res=[];
+  for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
+  return res.slice(0,15);
+}
+
+function sbFetch(method,path,body){
+  var opts={method:method,headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
+  if(body)opts.body=JSON.stringify(body);
+  return fetch(SB_URL+"/rest/v1/"+path,opts).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});return r.status===204?null:r.json();});
+}
+
+function loadCallLogs(){
+  setSyncStatus("saving");
+  return Promise.all([
+    sbFetch("GET","call_logs?week_key=eq."+weekKey+"&select=*"),
+    sbFetch("GET","call_logs?week_key=eq."+lastWeekKey+"&select=*")
+  ]).then(function(res){
+    callLogs={};lastWeekLogs={};
+    if(res[0])res[0].forEach(function(r){callLogs[r.agent_name]=r;});
+    if(res[1])res[1].forEach(function(r){lastWeekLogs[r.agent_name]=r;});
+    setSyncStatus("live");
+  }).catch(function(){setSyncStatus("error");});
+}
+
+function upsertCallLog(name,lp,note){
+  var id=name+"__"+weekKey;
+  var data={id:id,agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||""};
+  callLogs[name]=data;
+  setSyncStatus("saving");
+  return Promise.all([
+    sbFetch("POST","call_logs",data),
+    sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||""})
+  ]).then(function(){setSyncStatus("live");}).catch(function(){setSyncStatus("error");});
+}
+
+function deleteCallLog(name){
+  var id=name+"__"+weekKey;
+  delete callLogs[name];
+  setSyncStatus("saving");
+  return sbFetch("DELETE","call_logs?id=eq."+encodeURIComponent(id))
+    .then(function(){setSyncStatus("live");}).catch(function(){setSyncStatus("error");});
+}
+
+function setSyncStatus(s){
+  var dot=document.getElementById("syncDot"),ind=document.getElementById("saveInd");
+  if(s==="live"){dot.className="sync-dot live";ind.textContent="Live";}
+  else if(s==="saving"){dot.className="sync-dot saving";ind.textContent="Syncing...";}
+  else{dot.className="sync-dot error";ind.textContent="Offline";}
+}
+
+function loadAgents(){
+  agents=SEED.map(function(r){return r.slice();});
+  try{
+    var s=localStorage.getItem(STORAGE_KEY);
+    if(s){
+      var d=JSON.parse(s);
+      if(d.ov)d.ov.forEach(function(o){var a=agents.find(function(x){return x[0]===o.n;});if(a){a[2]=o.lp;if(o.pr!==undefined)a[7]=o.pr;}else if(o.added){agents.push([o.n,o.lv,o.lp,null,null,null,null,o.pr||false,0]);}});
+      if(d.rm)d.rm.forEach(function(n){agents=agents.filter(function(a){return a[0]!==n;});});
+      if(d.up)d.up.forEach(function(u){var a=agents.find(function(x){return x[0]===u[0];});if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];}else{agents.push(u);}});
+    }
+  }catch(e){}
+}
+
+function saveAgents(){
+  var ov=agents.filter(function(a){var s=SEED.find(function(x){return x[0]===a[0];});return!s||s[2]!==a[2]||s[7]!==a[7];}).map(function(a){return{n:a[0],lp:a[2],lv:a[1],pr:a[7],added:!SEED.find(function(s){return s[0]===a[0];})};});
+  var rm=SEED.map(function(s){return s[0];}).filter(function(n){return!agents.find(function(a){return a[0]===n;});});
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify({ov:ov,rm:rm}));}catch(e){}
+}
+
+function selectUser(btn,u){
+  currentUser=u;
+  document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+  if(u==="Daniel"){document.getElementById("view-daniel").classList.add("active");loadCallLogs().then(function(){renderDaniel();});}
+  else if(u==="Admin"){document.getElementById("view-admin").classList.add("active");renderAdmin();}
+  else{document.getElementById("view-lp").classList.add("active");loadCallLogs().then(function(){renderLP(u);});}
+}
+
+function calcStreak(lp){
+  var streak=0,dt=new Date(TODAY);dt.setDate(dt.getDate()-7);
+  for(var i=0;i<52;i++){
+    var wk=getWeekKey(dt);
+    var wn=Math.floor((new Date(wk+'T12:00:00')-new Date("2024-01-01T12:00:00"))/(7*86400000));
+    var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+    if(!active.length)break;
+    var pw=Math.min(15,active.length);
+    var si=active.length?((wn*pw)%active.length):0;
+    var rot=[];for(var j=0;j<pw;j++)rot.push(active[(si+j)%active.length]);
+    var done=rot.filter(function(a){return !!(callLogs[a[0]]&&callLogs[a[0]].week_key===wk);}).length;
+    if(done===rot.length&&rot.length>0)streak++;else break;
+    dt.setDate(dt.getDate()-7);
+  }
+  return streak;
+}
+
+function renderLP(lp){
+  var all=agents.filter(function(a){return a[2]===lp;});
+  var ac=all.filter(isActive).length,ic=all.filter(function(a){return!isActive(a);}).length;
+  var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
+  document.getElementById("lp-hero-name").textContent=lp+"'s calls this week";
+  document.getElementById("lp-hero-sub").textContent=ac+" active / "+ic+" inactive"+(pc?" / "+pc+" priority":"");
+  var rot=getRotation(lp);
+  var done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
+  var pct=rot.length?Math.round(done/rot.length*100):0;
+  var bar=document.getElementById("lp-prog");
+  bar.style.width=pct+"%";bar.style.background=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
+  document.getElementById("lp-prog-txt").textContent=done+"/"+rot.length+" done";
+  document.getElementById("monday-banner-el").style.display=isMonday()?"block":"none";
+  var streak=calcStreak(lp);
+  var sb=document.getElementById("streak-bar-el");
+  if(streak>=1){sb.style.display="flex";sb.innerHTML="&#128293; "+streak+" week streak! Keep it going "+lp+"!";}
+  else sb.style.display="none";
+  document.getElementById("priority-banner").style.display=rot.some(function(a){return isPriority(a)&&!calledThisWeek(a[0]);})?"flex":"none";
+  var ib=document.getElementById("inactive-banner");
+  if(ic>0){ib.style.display="flex";document.getElementById("inactive-banner-txt").textContent=ic+" agents inactive (90+ days) — removed from rotation.";}
+  else ib.style.display="none";
+  var el=document.getElementById("lp-call-list"),html="";
+  if(!rot.length){el.innerHTML='<div class="no-data">No active agents in rotation.</div>';return;}
+  rot.forEach(function(a){
+    var called=calledThisWeek(a[0]),ds=lpDays(a[0]),act=mostRecent(a),pri=isPriority(a);
+    var log=callLogs[a[0]],note=log?log.note:"";
+    var safeId=a[0].replace(/\s+/g,'_');
+    var chk=called?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
+    var dsText=ds===null?"Never called":ds===0?"Called this week":ds+"d since last call";
+    html+='<div class="call-card'+(pri?" priority":"")+(called?" done":"")+'">';
+    html+='<button class="check-btn'+(called?" checked":'"')+'" data-name="'+a[0]+'" onclick="toggleCall(this)">'+chk+'</button>';
+    html+='<div class="call-info">';
+    html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:#aaa">'+a[0]+'</span>':a[0])+(pri&&!called?'<span class="priority-tag">PRIORITY</span>':'')+'</div>';
+    html+='<div class="call-meta"><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
+    html+='<span'+(ds===null?' style="color:#E53935"':'')+'>'+dsText+'</span>';
+    if(ds!==null&&ds>=14)html+='<span style="color:#E53935">overdue</span>';
+    if(act)html+='<span>Last activity: '+fmt(act)+'</span>';
+    html+='</div>';
+    html+='<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:6px;padding:6px 8px;background:#f8f7fc;border-radius:6px;border:0.5px solid #e4e2ee">';
+    html+='<span style="font-size:12px;color:#555" id="ci-phone-'+safeId+'">📞 <span style="color:#bbb">Loading...</span></span>';
+    html+='<span style="font-size:12px;color:#555" id="ci-email-'+safeId+'">✉️ <span style="color:#bbb">Loading...</span></span>';
+    html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="margin-left:auto;font-size:11px">Edit contact</button>';
+    html+='</div>';
+    if(called)html+='<textarea class="note-field" data-name="'+a[0]+'" placeholder="Details, referrals mentioned, next steps..." onchange="queueNote(this)">'+note+'</textarea>';
+    html+='</div></div>';
+  });
+  el.innerHTML=html;
+  rot.forEach(function(a){loadAgentContact(a[0],a[0].replace(/\s+/g,'_'));});
+}
+
+function loadAgentContact(name,safeId){
+  if(contactCache[name]){renderInlineContact(name,safeId,contactCache[name]);return;}
+  sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(name)+"&limit=1").then(function(res){
+    var data=(res&&res.length)?res[0]:{agent_name:name};
+    contactCache[name]=data;renderInlineContact(name,safeId,data);
+  }).catch(function(){contactCache[name]={agent_name:name};renderInlineContact(name,safeId,contactCache[name]);});
+}
+
+function renderInlineContact(name,safeId,data){
+  var p=document.getElementById("ci-phone-"+safeId),e=document.getElementById("ci-email-"+safeId);
+  if(p)p.innerHTML='📞 '+(data.phone?'<span style="font-weight:500;color:#333">'+data.phone+'</span>':'<span style="color:#ccc">No phone</span>');
+  if(e)e.innerHTML='✉️ '+(data.email?'<span style="font-weight:500;color:#333">'+data.email+'</span>':'<span style="color:#ccc">No email</span>');
+}
+
+function toggleCall(btn){
+  var name=btn.getAttribute("data-name");
+  if(calledThisWeek(name)){deleteCallLog(name).then(function(){renderLP(currentUser);});}
+  else{upsertCallLog(name,currentUser,"").then(function(){renderLP(currentUser);});}
+}
+
+function queueNote(ta){
+  var name=ta.getAttribute("data-name"),val=ta.value;
+  if(noteTimers[name])clearTimeout(noteTimers[name]);
+  noteTimers[name]=setTimeout(function(){upsertCallLog(name,currentUser,val);},800);
+}
+
+function openLpContactModal(name){
+  editingLpContact=name;
+  document.getElementById("lpContactModalName").textContent=name;
+  var cp=contactCache[name]||{};
+  document.getElementById("lp-cm-phone").value=cp.phone||"";
+  document.getElementById("lp-cm-email").value=cp.email||"";
+  document.getElementById("lp-cm-birthday").value=cp.birthday||"";
+  if(!contactCache[name]){
+    sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(name)+"&limit=1").then(function(res){
+      var data=(res&&res.length)?res[0]:{agent_name:name};
+      contactCache[name]=data;
+      document.getElementById("lp-cm-phone").value=data.phone||"";
+      document.getElementById("lp-cm-email").value=data.email||"";
+      document.getElementById("lp-cm-birthday").value=data.birthday||"";
+    }).catch(function(){});
+  }
+  document.getElementById("lpContactModal").classList.add("open");
+}
+
+function closeLpContactModal(){document.getElementById("lpContactModal").classList.remove("open");editingLpContact=null;}
+
+function saveLpContactModal(){
+  if(!editingLpContact)return;
+  var payload={agent_name:editingLpContact,phone:document.getElementById("lp-cm-phone").value.trim()||null,email:document.getElementById("lp-cm-email").value.trim()||null,birthday:document.getElementById("lp-cm-birthday").value.trim()||null};
+  sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(editingLpContact)+"&limit=1").then(function(res){
+    var method=(res&&res.length)?"PATCH":"POST";
+    var path=method==="PATCH"?"agent_profiles?agent_name=eq."+encodeURIComponent(editingLpContact):"agent_profiles";
+    return sbFetch(method,path,payload);
+  }).then(function(){
+    if(!contactCache[editingLpContact])contactCache[editingLpContact]={agent_name:editingLpContact};
+    Object.assign(contactCache[editingLpContact],payload);
+    closeLpContactModal();setSyncStatus("live");alert("Saved!");
+  }).catch(function(e){alert("Save failed: "+e);});
+}
+
+function renderScorecard(which,logs,wkKey,rotFn){
+  var pills="",content="";
+  document.getElementById(which+"-lbl").textContent=getWeekLabel(wkKey);
+  LPS.forEach(function(lp){
+    var rot=rotFn(lp);
+    var done=rot.filter(function(a){return !!(logs[a[0]]&&logs[a[0]].week_key===wkKey);}).length;
+    var missed=rot.filter(function(a){return !(logs[a[0]]&&logs[a[0]].week_key===wkKey);});
+    var pct=rot.length?Math.round(done/rot.length*100):0;
+    var col=pct===100?"#43A047":pct>=80?"#FB8C00":"#E53935";
+    var bg=pct===100?"pill-green":pct>=80?"pill-amber":"pill-red";
+    pills+='<span class="pill '+bg+'">'+lp+" "+pct+'%</span>';
+    content+='<div class="sc-row"><div class="sc-top"><div style="font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block"></span>'+lp+'</div><div style="display:flex;align-items:center;gap:10px"><span class="sc-pct" style="color:'+col+'">'+pct+'%</span><span style="font-size:11px;color:#888">'+done+"/"+rot.length+"</span></div></div>"+(pct===100?'<div class="won-box">✓ Called all agents!</div>':'<div class="missed-box"><b>Did not call:</b> '+missed.map(function(a){return a[0];}).join(", ")+'</div>')+'</div>';
+  });
+  document.getElementById(which+"-pills").innerHTML=pills;
+  document.getElementById(which+"-content").innerHTML=content;
+}
+
+function renderLeaderboard(){
+  var stats=LPS.map(function(lp){
+    var allCalls=Object.values(callLogs).filter(function(l){return l.lp===lp;}).length+Object.values(lastWeekLogs).filter(function(l){return l.lp===lp;}).length;
+    var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
+    var pct=rot.length?Math.round(done/rot.length*100):0;
+    return{lp:lp,allCalls:allCalls,pct:pct,streak:calcStreak(lp)};
+  }).sort(function(a,b){return b.allCalls-a.allCalls;});
+  var medals=["🥇","🥈","🥉","4.","5."];
+  document.getElementById("leaderboard").innerHTML=stats.map(function(s,i){
+    return'<div class="leaderboard-row"><span style="font-size:18px;width:28px;text-align:center">'+medals[i]+'</span><div style="flex:1"><div style="font-weight:700;font-size:14px;color:'+LP_COLORS[s.lp]+'">'+s.lp+'</div><div style="font-size:11px;color:#888;margin-top:2px">'+s.allCalls+' total calls'+(s.streak>0?' 🔥 '+s.streak+' week streak':'')+'</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:'+(s.pct===100?"#43A047":s.pct>50?"#FB8C00":"#E53935")+'">'+s.pct+'%</div><div style="font-size:10px;color:#888">this week</div></div></div>';
+  }).join("");
+}
+
+function renderTeamsMsg(){
+  var lines=["Core Team Weekly Update - "+getWeekLabel(weekKey),""];
+  LPS.forEach(function(lp){
+    var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
+    var pct=rot.length?Math.round(done/rot.length*100):0;
+    lines.push((pct===100?"✅":pct>=80?"🟡":"🔴")+" "+lp+": "+pct+"% ("+done+"/"+rot.length+" calls done)");
+  });
+  lines.push("");
+  var allDone=LPS.every(function(lp){var rot=getRotation(lp);return rot.filter(function(a){return calledThisWeek(a[0]);}).length===rot.length;});
+  lines.push(allDone?"Everyone hit 100% this week! 🎉":"Outstanding: "+LPS.filter(function(lp){var rot=getRotation(lp);return rot.filter(function(a){return calledThisWeek(a[0]);}).length<rot.length;}).join(", ")+" — finish strong!");
+  lines.push("");lines.push("Tracker: https://pwang318.github.io/core-team-tracker");
+  document.getElementById("teams-message").textContent=lines.join("\n");
+}
+
+function copyTeamsMsg(){
+  navigator.clipboard.writeText(document.getElementById("teams-message").textContent).then(function(){var c=document.getElementById("copy-confirm");c.style.display="inline";setTimeout(function(){c.style.display="none";},2000);});
+}
+
+function toggleSC(bodyId,chevId){
+  var body=document.getElementById(bodyId),chev=document.getElementById(chevId);
+  var isOpen=body.style.display!=="none";
+  body.style.display=isOpen?"none":"block";
+  chev.style.transform=isOpen?"":"rotate(180deg)";
+}
+
+function renderDaniel(){
+  renderScorecard("tw",callLogs,weekKey,getRotation);
+  renderScorecard("lw",lastWeekLogs,lastWeekKey,getLastWeekRotation);
+  renderLeaderboard();renderTeamsMsg();
+  var flp=document.getElementById("d-lp").value,flv=document.getElementById("d-lvl").value;
+  var fst=document.getElementById("d-status").value,q=document.getElementById("d-q").value.toLowerCase();
+  var gh="";
+  LPS.forEach(function(lp){
+    var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
+    var pct=rot.length?Math.round(done/rot.length*100):0;
+    var all=agents.filter(function(a){return a[2]===lp;}),ic=all.filter(function(a){return!isActive(a);}).length;
+    var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
+    var col=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
+    gh+='<div class="d-card"><div class="d-name"><span style="width:10px;height:10px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block;flex-shrink:0"></span><span class="lp-c-'+lp+'">'+lp+'</span></div>';
+    gh+='<div class="d-pct" style="color:'+col+'">'+pct+'%</div>';
+    gh+='<div class="d-bar-track"><div class="d-bar-fill bar-'+lp+'" style="width:'+pct+'%"></div></div>';
+    gh+='<div class="d-meta"><span>'+done+"/"+rot.length+' this week</span><span>'+all.length+' agents</span></div>';
+    if(pc)gh+='<div style="font-size:11px;color:#C62828;margin-top:4px">'+pc+' priority</div>';
+    if(ic)gh+='<div style="font-size:11px;color:#E65100;margin-top:2px">'+ic+' inactive</div>';
+    gh+='</div>';
+  });
+  document.getElementById("d-grid").innerHTML=gh;
+  var list=agents.filter(function(a){return a[2]&&a[2]!=="Unassigned";});
+  if(flp)list=list.filter(function(a){return a[2]===flp;});
+  if(flv)list=list.filter(function(a){return a[1]===flv;});
+  if(fst==="active")list=list.filter(isActive);
+  if(fst==="inactive")list=list.filter(function(a){return!isActive(a);});
+  if(q)list=list.filter(function(a){return a[0].toLowerCase().indexOf(q)>=0;});
+  list.sort(function(a,b){if(isPriority(a)&&!isPriority(b))return -1;if(!isPriority(a)&&isPriority(b))return 1;return(lpDays(b[0])||9999)-(lpDays(a[0])||9999);});
+  document.getElementById("d-tbody").innerHTML=list.map(function(a){
+    var act=isActive(a),ds=lpDays(a[0]),mr=mostRecent(a),cal=calledThisWeek(a[0]),pri=isPriority(a);
+    var log=callLogs[a[0]],notePreview=log&&log.note?'<div style="font-size:11px;color:#888;margin-top:2px;font-style:italic">'+log.note+'</div>':"";
+    var dsc=ds===null?"color:#E53935":ds>=14?"color:#FB8C00":"color:#43A047";
+    return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
+      '<td style="font-weight:600">'+a[0]+(pri?'<span class="priority-tag" style="margin-left:5px">PRIORITY</span>':"")+notePreview+'</td>'+
+      '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
+      '<td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td>'+
+      '<td>'+(act?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
+      '<td><button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="font-size:11px">View/Edit</button></td>'+
+      '<td style="font-size:12px;'+dsc+'">'+(ds===null?"Never":ds+"d ago")+'</td>'+
+      '<td style="font-size:12px;color:#888">'+(mr?fmt(mr):"--")+'</td>'+
+      '<td style="text-align:center">'+(cal?'<b style="color:#43A047">Yes</b>':'<span style="color:#ccc">-</span>')+'</td></tr>';
+  }).join("");
+}
+
+function renderAdmin(){
+  renderReassign();renderRemoveList();
+  var inactive=agents.filter(function(a){return!isActive(a);});
+  document.getElementById("inactive-count-label").textContent="- "+inactive.length+" agents";
+  document.getElementById("inactive-list").innerHTML=inactive.length?inactive.map(function(a){return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
+}
+
+function renderReassign(){
+  var q=document.getElementById("reassign-q").value.toLowerCase();
+  var flp=document.getElementById("reassign-filter-lp").value;
+  var list=agents.filter(function(a){return(!q||a[0].toLowerCase().indexOf(q)>=0)&&(!flp||a[2]===flp);});
+  document.getElementById("admin-tbody").innerHTML=list.map(function(a){
+    var idx=agents.indexOf(a),pri=isPriority(a);
+    var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said"].map(function(lp){return'<option'+(a[2]===lp?" selected":"")+' value="'+lp+'">'+lp+'</option>';}).join("");
+    return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
+      '<td style="font-weight:600">'+a[0]+'</td>'+
+      '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
+      '<td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
+      '<td><button class="btn btn-sm'+(pri?" btn-danger":" btn-success")+'" data-idx="'+idx+'" onclick="togglePriority(this)">'+(pri?"Remove":"Set Priority")+'</button></td>'+
+      '<td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td>'+
+      '<td><select data-idx="'+idx+'" onchange="reassign(this)" style="font-size:12px">'+opts+'</select></td></tr>';
+  }).join("");
+}
+
+function renderRemoveList(){
+  var q=document.getElementById("remove-q").value.toLowerCase(),el=document.getElementById("remove-list");
+  if(!q){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">Type an agent name to search.</div>';return;}
+  var list=agents.filter(function(a){return a[0].toLowerCase().indexOf(q)>=0;}).slice(0,8);
+  if(!list.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">No agents found.</div>';return;}
+  el.innerHTML=list.map(function(a){return'<div class="alert-item"><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
+}
+
+function reassign(sel){var idx=parseInt(sel.getAttribute("data-idx"));agents[idx][2]=sel.value;saveAgents();renderAdmin();}
+function togglePriority(btn){var idx=parseInt(btn.getAttribute("data-idx"));agents[idx][7]=!agents[idx][7];saveAgents();renderAdmin();}
+function addAgent(){
+  var name=document.getElementById("add-name").value.trim().toUpperCase();
+  var lv=document.getElementById("add-level").value,lp=document.getElementById("add-lp").value,pri=document.getElementById("add-priority").value==="true";
+  if(!name){alert("Enter a name.");return;}
+  if(agents.find(function(a){return a[0]===name;})){alert("Already exists.");return;}
+  agents.push([name,lv,lp,null,null,null,null,pri,0]);
+  document.getElementById("add-name").value="";saveAgents();renderAdmin();alert(name+" added!");
+}
+function removeAgent(btn){var name=btn.getAttribute("data-name");if(!confirm("Remove "+name+"?"))return;agents=agents.filter(function(a){return a[0]!==name;});saveAgents();renderAdmin();}
+function reactivate(btn){var a=agents.find(function(x){return x[0]===btn.getAttribute("data-name");});if(a)a[3]=localDateStr(TODAY);saveAgents();renderAdmin();}
+
+function loadXLSX(){
+  if(typeof XLSX!=="undefined"){document.getElementById("fileInput").click();return;}
+  var res=document.getElementById("upload-result");res.textContent="Loading...";res.style.color="#888";
+  var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+  s.onload=function(){res.textContent="";document.getElementById("fileInput").click();};
+  s.onerror=function(){res.style.color="#E53935";res.textContent="Could not load Excel library.";};
+  document.head.appendChild(s);
+}
+
+function handleUpload(input){
+  var file=input.files[0];if(!file)return;
+  var res=document.getElementById("upload-result");res.textContent="Reading...";res.style.color="";
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:"array",cellDates:true});
+      var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null});
+      var up=[],added=0,updated=0,flagged=0;
+      rows.forEach(function(row){
+        var n=(row["Agent"]||"").toString().trim().toUpperCase();
+        var lv=(row["Level"]||"").toString().trim();
+        if(!n||n==="AGENT"||n==="NAN")return;
+        var gd=function(c){var v=row[c];if(!v)return null;try{var d=new Date(v);return isNaN(d)?null:d.toISOString().split("T")[0];}catch(e){return null;}};
+        var u=[n,lv||"C","Unassigned",gd("Latest Lead (In Velocify)"),gd("Latest File Started"),gd("Latest Contract"),gd("Latest Close"),false,0];
+        up.push(u);
+        var a=agents.find(function(x){return x[0]===n;});
+        if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];if(!isActive(a))flagged++;updated++;}
+        else{agents.push(u);added++;}
+      });
+      try{var st=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");st.up=up;localStorage.setItem(STORAGE_KEY,JSON.stringify(st));}catch(e){}
+      res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged.";
+      renderAdmin();
+    }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
+  };
+  reader.readAsArrayBuffer(file);input.value="";
+}
+
+setInterval(function(){if(currentUser==="Daniel")loadCallLogs().then(function(){renderDaniel();});},30000);
+document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
+loadAgents();
+loadCallLogs();
+</script>
+</body>
+</html>
