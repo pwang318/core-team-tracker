@@ -254,62 +254,7 @@ tr:hover td{background:#fafbfc}
     </div>
     <div class="section-head" style="margin-top:.5rem">Your 15 this week</div>
     <div id="lp-call-list"></div>
-  <!-- DAILY REFERRAL LEADS panel removed from LP view -->
-  <div id="lp-tab-referral-leads" class="ref-tab-panel" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <div>
-        <div style="font-size:16px;font-weight:700;color:#1F4E79">Daily Referral Leads Update</div>
-        <div style="font-size:12px;color:#888;margin-top:2px" id="ref-last-updated">Loading...</div>
-      </div>
-      <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">&#8635; Refresh</button>
-    </div>
 
-    <!-- MTD Stats -->
-    <div class="ref-stat-grid" id="ref-stat-grid">
-      <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">Unconverted</div><div class="ref-stat-value warn" id="ref-unconverted">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">Prior Day</div><div class="ref-stat-value" id="ref-prior-count">--</div></div>
-    </div>
-
-    <!-- Status legend -->
-    <div class="ref-legend">
-      <span class="ref-badge rs-started">File Started</span>
-      <span class="ref-badge rs-contact">Contact Attempt</span>
-      <span class="ref-badge rs-nurture">Nurture</span>
-      <span class="ref-badge rs-contacted">Contacted</span>
-      <span class="ref-badge rs-withdrawn">App Withdrawn</span>
-      <span class="ref-badge rs-other">Other</span>
-    </div>
-
-    <!-- Today -->
-    <div class="ref-section">
-      <div class="ref-section-header">
-        <span class="ref-section-title">Today — <span id="ref-today-label"></span></span>
-        <span class="ref-section-count" id="ref-today-count">0 leads</span>
-      </div>
-      <div id="ref-today-table"></div>
-    </div>
-
-    <!-- Prior Day -->
-    <div class="ref-section">
-      <div class="ref-section-header">
-        <span class="ref-section-title">Prior Day — <span id="ref-prior-label"></span></span>
-        <span class="ref-section-count" id="ref-prior-day-count">0 leads</span>
-      </div>
-      <div id="ref-prior-table"></div>
-    </div>
-
-    <!-- Uncovered MTD -->
-    <div class="ref-section">
-      <div class="ref-section-header">
-        <span class="ref-section-title">Uncovered Leads — MTD</span>
-        <span class="ref-section-count" id="ref-uncovered-count">0 leads</span>
-      </div>
-      <div id="ref-uncovered-table"></div>
-    </div>
-  </div>
 </div>
 
 <!-- DANIEL VIEW -->
