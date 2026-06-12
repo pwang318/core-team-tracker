@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,11 +42,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;col
 .call-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
 .call-card.priority{border-color:#EF9A9A;border-width:2px;background:#FFFAFA}
 .call-card.done{opacity:.45}
+.call-card.bonus{border-color:#90CAF9;background:#F0F8FF}
 .check-btn{width:44px;height:44px;border-radius:50%;border:2px solid #ccc;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
 .check-btn.checked{background:#EAF3DE;border-color:#4CAF50}
 .call-info{flex:1;min-width:0}
 .call-name{font-weight:600;font-size:14px;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .priority-tag{background:#FFEBEE;color:#C62828;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700}
+.bonus-tag{background:#E3F2FD;color:#1565C0;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700}
 .call-meta{font-size:12px;color:#888;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .note-field{width:100%;margin-top:7px;padding:6px 10px;border:1px solid #dde1e7;border-radius:8px;background:#fafafa;color:#333;font-size:12px;font-family:inherit;resize:none;height:46px}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
@@ -120,6 +121,15 @@ tr:hover td{background:#fafbfc}
 .cm-field label{display:block;font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .cm-field input{width:100%;padding:8px 10px;border:1px solid #dde1e7;border-radius:8px;font-size:13px;font-family:inherit;color:#1a1a1a;background:#fff}
 .cm-field input:focus{outline:none;border-color:#1F4E79}
+/* Search panel */
+.search-panel{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:.9rem}
+.search-panel-title{font-size:13px;font-weight:700;margin-bottom:.6rem;color:#1F4E79}
+.search-input-row{display:flex;gap:8px;align-items:center;margin-bottom:.6rem}
+.search-input-row input{flex:1}
+.search-results{max-height:300px;overflow-y:auto}
+.search-agent-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f5;flex-wrap:wrap}
+.search-agent-row:last-child{border-bottom:none}
+.target-complete-bar{background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:9px 12px;font-size:12px;color:#2E7D32;margin-bottom:.75rem;font-weight:600;display:flex;align-items:center;gap:8px}
 </style>
 </head>
 <body>
@@ -161,13 +171,26 @@ tr:hover td{background:#fafbfc}
   <div class="lp-hero">
     <div class="lp-hero-top">
       <div><div class="lp-hero-name" id="lp-hero-name"></div><div class="lp-hero-sub" id="lp-hero-sub"></div></div>
-      <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="lp-prog" style="width:0%"></div></div><span class="prog-txt" id="lp-prog-txt">0/0</span></div>
+      <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="lp-prog" style="width:0%"></div></div><span class="prog-txt" id="lp-prog-txt">0/15</span></div>
     </div>
   </div>
   <div id="monday-banner-el" class="monday-banner" style="display:none">&#128197; New week! Your 15 agents for this week are ready. Let&#39;s go!</div>
+  <div id="target-complete-el" class="target-complete-bar" style="display:none">&#127881; Target hit! You called your 15 this week. Any extra calls below are bonus.</div>
   <div id="streak-bar-el" class="streak-bar" style="display:none"></div>
   <div id="priority-banner" class="priority-banner" style="display:none">&#9888; You have priority agents that need to be called ASAP!</div>
   <div id="inactive-banner" class="inactive-banner" style="display:none">&#9888; <span id="inactive-banner-txt"></span></div>
+
+  <!-- Agent Search Panel -->
+  <div class="search-panel">
+    <div class="search-panel-title">&#128269; Search &amp; Log Any Agent</div>
+    <p style="font-size:12px;color:#888;margin-bottom:.6rem">Search the full roster to log a call, add notes, or update contact info — regardless of assignment.</p>
+    <div class="search-input-row">
+      <input type="text" id="lp-search-input" placeholder="Search any agent by name..." oninput="renderLpSearch()">
+    </div>
+    <div class="search-results" id="lp-search-results"></div>
+  </div>
+
+  <div class="section-head" style="margin-top:.5rem">Your 15 this week</div>
   <div id="lp-call-list"></div>
 </div>
 <div id="view-daniel" class="view">
@@ -251,13 +274,11 @@ var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Karen","Osgood","Jordan","Said"];
 var LP_COLORS={Gavin:"#4CAF50",Karen:"#2196F3",Osgood:"#FF9800",Jordan:"#E91E63",Said:"#9C27B0"};
+var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
 
-// ── LOCAL DATE HELPER — avoids UTC timezone shift for EST users ──
 function localDateStr(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
-
-// ── WEEK KEY uses local date, Mon–Sun weeks, Sunday rolls to NEXT Monday ──
 function getWeekKey(d){var dt=new Date(d);dt.setHours(0,0,0,0);var day=dt.getDay();dt.setDate(dt.getDate()-(day===0?6:day-1));return localDateStr(dt);}
 function getLastWeekKey(d){var dt=new Date(d);dt.setDate(dt.getDate()-7);return getWeekKey(dt);}
 function getWeekLabel(k){var mon=new Date(k+'T12:00:00'),sun=new Date(mon);sun.setDate(mon.getDate()+6);var o={month:'short',day:'numeric'};return 'Week of '+mon.toLocaleDateString('en-US',o)+' - '+sun.toLocaleDateString('en-US',o);}
@@ -268,6 +289,23 @@ function calledThisWeek(name){return !!(callLogs[name]&&callLogs[name].week_key=
 function lpDays(name){var log=callLogs[name];if(!log||!log.call_date)return null;var dt=new Date(log.call_date+'T12:00:00');dt.setHours(0,0,0,0);return Math.floor((TODAY-dt)/86400000);}
 function isPriority(a){return a[7]===true;}
 function isMonday(){return TODAY.getDay()===1;}
+
+// ── FIXED PERCENTAGE: always calls_this_week / WEEKLY_TARGET (15) ──
+// Reassignments do NOT affect this — we count actual call log events for this LP this week
+function getLpCallsThisWeek(lp){
+  return Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey;}).length;
+}
+function getLpCallsLastWeek(lp){
+  return Object.values(lastWeekLogs).filter(function(l){return l.lp===lp&&l.week_key===lastWeekKey;}).length;
+}
+function getLpPctThisWeek(lp){
+  var done=getLpCallsThisWeek(lp);
+  return Math.min(100,Math.round(done/WEEKLY_TARGET*100));
+}
+function getLpPctLastWeek(lp){
+  var done=getLpCallsLastWeek(lp);
+  return Math.min(100,Math.round(done/WEEKLY_TARGET*100));
+}
 
 var weekKey=getWeekKey(TODAY);
 var lastWeekKey=getLastWeekKey(TODAY);
@@ -386,14 +424,9 @@ function calcStreak(lp){
   var streak=0,dt=new Date(TODAY);dt.setDate(dt.getDate()-7);
   for(var i=0;i<52;i++){
     var wk=getWeekKey(dt);
-    var wn=Math.floor((new Date(wk+'T12:00:00')-new Date("2024-01-01T12:00:00"))/(7*86400000));
-    var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
-    if(!active.length)break;
-    var pw=Math.min(15,active.length);
-    var si=active.length?((wn*pw)%active.length):0;
-    var rot=[];for(var j=0;j<pw;j++)rot.push(active[(si+j)%active.length]);
-    var done=rot.filter(function(a){return !!(callLogs[a[0]]&&callLogs[a[0]].week_key===wk);}).length;
-    if(done===rot.length&&rot.length>0)streak++;else break;
+    var lpCallsInWeek=Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===wk;}).length+
+                      Object.values(lastWeekLogs).filter(function(l){return l.lp===lp&&l.week_key===wk;}).length;
+    if(lpCallsInWeek>=WEEKLY_TARGET)streak++;else break;
     dt.setDate(dt.getDate()-7);
   }
   return streak;
@@ -405,48 +438,132 @@ function renderLP(lp){
   var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
   document.getElementById("lp-hero-name").textContent=lp+"'s calls this week";
   document.getElementById("lp-hero-sub").textContent=ac+" active / "+ic+" inactive"+(pc?" / "+pc+" priority":"");
-  var rot=getRotation(lp);
-  var done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
-  var pct=rot.length?Math.round(done/rot.length*100):0;
+
+  // ── FIXED: count actual logged calls for this LP this week, cap at 15 for progress ──
+  var done=getLpCallsThisWeek(lp);
+  var displayDone=Math.min(done,WEEKLY_TARGET);
+  var pct=Math.min(100,Math.round(done/WEEKLY_TARGET*100));
   var bar=document.getElementById("lp-prog");
   bar.style.width=pct+"%";bar.style.background=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
-  document.getElementById("lp-prog-txt").textContent=done+"/"+rot.length+" done";
+  document.getElementById("lp-prog-txt").textContent=done+"/"+WEEKLY_TARGET+(done>WEEKLY_TARGET?" 🎉":"");
+
   document.getElementById("monday-banner-el").style.display=isMonday()?"block":"none";
+  var targetEl=document.getElementById("target-complete-el");
+  targetEl.style.display=done>=WEEKLY_TARGET?"flex":"none";
+
   var streak=calcStreak(lp);
   var sb=document.getElementById("streak-bar-el");
   if(streak>=1){sb.style.display="flex";sb.innerHTML="&#128293; "+streak+" week streak! Keep it going "+lp+"!";}
   else sb.style.display="none";
+
+  var rot=getRotation(lp);
   document.getElementById("priority-banner").style.display=rot.some(function(a){return isPriority(a)&&!calledThisWeek(a[0]);})?"flex":"none";
   var ib=document.getElementById("inactive-banner");
   if(ic>0){ib.style.display="flex";document.getElementById("inactive-banner-txt").textContent=ic+" agents inactive (90+ days) — removed from rotation.";}
   else ib.style.display="none";
+
+  // Render the search panel (clear on re-render)
+  document.getElementById("lp-search-input").value="";
+  document.getElementById("lp-search-results").innerHTML="";
+
+  // Render the 15 rotation cards
   var el=document.getElementById("lp-call-list"),html="";
   if(!rot.length){el.innerHTML='<div class="no-data">No active agents in rotation.</div>';return;}
   rot.forEach(function(a){
-    var called=calledThisWeek(a[0]),ds=lpDays(a[0]),act=mostRecent(a),pri=isPriority(a);
-    var log=callLogs[a[0]],note=log?log.note:"";
-    var safeId=a[0].replace(/\s+/g,'_');
-    var chk=called?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
-    var dsText=ds===null?"Never called":ds===0?"Called this week":ds+"d since last call";
-    html+='<div class="call-card'+(pri?" priority":"")+(called?" done":"")+'">';
-    html+='<button class="check-btn'+(called?" checked":'"')+'" data-name="'+a[0]+'" onclick="toggleCall(this)">'+chk+'</button>';
-    html+='<div class="call-info">';
-    html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:#aaa">'+a[0]+'</span>':a[0])+(pri&&!called?'<span class="priority-tag">PRIORITY</span>':'')+'</div>';
-    html+='<div class="call-meta"><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
-    html+='<span'+(ds===null?' style="color:#E53935"':'')+'>'+dsText+'</span>';
-    if(ds!==null&&ds>=14)html+='<span style="color:#E53935">overdue</span>';
-    if(act)html+='<span>Last activity: '+fmt(act)+'</span>';
-    html+='</div>';
-    html+='<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:6px;padding:6px 8px;background:#f8f7fc;border-radius:6px;border:0.5px solid #e4e2ee">';
-    html+='<span style="font-size:12px;color:#555" id="ci-phone-'+safeId+'">📞 <span style="color:#bbb">Loading...</span></span>';
-    html+='<span style="font-size:12px;color:#555" id="ci-email-'+safeId+'">✉️ <span style="color:#bbb">Loading...</span></span>';
-    html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="margin-left:auto;font-size:11px">Edit contact</button>';
-    html+='</div>';
-    if(called)html+='<textarea class="note-field" data-name="'+a[0]+'" placeholder="Details, referrals mentioned, next steps..." onchange="queueNote(this)">'+note+'</textarea>';
-    html+='</div></div>';
+    html+=renderCallCard(a,lp,false);
   });
+
+  // Bonus calls — called this week but NOT in the rotation
+  var rotNames=rot.map(function(a){return a[0];});
+  var bonusCalls=Object.values(callLogs).filter(function(l){
+    return l.lp===lp&&l.week_key===weekKey&&rotNames.indexOf(l.agent_name)<0;
+  });
+  if(bonusCalls.length){
+    html+='<div class="section-head" style="margin-top:1rem">&#11088; Bonus calls this week ('+bonusCalls.length+')</div>';
+    bonusCalls.forEach(function(l){
+      var a=agents.find(function(x){return x[0]===l.agent_name;})||[l.agent_name,"C",lp,null,null,null,null,false,0];
+      html+=renderCallCard(a,lp,true);
+    });
+  }
   el.innerHTML=html;
   rot.forEach(function(a){loadAgentContact(a[0],a[0].replace(/\s+/g,'_'));});
+  bonusCalls.forEach(function(l){
+    var safeId=l.agent_name.replace(/\s+/g,'_');
+    loadAgentContact(l.agent_name,safeId);
+  });
+}
+
+function renderCallCard(a,lp,isBonus){
+  var called=calledThisWeek(a[0]),ds=lpDays(a[0]),act=mostRecent(a),pri=isPriority(a);
+  var log=callLogs[a[0]],note=log?log.note:"";
+  var safeId=a[0].replace(/\s+/g,'_');
+  var chk=called?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
+  var dsText=ds===null?"Never called":ds===0?"Called today":ds+"d since last call";
+  var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"");
+  var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:null;
+  var html='<div class="'+cardClass+'">';
+  html+='<button class="check-btn'+(called?" checked":'"')+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="toggleCallFromCard(this)">'+chk+'</button>';
+  html+='<div class="call-info">';
+  html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:#aaa">'+a[0]+'</span>':a[0])+(pri&&!called&&!isBonus?'<span class="priority-tag">PRIORITY</span>':'')+(isBonus?'<span class="bonus-tag">BONUS</span>':'')+'</div>';
+  html+='<div class="call-meta"><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
+  if(assignedLp&&assignedLp!==lp)html+='<span class="lp-tag lp-tag-'+assignedLp+'" style="font-size:10px">'+assignedLp+'\'s agent</span>';
+  html+='<span'+(ds===null?' style="color:#E53935"':'')+'>'+dsText+'</span>';
+  if(ds!==null&&ds>=14&&!isBonus)html+='<span style="color:#E53935">overdue</span>';
+  if(act)html+='<span>Last activity: '+fmt(act)+'</span>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:6px;padding:6px 8px;background:#f8f7fc;border-radius:6px;border:0.5px solid #e4e2ee">';
+  html+='<span style="font-size:12px;color:#555" id="ci-phone-'+safeId+'">📞 <span style="color:#bbb">Loading...</span></span>';
+  html+='<span style="font-size:12px;color:#555" id="ci-email-'+safeId+'">✉️ <span style="color:#bbb">Loading...</span></span>';
+  html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="margin-left:auto;font-size:11px">Edit contact</button>';
+  html+='</div>';
+  if(called)html+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+lp+'" placeholder="Details, referrals mentioned, next steps..." onchange="queueNote(this)">'+note+'</textarea>';
+  html+='</div></div>';
+  return html;
+}
+
+// ── AGENT SEARCH: full roster, any LP can log ──
+function renderLpSearch(){
+  var q=document.getElementById("lp-search-input").value.trim().toLowerCase();
+  var el=document.getElementById("lp-search-results");
+  if(!q){el.innerHTML="";return;}
+  var results=agents.filter(function(a){return a[0].toLowerCase().indexOf(q)>=0;}).slice(0,10);
+  if(!results.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">No agents found.</div>';return;}
+  var html="";
+  results.forEach(function(a){
+    var called=calledThisWeek(a[0]);
+    var log=callLogs[a[0]],note=log?log.note:"";
+    var ds=lpDays(a[0]);
+    var dsText=ds===null?"Never called":ds===0?"Called today":ds+"d since last call";
+    var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:"Unassigned";
+    html+='<div class="search-agent-row">';
+    html+='<button class="check-btn'+(called?" checked":"")+('" style="width:36px;height:36px;flex-shrink:0"')+' data-name="'+a[0]+'" data-lp="'+currentUser+'" onclick="toggleCallFromCard(this);setTimeout(renderLpSearch,300)">';
+    html+=(called?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>');
+    html+='</button>';
+    html+='<div style="flex:1;min-width:0">';
+    html+='<div style="font-weight:600;font-size:13px">'+(called?'<span style="text-decoration:line-through;color:#aaa">'+a[0]+'</span>':a[0])+'</div>';
+    html+='<div style="font-size:11px;color:#888;display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">';
+    html+='<span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
+    html+='<span class="lp-tag lp-tag-'+assignedLp+'">'+assignedLp+'</span>';
+    html+='<span'+(ds===null?' style="color:#E53935"':'')+'>'+dsText+'</span>';
+    if(!isActive(a))html+='<span class="badge badge-inactive">Inactive</span>';
+    html+='</div>';
+    if(called){
+      html+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+currentUser+'" placeholder="Add call notes..." onchange="queueNote(this)" style="margin-top:5px;height:38px">'+note+'</textarea>';
+    }
+    html+='</div>';
+    html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="font-size:11px;flex-shrink:0">Edit</button>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function toggleCallFromCard(btn){
+  var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp")||currentUser;
+  if(calledThisWeek(name)){
+    deleteCallLog(name).then(function(){renderLP(currentUser);});
+  } else {
+    upsertCallLog(name,lp,"").then(function(){renderLP(currentUser);});
+  }
 }
 
 function loadAgentContact(name,safeId){
@@ -470,9 +587,9 @@ function toggleCall(btn){
 }
 
 function queueNote(ta){
-  var name=ta.getAttribute("data-name"),val=ta.value;
+  var name=ta.getAttribute("data-name"),lp=ta.getAttribute("data-lp")||currentUser,val=ta.value;
   if(noteTimers[name])clearTimeout(noteTimers[name]);
-  noteTimers[name]=setTimeout(function(){upsertCallLog(name,currentUser,val);},800);
+  noteTimers[name]=setTimeout(function(){upsertCallLog(name,lp,val);},800);
 }
 
 function openLpContactModal(name){
@@ -510,18 +627,20 @@ function saveLpContactModal(){
   }).catch(function(e){alert("Save failed: "+e);});
 }
 
+// ── SCORECARD: fixed denominator = WEEKLY_TARGET (15) ──
 function renderScorecard(which,logs,wkKey,rotFn){
   var pills="",content="";
   document.getElementById(which+"-lbl").textContent=getWeekLabel(wkKey);
   LPS.forEach(function(lp){
+    var done=Object.values(logs).filter(function(l){return l.lp===lp&&l.week_key===wkKey;}).length;
+    var pct=Math.min(100,Math.round(done/WEEKLY_TARGET*100));
+    // For missed: use rotation to show who wasn't called from the assigned list
     var rot=rotFn(lp);
-    var done=rot.filter(function(a){return !!(logs[a[0]]&&logs[a[0]].week_key===wkKey);}).length;
     var missed=rot.filter(function(a){return !(logs[a[0]]&&logs[a[0]].week_key===wkKey);});
-    var pct=rot.length?Math.round(done/rot.length*100):0;
     var col=pct===100?"#43A047":pct>=80?"#FB8C00":"#E53935";
     var bg=pct===100?"pill-green":pct>=80?"pill-amber":"pill-red";
     pills+='<span class="pill '+bg+'">'+lp+" "+pct+'%</span>';
-    content+='<div class="sc-row"><div class="sc-top"><div style="font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block"></span>'+lp+'</div><div style="display:flex;align-items:center;gap:10px"><span class="sc-pct" style="color:'+col+'">'+pct+'%</span><span style="font-size:11px;color:#888">'+done+"/"+rot.length+"</span></div></div>"+(pct===100?'<div class="won-box">✓ Called all agents!</div>':'<div class="missed-box"><b>Did not call:</b> '+missed.map(function(a){return a[0];}).join(", ")+'</div>')+'</div>';
+    content+='<div class="sc-row"><div class="sc-top"><div style="font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block"></span>'+lp+'</div><div style="display:flex;align-items:center;gap:10px"><span class="sc-pct" style="color:'+col+'">'+pct+'%</span><span style="font-size:11px;color:#888">'+done+"/"+WEEKLY_TARGET+"</span></div></div>'+(pct>=100?'<div class="won-box">✓ Hit the 15 target!</div>':missed.length?'<div class="missed-box"><b>Not yet called from rotation:</b> '+missed.map(function(a){return a[0];}).join(", ")+'</div>':'')+'</div>';
   });
   document.getElementById(which+"-pills").innerHTML=pills;
   document.getElementById(which+"-content").innerHTML=content;
@@ -530,26 +649,26 @@ function renderScorecard(which,logs,wkKey,rotFn){
 function renderLeaderboard(){
   var stats=LPS.map(function(lp){
     var allCalls=Object.values(callLogs).filter(function(l){return l.lp===lp;}).length+Object.values(lastWeekLogs).filter(function(l){return l.lp===lp;}).length;
-    var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
-    var pct=rot.length?Math.round(done/rot.length*100):0;
-    return{lp:lp,allCalls:allCalls,pct:pct,streak:calcStreak(lp)};
+    var done=getLpCallsThisWeek(lp);
+    var pct=getLpPctThisWeek(lp);
+    return{lp:lp,allCalls:allCalls,done:done,pct:pct,streak:calcStreak(lp)};
   }).sort(function(a,b){return b.allCalls-a.allCalls;});
   var medals=["🥇","🥈","🥉","4.","5."];
   document.getElementById("leaderboard").innerHTML=stats.map(function(s,i){
-    return'<div class="leaderboard-row"><span style="font-size:18px;width:28px;text-align:center">'+medals[i]+'</span><div style="flex:1"><div style="font-weight:700;font-size:14px;color:'+LP_COLORS[s.lp]+'">'+s.lp+'</div><div style="font-size:11px;color:#888;margin-top:2px">'+s.allCalls+' total calls'+(s.streak>0?' 🔥 '+s.streak+' week streak':'')+'</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:'+(s.pct===100?"#43A047":s.pct>50?"#FB8C00":"#E53935")+'">'+s.pct+'%</div><div style="font-size:10px;color:#888">this week</div></div></div>';
+    return'<div class="leaderboard-row"><span style="font-size:18px;width:28px;text-align:center">'+medals[i]+'</span><div style="flex:1"><div style="font-weight:700;font-size:14px;color:'+LP_COLORS[s.lp]+'">'+s.lp+'</div><div style="font-size:11px;color:#888;margin-top:2px">'+s.allCalls+' total calls'+(s.streak>0?' 🔥 '+s.streak+' week streak':'')+'</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:'+(s.pct===100?"#43A047":s.pct>50?"#FB8C00":"#E53935")+'">'+s.pct+'%</div><div style="font-size:10px;color:#888">'+s.done+'/'+WEEKLY_TARGET+' this week</div></div></div>';
   }).join("");
 }
 
 function renderTeamsMsg(){
   var lines=["Core Team Weekly Update - "+getWeekLabel(weekKey),""];
   LPS.forEach(function(lp){
-    var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
-    var pct=rot.length?Math.round(done/rot.length*100):0;
-    lines.push((pct===100?"✅":pct>=80?"🟡":"🔴")+" "+lp+": "+pct+"% ("+done+"/"+rot.length+" calls done)");
+    var done=getLpCallsThisWeek(lp);
+    var pct=getLpPctThisWeek(lp);
+    lines.push((pct>=100?"✅":pct>=80?"🟡":"🔴")+" "+lp+": "+pct+"% ("+done+"/"+WEEKLY_TARGET+" calls done)"+(done>WEEKLY_TARGET?" +"+( done-WEEKLY_TARGET)+" bonus":""));
   });
   lines.push("");
-  var allDone=LPS.every(function(lp){var rot=getRotation(lp);return rot.filter(function(a){return calledThisWeek(a[0]);}).length===rot.length;});
-  lines.push(allDone?"Everyone hit 100% this week! 🎉":"Outstanding: "+LPS.filter(function(lp){var rot=getRotation(lp);return rot.filter(function(a){return calledThisWeek(a[0]);}).length<rot.length;}).join(", ")+" — finish strong!");
+  var allDone=LPS.every(function(lp){return getLpCallsThisWeek(lp)>=WEEKLY_TARGET;});
+  lines.push(allDone?"Everyone hit 100% this week! 🎉":"Outstanding: "+LPS.filter(function(lp){return getLpCallsThisWeek(lp)<WEEKLY_TARGET;}).join(", ")+" — finish strong!");
   lines.push("");lines.push("Tracker: https://pwang318.github.io/core-team-tracker");
   document.getElementById("teams-message").textContent=lines.join("\n");
 }
@@ -573,15 +692,14 @@ function renderDaniel(){
   var fst=document.getElementById("d-status").value,q=document.getElementById("d-q").value.toLowerCase();
   var gh="";
   LPS.forEach(function(lp){
-    var rot=getRotation(lp),done=rot.filter(function(a){return calledThisWeek(a[0]);}).length;
-    var pct=rot.length?Math.round(done/rot.length*100):0;
+    var done=getLpCallsThisWeek(lp),pct=getLpPctThisWeek(lp);
     var all=agents.filter(function(a){return a[2]===lp;}),ic=all.filter(function(a){return!isActive(a);}).length;
     var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
     var col=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
     gh+='<div class="d-card"><div class="d-name"><span style="width:10px;height:10px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block;flex-shrink:0"></span><span class="lp-c-'+lp+'">'+lp+'</span></div>';
     gh+='<div class="d-pct" style="color:'+col+'">'+pct+'%</div>';
     gh+='<div class="d-bar-track"><div class="d-bar-fill bar-'+lp+'" style="width:'+pct+'%"></div></div>';
-    gh+='<div class="d-meta"><span>'+done+"/"+rot.length+' this week</span><span>'+all.length+' agents</span></div>';
+    gh+='<div class="d-meta"><span>'+done+"/"+WEEKLY_TARGET+' this week</span><span>'+all.length+' agents</span></div>';
     if(pc)gh+='<div style="font-size:11px;color:#C62828;margin-top:4px">'+pc+' priority</div>';
     if(ic)gh+='<div style="font-size:11px;color:#E65100;margin-top:2px">'+ic+' inactive</div>';
     gh+='</div>';
