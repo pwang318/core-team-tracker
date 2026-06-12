@@ -352,17 +352,26 @@ function sbFetch(method,path,body){
   return fetch(SB_URL+"/rest/v1/"+path,opts).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});return r.status===204?null:r.json();});
 }
 
+function fetchWithTimeout(promise,ms){
+  var timeout=new Promise(function(_,rej){setTimeout(function(){rej(new Error("timeout"));},ms);});
+  return Promise.race([promise,timeout]);
+}
+
 function loadCallLogs(){
   setSyncStatus("saving");
-  return Promise.all([
+  return fetchWithTimeout(Promise.all([
     sbFetch("GET","call_logs?week_key=eq."+weekKey+"&select=*"),
     sbFetch("GET","call_logs?week_key=eq."+lastWeekKey+"&select=*")
-  ]).then(function(res){
+  ]),8000).then(function(res){
     callLogs={};lastWeekLogs={};
     if(res[0])res[0].forEach(function(r){callLogs[r.agent_name]=r;});
     if(res[1])res[1].forEach(function(r){lastWeekLogs[r.agent_name]=r;});
     setSyncStatus("live");
-  }).catch(function(){setSyncStatus("error");});
+  }).catch(function(){
+    setSyncStatus("error");
+    // Still resolve so the UI renders with local data
+    return Promise.resolve();
+  });
 }
 
 function upsertCallLog(name,lp,note){
@@ -415,9 +424,18 @@ function selectUser(btn,u){
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   if(btn)btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  if(u==="Daniel"){document.getElementById("view-daniel").classList.add("active");loadCallLogs().then(function(){renderDaniel();});}
-  else if(u==="Admin"){document.getElementById("view-admin").classList.add("active");renderAdmin();}
-  else{document.getElementById("view-lp").classList.add("active");loadCallLogs().then(function(){renderLP(u);});}
+  if(u==="Daniel"){
+    document.getElementById("view-daniel").classList.add("active");
+    renderDaniel();
+    loadCallLogs().then(function(){renderDaniel();});
+  } else if(u==="Admin"){
+    document.getElementById("view-admin").classList.add("active");
+    renderAdmin();
+  } else {
+    document.getElementById("view-lp").classList.add("active");
+    renderLP(u);
+    loadCallLogs().then(function(){renderLP(u);});
+  }
 }
 
 function calcStreak(lp){
