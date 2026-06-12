@@ -188,6 +188,34 @@ tr:hover td{background:#fafbfc}
 .ref-empty{text-align:center;padding:2rem;color:#aaa;font-size:13px}
 .ref-refresh-btn{font-size:11px;color:#1F4E79;background:none;border:1px solid #dde1e7;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600}
 .ref-refresh-btn:hover{background:#f0f2f5}
+
+/* ── REFERRAL LEADS SECTION ── */
+.ref-stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.25rem}
+.ref-stat-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:12px 14px;text-align:center}
+.ref-stat-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:600}
+.ref-stat-value{font-size:22px;font-weight:800;color:#1F4E79}
+.ref-stat-value.good{color:#2E7D32}
+.ref-stat-value.warn{color:#E65100}
+.ref-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.ref-section-header{padding:10px 16px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between;align-items:center;background:#fafbfc}
+.ref-section-title{font-size:13px;font-weight:700;color:#1a1a1a}
+.ref-section-count{font-size:12px;color:#888;font-weight:500}
+.ref-leads-table{width:100%;border-collapse:collapse;font-size:13px}
+.ref-leads-table th{text-align:left;padding:8px 12px;font-size:10px;font-weight:700;color:#888;border-bottom:1px solid #e8eaf0;background:#f8f9fc;text-transform:uppercase;letter-spacing:.05em}
+.ref-leads-table td{padding:9px 12px;border-bottom:1px solid #f5f6f8;vertical-align:middle}
+.ref-leads-table tr:last-child td{border-bottom:none}
+.ref-leads-table tr:hover td{background:#fafbfc}
+.ref-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1rem}
+.ref-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.rs-started{background:#C6EFCE;color:#1B5E20}
+.rs-contact{background:#BBDEFB;color:#0D47A1}
+.rs-nurture{background:#FFF2CC;color:#7D5A00}
+.rs-contacted{background:#EDE7F6;color:#4527A0}
+.rs-withdrawn{background:#FFCDD2;color:#B71C1C}
+.rs-other{background:#EEE;color:#555}
+.ref-empty{text-align:center;padding:2rem;color:#aaa;font-size:13px}
+.ref-refresh-btn{font-size:11px;color:#1F4E79;background:none;border:1px solid #dde1e7;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600}
+.ref-refresh-btn:hover{background:#f0f2f5}
 </style>
 </head>
 <body>
@@ -230,6 +258,12 @@ tr:hover td{background:#fafbfc}
 
 <!-- LP VIEW -->
 <div id="view-lp" class="view">
+  <!-- LP sub-tabs -->
+  <div class="ref-tab-bar">
+    <div class="ref-tab active" onclick="switchLpTab('my-week',this)">My Week</div>
+    <div class="ref-tab" onclick="switchLpTab('referral-leads',this)">&#127968; Daily Referral Leads Update</div>
+  </div>
+
   <!-- MY WEEK panel -->
   <div id="lp-tab-my-week" class="ref-tab-panel active">
     <div class="lp-hero">
@@ -254,7 +288,9 @@ tr:hover td{background:#fafbfc}
     </div>
     <div class="section-head" style="margin-top:.5rem">Your 15 this week</div>
     <div id="lp-call-list"></div>
+  </div>
 
+  <!-- DAILY REFERRAL LEADS panel -->
 </div>
 
 <!-- DANIEL VIEW -->
@@ -275,22 +311,19 @@ tr:hover td{background:#fafbfc}
   </div>
   <div class="section-head">This week&#39;s LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
   <div class="d-grid" id="d-grid"></div>
-  <!-- DAILY REFERRAL LEADS UPDATE in Daniel view -->
   <div class="section-head" style="margin-top:1rem">&#127968; Daily Referral Leads Update
     <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">&#8635; Refresh</button>
   </div>
   <div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
-      <div style="font-size:12px;color:#888" id="ref-last-updated">Loading...</div>
-    </div>
-    <div class="ref-stat-grid" id="ref-stat-grid">
+    <div style="font-size:12px;color:#888;margin-bottom:1rem" id="ref-last-updated">Loading...</div>
+    <div class="ref-stat-grid">
       <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads">--</div></div>
       <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts">--</div></div>
       <div class="ref-stat-card"><div class="ref-stat-label">Unconverted</div><div class="ref-stat-value warn" id="ref-unconverted">--</div></div>
       <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf">--</div></div>
       <div class="ref-stat-card"><div class="ref-stat-label">Prior Day</div><div class="ref-stat-value" id="ref-prior-count">--</div></div>
     </div>
-    <div class="ref-legend" style="margin-top:1rem">
+    <div class="ref-legend">
       <span class="ref-badge rs-started">File Started</span>
       <span class="ref-badge rs-contact">Contact Attempt</span>
       <span class="ref-badge rs-nurture">Nurture</span>
@@ -298,7 +331,7 @@ tr:hover td{background:#fafbfc}
       <span class="ref-badge rs-withdrawn">App Withdrawn</span>
       <span class="ref-badge rs-other">Other</span>
     </div>
-    <div class="ref-section" style="margin-top:1rem">
+    <div class="ref-section">
       <div class="ref-section-header">
         <span class="ref-section-title">Today — <span id="ref-today-label"></span></span>
         <span class="ref-section-count" id="ref-today-count">0 leads</span>
@@ -1212,6 +1245,96 @@ function getLastUpdate(r){
   if(r.last_update)return r.last_update;
   if(r.updated_at)return r.updated_at.split("T")[0];
   return null;
+}
+
+
+// ── REFERRAL LEADS FUNCTIONS ──
+var referralLeadsCache=null;
+
+function getStatusBadgeClass(status){
+  if(!status)return"rs-other";
+  var s=status.toLowerCase();
+  if(s.indexOf("file started")>=0||s==="started")return"rs-started";
+  if(s.indexOf("contact attempt")>=0)return"rs-contact";
+  if(s.indexOf("nurture")>=0)return"rs-nurture";
+  if(s.indexOf("contacted")>=0)return"rs-contacted";
+  if(s.indexOf("withdrawn")>=0)return"rs-withdrawn";
+  return"rs-other";
+}
+
+function loadReferralLeads(force){
+  if(referralLeadsCache&&!force){renderReferralLeads(referralLeadsCache);return;}
+  var el=document.getElementById("ref-last-updated");
+  if(el)el.textContent="Loading...";
+  var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
+  sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
+    referralLeadsCache=res||[];
+    renderReferralLeads(referralLeadsCache);
+    if(el)el.textContent="Last refreshed: "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+  }).catch(function(){
+    if(el)el.textContent="Could not load — check Zap connection";
+    renderReferralLeads([]);
+  });
+}
+
+function renderReferralLeads(data){
+  var todayStr=localDateStr(TODAY);
+  var priorDay=new Date(TODAY);priorDay.setDate(TODAY.getDate()-1);
+  while(priorDay.getDay()===0||priorDay.getDay()===6)priorDay.setDate(priorDay.getDate()-1);
+  var priorStr=localDateStr(priorDay);
+
+  function isFileStarted(status){
+    if(!status)return false;
+    var s=status.toLowerCase();
+    return s.indexOf("file started")>=0||s==="started";
+  }
+
+  var todayLeads=data.filter(function(r){return r.date_added===todayStr;});
+  var priorLeads=data.filter(function(r){return r.date_added===priorStr;});
+  var uncovered=data.filter(function(r){return!isFileStarted(r.status);});
+  var mtdTotal=data.length;
+  var mtdFileStarts=data.filter(function(r){return isFileStarted(r.status);}).length;
+  var mtdUnconverted=mtdTotal-mtdFileStarts;
+  var ltf=mtdTotal>0?Math.round(mtdFileStarts/mtdTotal*1000)/10:0;
+
+  function setEl(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
+  setEl("ref-mtd-leads",mtdTotal||"0");
+  setEl("ref-file-starts",mtdFileStarts||"0");
+  setEl("ref-unconverted",mtdUnconverted||"0");
+  setEl("ref-ltf",ltf+"%");
+  setEl("ref-prior-count",priorLeads.length||"0");
+  setEl("ref-today-label",TODAY.toLocaleDateString("en-US",{month:"numeric",day:"numeric"}));
+  setEl("ref-prior-label",priorDay.toLocaleDateString("en-US",{month:"numeric",day:"numeric"}));
+  setEl("ref-today-count",todayLeads.length+" lead"+(todayLeads.length!==1?"s":""));
+  setEl("ref-prior-day-count",priorLeads.length+" lead"+(priorLeads.length!==1?"s":""));
+  setEl("ref-uncovered-count",uncovered.length+" lead"+(uncovered.length!==1?"s":""));
+
+  function setHtml(id,val){var e=document.getElementById(id);if(e)e.innerHTML=val;}
+  setHtml("ref-today-table",buildLeadsTable(todayLeads,"No leads received today yet."));
+  setHtml("ref-prior-table",buildLeadsTable(priorLeads,"No leads on prior day."));
+  setHtml("ref-uncovered-table",buildLeadsTable(uncovered,"No uncovered leads — great conversion!"));
+}
+
+function buildLeadsTable(rows,emptyMsg){
+  if(!rows||!rows.length)return'<div class="ref-empty">'+emptyMsg+'</div>';
+  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:22%">Agent</th><th style="width:25%">Buyer(s)</th><th style="width:9%">LP</th><th style="width:18%">Status</th><th style="width:16%">Last Update</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    var agent=r.referral_partner_name||"--";
+    var buyer=r.buyer_name||"--";
+    var lp=r.lp_user||"--";
+    LPS.forEach(function(lpName){if(lp.toLowerCase().indexOf(lpName.toLowerCase())>=0)lp=lpName;});
+    var status=r.status||"--";
+    var dateAdded=r.date_added?new Date(r.date_added+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):"--";
+    var lastUpdate=r.last_update?new Date(r.last_update+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):dateAdded;
+    var badgeCls=getStatusBadgeClass(status);
+    var lpKey=LPS.find(function(n){return lp===n;});
+    html+='<tr><td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
+    html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:11px;color:#888">'+escHtml(lp)+'</span>')+'</td>';
+    html+='<td><span class="ref-badge '+badgeCls+'">'+escHtml(status)+'</span></td>';
+    html+='<td style="font-size:12px;color:#888">'+lastUpdate+'</td></tr>';
+  });
+  html+='</tbody></table>';
+  return html;
 }
 
 setInterval(function(){if(currentUser==="Daniel")loadCallLogs().then(function(){renderDaniel();});},30000);
