@@ -230,12 +230,6 @@ tr:hover td{background:#fafbfc}
 
 <!-- LP VIEW -->
 <div id="view-lp" class="view">
-  <!-- LP sub-tabs -->
-  <div class="ref-tab-bar">
-    <div class="ref-tab active" onclick="switchLpTab('my-week',this)">My Week</div>
-    <div class="ref-tab" onclick="switchLpTab('referral-leads',this)">&#127968; Daily Referral Leads Update</div>
-  </div>
-
   <!-- MY WEEK panel -->
   <div id="lp-tab-my-week" class="ref-tab-panel active">
     <div class="lp-hero">
@@ -260,10 +254,8 @@ tr:hover td{background:#fafbfc}
     </div>
     <div class="section-head" style="margin-top:.5rem">Your 15 this week</div>
     <div id="lp-call-list"></div>
-  </div>
-
-  <!-- DAILY REFERRAL LEADS panel -->
-  <div id="lp-tab-referral-leads" class="ref-tab-panel">
+  <!-- DAILY REFERRAL LEADS panel removed from LP view -->
+  <div id="lp-tab-referral-leads" class="ref-tab-panel" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
       <div>
         <div style="font-size:16px;font-weight:700;color:#1F4E79">Daily Referral Leads Update</div>
@@ -338,6 +330,52 @@ tr:hover td{background:#fafbfc}
   </div>
   <div class="section-head">This week&#39;s LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
   <div class="d-grid" id="d-grid"></div>
+  <!-- DAILY REFERRAL LEADS UPDATE in Daniel view -->
+  <div class="section-head" style="margin-top:1rem">&#127968; Daily Referral Leads Update
+    <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">&#8635; Refresh</button>
+  </div>
+  <div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+      <div style="font-size:12px;color:#888" id="ref-last-updated">Loading...</div>
+    </div>
+    <div class="ref-stat-grid" id="ref-stat-grid">
+      <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads">--</div></div>
+      <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts">--</div></div>
+      <div class="ref-stat-card"><div class="ref-stat-label">Unconverted</div><div class="ref-stat-value warn" id="ref-unconverted">--</div></div>
+      <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf">--</div></div>
+      <div class="ref-stat-card"><div class="ref-stat-label">Prior Day</div><div class="ref-stat-value" id="ref-prior-count">--</div></div>
+    </div>
+    <div class="ref-legend" style="margin-top:1rem">
+      <span class="ref-badge rs-started">File Started</span>
+      <span class="ref-badge rs-contact">Contact Attempt</span>
+      <span class="ref-badge rs-nurture">Nurture</span>
+      <span class="ref-badge rs-contacted">Contacted</span>
+      <span class="ref-badge rs-withdrawn">App Withdrawn</span>
+      <span class="ref-badge rs-other">Other</span>
+    </div>
+    <div class="ref-section" style="margin-top:1rem">
+      <div class="ref-section-header">
+        <span class="ref-section-title">Today — <span id="ref-today-label"></span></span>
+        <span class="ref-section-count" id="ref-today-count">0 leads</span>
+      </div>
+      <div id="ref-today-table"></div>
+    </div>
+    <div class="ref-section">
+      <div class="ref-section-header">
+        <span class="ref-section-title">Prior Day — <span id="ref-prior-label"></span></span>
+        <span class="ref-section-count" id="ref-prior-day-count">0 leads</span>
+      </div>
+      <div id="ref-prior-table"></div>
+    </div>
+    <div class="ref-section">
+      <div class="ref-section-header">
+        <span class="ref-section-title">Uncovered Leads — MTD</span>
+        <span class="ref-section-count" id="ref-uncovered-count">0 leads</span>
+      </div>
+      <div id="ref-uncovered-table"></div>
+    </div>
+  </div>
+
   <div class="section-head" style="margin-top:1rem">&#127942; All-time leaderboard</div>
   <div id="leaderboard"></div>
   <div class="section-head" style="margin-top:1rem">&#127968; Velocify lead leaderboard — agents sending real business <span style="font-size:10px;font-weight:400;color:#aaa;text-transform:none;letter-spacing:0">Updates when Zap is live</span></div>
@@ -673,6 +711,7 @@ function selectUser(btn,u){
     document.getElementById("view-daniel").classList.add("active");
     renderDaniel();
     loadCallLogs().then(function(){renderDaniel();});
+    loadReferralLeads(false);
   } else if(u==="Admin"){
     document.getElementById("view-admin").classList.add("active");
     renderAdmin();
