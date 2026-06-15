@@ -113,6 +113,16 @@ tr:hover td{background:#fafbfc}
 .teams-msg-box{background:#f8f9fc;border-radius:8px;padding:.75rem 1rem;font-size:12px;line-height:1.7;white-space:pre-wrap;font-family:inherit;border:1px solid #dde1e7}
 .contact-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;padding:20px}
 .contact-modal-overlay.open{display:flex}
+.lead-detail-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:flex-end;justify-content:center}
+.lead-detail-modal-overlay.open{display:flex}
+.lead-detail-box{background:#fff;border-radius:18px 18px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;animation:slideUp .2s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.lead-detail-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 18px}
+.lead-detail-label{font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.lead-detail-value{font-size:15px;font-weight:600;color:#222;margin-bottom:14px}
+.lead-detail-value.small{font-size:13px;font-weight:500}
+.ref-leads-table tr.tappable-row{cursor:pointer}
+.ref-leads-table tr.tappable-row:active td{background:#f0f4ff}
 .contact-modal-box{background:#fff;border-radius:14px;padding:22px 24px;width:100%;max-width:420px}
 .cm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .cm-title{font-size:14px;font-weight:700;color:#1a1a1a}
@@ -555,7 +565,7 @@ function renderReferralLeads(data){
 
 function buildLeadsTable(rows, emptyMsg){
   if(!rows||!rows.length) return '<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:11%">Date</th><th style="width:26%">Agent</th><th style="width:28%">Buyer(s)</th><th style="width:11%">LP</th><th style="width:24%">Status</th></tr></thead><tbody>';
+  var html='<table class="ref-leads-table"><thead><tr><th style="width:11%">Date</th><th style="width:26%">Agent</th><th style="width:38%">Buyer(s)</th><th style="width:11%">LP</th></tr></thead><tbody>';
   rows.forEach(function(r){
     var agent=r.referral_partner_name||"--";
     var buyer=r.buyer_name||r.buyers||"--";
@@ -563,12 +573,12 @@ function buildLeadsTable(rows, emptyMsg){
     LPS.forEach(function(lpName){if(lp.toLowerCase().indexOf(lpName.toLowerCase())>=0)lp=lpName;});
     var status=r.status||"--";
     var dateAdded=r.date_added?fmtShort(r.date_added):"--";
-    var badgeCls=getStatusBadgeClass(status);
-    html+='<tr><td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500;font-size:12px">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
-    html+='<td>';
-    if(lp!=="--"){var lpKey=LPS.find(function(n){return lp===n;});html+='<span class="lp-tag lp-tag-'+(lpKey||"Unassigned")+'">'+escHtml(lp)+'</span>';}else{html+='<span style="color:#ccc">--</span>';}
-    html+='</td>';
-    html+='<td><span class="ref-badge '+badgeCls+'" style="font-size:10px">'+escHtml(status)+'</span></td></tr>';
+    var lpKey=LPS.find(function(n){return lp===n;});
+    var rowData=encodeURIComponent(JSON.stringify({agent:agent,buyer:buyer,lp:lp,status:status,date:dateAdded,lastUpdate:dateAdded}));
+    html+='<tr class="tappable-row" onclick="showLeadDetail(\''+rowData+'\')">';
+    html+='<td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500;font-size:12px">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
+    html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="color:#ccc">--</span>')+'</td>';
+    html+='</tr>';
   });
   html+='</tbody></table>';
   return html;
@@ -1321,7 +1331,7 @@ function renderReferralLeads(data){
 
 function buildLeadsTable(rows,emptyMsg){
   if(!rows||!rows.length)return'<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:22%">Agent</th><th style="width:25%">Buyer(s)</th><th style="width:9%">LP</th><th style="width:18%">Status</th><th style="width:16%">Last Update</th></tr></thead><tbody>';
+  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:22%">Agent</th><th style="width:38%">Buyer(s)</th><th style="width:9%">LP</th></tr></thead><tbody>';
   rows.forEach(function(r){
     var agent=r.referral_partner_name||"--";
     var buyer=r.buyer_name||"--";
@@ -1330,15 +1340,32 @@ function buildLeadsTable(rows,emptyMsg){
     var status=r.status||"--";
     var dateAdded=r.date_added?new Date(r.date_added+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):"--";
     var lastUpdate=r.last_update?new Date(r.last_update+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):dateAdded;
-    var badgeCls=getStatusBadgeClass(status);
     var lpKey=LPS.find(function(n){return lp===n;});
-    html+='<tr><td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
+    var rowData=encodeURIComponent(JSON.stringify({agent:agent,buyer:buyer,lp:lp,status:status,date:dateAdded,lastUpdate:lastUpdate}));
+    html+='<tr class="tappable-row" onclick="showLeadDetail(\''+rowData+'\')">';
+    html+='<td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
     html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:11px;color:#888">'+escHtml(lp)+'</span>')+'</td>';
-    html+='<td><span class="ref-badge '+badgeCls+'">'+escHtml(status)+'</span></td>';
-    html+='<td style="font-size:12px;color:#888">'+lastUpdate+'</td></tr>';
+    html+='</tr>';
   });
   html+='</tbody></table>';
   return html;
+}
+
+function showLeadDetail(encoded){
+  var d=JSON.parse(decodeURIComponent(encoded));
+  var badgeCls=getStatusBadgeClass(d.status);
+  var lpKey=LPS.find(function(n){return d.lp===n;});
+  var lpBadge=lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:13px;color:#888">'+escHtml(d.lp)+'</span>';
+  document.getElementById('leadDetailContent').innerHTML=
+    '<div class="lead-detail-label">Agent</div><div class="lead-detail-value">'+escHtml(d.agent)+'</div>'+
+    '<div class="lead-detail-label">Buyer(s)</div><div class="lead-detail-value small">'+escHtml(d.buyer)+'</div>'+
+    '<div class="lead-detail-label">LP</div><div class="lead-detail-value">'+lpBadge+'</div>'+
+    '<div class="lead-detail-label">Status</div><div class="lead-detail-value"><span class="ref-badge '+badgeCls+'">'+escHtml(d.status)+'</span></div>'+
+    '<div class="lead-detail-label">Date</div><div class="lead-detail-value small">'+escHtml(d.date)+(d.lastUpdate&&d.lastUpdate!==d.date?' &nbsp;&middot;&nbsp; Updated '+escHtml(d.lastUpdate):'')+'</div>';
+  document.getElementById('leadDetailModal').classList.add('open');
+}
+function closeLeadDetail(e){
+  if(e.target===document.getElementById('leadDetailModal'))document.getElementById('leadDetailModal').classList.remove('open');
 }
 
 setInterval(function(){if(currentUser==="Daniel")loadCallLogs().then(function(){renderDaniel();});},30000);
@@ -1346,5 +1373,12 @@ document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 loadAgents();
 loadCallLogs();
 </script>
+<div class="lead-detail-modal-overlay" id="leadDetailModal" onclick="closeLeadDetail(event)">
+  <div class="lead-detail-box" id="leadDetailBox">
+    <div class="lead-detail-handle"></div>
+    <div id="leadDetailContent"></div>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="document.getElementById('leadDetailModal').classList.remove('open')">Close</button>
+  </div>
+</div>
 </body>
 </html>
