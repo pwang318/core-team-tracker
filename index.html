@@ -329,12 +329,12 @@ tr:hover td{background:var(--bg)}
 .no-ref-tag{display:inline-flex;align-items:center;gap:4px;background:var(--red-soft);border:1.5px solid var(--red-border);border-radius:var(--r);padding:2px 8px;font-size:10px;font-weight:700;color:var(--red)}
 .tags-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .outcome-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.outcome-btn{border:1.5px solid var(--border-mid);background:#f3f4f6;border-radius:var(--r);padding:7px 16px;cursor:pointer;font-size:12px;font-weight:700;color:var(--ink-soft);font-family:inherit;transition:all .12s;box-shadow:0 1px 3px rgba(0,0,0,0.1),0 1px 0 rgba(255,255,255,0.8) inset}
-.outcome-btn:hover{background:#e5e7eb;border-color:var(--ink);color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,0.12)}
-.outcome-btn.sel-answered{background:#16a34a;border-color:#15803d;color:#fff;box-shadow:0 2px 6px rgba(22,163,74,.35)}
-.outcome-btn.sel-voicemail{background:#b45309;border-color:#92400e;color:#fff;box-shadow:0 2px 6px rgba(180,83,9,.35)}
-.outcome-btn.sel-noanswer{background:#dc2626;border-color:#b91c1c;color:#fff;box-shadow:0 2px 6px rgba(220,38,38,.35)}
-.outcome-btn.sel-senttext{background:#1d4ed8;border-color:#1e40af;color:#fff;box-shadow:0 2px 6px rgba(29,78,216,.35)}
+.outcome-btn{border:2px solid #d1d5db;background:#fff;border-radius:var(--r);padding:7px 16px;cursor:pointer;font-size:12px;font-weight:700;color:#374151;font-family:inherit;transition:all .12s;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.outcome-btn:hover{border-color:#374151;color:#111;box-shadow:0 2px 8px rgba(0,0,0,0.12)}
+.outcome-btn.sel-answered{background:#16a34a;border-color:#15803d;color:#fff;box-shadow:0 2px 6px rgba(22,163,74,.3)}
+.outcome-btn.sel-voicemail{background:#d97706;border-color:#b45309;color:#fff;box-shadow:0 2px 6px rgba(217,119,6,.3)}
+.outcome-btn.sel-noanswer{background:#dc2626;border-color:#b91c1c;color:#fff;box-shadow:0 2px 6px rgba(220,38,38,.3)}
+.outcome-btn.sel-senttext{background:#2563eb;border-color:#1d4ed8;color:#fff;box-shadow:0 2px 6px rgba(37,99,235,.3)}
 .outcome-btn.sel-answered{background:var(--green-soft);border-color:var(--green-border);color:var(--green)}
 .outcome-btn.sel-voicemail{background:var(--amber-soft);border-color:var(--amber-border);color:var(--amber)}
 .outcome-btn.sel-noanswer{background:var(--red-soft);border-color:var(--red-border);color:var(--red)}
@@ -489,46 +489,6 @@ tr:hover td{background:var(--bg)}
     <div id="lp-call-list"></div>
 
     <!-- REFERRAL LEADS always below call list -->
-    <div class="section-head" style="margin-top:2rem">Daily Referral Leads
-      <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">&#8635; Refresh</button>
-    </div>
-    <div class="ref-last-updated" id="ref-last-updated" style="font-size:11px;color:var(--faint);margin-bottom:.75rem;font-weight:600">Loading...</div>
-    <div class="ref-stat-grid">
-      <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">Unconverted</div><div class="ref-stat-value warn" id="ref-unconverted">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">Prior Day</div><div class="ref-stat-value" id="ref-prior-count">--</div></div>
-    </div>
-    <div class="ref-legend">
-      <span class="ref-badge rs-started">File Started</span>
-      <span class="ref-badge rs-contact">Contact Attempt</span>
-      <span class="ref-badge rs-nurture">Nurture</span>
-      <span class="ref-badge rs-contacted">Contacted</span>
-      <span class="ref-badge rs-withdrawn">App Withdrawn</span>
-      <span class="ref-badge rs-other">Other</span>
-    </div>
-    <div class="ref-section">
-      <div class="ref-section-header">
-        <span class="ref-section-title">Today — <span id="ref-today-label"></span></span>
-        <span class="ref-section-count" id="ref-today-count">0 leads</span>
-      </div>
-      <div id="ref-today-table"></div>
-    </div>
-    <div class="ref-section">
-      <div class="ref-section-header">
-        <span class="ref-section-title">Prior Day — <span id="ref-prior-label"></span></span>
-        <span class="ref-section-count" id="ref-prior-day-count">0 leads</span>
-      </div>
-      <div id="ref-prior-table"></div>
-    </div>
-    <div class="ref-section">
-      <div class="ref-section-header">
-        <span class="ref-section-title">Unconverted Leads — MTD</span>
-        <span class="ref-section-count" id="ref-uncovered-count">0 leads</span>
-      </div>
-      <div id="ref-uncovered-table"></div>
-    </div>
   </div>
 </div>
 
@@ -948,7 +908,6 @@ function selectUser(btn,u){
     document.getElementById("view-lp").classList.add("active");
     renderLP(u);
     loadCallLogs().then(function(){renderLP(u);});
-    loadReferralLeads(false);
   }
 }
 
@@ -1107,19 +1066,32 @@ function renderLpSearch(){
 
 function toggleCallFromCard(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp")||currentUser;
-  if(calledThisWeek(name)){deleteCallLog(name).then(function(){renderLP(currentUser);});}
-  else{
-    // Mark called immediately so note field appears, then LP can fill it in
-    upsertCallLog(name,lp,"").then(function(){
-      renderLP(currentUser);
-      // Focus the note field after render
-      setTimeout(function(){
-        var cards=document.querySelectorAll(".note-field");
-        for(var i=0;i<cards.length;i++){
-          if(cards[i].getAttribute("data-name")===name){cards[i].focus();break;}
-        }
-      },100);
-    });
+  if(calledThisWeek(name)){
+    deleteCallLog(name).then(function(){renderLP(currentUser);});
+  } else {
+    // Find note and outcome from current card if already expanded
+    var noteEl=document.querySelector('.note-field[data-name="'+name+'"]');
+    var note=noteEl?noteEl.value.trim():"";
+    var log=callLogs[name];
+    var outcome=log?log.outcome||"":"";
+    if(!note||note.length<10){
+      // Mark as called so note field appears, focus it
+      upsertCallLog(name,lp,"").then(function(){
+        renderLP(currentUser);
+        setTimeout(function(){
+          var cards=document.querySelectorAll(".note-field");
+          for(var i=0;i<cards.length;i++){
+            if(cards[i].getAttribute("data-name")===name){
+              cards[i].focus();
+              cards[i].style.borderColor="var(--red)";
+              break;
+            }
+          }
+        },150);
+      });
+      return;
+    }
+    upsertCallLog(name,lp,note).then(function(){renderLP(currentUser);});
   }
 }
 
