@@ -775,32 +775,40 @@ function buildLeadsTable(rows, emptyMsg){
 }
 
 function getRotation(lp){
+  // Priority agents always first, then sort remaining active by longest since last LP call
   var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
   if(!active.length)return[];
   var priority=active.filter(isPriority);
   var normal=active.filter(function(a){return!isPriority(a);});
-  var wn=Math.floor((TODAY-new Date("2024-01-01T12:00:00"))/(7*86400000));
+  // Sort normal agents: never called first (null = 9999 days), then by most days since last call
+  normal.sort(function(a,b){
+    var da=lpDays(a[0]); var db=lpDays(b[0]);
+    var sa=da===null?99999:da;
+    var sb=db===null?99999:db;
+    return sb-sa;
+  });
   var remaining=Math.max(0,15-priority.length);
-  var pw=Math.min(remaining,normal.length);
-  var si=normal.length?((wn*pw)%normal.length):0;
-  var base=[];for(var i=0;i<pw;i++)base.push(normal[(si+i)%normal.length]);
-  var overdue=normal.filter(function(a){var ds=lpDays(a[0]);return ds!==null&&ds>=14&&base.indexOf(a)<0;});
-  var combined=priority.concat(overdue.slice(0,2)).concat(base);
+  var base=normal.slice(0,remaining);
+  var combined=priority.concat(base);
   var seen={},res=[];
   for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
   return res.slice(0,15);
 }
 
 function getLastWeekRotation(lp){
+  // Same logic for last week display — use last week logs for "called" check
   var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
   if(!active.length)return[];
-  var wn=Math.floor((TODAY-new Date("2024-01-01T12:00:00"))/(7*86400000))-1;
   var priority=active.filter(isPriority);
   var normal=active.filter(function(a){return!isPriority(a);});
+  normal.sort(function(a,b){
+    var da=lpDays(a[0]); var db=lpDays(b[0]);
+    var sa=da===null?99999:da;
+    var sb=db===null?99999:db;
+    return sb-sa;
+  });
   var remaining=Math.max(0,15-priority.length);
-  var pw=Math.min(remaining,normal.length);
-  var si=normal.length?((wn*pw)%normal.length):0;
-  var base=[];for(var i=0;i<pw;i++)base.push(normal[(si+i)%normal.length]);
+  var base=normal.slice(0,remaining);
   var combined=priority.concat(base);
   var seen={},res=[];
   for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
