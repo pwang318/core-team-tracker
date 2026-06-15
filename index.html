@@ -979,7 +979,8 @@ function renderCallCard(a,lp,isBonus){
   var chkN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
   var chk=called?chkY:chkN;
   var dsText=ds===null?"Never called":ds===0?"Called today":ds+"d since last call";
-  var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"");
+  var isPending=pendingNote&&pendingNote[a[0]];
+  var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"")+(isPending?" priority":"");
   var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:null;
   var velData=VELOCIFY_SEED[a[0]]||null;
   var velTotal=velData?velData.total:0,velMtd=velData?velData.mtd:0;
@@ -1015,8 +1016,9 @@ function renderCallCard(a,lp,isBonus){
   html+='<span style="font-size:12px;color:#555" id="ci-email-'+safeId+'">&#9993;&#65039; <span style="color:#bbb">Loading...</span></span>';
   html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="margin-left:auto;font-size:11px">Edit contact</button>';
   html+='</div>';
-  if(called){
-    var noteErr=called&&(!note||note.trim().length<15)?'<div style="font-size:11px;color:var(--red);margin-top:4px;font-weight:600">&#9888; Add a real note — what did they say? Any leads, listings, or next steps?</div>':'';
+  if(called||isPending){
+    var noteErr=called&&(!note||note.trim().length<10)?'<div style="font-size:11px;color:var(--red);margin-top:4px;font-weight:600">&#9888; Add a real note — what did they say? Any leads, listings, or next steps?</div>':'';
+    if(isPending&&!called)noteErr='<div style="font-size:11px;color:var(--red);margin-top:4px;font-weight:700">&#9888; Write your note below — then tap the phone button again to save.</div>';
     html+='<div style="margin-top:8px"><span class="outcome-label">How did it go?</span><div class="outcome-row">';
     var oKeys=["Answered","Voicemail","No Answer","Sent Text"];
     var oLabels=["&#9989; Answered","&#128222; Voicemail","&#10060; No Answer","&#128172; Sent Text"];
@@ -1068,31 +1070,36 @@ function toggleCallFromCard(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp")||currentUser;
   if(calledThisWeek(name)){
     deleteCallLog(name).then(function(){renderLP(currentUser);});
-  } else {
-    // Find note and outcome from current card if already expanded
-    var noteEl=document.querySelector('.note-field[data-name="'+name+'"]');
-    var note=noteEl?noteEl.value.trim():"";
-    var log=callLogs[name];
-    var outcome=log?log.outcome||"":"";
-    if(!note||note.length<10){
-      // Mark as called so note field appears, focus it
-      upsertCallLog(name,lp,"").then(function(){
-        renderLP(currentUser);
-        setTimeout(function(){
-          var cards=document.querySelectorAll(".note-field");
-          for(var i=0;i<cards.length;i++){
-            if(cards[i].getAttribute("data-name")===name){
-              cards[i].focus();
-              cards[i].style.borderColor="var(--red)";
-              break;
-            }
-          }
-        },150);
-      });
-      return;
-    }
-    upsertCallLog(name,lp,note).then(function(){renderLP(currentUser);});
+    return;
   }
+  // Check if note already exists in DOM (card already expanded)
+  var noteEl=document.querySelector('.note-field[data-name="'+name+'"]');
+  var note=noteEl?noteEl.value.trim():"";
+  if(note.length>=10){
+    // Has a real note — save it
+    upsertCallLog(name,lp,note).then(function(){renderLP(currentUser);});
+    return;
+  }
+  // No note yet — set a pending flag and re-render to show the note field
+  if(!pendingNote)pendingNote={};
+  pendingNote[name]=true;
+  renderLP(currentUser);
+  setTimeout(function(){
+    var nf=document.querySelector('.note-field[data-name="'+name+'"]');
+    if(nf){
+      nf.focus();
+      nf.style.borderColor="var(--red)";
+      nf.placeholder="Required — what did they say? Buyers, listings, next steps...";
+    }
+  },150);
+}
+
+function confirmCallWithNote(name,lp,note){
+  // Called from note blur/change once note is long enough
+  if(!pendingNote||!pendingNote[name])return;
+  if(!note||note.trim().length<10)return;
+  delete pendingNote[name];
+  upsertCallLog(name,lp,note.trim()).then(function(){renderLP(currentUser);});
 }
 
 function loadAgentContact(name,safeId){
@@ -1118,7 +1125,13 @@ function toggleCall(btn){
 function queueNote(ta){
   var name=ta.getAttribute("data-name"),lp=ta.getAttribute("data-lp")||currentUser,val=ta.value;
   if(noteTimers[name])clearTimeout(noteTimers[name]);
-  noteTimers[name]=setTimeout(function(){upsertCallLog(name,lp,val);},800);
+  noteTimers[name]=setTimeout(function(){
+    if(pendingNote&&pendingNote[name]&&val.trim().length>=10){
+      confirmCallWithNote(name,lp,val);
+    } else {
+      upsertCallLog(name,lp,val);
+    }
+  },800);
 }
 
 function openLpContactModal(name){
@@ -1358,6 +1371,7 @@ function handleUpload(input){
 var VELOCIFY_SEED={"JOHN BRUNNER":{"total":1,"mtd":0,"wtd":0},"ANNIE MORENO":{"total":4,"mtd":3,"wtd":2},"CELINE WILLIAMS":{"total":1,"mtd":0,"wtd":0},"BRANDON THOMPSON":{"total":1,"mtd":0,"wtd":0},"LUIS GIL":{"total":1,"mtd":1,"wtd":0},"CHRIS REED":{"total":3,"mtd":3,"wtd":0},"HYPATIA ESPINAL":{"total":1,"mtd":1,"wtd":0},"KRISTINA MURPHY":{"total":1,"mtd":1,"wtd":0},"JAIDEN BALLAH":{"total":1,"mtd":1,"wtd":0},"MEGAN LYNCH":{"total":1,"mtd":1,"wtd":0},"TODD STONE":{"total":8,"mtd":8,"wtd":4},"OSCAR MARTINEZ":{"total":2,"mtd":2,"wtd":0},"DONALD PAYNE JR":{"total":1,"mtd":1,"wtd":0},"YVETTA HARRISON":{"total":1,"mtd":1,"wtd":0},"ROSALIA PABLO":{"total":2,"mtd":2,"wtd":0},"SAHAR SHALASH":{"total":1,"mtd":1,"wtd":0},"BRIAN ZINN":{"total":1,"mtd":1,"wtd":0},"BRANDON MCCLENDON":{"total":1,"mtd":1,"wtd":0},"PAIGE LUDWIG":{"total":1,"mtd":1,"wtd":0},"TATIANA GRIGORITA":{"total":1,"mtd":1,"wtd":0},"CLAUDIA CHUECO":{"total":1,"mtd":1,"wtd":0},"TOM NEWMAN":{"total":1,"mtd":1,"wtd":0},"KISHMA JAMES":{"total":1,"mtd":1,"wtd":1},"TIMOTHY OLIVER":{"total":1,"mtd":1,"wtd":1},"HEATHER EMMERT":{"total":1,"mtd":1,"wtd":1},"LEXIS GRANDY":{"total":1,"mtd":1,"wtd":1}};
 
 var prevNotes={};
+var pendingNote={};
 var rmActivity={};
 var selfReportedReferrals={};
 var agentFirstCall={};
