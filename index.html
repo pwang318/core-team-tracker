@@ -493,7 +493,12 @@ function loadReferralLeads(force){
   var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
 
   sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
-    referralLeadsCache=res||[];
+    var CORE_LP_KEYWORDS=["Dill","De La Riva","Saleh","McMahon","Johnston"];
+    var filtered=(res||[]).filter(function(r){
+      var lp=r.lp_user||"";
+      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
+    });
+    referralLeadsCache=filtered;
     renderReferralLeads(referralLeadsCache);
     document.getElementById("ref-last-updated").textContent="Last refreshed: "+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   }).catch(function(){
@@ -1263,7 +1268,12 @@ function loadReferralLeads(force){
   if(el)el.textContent="Loading...";
   var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
   sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
-    referralLeadsCache=res||[];
+    var CORE_LP_KEYWORDS=["Dill","De La Riva","Saleh","McMahon","Johnston"];
+    var filtered=(res||[]).filter(function(r){
+      var lp=r.lp_user||"";
+      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
+    });
+    referralLeadsCache=filtered;
     renderReferralLeads(referralLeadsCache);
     if(el)el.textContent="Last refreshed: "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
   }).catch(function(){
