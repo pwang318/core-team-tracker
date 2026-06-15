@@ -331,6 +331,10 @@ tr:hover td{background:var(--bg)}
 .outcome-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .outcome-btn{border:1.5px solid var(--border);background:var(--bg);border-radius:var(--r);padding:5px 13px;cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);font-family:inherit;transition:all .12s}
 .outcome-btn:hover{background:var(--surface);border-color:var(--ink);color:var(--ink)}
+.outcome-btn.sel-answered{background:var(--green-soft);border-color:var(--green-border);color:var(--green)}
+.outcome-btn.sel-voicemail{background:var(--amber-soft);border-color:var(--amber-border);color:var(--amber)}
+.outcome-btn.sel-noanswer{background:var(--red-soft);border-color:var(--red-border);color:var(--red)}
+.outcome-btn.sel-senttext{background:var(--blue-soft);border-color:var(--blue-border);color:var(--blue)}
 .outcome-btn.sel-referral{background:var(--blue-soft);border-color:var(--blue-border);color:var(--blue)}
 .outcome-btn.sel-checkin{background:var(--green-soft);border-color:var(--green-border);color:var(--green)}
 .outcome-btn.sel-listing{background:var(--amber-soft);border-color:var(--amber-border);color:var(--amber)}
@@ -455,12 +459,7 @@ tr:hover td{background:var(--bg)}
 <!-- LP VIEW -->
 <div id="view-lp" class="view">
   <!-- LP sub-tabs -->
-  <div class="ref-tab-bar">
-    <div class="ref-tab active" onclick="switchLpTab('my-week',this)">My Week</div>
-    <div class="ref-tab" onclick="switchLpTab('referral-leads',this)">&#127968; Daily Referral Leads Update</div>
-  </div>
-
-  <!-- MY WEEK panel -->
+  <!-- MY WEEK — no sub-tabs, always visible -->
   <div id="lp-tab-my-week" class="ref-tab-panel active">
     <div class="lp-hero">
       <div class="lp-hero-top">
@@ -484,9 +483,49 @@ tr:hover td{background:var(--bg)}
     </div>
     <div class="section-head" style="margin-top:.5rem">Your 15 this week</div>
     <div id="lp-call-list"></div>
-  </div>
 
-  <!-- DAILY REFERRAL LEADS panel -->
+    <!-- REFERRAL LEADS always below call list -->
+    <div class="section-head" style="margin-top:2rem">Daily Referral Leads
+      <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">&#8635; Refresh</button>
+    </div>
+    <div class="ref-last-updated" id="ref-last-updated" style="font-size:11px;color:var(--faint);margin-bottom:.75rem;font-weight:600">Loading...</div>
+    <div class="ref-stat-grid">
+      <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads">--</div></div>
+      <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts">--</div></div>
+      <div class="ref-stat-card"><div class="ref-stat-label">Unconverted</div><div class="ref-stat-value warn" id="ref-unconverted">--</div></div>
+      <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf">--</div></div>
+      <div class="ref-stat-card"><div class="ref-stat-label">Prior Day</div><div class="ref-stat-value" id="ref-prior-count">--</div></div>
+    </div>
+    <div class="ref-legend">
+      <span class="ref-badge rs-started">File Started</span>
+      <span class="ref-badge rs-contact">Contact Attempt</span>
+      <span class="ref-badge rs-nurture">Nurture</span>
+      <span class="ref-badge rs-contacted">Contacted</span>
+      <span class="ref-badge rs-withdrawn">App Withdrawn</span>
+      <span class="ref-badge rs-other">Other</span>
+    </div>
+    <div class="ref-section">
+      <div class="ref-section-header">
+        <span class="ref-section-title">Today — <span id="ref-today-label"></span></span>
+        <span class="ref-section-count" id="ref-today-count">0 leads</span>
+      </div>
+      <div id="ref-today-table"></div>
+    </div>
+    <div class="ref-section">
+      <div class="ref-section-header">
+        <span class="ref-section-title">Prior Day — <span id="ref-prior-label"></span></span>
+        <span class="ref-section-count" id="ref-prior-day-count">0 leads</span>
+      </div>
+      <div id="ref-prior-table"></div>
+    </div>
+    <div class="ref-section">
+      <div class="ref-section-header">
+        <span class="ref-section-title">Unconverted Leads — MTD</span>
+        <span class="ref-section-count" id="ref-uncovered-count">0 leads</span>
+      </div>
+      <div id="ref-uncovered-table"></div>
+    </div>
+  </div>
 </div>
 
 <!-- DANIEL VIEW -->
@@ -658,7 +697,7 @@ var SEED=[["BRANDON THOMPSON","A","Osgood","2026-06-01","2026-06-01","2026-05-04
 
 // ── LP sub-tab switching ──
 function switchLpTab(tabId, btn){
-  document.querySelectorAll("#view-lp .ref-tab").forEach(function(t){t.classList.remove("active");});
+  // tabs removed — kept for compatibility
   document.querySelectorAll("#view-lp .ref-tab-panel").forEach(function(p){p.classList.remove("active");});
   btn.classList.add("active");
   document.getElementById("lp-tab-"+tabId).classList.add("active");
@@ -905,6 +944,7 @@ function selectUser(btn,u){
     document.getElementById("view-lp").classList.add("active");
     renderLP(u);
     loadCallLogs().then(function(){renderLP(u);});
+    loadReferralLeads(false);
   }
 }
 
@@ -1013,13 +1053,15 @@ function renderCallCard(a,lp,isBonus){
   html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="margin-left:auto;font-size:11px">Edit contact</button>';
   html+='</div>';
   if(called){
-    html+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+lp+'" placeholder="Details, referrals mentioned, next steps..." onchange="queueNote(this)">'+note+'</textarea>';
-    var outcomes=["&#127968; Referred a lead","&#128203; Sent a listing","&#128075; Check-in","&#128263; Not responsive"];
-    var oKeys=["Referred a lead","Sent a listing","Check-in","Not responsive"];
-    var oCls=["sel-referral","sel-listing","sel-checkin","sel-noresponse"];
-    html+='<div style="margin-top:8px"><span class="outcome-label">What happened?</span><div class="outcome-row">';
-    for(var oi=0;oi<outcomes.length;oi++){html+='<button class="outcome-btn'+(outcome===oKeys[oi]?' '+oCls[oi]:'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" data-outcome="'+oKeys[oi]+'" onclick="selectOutcome(this)">'+outcomes[oi]+'</button>';}
+    var noteErr=called&&(!note||note.trim().length<15)?'<div style="font-size:11px;color:var(--red);margin-top:4px;font-weight:600">&#9888; Add a real note — what did they say? Any leads, listings, or next steps?</div>':'';
+    html+='<div style="margin-top:8px"><span class="outcome-label">How did it go?</span><div class="outcome-row">';
+    var oKeys=["Answered","Voicemail","No Answer","Sent Text"];
+    var oLabels=["&#9989; Answered","&#128222; Voicemail","&#10060; No Answer","&#128172; Sent Text"];
+    var oCls=["sel-answered","sel-voicemail","sel-noanswer","sel-senttext"];
+    for(var oi=0;oi<oKeys.length;oi++){html+='<button class="outcome-btn'+(outcome===oKeys[oi]?' '+oCls[oi]:'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" data-outcome="'+oKeys[oi]+'" onclick="selectOutcome(this)">'+oLabels[oi]+'</button>';}
     html+='</div></div>';
+    html+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+lp+'" placeholder="What did they say? Any buyers, listings, upcoming moves, pain points, next steps..." onchange="queueNote(this)">'+note+'</textarea>';
+    html+=noteErr;
   }
   html+='</div></div>';
   return html;
@@ -1062,7 +1104,19 @@ function renderLpSearch(){
 function toggleCallFromCard(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp")||currentUser;
   if(calledThisWeek(name)){deleteCallLog(name).then(function(){renderLP(currentUser);});}
-  else{upsertCallLog(name,lp,"").then(function(){renderLP(currentUser);});}
+  else{
+    // Mark called immediately so note field appears, then LP can fill it in
+    upsertCallLog(name,lp,"").then(function(){
+      renderLP(currentUser);
+      // Focus the note field after render
+      setTimeout(function(){
+        var cards=document.querySelectorAll(".note-field");
+        for(var i=0;i<cards.length;i++){
+          if(cards[i].getAttribute("data-name")===name){cards[i].focus();break;}
+        }
+      },100);
+    });
+  }
 }
 
 function loadAgentContact(name,safeId){
