@@ -5,421 +5,217 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Core Team Agent Tracker</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-:root {
-  --ink: #0d0d0d;
-  --ink-mid: #1f1f1f;
-  --ink-soft: #374151;
-  --muted: #6b7280;
-  --faint: #9ca3af;
-  --border: #e5e7eb;
-  --border-mid: #d1d5db;
-  --bg: #f9fafb;
-  --surface: #ffffff;
-  --accent: #111827;
-  --accent-line: #111827;
-  --green: #16a34a;
-  --green-soft: #f0fdf4;
-  --green-border: #86efac;
-  --amber: #b45309;
-  --amber-soft: #fffbeb;
-  --amber-border: #fcd34d;
-  --red: #dc2626;
-  --red-soft: #fef2f2;
-  --red-border: #fca5a5;
-  --blue: #1d4ed8;
-  --blue-soft: #eff6ff;
-  --blue-border: #bfdbfe;
-  --purple: #7c3aed;
-  --purple-soft: #f5f3ff;
-  --purple-border: #ddd6fe;
-  --pink: #be185d;
-  --pink-soft: #fdf2f8;
-  --pink-border: #fbcfe8;
-  --orange: #c2410c;
-  --orange-soft: #fff7ed;
-  --orange-border: #fed7aa;
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
-  --r: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
-}
-
 *{box-sizing:border-box;margin:0;padding:0}
-
-body{
-  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-  color:var(--ink);
-  font-size:14px;
-  background:var(--bg);
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
-}
-
-.app{max-width:960px;margin:0 auto;padding:1.5rem 1.5rem 5rem}
-
-/* ── HEADER ── */
-.app-header{
-  padding:.9rem 0;
-  display:flex;justify-content:space-between;align-items:center;
-  flex-wrap:wrap;gap:8px;
-  border-bottom:2px solid var(--ink);
-  margin-bottom:1.5rem;
-}
-.brand{display:flex;align-items:center;gap:12px}
-.brand-logo{
-  background:var(--ink);color:#fff;
-  font-weight:900;font-size:11px;
-  padding:6px 14px;border-radius:var(--r);
-  letter-spacing:.12em;text-transform:uppercase;
-}
-.brand-sub{font-size:12px;color:var(--muted);font-weight:500}
-.week-pill{
-  font-size:11px;font-weight:700;
-  color:var(--ink-soft);
-  letter-spacing:.02em;
-}
-.save-ind{font-size:11px;color:var(--faint);display:flex;align-items:center;gap:5px;font-weight:500}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:#d1d5db;flex-shrink:0;transition:background .3s}
-.sync-dot.live{background:#22c55e}
-.sync-dot.saving{background:#f59e0b}
-.sync-dot.error{background:#ef4444}
-
-/* ── WHO BAR ── */
-.who-bar{
-  display:flex;gap:6px;flex-wrap:wrap;
-  margin-bottom:1.5rem;align-items:center;
-  background:var(--surface);
-  padding:.8rem 1rem;
-  border-radius:var(--r-md);
-  border:1px solid var(--border);
-}
-.who-label{font-size:10px;color:var(--faint);margin-right:4px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
-.who-btn{
-  padding:6px 16px;border-radius:var(--r);
-  border:1.5px solid var(--border);
-  background:var(--bg);
-  cursor:pointer;font-size:13px;font-weight:600;
-  color:var(--muted);font-family:inherit;transition:all .12s;
-}
-.who-btn:hover{background:var(--surface);border-color:var(--border-mid);color:var(--ink)}
-.wb-Gavin.active{background:#15803d;border-color:#15803d;color:#fff}
-.wb-Karen.active{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
-.wb-Osgood.active{background:#c2410c;border-color:#c2410c;color:#fff}
-.wb-Jordan.active{background:#be185d;border-color:#be185d;color:#fff}
-.wb-Said.active{background:#7c3aed;border-color:#7c3aed;color:#fff}
-.wb-Daniel.active{background:#0f172a;border-color:#0f172a;color:#fff}
-.wb-Admin.active{background:#dc2626;border-color:#dc2626;color:#fff}
+body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#1a1a1a;font-size:14px;background:#f0f2f5;min-height:100vh}
+.app{max-width:940px;margin:0 auto;padding:1rem 1rem 3rem}
+.app-header{padding:.9rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #dde1e7;margin-bottom:.75rem}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-logo{background:#1F4E79;color:#fff;font-weight:700;font-size:13px;padding:6px 13px;border-radius:8px;letter-spacing:.05em}
+.brand-sub{font-size:12px;color:#666}
+.week-pill{font-size:11px;background:#e8eaf0;padding:4px 11px;border-radius:20px;color:#555}
+.save-ind{font-size:11px;color:#888;min-width:60px;text-align:right;display:flex;align-items:center;gap:4px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
+.sync-dot.live{background:#43A047}.sync-dot.saving{background:#FB8C00}.sync-dot.error{background:#E53935}
+.who-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.9rem;align-items:center;background:#fff;padding:.75rem 1rem;border-radius:12px;border:1px solid #dde1e7}
+.who-label{font-size:12px;color:#888;margin-right:2px;font-weight:500}
+.who-btn{padding:7px 16px;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#555}
+.who-btn:hover{background:#f5f6fa}
+.wb-Gavin.active{background:#E8F5E9;border-color:#2E7D32;color:#2E7D32}
+.wb-Karen.active{background:#E3F2FD;border-color:#1565C0;color:#1565C0}
+.wb-Osgood.active{background:#FFF8E1;border-color:#E65100;color:#E65100}
+.wb-Jordan.active{background:#FCE4EC;border-color:#880E4F;color:#880E4F}
+.wb-Said.active{background:#EDE7F6;border-color:#4527A0;color:#4527A0}
+.wb-Daniel.active{background:#F3E5F5;border-color:#6A1B9A;color:#6A1B9A}
+.wb-Admin.active{background:#FBE9E7;border-color:#BF360C;color:#BF360C}
 .view{display:none}.view.active{display:block}
-
-/* ── LP HERO ── */
-.lp-hero{
-  background:#0f172a;color:#fff;
-  border-radius:var(--r-lg);
-  padding:1.5rem 1.75rem;margin-bottom:1rem;
-  border:1.5px solid #1e293b;
-}
-.lp-hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:8px}
-.lp-hero-name{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.03em}
-.lp-hero-sub{font-size:12px;color:rgba(255,255,255,.45);margin-top:4px;font-weight:500}
+.lp-hero{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:.9rem}
+.lp-hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.lp-hero-name{font-size:17px;font-weight:700}
+.lp-hero-sub{font-size:12px;color:#888;margin-top:2px}
 .prog-wrap{display:flex;align-items:center;gap:10px}
-.prog-track{flex:1;background:rgba(255,255,255,.15);border-radius:20px;height:5px;overflow:hidden;min-width:140px}
-.prog-fill{height:5px;border-radius:20px;background:#fff;transition:width .4s ease}
-.prog-txt{font-size:12px;color:rgba(255,255,255,.6);white-space:nowrap;font-weight:700}
-
-/* ── BANNERS ── */
-.priority-banner{background:var(--red-soft);border:1.5px solid var(--red-border);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:700}
-.monday-banner{background:var(--blue-soft);border:1.5px solid var(--blue-border);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--blue);margin-bottom:.75rem;font-weight:700}
-.streak-bar{background:var(--amber-soft);border:1.5px solid var(--amber-border);border-radius:var(--r);padding:10px 14px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--amber)}
-.target-complete-bar{background:var(--green-soft);border:1.5px solid var(--green-border);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--green);margin-bottom:.75rem;font-weight:700;display:flex;align-items:center;gap:8px}
-.inactive-banner{background:var(--amber-soft);border:1.5px solid var(--amber-border);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:700}
-.bday-banner{background:var(--pink-soft);border:1.5px solid var(--pink-border);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--pink);margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:700;flex-wrap:wrap}
-
-/* ── CALL CARDS ── */
-.call-card{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--r-md);
-  padding:1rem 1.1rem;margin-bottom:8px;
-  display:flex;align-items:flex-start;gap:13px;
-  transition:border-color .12s;
-}
-.call-card:hover{border-color:var(--ink)}
-.call-card.priority{border-color:var(--red);border-width:2px;background:#fffcfc}
-.call-card.done{opacity:.3}
-.call-card.bonus{border-color:var(--blue-border);background:var(--blue-soft)}
-.check-btn{
-  width:38px;height:38px;border-radius:50%;
-  border:2px solid var(--border-mid);
-  background:var(--bg);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;margin-top:1px;transition:all .12s;font-size:16px;
-}
-.check-btn:hover{border-color:var(--ink);background:var(--ink);color:#fff}
-.check-btn.checked{background:var(--ink);border-color:var(--ink);color:#fff}
+.prog-track{flex:1;background:#e8eaf0;border-radius:20px;height:9px;overflow:hidden;min-width:130px}
+.prog-fill{height:9px;border-radius:20px}
+.prog-txt{font-size:12px;color:#888;white-space:nowrap;font-weight:500}
+.priority-banner{background:#FFEBEE;border:1px solid #EF9A9A;border-radius:8px;padding:9px 12px;font-size:12px;color:#C62828;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:500}
+.monday-banner{background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:9px 12px;font-size:12px;color:#1565C0;margin-bottom:.75rem;font-weight:500}
+.streak-bar{background:#fff;border:1px solid #FFE082;border-radius:8px;padding:8px 12px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#E65100}
+.call-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+.call-card.priority{border-color:#EF9A9A;border-width:2px;background:#FFFAFA}
+.call-card.done{opacity:.45}
+.call-card.bonus{border-color:#90CAF9;background:#F0F8FF}
+.check-btn{width:44px;height:44px;border-radius:50%;border:2px solid #ccc;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.check-btn.checked{background:#EAF3DE;border-color:#4CAF50}
 .call-info{flex:1;min-width:0}
-.call-name{font-weight:700;font-size:14px;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--ink)}
-
-/* ── TAGS & BADGES ── */
-.priority-tag{background:var(--red);color:#fff;font-size:10px;padding:2px 8px;border-radius:var(--r);font-weight:700}
-.bonus-tag{background:var(--ink);color:#fff;font-size:10px;padding:2px 8px;border-radius:var(--r);font-weight:700}
-.call-meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-weight:500}
-.note-field{width:100%;margin-top:8px;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--ink-soft);font-size:12px;font-family:inherit;resize:none;height:46px;transition:border-color .12s}
-.note-field:focus{outline:none;border-color:var(--ink)}
-.badge{display:inline-block;padding:2px 9px;border-radius:var(--r);font-size:11px;font-weight:700}
-.badge-a{background:var(--ink);color:#fff}
-.badge-b{background:var(--ink-soft);color:#fff}
-.badge-c{background:var(--border);color:var(--ink-soft)}
-.badge-inactive{background:var(--red-soft);color:var(--red);border:1.5px solid var(--red-border)}
-
-/* ── SECTION HEADS ── */
-.section-head{
-  font-size:10px;font-weight:800;color:var(--faint);
-  text-transform:uppercase;letter-spacing:.12em;
-  margin:2rem 0 .75rem;
-  display:flex;justify-content:space-between;align-items:center;
-  flex-wrap:wrap;gap:6px;
-}
-
-/* ── DANIEL GRID ── */
-.d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:1rem}
-.d-card{
-  background:var(--surface);
-  border:1.5px solid var(--border);
-  border-radius:var(--r-md);
-  padding:1.1rem;
-  border-top:3px solid var(--ink);
-  transition:border-color .12s;
-}
-.d-card:hover{border-color:var(--ink);border-top-color:var(--ink)}
-.d-name{font-weight:700;font-size:12px;margin-bottom:10px;display:flex;align-items:center;gap:6px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em}
-.d-pct-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
-.d-pct{font-size:32px;font-weight:900;letter-spacing:-.04em;color:var(--ink)}
-.d-pct.zero{color:var(--faint)}
-.d-pct.ok{color:var(--amber)}
-.d-pct.good{color:var(--green)}
-.d-trend{font-size:13px;font-weight:800}
-.trend-up{color:var(--green)}
-.trend-down{color:var(--red)}
-.d-bar-track{background:var(--border);border-radius:20px;height:4px;margin-bottom:8px;overflow:hidden}
-.d-bar-fill{height:4px;border-radius:20px}
-.d-meta{font-size:11px;color:var(--faint);display:flex;justify-content:space-between;font-weight:600}
-.d-tiers{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
-.d-tier-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:var(--r)}
-.tier-a{background:var(--ink);color:#fff}
-.tier-b{background:var(--ink-soft);color:#fff}
-.tier-c{background:var(--border);color:var(--ink-soft)}
-.d-alert{font-size:11px;color:var(--red);margin-top:6px;font-weight:700}
-.d-alert-warn{font-size:11px;color:var(--amber);margin-top:3px;font-weight:600}
-
-/* ── SCORECARDS ── */
-.scorecard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:.75rem}
-.sc-header{padding:1rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .12s}
-.sc-header:hover{background:var(--bg)}
-.sc-title{font-size:14px;font-weight:800;display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--ink)}
+.call-name{font-weight:600;font-size:14px;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.priority-tag{background:#FFEBEE;color:#C62828;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700}
+.bonus-tag{background:#E3F2FD;color:#1565C0;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700}
+.call-meta{font-size:12px;color:#888;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note-field{width:100%;margin-top:7px;padding:6px 10px;border:1px solid #dde1e7;border-radius:8px;background:#fafafa;color:#333;font-size:12px;font-family:inherit;resize:none;height:46px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-a{background:#C6EFCE;color:#1B5E20}.badge-b{background:#BBDEFB;color:#0D47A1}.badge-c{background:#EEE;color:#424242}.badge-inactive{background:#FFCDD2;color:#B71C1C}
+.section-head{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:1rem 0 .5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-bottom:1rem}
+.d-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem}
+.d-name{font-weight:700;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.d-pct{font-size:24px;font-weight:800;margin-bottom:4px}
+.d-bar-track{background:#eee;border-radius:20px;height:5px;margin-bottom:6px;overflow:hidden}
+.d-bar-fill{height:5px;border-radius:20px}
+.d-meta{font-size:11px;color:#888;display:flex;justify-content:space-between}
+.scorecard{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.sc-header{padding:.85rem 1.1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sc-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .pills{display:flex;gap:5px;flex-wrap:wrap}
-.pill{font-size:10px;font-weight:700;padding:2px 9px;border-radius:var(--r)}
-.pill-green{background:var(--green-soft);color:var(--green);border:1.5px solid var(--green-border)}
-.pill-amber{background:var(--amber-soft);color:var(--amber);border:1.5px solid var(--amber-border)}
-.pill-red{background:var(--red-soft);color:var(--red);border:1.5px solid var(--red-border)}
-.sc-body{border-top:1.5px solid var(--border);padding:1rem 1.25rem}
-.sc-row{padding:9px 0;border-bottom:1px solid var(--border)}
+.pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.pill-green{background:#EAF3DE;color:#3B6D11}.pill-amber{background:#FFF2CC;color:#7D5A00}.pill-red{background:#FFEBEE;color:#C62828}
+.sc-body{border-top:1px solid #f0f2f5;padding:.9rem 1.1rem}
+.sc-row{padding:9px 0;border-bottom:1px solid #f0f2f5}
 .sc-row:last-child{border-bottom:none}
 .sc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.sc-pct{font-size:22px;font-weight:900;color:var(--ink);letter-spacing:-.03em}
-.missed-box{background:var(--red-soft);border-radius:var(--r);padding:5px 10px;font-size:11px;color:var(--red);margin-top:4px;border:1.5px solid var(--red-border);font-weight:700}
-.won-box{font-size:11px;color:var(--green);font-weight:700;margin-top:2px}
-
-/* ── LEADERBOARD ── */
-.leaderboard-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:.8rem 1rem;margin-bottom:6px;display:flex;align-items:center;gap:12px;transition:border-color .12s}
-.leaderboard-row:hover{border-color:var(--ink)}
-.alert-item{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:9px 13px;margin-bottom:5px;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
-.adot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.adot-red{background:#ef4444}.adot-amber{background:#f59e0b}.adot-green{background:#22c55e}
-
-/* ── ADMIN ── */
-.admin-section{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:1.25rem 1.4rem;margin-bottom:1rem}
-.admin-section h3{font-size:14px;font-weight:800;margin-bottom:.85rem;color:var(--ink)}
+.sc-pct{font-size:20px;font-weight:800}
+.missed-box{background:#FFEBEE;border-radius:6px;padding:5px 9px;font-size:11px;color:#C62828;margin-top:4px}
+.won-box{font-size:11px;color:#43A047;font-weight:500;margin-top:2px}
+.leaderboard-row{background:#fff;border:1px solid #dde1e7;border-radius:10px;padding:.75rem 1rem;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.alert-item{background:#fff;border:1px solid #dde1e7;border-radius:8px;padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.adot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.adot-red{background:#E53935}.adot-amber{background:#FB8C00}.adot-green{background:#43A047}
+.admin-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.admin-section h3{font-size:14px;font-weight:700;margin-bottom:.75rem}
 .form-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end}
-.form-group{display:flex;flex-direction:column;gap:4px}
-.form-group label{font-size:10px;color:var(--faint);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
-input[type=text],input[type=email],select{padding:7px 11px;border:1.5px solid var(--border);border-radius:var(--r);font-size:13px;color:var(--ink);background:#fff;font-family:inherit;font-weight:500;transition:border-color .12s}
-input[type=text]:focus,input[type=email]:focus,select:focus{outline:none;border-color:var(--ink)}
-.upload-zone{border:2px dashed var(--border-mid);border-radius:var(--r-md);padding:1.75rem;text-align:center;cursor:pointer;color:var(--faint);font-size:13px;font-weight:600;transition:all .15s}
-.upload-zone:hover{background:var(--bg);border-color:var(--ink);color:var(--ink)}
-
-/* ── BUTTONS ── */
-.btn{border:1.5px solid var(--border);background:var(--surface);border-radius:var(--r);padding:7px 15px;cursor:pointer;font-size:13px;color:var(--ink-soft);font-weight:600;font-family:inherit;transition:all .12s}
-.btn:hover{background:var(--bg);border-color:var(--border-mid)}
-.btn-primary{background:var(--ink);color:#fff;border-color:var(--ink)}
-.btn-primary:hover{background:var(--ink-mid);border-color:var(--ink-mid)}
-.btn-danger{background:var(--red-soft);color:var(--red);border-color:var(--red-border)}
-.btn-success{background:var(--green-soft);color:var(--green);border-color:var(--green-border)}
-.btn-sm{padding:4px 11px;font-size:12px}
-
-/* ── TABLES ── */
-.tbl-wrap{max-height:360px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--r-md)}
+.form-group{display:flex;flex-direction:column;gap:3px}
+.form-group label{font-size:11px;color:#888;font-weight:500}
+input[type=text],select{padding:7px 10px;border:1px solid #dde1e7;border-radius:8px;font-size:13px;color:#1a1a1a;background:#fff;font-family:inherit}
+.upload-zone{border:2px dashed #ccc;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;color:#888;font-size:13px}
+.upload-zone:hover{background:#f8f9fc}
+.btn{border:1.5px solid #dde1e7;background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;color:#333;font-weight:500;font-family:inherit}
+.btn:hover{background:#f5f6fa}
+.btn-primary{background:#1F4E79;color:#fff;border-color:#1F4E79}
+.btn-danger{background:#FFEBEE;color:#C62828;border-color:#EF9A9A}
+.btn-success{background:#E8F5E9;color:#2E7D32;border-color:#A5D6A7}
+.btn-sm{padding:3px 10px;font-size:12px}
+.tbl-wrap{max-height:360px;overflow-y:auto;border:1px solid #dde1e7;border-radius:12px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:10px 13px;font-weight:800;font-size:10px;color:var(--faint);border-bottom:1.5px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:2;text-transform:uppercase;letter-spacing:.1em}
-td{padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{text-align:left;padding:8px 10px;font-weight:700;font-size:11px;color:#888;border-bottom:1px solid #e8eaf0;background:#f8f9fc;position:sticky;top:0;z-index:2;text-transform:uppercase;letter-spacing:.04em}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f5;vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--bg)}
-.priority-row{background:#fffcfc}
-.status-active{color:var(--green);font-size:12px;font-weight:700}
-.d-days-ok{color:var(--green);font-weight:600}
-.d-days-warn{color:var(--amber);font-weight:600}
-.d-days-never{color:var(--red);font-weight:600}
-.no-data{text-align:center;padding:3rem;color:var(--faint);font-size:13px;font-weight:600}
-
-/* ── LP TAGS ── */
-.lp-tag{display:inline-block;padding:2px 9px;border-radius:var(--r);font-size:11px;font-weight:700}
-.lp-tag-Gavin{background:var(--green-soft);color:var(--green);border:1.5px solid var(--green-border)}
-.lp-tag-Karen{background:var(--blue-soft);color:var(--blue);border:1.5px solid var(--blue-border)}
-.lp-tag-Osgood{background:var(--orange-soft);color:var(--orange);border:1.5px solid var(--orange-border)}
-.lp-tag-Jordan{background:var(--pink-soft);color:var(--pink);border:1.5px solid var(--pink-border)}
-.lp-tag-Said{background:var(--purple-soft);color:var(--purple);border:1.5px solid var(--purple-border)}
-.lp-tag-Unassigned{background:var(--bg);color:var(--muted);border:1.5px solid var(--border)}
-.lp-c-Gavin{color:var(--green)}.lp-c-Karen{color:var(--blue)}.lp-c-Osgood{color:var(--orange)}.lp-c-Jordan{color:var(--pink)}.lp-c-Said{color:var(--purple)}
-.bar-Gavin{background:#22c55e}.bar-Karen{background:#2563eb}.bar-Osgood{background:#f97316}.bar-Jordan{background:#ec4899}.bar-Said{background:#a855f7}
-
-/* ── WELCOME ── */
-.welcome{text-align:center;padding:5rem 1rem}
-.welcome-logo{background:var(--ink);color:#fff;font-weight:900;font-size:18px;padding:13px 26px;border-radius:var(--r-md);display:inline-block;margin-bottom:1.5rem;letter-spacing:.06em}
-.welcome h2{font-size:24px;font-weight:900;margin-bottom:10px;color:var(--ink);letter-spacing:-.03em}
-.welcome p{font-size:14px;max-width:380px;margin:0 auto;line-height:1.8;color:var(--muted)}
-.teams-msg-box{background:var(--bg);border-radius:var(--r);padding:.9rem 1.1rem;font-size:12px;line-height:1.8;white-space:pre-wrap;font-family:inherit;border:1.5px solid var(--border)}
-
-/* ── MODALS ── */
-.contact-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;padding:20px}
+tr:hover td{background:#fafbfc}
+.no-data{text-align:center;padding:2.5rem;color:#aaa;font-size:13px}
+.inactive-banner{background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:9px 12px;font-size:12px;color:#E65100;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.lp-tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.lp-tag-Gavin{background:#E8F5E9;color:#2E7D32}.lp-tag-Karen{background:#E3F2FD;color:#1565C0}
+.lp-tag-Osgood{background:#FFF8E1;color:#E65100}.lp-tag-Jordan{background:#FCE4EC;color:#880E4F}
+.lp-tag-Said{background:#EDE7F6;color:#4527A0}.lp-tag-Unassigned{background:#EEE;color:#555}
+.lp-c-Gavin{color:#2E7D32}.lp-c-Karen{color:#1565C0}.lp-c-Osgood{color:#E65100}.lp-c-Jordan{color:#880E4F}.lp-c-Said{color:#4527A0}
+.bar-Gavin{background:#4CAF50}.bar-Karen{background:#2196F3}.bar-Osgood{background:#FF9800}.bar-Jordan{background:#E91E63}.bar-Said{background:#9C27B0}
+.welcome{text-align:center;padding:3.5rem 1rem}
+.welcome-logo{background:#1F4E79;color:#fff;font-weight:800;font-size:20px;padding:10px 20px;border-radius:10px;display:inline-block;margin-bottom:1rem;letter-spacing:.04em}
+.welcome h2{font-size:19px;font-weight:700;margin-bottom:8px}
+.welcome p{font-size:13px;max-width:360px;margin:0 auto;line-height:1.7;color:#888}
+.teams-msg-box{background:#f8f9fc;border-radius:8px;padding:.75rem 1rem;font-size:12px;line-height:1.7;white-space:pre-wrap;font-family:inherit;border:1px solid #dde1e7}
+.contact-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;padding:20px}
 .contact-modal-overlay.open{display:flex}
-.lead-detail-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;align-items:flex-end;justify-content:center}
-.lead-detail-modal-overlay.open{display:flex}
-.lead-detail-box{background:#fff;border-radius:16px 16px 0 0;padding:26px 24px 40px;width:100%;max-width:480px;animation:slideUp .2s ease;border-top:3px solid var(--ink)}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.lead-detail-handle{width:40px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 22px}
-.lead-detail-label{font-size:10px;font-weight:800;color:var(--faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
-.lead-detail-value{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:18px}
-.lead-detail-value.small{font-size:14px;font-weight:500;color:var(--ink-soft)}
-.contact-modal-box{background:#fff;border-radius:var(--r-lg);padding:26px 28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.25);border-top:3px solid var(--ink)}
-.cm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.cm-title{font-size:15px;font-weight:800;color:var(--ink)}
-.cm-close{background:var(--bg);border:1.5px solid var(--border);font-size:14px;cursor:pointer;color:var(--muted);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .12s;font-family:inherit}
-.cm-close:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
-.cm-field{margin-bottom:14px}
-.cm-field label{display:block;font-size:10px;color:var(--faint);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
-.cm-field input{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--r);font-size:13px;font-family:inherit;color:var(--ink);background:#fff;transition:border-color .12s;font-weight:500}
-.cm-field input:focus{outline:none;border-color:var(--ink)}
-
-/* ── SEARCH ── */
-.search-panel{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);padding:1.1rem 1.25rem;margin-bottom:.9rem}
-.search-panel-title{font-size:13px;font-weight:800;margin-bottom:.65rem;color:var(--ink)}
+.contact-modal-box{background:#fff;border-radius:14px;padding:22px 24px;width:100%;max-width:420px}
+.cm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.cm-title{font-size:14px;font-weight:700;color:#1a1a1a}
+.cm-close{background:none;border:none;font-size:20px;cursor:pointer;color:#aaa}
+.cm-field{margin-bottom:12px}
+.cm-field label{display:block;font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.cm-field input{width:100%;padding:8px 10px;border:1px solid #dde1e7;border-radius:8px;font-size:13px;font-family:inherit;color:#1a1a1a;background:#fff}
+.cm-field input:focus{outline:none;border-color:#1F4E79}
+.search-panel{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:.9rem}
+.search-panel-title{font-size:13px;font-weight:700;margin-bottom:.6rem;color:#1F4E79}
 .search-input-row{display:flex;gap:8px;align-items:center;margin-bottom:.6rem}
 .search-input-row input{flex:1}
 .search-results{max-height:300px;overflow-y:auto}
-.search-agent-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.search-agent-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f5;flex-wrap:wrap}
 .search-agent-row:last-child{border-bottom:none}
-
-/* ── MISC ── */
-.last-note-preview{background:var(--purple-soft);border-left:3px solid var(--purple);border-radius:0 var(--r) var(--r) 0;padding:6px 10px;font-size:11px;color:var(--ink-soft);margin-top:6px;font-style:italic;line-height:1.6}
-.last-note-label{font-weight:800;font-style:normal;color:var(--faint);font-size:10px;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:2px}
-.rm-tag{display:inline-flex;align-items:center;gap:4px;background:var(--green-soft);border:1.5px solid var(--green-border);border-radius:var(--r);padding:2px 8px;font-size:10px;font-weight:700;color:var(--green)}
-.vel-tag{display:inline-flex;align-items:center;gap:4px;background:var(--blue-soft);border:1.5px solid var(--blue-border);border-radius:var(--r);padding:2px 8px;font-size:10px;font-weight:700;color:var(--blue)}
-.no-ref-tag{display:inline-flex;align-items:center;gap:4px;background:var(--red-soft);border:1.5px solid var(--red-border);border-radius:var(--r);padding:2px 8px;font-size:10px;font-weight:700;color:var(--red)}
-.tags-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.outcome-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.outcome-btn{border:2px solid #d1d5db;background:#fff;border-radius:var(--r);padding:7px 16px;cursor:pointer;font-size:12px;font-weight:700;color:#374151;font-family:inherit;transition:all .12s;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
-.outcome-btn:hover{border-color:#374151;color:#111;box-shadow:0 2px 8px rgba(0,0,0,0.12)}
-.outcome-btn.sel-answered{background:#16a34a;border-color:#15803d;color:#fff;box-shadow:0 2px 6px rgba(22,163,74,.3)}
-.outcome-btn.sel-voicemail{background:#d97706;border-color:#b45309;color:#fff;box-shadow:0 2px 6px rgba(217,119,6,.3)}
-.outcome-btn.sel-noanswer{background:#dc2626;border-color:#b91c1c;color:#fff;box-shadow:0 2px 6px rgba(220,38,38,.3)}
-.outcome-btn.sel-senttext{background:#2563eb;border-color:#1d4ed8;color:#fff;box-shadow:0 2px 6px rgba(37,99,235,.3)}
-.outcome-btn.sel-answered{background:var(--green-soft);border-color:var(--green-border);color:var(--green)}
-.outcome-btn.sel-voicemail{background:var(--amber-soft);border-color:var(--amber-border);color:var(--amber)}
-.outcome-btn.sel-noanswer{background:var(--red-soft);border-color:var(--red-border);color:var(--red)}
-.outcome-btn.sel-senttext{background:var(--blue-soft);border-color:var(--blue-border);color:var(--blue)}
-.outcome-btn.sel-referral{background:var(--blue-soft);border-color:var(--blue-border);color:var(--blue)}
-.outcome-btn.sel-checkin{background:var(--green-soft);border-color:var(--green-border);color:var(--green)}
-.outcome-btn.sel-listing{background:var(--amber-soft);border-color:var(--amber-border);color:var(--amber)}
-.outcome-btn.sel-noresponse{background:var(--red-soft);border-color:var(--red-border);color:var(--red)}
-.outcome-label{font-size:11px;color:var(--ink-soft);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:block}
-.co-mkt-tag{display:inline-flex;align-items:center;gap:4px;background:var(--amber-soft);border:1.5px solid var(--amber-border);border-radius:var(--r);padding:2px 8px;font-size:10px;font-weight:700;color:var(--amber)}
-.tenure-tag{font-size:10px;color:var(--faint);font-weight:500}
-
-/* ── VELOCIFY ── */
-.vel-board{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:1rem}
-.vel-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;transition:background .12s}
-.vel-row:hover{background:var(--bg)}
+.target-complete-bar{background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:9px 12px;font-size:12px;color:#2E7D32;margin-bottom:.75rem;font-weight:600;display:flex;align-items:center;gap:8px}
+.last-note-preview{background:#F8F7FC;border-left:3px solid #9C27B0;border-radius:0 6px 6px 0;padding:5px 9px;font-size:11px;color:#555;margin-top:5px;font-style:italic;line-height:1.5}
+.last-note-label{font-weight:700;font-style:normal;color:#888;font-size:10px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px}
+.rm-tag{display:inline-flex;align-items:center;gap:4px;background:#E8F5E9;border:1px solid #A5D6A7;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#2E7D32}
+.vel-tag{display:inline-flex;align-items:center;gap:4px;background:#E3F2FD;border:1px solid #90CAF9;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#1565C0}
+.no-ref-tag{display:inline-flex;align-items:center;gap:4px;background:#FFEBEE;border:1px solid #EF9A9A;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#C62828}
+.tags-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.outcome-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.outcome-btn{border:1.5px solid #dde1e7;background:#fff;border-radius:20px;padding:4px 12px;cursor:pointer;font-size:11px;font-weight:600;color:#555;font-family:inherit}
+.outcome-btn:hover{background:#f0f2f5}
+.outcome-btn.sel-referral{background:#E3F2FD;border-color:#90CAF9;color:#1565C0}
+.outcome-btn.sel-checkin{background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32}
+.outcome-btn.sel-listing{background:#FFF8E1;border-color:#FFE082;color:#E65100}
+.outcome-btn.sel-noresponse{background:#FFEBEE;border-color:#EF9A9A;color:#C62828}
+.outcome-label{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block}
+.vel-board{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.vel-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f0f2f5;font-size:13px}
 .vel-row:last-child{border-bottom:none}
-.vel-medal{font-size:15px;width:24px;text-align:center;flex-shrink:0}
+.vel-medal{font-size:16px;width:24px;text-align:center;flex-shrink:0}
 .vel-cols{display:flex;gap:12px}
 .vel-col{text-align:center;min-width:40px}
-.vel-col-num{font-size:16px;font-weight:800;color:var(--ink)}
-.vel-col-num.zero{color:var(--border-mid)}
-.vel-col-lbl{color:var(--faint);font-size:9px;text-transform:uppercase;font-weight:700;letter-spacing:.08em}
+.vel-col-num{font-size:15px;font-weight:800;color:#1F4E79}
+.vel-col-num.zero{color:#ddd}
+.vel-col-lbl{color:#aaa;font-size:9px;text-transform:uppercase}
+.co-mkt-tag{display:inline-flex;align-items:center;gap:4px;background:#FFF3E0;border:1px solid #FFCC02;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#E65100}
+.bday-banner{background:#FCE4EC;border:1px solid #F48FB1;border-radius:8px;padding:9px 12px;font-size:12px;color:#880E4F;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:500;flex-wrap:wrap}
+.tenure-tag{font-size:10px;color:#aaa;font-weight:400}
 
-/* ── REF TAB ── */
-.ref-tab-bar{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-bottom:1.25rem}
-.ref-tab{padding:10px 18px;font-size:13px;font-weight:700;color:var(--faint);border-bottom:3px solid transparent;cursor:pointer;margin-bottom:-2px;transition:all .15s}
-.ref-tab:hover{color:var(--ink-soft)}
-.ref-tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+/* ── REFERRAL LEADS TAB ── */
+.ref-tab-bar{display:flex;gap:0;border-bottom:2px solid #e8eaf0;margin-bottom:1.25rem}
+.ref-tab{padding:9px 18px;font-size:13px;font-weight:600;color:#999;border-bottom:3px solid transparent;cursor:pointer;margin-bottom:-2px;transition:color .15s}
+.ref-tab:hover{color:#555}
+.ref-tab.active{color:#1F4E79;border-bottom-color:#1F4E79}
 .ref-tab-panel{display:none}.ref-tab-panel.active{display:block}
-
-/* ── STAT CARDS ── */
 .ref-stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.25rem}
-.ref-stat-card{
-  background:var(--surface);border:1.5px solid var(--border);
-  border-top:3px solid var(--ink);
-  border-radius:var(--r-md);padding:18px 14px;text-align:center;
-  transition:border-color .12s;
-}
-.ref-stat-card:hover{border-color:var(--ink)}
-.ref-stat-label{font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-weight:800;display:block}
-.ref-stat-value{font-size:28px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-.04em;display:block}
-.ref-stat-value.good{color:var(--green)}
-.ref-stat-value.warn{color:var(--red)}
-
-/* ── REF SECTIONS ── */
-.ref-container{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.25rem;margin-bottom:1rem}
-.ref-last-updated{font-size:11px;color:var(--faint);margin-bottom:1rem;font-weight:600}
-.ref-section{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:1rem}
-.ref-section-header{padding:13px 18px;border-bottom:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--bg)}
-.ref-section-title{font-size:13px;font-weight:800;color:var(--ink)}
-.ref-section-count{font-size:11px;color:var(--ink);font-weight:800;background:var(--ink);color:#fff;padding:2px 10px;border-radius:var(--r)}
+.ref-stat-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:12px 14px;text-align:center}
+.ref-stat-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:600}
+.ref-stat-value{font-size:22px;font-weight:800;color:#1F4E79}
+.ref-stat-value.good{color:#2E7D32}
+.ref-stat-value.warn{color:#E65100}
+.ref-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.ref-section-header{padding:10px 16px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between;align-items:center;background:#fafbfc}
+.ref-section-title{font-size:13px;font-weight:700;color:#1a1a1a}
+.ref-section-count{font-size:12px;color:#888;font-weight:500}
 .ref-leads-table{width:100%;border-collapse:collapse;font-size:13px}
-.ref-leads-table th{text-align:left;padding:10px 16px;font-size:10px;font-weight:800;color:var(--faint);border-bottom:1.5px solid var(--border);background:var(--bg);text-transform:uppercase;letter-spacing:.1em}
-.ref-leads-table td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+.ref-leads-table th{text-align:left;padding:8px 12px;font-size:10px;font-weight:700;color:#888;border-bottom:1px solid #e8eaf0;background:#f8f9fc;text-transform:uppercase;letter-spacing:.05em}
+.ref-leads-table td{padding:9px 12px;border-bottom:1px solid #f5f6f8;vertical-align:middle}
 .ref-leads-table tr:last-child td{border-bottom:none}
-.ref-leads-table tr:hover td{background:var(--bg)}
-.ref-leads-table tr.tappable-row{cursor:pointer}
-.ref-leads-table tr.tappable-row:active td{background:var(--bg)}
-
-/* ── REF BADGES ── */
+.ref-leads-table tr:hover td{background:#fafbfc}
 .ref-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1rem}
-.ref-badge{display:inline-block;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:700}
-.rs-started{background:var(--green-soft);color:var(--green);border:1.5px solid var(--green-border)}
-.rs-contact{background:var(--blue-soft);color:var(--blue);border:1.5px solid var(--blue-border)}
-.rs-nurture{background:var(--amber-soft);color:var(--amber);border:1.5px solid var(--amber-border)}
-.rs-contacted{background:var(--purple-soft);color:var(--purple);border:1.5px solid var(--purple-border)}
-.rs-withdrawn{background:var(--red-soft);color:var(--red);border:1.5px solid var(--red-border)}
-.rs-other{background:var(--bg);color:var(--muted);border:1.5px solid var(--border)}
-.ref-empty{text-align:center;padding:3rem;color:var(--faint);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.ref-refresh-btn{font-size:11px;color:var(--ink);background:var(--bg);border:1.5px solid var(--border-mid);border-radius:var(--r);padding:4px 12px;cursor:pointer;font-weight:700;transition:all .12s;font-family:inherit}
-.ref-refresh-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ref-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.rs-started{background:#C6EFCE;color:#1B5E20}
+.rs-contact{background:#BBDEFB;color:#0D47A1}
+.rs-nurture{background:#FFF2CC;color:#7D5A00}
+.rs-contacted{background:#EDE7F6;color:#4527A0}
+.rs-withdrawn{background:#FFCDD2;color:#B71C1C}
+.rs-other{background:#EEE;color:#555}
+.ref-empty{text-align:center;padding:2rem;color:#aaa;font-size:13px}
+.ref-refresh-btn{font-size:11px;color:#1F4E79;background:none;border:1px solid #dde1e7;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600}
+.ref-refresh-btn:hover{background:#f0f2f5}
 
-/* ── SKELETON ── */
-@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
-.skeleton-rows{padding:12px 16px;display:flex;flex-direction:column;gap:10px}
-.skeleton-row{height:36px;border-radius:var(--r);background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%);background-size:400px 100%;animation:shimmer 1.4s ease infinite}
-
-/* ── RESPONSIVE ── */
-@media(max-width:600px){
-  .ref-col-status{display:none}
-  .ref-col-status-th{display:none}
-  .ref-stat-grid{grid-template-columns:repeat(3,1fr)}
-  .app{padding:1rem 1rem 4rem}
-}
+/* ── REFERRAL LEADS SECTION ── */
+.ref-stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.25rem}
+.ref-stat-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:12px 14px;text-align:center}
+.ref-stat-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:600}
+.ref-stat-value{font-size:22px;font-weight:800;color:#1F4E79}
+.ref-stat-value.good{color:#2E7D32}
+.ref-stat-value.warn{color:#E65100}
+.ref-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.ref-section-header{padding:10px 16px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between;align-items:center;background:#fafbfc}
+.ref-section-title{font-size:13px;font-weight:700;color:#1a1a1a}
+.ref-section-count{font-size:12px;color:#888;font-weight:500}
+.ref-leads-table{width:100%;border-collapse:collapse;font-size:13px}
+.ref-leads-table th{text-align:left;padding:8px 12px;font-size:10px;font-weight:700;color:#888;border-bottom:1px solid #e8eaf0;background:#f8f9fc;text-transform:uppercase;letter-spacing:.05em}
+.ref-leads-table td{padding:9px 12px;border-bottom:1px solid #f5f6f8;vertical-align:middle}
+.ref-leads-table tr:last-child td{border-bottom:none}
+.ref-leads-table tr:hover td{background:#fafbfc}
+.ref-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1rem}
+.ref-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.rs-started{background:#C6EFCE;color:#1B5E20}
+.rs-contact{background:#BBDEFB;color:#0D47A1}
+.rs-nurture{background:#FFF2CC;color:#7D5A00}
+.rs-contacted{background:#EDE7F6;color:#4527A0}
+.rs-withdrawn{background:#FFCDD2;color:#B71C1C}
+.rs-other{background:#EEE;color:#555}
+.ref-empty{text-align:center;padding:2rem;color:#aaa;font-size:13px}
+.ref-refresh-btn{font-size:11px;color:#1F4E79;background:none;border:1px solid #dde1e7;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600}
+.ref-refresh-btn:hover{background:#f0f2f5}
 </style>
 </head>
 <body>
@@ -463,7 +259,12 @@ tr:hover td{background:var(--bg)}
 <!-- LP VIEW -->
 <div id="view-lp" class="view">
   <!-- LP sub-tabs -->
-  <!-- MY WEEK — no sub-tabs, always visible -->
+  <div class="ref-tab-bar">
+    <div class="ref-tab active" onclick="switchLpTab('my-week',this)">My Week</div>
+    <div class="ref-tab" onclick="switchLpTab('referral-leads',this)">&#127968; Daily Referral Leads Update</div>
+  </div>
+
+  <!-- MY WEEK panel -->
   <div id="lp-tab-my-week" class="ref-tab-panel active">
     <div class="lp-hero">
       <div class="lp-hero-top">
@@ -487,9 +288,9 @@ tr:hover td{background:var(--bg)}
     </div>
     <div class="section-head" style="margin-top:.5rem">Your 15 this week</div>
     <div id="lp-call-list"></div>
-
-    <!-- REFERRAL LEADS always below call list -->
   </div>
+
+  <!-- DAILY REFERRAL LEADS panel -->
 </div>
 
 <!-- DANIEL VIEW -->
@@ -506,15 +307,15 @@ tr:hover td{background:var(--bg)}
       <div class="sc-title">&#128197; Last week <span style="font-size:11px;font-weight:400;color:#888" id="lw-lbl"></span><div class="pills" id="lw-pills"></div></div>
       <span id="lw-chev" style="font-size:14px;color:#888">&#9660;</span>
     </div>
-    <div id="lw-body" style="display:none;" class="sc-body"><div id="lw-content"></div></div>
+    <div id="lw-body" style="display:none;border-top:1px solid #f0f2f5;padding:.9rem 1.1rem"><div id="lw-content"></div></div>
   </div>
   <div class="section-head">This week&#39;s LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
   <div class="d-grid" id="d-grid"></div>
   <div class="section-head" style="margin-top:1rem">&#127968; Daily Referral Leads Update
     <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">&#8635; Refresh</button>
   </div>
-  <div class="ref-container">
-    <div class="ref-last-updated" id="ref-last-updated">Loading...</div>
+  <div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:12px;color:#888;margin-bottom:1rem" id="ref-last-updated">Loading...</div>
     <div class="ref-stat-grid">
       <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads">--</div></div>
       <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts">--</div></div>
@@ -546,7 +347,7 @@ tr:hover td{background:var(--bg)}
     </div>
     <div class="ref-section">
       <div class="ref-section-header">
-        <span class="ref-section-title">Unconverted Leads — MTD</span>
+        <span class="ref-section-title">Uncovered Leads — MTD</span>
         <span class="ref-section-count" id="ref-uncovered-count">0 leads</span>
       </div>
       <div id="ref-uncovered-table"></div>
@@ -657,11 +458,11 @@ var lastWeekKey=getLastWeekKey(TODAY);
 var agents=[],callLogs={},lastWeekLogs={},currentUser=null,noteTimers={},contactCache={},editingLpContact=null;
 var referralLeadsCache=null;
 
-var SEED=[["BRANDON THOMPSON","A","Osgood","2026-06-01","2026-06-01","2026-05-04","2026-06-01",false,0],["CHRIS REED","A","Said","2026-06-03","2026-06-02","2026-05-08","2026-05-27",false,0],["DUSTIN GOLDMAN","A","Osgood","2026-04-20","2026-04-24","2026-03-30","2026-03-27",false,0],["KEVIN SPEERT","A","Gavin","2026-05-08","2026-05-27","2026-06-01","2026-06-12",false,0],["MEGAN LYNCH","A","Gavin","2026-06-03","2026-06-10","2026-06-11","2026-06-22",false,0],["MICHELLE ERICKSON","A","Gavin","2025-08-04","2026-03-25","2026-04-20","2026-04-10",false,0],["OSCAR MARTINEZ","A","Karen","2026-06-08","2026-06-08","2026-05-05","2026-06-15",false,0],["RACQUEL LUDAWAY","A","Gavin","2026-05-29","2026-05-19","2026-04-16","2026-06-04",false,0],["SAHAR SHALASH","A","Said","2026-06-05","2026-06-05","2026-05-09","2026-05-29",false,0],["TIARA VILLATORO","A","Karen","2026-05-08","2026-05-08","2026-06-04","2026-05-22",false,0],["TINA HOFFMAN","A","Gavin","2023-10-10","2026-05-06","2026-05-27","2026-02-10",false,0],["TODD STONE","A","Said","2026-06-09","2026-06-09","2026-04-13","2026-05-08",false,0],["ANNIE MORENO","B","Karen","2026-06-10","2026-06-08","2026-05-11","2026-06-12",false,0],["CINDA ERICKSON","B","Gavin","2026-04-23","2026-04-21","2026-02-24","2026-03-26",false,0],["CONNER KOCHANSKY","B","Gavin","2026-05-30","2026-05-19","2026-05-20","2026-05-20",false,0],["COURTNEY HAMILTON","B","Osgood","2026-05-27","2026-05-27","2026-06-02","2026-06-17",false,0],["DAN MANLEY","B","Gavin","2025-11-23","2026-04-29","2026-05-01","2026-05-19",false,0],["DEANNE RHYNEHARDT","B","Osgood","2026-05-22","2026-05-28","2026-05-05","2026-06-12",false,0],["DERON BENDER","B","Gavin","2025-08-11","2026-04-24","2026-04-28","2026-05-08",true,0],["ELIZABETH ELLINGER","B","Jordan","2026-03-16","2026-04-01","2026-05-18","2026-06-10",false,0],["ERIKA WEHNER","B","Gavin",null,"2026-04-13","2026-05-28","2026-05-11",false,0],["HEATHER HENRY-MINOR","B","Jordan","2026-04-07","2026-04-15","2026-05-05","2026-05-28",false,0],["INGRID CORREIA","B","Gavin","2026-05-08","2026-05-08","2025-12-11","2026-01-05",false,0],["JOHN BRUNNER","B","Osgood","2026-06-01","2026-06-01","2026-06-05","2025-11-17",false,0],["KANDIS HALL","B","Osgood","2026-01-04","2026-01-31","2026-02-25","2026-03-17",false,0],["KATIE SUMMERS","B","Gavin",null,"2026-04-22","2026-02-26","2026-05-29",false,0],["KHADIJA FARAH","B","Jordan","2026-05-16","2026-05-17","2026-02-09","2026-03-06",false,0],["KISHMA JAMES","B","Said","2026-06-11","2026-06-11","2025-06-09","2025-07-14",false,0],["KRISTINA MURPHY","B","Osgood","2026-06-02","2026-05-11","2025-10-03","2025-10-21",false,0],["MARIA COMAS","B","Karen","2026-04-27","2026-03-02","2025-06-19","2025-07-21",false,0],["MARK BOYD","B","Gavin",null,"2026-03-28","2026-04-08","2026-02-02",false,0],["MARTIN HOPKINS","B","Karen","2026-02-12","2026-04-28","2026-01-29","2026-02-20",false,0],["MARY MCMICHAEL","B","Said","2026-04-13","2026-04-13","2025-09-11","2025-10-10",false,0],["MATT PIPER","B","Osgood","2026-05-19","2026-05-19","2025-11-11","2025-12-01",false,0],["MATTHEW MONTALVO","B","Karen","2026-04-09","2026-04-08","2026-05-29","2025-11-20",false,0],["NATALIE ESTRELLA","B","Karen","2026-05-25","2026-05-25","2025-10-08","2025-11-03",false,0],["RAMI TAMIMI","B","Jordan","2026-03-27","2026-04-20","2026-05-07","2026-06-30",false,0],["SETH COLBURN","B","Said","2025-04-23","2026-03-31","2026-04-06","2026-04-30",false,0],["STACEY LAMBRIGHT","B","Jordan",null,"2026-03-25","2026-03-26","2026-04-07",false,0],["TRACY BERARD","B","Jordan",null,"2026-04-04","2026-04-14","2026-05-27",false,0],["AIMEE WHITLOCK","C","Gavin",null,"2025-01-14","2026-02-10","2026-04-15",false,0],["ALEXIS REED","C","Said","2026-03-25","2026-05-12","2026-01-30","2026-02-27",false,0],["ALINA ILKAEVA","C","Said",null,"2026-03-20",null,null,false,0],["AMY AGRESTA","C","Gavin","2026-05-23","2026-05-28","2025-07-08","2025-08-05",false,0],["ANA SORIA","C","Karen","2026-04-19",null,null,null,false,0],["ANGELA PEREZ","C","Gavin","2026-04-27","2026-05-06","2026-04-06","2026-04-24",false,0],["ANGELA POTTS","C","Osgood","2026-05-10","2026-05-10",null,null,false,0],["ANGELIQUE SOTONDJI","C","Jordan","2026-03-27","2026-03-27",null,null,false,0],["ASHLEY HENRY","C","Osgood","2026-04-22","2026-04-21",null,null,false,0],["AVA LAIRD","C","Jordan","2026-05-26","2026-05-25",null,null,false,0],["BAILEY STRATHIE","C","Osgood","2026-05-30","2026-05-30","2024-11-21",null,false,0],["BENJAMIN GAYTAN","C","Gavin","2026-05-16","2026-05-22",null,null,false,0],["BRAD GILLIAM","C","Gavin","2026-05-14",null,null,null,false,0],["BRANDON KIDD","C","Said","2026-05-01",null,null,null,false,0],["BRANDON MCCLENDON","C","Said","2026-06-08","2026-06-08",null,null,false,0],["BRIAN NANTHAVONGDOUANGSY","C","Osgood","2025-10-23","2025-11-19","2025-12-18","2026-03-20",false,0],["BRIAN ZINN","C","Jordan","2026-06-06","2026-06-07",null,null,false,0],["BRITNEY DODDS","C","Gavin","2026-03-26","2026-03-26","2026-03-02","2026-04-08",false,0],["CAROLE MCMAHON","C","Osgood","2026-05-31","2026-05-31","2026-05-08","2026-05-26",false,0],["CELINE WILLIAMS","C","Jordan","2026-06-01",null,null,null,false,0],["CESIA ESPINOZA YOUNG","C","Karen","2026-03-11","2026-03-10","2026-03-26","2026-04-17",false,0],["CHELSEA ANDERSON","C","Osgood","2026-02-07","2026-02-06","2026-03-28","2026-04-17",false,0],["CHERYL KINSEY","C","Jordan","2026-05-05","2026-05-04",null,null,false,0],["CHRISTIAN CHALKIAS","C","Osgood","2026-04-08","2026-04-08",null,null,false,0],["CHRISTINA COUGHLIN","C","Osgood","2026-05-29","2026-05-29","2024-09-11",null,false,0],["CHUCK KINSEY","C","Jordan","2026-03-16","2026-03-26",null,null,false,0],["CLAUDIA CHUECO","C","Karen","2026-06-08",null,null,null,false,0],["CODA GAHRIS","C","Jordan","2026-04-29","2026-04-29","2026-05-25",null,false,0],["CRAIG MAURER","C","Osgood","2026-05-13","2026-05-19",null,null,false,0],["DAIRDRE SCRIVEN","C","Said","2026-05-19","2026-05-19",null,null,false,0],["DARREN HOGG","C","Said","2026-04-22","2026-04-28",null,null,false,0],["DEVIN JOHNSON","C","Said","2026-03-29","2026-04-15","2025-05-30","2025-07-09",false,0],["DIANNA JENKINS","C","Said",null,"2026-03-24","2026-02-23","2026-04-06",false,0],["DONALD PAYNE JR","C","Osgood","2026-06-04",null,null,null,false,0],["ELIAS PAPPAN","C","Karen","2026-04-30",null,null,null,false,0],["ELIZABETH BONAUDI","C","Osgood","2026-04-17","2026-04-17",null,null,false,0],["ELIZABETH HOWARD","C","Osgood","2026-04-04","2026-04-03","2024-11-08",null,false,0],["ERIKA BRUNNER","C","Gavin","2026-04-13","2026-04-15","2025-11-07",null,false,0],["GLADIS CHAVEZ","C","Karen","2026-05-15","2026-05-05",null,null,false,0],["HAIFA BRUNNEY","C","Karen","2026-05-21","2026-06-01","2026-03-26","2026-04-27",false,0],["HEATHER EMMERT","C","Jordan","2026-06-11","2026-06-11","2024-09-06",null,false,0],["HYPATIA ESPINAL","C","Karen","2026-06-02","2026-06-02",null,null,false,0],["IZXEL MARTINEZ","C","Karen","2026-05-20","2026-05-20","2026-06-02",null,false,0],["JACOB ENGLISH","C","Jordan",null,"2026-03-18","2026-04-23","2026-06-12",false,0],["JAIDEN BALLAH","C","Said","2026-06-02","2026-06-03",null,null,false,0],["JASMIN ARCOS","C","Karen","2026-03-19","2026-03-26",null,null,false,0],["JASMIN MONTOYA","C","Karen","2026-05-31","2026-05-30",null,null,false,0],["JASMINE MCKENZIE","C","Osgood","2026-05-03","2026-05-04","2026-05-06","2026-05-29",false,0],["JEFF MESSMER","C","Gavin","2026-05-12","2026-05-12","2025-10-01",null,false,0],["JENNIFER BLACKMORE","C","Jordan","2026-05-02",null,null,null,false,0],["JENNIFER HOWISON","C","Jordan","2026-03-15","2026-03-30","2026-04-06",null,false,0],["JESSE MCCRERRY","C","Said",null,"2026-04-06","2026-04-13","2026-05-26",false,0],["JESSICA TOWER","C","Jordan","2026-05-27","2026-05-30","2023-04-03",null,false,0],["JOHN LUBINSKY","C","Said","2025-12-17","2025-12-19","2026-02-17","2026-03-20",false,0],["JONNATHAN AGUDELO","C","Karen","2026-05-23","2026-05-19",null,null,false,0],["JORDAN HOLLIBAUGH","C","Gavin",null,"2026-05-12","2026-04-29","2026-04-16",false,0],["JUSTIN BIERY","C","Karen","2026-05-27","2026-05-28",null,null,false,0],["KATHERINE DE LA ROSA","C","Karen","2026-05-28","2026-06-02","2026-06-10","2026-04-29",false,0],["KATHY HAYES","C","Jordan","2026-05-30","2026-05-29","2024-12-09",null,false,0],["KATIE MANSOR","C","Jordan","2026-04-27","2026-04-26",null,null,false,0],["KELSY YODER","C","Said","2026-04-28","2026-01-09","2026-01-12","2026-02-05",false,0],["KERWIN HEATH","C","Said",null,"2026-04-12",null,null,false,0],["KINSIE HUSKINS","C","Jordan",null,"2026-03-17","2026-04-28","2026-06-01",false,0],["KRISTEN VALENTY","C","Jordan",null,"2026-01-21","2026-02-24","2026-03-25",false,0],["LAUREN MCCLINTON","C","Said",null,"2026-04-29",null,null,false,0],["LESLIE HERNANDEZ","C","Karen","2026-05-07","2026-05-08","2026-05-19",null,false,0],["LETIKA WHITE","C","Osgood","2026-05-11","2026-05-12","2025-07-31","2025-08-29",false,0],["LEXIS GRANDY","C","Osgood","2026-06-11","2025-09-26","2025-09-29","2025-10-29",false,0],["LILIAN FUENTES","C","Karen","2026-04-21","2026-04-21",null,null,false,0],["LISA SIMMONS","C","Osgood",null,"2026-03-19","2026-04-14","2026-05-27",false,0],["LIZBEL CONTRERAS","C","Karen","2026-04-30","2026-05-11","2024-09-18",null,false,0],["LUIS GIL","C","Karen","2026-06-02","2026-06-02","2026-06-02","2025-09-26",false,0],["LYNDSEY LANE","C","Osgood","2026-03-16","2025-09-23","2025-12-23","2026-01-23",false,0],["MANDY WILSON","C","Jordan",null,"2026-03-28",null,null,false,0],["MARK VENNITTI","C","Jordan","2026-04-08","2026-04-08","2026-06-01","2026-06-18",false,0],["MARLA SEWELL","C","Osgood",null,"2026-03-19",null,null,false,0],["MATHEA ARUDDA","C","Karen",null,"2026-03-16","2026-03-23",null,false,0],["MICHELE FREDERICK","C","Osgood",null,"2026-05-31",null,null,false,0],["MIKE WHITEMAN","C","Osgood",null,"2025-07-24","2025-07-31","2026-05-11",false,0],["NANCY PRICE","C","Jordan","2026-01-03","2026-01-02","2026-05-08","2026-01-30",false,0],["NIA HARRINGTON","C","Said","2026-05-13","2026-05-05","2024-10-17",null,false,0],["NICK ZATEZALO","C","Osgood","2026-05-16","2026-03-19","2024-03-12",null,false,0],["NIKEHA HAYES","C","Osgood","2026-04-15","2025-09-28","2024-09-25",null,false,0],["NINA AVERY","C","Jordan",null,"2026-04-23",null,null,false,0],["NORA KERELIUK","C","Said","2026-04-24",null,null,null,false,0],["PAIGE LUDWIG","C","Said","2026-06-08","2026-03-05","2026-03-17","2026-04-14",false,0],["PATRICK ARQUETTE","C","Said","2026-04-22","2026-01-14","2025-09-09","2025-10-07",false,0],["PAULA PALLESCHI","C","Said",null,"2026-04-21","2026-04-27","2026-05-26",false,0],["PIERINA MANTILLA","C","Karen",null,"2026-03-15",null,null,false,0],["PILAR BENNETT","C","Karen","2026-04-15","2026-04-15","2025-07-23","2025-08-15",false,0],["RACHELLE PARSLEY","C","Said","2024-09-03","2026-04-15","2026-04-22","2026-05-13",false,0],["ROBERT HAYNER","C","Jordan",null,"2026-04-20","2026-04-23","2026-05-15",false,0],["ROBIN BLAKE","C","Gavin",null,"2025-12-19","2025-12-27","2026-03-17",false,0],["ROSALIA PABLO","C","Karen","2026-06-08","2026-06-04","2024-11-08",null,false,0],["ROSS DIGIORGIO","C","Osgood",null,"2025-06-24","2025-07-14","2026-04-30",false,0],["RUTH ESPINOZA","C","Karen",null,"2026-02-26","2026-03-26","2026-04-17",false,0],["RUTH GONZALEZ","C","Karen","2026-05-19","2026-05-19",null,null,false,0],["SAHEL ALAM","C","Said","2026-05-10","2026-05-08",null,null,false,0],["SAM BAMRICK","C","Jordan",null,"2026-04-14","2026-04-20","2026-05-15",false,0],["SARA BUSH","C","Said",null,"2026-03-27","2026-04-13","2026-05-27",false,0],["SARAH HERNANDEZ","C","Osgood","2026-05-28","2026-05-29","2024-10-21",null,false,0],["SASHA ANTONOVA","C","Said","2026-03-31","2026-03-31",null,null,false,0],["SHANE STINER","C","Jordan",null,"2026-04-08",null,null,false,0],["SHARON PANTELIS","C","Jordan","2026-04-28","2025-03-21","2025-04-01",null,false,0],["SHAYNE D. BOYD","C","Said","2026-05-04","2026-05-07",null,null,false,0],["SHIRRELL BURNSIDE","C","Osgood","2026-04-08","2025-07-14",null,null,false,0],["SLAVI JORDANOV","C","Said","2026-05-30","2025-10-06","2025-10-10","2025-11-07",false,0],["STAN GORKSI","C","Jordan",null,"2026-03-07","2026-03-09","2026-04-07",false,0],["STEVEN OSBORN","C","Jordan","2026-04-30","2026-02-03",null,null,false,0],["SUMMER DURHAM","C","Osgood",null,"2026-03-23",null,null,false,0],["SUNI RIVAS","C","Karen","2026-05-27","2026-05-28",null,null,false,0],["TAMARA CHARLTON","C","Osgood","2025-07-27","2026-04-16","2025-04-14",null,false,0],["TATIANA GRIGORITA","C","Jordan","2026-06-08","2026-06-08",null,null,false,0],["THAER AHMED","C","Said","2026-03-31","2026-03-31","2025-08-26","2025-09-30",false,0],["TIMOTHY OLIVER","C","Osgood","2026-06-09","2026-06-02",null,null,false,0],["TINA-DUTT-HIREN","C","Osgood",null,"2026-05-11",null,null,false,0],["TOM NEWMAN","C","Gavin","2026-06-08","2026-06-08","2024-01-08",null,false,0],["TONY AMOS","C","Osgood","2026-04-19","2026-04-01","2024-02-27",null,false,0],["TRACI WILLIAMS-JONES","C","Jordan",null,"2026-04-09","2026-03-23","2026-05-21",false,0],["TROY BORDEN","C","Gavin","2026-04-28","2026-04-30","2026-04-22","2026-05-13",false,0],["WENDY RAMIREZ","C","Karen","2026-03-25","2026-03-25",null,null,false,0],["WHITNEY SCHMIDT","C","Said","2026-03-18","2024-01-12","2024-01-18",null,false,0],["YASMIN DE JESUS","C","Karen","2024-03-27","2025-11-18","2026-04-01","2026-04-29",false,0],["YVETTA HARRISON","C","Osgood","2026-06-04",null,null,null,false,0]];
+var SEED=[["AIMEE WHITLOCK","C","Gavin",null,"2025-01-14","2026-02-10","2026-04-15",false,0],["ALEXIS REED","C","Said","2026-03-25","2026-05-12","2026-01-30","2026-02-27",false,0],["AMY AGRESTA","C","Gavin","2026-05-23","2026-05-28","2025-07-08","2025-08-05",false,0],["ANA SORIA","C","Karen","2026-04-19",null,null,null,false,0],["ANGELA PEREZ","C","Gavin","2026-04-27","2026-05-06","2026-04-06","2026-04-24",false,0],["ANGELA POTTS","C","Osgood","2026-05-10","2026-05-10",null,null,false,0],["ANGELIQUE SOTONDJI","C","Jordan","2026-03-27","2026-03-27",null,null,false,0],["ANNIE MORENO","B","Karen","2026-06-10","2026-06-12","2026-05-11","2026-06-12",false,0],["ASHLEY HENRY","C","Osgood","2026-04-22","2026-04-21",null,null,false,0],["AVA LAIRD","C","Jordan","2026-05-26","2026-05-25",null,null,false,0],["BAILEY STRATHIE","C","Osgood","2026-05-30","2026-05-30","2024-11-21",null,false,0],["BENJAMIN GAYTAN","C","Gavin","2026-05-16","2026-05-22",null,null,false,0],["BRAD GILLIAM","C","Gavin","2026-05-14",null,null,null,false,0],["BRANDON KIDD","C","Said","2026-05-01",null,null,null,false,0],["BRANDON MCCLENDON","C","Said","2026-06-08","2026-06-08",null,null,false,0],["BRANDON THOMPSON","A","Osgood","2026-06-01","2026-06-01","2026-05-04","2026-06-01",false,0],["BRIAN NANTHAVONGDOUANGSY","C","Osgood","2025-10-23","2025-11-19","2025-12-18","2026-03-20",false,0],["BRIAN ZINN","C","Jordan","2026-06-06","2026-06-07",null,null,false,0],["BRITNEY DODDS","C","Gavin","2026-03-26","2026-03-26","2026-03-02","2026-04-08",false,0],["CAROLE MCMAHON","C","Osgood","2026-05-31","2026-05-31","2026-05-08","2026-05-26",false,0],["CELINE WILLIAMS","C","Jordan","2026-06-01",null,null,null,false,0],["CESIA ESPINOZA YOUNG","C","Karen","2026-03-11","2026-03-10","2026-03-26","2026-04-17",false,0],["CHELSEA ANDERSON","C","Osgood","2026-02-07","2026-02-06","2026-03-28","2026-04-17",false,0],["CHERYL KINSEY","C","Jordan","2026-05-05","2026-05-04",null,null,false,0],["CHRIS REED","A","Said","2026-06-12","2026-06-12","2026-05-08","2026-05-27",false,0],["CHRISTIAN CHALKIAS","C","Osgood","2026-04-08","2026-04-08",null,null,false,0],["CHRISTINA COUGHLIN","C","Osgood","2026-05-29","2026-05-29","2024-09-11",null,false,0],["CHUCK KINSEY","C","Jordan","2026-03-16","2026-03-26",null,null,false,0],["CINDA ERICKSON","B","Gavin","2026-04-23","2026-04-21","2026-02-24","2026-03-26",false,0],["CLAUDIA CHUECO","C","Karen","2026-06-08",null,null,null,false,0],["CODA GAHRIS","C","Jordan","2026-04-29","2026-04-29","2026-05-25",null,false,0],["CONNER KOCHANSKY","B","Gavin","2026-05-30","2026-05-19","2026-05-20","2026-05-20",false,0],["COURTNEY HAMILTON","B","Osgood","2026-05-27","2026-05-27","2026-06-02","2026-06-17",false,0],["CRAIG MAURER","C","Osgood","2026-05-13","2026-05-19",null,null,false,0],["DAIRDRE SCRIVEN","C","Said","2026-05-19","2026-05-19",null,null,false,0],["DAN MANLEY","B","Gavin","2025-11-23","2026-04-29","2026-05-01","2026-05-19",false,0],["DARREN HOGG","C","Said","2026-04-22","2026-04-28",null,null,false,0],["DEANNE RHYNEHARDT","B","Osgood","2026-05-22","2026-05-28","2026-05-05","2026-06-12",false,0],["DERON BENDER","B","Gavin","2025-08-11","2026-04-24","2026-04-28","2026-05-08",false,0],["DEVIN JOHNSON","C","Said","2026-03-29","2026-04-15","2025-05-30","2025-07-09",false,0],["DIANNA JENKINS","C","Said",null,"2026-03-24","2026-02-23","2026-04-06",false,0],["DONALD PAYNE JR","C","Osgood","2026-06-04",null,null,null,false,0],["DUSTIN GOLDMAN","A","Osgood","2026-04-20","2026-04-24","2026-03-30","2026-03-27",false,0],["ELIAS PAPPAN","C","Karen","2026-04-30",null,null,null,false,0],["ELIZABETH BONAUDI","C","Osgood","2026-04-17","2026-04-17",null,null,false,0],["ELIZABETH ELLINGER","B","Jordan","2026-03-16","2026-04-01","2026-06-13","2026-06-10",false,0],["ELIZABETH HOWARD","C","Osgood","2026-04-04","2026-04-03","2024-11-08",null,false,0],["ERIKA BRUNNER","C","Gavin","2026-04-13","2026-04-15","2025-11-07",null,false,0],["ERIKA WEHNER","B","Gavin",null,"2026-04-13","2026-05-28","2026-05-11",false,0],["GLADIS CHAVEZ","C","Karen","2026-05-15","2026-05-05",null,null,false,0],["HAIFA BRUNNEY","C","Karen","2026-05-21","2026-06-01","2026-06-15","2026-04-27",false,0],["HEATHER EMMERT","C","Jordan","2026-06-11","2026-06-11","2024-09-06",null,false,0],["HEATHER HENRY-MINOR","B","Jordan","2026-04-07","2026-04-15","2026-05-05","2026-05-28",false,0],["HYPATIA ESPINAL","C","Karen","2026-06-02","2026-06-02",null,null,false,0],["INGRID CORREIA","B","Gavin","2026-05-08","2026-05-08","2025-12-11","2026-01-05",false,0],["IZXEL MARTINEZ","C","Karen","2026-05-20","2026-05-20","2026-06-02",null,false,0],["JACOB ENGLISH","C","Jordan",null,"2026-03-18","2026-04-23","2026-06-12",false,0],["JAIDEN BALLAH","C","Said","2026-06-02","2026-06-03",null,null,false,0],["JASMIN ARCOS","C","Karen","2026-03-19","2026-03-26",null,null,false,0],["JASMIN MONTOYA","C","Karen","2026-05-31","2026-05-30",null,null,false,0],["JASMINE MCKENZIE","C","Osgood","2026-05-03","2026-05-04","2026-05-06","2026-05-29",false,0],["JEFF MESSMER","C","Gavin","2026-06-12","2026-05-12","2025-10-01",null,false,0],["JENNIFER BLACKMORE","C","Jordan","2026-05-02",null,null,null,false,0],["JENNIFER HOWISON","C","Jordan","2026-03-15","2026-03-30","2026-04-06",null,false,0],["JESSE MCCRERRY","C","Said",null,"2026-04-06","2026-04-13","2026-05-26",false,0],["JESSICA TOWER","C","Jordan","2026-05-27","2026-05-30","2023-04-03",null,false,0],["JOHN BRUNNER","B","Osgood","2026-06-01","2026-06-01","2026-06-05","2025-11-17",false,0],["JOHN LUBINSKY","C","Said","2025-12-17","2025-12-19","2026-02-17","2026-03-20",false,0],["JONNATHAN AGUDELO","C","Karen","2026-05-23","2026-05-19",null,null,false,0],["JORDAN HOLLIBAUGH","C","Gavin",null,"2026-06-12","2026-04-29","2026-04-16",false,0],["JUSTIN BIERY","C","Karen","2026-05-27","2026-05-28",null,null,false,0],["KANDIS HALL","B","Osgood","2026-01-04","2026-01-31","2026-02-25","2026-03-17",false,0],["KATHERINE DE LA ROSA","C","Karen","2026-06-14","2026-06-02","2026-06-10","2026-04-29",false,0],["KATHY HAYES","C","Jordan","2026-05-30","2026-05-29","2024-12-09",null,false,0],["KATIE MANSOR","C","Jordan","2026-04-27","2026-04-26",null,null,false,0],["KATIE SUMMERS","B","Gavin",null,"2026-04-22","2026-02-26","2026-05-29",false,0],["KELSY YODER","C","Said","2026-04-28","2026-01-09","2026-01-12","2026-02-05",false,0],["KERWIN HEATH","C","Said",null,"2026-04-12",null,null,false,0],["KEVIN SPEERT","A","Gavin","2026-05-08","2026-05-27","2026-06-01","2026-06-12",false,0],["KHADIJA FARAH","B","Jordan","2026-05-16","2026-05-17","2026-02-09","2026-03-06",false,0],["KINSIE HUSKINS","C","Jordan",null,"2026-03-17","2026-04-28","2026-06-01",false,0],["KISHMA JAMES","B","Said","2026-06-11","2026-06-11","2025-06-09","2025-07-14",false,0],["KRISTEN VALENTY","C","Jordan",null,"2026-01-21","2026-02-24","2026-03-25",false,0],["KRISTINA MURPHY","B","Osgood","2026-06-02","2026-05-11","2025-10-03","2025-10-21",false,0],["LAUREN MCCLINTON","C","Said",null,"2026-04-29",null,null,false,0],["LESLIE HERNANDEZ","C","Karen","2026-05-07","2026-05-08","2026-05-19",null,false,0],["LETIKA WHITE","C","Osgood","2026-05-11","2026-06-15","2025-07-31","2025-08-29",false,0],["LEXIS GRANDY","C","Osgood","2026-06-11","2025-09-26","2025-09-29","2025-10-29",false,0],["LILIAN FUENTES","C","Karen","2026-04-21","2026-04-21",null,null,false,0],["LISA SIMMONS","C","Osgood",null,"2026-03-19","2026-04-14","2026-05-27",false,0],["LIZBEL CONTRERAS","C","Karen","2026-06-12","2026-06-12","2024-09-18",null,false,0],["LUIS GIL","C","Karen","2026-06-02","2026-06-02","2026-06-12","2025-09-26",false,0],["MANDY WILSON","C","Jordan",null,"2026-03-28",null,null,false,0],["MARIA COMAS","B","Karen","2026-04-27","2026-03-02","2025-06-19","2025-07-21",false,0],["MARK BOYD","B","Gavin",null,"2026-03-28","2026-04-08","2026-02-02",false,0],["MARK VENNITTI","C","Jordan","2026-04-08","2026-04-08","2026-06-01","2026-06-18",false,0],["MARLA SEWELL","C","Osgood",null,"2026-03-19",null,null,false,0],["MARTIN HOPKINS","B","Karen","2026-02-12","2026-04-28","2026-01-29","2026-02-20",false,0],["MARY MCMICHAEL","B","Said","2026-04-13","2026-04-13","2026-06-14","2025-10-10",false,0],["MATHEA ARUDDA","C","Karen",null,"2026-03-16","2026-03-23",null,false,0],["MATT PIPER","B","Osgood","2026-05-19","2026-05-19","2025-11-11","2025-12-01",false,0],["MATTHEW MONTALVO","B","Karen","2026-04-09","2026-04-08","2026-05-29","2025-11-20",false,0],["MEGAN LYNCH","A","Gavin","2026-06-03","2026-06-10","2026-06-11","2026-06-22",false,0],["MICHELE FREDERICK","C","Osgood",null,"2026-05-31",null,null,false,0],["MICHELLE ERICKSON","A","Gavin","2025-08-04","2026-03-25","2026-04-20","2026-04-10",false,0],["MIKE WHITEMAN","C","Osgood",null,"2025-07-24","2025-07-31","2026-05-11",false,0],["NANCY PRICE","C","Jordan","2026-01-03","2026-01-02","2026-05-08","2026-01-30",false,0],["NATALIE ESTRELLA","B","Karen","2026-06-14","2026-05-25","2025-10-08","2025-11-03",false,0],["NATHAN WHITE","C","Karen","2026-06-12",null,null,null,false,0],["NIA HARRINGTON","C","Said","2026-05-13","2026-05-05","2024-10-17",null,false,0],["NICK ZATEZALO","C","Osgood","2026-05-16","2026-03-19","2024-03-12",null,false,0],["NIKEHA HAYES","C","Osgood","2026-04-15","2025-09-28","2024-09-25",null,false,0],["NINA AVERY","C","Jordan",null,"2026-04-23",null,null,false,0],["NORA KERELIUK","C","Said","2026-04-24",null,null,null,false,0],["OSCAR MARTINEZ","A","Karen","2026-06-14","2026-06-08","2026-05-05","2026-06-15",false,0],["PAIGE LUDWIG","C","Said","2026-06-08","2026-03-05","2026-03-17","2026-04-14",false,0],["PATRICK ARQUETTE","C","Said","2026-04-22","2026-01-14","2025-09-09","2025-10-07",false,0],["PAULA PALLESCHI","C","Said",null,"2026-04-21","2026-04-27","2026-05-26",false,0],["PILAR BENNETT","C","Karen","2026-04-15","2026-04-15","2025-07-23","2025-08-15",false,0],["RACHELLE PARSLEY","C","Said","2024-09-03","2026-04-15","2026-04-22","2026-05-13",false,0],["RACQUEL LUDAWAY","A","Gavin","2026-05-29","2026-05-19","2026-04-16","2026-06-04",false,0],["RAMI TAMIMI","B","Jordan","2026-03-27","2026-04-20","2026-05-07","2026-06-30",false,0],["ROBERT HAYNER","C","Jordan",null,"2026-04-20","2026-04-23","2026-05-15",false,0],["ROBIN BLAKE","C","Gavin",null,"2025-12-19","2025-12-27","2026-03-17",false,0],["ROSALIA PABLO","C","Karen","2026-06-08","2026-06-04","2024-11-08",null,false,0],["ROSS DIGIORGIO","C","Osgood",null,"2025-06-24","2025-07-14","2026-04-30",false,0],["RUTH ESPINOZA","C","Karen",null,"2026-02-26","2026-03-26","2026-04-17",false,0],["RUTH GONZALEZ","C","Karen","2026-05-19","2026-05-19",null,null,false,0],["SAHAR SHALASH","A","Said","2026-06-05","2026-06-05","2026-05-09","2026-05-29",false,0],["SAHEL ALAM","C","Said","2026-05-10","2026-05-08",null,null,false,0],["SAM BAMRICK","C","Jordan",null,"2026-04-14","2026-04-20","2026-05-15",false,0],["SARA BUSH","C","Said",null,"2026-03-27","2026-04-13","2026-05-27",false,0],["SARAH HERNANDEZ","C","Osgood","2026-05-28","2026-05-29","2024-10-21",null,false,0],["SASHA ANTONOVA","C","Said","2026-03-31","2026-03-31",null,null,false,0],["SETH COLBURN","B","Said","2025-04-23","2026-03-31","2026-04-06","2026-04-30",false,0],["SHANE STINER","C","Jordan",null,"2026-04-08",null,null,false,0],["SHARON PANTELIS","C","Jordan","2026-04-28","2025-03-21","2025-04-01",null,false,0],["SHAYNE D. BOYD","C","Said","2026-05-04","2026-05-07",null,null,false,0],["SHIRRELL BURNSIDE","C","Osgood","2026-04-08","2025-07-14",null,null,false,0],["STACEY LAMBRIGHT","B","Jordan",null,"2026-03-25","2026-03-26","2026-04-07",false,0],["STEVEN OSBORN","C","Jordan","2026-04-30","2026-02-03",null,null,false,0],["SUMMER DURHAM","C","Osgood",null,"2026-03-23",null,null,false,0],["SUNI RIVAS","C","Karen","2026-06-12","2026-05-28",null,null,false,0],["TAMARA CHARLTON","C","Osgood","2025-07-27","2026-04-16","2025-04-14",null,false,0],["TATIANA GRIGORITA","C","Jordan","2026-06-08","2026-06-08",null,null,false,0],["THAER AHMED","C","Said","2026-03-31","2026-03-31","2025-08-26","2025-09-30",false,0],["TIARA VILLATORO","A","Karen","2026-05-08","2026-05-08","2026-06-04","2026-05-22",false,0],["TIMOTHY OLIVER","C","Osgood","2026-06-09","2026-06-02",null,null,false,0],["TINA HOFFMAN","A","Gavin","2023-10-10","2026-05-06","2026-05-27","2026-02-10",false,0],["TINA-DUTT-HIREN","C","Osgood",null,"2026-05-11",null,null,false,0],["TODD STONE","A","Said","2026-06-13","2026-06-13","2026-04-13","2026-05-08",false,0],["TOM NEWMAN","C","Gavin","2026-06-08","2026-06-08","2024-01-08",null,false,0],["TRACI WILLIAMS-JONES","C","Jordan",null,"2026-04-09","2026-03-23","2026-05-21",false,0],["TRACY BERARD","B","Jordan",null,"2026-04-04","2026-04-14","2026-05-27",false,0],["TROY BORDEN","C","Gavin","2026-04-28","2026-04-30","2026-04-22","2026-05-13",false,0],["WENDY RAMIREZ","C","Karen","2026-03-25","2026-03-25",null,null,false,0],["WHITNEY SCHMIDT","C","Said","2026-03-18","2024-01-12","2024-01-18",null,false,0],["YASMIN DE JESUS","C","Karen","2024-03-27","2025-11-18","2026-04-01","2026-04-29",false,0],["YVETTA HARRISON","C","Osgood","2026-06-04",null,null,null,false,0]];
 
 // ── LP sub-tab switching ──
 function switchLpTab(tabId, btn){
-  // tabs removed — kept for compatibility
+  document.querySelectorAll("#view-lp .ref-tab").forEach(function(t){t.classList.remove("active");});
   document.querySelectorAll("#view-lp .ref-tab-panel").forEach(function(p){p.classList.remove("active");});
   btn.classList.add("active");
   document.getElementById("lp-tab-"+tabId).classList.add("active");
@@ -686,24 +487,22 @@ function loadReferralLeads(force){
     return;
   }
   document.getElementById("ref-last-updated").textContent="Loading...";
-  document.getElementById("ref-today-table").innerHTML='<div class="skeleton-rows"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div>';
-  document.getElementById("ref-prior-table").innerHTML='<div class="skeleton-rows"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>';
   var todayStr=localDateStr(TODAY);
   var priorDay=new Date(TODAY);priorDay.setDate(TODAY.getDate()-1);
   var priorStr=localDateStr(priorDay);
   var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
 
   sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
-    var CORE_LP_KEYWORDS=["Gavin","Karen","Osgood","Jordan","Said","Dill","De La Riva","Saleh","McMahon","Johnston"];
+    var CORE_LP_KEYWORDS=["Dill","De La Riva","Saleh","McMahon","Johnston"];
     var filtered=(res||[]).filter(function(r){
       var lp=r.lp_user||"";
-      return CORE_LP_KEYWORDS.some(function(k){return lp.toLowerCase().indexOf(k.toLowerCase())>=0;});
+      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
     });
     referralLeadsCache=filtered;
     renderReferralLeads(referralLeadsCache);
     document.getElementById("ref-last-updated").textContent="Last refreshed: "+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   }).catch(function(){
-    document.getElementById("ref-last-updated").textContent="Waiting for live data — connect Zap to populate";
+    document.getElementById("ref-last-updated").textContent="Could not load — Zap may not be connected yet";
     renderReferralLeads([]);
   });
 }
@@ -751,12 +550,12 @@ function renderReferralLeads(data){
   // Render tables
   document.getElementById("ref-today-table").innerHTML=buildLeadsTable(todayLeads,"No leads received today yet.");
   document.getElementById("ref-prior-table").innerHTML=buildLeadsTable(priorLeads,"No leads on prior day.");
-  document.getElementById("ref-uncovered-table").innerHTML=buildLeadsTable(uncovered,"No unconverted leads — great conversion!");
+  document.getElementById("ref-uncovered-table").innerHTML=buildLeadsTable(uncovered,"No uncovered leads — great conversion!");
 }
 
 function buildLeadsTable(rows, emptyMsg){
   if(!rows||!rows.length) return '<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:24%">Agent</th><th style="width:26%">Buyer(s)</th><th style="width:9%">LP</th><th class="ref-col-status-th" style="width:22%">Status</th></tr></thead><tbody>';
+  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:24%">Agent</th><th style="width:24%">Buyer(s)</th><th style="width:10%">LP</th><th style="width:32%">Status & Last Update</th></tr></thead><tbody>';
   rows.forEach(function(r){
     var agent=r.referral_partner_name||"--";
     var buyer=r.buyer_name||r.buyers||"--";
@@ -764,54 +563,53 @@ function buildLeadsTable(rows, emptyMsg){
     LPS.forEach(function(lpName){if(lp.toLowerCase().indexOf(lpName.toLowerCase())>=0)lp=lpName;});
     var status=r.status||"--";
     var dateAdded=r.date_added?fmtShort(r.date_added):"--";
-    var lpKey=LPS.find(function(n){return lp===n;});
+    var lastUpdate=r.last_update?fmtShort(r.last_update):"--";
     var badgeCls=getStatusBadgeClass(status);
-    var rowData=encodeURIComponent(JSON.stringify({agent:agent,buyer:buyer,lp:lp,status:status,date:dateAdded,lastUpdate:dateAdded}));
-    html+='<tr class="tappable-row" onclick="showLeadDetail(\''+rowData+'\')">';
-    html+='<td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500;font-size:12px">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
-    html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="color:#ccc">--</span>')+'</td>';
-    html+='<td class="ref-col-status"><span class="ref-badge '+badgeCls+'" style="font-size:10px">'+escHtml(status)+'</span></td>';
-    html+='</tr>';
+    // Flag overdue: not File Started, not Nurture, last update > 24hrs ago
+    var isFileStarted=getStatusBadgeClass(status)==='rs-started';
+    var isNurture=status.toLowerCase().indexOf('nurture')>=0;
+    var lastUpdateDate=r.last_update?new Date(r.last_update+'T00:00:00'):null;
+    var hoursSince=lastUpdateDate?((new Date()-lastUpdateDate)/3600000):9999;
+    var isOverdue=!isFileStarted&&!isNurture&&hoursSince>24;
+    var rowStyle=isOverdue?'background:#FFF5F5;border-left:3px solid #E53935;':'';
+    var overdueFlag=isOverdue?'<span style="font-size:10px;color:#E53935;font-weight:700">🔴 NEEDS TOUCH</span><br>':'';
+    html+='<tr style="'+rowStyle+'"><td style="font-size:11px;color:#888">'+dateAdded+'</td><td style="font-weight:500;font-size:11px">'+escHtml(agent)+'</td><td style="font-size:11px">'+escHtml(buyer)+'</td>';
+    html+='<td>';
+    if(lp!=="--"){var lpKey=LPS.find(function(n){return lp===n;});html+='<span class="lp-tag lp-tag-'+(lpKey||"Unassigned")+'" style="font-size:10px;padding:2px 6px">'+escHtml(lp)+'</span>';}else{html+='<span style="color:#ccc">--</span>';}
+    html+='</td>';
+    html+='<td>'+overdueFlag+'<span class="ref-badge '+badgeCls+'" style="font-size:10px;display:block;margin-bottom:2px">'+escHtml(status)+'</span><span style="font-size:10px;color:#aaa">Last: '+lastUpdate+'</span></td></tr>';
   });
   html+='</tbody></table>';
   return html;
 }
 
 function getRotation(lp){
-  // Priority agents always first, then sort remaining active by longest since last LP call
   var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
   if(!active.length)return[];
   var priority=active.filter(isPriority);
   var normal=active.filter(function(a){return!isPriority(a);});
-  // Sort normal agents: never called first (null = 9999 days), then by most days since last call
-  normal.sort(function(a,b){
-    var da=lpDays(a[0]); var db=lpDays(b[0]);
-    var sa=da===null?99999:da;
-    var sb=db===null?99999:db;
-    return sb-sa;
-  });
+  var wn=Math.floor((TODAY-new Date("2024-01-01T12:00:00"))/(7*86400000));
   var remaining=Math.max(0,15-priority.length);
-  var base=normal.slice(0,remaining);
-  var combined=priority.concat(base);
+  var pw=Math.min(remaining,normal.length);
+  var si=normal.length?((wn*pw)%normal.length):0;
+  var base=[];for(var i=0;i<pw;i++)base.push(normal[(si+i)%normal.length]);
+  var overdue=normal.filter(function(a){var ds=lpDays(a[0]);return ds!==null&&ds>=14&&base.indexOf(a)<0;});
+  var combined=priority.concat(overdue.slice(0,2)).concat(base);
   var seen={},res=[];
   for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
   return res.slice(0,15);
 }
 
 function getLastWeekRotation(lp){
-  // Same logic for last week display — use last week logs for "called" check
   var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
   if(!active.length)return[];
+  var wn=Math.floor((TODAY-new Date("2024-01-01T12:00:00"))/(7*86400000))-1;
   var priority=active.filter(isPriority);
   var normal=active.filter(function(a){return!isPriority(a);});
-  normal.sort(function(a,b){
-    var da=lpDays(a[0]); var db=lpDays(b[0]);
-    var sa=da===null?99999:da;
-    var sb=db===null?99999:db;
-    return sb-sa;
-  });
   var remaining=Math.max(0,15-priority.length);
-  var base=normal.slice(0,remaining);
+  var pw=Math.min(remaining,normal.length);
+  var si=normal.length?((wn*pw)%normal.length):0;
+  var base=[];for(var i=0;i<pw;i++)base.push(normal[(si+i)%normal.length]);
   var combined=priority.concat(base);
   var seen={},res=[];
   for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
@@ -979,8 +777,7 @@ function renderCallCard(a,lp,isBonus){
   var chkN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
   var chk=called?chkY:chkN;
   var dsText=ds===null?"Never called":ds===0?"Called today":ds+"d since last call";
-  var isPending=pendingNote&&pendingNote[a[0]];
-  var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"")+(isPending?" priority":"");
+  var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"");
   var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:null;
   var velData=VELOCIFY_SEED[a[0]]||null;
   var velTotal=velData?velData.total:0,velMtd=velData?velData.mtd:0;
@@ -1016,17 +813,14 @@ function renderCallCard(a,lp,isBonus){
   html+='<span style="font-size:12px;color:#555" id="ci-email-'+safeId+'">&#9993;&#65039; <span style="color:#bbb">Loading...</span></span>';
   html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="margin-left:auto;font-size:11px">Edit contact</button>';
   html+='</div>';
-  if(called||isPending){
-    var noteErr=called&&(!note||note.trim().length<10)?'<div style="font-size:11px;color:var(--red);margin-top:4px;font-weight:600">&#9888; Add a real note — what did they say? Any leads, listings, or next steps?</div>':'';
-    if(isPending&&!called)noteErr='<div style="font-size:11px;color:var(--red);margin-top:4px;font-weight:700">&#9888; Write your note below — then tap the phone button again to save.</div>';
-    html+='<div style="margin-top:8px"><span class="outcome-label">How did it go?</span><div class="outcome-row">';
-    var oKeys=["Answered","Voicemail","No Answer","Sent Text"];
-    var oLabels=["&#9989; Answered","&#128222; Voicemail","&#10060; No Answer","&#128172; Sent Text"];
-    var oCls=["sel-answered","sel-voicemail","sel-noanswer","sel-senttext"];
-    for(var oi=0;oi<oKeys.length;oi++){html+='<button class="outcome-btn'+(outcome===oKeys[oi]?' '+oCls[oi]:'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" data-outcome="'+oKeys[oi]+'" onclick="selectOutcome(this)">'+oLabels[oi]+'</button>';}
+  if(called){
+    html+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+lp+'" placeholder="Details, referrals mentioned, next steps..." onchange="queueNote(this)">'+note+'</textarea>';
+    var outcomes=["&#127968; Referred a lead","&#128203; Sent a listing","&#128075; Check-in","&#128263; Not responsive"];
+    var oKeys=["Referred a lead","Sent a listing","Check-in","Not responsive"];
+    var oCls=["sel-referral","sel-listing","sel-checkin","sel-noresponse"];
+    html+='<div style="margin-top:8px"><span class="outcome-label">What happened?</span><div class="outcome-row">';
+    for(var oi=0;oi<outcomes.length;oi++){html+='<button class="outcome-btn'+(outcome===oKeys[oi]?' '+oCls[oi]:'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" data-outcome="'+oKeys[oi]+'" onclick="selectOutcome(this)">'+outcomes[oi]+'</button>';}
     html+='</div></div>';
-    html+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+lp+'" placeholder="What did they say? Any buyers, listings, upcoming moves, pain points, next steps..." onchange="queueNote(this)">'+note+'</textarea>';
-    html+=noteErr;
   }
   html+='</div></div>';
   return html;
@@ -1068,38 +862,8 @@ function renderLpSearch(){
 
 function toggleCallFromCard(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp")||currentUser;
-  if(calledThisWeek(name)){
-    deleteCallLog(name).then(function(){renderLP(currentUser);});
-    return;
-  }
-  // Check if note already exists in DOM (card already expanded)
-  var noteEl=document.querySelector('.note-field[data-name="'+name+'"]');
-  var note=noteEl?noteEl.value.trim():"";
-  if(note.length>=10){
-    // Has a real note — save it
-    upsertCallLog(name,lp,note).then(function(){renderLP(currentUser);});
-    return;
-  }
-  // No note yet — set a pending flag and re-render to show the note field
-  if(!pendingNote)pendingNote={};
-  pendingNote[name]=true;
-  renderLP(currentUser);
-  setTimeout(function(){
-    var nf=document.querySelector('.note-field[data-name="'+name+'"]');
-    if(nf){
-      nf.focus();
-      nf.style.borderColor="var(--red)";
-      nf.placeholder="Required — what did they say? Buyers, listings, next steps...";
-    }
-  },150);
-}
-
-function confirmCallWithNote(name,lp,note){
-  // Called from note blur/change once note is long enough
-  if(!pendingNote||!pendingNote[name])return;
-  if(!note||note.trim().length<10)return;
-  delete pendingNote[name];
-  upsertCallLog(name,lp,note.trim()).then(function(){renderLP(currentUser);});
+  if(calledThisWeek(name)){deleteCallLog(name).then(function(){renderLP(currentUser);});}
+  else{upsertCallLog(name,lp,"").then(function(){renderLP(currentUser);});}
 }
 
 function loadAgentContact(name,safeId){
@@ -1125,13 +889,7 @@ function toggleCall(btn){
 function queueNote(ta){
   var name=ta.getAttribute("data-name"),lp=ta.getAttribute("data-lp")||currentUser,val=ta.value;
   if(noteTimers[name])clearTimeout(noteTimers[name]);
-  noteTimers[name]=setTimeout(function(){
-    if(pendingNote&&pendingNote[name]&&val.trim().length>=10){
-      confirmCallWithNote(name,lp,val);
-    } else {
-      upsertCallLog(name,lp,val);
-    }
-  },800);
+  noteTimers[name]=setTimeout(function(){upsertCallLog(name,lp,val);},800);
 }
 
 function openLpContactModal(name){
@@ -1245,21 +1003,15 @@ function renderDaniel(){
   var gh="";
   LPS.forEach(function(lp){
     var done=getLpCallsThisWeek(lp),pct=getLpPctThisWeek(lp);
-    var lastPct=getLpPctLastWeek(lp);
-    var all=agents.filter(function(a){return a[2]===lp;});
-    var active=all.filter(isActive);
-    var ic=all.filter(function(a){return!isActive(a);}).length;
+    var all=agents.filter(function(a){return a[2]===lp;}),ic=all.filter(function(a){return!isActive(a);}).length;
     var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
-    var pctCls=pct===0?"zero":pct===100?"good":pct>50?"ok":"";
-    var trend=pct>lastPct?"▲":pct<lastPct?"▼":"";
-    var trendCls=pct>lastPct?"trend-up":pct<lastPct?"trend-down":"";
-    gh+='<div class="d-card">';
-    gh+='<div class="d-name"><span style="width:9px;height:9px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block;flex-shrink:0"></span><span class="lp-c-'+lp+'">'+lp+'</span></div>';
-    gh+='<div class="d-pct-row"><div class="d-pct '+pctCls+'">'+pct+'%</div>'+(trend?'<span class="d-trend '+trendCls+'">'+trend+'</span>':'')+'</div>';
+    var col=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
+    gh+='<div class="d-card"><div class="d-name"><span style="width:10px;height:10px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block;flex-shrink:0"></span><span class="lp-c-'+lp+'">'+lp+'</span></div>';
+    gh+='<div class="d-pct" style="color:'+col+'">'+pct+'%</div>';
     gh+='<div class="d-bar-track"><div class="d-bar-fill bar-'+lp+'" style="width:'+pct+'%"></div></div>';
-    gh+='<div class="d-meta"><span>'+done+"/"+WEEKLY_TARGET+' calls</span><span>'+active.length+' active</span></div>';
-    if(pc)gh+='<div class="d-alert">⚑ '+pc+' priority</div>';
-    if(ic)gh+='<div class="d-alert-warn">'+ic+' inactive</div>';
+    gh+='<div class="d-meta"><span>'+done+"/"+WEEKLY_TARGET+' this week</span><span>'+all.length+' agents</span></div>';
+    if(pc)gh+='<div style="font-size:11px;color:#C62828;margin-top:4px">'+pc+' priority</div>';
+    if(ic)gh+='<div style="font-size:11px;color:#E65100;margin-top:2px">'+ic+' inactive</div>';
     gh+='</div>';
   });
   document.getElementById("d-grid").innerHTML=gh;
@@ -1273,14 +1025,14 @@ function renderDaniel(){
   document.getElementById("d-tbody").innerHTML=list.map(function(a){
     var act=isActive(a),ds=lpDays(a[0]),mr=mostRecent(a),cal=calledThisWeek(a[0]),pri=isPriority(a);
     var log=callLogs[a[0]],notePreview=log&&log.note?'<div style="font-size:11px;color:#888;margin-top:2px;font-style:italic">'+log.note+'</div>':"";
-    var dsc=ds===null?"d-days-never":ds>=14?"d-days-warn":"d-days-ok";
-    return'<tr'+(pri?' class="priority-row"':'')+'>'+
+    var dsc=ds===null?"color:#E53935":ds>=14?"color:#FB8C00":"color:#43A047";
+    return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
       '<td style="font-weight:600">'+a[0]+(pri?'<span class="priority-tag" style="margin-left:5px">PRIORITY</span>':"")+notePreview+'</td>'+
       '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
       '<td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td>'+
-      '<td>'+(act?'<span class="status-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
+      '<td>'+(act?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
       '<td><button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="font-size:11px">View/Edit</button></td>'+
-      '<td class="'+dsc+'" style="font-size:12px">'+(ds===null?"Never":ds+"d ago")+'</td>'+
+      '<td style="font-size:12px;'+dsc+'">'+(ds===null?"Never":ds+"d ago")+'</td>'+
       '<td style="font-size:12px;color:#888">'+(mr?fmt(mr):"--")+'</td>'+
       '<td style="text-align:center">'+(cal?'<b style="color:#43A047">Yes</b>':'<span style="color:#ccc">-</span>')+'</td></tr>';
   }).join("");
@@ -1371,7 +1123,6 @@ function handleUpload(input){
 var VELOCIFY_SEED={"JOHN BRUNNER":{"total":1,"mtd":0,"wtd":0},"ANNIE MORENO":{"total":4,"mtd":3,"wtd":2},"CELINE WILLIAMS":{"total":1,"mtd":0,"wtd":0},"BRANDON THOMPSON":{"total":1,"mtd":0,"wtd":0},"LUIS GIL":{"total":1,"mtd":1,"wtd":0},"CHRIS REED":{"total":3,"mtd":3,"wtd":0},"HYPATIA ESPINAL":{"total":1,"mtd":1,"wtd":0},"KRISTINA MURPHY":{"total":1,"mtd":1,"wtd":0},"JAIDEN BALLAH":{"total":1,"mtd":1,"wtd":0},"MEGAN LYNCH":{"total":1,"mtd":1,"wtd":0},"TODD STONE":{"total":8,"mtd":8,"wtd":4},"OSCAR MARTINEZ":{"total":2,"mtd":2,"wtd":0},"DONALD PAYNE JR":{"total":1,"mtd":1,"wtd":0},"YVETTA HARRISON":{"total":1,"mtd":1,"wtd":0},"ROSALIA PABLO":{"total":2,"mtd":2,"wtd":0},"SAHAR SHALASH":{"total":1,"mtd":1,"wtd":0},"BRIAN ZINN":{"total":1,"mtd":1,"wtd":0},"BRANDON MCCLENDON":{"total":1,"mtd":1,"wtd":0},"PAIGE LUDWIG":{"total":1,"mtd":1,"wtd":0},"TATIANA GRIGORITA":{"total":1,"mtd":1,"wtd":0},"CLAUDIA CHUECO":{"total":1,"mtd":1,"wtd":0},"TOM NEWMAN":{"total":1,"mtd":1,"wtd":0},"KISHMA JAMES":{"total":1,"mtd":1,"wtd":1},"TIMOTHY OLIVER":{"total":1,"mtd":1,"wtd":1},"HEATHER EMMERT":{"total":1,"mtd":1,"wtd":1},"LEXIS GRANDY":{"total":1,"mtd":1,"wtd":1}};
 
 var prevNotes={};
-var pendingNote={};
 var rmActivity={};
 var selfReportedReferrals={};
 var agentFirstCall={};
@@ -1526,16 +1277,16 @@ function loadReferralLeads(force){
   if(el)el.textContent="Loading...";
   var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
   sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
-    var CORE_LP_KEYWORDS=["Gavin","Karen","Osgood","Jordan","Said","Dill","De La Riva","Saleh","McMahon","Johnston"];
+    var CORE_LP_KEYWORDS=["Dill","De La Riva","Saleh","McMahon","Johnston"];
     var filtered=(res||[]).filter(function(r){
       var lp=r.lp_user||"";
-      return CORE_LP_KEYWORDS.some(function(k){return lp.toLowerCase().indexOf(k.toLowerCase())>=0;});
+      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
     });
     referralLeadsCache=filtered;
     renderReferralLeads(referralLeadsCache);
     if(el)el.textContent="Last refreshed: "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
   }).catch(function(){
-    if(el)el.textContent="Waiting for live data — connect Zap to populate";
+    if(el)el.textContent="Could not load — check Zap connection";
     renderReferralLeads([]);
   });
 }
@@ -1574,12 +1325,12 @@ function renderReferralLeads(data){
   function setHtml(id,val){var e=document.getElementById(id);if(e)e.innerHTML=val;}
   setHtml("ref-today-table",buildLeadsTable(todayLeads,"No leads received today yet."));
   setHtml("ref-prior-table",buildLeadsTable(priorLeads,"No leads on prior day."));
-  setHtml("ref-uncovered-table",buildLeadsTable(uncovered,"No unconverted leads — great conversion!"));
+  setHtml("ref-uncovered-table",buildLeadsTable(uncovered,"No uncovered leads — great conversion!"));
 }
 
 function buildLeadsTable(rows,emptyMsg){
   if(!rows||!rows.length)return'<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:22%">Agent</th><th style="width:26%">Buyer(s)</th><th style="width:9%">LP</th><th class="ref-col-status-th" style="width:22%">Status</th></tr></thead><tbody>';
+  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:22%">Agent</th><th style="width:25%">Buyer(s)</th><th style="width:9%">LP</th><th style="width:18%">Status</th><th style="width:16%">Last Update</th></tr></thead><tbody>';
   rows.forEach(function(r){
     var agent=r.referral_partner_name||"--";
     var buyer=r.buyer_name||"--";
@@ -1588,34 +1339,15 @@ function buildLeadsTable(rows,emptyMsg){
     var status=r.status||"--";
     var dateAdded=r.date_added?new Date(r.date_added+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):"--";
     var lastUpdate=r.last_update?new Date(r.last_update+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):dateAdded;
-    var lpKey=LPS.find(function(n){return lp===n;});
     var badgeCls=getStatusBadgeClass(status);
-    var rowData=encodeURIComponent(JSON.stringify({agent:agent,buyer:buyer,lp:lp,status:status,date:dateAdded,lastUpdate:lastUpdate}));
-    html+='<tr class="tappable-row" onclick="showLeadDetail(\''+rowData+'\')">';
-    html+='<td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
+    var lpKey=LPS.find(function(n){return lp===n;});
+    html+='<tr><td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
     html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:11px;color:#888">'+escHtml(lp)+'</span>')+'</td>';
-    html+='<td class="ref-col-status"><span class="ref-badge '+badgeCls+'">'+escHtml(status)+'</span></td>';
-    html+='</tr>';
+    html+='<td><span class="ref-badge '+badgeCls+'">'+escHtml(status)+'</span></td>';
+    html+='<td style="font-size:12px;color:#888">'+lastUpdate+'</td></tr>';
   });
   html+='</tbody></table>';
   return html;
-}
-
-function showLeadDetail(encoded){
-  var d=JSON.parse(decodeURIComponent(encoded));
-  var badgeCls=getStatusBadgeClass(d.status);
-  var lpKey=LPS.find(function(n){return d.lp===n;});
-  var lpBadge=lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:13px;color:#888">'+escHtml(d.lp)+'</span>';
-  document.getElementById('leadDetailContent').innerHTML=
-    '<div class="lead-detail-label">Agent</div><div class="lead-detail-value">'+escHtml(d.agent)+'</div>'+
-    '<div class="lead-detail-label">Buyer(s)</div><div class="lead-detail-value small">'+escHtml(d.buyer)+'</div>'+
-    '<div class="lead-detail-label">LP</div><div class="lead-detail-value">'+lpBadge+'</div>'+
-    '<div class="lead-detail-label">Status</div><div class="lead-detail-value"><span class="ref-badge '+badgeCls+'">'+escHtml(d.status)+'</span></div>'+
-    '<div class="lead-detail-label">Date</div><div class="lead-detail-value small">'+escHtml(d.date)+(d.lastUpdate&&d.lastUpdate!==d.date?' &nbsp;&middot;&nbsp; Updated '+escHtml(d.lastUpdate):'')+'</div>';
-  document.getElementById('leadDetailModal').classList.add('open');
-}
-function closeLeadDetail(e){
-  if(e.target===document.getElementById('leadDetailModal'))document.getElementById('leadDetailModal').classList.remove('open');
 }
 
 setInterval(function(){if(currentUser==="Daniel")loadCallLogs().then(function(){renderDaniel();});},30000);
@@ -1623,12 +1355,5 @@ document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 loadAgents();
 loadCallLogs();
 </script>
-<div class="lead-detail-modal-overlay" id="leadDetailModal" onclick="closeLeadDetail(event)">
-  <div class="lead-detail-box" id="leadDetailBox">
-    <div class="lead-detail-handle"></div>
-    <div id="leadDetailContent"></div>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="document.getElementById('leadDetailModal').classList.remove('open')">Close</button>
-  </div>
-</div>
 </body>
 </html>
