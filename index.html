@@ -123,6 +123,7 @@ tr:hover td{background:#fafbfc}
 .lead-detail-value.small{font-size:13px;font-weight:500}
 .ref-leads-table tr.tappable-row{cursor:pointer}
 .ref-leads-table tr.tappable-row:active td{background:#f0f4ff}
+@media(max-width:600px){.ref-col-status{display:none}.ref-col-status-th{display:none}}
 .contact-modal-box{background:#fff;border-radius:14px;padding:22px 24px;width:100%;max-width:420px}
 .cm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .cm-title{font-size:14px;font-weight:700;color:#1a1a1a}
@@ -503,10 +504,10 @@ function loadReferralLeads(force){
   var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
 
   sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
-    var CORE_LP_KEYWORDS=["Dill","De La Riva","Saleh","McMahon","Johnston"];
+    var CORE_LP_KEYWORDS=["Gavin","Karen","Osgood","Jordan","Said","Dill","De La Riva","Saleh","McMahon","Johnston"];
     var filtered=(res||[]).filter(function(r){
       var lp=r.lp_user||"";
-      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
+      return CORE_LP_KEYWORDS.some(function(k){return lp.toLowerCase().indexOf(k.toLowerCase())>=0;});
     });
     referralLeadsCache=filtered;
     renderReferralLeads(referralLeadsCache);
@@ -565,7 +566,7 @@ function renderReferralLeads(data){
 
 function buildLeadsTable(rows, emptyMsg){
   if(!rows||!rows.length) return '<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:11%">Date</th><th style="width:26%">Agent</th><th style="width:38%">Buyer(s)</th><th style="width:11%">LP</th></tr></thead><tbody>';
+  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:24%">Agent</th><th style="width:26%">Buyer(s)</th><th style="width:9%">LP</th><th class="ref-col-status-th" style="width:22%">Status</th></tr></thead><tbody>';
   rows.forEach(function(r){
     var agent=r.referral_partner_name||"--";
     var buyer=r.buyer_name||r.buyers||"--";
@@ -574,10 +575,12 @@ function buildLeadsTable(rows, emptyMsg){
     var status=r.status||"--";
     var dateAdded=r.date_added?fmtShort(r.date_added):"--";
     var lpKey=LPS.find(function(n){return lp===n;});
+    var badgeCls=getStatusBadgeClass(status);
     var rowData=encodeURIComponent(JSON.stringify({agent:agent,buyer:buyer,lp:lp,status:status,date:dateAdded,lastUpdate:dateAdded}));
     html+='<tr class="tappable-row" onclick="showLeadDetail(\''+rowData+'\')">';
     html+='<td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500;font-size:12px">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
     html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="color:#ccc">--</span>')+'</td>';
+    html+='<td class="ref-col-status"><span class="ref-badge '+badgeCls+'" style="font-size:10px">'+escHtml(status)+'</span></td>';
     html+='</tr>';
   });
   html+='</tbody></table>';
@@ -1278,10 +1281,10 @@ function loadReferralLeads(force){
   if(el)el.textContent="Loading...";
   var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
   sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
-    var CORE_LP_KEYWORDS=["Dill","De La Riva","Saleh","McMahon","Johnston"];
+    var CORE_LP_KEYWORDS=["Gavin","Karen","Osgood","Jordan","Said","Dill","De La Riva","Saleh","McMahon","Johnston"];
     var filtered=(res||[]).filter(function(r){
       var lp=r.lp_user||"";
-      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
+      return CORE_LP_KEYWORDS.some(function(k){return lp.toLowerCase().indexOf(k.toLowerCase())>=0;});
     });
     referralLeadsCache=filtered;
     renderReferralLeads(referralLeadsCache);
@@ -1331,7 +1334,7 @@ function renderReferralLeads(data){
 
 function buildLeadsTable(rows,emptyMsg){
   if(!rows||!rows.length)return'<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:22%">Agent</th><th style="width:38%">Buyer(s)</th><th style="width:9%">LP</th></tr></thead><tbody>';
+  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:22%">Agent</th><th style="width:26%">Buyer(s)</th><th style="width:9%">LP</th><th class="ref-col-status-th" style="width:22%">Status</th></tr></thead><tbody>';
   rows.forEach(function(r){
     var agent=r.referral_partner_name||"--";
     var buyer=r.buyer_name||"--";
@@ -1341,10 +1344,12 @@ function buildLeadsTable(rows,emptyMsg){
     var dateAdded=r.date_added?new Date(r.date_added+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):"--";
     var lastUpdate=r.last_update?new Date(r.last_update+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):dateAdded;
     var lpKey=LPS.find(function(n){return lp===n;});
+    var badgeCls=getStatusBadgeClass(status);
     var rowData=encodeURIComponent(JSON.stringify({agent:agent,buyer:buyer,lp:lp,status:status,date:dateAdded,lastUpdate:lastUpdate}));
     html+='<tr class="tappable-row" onclick="showLeadDetail(\''+rowData+'\')">';
     html+='<td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
     html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:11px;color:#888">'+escHtml(lp)+'</span>')+'</td>';
+    html+='<td class="ref-col-status"><span class="ref-badge '+badgeCls+'">'+escHtml(status)+'</span></td>';
     html+='</tr>';
   });
   html+='</tbody></table>';
