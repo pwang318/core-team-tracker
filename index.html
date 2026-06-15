@@ -8,216 +8,264 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;color:#0f172a;font-size:14px;background:#f0f2f5;min-height:100vh}
-.app{max-width:940px;margin:0 auto;padding:1rem 1rem 3rem}
-.app-header{padding:.9rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #dde1e7;margin-bottom:.75rem}
-.brand{display:flex;align-items:center;gap:10px}
-.brand-logo{background:#0f172a;color:#fff;font-weight:800;font-size:13px;padding:6px 13px;border-radius:8px;letter-spacing:.05em}
-.brand-sub{font-size:12px;color:#666}
-.week-pill{font-size:11px;background:#e8eaf0;padding:4px 11px;border-radius:20px;color:#555}
-.save-ind{font-size:11px;color:#888;min-width:60px;text-align:right;display:flex;align-items:center;gap:4px}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
-.sync-dot.live{background:#43A047}.sync-dot.saving{background:#FB8C00}.sync-dot.error{background:#E53935}
-.who-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.9rem;align-items:center;background:#fff;padding:.75rem 1rem;border-radius:12px;border:1px solid #dde1e7}
-.who-label{font-size:12px;color:#888;margin-right:2px;font-weight:500}
-.who-btn{padding:7px 16px;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#555}
-.who-btn:hover{background:#f5f6fa}
-.wb-Gavin.active{background:#E8F5E9;border-color:#2E7D32;color:#2E7D32}
-.wb-Karen.active{background:#E3F2FD;border-color:#1565C0;color:#1565C0}
-.wb-Osgood.active{background:#FFF8E1;border-color:#E65100;color:#E65100}
-.wb-Jordan.active{background:#FCE4EC;border-color:#880E4F;color:#880E4F}
-.wb-Said.active{background:#EDE7F6;border-color:#4527A0;color:#4527A0}
-.wb-Daniel.active{background:#F3E5F5;border-color:#6A1B9A;color:#6A1B9A}
-.wb-Admin.active{background:#FBE9E7;border-color:#BF360C;color:#BF360C}
+:root{
+  --navy:#0f172a;--navy-soft:#1e293b;
+  --red:#A32D2D;--red-bg:#FFF8F8;--red-border:#F7C1C1;--red-light:#FCEBEB;
+  --green:#3B6D11;--green-bg:#EAF3DE;--green-border:#C0DD97;--green-var:#15803d;
+  --amber:#854F0B;--amber-bg:#FAEEDA;
+  --border:#e2e8f0;--border-light:#f1f5f9;
+  --text:#0f172a;--text-2:#475569;--text-3:#94a3b8;
+  --bg:#f8fafc;--surface:#ffffff;
+  --lp-gavin:#15803d;--lp-gavin-bg:#f0fdf4;
+  --lp-karen:#1d4ed8;--lp-karen-bg:#eff6ff;
+  --lp-osgood:#c2410c;--lp-osgood-bg:#fff7ed;
+  --lp-jordan:#9d174d;--lp-jordan-bg:#fdf2f8;
+  --lp-said:#6d28d9;--lp-said-bg:#f5f3ff;
+}
+body{font-family:'Inter',sans-serif;color:var(--text);font-size:14px;background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased}
+.app{max-width:960px;margin:0 auto;padding:1.25rem 1.25rem 4rem}
+
+/* Header */
+.app-header{padding:1rem 0 .75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);margin-bottom:1rem}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-logo{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:6px 14px;border-radius:6px;letter-spacing:.08em;text-transform:uppercase}
+.brand-sub{font-size:12px;color:var(--text-3);letter-spacing:.01em}
+.week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:4px 12px;border-radius:20px;color:var(--text-2);font-weight:500}
+.save-ind{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#cbd5e1;flex-shrink:0}
+.sync-dot.live{background:#15803d}.sync-dot.saving{background:#d97706}.sync-dot.error{background:#dc2626}
+
+/* Who bar */
+.who-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;background:var(--surface);padding:.75rem 1rem;border-radius:10px;border:1px solid var(--border)}
+.who-label{font-size:11px;color:var(--text-3);margin-right:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.who-btn{padding:6px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-2);font-family:inherit;transition:all .15s}
+.who-btn:hover{background:var(--bg);border-color:#cbd5e1}
+.wb-Gavin.active{background:var(--lp-gavin-bg);border-color:var(--lp-gavin);color:var(--lp-gavin)}
+.wb-Karen.active{background:var(--lp-karen-bg);border-color:var(--lp-karen);color:var(--lp-karen)}
+.wb-Osgood.active{background:var(--lp-osgood-bg);border-color:var(--lp-osgood);color:var(--lp-osgood)}
+.wb-Jordan.active{background:var(--lp-jordan-bg);border-color:var(--lp-jordan);color:var(--lp-jordan)}
+.wb-Said.active{background:var(--lp-said-bg);border-color:var(--lp-said);color:var(--lp-said)}
+.wb-Daniel.active{background:#f5f3ff;border-color:#6d28d9;color:#6d28d9}
+.wb-Admin.active{background:#fff7ed;border-color:#c2410c;color:#c2410c}
+
 .view{display:none}.view.active{display:block}
-.lp-hero{background:#0f172a;border:none;border-radius:12px;padding:1rem 1.25rem;margin-bottom:.9rem}
-.lp-hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px}
-.lp-hero-name{font-size:20px;font-weight:900;color:#fff;letter-spacing:-.01em}
-.lp-hero-sub{font-size:12px;color:rgba(255,255,255,0.55);margin-top:2px}
+
+/* LP Hero */
+.lp-hero{background:var(--navy);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.lp-hero-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.lp-hero-name{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.02em;margin-bottom:4px}
+.lp-hero-sub{font-size:12px;color:rgba(255,255,255,.45);font-weight:400}
 .prog-wrap{display:flex;align-items:center;gap:10px}
-.prog-track{flex:1;background:rgba(255,255,255,0.15);border-radius:20px;height:9px;overflow:hidden;min-width:130px}
-.prog-fill{height:9px;border-radius:20px}
-.prog-txt{font-size:14px;color:#fff;white-space:nowrap;font-weight:800}
-.priority-banner{background:#FFEBEE;border:1px solid #EF9A9A;border-radius:8px;padding:9px 12px;font-size:12px;color:#C62828;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:500}
-.monday-banner{background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:9px 12px;font-size:12px;color:#1565C0;margin-bottom:.75rem;font-weight:500}
-.streak-bar{background:#fff;border:1px solid #FFE082;border-radius:8px;padding:8px 12px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#E65100}
-.call-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:.9rem 1rem;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
-.call-card.priority{border-color:#EF9A9A;border-width:2px;background:#FFFAFA}
-.call-card.done{opacity:.45}
-.call-card.bonus{border-color:#90CAF9;background:#F0F8FF}
-.check-btn{width:44px;height:44px;border-radius:50%;border:2px solid #ccc;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-.check-btn.checked{background:#EAF3DE;border-color:#4CAF50}
+.prog-track{width:140px;background:rgba(255,255,255,.15);border-radius:20px;height:6px;overflow:hidden}
+.prog-fill{height:6px;border-radius:20px;transition:width .3s}
+.prog-txt{font-size:15px;color:#fff;font-weight:700;white-space:nowrap}
+
+/* Banners */
+.priority-banner{background:#FCEBEB;border:1px solid var(--red-border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:600}
+.monday-banner{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;font-size:12px;color:#1d4ed8;margin-bottom:.75rem;font-weight:500}
+.streak-bar{background:var(--surface);border:1px solid #fde68a;border-radius:8px;padding:9px 14px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#92400e}
+.inactive-banner{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 14px;font-size:12px;color:#c2410c;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.bday-banner{background:#fdf2f8;border:1px solid #fbcfe8;border-radius:8px;padding:10px 14px;font-size:12px;color:#9d174d;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:500;flex-wrap:wrap}
+.target-complete-bar{background:#f0fdf4;border:1px solid var(--green-border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--green);margin-bottom:.75rem;font-weight:600;display:flex;align-items:center;gap:8px}
+
+/* Call cards */
+.call-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px}
+.call-card.priority{border-color:#fca5a5;border-left:3px solid #dc2626;background:#fffbfb}
+.call-card.done{opacity:.4}
+.call-card.bonus{border-color:#bfdbfe;background:#f8fbff}
+.call-card.pending{border-color:#fcd34d;background:#fffdf0}
+.check-btn{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s}
+.check-btn:hover{border-color:#94a3b8;background:var(--bg)}
+.check-btn.checked{background:#f0fdf4;border-color:#4ade80}
 .call-info{flex:1;min-width:0}
-.call-name{font-weight:600;font-size:14px;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.priority-tag{background:#FFEBEE;color:#C62828;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700}
-.bonus-tag{background:#E3F2FD;color:#1565C0;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700}
-.call-meta{font-size:12px;color:#888;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.note-field{width:100%;margin-top:7px;padding:6px 10px;border:1px solid #dde1e7;border-radius:8px;background:#fafafa;color:#333;font-size:12px;font-family:inherit;resize:none;height:46px}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
-.badge-a{background:#C6EFCE;color:#1B5E20}.badge-b{background:#BBDEFB;color:#0D47A1}.badge-c{background:#EEE;color:#424242}.badge-inactive{background:#FFCDD2;color:#B71C1C}
-.section-head{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:1rem 0 .5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
-.d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-bottom:1rem}
-.d-card{background:#fff;border:1px solid #e2e8f0;border-top:3px solid #0f172a;border-radius:12px;padding:.9rem 1rem}
-.d-name{font-weight:800;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.d-pct{font-size:28px;font-weight:900;margin-bottom:4px;letter-spacing:-.02em}
-.d-bar-track{background:#eee;border-radius:20px;height:5px;margin-bottom:6px;overflow:hidden}
-.d-bar-fill{height:5px;border-radius:20px}
-.d-meta{font-size:11px;color:#888;display:flex;justify-content:space-between}
-.scorecard{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
-.sc-header{padding:.85rem 1.1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-.sc-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.call-name{font-weight:600;font-size:14px;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.priority-tag{background:#FEE2E2;color:#991b1b;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.bonus-tag{background:#dbeafe;color:#1e40af;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.call-meta{font-size:12px;color:var(--text-2);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.note-field{width:100%;margin-top:8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;resize:none;height:52px;transition:border-color .15s}
+.note-field:focus{outline:none;border-color:#94a3b8}
+
+/* Badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.badge-a{background:#dcfce7;color:#15803d}.badge-b{background:#dbeafe;color:#1d4ed8}.badge-c{background:#f1f5f9;color:#475569}.badge-inactive{background:#fee2e2;color:#991b1b}
+
+/* LP tags */
+.lp-tag{display:inline-block;padding:2px 9px;border-radius:4px;font-size:11px;font-weight:600}
+.lp-tag-Gavin{background:var(--lp-gavin-bg);color:var(--lp-gavin)}
+.lp-tag-Karen{background:var(--lp-karen-bg);color:var(--lp-karen)}
+.lp-tag-Osgood{background:var(--lp-osgood-bg);color:var(--lp-osgood)}
+.lp-tag-Jordan{background:var(--lp-jordan-bg);color:var(--lp-jordan)}
+.lp-tag-Said{background:var(--lp-said-bg);color:var(--lp-said)}
+.lp-tag-Unassigned{background:#f1f5f9;color:#64748b}
+.lp-c-Gavin{color:var(--lp-gavin)}.lp-c-Karen{color:var(--lp-karen)}.lp-c-Osgood{color:var(--lp-osgood)}.lp-c-Jordan{color:var(--lp-jordan)}.lp-c-Said{color:var(--lp-said)}
+.bar-Gavin{background:var(--lp-gavin)}.bar-Karen{background:var(--lp-karen)}.bar-Osgood{background:var(--lp-osgood)}.bar-Jordan{background:var(--lp-jordan)}.bar-Said{background:var(--lp-said)}
+
+/* Section heads */
+.section-head{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin:1.25rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+
+/* Daniel stat cards */
+.d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem}
+.d-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--navy);border-radius:10px;padding:1rem 1.1rem}
+.d-name{font-weight:600;font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
+.d-pct{font-size:30px;font-weight:700;margin-bottom:6px;letter-spacing:-.02em}
+.d-bar-track{background:var(--border-light);border-radius:20px;height:4px;margin-bottom:8px;overflow:hidden}
+.d-bar-fill{height:4px;border-radius:20px}
+.d-meta{font-size:11px;color:var(--text-3);display:flex;justify-content:space-between}
+
+/* Scorecards */
+.scorecard{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.sc-header{padding:.9rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sc-header:hover{background:var(--bg)}
+.sc-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--text)}
 .pills{display:flex;gap:5px;flex-wrap:wrap}
-.pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
-.pill-green{background:#EAF3DE;color:#3B6D11}.pill-amber{background:#FFF2CC;color:#7D5A00}.pill-red{background:#FFEBEE;color:#C62828}
-.sc-body{border-top:1px solid #f0f2f5;padding:.9rem 1.1rem}
-.sc-row{padding:9px 0;border-bottom:1px solid #f0f2f5}
+.pill{font-size:10px;font-weight:700;padding:2px 9px;border-radius:4px;text-transform:uppercase;letter-spacing:.03em}
+.pill-green{background:#dcfce7;color:#15803d}.pill-amber{background:#fef3c7;color:#92400e}.pill-red{background:#fee2e2;color:#991b1b}
+.sc-row{padding:10px 0;border-bottom:1px solid var(--border-light)}
 .sc-row:last-child{border-bottom:none}
 .sc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.sc-pct{font-size:20px;font-weight:800}
-.missed-box{background:#FFEBEE;border-radius:6px;padding:5px 9px;font-size:11px;color:#C62828;margin-top:4px}
-.won-box{font-size:11px;color:#43A047;font-weight:500;margin-top:2px}
-.leaderboard-row{background:#fff;border:1px solid #dde1e7;border-radius:10px;padding:.75rem 1rem;margin-bottom:6px;display:flex;align-items:center;gap:12px}
-.alert-item{background:#fff;border:1px solid #dde1e7;border-radius:8px;padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
-.adot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.adot-red{background:#E53935}.adot-amber{background:#FB8C00}.adot-green{background:#43A047}
-.admin-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
-.admin-section h3{font-size:14px;font-weight:700;margin-bottom:.75rem}
+.sc-pct{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.missed-box{background:#fff1f1;border-radius:6px;padding:5px 10px;font-size:11px;color:#991b1b;margin-top:5px}
+.won-box{font-size:11px;color:#15803d;font-weight:500;margin-top:3px}
+
+/* Leaderboard */
+.leaderboard-row{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem 1.1rem;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+
+/* Alert items */
+.alert-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;margin-bottom:5px;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.adot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.adot-red{background:#dc2626}.adot-amber{background:#d97706}.adot-green{background:#15803d}
+
+/* Admin */
+.admin-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:1rem}
+.admin-section h3{font-size:13px;font-weight:700;margin-bottom:.75rem;color:var(--text);text-transform:uppercase;letter-spacing:.04em}
 .form-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end}
 .form-group{display:flex;flex-direction:column;gap:3px}
-.form-group label{font-size:11px;color:#888;font-weight:500}
-input[type=text],select{padding:7px 10px;border:1px solid #dde1e7;border-radius:8px;font-size:13px;color:#1a1a1a;background:#fff;font-family:inherit}
-.upload-zone{border:2px dashed #ccc;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;color:#888;font-size:13px}
-.upload-zone:hover{background:#f8f9fc}
-.btn{border:1.5px solid #dde1e7;background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;color:#333;font-weight:500;font-family:inherit}
-.btn:hover{background:#f5f6fa}
-.btn-primary{background:#1F4E79;color:#fff;border-color:#1F4E79}
-.btn-danger{background:#FFEBEE;color:#C62828;border-color:#EF9A9A}
-.btn-success{background:#E8F5E9;color:#2E7D32;border-color:#A5D6A7}
-.btn-sm{padding:3px 10px;font-size:12px}
-.tbl-wrap{max-height:360px;overflow-y:auto;border:1px solid #dde1e7;border-radius:12px}
+.form-group label{font-size:11px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+input[type=text],select,input[type=email]{padding:7px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;color:var(--text);background:var(--surface);font-family:inherit}
+input[type=text]:focus,select:focus{outline:none;border-color:#94a3b8}
+.upload-zone{border:1.5px dashed var(--border);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;color:var(--text-3);font-size:13px;background:var(--bg)}
+.upload-zone:hover{background:var(--surface);border-color:#94a3b8}
+.btn{border:1px solid var(--border);background:var(--surface);border-radius:7px;padding:7px 14px;cursor:pointer;font-size:12px;color:var(--text);font-weight:600;font-family:inherit;transition:all .15s}
+.btn:hover{background:var(--bg);border-color:#94a3b8}
+.btn-primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-primary:hover{background:var(--navy-soft)}
+.btn-danger{background:#fff1f1;color:#991b1b;border-color:#fca5a5}
+.btn-success{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.btn-sm{padding:4px 10px;font-size:11px}
+
+/* Tables */
+.tbl-wrap{max-height:360px;overflow-y:auto;border:1px solid var(--border);border-radius:10px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:8px 10px;font-weight:700;font-size:11px;color:#888;border-bottom:1px solid #e8eaf0;background:#f8f9fc;position:sticky;top:0;z-index:2;text-transform:uppercase;letter-spacing:.04em}
-td{padding:8px 10px;border-bottom:1px solid #f0f2f5;vertical-align:middle}
+th{text-align:left;padding:9px 12px;font-weight:700;font-size:10px;color:var(--text-3);border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:2;text-transform:uppercase;letter-spacing:.06em}
+td{padding:9px 12px;border-bottom:1px solid var(--border-light);vertical-align:middle;color:var(--text)}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:#fafbfc}
-.no-data{text-align:center;padding:2.5rem;color:#aaa;font-size:13px}
-.inactive-banner{background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:9px 12px;font-size:12px;color:#E65100;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
-.lp-tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
-.lp-tag-Gavin{background:#E8F5E9;color:#2E7D32}.lp-tag-Karen{background:#E3F2FD;color:#1565C0}
-.lp-tag-Osgood{background:#FFF8E1;color:#E65100}.lp-tag-Jordan{background:#FCE4EC;color:#880E4F}
-.lp-tag-Said{background:#EDE7F6;color:#4527A0}.lp-tag-Unassigned{background:#EEE;color:#555}
-.lp-c-Gavin{color:#2E7D32}.lp-c-Karen{color:#1565C0}.lp-c-Osgood{color:#E65100}.lp-c-Jordan{color:#880E4F}.lp-c-Said{color:#4527A0}
-.bar-Gavin{background:#4CAF50}.bar-Karen{background:#2196F3}.bar-Osgood{background:#FF9800}.bar-Jordan{background:#E91E63}.bar-Said{background:#9C27B0}
-.welcome{text-align:center;padding:3.5rem 1rem}
-.welcome-logo{background:#1F4E79;color:#fff;font-weight:800;font-size:20px;padding:10px 20px;border-radius:10px;display:inline-block;margin-bottom:1rem;letter-spacing:.04em}
-.welcome h2{font-size:19px;font-weight:700;margin-bottom:8px}
-.welcome p{font-size:13px;max-width:360px;margin:0 auto;line-height:1.7;color:#888}
-.teams-msg-box{background:#f8f9fc;border-radius:8px;padding:.75rem 1rem;font-size:12px;line-height:1.7;white-space:pre-wrap;font-family:inherit;border:1px solid #dde1e7}
-.contact-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;padding:20px}
+tr:hover td{background:var(--bg)}
+.no-data{text-align:center;padding:2.5rem;color:var(--text-3);font-size:13px}
+
+/* Welcome */
+.welcome{text-align:center;padding:4rem 1rem}
+.welcome-logo{background:var(--navy);color:#fff;font-weight:800;font-size:18px;padding:10px 22px;border-radius:8px;display:inline-block;margin-bottom:1.25rem;letter-spacing:.04em}
+.welcome h2{font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.welcome p{font-size:13px;max-width:360px;margin:0 auto;line-height:1.8;color:var(--text-2)}
+
+/* Teams message */
+.teams-msg-box{background:var(--bg);border-radius:8px;padding:.85rem 1rem;font-size:12px;line-height:1.8;white-space:pre-wrap;font-family:inherit;border:1px solid var(--border);color:var(--text-2)}
+
+/* Contact modal */
+.contact-modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:500;align-items:center;justify-content:center;padding:20px}
 .contact-modal-overlay.open{display:flex}
-.contact-modal-box{background:#fff;border-radius:14px;padding:22px 24px;width:100%;max-width:420px}
-.cm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.cm-title{font-size:14px;font-weight:700;color:#1a1a1a}
-.cm-close{background:none;border:none;font-size:20px;cursor:pointer;color:#aaa}
-.cm-field{margin-bottom:12px}
-.cm-field label{display:block;font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-.cm-field input{width:100%;padding:8px 10px;border:1px solid #dde1e7;border-radius:8px;font-size:13px;font-family:inherit;color:#1a1a1a;background:#fff}
-.cm-field input:focus{outline:none;border-color:#1F4E79}
-.search-panel{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:.9rem}
-.search-panel-title{font-size:13px;font-weight:700;margin-bottom:.6rem;color:#1F4E79}
+.contact-modal-box{background:var(--surface);border-radius:12px;padding:24px;width:100%;max-width:420px;border:1px solid var(--border)}
+.cm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cm-title{font-size:14px;font-weight:700;color:var(--text)}
+.cm-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-3);line-height:1}
+.cm-field{margin-bottom:13px}
+.cm-field label{display:block;font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.cm-field input{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text)}
+.cm-field input:focus{outline:none;border-color:#94a3b8}
+
+/* Search panel */
+.search-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem}
+.search-panel-title{font-size:12px;font-weight:700;margin-bottom:.5rem;color:var(--text);text-transform:uppercase;letter-spacing:.05em}
 .search-input-row{display:flex;gap:8px;align-items:center;margin-bottom:.6rem}
 .search-input-row input{flex:1}
 .search-results{max-height:300px;overflow-y:auto}
-.search-agent-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f5;flex-wrap:wrap}
+.search-agent-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-light);flex-wrap:wrap}
 .search-agent-row:last-child{border-bottom:none}
-.target-complete-bar{background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:9px 12px;font-size:12px;color:#2E7D32;margin-bottom:.75rem;font-weight:600;display:flex;align-items:center;gap:8px}
-.last-note-preview{background:#F8F7FC;border-left:3px solid #9C27B0;border-radius:0 6px 6px 0;padding:5px 9px;font-size:11px;color:#555;margin-top:5px;font-style:italic;line-height:1.5}
-.last-note-label{font-weight:700;font-style:normal;color:#888;font-size:10px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px}
-.rm-tag{display:inline-flex;align-items:center;gap:4px;background:#E8F5E9;border:1px solid #A5D6A7;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#2E7D32}
-.vel-tag{display:inline-flex;align-items:center;gap:4px;background:#E3F2FD;border:1px solid #90CAF9;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#1565C0}
-.no-ref-tag{display:inline-flex;align-items:center;gap:4px;background:#FFEBEE;border:1px solid #EF9A9A;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#C62828}
-.tags-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
-.outcome-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
-.outcome-btn{border:2px solid #dde1e7;background:#fff;border-radius:20px;padding:5px 14px;cursor:pointer;font-size:12px;font-weight:700;color:#555;font-family:inherit}
-.outcome-btn:hover{background:#f0f2f5}
-.outcome-btn.sel-answered{background:#E8F5E9;border-color:#4CAF50;color:#2E7D32}
-.outcome-btn.sel-voicemail{background:#FFF8E1;border-color:#FFB300;color:#E65100}
-.outcome-btn.sel-noanswer{background:#FFEBEE;border-color:#EF9A9A;color:#C62828}
-.outcome-btn.sel-text{background:#E3F2FD;border-color:#90CAF9;color:#1565C0}
-.outcome-label{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block}
-.vel-board{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
-.vel-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f0f2f5;font-size:13px}
+
+/* Tags */
+.last-note-preview{background:#faf9ff;border-left:3px solid #a78bfa;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:var(--text-2);margin-top:6px;font-style:italic;line-height:1.6}
+.last-note-label{font-weight:700;font-style:normal;color:var(--text-3);font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px}
+.rm-tag{display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;border:1px solid var(--green-border);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--green)}
+.vel-tag{display:inline-flex;align-items:center;gap:4px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#1d4ed8}
+.no-ref-tag{display:inline-flex;align-items:center;gap:4px;background:var(--red-light);border:1px solid var(--red-border);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--red)}
+.co-mkt-tag{display:inline-flex;align-items:center;gap:4px;background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#92400e}
+.tags-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tenure-tag{font-size:10px;color:var(--text-3);font-weight:400;margin-top:3px}
+
+/* Outcome buttons */
+.outcome-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.outcome-btn{border:1.5px solid var(--border);background:var(--surface);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text-2);font-family:inherit;transition:all .15s}
+.outcome-btn:hover{background:var(--bg)}
+.outcome-btn.sel-answered{background:#f0fdf4;border-color:#4ade80;color:#15803d}
+.outcome-btn.sel-voicemail{background:#fefce8;border-color:#fde047;color:#854d0e}
+.outcome-btn.sel-noanswer{background:var(--red-light);border-color:var(--red-border);color:var(--red)}
+.outcome-btn.sel-text{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8}
+.outcome-label{font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block}
+
+/* Velocify leaderboard */
+.vel-board{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.vel-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border-light);font-size:13px}
 .vel-row:last-child{border-bottom:none}
-.vel-medal{font-size:16px;width:24px;text-align:center;flex-shrink:0}
-.vel-cols{display:flex;gap:12px}
+.vel-medal{font-size:15px;width:24px;text-align:center;flex-shrink:0}
+.vel-cols{display:flex;gap:16px}
 .vel-col{text-align:center;min-width:40px}
-.vel-col-num{font-size:15px;font-weight:800;color:#1F4E79}
-.vel-col-num.zero{color:#ddd}
-.vel-col-lbl{color:#aaa;font-size:9px;text-transform:uppercase}
-.co-mkt-tag{display:inline-flex;align-items:center;gap:4px;background:#FFF3E0;border:1px solid #FFCC02;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#E65100}
-.bday-banner{background:#FCE4EC;border:1px solid #F48FB1;border-radius:8px;padding:9px 12px;font-size:12px;color:#880E4F;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:500;flex-wrap:wrap}
-.tenure-tag{font-size:10px;color:#aaa;font-weight:400}
+.vel-col-num{font-size:15px;font-weight:700;color:var(--navy)}
+.vel-col-num.zero{color:var(--border)}
+.vel-col-lbl{color:var(--text-3);font-size:9px;text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
 
-/* ── REFERRAL LEADS TAB ── */
-.ref-tab-bar{display:flex;gap:0;border-bottom:2px solid #e8eaf0;margin-bottom:1.25rem}
-.ref-tab{padding:9px 18px;font-size:13px;font-weight:600;color:#999;border-bottom:3px solid transparent;cursor:pointer;margin-bottom:-2px;transition:color .15s}
-.ref-tab:hover{color:#555}
-.ref-tab.active{color:#1F4E79;border-bottom-color:#1F4E79}
-.ref-tab-panel{display:none}.ref-tab-panel.active{display:block}
-.ref-stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.25rem}
-.ref-stat-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:12px 14px;text-align:center}
-.ref-stat-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:600}
-.ref-stat-value{font-size:22px;font-weight:800;color:#1F4E79}
-.ref-stat-value.good{color:#2E7D32}
-.ref-stat-value.warn{color:#E65100}
-.ref-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
-.ref-section-header{padding:10px 16px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between;align-items:center;background:#fafbfc}
-.ref-section-title{font-size:13px;font-weight:700;color:#1a1a1a}
-.ref-section-count{font-size:12px;color:#888;font-weight:500}
-.ref-leads-table{width:100%;border-collapse:collapse;font-size:13px}
-.ref-leads-table th{text-align:left;padding:8px 12px;font-size:10px;font-weight:700;color:#888;border-bottom:1px solid #e8eaf0;background:#f8f9fc;text-transform:uppercase;letter-spacing:.05em}
-.ref-leads-table td{padding:9px 12px;border-bottom:1px solid #f5f6f8;vertical-align:middle}
-.ref-leads-table tr:last-child td{border-bottom:none}
-.ref-leads-table tr:hover td{background:#fafbfc}
-.ref-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1rem}
-.ref-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.rs-started{background:#C6EFCE;color:#1B5E20}
-.rs-contact{background:#BBDEFB;color:#0D47A1}
-.rs-nurture{background:#FFF2CC;color:#7D5A00}
-.rs-contacted{background:#EDE7F6;color:#4527A0}
-.rs-withdrawn{background:#FFCDD2;color:#B71C1C}
-.rs-other{background:#EEE;color:#555}
-.ref-empty{text-align:center;padding:2rem;color:#aaa;font-size:13px}
-.ref-refresh-btn{font-size:11px;color:#1F4E79;background:none;border:1px solid #dde1e7;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600}
-.ref-refresh-btn:hover{background:#f0f2f5}
+/* ── REFERRAL LEADS — Executive design ── */
+.d-tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
+.d-tab{padding:10px 20px;font-size:13px;font-weight:600;color:var(--text-3);border-bottom:2px solid transparent;cursor:pointer;margin-bottom:-1px;transition:all .15s;letter-spacing:.01em}
+.d-tab:hover{color:var(--text-2)}
+.d-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.d-tab-panel{display:none}.d-tab-panel.active{display:block}
 
-/* ── REFERRAL LEADS SECTION ── */
-.ref-stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.25rem}
-.ref-stat-card{background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:12px 14px;text-align:center}
-.ref-stat-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:600}
-.ref-stat-value{font-size:22px;font-weight:800;color:#1F4E79}
-.ref-stat-value.good{color:#2E7D32}
-.ref-stat-value.warn{color:#E65100}
-.ref-section{background:#fff;border:1px solid #dde1e7;border-radius:12px;overflow:hidden;margin-bottom:1rem}
-.ref-section-header{padding:10px 16px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between;align-items:center;background:#fafbfc}
-.ref-section-title{font-size:13px;font-weight:700;color:#1a1a1a}
-.ref-section-count{font-size:12px;color:#888;font-weight:500}
+.ref-stat-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--navy);border-radius:10px;padding:1rem 1.1rem}
+.ref-stat-card.urgent{border-top-color:var(--red)}
+.ref-stat-label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-weight:600}
+.ref-stat-value{font-size:28px;font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1}
+.ref-stat-value.good{color:var(--green)}
+.ref-stat-value.warn{color:var(--red)}
+
+.ref-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.ref-section.urgent{border-color:var(--red-border)}
+.ref-section-header{padding:12px 18px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;background:var(--bg)}
+.ref-section.urgent .ref-section-header{background:var(--red-bg);border-bottom-color:var(--red-border)}
+.ref-section-title{font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em}
+.ref-section-subtitle{font-size:11px;color:var(--text-3);margin-top:1px}
+.ref-section-count{font-size:11px;color:var(--text-3);font-weight:600;background:var(--bg);border:1px solid var(--border);padding:2px 10px;border-radius:20px}
+.ref-section.urgent .ref-section-count{background:var(--red-light);border-color:var(--red-border);color:var(--red)}
+
 .ref-leads-table{width:100%;border-collapse:collapse;font-size:13px}
-.ref-leads-table th{text-align:left;padding:8px 12px;font-size:10px;font-weight:700;color:#888;border-bottom:1px solid #e8eaf0;background:#f8f9fc;text-transform:uppercase;letter-spacing:.05em}
-.ref-leads-table td{padding:9px 12px;border-bottom:1px solid #f5f6f8;vertical-align:middle}
+.ref-leads-table th{text-align:left;padding:8px 16px;font-size:10px;font-weight:700;color:var(--text-3);border-bottom:1px solid var(--border-light);background:var(--bg);text-transform:uppercase;letter-spacing:.06em}
+.ref-leads-table td{padding:11px 16px;border-bottom:1px solid var(--border-light);vertical-align:middle}
 .ref-leads-table tr:last-child td{border-bottom:none}
-.ref-leads-table tr:hover td{background:#fafbfc}
-.ref-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1rem}
-.ref-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.rs-started{background:#C6EFCE;color:#1B5E20}
-.rs-contact{background:#BBDEFB;color:#0D47A1}
-.rs-nurture{background:#FFF2CC;color:#7D5A00}
-.rs-contacted{background:#EDE7F6;color:#4527A0}
-.rs-withdrawn{background:#FFCDD2;color:#B71C1C}
-.rs-other{background:#EEE;color:#555}
-.ref-empty{text-align:center;padding:2rem;color:#aaa;font-size:13px}
-.ref-refresh-btn{font-size:11px;color:#1F4E79;background:none;border:1px solid #dde1e7;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600}
-.ref-refresh-btn:hover{background:#f0f2f5}
+.ref-leads-table tr:hover td{background:var(--bg)}
+.ref-leads-table tr.overdue td{background:#fff8f8}
+
+.ref-badge{display:inline-block;padding:2px 9px;border-radius:4px;font-size:11px;font-weight:600}
+.rs-started{background:#dcfce7;color:#15803d}
+.rs-contact{background:#dbeafe;color:#1e40af}
+.rs-nurture{background:#fef3c7;color:#92400e}
+.rs-contacted{background:#ede9fe;color:#5b21b6}
+.rs-withdrawn{background:#fee2e2;color:#991b1b}
+.rs-other{background:#f1f5f9;color:#475569}
+
+.ref-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.ref-empty{text-align:center;padding:2rem;color:var(--text-3);font-size:13px}
+.ref-refresh-btn{font-size:11px;color:var(--text-2);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:600}
+.ref-refresh-btn:hover{background:var(--bg)}
+.touch-badge{display:inline-flex;align-items:center;gap:4px;background:var(--red-light);border:1px solid var(--red-border);color:var(--red);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px}
 </style>
 </head>
 <body>
@@ -288,33 +336,64 @@ tr:hover td{background:#fafbfc}
 
 <!-- DANIEL VIEW -->
 <div id="view-daniel" class="view">
-  <div class="scorecard">
-    <div class="sc-header" onclick="toggleSC('tw-body','tw-chev')">
-      <div class="sc-title">&#128200; This week <span style="font-size:11px;font-weight:400;color:#888" id="tw-lbl"></span><div class="pills" id="tw-pills"></div></div>
-      <span id="tw-chev" style="font-size:14px;color:#888">&#9660;</span>
+  <div class="d-tab-bar">
+    <div class="d-tab active" onclick="switchDanielTab('dashboard',this)">Dashboard</div>
+    <div class="d-tab" onclick="switchDanielTab('referral-leads',this)">Referral Leads <span id="d-tab-badge" style="display:none;background:var(--red-light);color:var(--red);border:1px solid var(--red-border);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:6px"></span></div>
+  </div>
+
+  <!-- DASHBOARD PANEL -->
+  <div id="d-tab-dashboard" class="d-tab-panel active">
+    <div class="scorecard">
+      <div class="sc-header" onclick="toggleSC('tw-body','tw-chev')">
+        <div class="sc-title">This week <span style="font-size:11px;font-weight:400;color:var(--text-3)" id="tw-lbl"></span><div class="pills" id="tw-pills"></div></div>
+        <span id="tw-chev" style="font-size:13px;color:var(--text-3)">▾</span>
+      </div>
+      <div id="tw-body" style="display:none;border-top:1px solid var(--border-light);padding:.9rem 1.25rem"><div id="tw-content"></div></div>
     </div>
-    <div id="tw-body" style="display:none;border-top:1px solid #f0f2f5;padding:.9rem 1.1rem"><div id="tw-content"></div></div>
-  </div>
-  <div class="scorecard">
-    <div class="sc-header" onclick="toggleSC('lw-body','lw-chev')">
-      <div class="sc-title">&#128197; Last week <span style="font-size:11px;font-weight:400;color:#888" id="lw-lbl"></span><div class="pills" id="lw-pills"></div></div>
-      <span id="lw-chev" style="font-size:14px;color:#888">&#9660;</span>
+    <div class="scorecard">
+      <div class="sc-header" onclick="toggleSC('lw-body','lw-chev')">
+        <div class="sc-title">Last week <span style="font-size:11px;font-weight:400;color:var(--text-3)" id="lw-lbl"></span><div class="pills" id="lw-pills"></div></div>
+        <span id="lw-chev" style="font-size:13px;color:var(--text-3)">▾</span>
+      </div>
+      <div id="lw-body" style="display:none;border-top:1px solid var(--border-light);padding:.9rem 1.25rem"><div id="lw-content"></div></div>
     </div>
-    <div id="lw-body" style="display:none;border-top:1px solid #f0f2f5;padding:.9rem 1.1rem"><div id="lw-content"></div></div>
+    <div class="section-head">LP performance this week <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
+    <div class="d-grid" id="d-grid"></div>
+    <div class="section-head" style="margin-top:1rem">All-time leaderboard</div>
+    <div id="leaderboard"></div>
+    <div class="section-head" style="margin-top:1rem">Velocify lead leaderboard <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">— updates when Zap is live</span></div>
+    <div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading Velocify data...</div></div>
+    <div class="section-head" style="margin-top:1rem">Birthdays this week</div>
+    <div id="daniel-bday-list" style="margin-bottom:1rem"></div>
+    <div class="section-head" style="margin-top:1rem">Weekly Teams summary</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem">
+      <p style="font-size:12px;color:var(--text-2);margin-bottom:.75rem">Copy and paste into your Core Team channel every Monday.</p>
+      <div class="teams-msg-box" id="teams-message"></div>
+      <button class="btn btn-primary btn-sm" onclick="copyTeamsMsg()" style="margin-top:.75rem">Copy message</button>
+      <span id="copy-confirm" style="font-size:12px;color:#15803d;margin-left:8px;display:none">Copied!</span>
+    </div>
+    <div class="section-head" style="margin-top:1rem">Full roster
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
+        <select id="d-lvl" onchange="renderDaniel()"><option value="">All levels</option><option>A</option><option>B</option><option>C</option></select>
+        <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+        <input type="text" id="d-q" placeholder="Search..." oninput="renderDaniel()" style="width:120px">
+      </div>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last LP call</th><th>Last activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
   </div>
-  <div class="section-head">This week&#39;s LP performance <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
-  <div class="d-grid" id="d-grid"></div>
-  <div class="section-head" style="margin-top:1rem">&#127968; Daily Referral Leads Update
-    <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">&#8635; Refresh</button>
-  </div>
-  <div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
-    <div style="font-size:12px;color:#888;margin-bottom:1rem" id="ref-last-updated">Loading...</div>
+
+  <!-- REFERRAL LEADS PANEL -->
+  <div id="d-tab-referral-leads" class="d-tab-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div style="font-size:11px;color:var(--text-3)" id="ref-last-updated">Loading...</div>
+      <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">↻ Refresh</button>
+    </div>
     <div class="ref-stat-grid">
       <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads">--</div></div>
       <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">Unconverted</div><div class="ref-stat-value warn" id="ref-unconverted">--</div></div>
       <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">Prior Day</div><div class="ref-stat-value" id="ref-prior-count">--</div></div>
+      <div class="ref-stat-card urgent"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch">--</div></div>
     </div>
     <div class="ref-legend">
       <span class="ref-badge rs-started">File Started</span>
@@ -324,53 +403,36 @@ tr:hover td{background:#fafbfc}
       <span class="ref-badge rs-withdrawn">App Withdrawn</span>
       <span class="ref-badge rs-other">Other</span>
     </div>
+    <div class="ref-section urgent" id="ref-needs-touch-section" style="display:none">
+      <div class="ref-section-header">
+        <div><div class="ref-section-title">Needs contact today</div><div class="ref-section-subtitle">No touch in 24+ hours — action required</div></div>
+        <span class="ref-section-count" id="ref-needs-touch-count">0 leads</span>
+      </div>
+      <div id="ref-needs-touch-table"></div>
+    </div>
     <div class="ref-section">
       <div class="ref-section-header">
-        <span class="ref-section-title">Today — <span id="ref-today-label"></span></span>
+        <div><div class="ref-section-title">Today — <span id="ref-today-label"></span></div></div>
         <span class="ref-section-count" id="ref-today-count">0 leads</span>
       </div>
       <div id="ref-today-table"></div>
     </div>
     <div class="ref-section">
       <div class="ref-section-header">
-        <span class="ref-section-title">Prior Day — <span id="ref-prior-label"></span></span>
+        <div><div class="ref-section-title">Prior Day — <span id="ref-prior-label"></span></div></div>
         <span class="ref-section-count" id="ref-prior-day-count">0 leads</span>
       </div>
       <div id="ref-prior-table"></div>
     </div>
     <div class="ref-section">
       <div class="ref-section-header">
-        <span class="ref-section-title">Uncovered Leads — MTD</span>
+        <div><div class="ref-section-title">All unconverted — MTD</div><div class="ref-section-subtitle">Not yet a file start</div></div>
         <span class="ref-section-count" id="ref-uncovered-count">0 leads</span>
       </div>
       <div id="ref-uncovered-table"></div>
     </div>
   </div>
-
-  <div class="section-head" style="margin-top:1rem">&#127942; All-time leaderboard</div>
-  <div id="leaderboard"></div>
-  <div class="section-head" style="margin-top:1rem">&#127968; Velocify lead leaderboard — agents sending real business <span style="font-size:10px;font-weight:400;color:#aaa;text-transform:none;letter-spacing:0">Updates when Zap is live</span></div>
-  <div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:#aaa">Loading Velocify data...</div></div>
-  <div class="section-head" style="margin-top:1rem">&#127874; Birthdays this week</div>
-  <div id="daniel-bday-list" style="margin-bottom:1rem"></div>
-  <div class="section-head" style="margin-top:1rem">&#128229; Weekly Teams summary</div>
-  <div style="background:#fff;border:1px solid #dde1e7;border-radius:12px;padding:1rem 1.25rem">
-    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Copy and paste into your Core Team channel every Monday.</p>
-    <div class="teams-msg-box" id="teams-message"></div>
-    <button class="btn btn-primary btn-sm" onclick="copyTeamsMsg()" style="margin-top:.75rem">Copy message</button>
-    <span id="copy-confirm" style="font-size:12px;color:#43A047;margin-left:8px;display:none">Copied!</span>
-  </div>
-  <div class="section-head" style="margin-top:1rem">Full roster
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
-      <select id="d-lvl" onchange="renderDaniel()"><option value="">All levels</option><option>A</option><option>B</option><option>C</option></select>
-      <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
-      <input type="text" id="d-q" placeholder="Search..." oninput="renderDaniel()" style="width:120px">
-    </div>
-  </div>
-  <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last LP call</th><th>Last activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
 </div>
-
 <!-- ADMIN VIEW -->
 <div id="view-admin" class="view">
   <div class="admin-section">
@@ -454,6 +516,14 @@ var referralLeadsCache=null;
 var SEED=[["AIMEE WHITLOCK","C","Gavin",null,"2025-01-14","2026-02-10","2026-04-15",false,0],["ALEXIS REED","C","Said","2026-03-25","2026-05-12","2026-01-30","2026-02-27",false,0],["AMY AGRESTA","C","Gavin","2026-05-23","2026-05-28","2025-07-08","2025-08-05",false,0],["ANA SORIA","C","Karen","2026-04-19",null,null,null,false,0],["ANGELA PEREZ","C","Gavin","2026-04-27","2026-05-06","2026-04-06","2026-04-24",false,0],["ANGELA POTTS","C","Osgood","2026-05-10","2026-05-10",null,null,false,0],["ANGELIQUE SOTONDJI","C","Jordan","2026-03-27","2026-03-27",null,null,false,0],["ANNIE MORENO","B","Karen","2026-06-10","2026-06-12","2026-05-11","2026-06-12",false,0],["ASHLEY HENRY","C","Osgood","2026-04-22","2026-04-21",null,null,false,0],["AVA LAIRD","C","Jordan","2026-05-26","2026-05-25",null,null,false,0],["BAILEY STRATHIE","C","Osgood","2026-05-30","2026-05-30","2024-11-21",null,false,0],["BENJAMIN GAYTAN","C","Gavin","2026-05-16","2026-05-22",null,null,false,0],["BRAD GILLIAM","C","Gavin","2026-05-14",null,null,null,false,0],["BRANDON KIDD","C","Said","2026-05-01",null,null,null,false,0],["BRANDON MCCLENDON","C","Said","2026-06-08","2026-06-08",null,null,false,0],["BRANDON THOMPSON","A","Osgood","2026-06-01","2026-06-01","2026-05-04","2026-06-01",false,0],["BRIAN NANTHAVONGDOUANGSY","C","Osgood","2025-10-23","2025-11-19","2025-12-18","2026-03-20",false,0],["BRIAN ZINN","C","Jordan","2026-06-06","2026-06-07",null,null,false,0],["BRITNEY DODDS","C","Gavin","2026-03-26","2026-03-26","2026-03-02","2026-04-08",false,0],["CAROLE MCMAHON","C","Osgood","2026-05-31","2026-05-31","2026-05-08","2026-05-26",false,0],["CELINE WILLIAMS","C","Jordan","2026-06-01",null,null,null,false,0],["CESIA ESPINOZA YOUNG","C","Karen","2026-03-11","2026-03-10","2026-03-26","2026-04-17",false,0],["CHELSEA ANDERSON","C","Osgood","2026-02-07","2026-02-06","2026-03-28","2026-04-17",false,0],["CHERYL KINSEY","C","Jordan","2026-05-05","2026-05-04",null,null,false,0],["CHRIS REED","A","Said","2026-06-12","2026-06-12","2026-05-08","2026-05-27",false,0],["CHRISTIAN CHALKIAS","C","Osgood","2026-04-08","2026-04-08",null,null,false,0],["CHRISTINA COUGHLIN","C","Osgood","2026-05-29","2026-05-29","2024-09-11",null,false,0],["CHUCK KINSEY","C","Jordan","2026-03-16","2026-03-26",null,null,false,0],["CINDA ERICKSON","B","Gavin","2026-04-23","2026-04-21","2026-02-24","2026-03-26",false,0],["CLAUDIA CHUECO","C","Karen","2026-06-08",null,null,null,false,0],["CODA GAHRIS","C","Jordan","2026-04-29","2026-04-29","2026-05-25",null,false,0],["CONNER KOCHANSKY","B","Gavin","2026-05-30","2026-05-19","2026-05-20","2026-05-20",false,0],["COURTNEY HAMILTON","B","Osgood","2026-05-27","2026-05-27","2026-06-02","2026-06-17",false,0],["CRAIG MAURER","C","Osgood","2026-05-13","2026-05-19",null,null,false,0],["DAIRDRE SCRIVEN","C","Said","2026-05-19","2026-05-19",null,null,false,0],["DAN MANLEY","B","Gavin","2025-11-23","2026-04-29","2026-05-01","2026-05-19",false,0],["DARREN HOGG","C","Said","2026-04-22","2026-04-28",null,null,false,0],["DEANNE RHYNEHARDT","B","Osgood","2026-05-22","2026-05-28","2026-05-05","2026-06-12",false,0],["DERON BENDER","B","Gavin","2025-08-11","2026-04-24","2026-04-28","2026-05-08",false,0],["DEVIN JOHNSON","C","Said","2026-03-29","2026-04-15","2025-05-30","2025-07-09",false,0],["DIANNA JENKINS","C","Said",null,"2026-03-24","2026-02-23","2026-04-06",false,0],["DONALD PAYNE JR","C","Osgood","2026-06-04",null,null,null,false,0],["DUSTIN GOLDMAN","A","Osgood","2026-04-20","2026-04-24","2026-03-30","2026-03-27",false,0],["ELIAS PAPPAN","C","Karen","2026-04-30",null,null,null,false,0],["ELIZABETH BONAUDI","C","Osgood","2026-04-17","2026-04-17",null,null,false,0],["ELIZABETH ELLINGER","B","Jordan","2026-03-16","2026-04-01","2026-06-13","2026-06-10",false,0],["ELIZABETH HOWARD","C","Osgood","2026-04-04","2026-04-03","2024-11-08",null,false,0],["ERIKA BRUNNER","C","Gavin","2026-04-13","2026-04-15","2025-11-07",null,false,0],["ERIKA WEHNER","B","Gavin",null,"2026-04-13","2026-05-28","2026-05-11",false,0],["GLADIS CHAVEZ","C","Karen","2026-05-15","2026-05-05",null,null,false,0],["HAIFA BRUNNEY","C","Karen","2026-05-21","2026-06-01","2026-06-15","2026-04-27",false,0],["HEATHER EMMERT","C","Jordan","2026-06-11","2026-06-11","2024-09-06",null,false,0],["HEATHER HENRY-MINOR","B","Jordan","2026-04-07","2026-04-15","2026-05-05","2026-05-28",false,0],["HYPATIA ESPINAL","C","Karen","2026-06-02","2026-06-02",null,null,false,0],["INGRID CORREIA","B","Gavin","2026-05-08","2026-05-08","2025-12-11","2026-01-05",false,0],["IZXEL MARTINEZ","C","Karen","2026-05-20","2026-05-20","2026-06-02",null,false,0],["JACOB ENGLISH","C","Jordan",null,"2026-03-18","2026-04-23","2026-06-12",false,0],["JAIDEN BALLAH","C","Said","2026-06-02","2026-06-03",null,null,false,0],["JASMIN ARCOS","C","Karen","2026-03-19","2026-03-26",null,null,false,0],["JASMIN MONTOYA","C","Karen","2026-05-31","2026-05-30",null,null,false,0],["JASMINE MCKENZIE","C","Osgood","2026-05-03","2026-05-04","2026-05-06","2026-05-29",false,0],["JEFF MESSMER","C","Gavin","2026-06-12","2026-05-12","2025-10-01",null,false,0],["JENNIFER BLACKMORE","C","Jordan","2026-05-02",null,null,null,false,0],["JENNIFER HOWISON","C","Jordan","2026-03-15","2026-03-30","2026-04-06",null,false,0],["JESSE MCCRERRY","C","Said",null,"2026-04-06","2026-04-13","2026-05-26",false,0],["JESSICA TOWER","C","Jordan","2026-05-27","2026-05-30","2023-04-03",null,false,0],["JOHN BRUNNER","B","Osgood","2026-06-01","2026-06-01","2026-06-05","2025-11-17",false,0],["JOHN LUBINSKY","C","Said","2025-12-17","2025-12-19","2026-02-17","2026-03-20",false,0],["JONNATHAN AGUDELO","C","Karen","2026-05-23","2026-05-19",null,null,false,0],["JORDAN HOLLIBAUGH","C","Gavin",null,"2026-06-12","2026-04-29","2026-04-16",false,0],["JUSTIN BIERY","C","Karen","2026-05-27","2026-05-28",null,null,false,0],["KANDIS HALL","B","Osgood","2026-01-04","2026-01-31","2026-02-25","2026-03-17",false,0],["KATHERINE DE LA ROSA","C","Karen","2026-06-14","2026-06-02","2026-06-10","2026-04-29",false,0],["KATHY HAYES","C","Jordan","2026-05-30","2026-05-29","2024-12-09",null,false,0],["KATIE MANSOR","C","Jordan","2026-04-27","2026-04-26",null,null,false,0],["KATIE SUMMERS","B","Gavin",null,"2026-04-22","2026-02-26","2026-05-29",false,0],["KELSY YODER","C","Said","2026-04-28","2026-01-09","2026-01-12","2026-02-05",false,0],["KERWIN HEATH","C","Said",null,"2026-04-12",null,null,false,0],["KEVIN SPEERT","A","Gavin","2026-05-08","2026-05-27","2026-06-01","2026-06-12",false,0],["KHADIJA FARAH","B","Jordan","2026-05-16","2026-05-17","2026-02-09","2026-03-06",false,0],["KINSIE HUSKINS","C","Jordan",null,"2026-03-17","2026-04-28","2026-06-01",false,0],["KISHMA JAMES","B","Said","2026-06-11","2026-06-11","2025-06-09","2025-07-14",false,0],["KRISTEN VALENTY","C","Jordan",null,"2026-01-21","2026-02-24","2026-03-25",false,0],["KRISTINA MURPHY","B","Osgood","2026-06-02","2026-05-11","2025-10-03","2025-10-21",false,0],["LAUREN MCCLINTON","C","Said",null,"2026-04-29",null,null,false,0],["LESLIE HERNANDEZ","C","Karen","2026-05-07","2026-05-08","2026-05-19",null,false,0],["LETIKA WHITE","C","Osgood","2026-05-11","2026-06-15","2025-07-31","2025-08-29",false,0],["LEXIS GRANDY","C","Osgood","2026-06-11","2025-09-26","2025-09-29","2025-10-29",false,0],["LILIAN FUENTES","C","Karen","2026-04-21","2026-04-21",null,null,false,0],["LISA SIMMONS","C","Osgood",null,"2026-03-19","2026-04-14","2026-05-27",false,0],["LIZBEL CONTRERAS","C","Karen","2026-06-12","2026-06-12","2024-09-18",null,false,0],["LUIS GIL","C","Karen","2026-06-02","2026-06-02","2026-06-12","2025-09-26",false,0],["MANDY WILSON","C","Jordan",null,"2026-03-28",null,null,false,0],["MARIA COMAS","B","Karen","2026-04-27","2026-03-02","2025-06-19","2025-07-21",false,0],["MARK BOYD","B","Gavin",null,"2026-03-28","2026-04-08","2026-02-02",false,0],["MARK VENNITTI","C","Jordan","2026-04-08","2026-04-08","2026-06-01","2026-06-18",false,0],["MARLA SEWELL","C","Osgood",null,"2026-03-19",null,null,false,0],["MARTIN HOPKINS","B","Karen","2026-02-12","2026-04-28","2026-01-29","2026-02-20",false,0],["MARY MCMICHAEL","B","Said","2026-04-13","2026-04-13","2026-06-14","2025-10-10",false,0],["MATHEA ARUDDA","C","Karen",null,"2026-03-16","2026-03-23",null,false,0],["MATT PIPER","B","Osgood","2026-05-19","2026-05-19","2025-11-11","2025-12-01",false,0],["MATTHEW MONTALVO","B","Karen","2026-04-09","2026-04-08","2026-05-29","2025-11-20",false,0],["MEGAN LYNCH","A","Gavin","2026-06-03","2026-06-10","2026-06-11","2026-06-22",false,0],["MICHELE FREDERICK","C","Osgood",null,"2026-05-31",null,null,false,0],["MICHELLE ERICKSON","A","Gavin","2025-08-04","2026-03-25","2026-04-20","2026-04-10",false,0],["MIKE WHITEMAN","C","Osgood",null,"2025-07-24","2025-07-31","2026-05-11",false,0],["NANCY PRICE","C","Jordan","2026-01-03","2026-01-02","2026-05-08","2026-01-30",false,0],["NATALIE ESTRELLA","B","Karen","2026-06-14","2026-05-25","2025-10-08","2025-11-03",false,0],["NATHAN WHITE","C","Karen","2026-06-12",null,null,null,false,0],["NIA HARRINGTON","C","Said","2026-05-13","2026-05-05","2024-10-17",null,false,0],["NICK ZATEZALO","C","Osgood","2026-05-16","2026-03-19","2024-03-12",null,false,0],["NIKEHA HAYES","C","Osgood","2026-04-15","2025-09-28","2024-09-25",null,false,0],["NINA AVERY","C","Jordan",null,"2026-04-23",null,null,false,0],["NORA KERELIUK","C","Said","2026-04-24",null,null,null,false,0],["OSCAR MARTINEZ","A","Karen","2026-06-14","2026-06-08","2026-05-05","2026-06-15",false,0],["PAIGE LUDWIG","C","Said","2026-06-08","2026-03-05","2026-03-17","2026-04-14",false,0],["PATRICK ARQUETTE","C","Said","2026-04-22","2026-01-14","2025-09-09","2025-10-07",false,0],["PAULA PALLESCHI","C","Said",null,"2026-04-21","2026-04-27","2026-05-26",false,0],["PILAR BENNETT","C","Karen","2026-04-15","2026-04-15","2025-07-23","2025-08-15",false,0],["RACHELLE PARSLEY","C","Said","2024-09-03","2026-04-15","2026-04-22","2026-05-13",false,0],["RACQUEL LUDAWAY","A","Gavin","2026-05-29","2026-05-19","2026-04-16","2026-06-04",false,0],["RAMI TAMIMI","B","Jordan","2026-03-27","2026-04-20","2026-05-07","2026-06-30",false,0],["ROBERT HAYNER","C","Jordan",null,"2026-04-20","2026-04-23","2026-05-15",false,0],["ROBIN BLAKE","C","Gavin",null,"2025-12-19","2025-12-27","2026-03-17",false,0],["ROSALIA PABLO","C","Karen","2026-06-08","2026-06-04","2024-11-08",null,false,0],["ROSS DIGIORGIO","C","Osgood",null,"2025-06-24","2025-07-14","2026-04-30",false,0],["RUTH ESPINOZA","C","Karen",null,"2026-02-26","2026-03-26","2026-04-17",false,0],["RUTH GONZALEZ","C","Karen","2026-05-19","2026-05-19",null,null,false,0],["SAHAR SHALASH","A","Said","2026-06-05","2026-06-05","2026-05-09","2026-05-29",false,0],["SAHEL ALAM","C","Said","2026-05-10","2026-05-08",null,null,false,0],["SAM BAMRICK","C","Jordan",null,"2026-04-14","2026-04-20","2026-05-15",false,0],["SARA BUSH","C","Said",null,"2026-03-27","2026-04-13","2026-05-27",false,0],["SARAH HERNANDEZ","C","Osgood","2026-05-28","2026-05-29","2024-10-21",null,false,0],["SASHA ANTONOVA","C","Said","2026-03-31","2026-03-31",null,null,false,0],["SETH COLBURN","B","Said","2025-04-23","2026-03-31","2026-04-06","2026-04-30",false,0],["SHANE STINER","C","Jordan",null,"2026-04-08",null,null,false,0],["SHARON PANTELIS","C","Jordan","2026-04-28","2025-03-21","2025-04-01",null,false,0],["SHAYNE D. BOYD","C","Said","2026-05-04","2026-05-07",null,null,false,0],["SHIRRELL BURNSIDE","C","Osgood","2026-04-08","2025-07-14",null,null,false,0],["STACEY LAMBRIGHT","B","Jordan",null,"2026-03-25","2026-03-26","2026-04-07",false,0],["STEVEN OSBORN","C","Jordan","2026-04-30","2026-02-03",null,null,false,0],["SUMMER DURHAM","C","Osgood",null,"2026-03-23",null,null,false,0],["SUNI RIVAS","C","Karen","2026-06-12","2026-05-28",null,null,false,0],["TAMARA CHARLTON","C","Osgood","2025-07-27","2026-04-16","2025-04-14",null,false,0],["TATIANA GRIGORITA","C","Jordan","2026-06-08","2026-06-08",null,null,false,0],["THAER AHMED","C","Said","2026-03-31","2026-03-31","2025-08-26","2025-09-30",false,0],["TIARA VILLATORO","A","Karen","2026-05-08","2026-05-08","2026-06-04","2026-05-22",false,0],["TIMOTHY OLIVER","C","Osgood","2026-06-09","2026-06-02",null,null,false,0],["TINA HOFFMAN","A","Gavin","2023-10-10","2026-05-06","2026-05-27","2026-02-10",false,0],["TINA-DUTT-HIREN","C","Osgood",null,"2026-05-11",null,null,false,0],["TODD STONE","A","Said","2026-06-13","2026-06-13","2026-04-13","2026-05-08",false,0],["TOM NEWMAN","C","Gavin","2026-06-08","2026-06-08","2024-01-08",null,false,0],["TRACI WILLIAMS-JONES","C","Jordan",null,"2026-04-09","2026-03-23","2026-05-21",false,0],["TRACY BERARD","B","Jordan",null,"2026-04-04","2026-04-14","2026-05-27",false,0],["TROY BORDEN","C","Gavin","2026-04-28","2026-04-30","2026-04-22","2026-05-13",false,0],["WENDY RAMIREZ","C","Karen","2026-03-25","2026-03-25",null,null,false,0],["WHITNEY SCHMIDT","C","Said","2026-03-18","2024-01-12","2024-01-18",null,false,0],["YASMIN DE JESUS","C","Karen","2024-03-27","2025-11-18","2026-04-01","2026-04-29",false,0],["YVETTA HARRISON","C","Osgood","2026-06-04",null,null,null,false,0]];
 
 // ── LP sub-tab switching ──
+function switchDanielTab(tabId, btn){
+  document.querySelectorAll(".d-tab").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll(".d-tab-panel").forEach(function(p){p.classList.remove("active");});
+  btn.classList.add("active");
+  document.getElementById("d-tab-"+tabId).classList.add("active");
+  if(tabId==="referral-leads") loadReferralLeads(false);
+}
+
 function switchLpTab(tabId, btn){
   document.querySelectorAll("#view-lp .ref-tab").forEach(function(t){t.classList.remove("active");});
   document.querySelectorAll("#view-lp .ref-tab-panel").forEach(function(p){p.classList.remove("active");});
@@ -763,17 +833,13 @@ function renderLP(lp){
   bonusCalls.forEach(function(l){loadAgentContact(l.agent_name,l.agent_name.replace(/\s+/g,'_'));});
 }
 
+function countWords(s){return s.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;}
+
 function renderCallCard(a,lp,isBonus){
   var called=calledThisWeek(a[0]),ds=lpDays(a[0]),act=mostRecent(a),pri=isPriority(a);
   var isPending=!!(pendingNote&&pendingNote[a[0]]);
   var log=callLogs[a[0]],note=log?log.note:"",outcome=log?log.outcome||"":"";
   var safeId=a[0].replace(/\s+/g,'_');
-  var chkY='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-  var chkN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
-  var chk=called?chkY:chkN;
-  var dsText=ds===null?"Never called":ds===0?"Called today":ds+"d since last call";
-  var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"")+(isPending?" pending":"");
-  var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:null;
   var velData=VELOCIFY_SEED[a[0]]||null;
   var velTotal=velData?velData.total:0,velMtd=velData?velData.mtd:0;
   var lastNote=prevNotes[a[0]]||null;
@@ -782,46 +848,94 @@ function renderCallCard(a,lp,isBonus){
   var firstCall=agentFirstCall[a[0]]||null;
   var daysSinceFirst=firstCall?Math.floor((TODAY-new Date(firstCall+"T12:00:00"))/86400000):0;
   var noReferralFlag=daysSinceFirst>=90&&velTotal===0&&selfRefs===0&&!isBonus;
+  var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:null;
+  var dsText=ds===null?"Never called":ds===0?"Called today":ds+"d since last LP call";
+  var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"")+(isPending?" pending":"");
+
   var html='<div class="'+cardClass+'">';
-  html+='<button class="check-btn'+(called?" checked":'"')+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="toggleCallFromCard(this)">'+chk+'</button>';
+
+  // Check button — circle on left
+  var chkY='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+  var chkPending='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  var chkN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
+  var chk=called?chkY:(isPending?chkPending:chkN);
+  var btnStyle=isPending?"border-color:#d97706;background:#fffbeb":"";
+  html+='<button class="check-btn'+(called?" checked":"")+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="toggleCallFromCard(this)" style="'+btnStyle+'">'+chk+'</button>';
+
   html+='<div class="call-info">';
-  html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:#aaa">'+a[0]+'</span>':a[0])+(pri&&!called&&!isBonus?'<span class="priority-tag">PRIORITY</span>':'')+(isBonus?'<span class="bonus-tag">BONUS</span>':'')+'</div>';
+
+  // Name row
+  html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+a[0]+'</span>':a[0]);
+  if(pri&&!called&&!isBonus)html+='<span class="priority-tag">PRIORITY</span>';
+  if(isBonus)html+='<span class="bonus-tag">BONUS</span>';
+  html+='</div>';
+
+  // Meta row — badge, LP days, last activity
   html+='<div class="call-meta"><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
   if(assignedLp&&assignedLp!==lp)html+='<span class="lp-tag lp-tag-'+assignedLp+'" style="font-size:10px">'+assignedLp+"'s agent</span>";
-  html+='<span'+(ds===null?' style="color:#E53935"':'')+'>'+dsText+'</span>';
-  if(ds!==null&&ds>=14&&!isBonus)html+='<span style="color:#E53935">overdue</span>';
-  if(act)html+='<span>Last activity: '+fmt(act)+'</span>';
+  html+='<span style="color:'+(ds===null||ds>=14?'var(--red)':"var(--text-2)")+'">'+dsText+'</span>';
+  if(act)html+='<span style="color:var(--text-3)">Last activity: '+fmt(act)+'</span>';
   html+='</div>';
-  if(lastNote&&lastNote.note)html+='<div class="last-note-preview"><span class="last-note-label">Last note &middot; '+fmt(lastNote.call_date)+(lastNote.lp?' &middot; '+lastNote.lp:'')+'</span>'+escHtml(lastNote.note)+'</div>';
-  var tagsHtml='';
-  if(rmAct)tagsHtml+='<span class="rm-tag">&#129309; Relationship Manager: '+fmt(rmAct)+'</span>';
-  if(velMtd>0)tagsHtml+='<span class="vel-tag">&#127968; '+velMtd+' lead'+(velMtd>1?'s':'')+' this month</span>';
-  else if(velTotal>0)tagsHtml+='<span class="vel-tag" style="background:#f5f5f5;border-color:#ddd;color:#888">&#127968; '+velTotal+' total, none this month</span>';
-  if(noReferralFlag)tagsHtml+='<span class="no-ref-tag">&#9888;&#65039; 0 leads &middot; 90+ days</span>';
-  if(coMarketingAgents[a[0]])tagsHtml+='<span class="co-mkt-tag">&#128203; Co-marketing active</span>';
-  if(tagsHtml)html+='<div class="tags-row">'+tagsHtml+'</div>';
+
+  // MTD leads badge — prominent under name
+  if(velMtd>0){
+    html+='<div style="margin-top:5px"><span style="display:inline-flex;align-items:center;gap:5px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:4px;padding:3px 10px;font-size:12px;font-weight:700;color:#1d4ed8">'+velMtd+' lead'+(velMtd>1?'s':'')+' sent MTD</span></div>';
+  } else if(velTotal>0){
+    html+='<div style="margin-top:5px"><span style="display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 10px;font-size:12px;color:var(--text-3)">'+velTotal+' total leads, none this month</span></div>';
+  } else if(noReferralFlag){
+    html+='<div style="margin-top:5px"><span style="display:inline-flex;align-items:center;gap:5px;background:var(--red-light);border:1px solid var(--red-border);border-radius:4px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--red)">0 leads · 90+ days</span></div>';
+  }
+
+  // Extra tags row (RM activity, co-marketing, tenure)
+  var tagsHtml="";
+  if(rmAct)tagsHtml+='<span class="rm-tag">RM visited: '+fmt(rmAct)+'</span>';
+  if(coMarketingAgents[a[0]])tagsHtml+='<span class="co-mkt-tag">Co-marketing active</span>';
   var tenureDays=firstCall?Math.floor((TODAY-new Date(firstCall+"T12:00:00"))/86400000):0;
   var tenureStr=tenureDays>=365?Math.floor(tenureDays/365)+"yr "+(Math.floor((tenureDays%365)/30))+"mo":tenureDays>=30?Math.floor(tenureDays/30)+"mo":tenureDays>0?tenureDays+"d":"New";
-  if(firstCall)html+='<div class="tenure-tag" style="margin-top:3px;font-size:10px;color:#bbb">In tracker: '+tenureStr+'</div>';
-  html+='<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:6px;padding:6px 8px;background:#f8f7fc;border-radius:6px;border:0.5px solid #e4e2ee">';
-  html+='<span style="font-size:12px;color:#555" id="ci-phone-'+safeId+'">&#128222; <span style="color:#bbb">Loading...</span></span>';
-  html+='<span style="font-size:12px;color:#555" id="ci-email-'+safeId+'">&#9993;&#65039; <span style="color:#bbb">Loading...</span></span>';
-  html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="margin-left:auto;font-size:11px">Edit contact</button>';
+  if(firstCall)tagsHtml+='<span class="tenure-tag">In tracker: '+tenureStr+'</span>';
+  if(tagsHtml)html+='<div class="tags-row" style="margin-top:6px">'+tagsHtml+'</div>';
+
+  // Last week note preview
+  if(lastNote&&lastNote.note)html+='<div class="last-note-preview"><span class="last-note-label">Last note · '+fmt(lastNote.call_date)+(lastNote.lp?' · '+lastNote.lp:'')+'</span>'+escHtml(lastNote.note)+'</div>';
+
+  // Contact bar
+  html+='<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:8px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">';
+  html+='<span style="font-size:12px;color:var(--text-2)" id="ci-phone-'+safeId+'">📞 <span style="color:var(--text-3)">Loading...</span></span>';
+  html+='<span style="font-size:12px;color:var(--text-2)" id="ci-email-'+safeId+'">✉️ <span style="color:var(--text-3)">Loading...</span></span>';
+  html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+"\'"+ ')" style="margin-left:auto;font-size:11px">Edit contact</button>';
   html+='</div>';
-  if(called||isPending){
-    var noteHint=isPending?'<div style="font-size:11px;color:#E53935;font-weight:600;margin-bottom:4px">✏️ Add a note (10+ chars) to save this call</div>':'';
-    var noteBorderColor=isPending?'#E53935':'#dde1e7';
-    var notePlaceholder=isPending?'Required: what happened on this call...':'Details, referrals mentioned, next steps...';
-    html+=noteHint+'<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+lp+'" placeholder="'+notePlaceholder+'" oninput="queueNote(this)" style="border-color:'+noteBorderColor+'">'+note+'</textarea>';
-    if(called){
-      var outcomes=["✅ Answered","📵 Voicemail","🚫 No Answer","💬 Sent Text"];
-      var oKeys=["Answered","Voicemail","No Answer","Sent Text"];
-      var oCls=["sel-answered","sel-voicemail","sel-noanswer","sel-text"];
-      html+='<div style="margin-top:8px"><span class="outcome-label">What happened?</span><div class="outcome-row">';
-      for(var oi=0;oi<outcomes.length;oi++){html+='<button class="outcome-btn'+(outcome===oKeys[oi]?' '+oCls[oi]:'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" data-outcome="'+oKeys[oi]+'" onclick="selectOutcome(this)">'+outcomes[oi]+'</button>';}
-      html+='</div></div>';
+
+  // Pending or called state — outcome buttons FIRST, then note
+  if(isPending||called){
+    // Outcome buttons always visible when card is open
+    var outcomes=["✅ Answered","📞 Left VM","💬 Sent Follow-up Text","🤝 In Person"];
+    var oKeys=["Answered","Left VM","Sent Follow-up Text","In Person"];
+    var oCls=["sel-answered","sel-voicemail","sel-text","sel-noanswer"];
+    var pendingOutcome=pendingNote[a[0]]?pendingNote[a[0]].outcome||"":"";
+    var displayOutcome=called?outcome:pendingOutcome;
+    html+='<div style="margin-top:10px"><span class="outcome-label">What happened? (required)</span><div class="outcome-row">';
+    for(var oi=0;oi<outcomes.length;oi++){
+      html+='<button class="outcome-btn'+(displayOutcome===oKeys[oi]?' '+oCls[oi]:'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" data-outcome="'+oKeys[oi]+'" onclick="'+(called?'selectOutcome(this)':"selectPendingOutcome(this)")+'">'+outcomes[oi]+'</button>';
+    }
+    html+='</div></div>';
+
+    // Note field with word count
+    var wordCount=countWords(note);
+    var wordsLeft=Math.max(0,10-countWords(isPending?(pendingNote[a[0]]?pendingNote[a[0]].draft||"":""):note));
+    var noteReady=!isPending&&wordCount>=10;
+    var noteBorder=isPending?(pendingNote[a[0]]&&countWords(pendingNote[a[0]].draft||"")>=10?"var(--green)":"var(--red)"):"var(--border)";
+    var noteHintText=isPending?'<span style="font-size:11px;font-weight:600;color:var(--red)">Required: add at least 10 words before saving.</span>':'<span style="font-size:11px;color:var(--text-3)">'+wordCount+' words</span>';
+    html+='<div style="margin-top:8px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="outcome-label">Call notes</span>'+noteHintText+'</div>';
+    html+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+lp+'" placeholder="Did they mention a new buyer? Listing coming? Next step? (10 words min)" oninput="queueNote(this)" style="border-color:'+noteBorder+';height:60px">'+escHtml(isPending?(pendingNote[a[0]]?pendingNote[a[0]].draft||"":""):note)+'</textarea>';
+    html+='</div>';
+
+    // Save button shown only when pending
+    if(isPending){
+      html+='<button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%;padding:9px" onclick="tryConfirmCall(\''+a[0].replace(/'/g,"\\'")+"\'"+ ',\''+lp+'\')">Save & mark called ✓</button>';
     }
   }
+
   html+='</div></div>';
   return html;
 }
@@ -866,21 +980,54 @@ function toggleCallFromCard(btn){
     delete pendingNote[name];
     deleteCallLog(name).then(function(){renderLP(currentUser);});
   } else {
-    // Expand card with note field, require 10+ chars before saving
-    pendingNote[name]=true;
+    pendingNote[name]={draft:"",outcome:""};
     renderLP(currentUser);
     setTimeout(function(){
       var ta=document.querySelector('.note-field[data-name="'+name+'"]');
-      if(ta){ta.focus();ta.style.borderColor="#E53935";ta.placeholder="Add call notes before saving (required)...";}
+      if(ta)ta.focus();
     },100);
   }
 }
 
-function confirmCallWithNote(name,lp,note){
-  if(!note||note.trim().length<10)return;
-  delete pendingNote[name];
-  upsertCallLog(name,lp,note.trim()).then(function(){renderLP(currentUser);});
+function selectPendingOutcome(btn){
+  var name=btn.getAttribute("data-name"),outc=btn.getAttribute("data-outcome");
+  if(!pendingNote[name])pendingNote[name]={draft:"",outcome:""};
+  pendingNote[name].outcome=pendingNote[name].outcome===outc?"":outc;
+  renderLP(currentUser);
 }
+
+function tryConfirmCall(name,lp){
+  var pending=pendingNote[name]||{};
+  var draft=pending.draft||"";
+  var outcome=pending.outcome||"";
+  var words=countWords(draft);
+  if(!outcome){alert("Please select what happened (Answered, Left VM, etc.) before saving.");return;}
+  if(words<10){alert("Please add at least 10 words to your note before saving. You have "+words+".");return;}
+  delete pendingNote[name];
+  upsertCallLogWithOutcome(name,lp,draft.trim(),outcome).then(function(){renderLP(currentUser);});
+}
+
+function queueNote(ta){
+  var name=ta.getAttribute("data-name"),lp=ta.getAttribute("data-lp")||currentUser,val=ta.value;
+  var words=countWords(val);
+  if(pendingNote[name]){
+    if(!pendingNote[name])pendingNote[name]={draft:"",outcome:""};
+    pendingNote[name].draft=val;
+    ta.style.borderColor=words>=10?"var(--green)":"var(--red)";
+    // Update word count hint inline without full re-render
+    var card=ta.closest(".call-card");
+    if(card){
+      var hint=card.querySelector(".note-word-hint");
+      if(hint)hint.textContent=words+" / 10 words";
+    }
+  } else {
+    ta.style.borderColor=words>=10?"var(--green)":"var(--border)";
+    if(noteTimers[name])clearTimeout(noteTimers[name]);
+    noteTimers[name]=setTimeout(function(){upsertCallLog(name,lp,val);},800);
+  }
+}
+
+
 
 function loadAgentContact(name,safeId){
   if(contactCache[name]){renderInlineContact(name,safeId,contactCache[name]);return;}
@@ -900,19 +1047,6 @@ function toggleCall(btn){
   var name=btn.getAttribute("data-name");
   if(calledThisWeek(name)){deleteCallLog(name).then(function(){renderLP(currentUser);});}
   else{upsertCallLog(name,currentUser,"").then(function(){renderLP(currentUser);});}
-}
-
-function queueNote(ta){
-  var name=ta.getAttribute("data-name"),lp=ta.getAttribute("data-lp")||currentUser,val=ta.value;
-  ta.style.borderColor=val.trim().length>=10?"#4CAF50":"#E53935";
-  if(noteTimers[name])clearTimeout(noteTimers[name]);
-  noteTimers[name]=setTimeout(function(){
-    if(pendingNote[name]){
-      confirmCallWithNote(name,lp,val);
-    } else {
-      upsertCallLog(name,lp,val);
-    }
-  },800);
 }
 
 function openLpContactModal(name){
@@ -1324,54 +1458,77 @@ function renderReferralLeads(data){
     var s=status.toLowerCase();
     return s.indexOf("file started")>=0||s==="started";
   }
+  function isOverdue(r){
+    if(isFileStarted(r.status))return false;
+    var s=(r.status||"").toLowerCase();
+    if(s.indexOf("nurture")>=0)return false;
+    var lu=r.last_update||r.date_added;
+    if(!lu)return true;
+    var hrs=(new Date()-new Date(lu+"T00:00:00"))/3600000;
+    return hrs>24;
+  }
 
   var todayLeads=data.filter(function(r){return r.date_added===todayStr;});
   var priorLeads=data.filter(function(r){return r.date_added===priorStr;});
   var uncovered=data.filter(function(r){return!isFileStarted(r.status);});
+  var needsTouch=data.filter(function(r){return isOverdue(r);});
   var mtdTotal=data.length;
   var mtdFileStarts=data.filter(function(r){return isFileStarted(r.status);}).length;
-  var mtdUnconverted=mtdTotal-mtdFileStarts;
   var ltf=mtdTotal>0?Math.round(mtdFileStarts/mtdTotal*1000)/10:0;
 
   function setEl(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
+  function setHtml(id,val){var e=document.getElementById(id);if(e)e.innerHTML=val;}
+
   setEl("ref-mtd-leads",mtdTotal||"0");
   setEl("ref-file-starts",mtdFileStarts||"0");
-  setEl("ref-unconverted",mtdUnconverted||"0");
   setEl("ref-ltf",ltf+"%");
-  setEl("ref-prior-count",priorLeads.length||"0");
-  setEl("ref-today-label",TODAY.toLocaleDateString("en-US",{month:"numeric",day:"numeric"}));
-  setEl("ref-prior-label",priorDay.toLocaleDateString("en-US",{month:"numeric",day:"numeric"}));
+  setEl("ref-needs-touch",needsTouch.length||"0");
+  setEl("ref-today-label",TODAY.toLocaleDateString("en-US",{month:"short",day:"numeric"}));
+  setEl("ref-prior-label",priorDay.toLocaleDateString("en-US",{month:"short",day:"numeric"}));
   setEl("ref-today-count",todayLeads.length+" lead"+(todayLeads.length!==1?"s":""));
   setEl("ref-prior-day-count",priorLeads.length+" lead"+(priorLeads.length!==1?"s":""));
   setEl("ref-uncovered-count",uncovered.length+" lead"+(uncovered.length!==1?"s":""));
+  setEl("ref-needs-touch-count",needsTouch.length+" lead"+(needsTouch.length!==1?"s":""));
 
-  function setHtml(id,val){var e=document.getElementById(id);if(e)e.innerHTML=val;}
-  setHtml("ref-today-table",buildLeadsTable(todayLeads,"No leads received today yet."));
-  setHtml("ref-prior-table",buildLeadsTable(priorLeads,"No leads on prior day."));
-  setHtml("ref-uncovered-table",buildLeadsTable(uncovered,"No uncovered leads — great conversion!"));
+  var ntSection=document.getElementById("ref-needs-touch-section");
+  if(ntSection)ntSection.style.display=needsTouch.length?"block":"none";
+  var badge=document.getElementById("d-tab-badge");
+  if(badge){badge.textContent=needsTouch.length?needsTouch.length+" urgent":"";badge.style.display=needsTouch.length?"inline":"none";}
+
+  setHtml("ref-needs-touch-table",buildLeadsTable(needsTouch,"No overdue leads.",true));
+  setHtml("ref-today-table",buildLeadsTable(todayLeads,"No leads received today yet.",false));
+  setHtml("ref-prior-table",buildLeadsTable(priorLeads,"No leads on prior day.",false));
+  setHtml("ref-uncovered-table",buildLeadsTable(uncovered,"No unconverted leads — great conversion!",false));
 }
 
-function buildLeadsTable(rows,emptyMsg){
+function buildLeadsTable(rows,emptyMsg,showUrgency){
   if(!rows||!rows.length)return'<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:22%">Agent</th><th style="width:25%">Buyer(s)</th><th style="width:9%">LP</th><th style="width:18%">Status</th><th style="width:16%">Last Update</th></tr></thead><tbody>';
+  var html='<table class="ref-leads-table"><thead><tr><th style="width:22%">Agent</th><th style="width:22%">Buyer</th><th style="width:8%">LP</th><th style="width:16%">Status</th><th style="width:14%">Last touch</th>'+(showUrgency?'<th style="width:18%">Urgency</th>':'')+'</tr></thead><tbody>';
   rows.forEach(function(r){
     var agent=r.referral_partner_name||"--";
     var buyer=r.buyer_name||"--";
     var lp=r.lp_user||"--";
     LPS.forEach(function(lpName){if(lp.toLowerCase().indexOf(lpName.toLowerCase())>=0)lp=lpName;});
     var status=r.status||"--";
-    var dateAdded=r.date_added?new Date(r.date_added+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):"--";
-    var lastUpdate=r.last_update?new Date(r.last_update+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):dateAdded;
+    var lu=r.last_update||r.date_added;
+    var lastUpdate=lu?new Date(lu+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):"--";
+    var hrs=lu?Math.round((new Date()-new Date(lu+"T00:00:00"))/3600000):null;
     var badgeCls=getStatusBadgeClass(status);
     var lpKey=LPS.find(function(n){return lp===n;});
-    html+='<tr><td style="font-size:12px;color:#888">'+dateAdded+'</td><td style="font-weight:500">'+escHtml(agent)+'</td><td style="font-size:12px">'+escHtml(buyer)+'</td>';
-    html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:11px;color:#888">'+escHtml(lp)+'</span>')+'</td>';
+    var isOvd=showUrgency&&hrs&&hrs>24;
+    html+='<tr class="'+(isOvd?"overdue":"")+'">';
+    html+='<td style="font-weight:600;font-size:13px">'+escHtml(agent)+'</td>';
+    html+='<td style="font-size:12px;color:var(--text-2)">'+escHtml(buyer)+'</td>';
+    html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:11px;color:var(--text-3)">'+escHtml(lp)+'</span>')+'</td>';
     html+='<td><span class="ref-badge '+badgeCls+'">'+escHtml(status)+'</span></td>';
-    html+='<td style="font-size:12px;color:#888">'+lastUpdate+'</td></tr>';
+    html+='<td style="font-size:12px;color:var(--text-2)">'+lastUpdate+'</td>';
+    if(showUrgency)html+='<td><span class="touch-badge">'+(hrs?hrs+'hrs ago':'unknown')+'</span></td>';
+    html+='</tr>';
   });
   html+='</tbody></table>';
   return html;
 }
+
 
 setInterval(function(){if(currentUser==="Daniel")loadCallLogs().then(function(){renderDaniel();});},30000);
 document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
