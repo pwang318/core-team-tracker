@@ -1199,9 +1199,6 @@ function renderDaniel(){
     var active=all.filter(isActive);
     var ic=all.filter(function(a){return!isActive(a);}).length;
     var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
-    var aCount=active.filter(function(a){return a[1]==="A";}).length;
-    var bCount=active.filter(function(a){return a[1]==="B";}).length;
-    var cCount=active.filter(function(a){return a[1]==="C";}).length;
     var pctCls=pct===0?"zero":pct===100?"good":pct>50?"ok":"";
     var trend=pct>lastPct?"▲":pct<lastPct?"▼":"";
     var trendCls=pct>lastPct?"trend-up":pct<lastPct?"trend-down":"";
@@ -1210,11 +1207,6 @@ function renderDaniel(){
     gh+='<div class="d-pct-row"><div class="d-pct '+pctCls+'">'+pct+'%</div>'+(trend?'<span class="d-trend '+trendCls+'">'+trend+'</span>':'')+'</div>';
     gh+='<div class="d-bar-track"><div class="d-bar-fill bar-'+lp+'" style="width:'+pct+'%"></div></div>';
     gh+='<div class="d-meta"><span>'+done+"/"+WEEKLY_TARGET+' calls</span><span>'+active.length+' active</span></div>';
-    gh+='<div class="d-tiers">';
-    if(aCount)gh+='<span class="d-tier-pill tier-a">'+aCount+' A</span>';
-    if(bCount)gh+='<span class="d-tier-pill tier-b">'+bCount+' B</span>';
-    if(cCount)gh+='<span class="d-tier-pill tier-c">'+cCount+' C</span>';
-    gh+='</div>';
     if(pc)gh+='<div class="d-alert">⚑ '+pc+' priority</div>';
     if(ic)gh+='<div class="d-alert-warn">'+ic+' inactive</div>';
     gh+='</div>';
