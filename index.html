@@ -513,7 +513,7 @@ var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
 
 function localDateStr(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
-function getWeekKey(d){var dt=new Date(d);dt.setHours(0,0,0,0);var day=dt.getDay();dt.setDate(dt.getDate()-(day===0?6:day-1));return localDateStr(dt);}
+function getWeekKey(d){var dt=new Date(d.getFullYear(),d.getMonth(),d.getDate());var day=dt.getDay();dt.setDate(dt.getDate()-(day===0?6:day-1));return localDateStr(dt);}
 function getLastWeekKey(d){var dt=new Date(d);dt.setDate(dt.getDate()-7);return getWeekKey(dt);}
 function getWeekLabel(k){var mon=new Date(k+'T12:00:00'),sun=new Date(mon);sun.setDate(mon.getDate()+6);var o={month:'short',day:'numeric'};return 'Week of '+mon.toLocaleDateString('en-US',o)+' - '+sun.toLocaleDateString('en-US',o);}
 function fmt(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
@@ -789,13 +789,13 @@ function saveAgents(){
   var ov=agents.filter(function(a){var s=SEED.find(function(x){return x[0]===a[0];});return!s||s[2]!==a[2]||s[7]!==a[7];}).map(function(a){return{n:a[0],lp:a[2],lv:a[1],pr:a[7],added:!SEED.find(function(s){return s[0]===a[0];})};});
   var rm=SEED.map(function(s){return s[0];}).filter(function(n){return!agents.find(function(a){return a[0]===n;});});
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify({ov:ov,rm:rm}));}catch(e){}
-  // Also save to Supabase so all browsers stay in sync
-  var rows=ov.map(function(o){return{agent_name:o.n,lp:o.lp,priority:o.pr||false,added:o.added||false,level:o.lv||"C"};});
-  var removedRows=rm.map(function(n){return{agent_name:n,lp:"__REMOVED__",priority:false,added:false,level:"C"};});
-  var allRows=rows.concat(removedRows);
-  if(allRows.length){
-    sbFetch("POST","agent_assignments",allRows).catch(function(){});
-  }
+  // Save to Supabase async — don't block or error on failure
+  try{
+    var rows=ov.map(function(o){return{agent_name:o.n,lp:o.lp,priority:o.pr||false,added:o.added||false,level:o.lv||"C"};});
+    var removedRows=rm.map(function(n){return{agent_name:n,lp:"__REMOVED__",priority:false,added:false,level:"C"};});
+    var allRows=rows.concat(removedRows);
+    if(allRows.length)sbFetch("POST","agent_assignments",allRows).catch(function(){});
+  }catch(e){}
 }
 
 function loadAgentAssignments(){
