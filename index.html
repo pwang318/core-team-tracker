@@ -1520,7 +1520,7 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
     var note=r.last_action_note||"";
     var words=note.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
     if(!note)return{cls:"missing",text:"No note logged",flag:"MISSING"};
-    if(words<=3)return{cls:"lazy",text:escHtml(note),flag:"LAZY"};
+    if(words<=3)return{cls:"lazy",text:escHtml(note),flag:"NEEDS DETAIL"};
     return{cls:"good",text:escHtml(note.length>70?note.substring(0,70)+"...":note),flag:""};
   }
   function dayInfo(r){
