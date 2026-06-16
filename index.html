@@ -252,6 +252,18 @@ tr:hover td{background:var(--bg)}
 .ref-leads-table tr:last-child td{border-bottom:none}
 .ref-leads-table tr:hover td{background:var(--bg)}
 .ref-leads-table tr.overdue td{background:#fff8f8}
+.lead-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.lead-card.overdue{border-color:var(--red-border);border-left:3px solid var(--red);background:#fff8f8}
+.lead-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px}
+.lead-card-name{font-weight:700;font-size:14px;color:var(--text);line-height:1.2}
+.lead-card-days{font-size:11px;font-weight:700;white-space:nowrap}
+.lead-card-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.lead-card-note{font-size:11px;margin-top:6px;padding:6px 9px;border-radius:6px;line-height:1.5}
+.lead-card-note.missing{background:var(--red-light);color:var(--red);font-style:italic}
+.lead-card-note.lazy{background:var(--amber-bg);color:var(--amber)}
+.lead-card-note.good{background:var(--bg);color:var(--text-2)}
+@media(min-width:600px){.lead-card-view{display:none}.ref-leads-table-wrap{display:block}}
+@media(max-width:599px){.lead-card-view{display:block}.ref-leads-table-wrap{display:none}}
 
 .ref-badge{display:inline-block;padding:2px 9px;border-radius:4px;font-size:11px;font-weight:600}
 .rs-started{background:#dcfce7;color:#15803d}
@@ -1503,57 +1515,69 @@ function renderReferralLeads(data){
 
 function buildLeadsTable(rows,emptyMsg,showUrgency){
   if(!rows||!rows.length)return'<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:20%">Agent</th><th style="width:18%">Buyer</th><th style="width:7%">LP</th><th style="width:14%">Status</th><th style="width:18%">LP Note</th><th style="width:11%">Last touch</th>'+(showUrgency?'<th style="width:12%">Days out</th>':'')+'</tr></thead><tbody>';
-  rows.forEach(function(r){
-    var agent=r.referral_partner_name||"--";
-    var buyer=r.buyer_name||"--";
-    var lp=r.lp_user||"--";
-    LPS.forEach(function(lpName){if(lp.toLowerCase().indexOf(lpName.toLowerCase())>=0)lp=lpName;});
-    var status=r.status||"--";
-    var lu=r.last_update||r.date_added;
-    var lastUpdate=lu?new Date(lu+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):"--";
-    var days=lu?Math.floor((new Date()-new Date(lu+"T00:00:00"))/86400000):null;
-    var badgeCls=getStatusBadgeClass(status);
-    var lpKey=LPS.find(function(n){return lp===n;});
-    var isOvd=showUrgency&&days!==null&&days>=1;
 
-    // Note quality assessment
+  function noteInfo(r){
     var note=r.last_action_note||"";
-    var noteWords=note.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
-    var noteCls,noteDisplay,noteFlag;
-    if(!note){
-      noteCls="color:var(--red);font-style:italic";
-      noteDisplay="No note logged";
-      noteFlag='<span style="font-size:9px;font-weight:700;background:var(--red-light);color:var(--red);border:1px solid var(--red-border);border-radius:3px;padding:1px 5px;margin-left:4px">MISSING</span>';
-    } else if(noteWords<=3){
-      noteCls="color:var(--amber);font-style:italic";
-      noteDisplay=escHtml(note);
-      noteFlag='<span style="font-size:9px;font-weight:700;background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d;border-radius:3px;padding:1px 5px;margin-left:4px">LAZY</span>';
-    } else {
-      noteCls="color:var(--text-2)";
-      noteDisplay=escHtml(note.length>60?note.substring(0,60)+"...":note);
-      noteFlag="";
-    }
+    var words=note.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
+    if(!note)return{cls:"missing",text:"No note logged",flag:"MISSING"};
+    if(words<=3)return{cls:"lazy",text:escHtml(note),flag:"LAZY"};
+    return{cls:"good",text:escHtml(note.length>70?note.substring(0,70)+"...":note),flag:""};
+  }
+  function dayInfo(r){
+    var lu=r.last_update||r.date_added;
+    if(!lu)return{days:null,label:"--",cls:"color:var(--text-3)"};
+    var days=Math.floor((new Date()-new Date(lu+"T00:00:00"))/86400000);
+    var date=new Date(lu+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"});
+    if(days===0)return{days:0,label:"Today",date:date,cls:"color:var(--green)"};
+    if(days<=2)return{days:days,label:days+"d ago",date:date,cls:"color:var(--amber)"};
+    return{days:days,label:days+"d ago",date:date,cls:"color:var(--red);font-weight:700"};
+  }
+  function lpTag(r){
+    var lp=r.lp_user||"--";
+    LPS.forEach(function(n){if(lp.toLowerCase().indexOf(n.toLowerCase())>=0)lp=n;});
+    var lpKey=LPS.find(function(n){return lp===n;});
+    return lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:11px;color:var(--text-3)">'+escHtml(lp)+'</span>';
+  }
 
-    // Days color scale
-    var daysCls,daysDisplay;
-    if(days===null){daysDisplay="--";daysCls="color:var(--text-3)";}
-    else if(days===0){daysDisplay="Today";daysCls="color:var(--green)";}
-    else if(days<=2){daysDisplay=days+"d ago";daysCls="color:var(--amber)";}
-    else{daysDisplay=days+"d ago";daysCls="color:var(--red);font-weight:600";}
-
-    html+='<tr class="'+(isOvd?"overdue":"")+'">';
-    html+='<td style="font-weight:600;font-size:13px">'+escHtml(agent)+'</td>';
-    html+='<td style="font-size:12px;color:var(--text-2)">'+escHtml(buyer)+'</td>';
-    html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:11px;color:var(--text-3)">'+escHtml(lp)+'</span>')+'</td>';
-    html+='<td><span class="ref-badge '+badgeCls+'">'+escHtml(status)+'</span></td>';
-    html+='<td style="font-size:11px;'+noteCls+'">'+noteDisplay+noteFlag+'</td>';
-    html+='<td style="font-size:12px;'+daysCls+'">'+lastUpdate+'<br><span style="font-size:10px">'+daysDisplay+'</span></td>';
-    if(showUrgency)html+='<td style="font-size:12px;'+daysCls+'">'+daysDisplay+'</td>';
-    html+='</tr>';
+  // ── MOBILE CARDS ──
+  var cards='<div class="lead-card-view">';
+  rows.forEach(function(r){
+    var ni=noteInfo(r),di=dayInfo(r);
+    var isOvd=showUrgency&&di.days!==null&&di.days>=1;
+    var badgeCls=getStatusBadgeClass(r.status||"");
+    cards+='<div class="lead-card'+(isOvd?" overdue":"")+'">';
+    cards+='<div class="lead-card-top">';
+    cards+='<div class="lead-card-name">'+escHtml(r.referral_partner_name||"--")+'<div style="font-size:12px;font-weight:400;color:var(--text-2);margin-top:2px">'+escHtml(r.buyer_name||"--")+'</div></div>';
+    cards+='<div class="lead-card-days" style="'+di.cls+'">'+di.label+'</div>';
+    cards+='</div>';
+    cards+='<div class="lead-card-meta">'+lpTag(r)+'<span class="ref-badge '+badgeCls+'">'+escHtml(r.status||"--")+'</span></div>';
+    cards+='<div class="lead-card-note '+ni.cls+'">';
+    if(ni.flag)cards+='<span style="font-size:9px;font-weight:700;margin-right:5px;text-transform:uppercase">'+ni.flag+'</span>';
+    cards+=ni.text;
+    cards+='</div></div>';
   });
-  html+='</tbody></table>';
-  return html;
+  cards+='</div>';
+
+  // ── DESKTOP TABLE ──
+  var table='<div class="ref-leads-table-wrap"><table class="ref-leads-table"><thead><tr><th>Agent</th><th>Buyer</th><th>LP</th><th>Status</th><th>LP Note</th><th>Last touch</th>'+(showUrgency?'<th>Days out</th>':'')+'</tr></thead><tbody>';
+  rows.forEach(function(r){
+    var ni=noteInfo(r),di=dayInfo(r);
+    var isOvd=showUrgency&&di.days!==null&&di.days>=1;
+    var badgeCls=getStatusBadgeClass(r.status||"");
+    var noteFlagHtml=ni.flag?'<span style="font-size:9px;font-weight:700;margin-left:5px;padding:1px 5px;border-radius:3px;background:'+(ni.cls==="missing"?"var(--red-light)":"var(--amber-bg)")+';color:'+(ni.cls==="missing"?"var(--red)":"var(--amber)")+'">'+ni.flag+'</span>':"";
+    table+='<tr class="'+(isOvd?"overdue":"")+'">';
+    table+='<td style="font-weight:600;font-size:13px">'+escHtml(r.referral_partner_name||"--")+'</td>';
+    table+='<td style="font-size:12px;color:var(--text-2)">'+escHtml(r.buyer_name||"--")+'</td>';
+    table+='<td>'+lpTag(r)+'</td>';
+    table+='<td><span class="ref-badge '+badgeCls+'">'+escHtml(r.status||"--")+'</span></td>';
+    table+='<td style="font-size:11px;'+(ni.cls==="missing"?"color:var(--red);font-style:italic":ni.cls==="lazy"?"color:var(--amber)":"color:var(--text-2)")+'">'+ni.text+noteFlagHtml+'</td>';
+    table+='<td style="font-size:12px;'+di.cls+'">'+di.date+'<br><span style="font-size:10px">'+di.label+'</span></td>';
+    if(showUrgency)table+='<td style="font-size:12px;'+di.cls+'">'+di.label+'</td>';
+    table+='</tr>';
+  });
+  table+='</tbody></table></div>';
+
+  return cards+table;
 }
 
 
