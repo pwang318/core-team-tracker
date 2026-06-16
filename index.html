@@ -12,7 +12,7 @@
   --navy:#0f172a;--navy-soft:#1e293b;
   --red:#A32D2D;--red-bg:#FFF8F8;--red-border:#F7C1C1;--red-light:#FCEBEB;
   --green:#3B6D11;--green-bg:#EAF3DE;--green-border:#C0DD97;--green-var:#15803d;
-  --amber:#854F0B;--amber-bg:#FAEEDA;
+  --amber:#854F0B;--amber-bg:#FAEEDA;--amber-text:#854F0B;
   --border:#e2e8f0;--border-light:#f1f5f9;
   --text:#0f172a;--text-2:#475569;--text-3:#94a3b8;
   --bg:#f8fafc;--surface:#ffffff;
@@ -1503,7 +1503,7 @@ function renderReferralLeads(data){
 
 function buildLeadsTable(rows,emptyMsg,showUrgency){
   if(!rows||!rows.length)return'<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:22%">Agent</th><th style="width:22%">Buyer</th><th style="width:8%">LP</th><th style="width:16%">Status</th><th style="width:14%">Last touch</th>'+(showUrgency?'<th style="width:18%">Urgency</th>':'')+'</tr></thead><tbody>';
+  var html='<table class="ref-leads-table"><thead><tr><th style="width:20%">Agent</th><th style="width:18%">Buyer</th><th style="width:7%">LP</th><th style="width:14%">Status</th><th style="width:18%">LP Note</th><th style="width:11%">Last touch</th>'+(showUrgency?'<th style="width:12%">Days out</th>':'')+'</tr></thead><tbody>';
   rows.forEach(function(r){
     var agent=r.referral_partner_name||"--";
     var buyer=r.buyer_name||"--";
@@ -1512,22 +1512,50 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
     var status=r.status||"--";
     var lu=r.last_update||r.date_added;
     var lastUpdate=lu?new Date(lu+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"}):"--";
-    var hrs=lu?Math.round((new Date()-new Date(lu+"T00:00:00"))/3600000):null;
+    var days=lu?Math.floor((new Date()-new Date(lu+"T00:00:00"))/86400000):null;
     var badgeCls=getStatusBadgeClass(status);
     var lpKey=LPS.find(function(n){return lp===n;});
-    var isOvd=showUrgency&&hrs&&hrs>24;
+    var isOvd=showUrgency&&days!==null&&days>=1;
+
+    // Note quality assessment
+    var note=r.last_action_note||"";
+    var noteWords=note.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
+    var noteCls,noteDisplay,noteFlag;
+    if(!note){
+      noteCls="color:var(--red);font-style:italic";
+      noteDisplay="No note logged";
+      noteFlag='<span style="font-size:9px;font-weight:700;background:var(--red-light);color:var(--red);border:1px solid var(--red-border);border-radius:3px;padding:1px 5px;margin-left:4px">MISSING</span>';
+    } else if(noteWords<=3){
+      noteCls="color:var(--amber);font-style:italic";
+      noteDisplay=escHtml(note);
+      noteFlag='<span style="font-size:9px;font-weight:700;background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d;border-radius:3px;padding:1px 5px;margin-left:4px">LAZY</span>';
+    } else {
+      noteCls="color:var(--text-2)";
+      noteDisplay=escHtml(note.length>60?note.substring(0,60)+"...":note);
+      noteFlag="";
+    }
+
+    // Days color scale
+    var daysCls,daysDisplay;
+    if(days===null){daysDisplay="--";daysCls="color:var(--text-3)";}
+    else if(days===0){daysDisplay="Today";daysCls="color:var(--green)";}
+    else if(days<=2){daysDisplay=days+"d ago";daysCls="color:var(--amber)";}
+    else{daysDisplay=days+"d ago";daysCls="color:var(--red);font-weight:600";}
+
     html+='<tr class="'+(isOvd?"overdue":"")+'">';
     html+='<td style="font-weight:600;font-size:13px">'+escHtml(agent)+'</td>';
     html+='<td style="font-size:12px;color:var(--text-2)">'+escHtml(buyer)+'</td>';
     html+='<td>'+(lpKey?'<span class="lp-tag lp-tag-'+lpKey+'">'+lpKey+'</span>':'<span style="font-size:11px;color:var(--text-3)">'+escHtml(lp)+'</span>')+'</td>';
     html+='<td><span class="ref-badge '+badgeCls+'">'+escHtml(status)+'</span></td>';
-    html+='<td style="font-size:12px;color:var(--text-2)">'+lastUpdate+'</td>';
-    if(showUrgency)html+='<td><span class="touch-badge">'+(hrs?hrs+'hrs ago':'unknown')+'</span></td>';
+    html+='<td style="font-size:11px;'+noteCls+'">'+noteDisplay+noteFlag+'</td>';
+    html+='<td style="font-size:12px;'+daysCls+'">'+lastUpdate+'<br><span style="font-size:10px">'+daysDisplay+'</span></td>';
+    if(showUrgency)html+='<td style="font-size:12px;'+daysCls+'">'+daysDisplay+'</td>';
     html+='</tr>';
   });
   html+='</tbody></table>';
   return html;
 }
+
 
 
 setInterval(function(){if(currentUser==="Daniel")loadCallLogs().then(function(){renderDaniel();});},30000);
