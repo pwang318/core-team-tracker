@@ -753,7 +753,7 @@ function upsertCallLog(name,lp,note){
   callLogs[name]=data;
   setSyncStatus("saving");
   return sbFetch("POST","call_logs",data).then(function(){
-    return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",outcome:existingOutcome});
+    return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||""});
   }).then(function(){setSyncStatus("live");}).catch(function(){setSyncStatus("error");});
 }
 
@@ -1463,7 +1463,7 @@ function upsertCallLogWithOutcome(name,lp,note,outcome){
   callLogs[name]=data;
   setSyncStatus("saving");
   return sbFetch("POST","call_logs",data).then(function(){
-    return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",outcome:outcome||""});
+    return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||""});
   }).then(function(){setSyncStatus("live");}).catch(function(){setSyncStatus("error");});
 }
 
