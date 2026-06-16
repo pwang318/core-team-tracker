@@ -327,7 +327,7 @@ tr:hover td{background:var(--bg)}
         <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="lp-prog" style="width:0%"></div></div><span class="prog-txt" id="lp-prog-txt">0/15</span></div>
       </div>
     </div>
-    <div id="monday-banner-el" class="monday-banner" style="display:none">&#128197; New week! Your 15 agents for this week are ready. Let&#39;s go!</div>
+    <div id="monday-banner-el" class="monday-banner" style="display:none"></div>
     <div id="target-complete-el" class="target-complete-bar" style="display:none">&#127881; Target hit! You called your 15 this week. Any extra calls below are bonus.</div>
     <div id="streak-bar-el" class="streak-bar" style="display:none"></div>
     <div id="priority-banner" class="priority-banner" style="display:none">&#9888; You have priority agents that need to be called ASAP!</div>
@@ -407,13 +407,23 @@ tr:hover td{background:var(--bg)}
       <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf">--</div></div>
       <div class="ref-stat-card urgent"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch">--</div></div>
     </div>
-    <div class="ref-legend">
-      <span class="ref-badge rs-started">File Started</span>
-      <span class="ref-badge rs-contact">Contact Attempt</span>
-      <span class="ref-badge rs-nurture">Nurture</span>
-      <span class="ref-badge rs-contacted">Contacted</span>
-      <span class="ref-badge rs-withdrawn">App Withdrawn</span>
-      <span class="ref-badge rs-other">Other</span>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.75rem;align-items:center">
+      <span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Filter by status:</span>
+      <span class="ref-badge rs-started ref-filter-btn" onclick="toggleRefFilter('status','File Started',this)" style="cursor:pointer">File Started</span>
+      <span class="ref-badge rs-contact ref-filter-btn" onclick="toggleRefFilter('status','Contact Attempt',this)" style="cursor:pointer">Contact Attempt</span>
+      <span class="ref-badge rs-nurture ref-filter-btn" onclick="toggleRefFilter('status','Nurture',this)" style="cursor:pointer">Nurture</span>
+      <span class="ref-badge rs-contacted ref-filter-btn" onclick="toggleRefFilter('status','Contacted',this)" style="cursor:pointer">Contacted</span>
+      <span class="ref-badge rs-withdrawn ref-filter-btn" onclick="toggleRefFilter('status','App Withdrawn',this)" style="cursor:pointer">App Withdrawn</span>
+      <span class="ref-badge rs-other ref-filter-btn" onclick="toggleRefFilter('status','Other',this)" style="cursor:pointer">Other</span>
+      <button class="btn btn-sm" onclick="clearRefFilters()" style="font-size:10px;margin-left:4px">Clear</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;align-items:center">
+      <span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Filter by LP:</span>
+      <span class="lp-tag lp-tag-Gavin ref-filter-btn" onclick="toggleRefFilter('lp','Gavin',this)" style="cursor:pointer">Gavin</span>
+      <span class="lp-tag lp-tag-Karen ref-filter-btn" onclick="toggleRefFilter('lp','Karen',this)" style="cursor:pointer">Karen</span>
+      <span class="lp-tag lp-tag-Osgood ref-filter-btn" onclick="toggleRefFilter('lp','Osgood',this)" style="cursor:pointer">Osgood</span>
+      <span class="lp-tag lp-tag-Jordan ref-filter-btn" onclick="toggleRefFilter('lp','Jordan',this)" style="cursor:pointer">Jordan</span>
+      <span class="lp-tag lp-tag-Said ref-filter-btn" onclick="toggleRefFilter('lp','Said',this)" style="cursor:pointer">Said</span>
     </div>
     <div class="ref-section urgent" id="ref-needs-touch-section" style="display:none">
       <div class="ref-section-header">
@@ -823,7 +833,17 @@ function renderLP(lp){
   var bar=document.getElementById("lp-prog");
   bar.style.width=pct+"%";bar.style.background=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
   document.getElementById("lp-prog-txt").textContent=done+"/"+WEEKLY_TARGET+(done>WEEKLY_TARGET?" 🎉":"");
-  document.getElementById("monday-banner-el").style.display=isMonday()?"block":"none";
+  var mondayBanner=document.getElementById("monday-banner-el");
+  if(mondayBanner){
+    var day=TODAY.getDay();
+    if(day===1){mondayBanner.style.display="block";mondayBanner.textContent="📅 New week! Your 15 agents are freshly sorted. Let's go!";}
+    else{
+      var daysUntilMonday=day===0?1:8-day;
+      mondayBanner.style.display="block";
+      mondayBanner.style.background="var(--bg)";mondayBanner.style.borderColor="var(--border)";mondayBanner.style.color="var(--text-3)";
+      mondayBanner.textContent="🔄 List resets Monday (" + daysUntilMonday + " day"+(daysUntilMonday!==1?"s":"")+") — calls logged this week count toward your 15.";
+    }
+  }
   var targetEl=document.getElementById("target-complete-el");
   targetEl.style.display=done>=WEEKLY_TARGET?"flex":"none";
   var streak=calcStreak(lp);
@@ -1475,6 +1495,80 @@ function loadReferralLeads(force){
   });
 }
 
+var refFilters={status:"",lp:""};
+var refSort={col:"",dir:1};
+
+function toggleRefFilter(type,val,el){
+  if(refFilters[type]===val){refFilters[type]="";}
+  else{refFilters[type]=val;}
+  document.querySelectorAll(".ref-filter-btn").forEach(function(b){
+    b.style.outline="none";
+  });
+  document.querySelectorAll(".ref-filter-btn").forEach(function(b){
+    var bval=b.textContent.trim();
+    var btype=b.classList.contains("lp-tag")?"lp":"status";
+    if(refFilters[btype]&&bval.toLowerCase().indexOf(refFilters[btype].toLowerCase())>=0){
+      b.style.outline="2px solid var(--navy)";b.style.outlineOffset="2px";
+    }
+  });
+  renderReferralLeads(referralLeadsCache||[]);
+}
+
+function clearRefFilters(){
+  refFilters={status:"",lp:""};
+  document.querySelectorAll(".ref-filter-btn").forEach(function(b){b.style.outline="none";});
+  renderReferralLeads(referralLeadsCache||[]);
+}
+
+function sortRefTable(col){
+  if(refSort.col===col)refSort.dir*=-1;
+  else{refSort.col=col;refSort.dir=1;}
+  renderReferralLeads(referralLeadsCache||[]);
+}
+
+function applyRefFilters(data){
+  var d=data;
+  if(refFilters.status){
+    var sf=refFilters.status.toLowerCase();
+    d=d.filter(function(r){
+      var s=(r.status||"").toLowerCase();
+      if(sf==="file started")return s.indexOf("started")>=0;
+      if(sf==="contact attempt")return s.indexOf("contact attempt")>=0;
+      if(sf==="nurture")return s.indexOf("nurture")>=0;
+      if(sf==="contacted")return s==="contacted";
+      if(sf==="app withdrawn")return s.indexOf("withdrawn")>=0;
+      if(sf==="other")return["started","contact attempt","nurture","contacted","withdrawn"].every(function(k){return s.indexOf(k)<0;});
+      return true;
+    });
+  }
+  if(refFilters.lp){
+    d=d.filter(function(r){
+      return(r.lp_user||"").toLowerCase().indexOf(refFilters.lp.toLowerCase())>=0;
+    });
+  }
+  return d;
+}
+
+function applyRefSort(data){
+  if(!refSort.col)return data;
+  return data.slice().sort(function(a,b){
+    var va,vb;
+    if(refSort.col==="days"){
+      var lu_a=a.last_update||a.date_added;var lu_b=b.last_update||b.date_added;
+      va=lu_a?Math.floor((new Date()-new Date(lu_a+"T00:00:00"))/86400000):9999;
+      vb=lu_b?Math.floor((new Date()-new Date(lu_b+"T00:00:00"))/86400000):9999;
+    } else if(refSort.col==="agent"){
+      va=(a.referral_partner_name||"").toLowerCase();
+      vb=(b.referral_partner_name||"").toLowerCase();
+      return refSort.dir*(va<vb?-1:va>vb?1:0);
+    } else if(refSort.col==="status"){
+      va=(a.status||"").toLowerCase();vb=(b.status||"").toLowerCase();
+      return refSort.dir*(va<vb?-1:va>vb?1:0);
+    } else {return 0;}
+    return refSort.dir*(va-vb);
+  });
+}
+
 function renderReferralLeads(data){
   var todayStr=localDateStr(TODAY);
   var priorDay=new Date(TODAY);priorDay.setDate(TODAY.getDate()-1);
@@ -1522,10 +1616,14 @@ function renderReferralLeads(data){
   var badge=document.getElementById("d-tab-badge");
   if(badge){badge.textContent=needsTouch.length?needsTouch.length+" urgent":"";badge.style.display=needsTouch.length?"inline":"none";}
 
-  setHtml("ref-needs-touch-table",buildLeadsTable(needsTouch,"No overdue leads.",true));
-  setHtml("ref-today-table",buildLeadsTable(todayLeads,"No leads received today yet.",false));
-  setHtml("ref-prior-table",buildLeadsTable(priorLeads,"No leads on prior day.",false));
-  setHtml("ref-uncovered-table",buildLeadsTable(uncovered,"No unconverted leads — great conversion!",false));
+  var filteredNeeds=applyRefSort(applyRefFilters(needsTouch));
+  var filteredToday=applyRefSort(applyRefFilters(todayLeads));
+  var filteredPrior=applyRefSort(applyRefFilters(priorLeads));
+  var filteredUncovered=applyRefSort(applyRefFilters(uncovered));
+  setHtml("ref-needs-touch-table",buildLeadsTable(filteredNeeds,"No overdue leads.",true));
+  setHtml("ref-today-table",buildLeadsTable(filteredToday,"No leads received today yet.",false));
+  setHtml("ref-prior-table",buildLeadsTable(filteredPrior,"No leads on prior day.",false));
+  setHtml("ref-uncovered-table",buildLeadsTable(filteredUncovered,"No unconverted leads — great conversion!",false));
 }
 
 function buildLeadsTable(rows,emptyMsg,showUrgency){
@@ -1574,7 +1672,15 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
   cards+='</div>';
 
   // ── DESKTOP TABLE ──
-  var table='<div class="ref-leads-table-wrap"><table class="ref-leads-table"><thead><tr><th>Agent</th><th>Buyer</th><th>LP</th><th>Status</th><th>LP Note</th><th>Last touch</th>'+(showUrgency?'<th>Days out</th>':'')+'</tr></thead><tbody>';
+  var sortArrow=function(col){return refSort.col===col?(refSort.dir===1?" ↑":" ↓"):" ↕";};
+  var table='<div class="ref-leads-table-wrap"><table class="ref-leads-table"><thead><tr>'
+    +'<th style="cursor:pointer" onclick="sortRefTable(\'agent\')">Agent'+sortArrow("agent")+'</th>'
+    +'<th>Buyer</th><th>LP</th>'
+    +'<th style="cursor:pointer" onclick="sortRefTable(\'status\')">Status'+sortArrow("status")+'</th>'
+    +'<th>LP Note</th>'
+    +'<th style="cursor:pointer" onclick="sortRefTable(\'days\')">Last touch'+sortArrow("days")+'</th>'
+    +(showUrgency?'<th style="cursor:pointer" onclick="sortRefTable(\'days\')">Days out'+sortArrow("days")+'</th>':'')
+    +'</tr></thead><tbody>';
   rows.forEach(function(r){
     var ni=noteInfo(r),di=dayInfo(r);
     var isOvd=showUrgency&&di.days!==null&&di.days>=1;
