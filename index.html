@@ -689,19 +689,36 @@ function effectiveDays(a){
   return Math.floor((TODAY-best)/86400000);
 }
 
+function tierWindow(a){
+  var tier=a[1]||"C";
+  if(tier==="A")return 7;
+  if(tier==="B")return 14;
+  return 21;
+}
+
+function daysOverdue(a){
+  var days=effectiveDays(a);
+  if(days===null)return 99999; // never called = most overdue
+  return days - tierWindow(a); // positive = overdue, negative = not due yet
+}
+
 function getRotation(lp){
   var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
   if(!active.length)return[];
   var priority=active.filter(isPriority);
   var normal=active.filter(function(a){return!isPriority(a);});
-  // Sort by longest since last touch — never called = top, most recently called = bottom
-  normal.sort(function(a,b){
-    var va=effectiveDays(a);var vb=effectiveDays(b);
-    var sa=va===null?99999:va;var sb=vb===null?99999:vb;
-    return sb-sa;
-  });
-  // Show ALL agents — priority first, then sorted by last touch
-  var combined=priority.concat(normal);
+
+  // Split into overdue and not yet due
+  var overdue=normal.filter(function(a){return daysOverdue(a)>=0;});
+  var notDue=normal.filter(function(a){return daysOverdue(a)<0;});
+
+  // Sort overdue by most overdue first
+  overdue.sort(function(a,b){return daysOverdue(b)-daysOverdue(a);});
+  // Sort not-due by closest to being due next
+  notDue.sort(function(a,b){return daysOverdue(b)-daysOverdue(a);});
+
+  // Priority agents always first, then overdue, then fill with closest-to-due
+  var combined=priority.concat(overdue).concat(notDue);
   var seen={},res=[];
   for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
   return res;
@@ -954,7 +971,26 @@ function renderCallCard(a,lp,isBonus){
   var daysSinceFirst=firstCall?Math.floor((TODAY-new Date(firstCall+"T12:00:00"))/86400000):0;
   var noReferralFlag=daysSinceFirst>=90&&velTotal===0&&selfRefs===0&&!isBonus;
   var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:null;
-  var dsText=ds===null?"Never contacted":ds===0?"Contacted today":ds+"d since last touch";
+  var overdueDays=daysOverdue(a);
+  var tw=tierWindow(a);
+  var dsText="";
+  var dueLabel="";
+  if(ds===null){
+    dsText="Never contacted";
+    dueLabel="never called";
+  } else if(ds===0){
+    dsText="Contacted today";
+  } else if(!calledThisWeek(a[0])&&!isBonus){
+    if(overdueDays>=0){
+      dsText=overdueDays+"d overdue";
+      dueLabel=a[1]+"-tier — call every "+tw+"d";
+    } else {
+      dsText="Due in "+Math.abs(overdueDays)+"d";
+      dueLabel=a[1]+"-tier — call every "+tw+"d";
+    }
+  } else {
+    dsText=ds+"d since last touch";
+  }
   var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"")+(isPending?" pending":"");
 
   var html='<div class="'+cardClass+'">';
@@ -978,7 +1014,9 @@ function renderCallCard(a,lp,isBonus){
   // Meta row — badge, LP days, last activity
   html+='<div class="call-meta"><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
   if(assignedLp&&assignedLp!==lp)html+='<span class="lp-tag lp-tag-'+assignedLp+'" style="font-size:10px">'+assignedLp+"'s agent</span>";
-  html+='<span style="color:'+(ds===null||ds>=14?'var(--red)':"var(--text-2)")+'">'+dsText+'</span>';
+  var dsCls=(!calledThisWeek(a[0])&&overdueDays>=0&&ds!==null&&ds!==0)?'color:var(--red);font-weight:600':(ds===null?'color:var(--red)':'color:var(--text-2)');
+  html+='<span style="'+dsCls+'">'+dsText+'</span>';
+  if(dueLabel)html+='<span style="font-size:11px;color:var(--text-3)">'+dueLabel+'</span>';
   if(act)html+='<span style="color:var(--text-3)">Last activity: '+fmt(act)+'</span>';
   html+='</div>';
 
@@ -1002,6 +1040,32 @@ function renderCallCard(a,lp,isBonus){
 
   // Last week note preview
   if(lastNote&&lastNote.note)html+='<div class="last-note-preview"><span class="last-note-label">Last note · '+fmt(lastNote.call_date)+(lastNote.lp?' · '+lastNote.lp:'')+'</span>'+escHtml(lastNote.note)+'</div>';
+
+  // Talking points
+  if(!called&&!isBonus){
+    var talkPoints=[];
+    var velData2=VELOCIFY_SEED[a[0]]||null;
+    var velMtd2=velData2?velData2.mtd:0;
+    var velTotal2=velData2?velData2.total:0;
+    if(velMtd2>0)talkPoints.push('Follow up on the '+velMtd2+' lead'+(velMtd2>1?'s':'')+' sent this month — thank them and check on the buyer');
+    if(rmAct){var rmDays=Math.floor((TODAY-new Date(rmAct+'T12:00:00'))/86400000);talkPoints.push('Amanda visited '+rmDays+'d ago — reference that meeting and ask how it went');}
+    if(coMarketingAgents[a[0]])talkPoints.push('Co-marketing active — check if the flyer is working and if they need updated materials');
+    if(velTotal2===0&&daysSinceFirst>=90)talkPoints.push('No leads yet — share a recent win or a program they can use (rate buydown, fast close)');
+    else if(velMtd2===0&&velTotal2>0)talkPoints.push('Sent leads before but none this month — ask what buyers they are working with right now');
+    if(a[1]==="A")talkPoints.push('A-tier — protect this relationship, ask about their pipeline and upcoming listings');
+    else if(a[1]==="B")talkPoints.push('B-tier — ask what would make them more comfortable referring buyers to NFM');
+    else if(a[1]==="C"&&velTotal2===0)talkPoints.push('Building the relationship — ask about their business and share one thing NFM does differently');
+    var bdayCheck=getBirthdayAgentsThisWeek();
+    if(bdayCheck.some(function(b){return b.name===a[0];}))talkPoints.unshift('Birthday this week — lead with that, keep it personal');
+    if(talkPoints.length){
+      html+='<div style="margin-top:8px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:8px 12px">';
+      html+='<div style="font-size:10px;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">What to talk about</div>';
+      talkPoints.slice(0,2).forEach(function(tp){
+        html+='<div style="font-size:11px;color:#0c4a6e;margin-bottom:3px">&#8226; '+tp+'</div>';
+      });
+      html+='</div>';
+    }
+  }
 
   // Contact bar
   html+='<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:8px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">';
@@ -1095,7 +1159,26 @@ function renderLpSearch(){
     var called=calledThisWeek(a[0]);
     var log=callLogs[a[0]],note=log?log.note:"";
     var ds=effectiveDays(a);
-    var dsText=ds===null?"Never contacted":ds===0?"Contacted today":ds+"d since last touch";
+    var overdueDays=daysOverdue(a);
+  var tw=tierWindow(a);
+  var dsText="";
+  var dueLabel="";
+  if(ds===null){
+    dsText="Never contacted";
+    dueLabel="never called";
+  } else if(ds===0){
+    dsText="Contacted today";
+  } else if(!calledThisWeek(a[0])&&!isBonus){
+    if(overdueDays>=0){
+      dsText=overdueDays+"d overdue";
+      dueLabel=a[1]+"-tier — call every "+tw+"d";
+    } else {
+      dsText="Due in "+Math.abs(overdueDays)+"d";
+      dueLabel=a[1]+"-tier — call every "+tw+"d";
+    }
+  } else {
+    dsText=ds+"d since last touch";
+  }
     var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:"Unassigned";
     var histId="hist-"+a[0].replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"");
     h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px">';
