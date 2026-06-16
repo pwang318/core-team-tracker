@@ -669,16 +669,17 @@ function buildLeadsTable(rows, emptyMsg){
 }
 
 function effectiveDays(a){
-  // Most recent of: tracker call log OR Velocify activity date (whichever is newer)
-  var logDate=null,actDate=null;
+  // Most recent of: this week's call log OR all-time history OR Velocify activity
+  var logDate=null,histDate=null,actDate=null;
   var log=callLogs[a[0]];
   if(log&&log.call_date)logDate=new Date(log.call_date+'T12:00:00');
+  var hist=agentLastCall[a[0]]||null;
+  if(hist)histDate=new Date(hist+'T12:00:00');
   var act=mostRecent(a);
   if(act)actDate=new Date(act+'T12:00:00');
-  var best=null;
-  if(logDate&&actDate)best=logDate>actDate?logDate:actDate;
-  else best=logDate||actDate||null;
-  if(!best)return null;
+  var candidates=[logDate,histDate,actDate].filter(Boolean);
+  if(!candidates.length)return null;
+  var best=candidates.reduce(function(a,b){return a>b?a:b;});
   best.setHours(0,0,0,0);
   return Math.floor((TODAY-best)/86400000);
 }
@@ -747,12 +748,14 @@ function loadCallLogs(){
 
 function upsertCallLog(name,lp,note){
   var id=name+"__"+weekKey;
-  var data={id:id,agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||""};
+  // Preserve existing outcome if already set
+  var existingOutcome=callLogs[name]?callLogs[name].outcome||"":"";
+  var data={id:id,agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",outcome:existingOutcome};
   callLogs[name]=data;
   setSyncStatus("saving");
   return Promise.all([
     sbFetch("POST","call_logs",data),
-    sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||""})
+    sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",outcome:existingOutcome})
   ]).then(function(){setSyncStatus("live");}).catch(function(){setSyncStatus("error");});
 }
 
@@ -1330,6 +1333,7 @@ var prevNotes={};
 var rmActivity={};
 var selfReportedReferrals={};
 var agentFirstCall={};
+var agentLastCall={};
 var coMarketingAgents={};
 
 function loadCoMarketing(){
@@ -1425,7 +1429,11 @@ function loadSelfReportedReferrals(){
 function loadAgentFirstCalls(){
   return sbFetch("GET","call_logs_history?select=agent_name,call_date&order=call_date.asc&limit=5000").then(function(res){
     agentFirstCall={};
-    if(res)res.forEach(function(r){if(!agentFirstCall[r.agent_name])agentFirstCall[r.agent_name]=r.call_date;});
+    agentLastCall={};
+    if(res)res.forEach(function(r){
+      if(!agentFirstCall[r.agent_name])agentFirstCall[r.agent_name]=r.call_date;
+      if(!agentLastCall[r.agent_name]||r.call_date>agentLastCall[r.agent_name])agentLastCall[r.agent_name]=r.call_date;
+    });
   }).catch(function(){});
 }
 
