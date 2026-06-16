@@ -896,37 +896,45 @@ function renderLP(lp){
   if(!rot.length){el.innerHTML='<div class="no-data">No active agents in rotation.</div>';return;}
   var targetHit=done>=WEEKLY_TARGET;
   if(targetHit){
-    // Only show agents called this week — hide uncalled so it feels done
+    // Target hit — only show who they called this week
     var calledAgents=rot.filter(function(a){return calledThisWeek(a[0]);});
-    // Also include any called agents not in rotation top (called from search)
+    // Also grab any called via search that aren't in top rotation
     var allCalledThisWeek=Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey;});
     var calledNames=calledAgents.map(function(a){return a[0];});
     allCalledThisWeek.forEach(function(l){
       if(calledNames.indexOf(l.agent_name)<0){
         var a=agents.find(function(x){return x[0]===l.agent_name;})||[l.agent_name,"C",lp,null,null,null,null,false,0];
-        calledAgents.push(a);
-        calledNames.push(l.agent_name);
+        calledAgents.push(a);calledNames.push(l.agent_name);
       }
     });
     if(calledAgents.length){
       html+='<div class="section-head" style="margin-top:.25rem">Called this week ('+calledAgents.length+')</div>';
       calledAgents.forEach(function(a){html+=renderCallCard(a,lp,false);});
     }
-    var uncalledCount=rot.filter(function(a){return!calledThisWeek(a[0]);}).length;
+    var uncalledCount=rot.length-calledAgents.length;
     if(uncalledCount>0){
-      html+='<div style="text-align:center;padding:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:8px">';
+      html+='<div style="text-align:center;padding:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:8px">';
       html+='<div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:4px">'+uncalledCount+' agents not yet called this week</div>';
       html+='<div style="font-size:12px;color:var(--text-3)">You hit your 15! Use search above to log any additional calls.</div>';
       html+='</div>';
     }
   } else {
-    rot.forEach(function(a){html+=renderCallCard(a,lp,false);});
+    // Before target — show top 15 only, sorted by longest since last touch
+    var top15=rot.slice(0,WEEKLY_TARGET);
+    top15.forEach(function(a){html+=renderCallCard(a,lp,false);});
+    var remaining=rot.length-WEEKLY_TARGET;
+    if(remaining>0){
+      html+='<div style="text-align:center;padding:1rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-top:8px">';
+      html+='<div style="font-size:12px;color:var(--text-3)">'+remaining+' more agents — complete your 15 first, then they\'ll appear next week.</div>';
+      html+='</div>';
+    }
   }
   el.innerHTML=html;
-  rot.forEach(function(a){loadAgentContact(a[0],a[0].replace(/\s+/g,'_'));});
+  var toLoad=targetHit?rot:rot.slice(0,WEEKLY_TARGET);
+  toLoad.forEach(function(a){loadAgentContact(a[0],a[0].replace(/\s+/g,'_'));});
   if(targetHit){
-    var allCalledThisWeek2=Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey;});
-    allCalledThisWeek2.forEach(function(l){loadAgentContact(l.agent_name,l.agent_name.replace(/\s+/g,'_'));});
+    var allCalled2=Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey;});
+    allCalled2.forEach(function(l){loadAgentContact(l.agent_name,l.agent_name.replace(/\s+/g,'_'));});
   }
 }
 
