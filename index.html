@@ -658,16 +658,31 @@ function buildLeadsTable(rows, emptyMsg){
   return html;
 }
 
+function effectiveDays(a){
+  // Most recent of: tracker call log OR Velocify activity date (whichever is newer)
+  var logDate=null,actDate=null;
+  var log=callLogs[a[0]];
+  if(log&&log.call_date)logDate=new Date(log.call_date+'T12:00:00');
+  var act=mostRecent(a);
+  if(act)actDate=new Date(act+'T12:00:00');
+  var best=null;
+  if(logDate&&actDate)best=logDate>actDate?logDate:actDate;
+  else best=logDate||actDate||null;
+  if(!best)return null;
+  best.setHours(0,0,0,0);
+  return Math.floor((TODAY-best)/86400000);
+}
+
 function getRotation(lp){
   var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
   if(!active.length)return[];
   var priority=active.filter(isPriority);
   var normal=active.filter(function(a){return!isPriority(a);});
-  // Sort by longest since last LP call — never called = 99999 days (always top)
+  // Sort by longest since last touch (tracker call OR Velocify activity)
   normal.sort(function(a,b){
-    var da=lpDays(a[0]);var db=lpDays(b[0]);
-    var va=da===null?99999:da;var vb=db===null?99999:db;
-    return vb-va;
+    var va=effectiveDays(a);var vb=effectiveDays(b);
+    var sa=va===null?99999:va;var sb=vb===null?99999:vb;
+    return sb-sa;
   });
   var remaining=Math.max(0,15-priority.length);
   var base=normal.slice(0,remaining);
@@ -848,7 +863,7 @@ function renderLP(lp){
 function countWords(s){return s.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;}
 
 function renderCallCard(a,lp,isBonus){
-  var called=calledThisWeek(a[0]),ds=lpDays(a[0]),act=mostRecent(a),pri=isPriority(a);
+  var called=calledThisWeek(a[0]),ds=effectiveDays(a),act=mostRecent(a),pri=isPriority(a);
   var isPending=!!(pendingNote&&pendingNote[a[0]]);
   var log=callLogs[a[0]],note=log?log.note:"",outcome=log?log.outcome||"":"";
   var safeId=a[0].replace(/\s+/g,'_');
@@ -861,7 +876,7 @@ function renderCallCard(a,lp,isBonus){
   var daysSinceFirst=firstCall?Math.floor((TODAY-new Date(firstCall+"T12:00:00"))/86400000):0;
   var noReferralFlag=daysSinceFirst>=90&&velTotal===0&&selfRefs===0&&!isBonus;
   var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:null;
-  var dsText=ds===null?"Never called":ds===0?"Called today":ds+"d since last LP call";
+  var dsText=ds===null?"Never contacted":ds===0?"Contacted today":ds+"d since last touch";
   var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"")+(isPending?" pending":"");
 
   var html='<div class="'+cardClass+'">';
@@ -970,7 +985,7 @@ function renderLpSearch(){
   var html="";
   results.forEach(function(a){
     var called=calledThisWeek(a[0]);var log=callLogs[a[0]],note=log?log.note:"";
-    var ds=lpDays(a[0]);var dsText=ds===null?"Never called":ds===0?"Called today":ds+"d since last call";
+    var ds=effectiveDays(a);var dsText=ds===null?"Never contacted":ds===0?"Contacted today":ds+"d since last touch";
     var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:"Unassigned";
     html+='<div class="search-agent-row">';
     html+='<button class="check-btn'+(called?" checked":"")+('" style="width:36px;height:36px;flex-shrink:0"')+' data-name="'+a[0]+'" data-lp="'+currentUser+'" onclick="toggleCallFromCard(this);setTimeout(renderLpSearch,300)">';
@@ -1192,7 +1207,7 @@ function renderDaniel(){
   if(q)list=list.filter(function(a){return a[0].toLowerCase().indexOf(q)>=0;});
   list.sort(function(a,b){if(isPriority(a)&&!isPriority(b))return -1;if(!isPriority(a)&&isPriority(b))return 1;return(lpDays(b[0])||9999)-(lpDays(a[0])||9999);});
   document.getElementById("d-tbody").innerHTML=list.map(function(a){
-    var act=isActive(a),ds=lpDays(a[0]),mr=mostRecent(a),cal=calledThisWeek(a[0]),pri=isPriority(a);
+    var act=isActive(a),ds=effectiveDays(a),mr=mostRecent(a),cal=calledThisWeek(a[0]),pri=isPriority(a);
     var log=callLogs[a[0]],notePreview=log&&log.note?'<div style="font-size:11px;color:#888;margin-top:2px;font-style:italic">'+log.note+'</div>':"";
     var dsc=ds===null?"color:#E53935":ds>=14?"color:#FB8C00":"color:#43A047";
     return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
