@@ -936,10 +936,13 @@ function renderLP(lp){
       html+='</div>';
     }
   } else {
-    // Before target — show top 15 only, sorted by longest since last touch
-    var top15=rot.slice(0,WEEKLY_TARGET);
-    top15.forEach(function(a){html+=renderCallCard(a,lp,false);});
-    var remaining=rot.length-WEEKLY_TARGET;
+    // Before target — show called agents + top uncalled up to 15 total
+    var calledThisWk=rot.filter(function(a){return calledThisWeek(a[0]);});
+    var uncalledRot=rot.filter(function(a){return!calledThisWeek(a[0]);});
+    var slotsLeft=Math.max(0,WEEKLY_TARGET-calledThisWk.length);
+    var showList=calledThisWk.concat(uncalledRot.slice(0,slotsLeft));
+    showList.forEach(function(a){html+=renderCallCard(a,lp,false);});
+    var remaining=uncalledRot.length-slotsLeft;
     if(remaining>0){
       html+='<div style="text-align:center;padding:1rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-top:8px">';
       html+='<div style="font-size:12px;color:var(--text-3)">'+remaining+' more agents — complete your 15 first, then they\'ll appear next week.</div>';
