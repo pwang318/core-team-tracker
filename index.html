@@ -1102,6 +1102,10 @@ function renderCallCard(a,lp,isBonus){
     html+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+lp+'" placeholder="Did they mention a new buyer? Listing coming? Next step? (10 words min)" oninput="queueNote(this)" style="border-color:'+noteBorder+';height:60px">'+escHtml(isPending?(pendingNote[a[0]]?pendingNote[a[0]].draft||"":""):note)+'</textarea>';
     html+='</div>';
 
+    // RM flag toggle — lets LP signal Amanda needs to follow up on this agent
+    var curFlag=callLogs[a[0]]?(callLogs[a[0]].flag_rm||false):(pendingNote[a[0]]?(pendingNote[a[0]].flagRm||false):false);
+    html+='<div style="margin-top:8px"><button type="button" class="outcome-btn'+(curFlag?' sel-noanswer':'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="'+(called?'toggleRmFlag(this)':'togglePendingRmFlag(this)')+'" style="width:100%;text-align:left">'+(curFlag?'🚩 Flagged for RM follow-up':'🏳️ Flag for RM follow-up')+'</button></div>';
+
     // Save button shown only when pending
     if(isPending){
       html+='<button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%;padding:9px" onclick="tryConfirmCall(\''+a[0].replace(/'/g,"\\'")+"\'"+ ',\''+lp+'\')">Save & mark called ✓</button>';
@@ -1240,11 +1244,12 @@ function tryConfirmCall(name,lp){
   var pending=pendingNote[name]||{};
   var draft=pending.draft||"";
   var outcome=pending.outcome||"";
+  var flagRm=pending.flagRm||false;
   var words=countWords(draft);
   if(!outcome){alert("Please select what happened (Answered, Left VM, etc.) before saving.");return;}
   if(words<10){alert("Please add at least 10 words to your note before saving. You have "+words+".");return;}
   delete pendingNote[name];
-  upsertCallLogWithOutcome(name,lp,draft.trim(),outcome).then(function(){renderLP(currentUser);});
+  upsertCallLogWithOutcome(name,lp,draft.trim(),outcome,flagRm).then(function(){renderLP(currentUser);});
 }
 
 function queueNote(ta){
@@ -1627,14 +1632,29 @@ function loadAgentFirstCalls(){
   }).catch(function(){});
 }
 
-function upsertCallLogWithOutcome(name,lp,note,outcome){
+function upsertCallLogWithOutcome(name,lp,note,outcome,flagRm){
   var id=name+"__"+weekKey;
-  var data={id:id,agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",outcome:outcome||""};
+  var fr=flagRm!==undefined?flagRm:(callLogs[name]?callLogs[name].flag_rm||false:false);
+  var data={id:id,agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",outcome:outcome||"",flag_rm:fr};
   callLogs[name]=data;
   setSyncStatus("saving");
   return sbFetch("POST","call_logs",data).then(function(){
-    return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||""});
+    return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",flag_rm:fr});
   }).then(function(){setSyncStatus("live");}).catch(function(){setSyncStatus("error");});
+}
+
+function toggleRmFlag(btn){
+  var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp");
+  var log=callLogs[name];var cur=log?log.flag_rm||false:false;var newFlag=!cur;
+  if(callLogs[name])callLogs[name].flag_rm=newFlag;
+  upsertCallLogWithOutcome(name,lp,log?log.note||"":"",log?log.outcome||"":"",newFlag).then(function(){renderLP(currentUser);});
+}
+
+function togglePendingRmFlag(btn){
+  var name=btn.getAttribute("data-name");
+  if(!pendingNote[name])pendingNote[name]={draft:"",outcome:""};
+  pendingNote[name].flagRm=!pendingNote[name].flagRm;
+  renderLP(currentUser);
 }
 
 function renderVelocifyLeaderboard(){
