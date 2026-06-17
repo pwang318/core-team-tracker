@@ -278,6 +278,11 @@ tr:hover td{background:var(--bg)}
 .ref-refresh-btn{font-size:11px;color:var(--text-2);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:600}
 .ref-refresh-btn:hover{background:var(--bg)}
 .touch-badge{display:inline-flex;align-items:center;gap:4px;background:var(--red-light);border:1px solid var(--red-border);color:var(--red);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px}
+.rm-flag-btn{display:flex;align-items:center;gap:8px;width:100%;padding:11px 14px;border-radius:8px;border:2px solid #f59e0b;background:#fffbeb;color:#92400e;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.rm-flag-btn:hover{background:#fef3c7}
+.rm-flag-btn.is-flagged{border-color:#dc2626;background:#fef2f2;color:#991b1b}
+.rm-flag-btn.is-flagged:hover{background:#fee2e2}
+.rm-flag-icon{font-size:16px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -1104,7 +1109,7 @@ function renderCallCard(a,lp,isBonus){
 
     // RM flag toggle — lets LP signal Amanda needs to follow up on this agent
     var curFlag=callLogs[a[0]]?(callLogs[a[0]].flag_rm||false):(pendingNote[a[0]]?(pendingNote[a[0]].flagRm||false):false);
-    html+='<div style="margin-top:8px"><button type="button" class="outcome-btn'+(curFlag?' sel-noanswer':'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="'+(called?'toggleRmFlag(this)':'togglePendingRmFlag(this)')+'" style="width:100%;text-align:left">'+(curFlag?'🚩 Flagged for RM follow-up':'🏳️ Flag for RM follow-up')+'</button></div>';
+    html+='<div style="margin-top:10px"><button type="button" class="rm-flag-btn'+(curFlag?' is-flagged':'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="'+(called?'toggleRmFlag(this)':'togglePendingRmFlag(this)')+'"><span class="rm-flag-icon">'+(curFlag?'🚩':'🏳️')+'</span><span>'+(curFlag?'Flagged for RM follow-up':'Flag for RM follow-up')+'</span></button></div>';
 
     // Save button shown only when pending
     if(isPending){
