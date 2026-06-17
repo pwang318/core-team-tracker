@@ -2208,11 +2208,11 @@ const LPSC_METRICS_MAP={
     {key:"meetings",label:"Realtor meetings scheduled",goal:10}
   ],
   _lp2:[
+    {key:"rltr_talks",label:"Realtor talk to's",goal:10},
     {key:"referred_leads",label:"Referred leads",goal:16},
     {key:"apps_1003",label:"1003's",goal:13},
     {key:"pre_approvals",label:"Pre-approvals",goal:6},
-    {key:"contracts",label:"Contracts",goal:3},
-    {key:"rltr_talks",label:"Realtor talk to's",goal:10}
+    {key:"contracts",label:"Contracts",goal:3}
   ]
 };
 ["Gavin","Osgood","Karen","Said","Jordan"].forEach(function(n){LPSC_METRICS_MAP[n]=LPSC_METRICS_MAP._lp2;});
@@ -2224,7 +2224,7 @@ const LPSC_AMANDA_GOALS=[
   {key:"Realtor Buddy Referral Ask",label:"Realtor buddy intro",goal:3}
 ];
 
-const LPSC_DAYS=["Mon","Tue","Wed","Thu","Fri"];
+const LPSC_DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const LPSC_CHART_COLORS=["#1F4E79","#b8922a","#2a7a3b","#c0392b","#8e44ad"];
 var lpscCurrentLP="Isaak",lpscCharts=[];
 
@@ -2265,9 +2265,9 @@ function lpscEditWeekKey(mon){
   return mon.getFullYear()+"-"+String(mon.getMonth()+1).padStart(2,"0")+"-"+String(mon.getDate()).padStart(2,"0");
 }
 function lpscEditFmtRange(mon){
-  var fri=new Date(mon);fri.setDate(fri.getDate()+4);
+  var sun=new Date(mon);sun.setDate(sun.getDate()+6);
   var o={month:"short",day:"numeric"};
-  return mon.toLocaleDateString("en-US",o)+" – "+fri.toLocaleDateString("en-US",o);
+  return mon.toLocaleDateString("en-US",o)+" – "+sun.toLocaleDateString("en-US",o);
 }
 function lpscEditPrevWeek(){
   lpscEditMonday.setDate(lpscEditMonday.getDate()-7);
@@ -2541,10 +2541,10 @@ function lpscPctBadge(t,g){
 }
 
 function lpscFmtRange(wk){
-  var mon=new Date(wk+"T12:00:00"),fri=new Date(mon);
-  fri.setDate(fri.getDate()+4);
+  var mon=new Date(wk+"T12:00:00"),sun=new Date(mon);
+  sun.setDate(sun.getDate()+6);
   var o={month:"short",day:"numeric"};
-  return mon.toLocaleDateString("en-US",o)+" – "+fri.toLocaleDateString("en-US",o);
+  return mon.toLocaleDateString("en-US",o)+" – "+sun.toLocaleDateString("en-US",o);
 }
 
 function lpscAmWeekKeyOf(dateStr){
