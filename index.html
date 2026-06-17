@@ -283,6 +283,19 @@ tr:hover td{background:var(--bg)}
 .rm-flag-btn.is-flagged{border-color:#dc2626;background:#fef2f2;color:#991b1b}
 .rm-flag-btn.is-flagged:hover{background:#fee2e2}
 .rm-flag-icon{font-size:16px;flex-shrink:0}
+.lpsc-btn{padding:6px 16px;font-size:12px;font-weight:500;border:1px solid #d0d5e8;border-radius:20px;background:transparent;color:#666;cursor:pointer;font-family:inherit;transition:all .15s}
+.lpsc-btn.active{background:#1F4E79;color:#fff;border-color:#1F4E79}
+.lpsc-btn:hover:not(.active){background:#f0f2f8;color:#333}
+.lpsc-pct-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}
+.lpsc-pct-green{background:#dcf5e3;color:#1a5c2a}
+.lpsc-pct-amber{background:#fef3dc;color:#7a4f0a}
+.lpsc-pct-gray{background:#f0f0f0;color:#555}
+.lpsc-period-btn{padding:5px 14px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.4);border-radius:14px;background:transparent;color:#fff;cursor:pointer;font-family:inherit;transition:all .15s}
+.lpsc-period-btn.active{background:#fff;color:#1F4E79;border-color:#fff}
+.lpsc-period-btn:hover:not(.active){background:rgba(255,255,255,.15)}
+.lpsc-period-btn-light{padding:6px 16px;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:14px;background:transparent;color:#666;cursor:pointer;font-family:inherit;transition:all .15s}
+.lpsc-period-btn-light.active{background:#1F4E79;color:#fff;border-color:#1F4E79}
+.lpsc-period-btn-light:hover:not(.active){background:#f0f2f8}
 </style>
 </head>
 <body>
@@ -325,6 +338,12 @@ tr:hover td{background:var(--bg)}
 
 <!-- LP VIEW -->
 <div id="view-lp" class="view">
+  <div class="d-tab-bar">
+    <div class="d-tab active" onclick="switchLpMainTab('myweek',this)">My Week</div>
+    <div class="d-tab" onclick="switchLpMainTab('scorecards',this)">Scorecards</div>
+    <div class="d-tab" onclick="switchLpMainTab('rm',this)">Relationship Manager</div>
+  </div>
+  <div id="lp-tab-myweek-panel" class="d-tab-panel active">
   <div id="lp-tab-my-week">
     <div class="lp-hero">
       <div class="lp-hero-top">
@@ -348,6 +367,114 @@ tr:hover td{background:var(--bg)}
     </div>
     <div class="section-head" style="margin-top:.5rem">Your agents — sorted by longest since last contact</div>
     <div id="lp-call-list"></div>
+  </div>
+  </div>
+
+  <!-- SCORECARDS PANEL -->
+  <div id="lp-tab-scorecards-panel" class="d-tab-panel">
+
+    <!-- TEAM-WIDE ROLLUP -->
+    <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px">
+      <div style="background:#1F4E79;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <span style="color:#fff;font-size:13px;font-weight:600">Team totals — Gavin, Karen, Osgood, Said, Jordan combined</span>
+        <div style="display:flex;gap:6px">
+          <button class="lpsc-period-btn active" onclick="lpscTeamPeriod('daily',this)">Daily</button>
+          <button class="lpsc-period-btn" onclick="lpscTeamPeriod('mtd',this)">MTD</button>
+          <button class="lpsc-period-btn" onclick="lpscTeamPeriod('ytd',this)">YTD</button>
+        </div>
+      </div>
+      <div id="lpsc-team-body" style="padding:16px">
+        <div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading team totals...</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999">Individual Scorecards</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="lpsc-tabs">
+        <button class="lpsc-btn active" onclick="lpscSelectLP('Isaak',this)">Isaak</button>
+        <button class="lpsc-btn" onclick="lpscSelectLP('Gavin',this)">Gavin</button>
+        <button class="lpsc-btn" onclick="lpscSelectLP('Osgood',this)">Osgood</button>
+        <button class="lpsc-btn" onclick="lpscSelectLP('Karen',this)">Karen</button>
+        <button class="lpsc-btn" onclick="lpscSelectLP('Said',this)">Said</button>
+        <button class="lpsc-btn" onclick="lpscSelectLP('Jordan',this)">Jordan</button>
+        <button class="lpsc-btn" onclick="lpscSelectLP('Amanda',this)">Amanda (RM)</button>
+      </div>
+    </div>
+
+    <!-- EDITABLE CURRENT WEEK -->
+    <div id="lpsc-edit-wrap" style="display:none;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-bottom:18px">
+      <div style="background:#1F4E79;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <span style="color:#fff;font-size:13px;font-weight:600" id="lpsc-edit-label">Edit this week</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn btn-sm" onclick="lpscEditPrevWeek()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">&larr; Prev</button>
+          <span id="lpsc-edit-range" style="color:#f0c84a;font-size:12px;font-weight:600"></span>
+          <button class="btn btn-sm" onclick="lpscEditNextWeek()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">Next &rarr;</button>
+        </div>
+      </div>
+      <div id="lpsc-edit-body" style="padding:16px;overflow-x:auto">
+        <div style="text-align:center;padding:20px;color:#888;font-size:13px">Select a name above to edit their scorecard.</div>
+      </div>
+      <div style="padding:0 16px 16px;display:flex;align-items:center;gap:10px">
+        <button class="btn btn-primary btn-sm" onclick="lpscSaveEdit()">Save changes</button>
+        <span id="lpsc-save-msg" style="font-size:12px;font-weight:600"></span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <label style="font-size:11px;color:#888">From</label>
+      <input type="date" id="lpsc-from" style="padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit">
+      <label style="font-size:11px;color:#888">To</label>
+      <input type="date" id="lpsc-to" style="padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit">
+      <button onclick="lpscCurrentLP==='Amanda'?lpscLoadAmanda():lpscLoad()" class="btn btn-primary btn-sm">Search</button>
+    </div>
+
+    <div id="lpsc-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px"></div>
+
+    <div style="background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px">
+      <div style="background:#1F4E79;padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+        <span style="color:#fff;font-size:13px;font-weight:600" id="lpsc-person-label">Weekly History</span>
+        <span style="color:#f0c84a;font-size:11px">Click a week to see daily breakdown</span>
+      </div>
+      <div id="lpsc-table-wrap" style="overflow-x:auto">
+        <div style="text-align:center;padding:40px;color:#888;font-size:14px">Select a name above to load their scorecard history.</div>
+      </div>
+    </div>
+
+    <div id="lpsc-daily-wrap" style="display:none;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px">
+      <div style="background:#243d7a;padding:12px 16px">
+        <span style="color:#fff;font-size:13px;font-weight:600" id="lpsc-daily-label">Daily Breakdown</span>
+      </div>
+      <div id="lpsc-daily-content" style="overflow-x:auto"></div>
+    </div>
+
+    <div id="lpsc-charts"></div>
+  </div>
+
+  <!-- RELATIONSHIP MANAGER PANEL (Amanda) -->
+  <div id="lp-tab-rm-panel" class="d-tab-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999">Amanda Dearth — Relationship Manager</div>
+      <div style="display:flex;gap:6px">
+        <button class="lpsc-period-btn-light active" onclick="rmSwitchPeriod('today',this)">Today</button>
+        <button class="lpsc-period-btn-light" onclick="rmSwitchPeriod('week',this)">This week</button>
+        <button class="lpsc-period-btn-light" onclick="rmSwitchPeriod('mtd',this)">MTD</button>
+      </div>
+    </div>
+
+    <div id="rm-goals-body" style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:16px">
+      <div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading...</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px">Flagged by LPs</div>
+        <div id="rm-flagged-count" style="font-size:22px;font-weight:700;color:#1F4E79">—</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px">Going-quiet coverage</div>
+        <div id="rm-coverage-pct" style="font-size:22px;font-weight:700;color:#1F4E79">—</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1929,6 +2056,598 @@ setInterval(function(){if(currentUser==="Daniel")loadCallLogs().then(function(){
 document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 loadAgents();
 loadCallLogs();
+
+// ── TEAM-WIDE ROLLUP (Scorecards tab) ────────────────────────────────────
+const LPSC_TEAM_LPS=["Gavin","Karen","Osgood","Said","Jordan"];
+var lpscTeamCurrentPeriod="daily",lpscTeamCache=null;
+
+function lpscTeamPeriod(period,btn){
+  document.querySelectorAll(".lpsc-period-btn").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  lpscTeamCurrentPeriod=period;
+  lpscRenderTeamTotals();
+}
+
+async function lpscLoadTeamTotals(){
+  var body=document.getElementById("lpsc-team-body");
+  try{
+    var now=new Date();
+    var ytdStart=now.getFullYear()+"-01-01";
+    var res=await fetch(
+      SB_URL+"/rest/v1/lp_scorecards?person=in.("+LPSC_TEAM_LPS.join(",")+")&week_key=gte."+ytdStart+"&select=person,week_key,data",
+      {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}
+    );
+    lpscTeamCache=await res.json();
+    lpscRenderTeamTotals();
+  }catch(e){
+    console.warn(e);
+    body.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Could not load team totals.</div>';
+  }
+}
+
+function lpscRenderTeamTotals(){
+  var body=document.getElementById("lpsc-team-body");
+  if(!lpscTeamCache){body.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading team totals...</div>';return;}
+  var metrics=LPSC_METRICS_MAP._lp2;
+  var period=lpscTeamCurrentPeriod;
+  var now=new Date();
+  var todayWk=lpscAmWeekKeyOf(now.toISOString().slice(0,10));
+  var monthStart=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
+  var todayDayName=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][now.getDay()];
+
+  var rows=lpscTeamCache;
+  if(period==="daily"){
+    rows=rows.filter(function(r){return r.week_key===todayWk;});
+  }else if(period==="mtd"){
+    rows=rows.filter(function(r){return r.week_key>=monthStart;});
+  }
+
+  var TEAM_WEEKLY_GOALS={apps_1003:50,pre_approvals:25,contracts:14};
+
+  var cardsHtml="";
+  metrics.forEach(function(m){
+    var total=0;
+    if(period==="daily"){
+      rows.forEach(function(r){total+=parseInt((r.data||{})[m.key+"_"+todayDayName]||0)||0;});
+    }else{
+      rows.forEach(function(r){total+=lpscGetTotal(m.key,r.data);});
+    }
+    var weeklyTeamGoal=TEAM_WEEKLY_GOALS[m.key]!==undefined?TEAM_WEEKLY_GOALS[m.key]:(m.goal*LPSC_TEAM_LPS.length);
+    var teamGoal=period==="daily"?Math.round(weeklyTeamGoal/5):
+                  period==="mtd"?Math.round(weeklyTeamGoal*4.3):
+                  Math.round(weeklyTeamGoal*52);
+    var pct=teamGoal?Math.min(total/teamGoal,1):0;
+    var color=pct>=1?"#2a7a3b":pct>=0.6?"#b8922a":"#9ca3af";
+    cardsHtml+='<div style="background:#fff;border-radius:8px;border:1px solid var(--border);padding:14px;text-align:center">'
+      +'<div style="font-size:20px;font-weight:700;color:'+color+'">'+total+'</div>'
+      +'<div style="font-size:10px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:.04em">'+m.label+'</div>'
+      +'<div style="font-size:10px;color:#aaa;margin-top:1px">team goal '+teamGoal+'</div>'
+      +'<div style="height:3px;background:#eee;border-radius:2px;margin-top:6px;overflow:hidden">'
+      +'<div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+';border-radius:2px"></div></div>'
+      +'</div>';
+  });
+
+  body.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">'+cardsHtml+'</div>'
+    +'<div style="font-size:10px;color:#aaa;margin-top:10px;text-align:center">'+(period==="daily"?"Today's combined activity":period==="mtd"?"Month-to-date combined activity":"Year-to-date combined activity")+' across Gavin, Karen, Osgood, Said, and Jordan</div>';
+}
+
+
+function switchLpMainTab(name,btn){
+  document.querySelectorAll("#view-lp .d-tab").forEach(function(t){t.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  document.getElementById("lp-tab-myweek-panel").classList.toggle("active",name==="myweek");
+  document.getElementById("lp-tab-scorecards-panel").classList.toggle("active",name==="scorecards");
+  document.getElementById("lp-tab-rm-panel").classList.toggle("active",name==="rm");
+  if(name==="scorecards" && !lpscTeamCache) lpscLoadTeamTotals();
+  if(name==="rm") rmLoadAll();
+}
+
+const LPSC_METRICS_MAP={
+  Isaak:[
+    {key:"apps_1003",label:"1003's",goal:10},
+    {key:"realtor_calls",label:"Realtor calls",goal:100},
+    {key:"meetings",label:"Realtor meetings scheduled",goal:10}
+  ],
+  _lp2:[
+    {key:"referred_leads",label:"Referred leads",goal:16},
+    {key:"apps_1003",label:"1003's",goal:13},
+    {key:"pre_approvals",label:"Pre-approvals",goal:6},
+    {key:"contracts",label:"Contracts",goal:3},
+    {key:"rltr_talks",label:"Rltr talk to's",goal:10}
+  ]
+};
+["Gavin","Osgood","Karen","Said","Jordan"].forEach(function(n){LPSC_METRICS_MAP[n]=LPSC_METRICS_MAP._lp2;});
+
+const LPSC_AMANDA_GOALS=[
+  {key:"Cold Calls",label:"Cold calls",goal:25},
+  {key:"New Realtor Meeting",label:"New realtor meetings",goal:5},
+  {key:"Break Breads",label:"Break breads",goal:5},
+  {key:"Realtor Buddy Referral Ask",label:"Realtor buddy intro",goal:3}
+];
+
+const LPSC_DAYS=["Mon","Tue","Wed","Thu","Fri"];
+const LPSC_CHART_COLORS=["#1F4E79","#b8922a","#2a7a3b","#c0392b","#8e44ad"];
+var lpscCurrentLP="Isaak",lpscCharts=[];
+
+function lpscSelectLP(name,btn){
+  document.querySelectorAll(".lpsc-btn").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active");
+  lpscCurrentLP=name;
+  document.getElementById("lpsc-person-label").textContent=name+" — Weekly History";
+  document.getElementById("lpsc-daily-wrap").style.display="none";
+  document.getElementById("lpsc-save-msg").textContent="";
+  if(name==="Amanda"){
+    lpscLoadAmanda();
+    document.getElementById("lpsc-edit-wrap").style.display="none";
+  }else{
+    lpscLoad();
+    document.getElementById("lpsc-edit-wrap").style.display="block";
+    lpscEditMonday=lpscGetMonday(new Date());
+    lpscLoadEditWeek();
+  }
+}
+
+// ── EDITABLE SCORECARD (Scorecards tab) ──────────────────────────────────
+var lpscEditMonday=null,lpscEditData={};
+
+function lpscGetMonday(d){
+  var dt=new Date(d),day=dt.getDay();
+  dt.setDate(dt.getDate()+(day===0?-6:1-day));
+  dt.setHours(0,0,0,0);
+  return dt;
+}
+function lpscEditWeekKey(mon){
+  return mon.getFullYear()+"-"+String(mon.getMonth()+1).padStart(2,"0")+"-"+String(mon.getDate()).padStart(2,"0");
+}
+function lpscEditFmtRange(mon){
+  var fri=new Date(mon);fri.setDate(fri.getDate()+4);
+  var o={month:"short",day:"numeric"};
+  return mon.toLocaleDateString("en-US",o)+" – "+fri.toLocaleDateString("en-US",o);
+}
+function lpscEditPrevWeek(){
+  lpscEditMonday.setDate(lpscEditMonday.getDate()-7);
+  lpscLoadEditWeek();
+}
+function lpscEditNextWeek(){
+  lpscEditMonday.setDate(lpscEditMonday.getDate()+7);
+  lpscLoadEditWeek();
+}
+
+async function lpscLoadEditWeek(){
+  var wk=lpscEditWeekKey(lpscEditMonday);
+  document.getElementById("lpsc-edit-range").textContent=lpscEditFmtRange(lpscEditMonday);
+  document.getElementById("lpsc-edit-label").textContent=lpscCurrentLP+" — Edit this week";
+  document.getElementById("lpsc-edit-body").innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading...</div>';
+  lpscEditData={};
+  try{
+    var res=await fetch(SB_URL+"/rest/v1/lp_scorecards?person=eq."+encodeURIComponent(lpscCurrentLP)+"&week_key=eq."+wk+"&select=data",
+      {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
+    var rows=await res.json();
+    if(rows&&rows.length&&rows[0].data)lpscEditData=rows[0].data;
+  }catch(e){console.warn(e);}
+  lpscRenderEditTable();
+}
+
+function lpscRenderEditTable(){
+  var metrics=LPSC_METRICS_MAP[lpscCurrentLP];
+  var body=document.getElementById("lpsc-edit-body");
+  var html='<table style="width:100%;border-collapse:collapse"><thead><tr>'
+    +'<th style="text-align:left;padding:8px 10px;font-size:11px;color:#888;font-weight:600">Metric</th>';
+  LPSC_DAYS.forEach(function(d){html+='<th style="text-align:center;padding:8px 10px;font-size:11px;color:#888;font-weight:600">'+d+'</th>';});
+  html+='<th style="text-align:center;padding:8px 10px;font-size:11px;color:#888;font-weight:600">Total</th></tr></thead><tbody>';
+  metrics.forEach(function(m){
+    var total=lpscGetTotal(m.key,lpscEditData);
+    html+='<tr><td style="padding:8px 10px;font-size:13px;font-weight:500;border-bottom:1px solid #f0f2f8">'+m.label+'</td>';
+    LPSC_DAYS.forEach(function(day){
+      var v=lpscEditData[m.key+"_"+day]||"";
+      html+='<td style="padding:6px 8px;border-bottom:1px solid #f0f2f8;text-align:center"><input type="number" min="0" value="'+v+'" data-key="'+m.key+'" data-day="'+day+'" oninput="lpscEditInput(this)" style="width:48px;padding:6px;text-align:center;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit"></td>';
+    });
+    html+='<td id="lpsc-edit-total-'+m.key+'" style="padding:8px 10px;text-align:center;font-size:13px;font-weight:700;border-bottom:1px solid #f0f2f8">'+total+' <span style="font-size:10px;color:#aaa">/'+m.goal+'</span></td></tr>';
+  });
+  html+="</tbody></table>";
+  body.innerHTML=html;
+}
+
+function lpscEditInput(inp){
+  var key=inp.getAttribute("data-key"),day=inp.getAttribute("data-day");
+  lpscEditData[key+"_"+day]=inp.value;
+  var metrics=LPSC_METRICS_MAP[lpscCurrentLP];
+  var m=metrics.filter(function(x){return x.key===key;})[0];
+  if(m){
+    var total=lpscGetTotal(key,lpscEditData);
+    document.getElementById("lpsc-edit-total-"+key).innerHTML=total+' <span style="font-size:10px;color:#aaa">/'+m.goal+'</span>';
+  }
+}
+
+async function lpscSaveEdit(){
+  var wk=lpscEditWeekKey(lpscEditMonday);
+  var msgEl=document.getElementById("lpsc-save-msg");
+  msgEl.textContent="Saving...";msgEl.style.color="#888";
+  try{
+    var res=await fetch(SB_URL+"/rest/v1/lp_scorecards",{
+      method:"POST",
+      headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates"},
+      body:JSON.stringify({person:lpscCurrentLP,week_key:wk,data:lpscEditData})
+    });
+    if(res.ok||res.status===201){
+      msgEl.textContent="✓ Saved";msgEl.style.color="#1a6e35";
+      lpscLoad();
+    }else{
+      msgEl.textContent="Error "+res.status;msgEl.style.color="#c0392b";
+    }
+  }catch(e){msgEl.textContent="Could not save";msgEl.style.color="#c0392b";}
+  setTimeout(function(){msgEl.textContent="";},3000);
+}
+
+// ── RELATIONSHIP MANAGER TAB (Amanda) ────────────────────────────────────
+const RM_GOALS=[
+  {label:"Cold calls",type:"Cold Calls",weekly:25,monthly:100},
+  {label:"New realtor meetings",type:"New Realtor Meeting",weekly:5,monthly:20},
+  {label:"Break breads",type:"Break Breads",weekly:5,monthly:20},
+  {label:"Realtor buddy intro",type:"Realtor Buddy Referral Ask",weekly:3,monthly:12}
+];
+var rmCurrentPeriod="today";
+
+function rmWeekRange(){
+  var now=new Date(),day=now.getDay();
+  var mon=new Date(now);
+  mon.setDate(now.getDate()-(day===0?6:day-1));
+  mon.setHours(0,0,0,0);
+  var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  return{start:localDateStr(mon),end:localDateStr(sun)};
+}
+
+function rmSwitchPeriod(period,btn){
+  document.querySelectorAll("#lp-tab-rm-panel .lpsc-period-btn-light").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  rmCurrentPeriod=period;
+  rmRenderGoals();
+}
+
+async function rmLoadAll(){
+  await Promise.all([rmLoadGoals(),rmLoadFlagged(),rmLoadCoverage()]);
+}
+
+async function rmLoadGoals(){
+  var body=document.getElementById("rm-goals-body");
+  try{
+    var now=new Date(),todayStr=localDateStr(now);
+    var week=rmWeekRange();
+    var monthStart=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
+    var res=await fetch(SB_URL+"/rest/v1/amanda_activities?act_date=gte."+monthStart+"&select=act_type,act_date",
+      {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
+    var acts=await res.json();
+    rmActsCache={acts:acts,todayStr:todayStr,week:week,monthStart:monthStart};
+    rmRenderGoals();
+  }catch(e){
+    console.warn(e);
+    body.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Could not load goals.</div>';
+  }
+}
+
+var rmActsCache=null;
+
+function rmRenderGoals(){
+  var body=document.getElementById("rm-goals-body");
+  if(!rmActsCache){body.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading...</div>';return;}
+  var acts=rmActsCache.acts,todayStr=rmActsCache.todayStr,week=rmActsCache.week;
+  var period=rmCurrentPeriod;
+  var html="";
+
+  if(period==="today"){
+    var todaysActs=acts.filter(function(a){return a.act_date===todayStr;});
+    RM_GOALS.forEach(function(g){
+      var count=todaysActs.filter(function(a){return a.act_type===g.type;}).length;
+      var dailyTarget=Math.ceil(g.weekly/5);
+      var hit=count>=dailyTarget;
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f8">'
+        +'<span style="font-size:16px;color:'+(hit?"#1a6e35":"#bbb")+'">'+(hit?"&#10003;":"&#9711;")+'</span>'
+        +'<span style="font-size:13px;flex:1'+(hit?"":";color:#888")+'">'+g.label+'</span>'
+        +'<span style="font-size:12px;color:#888">'+count+' of '+dailyTarget+' today</span></div>';
+    });
+  }else if(period==="week"){
+    var weekActs=acts.filter(function(a){return a.act_date>=week.start&&a.act_date<=week.end;});
+    RM_GOALS.forEach(function(g){
+      var count=weekActs.filter(function(a){return a.act_type===g.type;}).length;
+      var pct=Math.min(count/g.weekly,1);
+      var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
+      html+='<div style="margin-bottom:12px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px">'+g.label+'</span><span style="font-size:13px;font-weight:600">'+count+' / '+g.weekly+'</span></div>'
+        +'<div style="height:5px;background:#eee;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+'"></div></div></div>';
+    });
+  }else{
+    RM_GOALS.forEach(function(g){
+      var count=acts.filter(function(a){return a.act_type===g.type;}).length;
+      var pct=Math.min(count/g.monthly,1);
+      var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
+      html+='<div style="margin-bottom:12px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px">'+g.label+'</span><span style="font-size:13px;font-weight:600">'+count+' / '+g.monthly+'</span></div>'
+        +'<div style="height:5px;background:#eee;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+'"></div></div></div>';
+    });
+  }
+  body.innerHTML=html;
+}
+
+async function rmLoadFlagged(){
+  try{
+    var res=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id",
+      {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
+    var rows=await res.json();
+    document.getElementById("rm-flagged-count").textContent=rows.length;
+  }catch(e){console.warn(e);document.getElementById("rm-flagged-count").textContent="—";}
+}
+
+async function rmLoadCoverage(){
+  try{
+    var week=rmWeekRange();
+    var[allAgents,priorActs,weekActs]=await Promise.all([
+      fetch(SB_URL+"/rest/v1/agent_profiles?select=agent_name&order=agent_name.asc&limit=500",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+      fetch(SB_URL+"/rest/v1/amanda_activities?select=agent_name,act_date&act_date=lt."+week.start+"&order=act_date.desc&limit=3000",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+      fetch(SB_URL+"/rest/v1/amanda_activities?select=agent_name&act_date=gte."+week.start+"&act_date=lte."+week.end,{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();})
+    ]);
+    var lastSeenBefore={};
+    priorActs.forEach(function(a){
+      var n=(a.agent_name||"").trim();
+      if(n && !lastSeenBefore[n])lastSeenBefore[n]=a.act_date;
+    });
+    var touchedThisWeek={};
+    weekActs.forEach(function(a){var n=(a.agent_name||"").trim();if(n)touchedThisWeek[n]=true;});
+
+    var mondayDate=new Date(week.start+"T12:00:00");
+    var quietAsOfMonday=allAgents.map(function(a){
+      var name=(a.agent_name||"").trim();
+      if(!name)return null;
+      var last=lastSeenBefore[name];
+      var days=last?Math.round((mondayDate-new Date(last+"T12:00:00"))/86400000):null;
+      return(days===null||days>=60)?name:null;
+    }).filter(Boolean);
+
+    var covered=quietAsOfMonday.filter(function(n){return touchedThisWeek[n];}).length;
+    var pct=quietAsOfMonday.length?Math.round(covered/quietAsOfMonday.length*100):100;
+    document.getElementById("rm-coverage-pct").textContent=pct+"%";
+  }catch(e){console.warn(e);document.getElementById("rm-coverage-pct").textContent="—";}
+}
+
+
+
+
+function lpscGetTotal(key,data){
+  var s=0;
+  LPSC_DAYS.forEach(function(d){s+=parseInt((data||{})[key+"_"+d]||0)||0;});
+  return s;
+}
+
+function lpscPctBadge(t,g){
+  var p=t/g,c=p>=1?"lpsc-pct-green":p>=0.6?"lpsc-pct-amber":"lpsc-pct-gray";
+  return '<span class="lpsc-pct-badge '+c+'">'+Math.round(p*100)+'%</span>';
+}
+
+function lpscFmtRange(wk){
+  var mon=new Date(wk+"T12:00:00"),fri=new Date(mon);
+  fri.setDate(fri.getDate()+4);
+  var o={month:"short",day:"numeric"};
+  return mon.toLocaleDateString("en-US",o)+" – "+fri.toLocaleDateString("en-US",o);
+}
+
+function lpscAmWeekKeyOf(dateStr){
+  var d=new Date(dateStr+"T12:00:00");
+  var day=d.getDay();
+  var diff=day===0?-6:1-day;
+  d.setDate(d.getDate()+diff);
+  d.setHours(0,0,0,0);
+  var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),dd=String(d.getDate()).padStart(2,"0");
+  return y+"-"+m+"-"+dd;
+}
+
+async function lpscLoad(){
+  var fromEl=document.getElementById("lpsc-from"),toEl=document.getElementById("lpsc-to");
+  if(!fromEl.value){var d=new Date();d.setDate(d.getDate()-56);fromEl.value=d.toISOString().slice(0,10);}
+  if(!toEl.value)toEl.value=new Date().toISOString().slice(0,10);
+
+  var wrap=document.getElementById("lpsc-table-wrap");
+  var chartsEl=document.getElementById("lpsc-charts");
+  var summaryEl=document.getElementById("lpsc-summary");
+  wrap.innerHTML='<div style="text-align:center;padding:30px;color:#888">Loading...</div>';
+  chartsEl.innerHTML="";summaryEl.innerHTML="";
+  lpscCharts.forEach(function(c){c.destroy();});lpscCharts=[];
+
+  var metrics=LPSC_METRICS_MAP[lpscCurrentLP];
+
+  try{
+    var res=await fetch(
+      SB_URL+"/rest/v1/lp_scorecards?person=eq."+encodeURIComponent(lpscCurrentLP)+"&week_key=gte."+fromEl.value+"&week_key=lte."+toEl.value+"&order=week_key.desc&select=week_key,data",
+      {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}
+    );
+    var rows=await res.json();
+
+    if(!rows||!rows.length){
+      wrap.innerHTML='<div style="text-align:center;padding:40px;color:#888">No data found for this date range.</div>';
+      return;
+    }
+
+    summaryEl.innerHTML="";
+    metrics.forEach(function(m){
+      var grandTotal=rows.reduce(function(s,r){return s+lpscGetTotal(m.key,r.data);},0);
+      var avgPerWeek=Math.round(grandTotal/rows.length);
+      var pct=Math.min(avgPerWeek/m.goal,1);
+      var color=pct>=1?"#2a7a3b":pct>=0.6?"#b8922a":"#9ca3af";
+      var card=document.createElement("div");
+      card.style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px;text-align:center";
+      card.innerHTML='<div style="font-size:20px;font-weight:700;color:'+color+'">'+avgPerWeek+'</div>'
+        +'<div style="font-size:10px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:.04em">'+m.label+'</div>'
+        +'<div style="font-size:10px;color:#aaa;margin-top:1px">avg/wk &bull; goal '+m.goal+'</div>'
+        +'<div style="height:3px;background:#eee;border-radius:2px;margin-top:6px;overflow:hidden">'
+        +'<div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+';border-radius:2px"></div></div>';
+      summaryEl.appendChild(card);
+    });
+
+    var thead='<thead><tr><th style="background:#1F4E79;color:#fff;padding:9px 12px;text-align:left;font-size:11px;font-weight:600">Week</th>';
+    metrics.forEach(function(m){thead+='<th style="background:#1F4E79;color:#fff;padding:9px 8px;text-align:center;font-size:11px;font-weight:600">'+m.label+'</th>';});
+    thead+="</tr></thead>";
+
+    var tbody="<tbody>";
+    rows.forEach(function(row){
+      var label=lpscFmtRange(row.week_key);
+      tbody+='<tr style="cursor:pointer" onclick=\'lpscShowDaily("'+row.week_key+'",'+JSON.stringify(row.data)+')\'>'
+        +'<td style="padding:9px 12px;font-size:12px;font-weight:500;border-bottom:1px solid #f0f2f8;white-space:nowrap">'+label+'</td>';
+      metrics.forEach(function(m){
+        var t=lpscGetTotal(m.key,row.data);
+        tbody+='<td style="padding:9px 8px;text-align:center;font-size:12px;border-bottom:1px solid #f0f2f8">'+t+" "+lpscPctBadge(t,m.goal)+'</td>';
+      });
+      tbody+="</tr>";
+    });
+    tbody+="</tbody>";
+    wrap.innerHTML='<table style="width:100%;border-collapse:collapse">'+thead+tbody+"</table>";
+
+    var weeks=rows.map(function(r){return lpscFmtRange(r.week_key);}).reverse();
+    metrics.forEach(function(m,i){
+      var vals=rows.map(function(r){return lpscGetTotal(m.key,r.data);}).reverse();
+      var div=document.createElement("div");
+      div.style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:12px";
+      div.innerHTML='<div style="font-size:13px;font-weight:600;color:#1a1f2e;margin-bottom:12px">'+m.label+' — weekly trend</div>'
+        +'<div style="position:relative;height:180px"><canvas id="lpsc-chart-'+i+'"></canvas></div>';
+      chartsEl.appendChild(div);
+      setTimeout(function(){
+        var ch=new Chart(document.getElementById("lpsc-chart-"+i).getContext("2d"),{
+          type:"line",
+          data:{labels:weeks,datasets:[
+            {label:m.label,data:vals,borderColor:LPSC_CHART_COLORS[i%5],backgroundColor:LPSC_CHART_COLORS[i%5]+"22",borderWidth:2,pointRadius:4,fill:true,tension:0.3},
+            {label:"Goal",data:weeks.map(function(){return m.goal;}),borderColor:"#ccc",borderWidth:1.5,borderDash:[4,4],pointRadius:0,fill:false}
+          ]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:11}}},x:{ticks:{font:{size:10}}}}}
+        });
+        lpscCharts.push(ch);
+      },50);
+    });
+
+  }catch(e){
+    wrap.innerHTML='<div style="text-align:center;padding:40px;color:#888">Could not load scorecard data.</div>';
+    console.warn(e);
+  }
+}
+
+async function lpscLoadAmanda(){
+  var fromEl=document.getElementById("lpsc-from"),toEl=document.getElementById("lpsc-to");
+  if(!fromEl.value){var d=new Date();d.setDate(d.getDate()-56);fromEl.value=d.toISOString().slice(0,10);}
+  if(!toEl.value)toEl.value=new Date().toISOString().slice(0,10);
+
+  var wrap=document.getElementById("lpsc-table-wrap");
+  var chartsEl=document.getElementById("lpsc-charts");
+  var summaryEl=document.getElementById("lpsc-summary");
+  wrap.innerHTML='<div style="text-align:center;padding:30px;color:#888">Loading...</div>';
+  chartsEl.innerHTML="";summaryEl.innerHTML="";
+  lpscCharts.forEach(function(c){c.destroy();});lpscCharts=[];
+
+  try{
+    var res=await fetch(
+      SB_URL+"/rest/v1/amanda_activities?act_date=gte."+fromEl.value+"&act_date=lte."+toEl.value+"&select=act_type,act_date",
+      {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}
+    );
+    var acts=await res.json();
+
+    if(!acts||!acts.length){
+      wrap.innerHTML='<div style="text-align:center;padding:40px;color:#888">No data found for this date range.</div>';
+      return;
+    }
+
+    var byWeek={};
+    acts.forEach(function(a){
+      var wk=lpscAmWeekKeyOf(a.act_date);
+      if(!byWeek[wk])byWeek[wk]={};
+      byWeek[wk][a.act_type]=(byWeek[wk][a.act_type]||0)+1;
+    });
+    var weekKeys=Object.keys(byWeek).sort().reverse();
+
+    summaryEl.innerHTML="";
+    LPSC_AMANDA_GOALS.forEach(function(g){
+      var grandTotal=acts.filter(function(a){return a.act_type===g.key;}).length;
+      var avgPerWeek=Math.round(grandTotal/Math.max(1,weekKeys.length));
+      var pct=Math.min(avgPerWeek/g.goal,1);
+      var color=pct>=1?"#2a7a3b":pct>=0.6?"#b8922a":"#9ca3af";
+      var card=document.createElement("div");
+      card.style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px;text-align:center";
+      card.innerHTML='<div style="font-size:20px;font-weight:700;color:'+color+'">'+avgPerWeek+'</div>'
+        +'<div style="font-size:10px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:.04em">'+g.label+'</div>'
+        +'<div style="font-size:10px;color:#aaa;margin-top:1px">avg/wk &bull; goal '+g.goal+'</div>'
+        +'<div style="height:3px;background:#eee;border-radius:2px;margin-top:6px;overflow:hidden">'
+        +'<div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+';border-radius:2px"></div></div>';
+      summaryEl.appendChild(card);
+    });
+
+    var thead='<thead><tr><th style="background:#1F4E79;color:#fff;padding:9px 12px;text-align:left;font-size:11px;font-weight:600">Week</th>';
+    LPSC_AMANDA_GOALS.forEach(function(g){thead+='<th style="background:#1F4E79;color:#fff;padding:9px 8px;text-align:center;font-size:11px;font-weight:600">'+g.label+'</th>';});
+    thead+="</tr></thead>";
+
+    var tbody="<tbody>";
+    weekKeys.forEach(function(wk){
+      var label=lpscFmtRange(wk);
+      tbody+='<tr><td style="padding:9px 12px;font-size:12px;font-weight:500;border-bottom:1px solid #f0f2f8;white-space:nowrap">'+label+'</td>';
+      LPSC_AMANDA_GOALS.forEach(function(g){
+        var t=byWeek[wk][g.key]||0;
+        tbody+='<td style="padding:9px 8px;text-align:center;font-size:12px;border-bottom:1px solid #f0f2f8">'+t+" "+lpscPctBadge(t,g.goal)+'</td>';
+      });
+      tbody+="</tr>";
+    });
+    tbody+="</tbody>";
+    wrap.innerHTML='<table style="width:100%;border-collapse:collapse">'+thead+tbody+"</table>";
+
+    var weekLabels=weekKeys.map(function(wk){return lpscFmtRange(wk);}).reverse();
+    LPSC_AMANDA_GOALS.forEach(function(g,i){
+      var vals=weekKeys.map(function(wk){return byWeek[wk][g.key]||0;}).reverse();
+      var div=document.createElement("div");
+      div.style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:12px";
+      div.innerHTML='<div style="font-size:13px;font-weight:600;color:#1a1f2e;margin-bottom:12px">'+g.label+' — weekly trend</div>'
+        +'<div style="position:relative;height:180px"><canvas id="lpsc-chart-am-'+i+'"></canvas></div>';
+      chartsEl.appendChild(div);
+      setTimeout(function(){
+        var ch=new Chart(document.getElementById("lpsc-chart-am-"+i).getContext("2d"),{
+          type:"line",
+          data:{labels:weekLabels,datasets:[
+            {label:g.label,data:vals,borderColor:LPSC_CHART_COLORS[i%5],backgroundColor:LPSC_CHART_COLORS[i%5]+"22",borderWidth:2,pointRadius:4,fill:true,tension:0.3},
+            {label:"Goal",data:weekLabels.map(function(){return g.goal;}),borderColor:"#ccc",borderWidth:1.5,borderDash:[4,4],pointRadius:0,fill:false}
+          ]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:11}}},x:{ticks:{font:{size:10}}}}}
+        });
+        lpscCharts.push(ch);
+      },50);
+    });
+
+  }catch(e){
+    wrap.innerHTML='<div style="text-align:center;padding:40px;color:#888">Could not load Amanda\'s data.</div>';
+    console.warn(e);
+  }
+}
+
+function lpscShowDaily(wk,data){
+  var metrics=lpscCurrentLP==="Amanda"?null:LPSC_METRICS_MAP[lpscCurrentLP];
+  if(!metrics)return;
+  var wrap=document.getElementById("lpsc-daily-wrap");
+  var label=document.getElementById("lpsc-daily-label");
+  var content=document.getElementById("lpsc-daily-content");
+  label.textContent=lpscCurrentLP+" — "+lpscFmtRange(wk)+" (Daily Breakdown)";
+
+  var thead='<thead><tr><th style="background:#243d7a;color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:600">Metric</th>';
+  LPSC_DAYS.forEach(function(d){thead+='<th style="background:#243d7a;color:#fff;padding:8px 10px;text-align:center;font-size:11px;font-weight:600">'+d+'</th>';});
+  thead+='<th style="background:#243d7a;color:#f0c84a;padding:8px 10px;text-align:center;font-size:11px;font-weight:600">Total</th></tr></thead>';
+
+  var tbody="<tbody>";
+  metrics.forEach(function(m){
+    var total=lpscGetTotal(m.key,data);
+    var pct=Math.min(total/m.goal,1);
+    var color=pct>=1?"#2a7a3b":pct>=0.6?"#b8922a":"#9ca3af";
+    tbody+='<tr><td style="padding:9px 12px;font-size:12px;font-weight:500;border-bottom:1px solid #f0f2f8">'+m.label+'</td>';
+    LPSC_DAYS.forEach(function(day){
+      var v=parseInt((data||{})[m.key+"_"+day]||0)||0;
+      tbody+='<td style="padding:9px 10px;text-align:center;font-size:13px;font-weight:500;border-bottom:1px solid #f0f2f8">'+v+'</td>';
+    });
+    tbody+='<td style="padding:9px 10px;text-align:center;font-size:13px;font-weight:700;color:'+color+';border-bottom:1px solid #f0f2f8">'+total+' <span style="font-size:10px;color:#aaa">/'+m.goal+'</span></td></tr>';
+  });
+  tbody+="</tbody>";
+
+  content.innerHTML='<table style="width:100%;border-collapse:collapse">'+thead+tbody+"</table>";
+  wrap.style.display="block";
+  wrap.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
 </script>
 </body>
 </html>
