@@ -1672,6 +1672,20 @@ function loadXLSX(){
   document.head.appendChild(s);
 }
 
+var chartJsLoadingPromise=null;
+function ensureChartJs(){
+  if(typeof Chart!=="undefined")return Promise.resolve();
+  if(chartJsLoadingPromise)return chartJsLoadingPromise;
+  chartJsLoadingPromise=new Promise(function(resolve,reject){
+    var s=document.createElement("script");
+    s.src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js";
+    s.onload=function(){resolve();};
+    s.onerror=function(){chartJsLoadingPromise=null;reject(new Error("Could not load Chart.js"));};
+    document.head.appendChild(s);
+  });
+  return chartJsLoadingPromise;
+}
+
 function handleUpload(input){
   var file=input.files[0];if(!file)return;
   var res=document.getElementById("upload-result");res.textContent="Reading...";res.style.color="";
@@ -2321,7 +2335,7 @@ async function lpscSaveEdit(){
     cleanData[k]=(v===""||v===null||v===undefined)?0:(parseInt(v)||0);
   });
   try{
-    var res=await fetch(SB_URL+"/rest/v1/lp_scorecards",{
+    var res=await fetch(SB_URL+"/rest/v1/lp_scorecards?on_conflict=person,week_key",{
       method:"POST",
       headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates"},
       body:JSON.stringify({person:lpscCurrentLP,week_key:wk,data:cleanData})
@@ -2611,7 +2625,7 @@ async function lpscLoad(){
       div.innerHTML='<div style="font-size:13px;font-weight:600;color:#1a1f2e;margin-bottom:12px">'+m.label+' — weekly trend</div>'
         +'<div style="position:relative;height:180px"><canvas id="lpsc-chart-'+i+'"></canvas></div>';
       chartsEl.appendChild(div);
-      setTimeout(function(){
+      ensureChartJs().then(function(){
         var ch=new Chart(document.getElementById("lpsc-chart-"+i).getContext("2d"),{
           type:"line",
           data:{labels:weeks,datasets:[
@@ -2621,7 +2635,7 @@ async function lpscLoad(){
           options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:11}}},x:{ticks:{font:{size:10}}}}}
         });
         lpscCharts.push(ch);
-      },50);
+      }).catch(function(){});
     });
 
   }catch(e){
@@ -2709,7 +2723,7 @@ async function lpscLoadAmanda(){
       div.innerHTML='<div style="font-size:13px;font-weight:600;color:#1a1f2e;margin-bottom:12px">'+g.label+' — weekly trend</div>'
         +'<div style="position:relative;height:180px"><canvas id="lpsc-chart-am-'+i+'"></canvas></div>';
       chartsEl.appendChild(div);
-      setTimeout(function(){
+      ensureChartJs().then(function(){
         var ch=new Chart(document.getElementById("lpsc-chart-am-"+i).getContext("2d"),{
           type:"line",
           data:{labels:weekLabels,datasets:[
@@ -2719,7 +2733,7 @@ async function lpscLoadAmanda(){
           options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:11}}},x:{ticks:{font:{size:10}}}}}
         });
         lpscCharts.push(ch);
-      },50);
+      }).catch(function(){});
     });
 
   }catch(e){
