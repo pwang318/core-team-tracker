@@ -1004,6 +1004,7 @@ function loadAgentAssignments(){
 }
 
 function selectUser(btn,u){
+  rmStopPolling();
   currentUser=u;
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   if(btn)btn.classList.add("active");
@@ -2192,6 +2193,15 @@ function lpscRenderTeamTotals(){
 }
 
 
+var rmPollInterval=null;
+function rmStartPolling(){
+  if(rmPollInterval)clearInterval(rmPollInterval);
+  rmPollInterval=setInterval(function(){rmLoadAll();},30000);
+}
+function rmStopPolling(){
+  if(rmPollInterval){clearInterval(rmPollInterval);rmPollInterval=null;}
+}
+
 function openRmView(btn){
   currentUser=null;
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
@@ -2199,6 +2209,7 @@ function openRmView(btn){
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-rm").classList.add("active");
   rmLoadAll();
+  rmStartPolling();
 }
 
 const LPSC_METRICS_MAP={
