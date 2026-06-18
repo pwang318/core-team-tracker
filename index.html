@@ -539,9 +539,29 @@ tr:hover td{background:var(--bg)}
       </div>
       <div id="lw-body" style="display:none;border-top:1px solid var(--border-light);padding:.9rem 1.25rem"><div id="lw-content"></div></div>
     </div>
+    <!-- NEEDS ATTENTION ALERTS -->
+    <div id="d-alerts-section" style="margin-bottom:1rem"></div>
+
     <div class="section-head">LP performance this week <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
     <div class="d-grid" id="d-grid"></div>
-    <div class="section-head" style="margin-top:1rem">All-time leaderboard</div>
+
+    <!-- GROWTH SCOREBOARD -->
+    <div class="section-head" style="margin-top:1rem">Growth scoreboard <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">— active agent goals</span></div>
+    <div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div>
+
+    <!-- RM SUMMARY -->
+    <div class="section-head" style="margin-top:1rem">Amanda — this week</div>
+    <div id="d-rm-summary" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem">
+      <div style="text-align:center;padding:12px;color:#aaa;font-size:13px">Loading...</div>
+    </div>
+
+    <!-- LP SCORECARD SUMMARY -->
+    <div class="section-head" style="margin-top:1rem">LP scorecard summary <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">— this week</span></div>
+    <div id="d-lp-scorecard-summary" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem">
+      <div style="text-align:center;padding:12px;color:#aaa;font-size:13px">Loading...</div>
+    </div>
+
+    <div class="section-head" style="margin-top:1rem">All-time leaderboard <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">— based on full call history</span></div>
     <div id="leaderboard"></div>
     <div class="section-head" style="margin-top:1rem">Velocify lead leaderboard <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">— updates when Zap is live</span></div>
     <div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading Velocify data...</div></div>
@@ -730,118 +750,11 @@ function switchLpTab(tabId, btn){
 }
 
 // ── REFERRAL LEADS LOGIC ──
-function getStatusBadgeClass(status){
-  if(!status) return "rs-other";
-  var s=status.toLowerCase();
-  if(s.indexOf("file started")>=0||s==="started") return "rs-started";
-  if(s.indexOf("contact attempt")>=0) return "rs-contact";
-  if(s.indexOf("nurture")>=0) return "rs-nurture";
-  if(s.indexOf("contacted")>=0) return "rs-contacted";
-  if(s.indexOf("withdrawn")>=0) return "rs-withdrawn";
-  return "rs-other";
-}
+// getStatusBadgeClass and loadReferralLeads defined below (active versions)
 
-function loadReferralLeads(force){
-  if(referralLeadsCache && !force){
-    renderReferralLeads(referralLeadsCache);
-    return;
-  }
-  document.getElementById("ref-last-updated").textContent="Loading...";
-  var todayStr=localDateStr(TODAY);
-  var priorDay=new Date(TODAY);priorDay.setDate(TODAY.getDate()-1);
-  var priorStr=localDateStr(priorDay);
-  var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
+// renderReferralLeads defined below (active version)
 
-  sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
-    var CORE_LP_KEYWORDS=["Dill","Gavin","De La Riva","Karen","Saleh","Said","McMahon","Osgood","Johnston","Jordan"];
-    var filtered=(res||[]).filter(function(r){
-      var lp=r.lp_user||"";
-      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
-    });
-    referralLeadsCache=filtered;
-    renderReferralLeads(referralLeadsCache);
-    document.getElementById("ref-last-updated").textContent="Last refreshed: "+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-  }).catch(function(){
-    document.getElementById("ref-last-updated").textContent="Could not load — Zap may not be connected yet";
-    renderReferralLeads([]);
-  });
-}
-
-function renderReferralLeads(data){
-  var todayStr=localDateStr(TODAY);
-  var priorDay=new Date(TODAY);priorDay.setDate(TODAY.getDate()-1);
-  while(priorDay.getDay()===0||priorDay.getDay()===6) priorDay.setDate(priorDay.getDate()-1);
-  var priorStr=localDateStr(priorDay);
-
-  // Split into buckets
-  var todayLeads=data.filter(function(r){return r.date_added===todayStr;});
-  var priorLeads=data.filter(function(r){return r.date_added===priorStr;});
-
-  // Uncovered = not File Started
-  var FILE_STARTED_STATUSES=["file started","started"];
-  function isFileStarted(status){
-    if(!status)return false;
-    var s=status.toLowerCase();
-    return FILE_STARTED_STATUSES.some(function(fs){return s.indexOf(fs)>=0;});
-  }
-  var uncovered=data.filter(function(r){return !isFileStarted(r.status);});
-  // MTD stats
-  var mtdTotal=data.length;
-  var mtdFileStarts=data.filter(function(r){return isFileStarted(r.status);}).length;
-  var mtdUnconverted=mtdTotal-mtdFileStarts;
-  var ltf=mtdTotal>0?Math.round(mtdFileStarts/mtdTotal*1000)/10:0;
-
-  // Update stat cards
-  document.getElementById("ref-mtd-leads").textContent=mtdTotal||"0";
-  document.getElementById("ref-file-starts").textContent=mtdFileStarts||"0";
-  document.getElementById("ref-unconverted").textContent=mtdUnconverted||"0";
-  document.getElementById("ref-ltf").textContent=ltf+"%";
-  document.getElementById("ref-prior-count").textContent=priorLeads.length||"0";
-
-  // Update labels
-  var todayFmt=TODAY.toLocaleDateString("en-US",{month:"numeric",day:"numeric"});
-  var priorFmt=priorDay.toLocaleDateString("en-US",{month:"numeric",day:"numeric"});
-  document.getElementById("ref-today-label").textContent=todayFmt;
-  document.getElementById("ref-prior-label").textContent=priorFmt;
-  document.getElementById("ref-today-count").textContent=todayLeads.length+" lead"+(todayLeads.length!==1?"s":"");
-  document.getElementById("ref-prior-day-count").textContent=priorLeads.length+" lead"+(priorLeads.length!==1?"s":"");
-  document.getElementById("ref-uncovered-count").textContent=uncovered.length+" lead"+(uncovered.length!==1?"s":"");
-
-  // Render tables
-  document.getElementById("ref-today-table").innerHTML=buildLeadsTable(todayLeads,"No leads received today yet.");
-  document.getElementById("ref-prior-table").innerHTML=buildLeadsTable(priorLeads,"No leads on prior day.");
-  document.getElementById("ref-uncovered-table").innerHTML=buildLeadsTable(uncovered,"No uncovered leads — great conversion!");
-}
-
-function buildLeadsTable(rows, emptyMsg){
-  if(!rows||!rows.length) return '<div class="ref-empty">'+emptyMsg+'</div>';
-  var html='<table class="ref-leads-table"><thead><tr><th style="width:10%">Date</th><th style="width:24%">Agent</th><th style="width:24%">Buyer(s)</th><th style="width:10%">LP</th><th style="width:32%">Status & Last Update</th></tr></thead><tbody>';
-  rows.forEach(function(r){
-    var agent=r.referral_partner_name||"--";
-    var buyer=r.buyer_name||r.buyers||"--";
-    var lp=r.lp_user||"--";
-    LPS.forEach(function(lpName){if(lp.toLowerCase().indexOf(lpName.toLowerCase())>=0)lp=lpName;});
-    var status=r.status||"--";
-    var dateAdded=r.date_added?fmtShort(r.date_added):"--";
-    var lastUpdate=r.last_update?fmtShort(r.last_update):"--";
-    var badgeCls=getStatusBadgeClass(status);
-    // Flag overdue: not File Started, not Nurture, last update > 24hrs ago
-    var isFileStarted=getStatusBadgeClass(status)==='rs-started';
-    var isNurture=status.toLowerCase().indexOf('nurture')>=0;
-    var lastUpdateDate=r.last_update?new Date(r.last_update+'T00:00:00'):null;
-    var hoursSince=lastUpdateDate?((new Date()-lastUpdateDate)/3600000):9999;
-    var isOverdue=!isFileStarted&&!isNurture&&hoursSince>24;
-    var rowStyle=isOverdue?'background:#FFF5F5;border-left:3px solid #E53935;':'';
-    var overdueFlag=isOverdue?'<span style="font-size:10px;color:#E53935;font-weight:700">🔴 NEEDS TOUCH</span><br>':'';
-    html+='<tr style="'+rowStyle+'"><td style="font-size:11px;color:#888">'+dateAdded+'</td><td style="font-weight:500;font-size:11px">'+escHtml(agent)+'</td><td style="font-size:11px">'+escHtml(buyer)+'</td>';
-    html+='<td>';
-    if(lp!=="--"){var lpKey=LPS.find(function(n){return lp===n;});html+='<span class="lp-tag lp-tag-'+(lpKey||"Unassigned")+'" style="font-size:10px;padding:2px 6px">'+escHtml(lp)+'</span>';}else{html+='<span style="color:#ccc">--</span>';}
-    html+='</td>';
-    html+='<td>'+overdueFlag+'<span class="ref-badge '+badgeCls+'" style="font-size:10px;display:block;margin-bottom:2px">'+escHtml(status)+'</span><span style="font-size:10px;color:#aaa">Last: '+lastUpdate+'</span></td></tr>';
-  });
-  html+='</tbody></table>';
-  return html;
-}
+// buildLeadsTable defined below (active version)
 
 function effectiveDays(a){
   // Most recent of: this week's call log OR all-time history OR Velocify activity
@@ -1548,14 +1461,24 @@ function renderScorecard(which,logs,wkKey,rotFn){
 }
 
 function renderLeaderboard(){
+  // Count true all-time calls per LP from call_logs_history via agentLastCall keys
+  var lpHistoryCounts={};
+  LPS.forEach(function(lp){lpHistoryCounts[lp]=0;});
+  // agentLastCall is keyed by agent_name — we need call count per LP from history
+  // Use a separate approach: sum from the history data we loaded
   var stats=LPS.map(function(lp){
-    var allCalls=Object.values(callLogs).filter(function(l){return l.lp===lp;}).length+Object.values(lastWeekLogs).filter(function(l){return l.lp===lp;}).length;
+    var histCount=Object.keys(agentLastCall).filter(function(name){
+      var a=agents.find(function(x){return x[0]===name;});
+      return a&&a[2]===lp;
+    }).length; // fallback: agents with any history assigned to this LP
+    // Better: use lpHistoryCallCounts if populated
+    var allCalls=(lpHistoryCallCounts&&lpHistoryCallCounts[lp])||histCount;
     var done=getLpCallsThisWeek(lp),pct=getLpPctThisWeek(lp);
     return{lp:lp,allCalls:allCalls,done:done,pct:pct,streak:calcStreak(lp)};
   }).sort(function(a,b){return b.allCalls-a.allCalls;});
   var medals=["🥇","🥈","🥉","4.","5."];
   document.getElementById("leaderboard").innerHTML=stats.map(function(s,i){
-    return'<div class="leaderboard-row"><span style="font-size:18px;width:28px;text-align:center">'+medals[i]+'</span><div style="flex:1"><div style="font-weight:700;font-size:14px;color:'+LP_COLORS[s.lp]+'">'+s.lp+'</div><div style="font-size:11px;color:#888;margin-top:2px">'+s.allCalls+' total calls'+(s.streak>0?' 🔥 '+s.streak+' week streak':'')+'</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:'+(s.pct===100?"#43A047":s.pct>50?"#FB8C00":"#E53935")+'">'+s.pct+'%</div><div style="font-size:10px;color:#888">'+s.done+'/'+WEEKLY_TARGET+' this week</div></div></div>';
+    return'<div class="leaderboard-row"><span style="font-size:18px;width:28px;text-align:center">'+medals[i]+'</span><div style="flex:1"><div style="font-weight:700;font-size:14px;color:'+LP_COLORS[s.lp]+'">'+s.lp+'</div><div style="font-size:11px;color:#888;margin-top:2px">'+s.allCalls+' total calls logged'+(s.streak>0?' &nbsp;🔥 '+s.streak+' week streak':'')+'</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:'+(s.pct===100?"#43A047":s.pct>50?"#FB8C00":"#E53935")+'">'+s.pct+'%</div><div style="font-size:10px;color:#888">'+s.done+'/'+WEEKLY_TARGET+' this week</div></div></div>';
   }).join("");
 }
 
@@ -1583,7 +1506,201 @@ function toggleSC(bodyId,chevId){
   chev.style.transform=isOpen?"":"rotate(180deg)";
 }
 
+// ── MANAGEMENT DASHBOARD ADDITIONS ──────────────────────────────────────
+
+function renderAlerts(){
+  var el=document.getElementById("d-alerts-section");
+  if(!el)return;
+  var alerts=[];
+
+  // Priority agents not called this week
+  LPS.forEach(function(lp){
+    var uncalled=agents.filter(function(a){return a[2]===lp&&isPriority(a)&&isActive(a)&&!calledThisWeek(a[0]);});
+    if(uncalled.length)alerts.push({level:"red",msg:"&#9888; "+lp+" has "+uncalled.length+" priority agent"+(uncalled.length>1?"s":"")+" not yet called this week"});
+  });
+
+  // LPs behind pace (less than 60% of week done but >40% of week elapsed)
+  var now=new Date(),dayOfWeek=now.getDay();
+  var weekDaysPassed=dayOfWeek===0?5:Math.min(dayOfWeek,5); // Mon=1..Fri=5
+  var weekPctElapsed=weekDaysPassed/5;
+  if(weekPctElapsed>0.4){
+    LPS.forEach(function(lp){
+      var pct=getLpPctThisWeek(lp)/100;
+      if(pct<weekPctElapsed-0.2){
+        alerts.push({level:"amber",msg:"&#128337; "+lp+" is behind pace — "+getLpPctThisWeek(lp)+"% done with ~"+Math.round(weekPctElapsed*100)+"% of the week gone"});
+      }
+    });
+  }
+
+  // Agents overdue across all LPs (A-tier >7d, B-tier >14d, C-tier >21d)
+  var overdueCount=agents.filter(function(a){
+    if(!isActive(a))return false;
+    var ds=effectiveDays(a);
+    if(ds===null)return false;
+    var tw=tierWindow(a);
+    return ds>tw;
+  }).length;
+  if(overdueCount>0)alerts.push({level:"amber",msg:"&#128197; "+overdueCount+" agent"+(overdueCount>1?"s are":" is")+" overdue for a call across all LPs"});
+
+  if(!alerts.length){
+    el.innerHTML='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:12px;color:#15803d;font-weight:500;display:flex;align-items:center;gap:8px">&#10003; No alerts — all clear!</div>';
+    return;
+  }
+  el.innerHTML=alerts.map(function(a){
+    var bg=a.level==="red"?"#fff1f2":"#fffbeb",border=a.level==="red"?"#fecdd3":"#fde68a",color=a.level==="red"?"#be123c":"#92400e";
+    return'<div style="background:'+bg+';border:1px solid '+border+';border-radius:8px;padding:10px 14px;font-size:12px;color:'+color+';font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:8px">'+a.msg+'</div>';
+  }).join("");
+}
+
+function renderGrowthScoreboard(){
+  var el=document.getElementById("d-growth-scoreboard");
+  if(!el)return;
+  var activeAgents=agents.filter(isActive);
+  var total=activeAgents.length;
+  var aTier=activeAgents.filter(function(a){return a[1]==="A";}).length;
+  var bTier=activeAgents.filter(function(a){return a[1]==="B";}).length;
+  var cTier=activeAgents.filter(function(a){return a[1]==="C";}).length;
+  var GOAL_TOTAL=200,GOAL_A=30,GOAL_B=35;
+
+  function bar(val,goal,color){
+    var pct=Math.min(val/goal,1);
+    var labelColor=pct>=1?"#15803d":pct>=0.7?"#b8922a":"#64748b";
+    return'<div style="height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden;margin:5px 0 3px"><div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+';border-radius:3px;transition:width .4s"></div></div>'
+      +'<div style="font-size:10px;color:'+labelColor+'">'+val+' / '+goal+' goal &nbsp;('+Math.round(pct*100)+'%)</div>';
+  }
+
+  // LP breakdown
+  var lpRows="";
+  LPS.forEach(function(lp){
+    var lpActive=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+    var lpA=lpActive.filter(function(a){return a[1]==="A";}).length;
+    var lpB=lpActive.filter(function(a){return a[1]==="B";}).length;
+    var lpC=lpActive.filter(function(a){return a[1]==="C";}).length;
+    lpRows+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0f2f8">'
+      +'<span style="font-size:12px;font-weight:600;color:'+LP_COLORS[lp]+';width:52px">'+lp+'</span>'
+      +'<span class="badge badge-a" style="font-size:10px">A:'+lpA+'</span>'
+      +'<span class="badge badge-b" style="font-size:10px">B:'+lpB+'</span>'
+      +'<span class="badge badge-c" style="font-size:10px">C:'+lpC+'</span>'
+      +'<span style="margin-left:auto;font-size:12px;font-weight:600;color:#475569">'+lpActive.length+' active</span>'
+      +'</div>';
+  });
+
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">'
+    +'<div style="background:#f8fafc;border-radius:8px;padding:14px;border:1px solid var(--border)">'
+      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Active agents</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-.02em">'+total+'</div>'
+      +bar(total,GOAL_TOTAL,"#1F4E79")
+    +'</div>'
+    +'<div style="background:#f0fdf4;border-radius:8px;padding:14px;border:1px solid #bbf7d0">'
+      +'<div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">A-tier agents</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#15803d;letter-spacing:-.02em">'+aTier+'</div>'
+      +bar(aTier,GOAL_A,"#15803d")
+    +'</div>'
+    +'<div style="background:#eff6ff;border-radius:8px;padding:14px;border:1px solid #bfdbfe">'
+      +'<div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">B-tier agents</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#1d4ed8;letter-spacing:-.02em">'+bTier+'</div>'
+      +bar(bTier,GOAL_B,"#1d4ed8")
+    +'</div>'
+    +'<div style="background:#f8fafc;border-radius:8px;padding:14px;border:1px solid var(--border)">'
+      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">C-tier agents</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#64748b;letter-spacing:-.02em">'+cTier+'</div>'
+      +'<div style="font-size:10px;color:#94a3b8;margin-top:8px">Development pool</div>'
+    +'</div>'
+  +'</div>'
+  +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:8px">By LP</div>'
+  +lpRows;
+}
+
+async function renderRmSummary(){
+  var el=document.getElementById("d-rm-summary");
+  if(!el)return;
+  try{
+    var now=new Date(),todayStr=localDateStr(now);
+    var week=rmWeekRange?rmWeekRange():{start:todayStr,end:todayStr};
+    var res=await fetch(SB_URL+"/rest/v1/amanda_activities?act_date=gte."+week.start+"&act_date=lte."+week.end+"&select=act_type,act_date,agent_name",
+      {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
+    var acts=await res.json();
+    if(!Array.isArray(acts)){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load Amanda&#39;s data.</div>';return;}
+
+    var flagRes=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
+    var flagRows=await flagRes.json();
+    var flagCount=Array.isArray(flagRows)?flagRows.length:0;
+
+    var goals=[
+      {type:"Cold Calls",label:"Cold calls",weekly:25},
+      {type:"New Realtor Meeting",label:"New meetings",weekly:5},
+      {type:"Break Breads",label:"Break breads",weekly:5},
+      {type:"Realtor Buddy Referral Ask",label:"Buddy intros",weekly:3}
+    ];
+    var cards=goals.map(function(g){
+      var count=acts.filter(function(a){return a.act_type===g.type;}).length;
+      var pct=Math.min(count/g.weekly,1);
+      var color=pct>=1?"#15803d":pct>=0.6?"#b8922a":"#9ca3af";
+      return'<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:12px;border:1px solid var(--border)">'
+        +'<div style="font-size:20px;font-weight:700;color:'+color+'">'+count+'</div>'
+        +'<div style="font-size:10px;color:#888;margin-top:2px">'+g.label+'</div>'
+        +'<div style="font-size:10px;color:#aaa">/ '+g.weekly+' goal</div>'
+        +'<div style="height:3px;background:#e2e8f0;border-radius:2px;margin-top:6px;overflow:hidden">'
+        +'<div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+'"></div></div>'
+      +'</div>';
+    }).join("");
+
+    el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:12px">'+cards+'</div>'
+      +'<div style="display:flex;gap:12px;flex-wrap:wrap">'
+      +'<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 16px;font-size:12px;color:#c2410c">'
+        +'<span style="font-weight:700;font-size:18px">'+flagCount+'</span> <span style="font-weight:500">flagged by LPs</span></div>'
+      +'<div style="font-size:11px;color:#94a3b8;display:flex;align-items:center">'+acts.length+' total activities this week</div>'
+      +'</div>';
+  }catch(e){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load Amanda&#39;s data.</div>';}
+}
+
+async function renderLpScorecardSummary(){
+  var el=document.getElementById("d-lp-scorecard-summary");
+  if(!el)return;
+  try{
+    var wk=getWeekKey(TODAY);
+    var res=await fetch(
+      SB_URL+"/rest/v1/lp_scorecards?person=in.("+LPSC_TEAM_LPS.join(",")+")"+"&week_key=eq."+wk+"&select=person,data",
+      {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}
+    );
+    var rows=await res.json();
+    if(!Array.isArray(rows)||!rows.length){
+      el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">No scorecard data entered yet this week.</div>';
+      return;
+    }
+    var metrics=LPSC_METRICS_MAP._lp2;
+    var byPerson={};
+    rows.forEach(function(r){byPerson[r.person]=r.data||{};});
+
+    // Header
+    var thead='<thead><tr><th style="background:#1F4E79;color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:600;white-space:nowrap">LP</th>';
+    metrics.forEach(function(m){thead+='<th style="background:#1F4E79;color:#fff;padding:8px 10px;text-align:center;font-size:11px;font-weight:600">'+m.label+'</th>';});
+    thead+='</tr></thead>';
+
+    var tbody='<tbody>';
+    LPSC_TEAM_LPS.forEach(function(lp){
+      var data=byPerson[lp]||{};
+      tbody+='<tr><td style="padding:8px 12px;font-size:12px;font-weight:600;border-bottom:1px solid #f0f2f8;color:'+LP_COLORS[lp]+'">'+lp+'</td>';
+      metrics.forEach(function(m){
+        var t=lpscGetTotal(m.key,data);
+        var pct=Math.min(t/m.goal,1);
+        var color=pct>=1?"#15803d":pct>=0.6?"#b8922a":"#94a3b8";
+        tbody+='<td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:600;border-bottom:1px solid #f0f2f8;color:'+color+'">'+t+'<span style="font-size:10px;color:#cbd5e1;font-weight:400"> /'+m.goal+'</span></td>';
+      });
+      tbody+='</tr>';
+    });
+    tbody+='</tbody>';
+
+    el.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+thead+tbody+'</table></div>'
+      +'<div style="font-size:10px;color:#aaa;margin-top:8px">Based on scorecard entries for the current week. LPs with no entries are omitted.</div>';
+  }catch(e){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load scorecard data.</div>';}
+}
+
 function renderDaniel(){
+  renderAlerts();
+  renderGrowthScoreboard();
+  renderRmSummary();
+  renderLpScorecardSummary();
   renderVelocifyLeaderboard();
   var bdayEl=document.getElementById("daniel-bday-list");
   if(bdayEl){
@@ -1835,13 +1952,16 @@ function loadSelfReportedReferrals(){
   }).catch(function(){});
 }
 
+var lpHistoryCallCounts={};
 function loadAgentFirstCalls(){
-  return sbFetch("GET","call_logs_history?select=agent_name,call_date&order=call_date.asc&limit=5000").then(function(res){
+  return sbFetch("GET","call_logs_history?select=agent_name,call_date,lp&order=call_date.asc&limit=5000").then(function(res){
     agentFirstCall={};
     agentLastCall={};
+    lpHistoryCallCounts={};
     if(res)res.forEach(function(r){
       if(!agentFirstCall[r.agent_name])agentFirstCall[r.agent_name]=r.call_date;
       if(!agentLastCall[r.agent_name]||r.call_date>agentLastCall[r.agent_name])agentLastCall[r.agent_name]=r.call_date;
+      if(r.lp&&r.lp!=="__REMOVED__")lpHistoryCallCounts[r.lp]=(lpHistoryCallCounts[r.lp]||0)+1;
     });
   }).catch(function(){});
 }
