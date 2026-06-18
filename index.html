@@ -388,7 +388,10 @@ tr:hover td{background:var(--bg)}
     <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999">Amanda Dearth</div>
+    <div id="rm-last-refreshed" style="font-size:10px;color:#bbb;font-weight:500"></div>
+  </div>
     <div style="display:flex;gap:6px">
       <button class="lpsc-period-btn-light active" onclick="rmSwitchPeriod('today',this)">Today</button>
       <button class="lpsc-period-btn-light" onclick="rmSwitchPeriod('week',this)">This week</button>
@@ -1003,8 +1006,18 @@ function loadAgentAssignments(){
   }).catch(function(){});
 }
 
+var lpPollInterval=null;
+function lpStartPolling(lp){
+  if(lpPollInterval)clearInterval(lpPollInterval);
+  lpPollInterval=setInterval(function(){loadCallLogs().then(function(){if(currentUser===lp)renderLP(lp);});},30000);
+}
+function lpStopPolling(){
+  if(lpPollInterval){clearInterval(lpPollInterval);lpPollInterval=null;}
+}
+
 function selectUser(btn,u){
   rmStopPolling();
+  lpStopPolling();
   currentUser=u;
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   if(btn)btn.classList.add("active");
@@ -1023,16 +1036,24 @@ function selectUser(btn,u){
     document.getElementById("view-lp").classList.add("active");
     renderLP(u);
     loadCallLogs().then(function(){renderLP(u);});
+    lpStartPolling(u);
   }
 }
 
 function openScorecardsView(){
+  rmStopPolling();lpStopPolling();
   currentUser=null;
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-scorecards").classList.add("active");
-  if(!lpscTeamCache) lpscLoadTeamTotals();
-  else lpscRenderTeamTotals();
+  lpscLoadTeamTotals();
+  // Auto-load Isaak's history if no one is selected yet
+  if(lpscCurrentLP==="Isaak"){
+    document.getElementById("lpsc-edit-wrap").style.display="block";
+    lpscEditMonday=lpscGetMonday(new Date());
+    lpscLoadEditWeek();
+    lpscLoad();
+  }
 }
 
 function calcStreak(lp){
@@ -2152,7 +2173,7 @@ function lpscRenderTeamTotals(){
   var metrics=LPSC_METRICS_MAP._lp2;
   var period=lpscTeamCurrentPeriod;
   var now=new Date();
-  var todayWk=lpscAmWeekKeyOf(now.toISOString().slice(0,10));
+  var todayWk=lpscAmWeekKeyOf(localDateStr(now));
   var monthStart=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
   var todayDayName=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][now.getDay()];
 
@@ -2193,10 +2214,21 @@ function lpscRenderTeamTotals(){
 }
 
 
-var rmPollInterval=null;
+var rmPollInterval=null,rmCoverageLastLoaded=0;
 function rmStartPolling(){
   if(rmPollInterval)clearInterval(rmPollInterval);
-  rmPollInterval=setInterval(function(){rmLoadAll();},30000);
+  rmCoverageLastLoaded=0; // reset so coverage loads immediately on tab open
+  rmPollInterval=setInterval(function(){
+    var now=Date.now();
+    // Coverage is expensive (3 fetches) — throttle to every 5 minutes
+    if(now-rmCoverageLastLoaded>=300000){
+      rmLoadAll();
+      rmCoverageLastLoaded=now;
+    } else {
+      // Fast refresh: goals, flagged, feed only
+      Promise.all([rmLoadGoals(),rmLoadFlagged(),rmLoadFeed()]);
+    }
+  },30000);
 }
 function rmStopPolling(){
   if(rmPollInterval){clearInterval(rmPollInterval);rmPollInterval=null;}
@@ -2393,6 +2425,8 @@ function rmSwitchPeriod(period,btn){
 
 async function rmLoadAll(){
   await Promise.all([rmLoadGoals(),rmLoadFlagged(),rmLoadCoverage(),rmLoadFeed()]);
+  var el=document.getElementById("rm-last-refreshed");
+  if(el)el.textContent="Updated "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
 }
 
 var rmFeedCache={today:[],week:[],mtd:[]};
@@ -2427,6 +2461,8 @@ function rmRenderFeed(){
   var data=rmFeedCache[rmCurrentPeriod]||[];
   var filt=typeF?data.filter(function(a){return a.act_type===typeF;}):data;
   if(!filt.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">No activity found.</div>';return;}
+  var showCount=Math.min(filt.length,80);
+  var capNote=filt.length>80?'<div style="text-align:center;font-size:11px;color:#aaa;padding:8px 0;border-top:1px solid #f0f2f8">Showing '+showCount+' of '+filt.length+' entries</div>':"";
   el.innerHTML=filt.slice(0,80).map(function(a){
     var h='<div style="padding:9px 0;border-bottom:1px solid #f0f2f8">';
     h+='<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:13px">'+escHtml(a.agent_name||"—")+'</span><span style="font-size:11px;color:#999">'+fmt(a.act_date)+'</span></div>';
@@ -2434,7 +2470,7 @@ function rmRenderFeed(){
     if(a.notes)h+='<div style="font-size:11px;color:#888;margin-top:3px;font-style:italic">"'+escHtml(String(a.notes).substring(0,80))+'"</div>';
     h+='</div>';
     return h;
-  }).join("");
+  }).join("")+capNote;
 }
 
 async function rmLoadGoals(){
@@ -2570,8 +2606,8 @@ function lpscAmWeekKeyOf(dateStr){
 
 async function lpscLoad(){
   var fromEl=document.getElementById("lpsc-from"),toEl=document.getElementById("lpsc-to");
-  if(!fromEl.value){var d=new Date();d.setDate(d.getDate()-56);fromEl.value=d.toISOString().slice(0,10);}
-  if(!toEl.value)toEl.value=new Date().toISOString().slice(0,10);
+  if(!fromEl.value){var d=new Date();d.setDate(d.getDate()-56);fromEl.value=localDateStr(d);}
+  if(!toEl.value)toEl.value=localDateStr(new Date());
 
   var wrap=document.getElementById("lpsc-table-wrap");
   var chartsEl=document.getElementById("lpsc-charts");
@@ -2657,8 +2693,8 @@ async function lpscLoad(){
 
 async function lpscLoadAmanda(){
   var fromEl=document.getElementById("lpsc-from"),toEl=document.getElementById("lpsc-to");
-  if(!fromEl.value){var d=new Date();d.setDate(d.getDate()-56);fromEl.value=d.toISOString().slice(0,10);}
-  if(!toEl.value)toEl.value=new Date().toISOString().slice(0,10);
+  if(!fromEl.value){var d=new Date();d.setDate(d.getDate()-56);fromEl.value=localDateStr(d);}
+  if(!toEl.value)toEl.value=localDateStr(new Date());
 
   var wrap=document.getElementById("lpsc-table-wrap");
   var chartsEl=document.getElementById("lpsc-charts");
