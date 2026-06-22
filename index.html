@@ -1954,14 +1954,21 @@ function loadSelfReportedReferrals(){
 
 var lpHistoryCallCounts={};
 function loadAgentFirstCalls(){
-  return sbFetch("GET","call_logs_history?select=agent_name,call_date,lp&order=call_date.asc&limit=5000").then(function(res){
+  return Promise.all([
+    sbFetch("GET","agent_call_summary?select=agent_name,first_call_date,last_call_date,total_calls"),
+    sbFetch("GET","lp_call_history_counts?select=lp,call_count")
+  ]).then(function(results){
+    var summary=results[0]||[];
+    var lpCounts=results[1]||[];
     agentFirstCall={};
     agentLastCall={};
     lpHistoryCallCounts={};
-    if(res)res.forEach(function(r){
-      if(!agentFirstCall[r.agent_name])agentFirstCall[r.agent_name]=r.call_date;
-      if(!agentLastCall[r.agent_name]||r.call_date>agentLastCall[r.agent_name])agentLastCall[r.agent_name]=r.call_date;
-      if(r.lp&&r.lp!=="__REMOVED__")lpHistoryCallCounts[r.lp]=(lpHistoryCallCounts[r.lp]||0)+1;
+    summary.forEach(function(r){
+      agentFirstCall[r.agent_name]=r.first_call_date;
+      agentLastCall[r.agent_name]=r.last_call_date;
+    });
+    lpCounts.forEach(function(r){
+      lpHistoryCallCounts[r.lp]=r.call_count;
     });
   }).catch(function(){});
 }
