@@ -884,7 +884,6 @@ function loadAgents(){
       var d=JSON.parse(s);
       if(d.ov)d.ov.forEach(function(o){var a=agents.find(function(x){return x[0]===o.n;});if(a){a[2]=o.lp;if(o.pr!==undefined)a[7]=o.pr;}else if(o.added){agents.push([o.n,o.lv,o.lp,null,null,null,null,o.pr||false,0]);}});
       if(d.rm)d.rm.forEach(function(n){agents=agents.filter(function(a){return a[0]!==n;});});
-      if(d.up)d.up.forEach(function(u){var a=agents.find(function(x){return x[0]===u[0];});if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];}else{agents.push(u);}});
     }
   }catch(e){}
 }
@@ -1872,8 +1871,7 @@ function handleUpload(input){
         if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];if(!isActive(a))flagged++;updated++;}
         else{agents.push(u);added++;}
       });
-      try{var st=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");st.up=up;localStorage.setItem(STORAGE_KEY,JSON.stringify(st));}catch(e){}
-      res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged.";
+      res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged. (This session only — to make it permanent, send the new Power BI .xlsx to Claude to update the file.)";
       renderAdmin();
     }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
   };
