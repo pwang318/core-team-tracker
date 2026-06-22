@@ -858,7 +858,7 @@ function upsertCallLog(name,lp,note){
   setSyncStatus("saving");
   return sbFetch("POST","call_logs",data).then(function(){
     return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||""});
-  }).then(function(){setSyncStatus("live");}).catch(function(){setSyncStatus("error");});
+  }).then(function(){setSyncStatus("live");}).catch(function(e){setSyncStatus("error");console.error("Call log save failed for "+name+":",e);});
 }
 
 function deleteCallLog(name){
@@ -1981,7 +1981,7 @@ function upsertCallLogWithOutcome(name,lp,note,outcome,flagRm){
   setSyncStatus("saving");
   return sbFetch("POST","call_logs",data).then(function(){
     return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",flag_rm:fr});
-  }).then(function(){setSyncStatus("live");}).catch(function(){setSyncStatus("error");});
+  }).then(function(){setSyncStatus("live");}).catch(function(e){setSyncStatus("error");console.error("Call log save failed for "+name+":",e);});
 }
 
 function toggleRmFlag(btn){
