@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -826,7 +825,7 @@ function getLastWeekRotation(lp){
 function sbFetch(method,path,body){
   var opts={method:method,headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
   if(body)opts.body=JSON.stringify(body);
-  return fetch(SB_URL+"/rest/v1/"+path,opts).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});return r.status===204?null:r.json();});
+  return fetch(SB_URL+"/rest/v1/"+path,opts).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});return r.text().then(function(t){return t?JSON.parse(t):null;});});
 }
 
 function fetchWithTimeout(promise,ms){
