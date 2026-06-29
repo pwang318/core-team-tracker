@@ -82,6 +82,7 @@ body{font-family:'Inter',sans-serif;color:var(--text);font-size:14px;background:
 .call-info{flex:1;min-width:0}
 .call-name{font-weight:600;font-size:14px;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .priority-tag{background:#FEE2E2;color:#991b1b;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.carryover-tag{background:#fff3cd;color:#856404;border:1px solid #ffc107;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .bonus-tag{background:#dbeafe;color:#1e40af;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .call-meta{font-size:12px;color:var(--text-2);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .note-field{width:100%;margin-top:8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;resize:none;height:52px;transition:border-color .15s}
@@ -363,6 +364,7 @@ tr:hover td{background:var(--bg)}
       </div>
     </div>
     <div id="carryover-banner-el" class="carryover-banner" style="display:none"></div>
+    <div id="carryover-list-el" style="display:none;background:#fffdf5;border:1px solid #ffe08a;border-top:none;border-radius:0 0 8px 8px;margin-top:-0.75rem;margin-bottom:.75rem;padding:10px 14px"></div>
     <div id="monday-banner-el" class="monday-banner" style="display:none"></div>
     <div id="target-complete-el" class="target-complete-bar" style="display:none">&#127881; Target hit! You called your 15 this week. Agents below are sorted for next week.</div>
     <div id="streak-bar-el" class="streak-bar" style="display:none"></div>
@@ -735,7 +737,10 @@ function getLpIncompleteFromLastWeek(lp){
   return Math.max(0,WEEKLY_TARGET-lastWeekCalls);
 }
 function getLpTotalTargetThisWeek(lp){
-  return WEEKLY_TARGET+getLpIncompleteFromLastWeek(lp);
+  var raw=WEEKLY_TARGET+getLpIncompleteFromLastWeek(lp);
+  // Cap at the LP's active agent count - can't call more unique agents than exist
+  var activeCount=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
+  return Math.min(raw,Math.max(WEEKLY_TARGET,activeCount));
 }
 
 var weekKey=getWeekKey(TODAY);
@@ -813,8 +818,11 @@ function getRotation(lp){
   // Sort not-due by closest to being due next
   notDue.sort(function(a,b){return daysOverdue(b)-daysOverdue(a);});
 
-  // Priority agents always first, then overdue, then fill with closest-to-due
-  var combined=priority.concat(overdue).concat(notDue);
+  // CARRYOVER: pin last week's missed agents to the top so they can't be skipped again
+  var missedLastWeek=getLpMissedLastWeek(lp).filter(function(a){return isActive(a);});
+
+  // Priority first, then last week's misses, then overdue, then fill with closest-to-due
+  var combined=priority.concat(missedLastWeek).concat(overdue).concat(notDue);
   var seen={},res=[];
   for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
   return res;
@@ -1000,10 +1008,11 @@ function renderLP(lp){
   document.getElementById("lp-hero-name").textContent=lp+"'s calls this week";
   document.getElementById("lp-hero-sub").textContent=ac+" active / "+ic+" inactive"+(pc?" / "+pc+" priority":"");
   var done=getLpCallsThisWeek(lp);
-  var pct=Math.min(100,Math.round(done/WEEKLY_TARGET*100));
+  var heroTarget=getLpTotalTargetThisWeek(lp);
+  var pct=Math.min(100,Math.round(done/heroTarget*100));
   var bar=document.getElementById("lp-prog");
   bar.style.width=pct+"%";bar.style.background=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
-  document.getElementById("lp-prog-txt").textContent=done+"/"+WEEKLY_TARGET+(done>WEEKLY_TARGET?" 🎉":"");
+  document.getElementById("lp-prog-txt").textContent=done+"/"+heroTarget+(done>heroTarget?" 🎉":"");
   var mondayBanner=document.getElementById("monday-banner-el");
   if(mondayBanner){
     var day=TODAY.getDay();
@@ -1018,14 +1027,20 @@ function renderLP(lp){
   var incomplete=getLpIncompleteFromLastWeek(lp);
   var totalTarget=getLpTotalTargetThisWeek(lp);
   var carryEl=document.getElementById("carryover-banner-el");
+  var carryListEl=document.getElementById("carryover-list-el");
   if(carryEl){
     if(incomplete>0){
       carryEl.style.display="flex";
-      carryEl.innerHTML="⚠️ You have <b>"+incomplete+" incomplete call"+(incomplete>1?"s":"")+"</b> from last week. This week's target: <b>"+totalTarget+" total</b> ("+WEEKLY_TARGET+" new + "+incomplete+" carryover).";
+      carryEl.style.cursor="pointer";
+      carryEl.setAttribute("data-lp",lp);
+      carryEl.onclick=function(){toggleCarryoverList(this.getAttribute("data-lp"));};
+      carryEl.innerHTML="⚠️ You have <b>"+incomplete+" incomplete call"+(incomplete>1?"s":"")+"</b> from last week. This week's target: <b>"+totalTarget+" total</b> ("+WEEKLY_TARGET+" new + "+incomplete+" carryover). <span style=\"margin-left:auto;font-size:11px;font-weight:700;text-decoration:underline\">View not-called ▾</span>";
     } else {
       carryEl.style.display="none";
+      carryEl.onclick=null;
     }
   }
+  if(carryListEl){carryListEl.style.display="none";carryListEl.innerHTML="";}
   var targetEl=document.getElementById("target-complete-el");
   targetEl.style.display=done>=WEEKLY_TARGET?"flex":"none";
   var streak=calcStreak(lp);
@@ -1047,7 +1062,7 @@ function renderLP(lp){
   document.getElementById("lp-search-results").innerHTML="";
   var el=document.getElementById("lp-call-list"),html="";
   if(!rot.length){el.innerHTML='<div class="no-data">No active agents in rotation.</div>';return;}
-  var targetHit=done>=WEEKLY_TARGET;
+  var targetHit=done>=totalTarget;
   if(targetHit){
     // Target hit — only show who they called this week
     var calledAgents=rot.filter(function(a){return calledThisWeek(a[0]);});
@@ -1068,25 +1083,25 @@ function renderLP(lp){
     if(uncalledCount>0){
       html+='<div style="text-align:center;padding:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:8px">';
       html+='<div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:4px">'+uncalledCount+' agents not yet called this week</div>';
-      html+='<div style="font-size:12px;color:var(--text-3)">You hit your 15! Use search above to log any additional calls.</div>';
+      html+='<div style="font-size:12px;color:var(--text-3)">You hit your '+totalTarget+'! Use search above to log any additional calls.</div>';
       html+='</div>';
     }
   } else {
     // Before target — show called agents + top uncalled up to 15 total
     var calledThisWk=rot.filter(function(a){return calledThisWeek(a[0]);});
     var uncalledRot=rot.filter(function(a){return!calledThisWeek(a[0]);});
-    var slotsLeft=Math.max(0,WEEKLY_TARGET-calledThisWk.length);
+    var slotsLeft=Math.max(0,totalTarget-calledThisWk.length);
     var showList=calledThisWk.concat(uncalledRot.slice(0,slotsLeft));
     showList.forEach(function(a){html+=renderCallCard(a,lp,false);});
     var remaining=uncalledRot.length-slotsLeft;
     if(remaining>0){
       html+='<div style="text-align:center;padding:1rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-top:8px">';
-      html+='<div style="font-size:12px;color:var(--text-3)">'+remaining+' more agents — complete your 15 first, then they\'ll appear next week.</div>';
+      html+='<div style="font-size:12px;color:var(--text-3)">'+remaining+' more agents — complete your '+totalTarget+' first, then they\'ll appear next week.</div>';
       html+='</div>';
     }
   }
   el.innerHTML=html;
-  var toLoad=targetHit?rot:rot.slice(0,WEEKLY_TARGET);
+  var toLoad=targetHit?rot:rot.slice(0,totalTarget);
   toLoad.forEach(function(a){loadAgentContact(a[0],a[0].replace(/\s+/g,'_'));});
   if(targetHit){
     var allCalled2=Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey;});
@@ -1098,6 +1113,7 @@ function countWords(s){return s.trim().split(/\s+/).filter(function(w){return w.
 
 function renderCallCard(a,lp,isBonus){
   var called=calledThisWeek(a[0]),ds=effectiveDays(a),act=mostRecent(a),pri=isPriority(a);
+  var isCarryover=(typeof lastWeekLogs!=="undefined")&&!(lastWeekLogs[a[0]]&&lastWeekLogs[a[0]].week_key===lastWeekKey)&&getLastWeekRotation(a[2]).some(function(x){return x[0]===a[0];});
   var isPending=!!(pendingNote&&pendingNote[a[0]]);
   var log=callLogs[a[0]],note=log?log.note:"",outcome=log?log.outcome||"":"";
   var safeId=a[0].replace(/\s+/g,'_');
@@ -1147,6 +1163,7 @@ function renderCallCard(a,lp,isBonus){
   // Name row
   html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+a[0]+'</span>':a[0]);
   if(pri&&!called&&!isBonus)html+='<span class="priority-tag">PRIORITY</span>';
+  if(isCarryover&&!called&&!isBonus)html+='<span class="carryover-tag">CARRYOVER</span>';
   
   html+='</div>';
 
@@ -1744,6 +1761,52 @@ async function renderLpScorecardSummary(){
     el.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+thead+tbody+'</table></div>'
       +'<div style="font-size:10px;color:#aaa;margin-top:8px">Based on scorecard entries for the current week. LPs with no entries are omitted.</div>';
   }catch(e){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load scorecard data.</div>';}
+}
+
+function getLpMissedLastWeek(lp){
+  // Agents from last week's rotation that have NO call logged last week
+  var rot=getLastWeekRotation(lp);
+  return rot.filter(function(a){
+    var log=lastWeekLogs[a[0]];
+    return !(log&&log.week_key===lastWeekKey);
+  });
+}
+
+function toggleCarryoverList(lp){
+  var el=document.getElementById("carryover-list-el");
+  if(!el)return;
+  if(el.style.display!=="none"){el.style.display="none";el.innerHTML="";return;}
+  var missed=getLpMissedLastWeek(lp);
+  var html='<div style="font-size:11px;font-weight:700;color:#92600a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Not called last week ('+missed.length+')</div>';
+  if(!missed.length){
+    html+='<div style="font-size:12px;color:#92600a">Every agent in last week\'s rotation was called. The carryover number reflects rotation size vs. logged calls.</div>';
+  } else {
+    missed.forEach(function(a){
+      var calledNow=calledThisWeek(a[0]);
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f4e3b8">';
+      html+='<span style="font-weight:600;font-size:13px;flex:1'+(calledNow?';text-decoration:line-through;color:var(--text-3)':'')+'">'+escHtml(a[0])+'</span>';
+      html+='<span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
+      if(calledNow){
+        html+='<span style="font-size:11px;color:var(--green);font-weight:700">\u2713 Called this week</span>';
+      } else {
+        html+='<button class="btn btn-sm" data-name="'+escHtml(a[0])+'" data-lp="'+lp+'" onclick="carryoverQuickLog(this)" style="font-size:11px">Log call</button>';
+      }
+      html+='</div>';
+    });
+  }
+  el.innerHTML=html;
+  el.style.display="block";
+}
+
+function carryoverQuickLog(btn){
+  var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp");
+  // Open the same pending-note flow used by the main list, then scroll to the card
+  pendingNote[name]={draft:"",outcome:""};
+  renderLP(lp);
+  setTimeout(function(){
+    var card=document.querySelector('.note-field[data-name="'+name+'"]');
+    if(card){card.scrollIntoView({behavior:"smooth",block:"center"});card.focus();}
+  },120);
 }
 
 function renderCarryoverAlerts(){
@@ -2551,8 +2614,25 @@ function lpscRenderEditTable(){
     });
     html+='<td id="lpsc-edit-total-'+m.key+'" style="padding:8px 10px;text-align:center;font-size:13px;font-weight:700;border-bottom:1px solid #f0f2f8">'+total+' <span style="font-size:10px;color:#aaa">/'+m.goal+'</span></td></tr>';
   });
+  // TOTAL row across all metrics
+  var goalSum=metrics.reduce(function(s,m){return s+m.goal;},0);
+  html+='<tr style="background:#f8fafc"><td style="padding:9px 10px;font-size:13px;font-weight:800;border-top:2px solid #1F4E79">TOTAL</td>';
+  LPSC_DAYS.forEach(function(day){
+    var dayTot=metrics.reduce(function(s,m){return s+(parseInt(lpscEditData[m.key+"_"+day]||0)||0);},0);
+    html+='<td style="padding:9px 8px;text-align:center;font-size:12px;font-weight:700;border-top:2px solid #1F4E79;color:#475569">'+(dayTot||"")+'</td>';
+  });
+  html+='<td id="lpsc-edit-grandtotal" style="padding:9px 10px;text-align:center;border-top:2px solid #1F4E79">'+lpscEditTotalCell(goalSum)+'</td></tr>';
   html+="</tbody></table>";
   body.innerHTML=html;
+}
+
+function lpscEditTotalCell(goalSum){
+  var metrics=LPSC_METRICS_MAP[lpscCurrentLP];
+  var tot=metrics.reduce(function(s,m){return s+lpscGetTotal(m.key,lpscEditData);},0);
+  var pct=goalSum?tot/goalSum:0;
+  var color=pct>=1?"#1a5c2a":pct>=0.6?"#7a4f0a":"#555";
+  var bg=pct>=1?"#dcf5e3":pct>=0.6?"#fef3dc":"#f0f0f0";
+  return '<span style="display:inline-block;padding:4px 10px;border-radius:8px;font-size:14px;font-weight:800;background:'+bg+';color:'+color+'">'+tot+' / '+goalSum+' <span style="font-size:10px;font-weight:600">('+Math.round(pct*100)+'%)</span></span>';
 }
 
 function lpscEditInput(inp){
@@ -2565,6 +2645,9 @@ function lpscEditInput(inp){
     var total=lpscGetTotal(key,lpscEditData);
     document.getElementById("lpsc-edit-total-"+key).innerHTML=total+' <span style="font-size:10px;color:#aaa">/'+m.goal+'</span>';
   }
+  // refresh the TOTAL row (grand total + per-day column totals)
+  var gt=document.getElementById("lpsc-edit-grandtotal");
+  if(gt){var goalSum=metrics.reduce(function(s,x){return s+x.goal;},0);gt.innerHTML=lpscEditTotalCell(goalSum);}
 }
 
 async function lpscSaveEdit(){
@@ -2847,6 +2930,8 @@ async function lpscLoad(){
 
     var thead='<thead><tr><th style="background:#1F4E79;color:#fff;padding:9px 12px;text-align:left;font-size:11px;font-weight:600">Week</th>';
     metrics.forEach(function(m){thead+='<th style="background:#1F4E79;color:#fff;padding:9px 8px;text-align:center;font-size:11px;font-weight:600">'+m.label+'</th>';});
+    var lpscGoalSum=metrics.reduce(function(s,m){return s+m.goal;},0);
+    thead+='<th style="background:#16385c;color:#f0c84a;padding:9px 10px;text-align:center;font-size:11px;font-weight:700">TOTAL<br><span style="font-size:9px;color:#cbd5e1;font-weight:400">/ '+lpscGoalSum+'</span></th>';
     thead+="</tr></thead>";
 
     var tbody="<tbody>";
@@ -2854,10 +2939,16 @@ async function lpscLoad(){
       var label=lpscFmtRange(row.week_key);
       tbody+='<tr style="cursor:pointer" onclick=\'lpscShowDaily("'+row.week_key+'",'+JSON.stringify(row.data)+')\'>'
         +'<td style="padding:9px 12px;font-size:12px;font-weight:500;border-bottom:1px solid #f0f2f8;white-space:nowrap">'+label+'</td>';
+      var lpscRowTotal=0;
       metrics.forEach(function(m){
         var t=lpscGetTotal(m.key,row.data);
+        lpscRowTotal+=t;
         tbody+='<td style="padding:9px 8px;text-align:center;font-size:12px;border-bottom:1px solid #f0f2f8">'+t+" "+lpscPctBadge(t,m.goal)+'</td>';
       });
+      var lpscTotPct=lpscGoalSum?lpscRowTotal/lpscGoalSum:0;
+      var lpscTotColor=lpscTotPct>=1?"#1a5c2a":lpscTotPct>=0.6?"#7a4f0a":"#555";
+      var lpscTotBg=lpscTotPct>=1?"#dcf5e3":lpscTotPct>=0.6?"#fef3dc":"#f0f0f0";
+      tbody+='<td style="padding:9px 10px;text-align:center;font-size:13px;font-weight:700;border-bottom:1px solid #f0f2f8;border-left:2px solid #e2e8f0;background:'+lpscTotBg+';color:'+lpscTotColor+'">'+lpscRowTotal+' / '+lpscGoalSum+'<br><span style="font-size:10px;font-weight:600">'+Math.round(lpscTotPct*100)+'%</span></td>';
       tbody+="</tr>";
     });
     tbody+="</tbody>";
