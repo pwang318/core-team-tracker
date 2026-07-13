@@ -375,7 +375,7 @@ tr:hover td{background:var(--bg)}
       <div class="search-panel-title">&#128269; Search &amp; Log Any Agent</div>
       <p style="font-size:12px;color:#888;margin-bottom:.6rem">Search the full roster to log a call, add notes, or update contact info — regardless of assignment.</p>
       <div class="search-input-row">
-        <input type="text" id="lp-search-input" placeholder="Search any agent by name..." oninput="renderLpSearch()">
+        <input type="text" id="lp-search-input" placeholder="Search any agent by name..." oninput="renderLpSearch()" onfocus="renderLpSearch()">
       </div>
       <div class="search-results" id="lp-search-results"></div>
     </div>
@@ -547,6 +547,8 @@ tr:hover td{background:var(--bg)}
     <!-- INCOMPLETE CALLS CARRYOVER ALERTS -->
     <div id="d-carryover-section" style="margin-bottom:1rem"></div>
     <div id="d-alerts-section" style="margin-bottom:1rem"></div>
+    <!-- NOTE QUALITY FLAGS -->
+    <div id="d-note-quality-section" style="margin-bottom:1rem"></div>
 
     <div class="section-head">LP performance this week <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
     <div class="d-grid" id="d-grid"></div>
@@ -1034,7 +1036,8 @@ function renderLP(lp){
       carryEl.style.cursor="pointer";
       carryEl.setAttribute("data-lp",lp);
       carryEl.onclick=function(){toggleCarryoverList(this.getAttribute("data-lp"));};
-      carryEl.innerHTML="⚠️ You have <b>"+incomplete+" incomplete call"+(incomplete>1?"s":"")+"</b> from last week. This week's target: <b>"+totalTarget+" total</b> ("+WEEKLY_TARGET+" new + "+incomplete+" carryover). <span style=\"margin-left:auto;font-size:11px;font-weight:700;text-decoration:underline\">View not-called ▾</span>";
+      var actualCarryover=totalTarget-WEEKLY_TARGET;
+      carryEl.innerHTML="⚠️ You have <b>"+incomplete+" incomplete call"+(incomplete>1?"s":"")+"</b> from last week. This week's target: <b>"+totalTarget+" total</b> ("+WEEKLY_TARGET+" new + "+actualCarryover+" carryover"+(incomplete>actualCarryover?" — capped at your active roster":"")+"). <span style=\"margin-left:auto;font-size:11px;font-weight:700;text-decoration:underline\">View not-called ▾</span>";
     } else {
       carryEl.style.display="none";
       carryEl.onclick=null;
@@ -1195,7 +1198,7 @@ function renderCallCard(a,lp,isBonus){
   if(tagsHtml)html+='<div class="tags-row" style="margin-top:6px">'+tagsHtml+'</div>';
 
   // Last week note preview
-  if(lastNote&&lastNote.note)html+='<div class="last-note-preview"><span class="last-note-label">Last note · '+fmt(lastNote.call_date)+(lastNote.lp?' · '+lastNote.lp:'')+'</span>'+escHtml(lastNote.note)+'</div>';
+  if(lastNote&&lastNote.note)html+='<div class="last-note-preview"><span class="last-note-label">Last team note · '+fmt(lastNote.call_date)+(lastNote.lp?' · <span class="lp-tag lp-tag-'+lastNote.lp+'">'+lastNote.lp+'</span>':'')+'</span>'+escHtml(lastNote.note)+'</div>';
 
   // Talking points
   if(!called&&!isBonus){
@@ -1311,7 +1314,58 @@ function renderAgentHistory(name,containerId,records){
 function renderLpSearch(){
   var q=document.getElementById("lp-search-input").value.trim().toLowerCase();
   var el=document.getElementById("lp-search-results");
-  if(!q){el.innerHTML="";return;}
+  if(!q){
+    // Show all active agents sorted by overdue when field is focused but empty
+    var allActive=agents.filter(function(a){return isActive(a);}).slice();
+    allActive.sort(function(a,b){return daysOverdue(b)-daysOverdue(a);});
+    var results=allActive.slice(0,20);
+    if(!results.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">No active agents found.</div>';return;}
+    // fall through to render with these results
+    var h="";
+    results.forEach(function(a){
+      var called=calledThisWeek(a[0]);
+      var log=callLogs[a[0]],note=log?log.note:"";
+      var ds=effectiveDays(a);
+      var overdueDays=daysOverdue(a);
+      var tw=tierWindow(a);
+      var dsText="",dueLabel="";
+      if(ds===null){dsText="Never contacted";dueLabel="never called";}
+      else if(ds===0){dsText="Contacted today";}
+      else if(!calledThisWeek(a[0])){
+        if(overdueDays>=0){dsText=overdueDays+"d overdue";dueLabel=a[1]+"-tier — call every "+tw+"d";}
+        else{dsText="Due in "+Math.abs(overdueDays)+"d";dueLabel=a[1]+"-tier — call every "+tw+"d";}
+      }else{dsText=ds+"d since last touch";}
+      var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:"Unassigned";
+      var histId="hist-"+a[0].replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"");
+      h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px">';
+      h+='<div style="display:flex;align-items:flex-start;gap:12px">';
+      h+='<button class="check-btn'+(called?" checked":"")+'" style="width:36px;height:36px;flex-shrink:0;margin-top:2px" data-name="'+a[0]+'" data-lp="'+currentUser+'" onclick="toggleCallFromCard(this);setTimeout(function(){agentHistoryCache={};renderLpSearch();},400)">';
+      h+=(called?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>');
+      h+='</button>';
+      h+='<div style="flex:1;min-width:0">';
+      h+='<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+a[0]+'</span>':a[0])+'</div>';
+      h+='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px">';
+      h+='<span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
+      h+='<span class="lp-tag lp-tag-'+assignedLp+'">'+assignedLp+'</span>';
+      h+='<span style="font-size:11px;color:'+(ds===null||overdueDays>=0?'var(--red)':'var(--text-2)')+'">'+dsText+'</span>';
+      if(!isActive(a))h+='<span class="badge badge-inactive">Inactive</span>';
+      h+='</div>';
+      if(called&&note)h+='<div style="background:#faf9ff;border-left:3px solid #a78bfa;border-radius:0 6px 6px 0;padding:5px 9px;font-size:11px;color:var(--text-2);font-style:italic;margin-bottom:6px">"'+ escHtml(note)+'"</div>';
+      h+='</div>';
+      h+='<button class="btn btn-sm" data-agent-name="'+escHtml(a[0])+'" onclick="var n=this.getAttribute(\"data-agent-name\");openLpContactModal(n)" style="font-size:11px;flex-shrink:0">Edit</button>';
+      h+='</div>';
+      h+='<div style="margin-top:10px;border-top:1px solid var(--border-light);padding-top:8px">';
+      h+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Call History</div>';
+      h+='<div id="'+histId+'"><div style="font-size:11px;color:var(--text-3)">Loading...</div></div>';
+      h+='</div></div>';
+    });
+    el.innerHTML=h;
+    results.forEach(function(a){
+      var histId="hist-"+a[0].replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"");
+      loadAgentHistory(a[0],histId);
+    });
+    return;
+  }
   var results=agents.filter(function(a){return a[0].toLowerCase().indexOf(q)>=0;}).slice(0,8);
   if(!results.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">No agents found.</div>';return;}
   var h="";
@@ -1328,7 +1382,7 @@ function renderLpSearch(){
     dueLabel="never called";
   } else if(ds===0){
     dsText="Contacted today";
-  } else if(!calledThisWeek(a[0])&&!isBonus){
+  } else if(!calledThisWeek(a[0])){
     if(overdueDays>=0){
       dsText=overdueDays+"d overdue";
       dueLabel=a[1]+"-tier — call every "+tw+"d";
@@ -1831,8 +1885,62 @@ function renderCarryoverAlerts(){
   el.innerHTML=html;
 }
 
+function renderNoteQuality(){
+  var el=document.getElementById("d-note-quality-section");
+  if(!el)return;
+
+  // Detect low-quality notes: unique word count < 6 OR any word repeated 4+ times
+  function isLowQuality(note){
+    if(!note||!note.trim())return false; // empty handled elsewhere
+    var words=note.trim().toLowerCase().split(/\s+/).filter(function(w){return w.length>0;});
+    if(words.length<3)return true; // too short
+    var unique=new Set(words).size;
+    if(unique<6)return true; // not enough different words
+    var freq={};
+    words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
+    var maxRep=Math.max.apply(null,Object.values(freq));
+    if(maxRep>=4)return true; // same word repeated 4+ times
+    return false;
+  }
+
+  var flags=[];
+  Object.values(callLogs).forEach(function(log){
+    if(log.week_key!==weekKey)return;
+    if(isLowQuality(log.note)){
+      flags.push({lp:log.lp,agent:log.agent_name,note:log.note||"",date:log.call_date});
+    }
+  });
+
+  if(!flags.length){
+    el.innerHTML='';
+    return;
+  }
+
+  var html='<div style="background:var(--surface);border:1px solid #fde68a;border-radius:10px;overflow:hidden;margin-bottom:1rem">'
+    +'<div style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em">⚠️ Note Quality Flags — '+flags.length+' this week</div>'
+    +'<div style="font-size:10px;color:#b45309;font-weight:500">Low-effort or repetitive notes</div>'
+    +'</div>';
+
+  flags.forEach(function(f){
+    var noteDisplay=f.note?'"'+escHtml(f.note)+'"':'<span style="color:#dc2626;font-style:italic">No note</span>';
+    html+='<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 16px;border-bottom:1px solid #fef3c7">'
+      +'<span class="lp-tag lp-tag-'+f.lp+'" style="flex-shrink:0;margin-top:2px">'+f.lp+'</span>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">'+escHtml(f.agent)+'</div>'
+      +'<div style="font-size:11px;color:#92400e;font-style:italic;word-break:break-word">'+noteDisplay+'</div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--text-3);flex-shrink:0;white-space:nowrap">'+fmt(f.date)+'</div>'
+      +'</div>';
+  });
+
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 function renderDaniel(){
   renderCarryoverAlerts();
+  renderNoteQuality();
   renderAlerts();
   renderGrowthScoreboard();
   renderRmSummary();
@@ -2065,9 +2173,15 @@ function loadVelocifyLeads(){
 }
 
 function loadPrevNotes(){
-  return sbFetch("GET","call_logs?week_key=eq."+lastWeekKey+"&select=agent_name,note,call_date,lp&limit=500").then(function(res){
+  // Load most recent note for every agent from full history, any LP, any week
+  return sbFetch("GET","call_logs_history?select=agent_name,note,call_date,lp&order=call_date.desc&limit=2000").then(function(res){
     prevNotes={};
-    if(res)res.forEach(function(r){if(r.note&&r.note.trim())prevNotes[r.agent_name]={note:r.note,call_date:r.call_date,lp:r.lp};});
+    if(res)res.forEach(function(r){
+      // Keep only the most recent note per agent (first one seen since sorted desc)
+      if(r.note&&r.note.trim()&&!prevNotes[r.agent_name]){
+        prevNotes[r.agent_name]={note:r.note,call_date:r.call_date,lp:r.lp};
+      }
+    });
   }).catch(function(){});
 }
 
