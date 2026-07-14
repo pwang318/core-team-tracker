@@ -2526,6 +2526,17 @@ function renderLeadPipelinePanels(raw){
     s+='<div style="text-align:center"><div style="color:#f0c84a;font-size:16px;font-weight:700">'+totals.file_starts_mtd+'</div><div style="color:#93c5fd;font-size:9px">FILES MTD</div></div>';
     s+='</div></div>';
 
+    // Column header row
+    s+='<div style="display:flex;align-items:center;gap:8px;padding:5px 16px;background:#f8fafc;border-bottom:1px solid var(--border-light)">';
+    s+='<span style="font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;width:52px">LP</span>';
+    s+='<span style="font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;width:20px;text-align:center">Day</span>';
+    s+='<span style="font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;width:20px;text-align:center">WTD</span>';
+    s+='<span style="font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;width:28px;text-align:center">MTD</span>';
+    s+='<span style="font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;width:28px;text-align:center">YTD</span>';
+    s+='<span style="font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;width:36px;text-align:center">Files</span>';
+    s+='<span style="font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Lead→File %</span>';
+    s+='</div>';
+
     // Per-LP rows
     ["Gavin","Karen","Osgood","Jordan","Said"].forEach(function(lp){
       var r=lps[lp];
@@ -2542,7 +2553,7 @@ function renderLeadPipelinePanels(raw){
       s+=(ltf>0?'<span style="font-size:10px;background:'+(ltf>=20?"#dcfce7":ltf>=10?"#fef3c7":"#fee2e2")
         +';color:'+(ltf>=20?"#15803d":ltf>=10?"#92400e":"#991b1b")+';padding:2px 7px;border-radius:4px">'+ltf+'% lead-to-file</span>':'');
       var quietId='quiet-'+lp;
-      s+=(quietCount>0?'<span style="font-size:10px;color:#991b1b;margin-left:auto;cursor:pointer;text-decoration:underline" onclick="var el=document.getElementById(\"'+quietId+'\");el.style.display=el.style.display===\"none\"?\"block\":\"none\"">'+quietCount+' agent'+(quietCount>1?'s':'')+' gone quiet ▾</span>':'<span style="font-size:10px;color:var(--text-3);margin-left:auto">'+r.agents_mtd.size+' agents active</span>');
+      s+=(quietCount>0?'<span style="font-size:10px;color:#991b1b;margin-left:auto;cursor:pointer;text-decoration:underline" data-qid="'+quietId+'" onclick="toggleQuiet(this.getAttribute(\'data-qid\'))">'+quietCount+' agent'+(quietCount>1?'s':'')+' gone quiet ▾</span>':'<span style="font-size:10px;color:var(--text-3);margin-left:auto">'+r.agents_mtd.size+' agents active</span>');
       s+='</div>';
       if(quietCount>0){
         s+='<div id="'+quietId+'" style="display:none;margin-top:6px;padding:6px 0;border-top:1px solid var(--border-light)">';
@@ -2561,9 +2572,7 @@ function renderLeadPipelinePanels(raw){
       }
       s+='</div>';
     });
-    s+='<div style="display:flex;gap:20px;padding:6px 16px;background:var(--bg);font-size:9px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">';
-    s+='<span style="width:52px"></span><span style="width:20px">DAY</span><span style="width:20px">WTD</span><span style="width:28px">MTD</span><span style="width:28px">YTD</span>';
-    s+='</div></div>';
+    s+='</div>';
     summaryEl.innerHTML=s;
   }
 
@@ -2617,6 +2626,11 @@ function renderLeadPipelinePanels(raw){
     f+='</div>';
     fullEl.innerHTML=f;
   }
+}
+
+function toggleQuiet(id){
+  var el=document.getElementById(id);
+  if(el)el.style.display=el.style.display==="none"?"block":"none";
 }
 
 function goToLP(lp){
@@ -3312,6 +3326,8 @@ loadAgents();
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-daniel").classList.add("active");
   if(danielBtn)danielBtn.classList.add("active");
+  // Render Daniel after a tick so all data vars are initialized
+  setTimeout(function(){renderDaniel();loadLeadPipeline();},100);
 })();
 loadCallLogs();
 
