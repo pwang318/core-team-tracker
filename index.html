@@ -48,6 +48,7 @@ body{font-family:'Inter',sans-serif;color:var(--text);font-size:14px;background:
 .wb-Daniel.active{background:#f5f3ff;border-color:#6d28d9;color:#6d28d9}
 .wb-RM.active{background:#f0fdf4;border-color:#15803d;color:#15803d}
 .wb-Admin.active{background:#fff7ed;border-color:#c2410c;color:#c2410c}
+.wb-Leads.active{background:#eff6ff;border-color:#1d4ed8;color:#1d4ed8}
 
 .view{display:none}.view.active{display:block}
 
@@ -309,6 +310,87 @@ tr:hover td{background:var(--bg)}
   #lpsc-summary{grid-template-columns:repeat(3,1fr)!important}
   .scorecard,#lpsc-table-wrap,#lpsc-charts>div{break-inside:avoid;page-break-inside:avoid}
 }
+
+/* ══════════════════════════════════════════════════════
+   MOBILE — LP workflow optimized for 390px screens
+   ══════════════════════════════════════════════════════ */
+@media(max-width:600px){
+  /* Tighter app padding */
+  .app{padding:.75rem .75rem 5rem}
+  .app-header{padding:.75rem 0 .5rem}
+
+  /* Who bar — horizontal scroll instead of wrapping */
+  .who-bar{padding:.5rem .75rem;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .who-bar::-webkit-scrollbar{display:none}
+  .who-btn{flex-shrink:0;padding:8px 14px;font-size:13px}
+
+  /* LP hero — stack vertically */
+  .lp-hero{padding:1rem}
+  .lp-hero-top{flex-direction:column;gap:10px}
+  .prog-wrap{width:100%}
+  .prog-track{flex:1}
+  .prog-txt{font-size:16px}
+  .lp-hero-name{font-size:18px}
+
+  /* Banners — full width readable */
+  .carryover-banner,.monday-banner,.streak-bar,
+  .priority-banner,.inactive-banner,.bday-banner,.target-complete-bar{
+    font-size:13px;padding:11px 13px;border-radius:8px
+  }
+
+  /* Call cards — easier to tap */
+  .call-card{padding:.85rem;gap:10px}
+  .check-btn{width:48px;height:48px;flex-shrink:0} /* Apple HIG 44px min */
+  .call-name{font-size:15px}
+  .call-meta{font-size:12px;gap:8px}
+
+  /* Outcome buttons — 2x2 grid, big tap targets */
+  .outcome-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .outcome-btn{padding:11px 8px;font-size:12px;text-align:center;border-radius:8px}
+
+  /* Note textarea — taller on mobile */
+  .note-field{height:90px;font-size:14px}
+
+  /* Save button — full width sticky feel */
+  .call-card .btn-primary[onclick*="tryConfirmCall"]{
+    width:100%;padding:13px;font-size:14px;border-radius:8px;margin-top:10px
+  }
+
+  /* Search panel */
+  .search-panel{padding:.85rem}
+  .search-panel-title{font-size:13px}
+  #lp-search-input{font-size:16px;padding:10px 13px} /* 16px prevents iOS zoom */
+
+  /* Section heads */
+  .section-head{font-size:11px}
+
+  /* Daniel cards — single column */
+  .d-grid{grid-template-columns:1fr 1fr}
+  .d-card{padding:.85rem}
+  .d-pct{font-size:24px}
+
+  /* Tables — horizontal scroll */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:500px}
+
+  /* Scorecards top btn */
+  #scorecardsTopBtn{font-size:11px;padding:5px 10px}
+
+  /* Admin forms */
+  .form-row{flex-direction:column}
+
+  /* Contact modal */
+  .contact-modal-box{padding:18px}
+
+  /* Daniel tab bar */
+  .d-tab{padding:9px 14px;font-size:12px}
+
+  /* RM view period buttons */
+  #view-rm .lpsc-period-btn-light{padding:7px 12px;font-size:12px}
+
+  /* Note quality / carryover panels in Daniel */
+  #d-note-quality-section>div,#d-carryover-section>div{border-radius:8px}
+}
 </style>
 </head>
 <body>
@@ -331,6 +413,7 @@ tr:hover td{background:var(--bg)}
   <button class="who-btn wb-Jordan" onclick="selectUser(this,'Jordan')">Jordan</button>
   <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
   <button class="who-btn wb-RM" onclick="openRmView(this)">Relationship Manager</button>
+  <button class="who-btn wb-Leads" onclick="openLeadsView(this)">Referral Leads</button>
   <button class="who-btn wb-Daniel" onclick="selectUser(this,'Daniel')">Management</button>
   <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button>
 </div>
@@ -523,67 +606,74 @@ tr:hover td{background:var(--bg)}
 <!-- DANIEL VIEW -->
 <div id="view-daniel" class="view">
   <div class="d-tab-bar">
-    <div class="d-tab active" onclick="switchDanielTab('dashboard',this)">Dashboard</div>
-    <div class="d-tab" onclick="switchDanielTab('referral-leads',this)">Referral Leads <span id="d-tab-badge" style="display:none;background:var(--red-light);color:var(--red);border:1px solid var(--red-border);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:6px"></span></div>
+    <div class="d-tab active" onclick="switchDanielTab4('today',this)">Today</div>
+    <div class="d-tab" onclick="switchDanielTab4('week',this)">This week</div>
+    <div class="d-tab" onclick="switchDanielTab4('pipeline',this)">Pipeline</div>
+    <div class="d-tab" onclick="switchDanielTab4('agents',this)">Agents</div>
   </div>
 
-  <!-- DASHBOARD PANEL -->
-  <div id="d-tab-dashboard" class="d-tab-panel active">
+  <!-- TAB: TODAY -->
+  <div id="d-tab4-today" class="d-tab-panel active">
+    <div id="d-carryover-section" style="margin-bottom:1rem"></div>
+    <div id="d-alerts-section" style="margin-bottom:1rem"></div>
+    <div id="d-note-quality-section" style="margin-bottom:1rem"></div>
+    <div class="section-head">LP calls this week <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
+    <div class="d-grid" id="d-grid"></div>
+    <div class="section-head" style="margin-top:1rem">Birthdays this week</div>
+    <div id="daniel-bday-list" style="margin-bottom:1rem"></div>
+  </div>
+
+  <!-- TAB: THIS WEEK -->
+  <div id="d-tab4-week" class="d-tab-panel">
     <div class="scorecard">
       <div class="sc-header" onclick="toggleSC('tw-body','tw-chev')">
         <div class="sc-title">This week <span style="font-size:11px;font-weight:400;color:var(--text-3)" id="tw-lbl"></span><div class="pills" id="tw-pills"></div></div>
-        <span id="tw-chev" style="font-size:13px;color:var(--text-3)">▾</span>
+        <span id="tw-chev" style="font-size:13px;color:var(--text-3)">&#9662;</span>
       </div>
       <div id="tw-body" style="display:none;border-top:1px solid var(--border-light);padding:.9rem 1.25rem"><div id="tw-content"></div></div>
     </div>
     <div class="scorecard">
       <div class="sc-header" onclick="toggleSC('lw-body','lw-chev')">
         <div class="sc-title">Last week <span style="font-size:11px;font-weight:400;color:var(--text-3)" id="lw-lbl"></span><div class="pills" id="lw-pills"></div></div>
-        <span id="lw-chev" style="font-size:13px;color:var(--text-3)">▾</span>
+        <span id="lw-chev" style="font-size:13px;color:var(--text-3)">&#9662;</span>
       </div>
       <div id="lw-body" style="display:none;border-top:1px solid var(--border-light);padding:.9rem 1.25rem"><div id="lw-content"></div></div>
     </div>
-    <!-- NEEDS ATTENTION ALERTS -->
-    <!-- INCOMPLETE CALLS CARRYOVER ALERTS -->
-    <div id="d-carryover-section" style="margin-bottom:1rem"></div>
-    <div id="d-alerts-section" style="margin-bottom:1rem"></div>
-    <!-- NOTE QUALITY FLAGS -->
-    <div id="d-note-quality-section" style="margin-bottom:1rem"></div>
-
-    <div class="section-head">LP performance this week <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
-    <div class="d-grid" id="d-grid"></div>
-
-    <!-- GROWTH SCOREBOARD -->
-    <div class="section-head" style="margin-top:1rem">Growth scoreboard <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">— active agent goals</span></div>
-    <div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div>
-
-    <!-- RM SUMMARY -->
-    <div class="section-head" style="margin-top:1rem">Amanda — this week</div>
+    <div class="section-head" style="margin-top:.5rem">Amanda &#8212; this week</div>
     <div id="d-rm-summary" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem">
       <div style="text-align:center;padding:12px;color:#aaa;font-size:13px">Loading...</div>
     </div>
-
-    <!-- LP SCORECARD SUMMARY -->
-    <div class="section-head" style="margin-top:1rem">LP scorecard summary <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">— this week</span></div>
+    <div class="section-head">LP scorecard summary</div>
     <div id="d-lp-scorecard-summary" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem">
       <div style="text-align:center;padding:12px;color:#aaa;font-size:13px">Loading...</div>
     </div>
-
-    <div class="section-head" style="margin-top:1rem">All-time leaderboard <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">— based on full call history</span></div>
-    <div id="leaderboard"></div>
-    <div class="section-head" style="margin-top:1rem">Velocify lead leaderboard <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">— updates when Zap is live</span></div>
-    <div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading Velocify data...</div></div>
-    <div class="section-head" style="margin-top:1rem">Birthdays this week</div>
-    <div id="daniel-bday-list" style="margin-bottom:1rem"></div>
-    <div class="section-head" style="margin-top:1rem">Weekly Teams summary</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem">
+    <div class="section-head">Weekly Teams summary</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem">
       <p style="font-size:12px;color:var(--text-2);margin-bottom:.75rem">Copy and paste into your Core Team channel every Monday.</p>
       <div class="teams-msg-box" id="teams-message"></div>
       <button class="btn btn-primary btn-sm" onclick="copyTeamsMsg()" style="margin-top:.75rem">Copy message</button>
       <span id="copy-confirm" style="font-size:12px;color:#15803d;margin-left:8px;display:none">Copied!</span>
     </div>
-    <div class="section-head" style="margin-top:1rem">Full roster
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
+  </div>
+
+  <!-- TAB: PIPELINE -->
+  <div id="d-tab4-pipeline" class="d-tab-panel">
+    <div id="d-churn-risk-section" style="margin-bottom:1rem"></div>
+    <div id="d-lp-effectiveness-section" style="margin-bottom:1rem"></div>
+    <div class="section-head">Growth scoreboard</div>
+    <div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div>
+    <div class="section-head">Velocify lead leaderboard</div>
+    <div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading...</div></div>
+    <div class="section-head" style="margin-top:1rem">All-time leaderboard</div>
+    <div id="leaderboard"></div>
+  </div>
+
+  <!-- TAB: AGENTS -->
+  <div id="d-tab4-agents" class="d-tab-panel">
+    <div id="d-activation-section" style="margin-bottom:1rem"></div>
+    <div id="d-tier-upgrade-section" style="margin-bottom:1rem"></div>
+    <div class="section-head">Full roster
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
         <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
         <select id="d-lvl" onchange="renderDaniel()"><option value="">All levels</option><option>A</option><option>B</option><option>C</option></select>
         <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
@@ -593,64 +683,67 @@ tr:hover td{background:var(--bg)}
     <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last LP call</th><th>Last activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
   </div>
 
-  <!-- REFERRAL LEADS PANEL -->
-  <div id="d-tab-referral-leads" class="d-tab-panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <div style="font-size:11px;color:var(--text-3)" id="ref-last-updated">Loading...</div>
-      <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">↻ Refresh</button>
+</div>
+<!-- REFERRAL LEADS VIEW (standalone) -->
+<div id="view-leads" class="view">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+    <div style="font-size:18px;font-weight:700;color:var(--text)">Referral Leads</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font-size:11px;color:var(--text-3)" id="ref-last-updated-v2">Loading...</div>
+      <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">&#8635; Refresh</button>
     </div>
-    <div class="ref-stat-grid">
-      <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts">--</div></div>
-      <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf">--</div></div>
-      <div class="ref-stat-card urgent"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch">--</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem">
+    <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads-v2">--</div></div>
+    <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts-v2">--</div></div>
+    <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf-v2">--</div></div>
+    <div class="ref-stat-card urgent"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch-v2">--</div></div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.75rem;align-items:center">
+    <span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Status:</span>
+    <span class="ref-badge rs-started ref-filter-btn" onclick="toggleRefFilter('status','File Started',this)" style="cursor:pointer">File Started</span>
+    <span class="ref-badge rs-contact ref-filter-btn" onclick="toggleRefFilter('status','Contact Attempt',this)" style="cursor:pointer">Contact Attempt</span>
+    <span class="ref-badge rs-nurture ref-filter-btn" onclick="toggleRefFilter('status','Nurture',this)" style="cursor:pointer">Nurture</span>
+    <span class="ref-badge rs-contacted ref-filter-btn" onclick="toggleRefFilter('status','Contacted',this)" style="cursor:pointer">Contacted</span>
+    <span class="ref-badge rs-withdrawn ref-filter-btn" onclick="toggleRefFilter('status','App Withdrawn',this)" style="cursor:pointer">App Withdrawn</span>
+    <span class="ref-badge rs-other ref-filter-btn" onclick="toggleRefFilter('status','Other',this)" style="cursor:pointer">Other</span>
+    <button class="btn btn-sm" onclick="clearRefFilters()" style="font-size:10px;margin-left:4px">Clear</button>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;align-items:center">
+    <span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP:</span>
+    <span class="lp-tag lp-tag-Gavin ref-filter-btn" onclick="toggleRefFilter('lp','Gavin',this)" style="cursor:pointer">Gavin</span>
+    <span class="lp-tag lp-tag-Karen ref-filter-btn" onclick="toggleRefFilter('lp','Karen',this)" style="cursor:pointer">Karen</span>
+    <span class="lp-tag lp-tag-Osgood ref-filter-btn" onclick="toggleRefFilter('lp','Osgood',this)" style="cursor:pointer">Osgood</span>
+    <span class="lp-tag lp-tag-Jordan ref-filter-btn" onclick="toggleRefFilter('lp','Jordan',this)" style="cursor:pointer">Jordan</span>
+    <span class="lp-tag lp-tag-Said ref-filter-btn" onclick="toggleRefFilter('lp','Said',this)" style="cursor:pointer">Said</span>
+  </div>
+  <div class="ref-section urgent" id="ref-needs-touch-section-v2" style="display:none">
+    <div class="ref-section-header">
+      <div><div class="ref-section-title">Needs contact today</div><div class="ref-section-subtitle">No touch in 24+ hours</div></div>
+      <span class="ref-section-count" id="ref-needs-touch-count-v2">0 leads</span>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.75rem;align-items:center">
-      <span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Filter by status:</span>
-      <span class="ref-badge rs-started ref-filter-btn" onclick="toggleRefFilter('status','File Started',this)" style="cursor:pointer">File Started</span>
-      <span class="ref-badge rs-contact ref-filter-btn" onclick="toggleRefFilter('status','Contact Attempt',this)" style="cursor:pointer">Contact Attempt</span>
-      <span class="ref-badge rs-nurture ref-filter-btn" onclick="toggleRefFilter('status','Nurture',this)" style="cursor:pointer">Nurture</span>
-      <span class="ref-badge rs-contacted ref-filter-btn" onclick="toggleRefFilter('status','Contacted',this)" style="cursor:pointer">Contacted</span>
-      <span class="ref-badge rs-withdrawn ref-filter-btn" onclick="toggleRefFilter('status','App Withdrawn',this)" style="cursor:pointer">App Withdrawn</span>
-      <span class="ref-badge rs-other ref-filter-btn" onclick="toggleRefFilter('status','Other',this)" style="cursor:pointer">Other</span>
-      <button class="btn btn-sm" onclick="clearRefFilters()" style="font-size:10px;margin-left:4px">Clear</button>
+    <div id="ref-needs-touch-table-v2"></div>
+  </div>
+  <div class="ref-section">
+    <div class="ref-section-header">
+      <div><div class="ref-section-title">Today &#8212; <span id="ref-today-label-v2"></span></div></div>
+      <span class="ref-section-count" id="ref-today-count-v2">0 leads</span>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;align-items:center">
-      <span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Filter by LP:</span>
-      <span class="lp-tag lp-tag-Gavin ref-filter-btn" onclick="toggleRefFilter('lp','Gavin',this)" style="cursor:pointer">Gavin</span>
-      <span class="lp-tag lp-tag-Karen ref-filter-btn" onclick="toggleRefFilter('lp','Karen',this)" style="cursor:pointer">Karen</span>
-      <span class="lp-tag lp-tag-Osgood ref-filter-btn" onclick="toggleRefFilter('lp','Osgood',this)" style="cursor:pointer">Osgood</span>
-      <span class="lp-tag lp-tag-Jordan ref-filter-btn" onclick="toggleRefFilter('lp','Jordan',this)" style="cursor:pointer">Jordan</span>
-      <span class="lp-tag lp-tag-Said ref-filter-btn" onclick="toggleRefFilter('lp','Said',this)" style="cursor:pointer">Said</span>
+    <div id="ref-today-table-v2"></div>
+  </div>
+  <div class="ref-section">
+    <div class="ref-section-header">
+      <div><div class="ref-section-title">Prior Day &#8212; <span id="ref-prior-label-v2"></span></div></div>
+      <span class="ref-section-count" id="ref-prior-day-count-v2">0 leads</span>
     </div>
-    <div class="ref-section urgent" id="ref-needs-touch-section" style="display:none">
-      <div class="ref-section-header">
-        <div><div class="ref-section-title">Needs contact today</div><div class="ref-section-subtitle">No touch in 24+ hours — action required</div></div>
-        <span class="ref-section-count" id="ref-needs-touch-count">0 leads</span>
-      </div>
-      <div id="ref-needs-touch-table"></div>
+    <div id="ref-prior-table-v2"></div>
+  </div>
+  <div class="ref-section">
+    <div class="ref-section-header">
+      <div><div class="ref-section-title">All unconverted &#8212; MTD</div><div class="ref-section-subtitle">Not yet a file start</div></div>
+      <span class="ref-section-count" id="ref-uncovered-count-v2">0 leads</span>
     </div>
-    <div class="ref-section">
-      <div class="ref-section-header">
-        <div><div class="ref-section-title">Today — <span id="ref-today-label"></span></div></div>
-        <span class="ref-section-count" id="ref-today-count">0 leads</span>
-      </div>
-      <div id="ref-today-table"></div>
-    </div>
-    <div class="ref-section">
-      <div class="ref-section-header">
-        <div><div class="ref-section-title">Prior Day — <span id="ref-prior-label"></span></div></div>
-        <span class="ref-section-count" id="ref-prior-day-count">0 leads</span>
-      </div>
-      <div id="ref-prior-table"></div>
-    </div>
-    <div class="ref-section">
-      <div class="ref-section-header">
-        <div><div class="ref-section-title">All unconverted — MTD</div><div class="ref-section-subtitle">Not yet a file start</div></div>
-        <span class="ref-section-count" id="ref-uncovered-count">0 leads</span>
-      </div>
-      <div id="ref-uncovered-table"></div>
-    </div>
+    <div id="ref-uncovered-table-v2"></div>
   </div>
 </div>
 <!-- ADMIN VIEW -->
@@ -750,9 +843,129 @@ var lastWeekKey=getLastWeekKey(TODAY);
 var agents=[],callLogs={},lastWeekLogs={},currentUser=null,noteTimers={},contactCache={},editingLpContact=null,pendingNote={};
 var referralLeadsCache=null;
 
-var SEED=[["AIMEE WHITLOCK","C","Gavin",null,"2025-01-14","2026-02-10","2026-04-15",false,0],["ALEXIS REED","C","Said","2026-07-06","2026-07-07","2026-01-30","2026-02-27",false,0],["AMY AGRESTA","C","Gavin","2026-06-16","2026-06-16","2025-07-08","2025-08-05",false,0],["ANA SORIA","C","Karen","2026-04-19",null,null,null,false,0],["ANGELA PEREZ","C","Gavin","2026-04-27","2026-05-06","2026-04-06","2026-04-24",false,0],["ANGELA POTTS","C","Osgood","2026-05-10","2026-05-10",null,null,false,0],["ANGELIQUE SOTONDJI","C","Jordan","2026-03-27","2026-03-27",null,null,false,0],["ANNIE MORENO","B","Karen","2026-06-17","2026-06-18","2026-05-11","2026-06-12",false,0],["ASHLEY HENRY","C","Osgood","2026-04-22","2026-04-21",null,null,false,0],["AVA LAIRD","C","Jordan","2026-07-09","2026-07-09",null,null,false,0],["BAILEY STRATHIE","C","Osgood","2026-05-30","2026-05-30","2024-11-21",null,false,0],["BENJAMIN GAYTAN","C","Gavin","2026-05-16","2026-05-22",null,null,false,0],["BRAD GILLIAM","C","Gavin","2026-05-14",null,null,null,false,0],["BRANDON KIDD","C","Said","2026-05-01",null,null,null,false,0],["BRANDON MCCLENDON","C","Said","2026-06-08","2026-06-08",null,null,false,0],["BRANDON THOMPSON","A","Osgood","2026-07-10","2026-07-12","2026-05-04","2026-06-01",false,0],["BRIAN NANTHAVONGDOUANGSY","C","Osgood","2025-10-23","2025-11-19","2025-12-18","2026-03-20",false,0],["BRIAN ZINN","C","Jordan","2026-07-09","2026-07-09",null,null,false,0],["BRITNEY DODDS","C","Gavin","2026-03-26","2026-03-26","2026-03-02","2026-04-08",false,0],["CAROLE MCMAHON","C","Osgood","2026-05-31","2026-05-31","2026-05-08","2026-05-26",false,0],["CELINE WILLIAMS","C","Jordan","2026-06-01",null,null,null,false,0],["CESIA ESPINOZA YOUNG","C","Karen","2026-03-11","2026-03-10","2026-03-26","2026-04-17",false,0],["CHELSEA ANDERSON","C","Osgood","2026-02-07","2026-02-06","2026-03-28","2026-04-17",false,0],["CHERYL KINSEY","C","Jordan","2026-05-05","2026-05-04",null,null,false,0],["CHRIS REED","A","Said","2026-07-01","2026-07-01","2026-07-08","2026-06-26",false,0],["CHRISTIAN CHALKIAS","C","Osgood","2026-07-08","2026-04-08",null,null,false,0],["CHRISTINA COUGHLIN","C","Osgood","2026-05-29","2026-05-29","2026-07-10",null,false,0],["CHUCK KINSEY","C","Jordan","2026-03-16","2026-03-26",null,null,false,0],["CINDA ERICKSON","B","Gavin","2026-04-23","2026-04-21","2026-02-24","2026-03-26",false,0],["CLAUDIA CHUECO","C","Karen","2026-07-02",null,null,null,false,0],["CODA GAHRIS","C","Jordan","2026-04-29","2026-04-29","2026-05-25",null,false,0],["CONNER KOCHANSKY","A","Gavin","2026-07-10","2026-07-10","2026-06-22","2026-07-09",false,0],["COURTNEY HAMILTON","B","Osgood","2026-05-27","2026-05-27","2026-06-02","2026-06-17",false,0],["CRAIG MAURER","C","Osgood","2026-05-13","2026-05-19",null,null,false,0],["DAIRDRE SCRIVEN","C","Said","2026-05-19","2026-05-19",null,null,false,0],["DAN MANLEY","B","Gavin","2025-11-23","2026-04-29","2026-05-01","2026-05-19",false,0],["DARREN HOGG","C","Said","2026-04-22","2026-04-28",null,null,false,0],["DEANNE RHYNEHARDT","B","Osgood","2026-05-22","2026-05-28","2026-05-05","2026-06-12",false,0],["DERON BENDER","B","Gavin","2025-08-11","2026-04-24","2026-04-28","2026-05-08",false,0],["DEVIN JOHNSON","C","Said","2026-03-29","2026-04-15","2025-05-30",null,false,0],["DIANNA JENKINS","C","Said",null,"2026-03-24","2026-02-23","2026-04-06",false,0],["DONALD PAYNE JR","C","Osgood","2026-06-04",null,null,null,false,0],["DUSTIN GOLDMAN","A","Osgood","2026-06-22","2026-04-24","2026-03-30","2026-03-27",false,0],["ELIAS PAPPAN","C","Karen","2026-04-30",null,null,null,false,0],["ELIZABETH BONAUDI","C","Osgood","2026-04-17","2026-04-17",null,null,false,0],["ELIZABETH ELLINGER","B","Jordan","2026-03-16","2026-04-01","2026-06-18","2026-06-10",false,0],["ELIZABETH HOWARD","C","Osgood","2026-07-05","2026-07-05","2024-11-08",null,false,0],["ERIKA BRUNNER","C","Gavin","2026-04-13","2026-04-15","2025-11-07",null,false,0],["ERIKA WEHNER","B","Gavin",null,"2026-04-13","2026-05-28","2026-05-11",false,0],["GLADIS CHAVEZ","C","Karen","2026-05-15","2026-05-05",null,null,false,0],["HAIFA BRUNNEY","C","Karen","2026-07-06","2026-07-03","2026-06-15","2026-07-14",false,0],["HEATHER EMMERT","C","Jordan","2026-06-11","2026-06-11","2024-09-06",null,false,0],["HEATHER HENRY-MINOR","B","Jordan","2026-04-07","2026-04-15","2026-05-05","2026-05-28",false,0],["HYPATIA ESPINAL","C","Karen","2026-06-02","2026-06-02",null,null,false,0],["INGRID CORREIA","B","Gavin","2026-05-08","2026-05-08","2025-12-11","2026-01-05",false,0],["IZXEL MARTINEZ","C","Karen","2026-05-20","2026-05-20","2026-06-02",null,false,0],["JACOB ENGLISH","C","Jordan",null,"2026-03-18","2026-04-23","2026-06-12",false,0],["JAIDEN BALLAH","C","Said","2026-06-02","2026-06-03",null,null,false,0],["JASMIN ARCOS","C","Karen","2026-03-19","2026-03-26",null,null,false,0],["JASMIN MONTOYA","C","Karen","2026-06-25","2026-06-19",null,null,false,0],["JASMINE MCKENZIE","C","Osgood","2026-05-03","2026-05-04","2026-05-06","2026-05-29",false,0],["JEFF MESSMER","C","Gavin","2026-06-12","2026-05-12","2025-10-01",null,false,0],["JENNIFER BLACKMORE","C","Jordan","2026-05-02",null,null,null,false,0],["JENNIFER HOWISON","C","Jordan","2026-03-15","2026-03-30","2026-04-06",null,false,0],["JESSE MCCRERRY","C","Said",null,"2026-04-06","2026-04-13","2026-05-26",false,0],["JESSICA TOWER","C","Jordan","2026-05-27","2026-05-30","2023-04-03",null,false,0],["JOHN BRUNNER","B","Osgood","2026-06-01","2026-06-01","2026-06-30","2026-07-17",false,0],["JOHN LUBINSKY","C","Said","2026-06-17","2026-06-17","2026-06-23","2026-03-20",false,0],["JONNATHAN AGUDELO","C","Karen","2026-06-23","2026-05-19",null,null,false,0],["JORDAN HOLLIBAUGH","C","Gavin",null,"2026-06-28","2026-06-26","2026-04-16",false,0],["JUSTIN BIERY","C","Karen","2026-05-27","2026-05-28",null,null,false,0],["KANDIS HALL","B","Osgood","2026-01-04","2026-01-31","2026-02-25","2026-03-17",false,0],["KATHERINE DE LA ROSA","C","Karen","2026-06-29","2026-06-23","2026-06-10","2026-04-29",false,0],["KATHY HAYES","C","Jordan","2026-07-08","2026-07-08","2024-12-09",null,false,0],["KATIE MANSOR","C","Jordan","2026-04-27","2026-04-26",null,null,false,0],["KATIE SUMMERS","B","Gavin",null,"2026-06-23","2026-02-26","2026-05-29",false,0],["KELSY YODER","C","Said","2026-04-28","2026-01-09","2026-01-12","2026-02-05",false,0],["KERWIN HEATH","C","Said",null,"2026-04-12",null,null,false,0],["KEVIN SPEERT","A","Gavin","2026-07-11","2026-06-24","2026-06-01","2026-06-26",false,0],["KHADIJA FARAH","B","Jordan","2026-07-09","2026-07-10","2026-02-09","2026-03-06",false,0],["KINSIE HUSKINS","C","Jordan",null,"2026-03-17","2026-04-28","2026-06-01",false,0],["KISHMA JAMES","B","Said","2026-07-10","2026-07-10","2025-06-09","2025-07-14",false,0],["KRISTEN VALENTY","C","Jordan",null,"2026-01-21","2026-02-24","2026-03-25",false,0],["KRISTINA MURPHY","B","Osgood","2026-06-02","2026-05-11","2025-10-03","2025-10-21",false,0],["LAUREN MCCLINTON","C","Said",null,"2026-04-29",null,null,false,0],["LESLIE HERNANDEZ","C","Karen","2026-06-19","2026-06-29","2026-05-19","2026-06-18",false,0],["LETIKA WHITE","C","Osgood","2026-05-11","2026-06-15","2025-07-31","2025-08-29",false,0],["LEXIS GRANDY","C","Osgood","2026-06-11","2025-09-26","2025-09-29","2025-10-29",false,0],["LILIAN FUENTES","C","Karen","2026-04-21","2026-04-21",null,null,false,0],["LISA SIMMONS","C","Osgood",null,"2026-03-19","2026-04-14","2026-05-27",false,0],["LIZBEL CONTRERAS","C","Karen","2026-07-06","2026-06-12","2024-09-18",null,false,0],["LUIS GIL","C","Karen","2026-06-02","2026-06-30","2026-06-12","2025-09-26",false,0],["MANDY WILSON","C","Jordan",null,"2026-03-28",null,null,false,0],["MARIA COMAS","B","Karen","2026-04-27","2026-03-02","2025-06-19","2025-07-21",false,0],["MARK BOYD","B","Gavin",null,"2026-03-28","2026-04-08","2026-02-02",false,0],["MARK VENNITTI","C","Jordan","2026-04-08","2026-04-08","2026-06-01","2026-06-18",false,0],["MARLA SEWELL","C","Osgood",null,"2026-03-19",null,null,false,0],["MARTIN HOPKINS","B","Karen","2026-02-12","2026-07-01","2026-01-29","2026-02-20",false,0],["MARY MCMICHAEL","B","Said","2026-04-13","2026-04-13","2026-06-14","2026-07-09",false,0],["MATHEA ARUDDA","C","Karen",null,"2026-03-16","2026-03-23","2026-07-17",false,0],["MATT PIPER","B","Osgood","2026-05-19","2026-07-09","2026-07-09","2025-12-01",false,0],["MATTHEW MONTALVO","B","Karen","2026-04-09","2026-04-08","2026-05-29","2026-06-29",false,0],["MEGAN LYNCH","A","Gavin","2026-07-10","2026-07-10","2026-06-11","2026-07-13",false,0],["MICHELE FREDERICK","C","Osgood",null,"2026-05-31","2026-07-02",null,false,0],["MICHELLE ERICKSON","A","Gavin","2025-08-04","2026-03-25","2026-04-20","2026-04-10",false,0],["MIKE WHITEMAN","C","Osgood",null,"2025-07-24","2025-07-31","2026-05-11",false,0],["NANCY PRICE","B","Jordan","2026-01-03","2026-01-02","2026-05-08","2026-06-26",false,0],["NATALIE ESTRELLA","B","Karen","2026-06-14","2026-05-25","2026-07-01","2025-11-03",false,0],["NATHAN WHITE","C","Karen","2026-06-12","2026-06-16",null,null,false,0],["NIA HARRINGTON","C","Said","2026-05-13","2026-05-05","2024-10-17",null,false,0],["NICK ZATEZALO","C","Osgood","2026-07-09","2026-07-09","2024-03-12",null,false,0],["NIKEHA HAYES","C","Osgood","2026-04-15","2025-09-28","2024-09-25",null,false,0],["NINA AVERY","C","Jordan",null,"2026-04-23",null,null,false,0],["NORA KERELIUK","C","Said","2026-04-24",null,null,null,false,0],["OSCAR MARTINEZ","A","Karen","2026-06-14","2026-06-16","2026-05-05","2026-06-15",false,0],["PAIGE LUDWIG","C","Said","2026-06-08","2026-03-05","2026-03-17","2026-04-14",false,0],["PATRICK ARQUETTE","C","Said","2026-04-22","2026-01-14","2025-09-09","2025-10-07",false,0],["PAULA PALLESCHI","C","Said",null,"2026-04-21","2026-04-27","2026-05-26",false,0],["PILAR BENNETT","C","Karen","2026-07-10","2026-07-07","2025-07-23","2025-08-15",false,0],["RACHELLE PARSLEY","C","Said","2024-09-03","2026-04-15","2026-04-22","2026-05-13",false,0],["RACQUEL LUDAWAY","A","Gavin","2026-05-29","2026-05-19","2026-06-17","2026-07-10",false,0],["RAMI TAMIMI","B","Jordan","2026-03-27","2026-04-20","2026-05-07","2026-03-27",false,0],["ROBERT HAYNER","C","Jordan",null,"2026-04-20","2026-04-23","2026-05-15",false,0],["ROBIN BLAKE","C","Gavin",null,"2025-12-19","2025-12-27","2026-03-17",false,0],["ROSALIA PABLO","C","Karen","2026-06-08","2026-06-04","2024-11-08",null,false,0],["ROSS DIGIORGIO","C","Osgood","2026-06-25","2026-06-25","2025-07-14","2026-04-30",false,0],["RUTH ESPINOZA","C","Karen",null,"2026-02-26","2026-03-26","2026-04-17",false,0],["RUTH GONZALEZ","C","Karen","2026-05-19","2026-05-19",null,null,false,0],["SAHAR SHALASH","A","Said","2026-07-09","2026-07-06","2026-05-09","2026-05-29",false,0],["SAHEL ALAM","C","Said","2026-05-10","2026-05-08","2026-07-10",null,false,0],["SAM BAMRICK","C","Jordan",null,"2026-04-14","2026-04-20","2026-05-15",false,0],["SARA BUSH","C","Said",null,"2026-03-27","2026-04-13","2026-05-27",false,0],["SARAH HERNANDEZ","C","Osgood","2026-05-28","2026-05-29","2024-10-21",null,false,0],["SASHA ANTONOVA","C","Said","2026-03-31","2026-03-31",null,null,false,0],["SETH COLBURN","B","Said","2025-04-23","2026-03-31","2026-04-06","2026-04-30",false,0],["SHANE STINER","C","Jordan",null,"2026-04-08",null,null,false,0],["SHARON PANTELIS","C","Jordan","2026-04-28","2025-03-21","2025-04-01",null,false,0],["SHAYNE D. BOYD","C","Said","2026-05-04","2026-05-07",null,null,false,0],["SHIRRELL BURNSIDE","C","Osgood","2026-06-26","2026-06-26",null,null,false,0],["STACEY LAMBRIGHT","B","Jordan",null,"2026-03-25","2026-03-26","2026-04-07",false,0],["STEVEN OSBORN","C","Jordan","2026-04-30","2026-02-03",null,null,false,0],["SUMMER DURHAM","C","Osgood",null,"2026-03-23",null,null,false,0],["SUNI RIVAS","C","Karen","2026-06-12","2026-07-06",null,null,false,0],["TAMARA CHARLTON","C","Osgood","2025-07-27","2026-04-16","2025-04-14",null,false,0],["TATIANA GRIGORITA","C","Jordan","2026-06-08","2026-06-08",null,null,false,0],["THAER AHMED","C","Said","2026-03-31","2026-03-31","2025-08-26","2025-09-30",false,0],["TIARA VILLATORO","A","Karen","2026-07-01","2026-06-30","2026-06-04","2026-06-26",false,0],["TIMOTHY OLIVER","C","Osgood","2026-06-09","2026-06-02",null,null,false,0],["TINA HOFFMAN","A","Gavin","2023-10-10","2026-05-06","2026-05-27","2026-02-10",false,0],["TINA-DUTT-HIREN","C","Osgood",null,"2026-05-11",null,null,false,0],["TODD STONE","A","Said","2026-07-10","2026-06-30","2026-06-25","2026-05-08",false,0],["TOM NEWMAN","C","Gavin","2026-06-08","2026-06-08","2024-01-08",null,false,0],["TRACI WILLIAMS-JONES","C","Jordan",null,"2026-04-09","2026-03-23","2026-05-21",false,0],["TRACY BERARD","B","Jordan",null,"2026-04-04","2026-04-14","2026-05-27",false,0],["TROY BORDEN","C","Gavin","2026-04-28","2026-04-30","2026-04-22","2026-05-13",false,0],["WENDY RAMIREZ","C","Karen","2026-03-25","2026-03-25",null,null,false,0],["WHITNEY SCHMIDT","C","Said","2026-03-18","2024-01-12","2024-01-18",null,false,0],["YASMIN DE JESUS","C","Karen","2024-03-27","2025-11-18","2026-04-01","2026-04-29",false,0],["YVETTA HARRISON","C","Osgood","2026-06-04",null,null,null,false,0],["SUMMER MAXSON","A","Unassigned","2026-04-12","2026-04-17","2026-03-10","2026-04-01",false,0],["CARRIE SISTARE-KOLIN CAUSEY","C","Unassigned",null,"2026-03-12","2026-04-03","2026-05-20",false,0],["SLAVI JORDANOV","C","Unassigned","2026-05-30","2025-10-06","2025-10-10","2025-11-07",false,0],["STAN GORKSI","C","Unassigned",null,"2026-03-07","2026-03-09","2026-04-07",false,0],["ALI SWEAZY","C","Unassigned","2026-05-09","2026-05-09",null,null,false,0],["AUBREY SNOW","C","Unassigned",null,"2026-03-25",null,null,false,0],["CAROL DOMINGUEZ","C","Unassigned",null,"2026-04-08",null,null,false,0],["GAMAL HARDING","C","Unassigned","2026-06-17","2026-06-23","2025-10-17",null,false,0],["HOLLY BLANKEN","C","Unassigned",null,"2026-05-14",null,null,false,0],["JIMMY LIEU","C","Unassigned","2026-04-26",null,null,null,false,0],["KRISTY BROWN","C","Unassigned","2025-01-25","2026-03-29","2025-01-29",null,false,0],["LAUREN MICHELLE","C","Unassigned","2026-04-29",null,null,null,false,0],["LEZLEY MCCURRY","C","Unassigned",null,"2026-05-01",null,null,false,0],["MATT BRADDY","C","Unassigned","2026-06-19",null,null,null,false,0],["NANCY BAKER","C","Unassigned","2026-04-30",null,null,null,false,0],["TINA ALLEN","C","Unassigned",null,"2026-04-29",null,null,false,0],["TINA THOMPSON","C","Unassigned",null,"2026-04-07",null,null,false,0],["TONY AMOS","C","Unassigned","2026-04-19","2026-04-01","2024-02-27",null,false,0],["AMANDA HOWARD","C","Unassigned","2026-07-01","2026-07-01","2025-11-25","2025-12-23",false,0],["JUANE MADARIS","C","Unassigned","2026-06-27",null,null,null,false,0],["COLIN BURNHEIMER - THRIVE","C","Unassigned",null,"2026-06-30",null,null,false,0],["GEORGENA XAMMAR","C","Unassigned","2026-07-09","2026-07-09","2023-03-07",null,false,0],["MICHELLE HOLTZ","C","Unassigned",null,"2026-06-29",null,null,false,0],["MORGAN STONE","C","Unassigned","2026-06-29","2026-06-29",null,null,false,0],["RAMIRO SOLIS","C","Unassigned",null,"2026-07-01",null,null,false,0]];
+var SEED=[["AIMEE WHITLOCK","C","Gavin",null,"2025-01-14","2026-02-10","2026-04-15",false,0],["ALEXIS REED","C","Said","2026-07-06","2026-07-07","2026-01-30","2026-02-27",false,0],["AMY AGRESTA","C","Gavin","2026-06-16","2026-06-16","2025-07-08","2025-08-05",false,0],["ANA SORIA","C","Karen","2026-04-19",null,null,null,false,0],["ANGELA PEREZ","C","Gavin","2026-04-27","2026-05-06","2026-04-06","2026-04-24",false,0],["ANGELA POTTS","C","Osgood","2026-05-10","2026-05-10",null,null,false,0],["ANGELIQUE SOTONDJI","C","Jordan","2026-03-27","2026-03-27",null,null,false,0],["ANNIE MORENO","B","Karen","2026-06-17","2026-06-18","2026-05-11","2026-06-12",false,0],["ASHLEY HENRY","C","Osgood","2026-04-22","2026-04-21",null,null,false,0],["AVA LAIRD","C","Jordan","2026-07-09","2026-07-09",null,null,false,0],["BAILEY STRATHIE","C","Osgood","2026-05-30","2026-05-30","2024-11-21",null,false,0],["BENJAMIN GAYTAN","C","Gavin","2026-05-16","2026-05-22",null,null,false,0],["BRAD GILLIAM","C","Gavin","2026-05-14",null,null,null,false,0],["BRANDON KIDD","C","Said","2026-05-01",null,null,null,false,0],["BRANDON MCCLENDON","C","Said","2026-06-08","2026-06-08",null,null,false,0],["BRANDON THOMPSON","A","Osgood","2026-07-10","2026-07-12","2026-05-04","2026-06-01",false,0],["BRIAN NANTHAVONGDOUANGSY","C","Osgood","2025-10-23","2025-11-19","2025-12-18","2026-03-20",false,0],["BRIAN ZINN","C","Jordan","2026-07-09","2026-07-09",null,null,false,0],["BRITNEY DODDS","C","Gavin","2026-03-26","2026-03-26","2026-03-02","2026-04-08",false,0],["CAROLE MCMAHON","C","Osgood","2026-05-31","2026-05-31","2026-05-08","2026-05-26",false,0],["CELINE WILLIAMS","C","Jordan","2026-06-01",null,null,null,false,0],["CESIA ESPINOZA YOUNG","C","Karen","2026-03-11","2026-03-10","2026-03-26","2026-04-17",false,0],["CHELSEA ANDERSON","C","Osgood","2026-02-07","2026-02-06","2026-03-28","2026-04-17",false,0],["CHERYL KINSEY","C","Jordan","2026-05-05","2026-05-04",null,null,false,0],["CHRIS REED","A","Said","2026-07-01","2026-07-01","2026-07-08","2026-06-26",false,0],["CHRISTIAN CHALKIAS","C","Osgood","2026-07-08","2026-04-08",null,null,false,0],["CHRISTINA COUGHLIN","C","Osgood","2026-05-29","2026-05-29","2026-07-10",null,false,0],["CHUCK KINSEY","C","Jordan","2026-03-16","2026-03-26",null,null,false,0],["CINDA ERICKSON","B","Gavin","2026-04-23","2026-04-21","2026-02-24","2026-03-26",false,0],["CLAUDIA CHUECO","C","Karen","2026-07-02",null,null,null,false,0],["CODA GAHRIS","C","Jordan","2026-04-29","2026-04-29","2026-05-25",null,false,0],["CONNER KOCHANSKY","A","Gavin","2026-07-10","2026-07-10","2026-06-22","2026-07-09",false,0],["COURTNEY HAMILTON","B","Osgood","2026-05-27","2026-05-27","2026-06-02","2026-06-17",false,0],["CRAIG MAURER","C","Osgood","2026-05-13","2026-05-19",null,null,false,0],["DAIRDRE SCRIVEN","C","Said","2026-05-19","2026-05-19",null,null,false,0],["DAN MANLEY","B","Gavin","2025-11-23","2026-04-29","2026-05-01","2026-05-19",false,0],["DARREN HOGG","C","Said","2026-04-22","2026-04-28",null,null,false,0],["DEANNE RHYNEHARDT","B","Osgood","2026-05-22","2026-05-28","2026-05-05","2026-06-12",false,0],["DERON BENDER","B","Gavin","2025-08-11","2026-04-24","2026-04-28","2026-05-08",false,0],["DEVIN JOHNSON","C","Said","2026-03-29","2026-04-15","2025-05-30",null,false,0],["DIANNA JENKINS","C","Said",null,"2026-03-24","2026-02-23","2026-04-06",false,0],["DONALD PAYNE JR","C","Osgood","2026-06-04",null,null,null,false,0],["DUSTIN GOLDMAN","A","Osgood","2026-06-22","2026-04-24","2026-03-30","2026-03-27",false,0],["ELIAS PAPPAN","C","Karen","2026-04-30",null,null,null,false,0],["ELIZABETH BONAUDI","C","Osgood","2026-04-17","2026-04-17",null,null,false,0],["ELIZABETH ELLINGER","B","Jordan","2026-03-16","2026-04-01","2026-06-18","2026-06-10",false,0],["ELIZABETH HOWARD","C","Osgood","2026-07-05","2026-07-05","2024-11-08",null,false,0],["ERIKA BRUNNER","C","Gavin","2026-04-13","2026-04-15","2025-11-07",null,false,0],["ERIKA WEHNER","B","Gavin",null,"2026-04-13","2026-05-28","2026-05-11",false,0],["GLADIS CHAVEZ","C","Karen","2026-05-15","2026-05-05",null,null,false,0],["HAIFA BRUNNEY","C","Karen","2026-07-06","2026-07-03","2026-06-15","2026-07-14",false,0],["HEATHER EMMERT","C","Jordan","2026-06-11","2026-06-11","2024-09-06",null,false,0],["HEATHER HENRY-MINOR","B","Jordan","2026-04-07","2026-04-15","2026-05-05","2026-05-28",false,0],["HYPATIA ESPINAL","C","Karen","2026-06-02","2026-06-02",null,null,false,0],["INGRID CORREIA","B","Gavin","2026-05-08","2026-05-08","2025-12-11","2026-01-05",false,0],["IZXEL MARTINEZ","C","Karen","2026-05-20","2026-05-20","2026-06-02",null,false,0],["JACOB ENGLISH","C","Jordan",null,"2026-03-18","2026-04-23","2026-06-12",false,0],["JAIDEN BALLAH","C","Said","2026-06-02","2026-06-03",null,null,false,0],["JASMIN ARCOS","C","Karen","2026-03-19","2026-03-26",null,null,false,0],["JASMIN MONTOYA","C","Karen","2026-06-25","2026-06-19",null,null,false,0],["JASMINE MCKENZIE","C","Osgood","2026-05-03","2026-05-04","2026-05-06","2026-05-29",false,0],["JEFF MESSMER","C","Gavin","2026-06-12","2026-05-12","2025-10-01",null,false,0],["JENNIFER BLACKMORE","C","Jordan","2026-05-02",null,null,null,false,0],["JENNIFER HOWISON","C","Jordan","2026-03-15","2026-03-30","2026-04-06",null,false,0],["JESSE MCCRERRY","C","Said",null,"2026-04-06","2026-04-13","2026-05-26",false,0],["JESSICA TOWER","C","Jordan","2026-05-27","2026-05-30","2023-04-03",null,false,0],["JOHN BRUNNER","B","Jordan","2026-06-01","2026-06-01","2026-06-30","2026-07-17",false,0],["JOHN LUBINSKY","C","Said","2026-06-17","2026-06-17","2026-06-23","2026-03-20",false,0],["JONNATHAN AGUDELO","C","Karen","2026-06-23","2026-05-19",null,null,false,0],["JORDAN HOLLIBAUGH","C","Gavin",null,"2026-06-28","2026-06-26","2026-04-16",false,0],["JUSTIN BIERY","C","Karen","2026-05-27","2026-05-28",null,null,false,0],["KANDIS HALL","B","Osgood","2026-01-04","2026-01-31","2026-02-25","2026-03-17",false,0],["KATHERINE DE LA ROSA","C","Karen","2026-06-29","2026-06-23","2026-06-10","2026-04-29",false,0],["KATHY HAYES","C","Jordan","2026-07-08","2026-07-08","2024-12-09",null,false,0],["KATIE MANSOR","C","Jordan","2026-04-27","2026-04-26",null,null,false,0],["KATIE SUMMERS","B","Gavin",null,"2026-06-23","2026-02-26","2026-05-29",false,0],["KELSY YODER","C","Said","2026-04-28","2026-01-09","2026-01-12","2026-02-05",false,0],["KERWIN HEATH","C","Said",null,"2026-04-12",null,null,false,0],["KEVIN SPEERT","A","Gavin","2026-07-11","2026-06-24","2026-06-01","2026-06-26",false,0],["KHADIJA FARAH","B","Jordan","2026-07-09","2026-07-10","2026-02-09","2026-03-06",false,0],["KINSIE HUSKINS","C","Jordan",null,"2026-03-17","2026-04-28","2026-06-01",false,0],["KISHMA JAMES","B","Said","2026-07-10","2026-07-10","2025-06-09","2025-07-14",false,0],["KRISTEN VALENTY","C","Jordan",null,"2026-01-21","2026-02-24","2026-03-25",false,0],["KRISTINA MURPHY","B","Osgood","2026-06-02","2026-05-11","2025-10-03","2025-10-21",false,0],["LAUREN MCCLINTON","C","Said",null,"2026-04-29",null,null,false,0],["LESLIE HERNANDEZ","C","Karen","2026-06-19","2026-06-29","2026-05-19","2026-06-18",false,0],["LETIKA WHITE","C","Osgood","2026-05-11","2026-06-15","2025-07-31","2025-08-29",false,0],["LEXIS GRANDY","C","Osgood","2026-06-11","2025-09-26","2025-09-29","2025-10-29",false,0],["LILIAN FUENTES","C","Karen","2026-04-21","2026-04-21",null,null,false,0],["LISA SIMMONS","C","Osgood",null,"2026-03-19","2026-04-14","2026-05-27",false,0],["LIZBEL CONTRERAS","C","Karen","2026-07-06","2026-06-12","2024-09-18",null,false,0],["LUIS GIL","C","Karen","2026-06-02","2026-06-30","2026-06-12","2025-09-26",false,0],["MANDY WILSON","C","Jordan",null,"2026-03-28",null,null,false,0],["MARIA COMAS","B","Karen","2026-04-27","2026-03-02","2025-06-19","2025-07-21",false,0],["MARK BOYD","B","Gavin",null,"2026-03-28","2026-04-08","2026-02-02",false,0],["MARK VENNITTI","C","Jordan","2026-04-08","2026-04-08","2026-06-01","2026-06-18",false,0],["MARLA SEWELL","C","Osgood",null,"2026-03-19",null,null,false,0],["MARTIN HOPKINS","B","Karen","2026-02-12","2026-07-01","2026-01-29","2026-02-20",false,0],["MARY MCMICHAEL","B","Said","2026-04-13","2026-04-13","2026-06-14","2026-07-09",false,0],["MATHEA ARUDDA","C","Karen",null,"2026-03-16","2026-03-23","2026-07-17",false,0],["MATT PIPER","B","Osgood","2026-05-19","2026-07-09","2026-07-09","2025-12-01",false,0],["MATTHEW MONTALVO","B","Karen","2026-04-09","2026-04-08","2026-05-29","2026-06-29",false,0],["MEGAN LYNCH","A","Gavin","2026-07-10","2026-07-10","2026-06-11","2026-07-13",false,0],["MICHELE FREDERICK","C","Osgood",null,"2026-05-31","2026-07-02",null,false,0],["MICHELLE ERICKSON","A","Gavin","2025-08-04","2026-03-25","2026-04-20","2026-04-10",false,0],["MIKE WHITEMAN","C","Osgood",null,"2025-07-24","2025-07-31","2026-05-11",false,0],["NANCY PRICE","B","Jordan","2026-01-03","2026-01-02","2026-05-08","2026-06-26",false,0],["NATALIE ESTRELLA","B","Karen","2026-06-14","2026-05-25","2026-07-01","2025-11-03",false,0],["NATHAN WHITE","C","Karen","2026-06-12","2026-06-16",null,null,false,0],["NIA HARRINGTON","C","Said","2026-05-13","2026-05-05","2024-10-17",null,false,0],["NICK ZATEZALO","C","Osgood","2026-07-09","2026-07-09","2024-03-12",null,false,0],["NIKEHA HAYES","C","Osgood","2026-04-15","2025-09-28","2024-09-25",null,false,0],["NINA AVERY","C","Jordan",null,"2026-04-23",null,null,false,0],["NORA KERELIUK","C","Said","2026-04-24",null,null,null,false,0],["OSCAR MARTINEZ","A","Karen","2026-06-14","2026-06-16","2026-05-05","2026-06-15",false,0],["PAIGE LUDWIG","C","Said","2026-06-08","2026-03-05","2026-03-17","2026-04-14",false,0],["PATRICK ARQUETTE","C","Said","2026-04-22","2026-01-14","2025-09-09","2025-10-07",false,0],["PAULA PALLESCHI","C","Said",null,"2026-04-21","2026-04-27","2026-05-26",false,0],["PILAR BENNETT","C","Karen","2026-07-10","2026-07-07","2025-07-23","2025-08-15",false,0],["RACHELLE PARSLEY","C","Said","2024-09-03","2026-04-15","2026-04-22","2026-05-13",false,0],["RACQUEL LUDAWAY","A","Gavin","2026-05-29","2026-05-19","2026-06-17","2026-07-10",false,0],["RAMI TAMIMI","B","Jordan","2026-03-27","2026-04-20","2026-05-07","2026-03-27",false,0],["ROBERT HAYNER","C","Jordan",null,"2026-04-20","2026-04-23","2026-05-15",false,0],["ROBIN BLAKE","C","Gavin",null,"2025-12-19","2025-12-27","2026-03-17",false,0],["ROSALIA PABLO","C","Karen","2026-06-08","2026-06-04","2024-11-08",null,false,0],["ROSS DIGIORGIO","C","Osgood","2026-06-25","2026-06-25","2025-07-14","2026-04-30",false,0],["RUTH ESPINOZA","C","Karen",null,"2026-02-26","2026-03-26","2026-04-17",false,0],["RUTH GONZALEZ","C","Karen","2026-05-19","2026-05-19",null,null,false,0],["SAHAR SHALASH","A","Said","2026-07-09","2026-07-06","2026-05-09","2026-05-29",false,0],["SAHEL ALAM","C","Said","2026-05-10","2026-05-08","2026-07-10",null,false,0],["SAM BAMRICK","C","Jordan",null,"2026-04-14","2026-04-20","2026-05-15",false,0],["SARA BUSH","C","Said",null,"2026-03-27","2026-04-13","2026-05-27",false,0],["SARAH HERNANDEZ","C","Osgood","2026-05-28","2026-05-29","2024-10-21",null,false,0],["SASHA ANTONOVA","C","Said","2026-03-31","2026-03-31",null,null,false,0],["SETH COLBURN","B","Said","2025-04-23","2026-03-31","2026-04-06","2026-04-30",false,0],["SHANE STINER","C","Jordan",null,"2026-04-08",null,null,false,0],["SHARON PANTELIS","C","Jordan","2026-04-28","2025-03-21","2025-04-01",null,false,0],["SHAYNE D. BOYD","C","Said","2026-05-04","2026-05-07",null,null,false,0],["SHIRRELL BURNSIDE","C","Osgood","2026-06-26","2026-06-26",null,null,false,0],["STACEY LAMBRIGHT","B","Jordan",null,"2026-03-25","2026-03-26","2026-04-07",false,0],["STEVEN OSBORN","C","Jordan","2026-04-30","2026-02-03",null,null,false,0],["SUMMER DURHAM","C","Osgood",null,"2026-03-23",null,null,false,0],["SUNI RIVAS","C","Karen","2026-06-12","2026-07-06",null,null,false,0],["TAMARA CHARLTON","C","Osgood","2025-07-27","2026-04-16","2025-04-14",null,false,0],["TATIANA GRIGORITA","C","Jordan","2026-06-08","2026-06-08",null,null,false,0],["THAER AHMED","C","Said","2026-03-31","2026-03-31","2025-08-26","2025-09-30",false,0],["TIARA VILLATORO","A","Karen","2026-07-01","2026-06-30","2026-06-04","2026-06-26",false,0],["TIMOTHY OLIVER","C","Osgood","2026-06-09","2026-06-02",null,null,false,0],["TINA HOFFMAN","A","Gavin","2023-10-10","2026-05-06","2026-05-27","2026-02-10",false,0],["TINA-DUTT-HIREN","C","Osgood",null,"2026-05-11",null,null,false,0],["TODD STONE","A","Said","2026-07-10","2026-06-30","2026-06-25","2026-05-08",false,0],["TOM NEWMAN","C","Gavin","2026-06-08","2026-06-08","2024-01-08",null,false,0],["TRACI WILLIAMS-JONES","C","Jordan",null,"2026-04-09","2026-03-23","2026-05-21",false,0],["TRACY BERARD","B","Jordan",null,"2026-04-04","2026-04-14","2026-05-27",false,0],["TROY BORDEN","C","Gavin","2026-04-28","2026-04-30","2026-04-22","2026-05-13",false,0],["WENDY RAMIREZ","C","Karen","2026-03-25","2026-03-25",null,null,false,0],["WHITNEY SCHMIDT","C","Said","2026-03-18","2024-01-12","2024-01-18",null,false,0],["YASMIN DE JESUS","C","Karen","2024-03-27","2025-11-18","2026-04-01","2026-04-29",false,0],["YVETTA HARRISON","C","Osgood","2026-06-04",null,null,null,false,0],["SUMMER MAXSON","A","Unassigned","2026-04-12","2026-04-17","2026-03-10","2026-04-01",false,0],["CARRIE SISTARE-KOLIN CAUSEY","C","Unassigned",null,"2026-03-12","2026-04-03","2026-05-20",false,0],["SLAVI JORDANOV","C","Unassigned","2026-05-30","2025-10-06","2025-10-10","2025-11-07",false,0],["STAN GORKSI","C","Unassigned",null,"2026-03-07","2026-03-09","2026-04-07",false,0],["ALI SWEAZY","C","Unassigned","2026-05-09","2026-05-09",null,null,false,0],["AUBREY SNOW","C","Unassigned",null,"2026-03-25",null,null,false,0],["CAROL DOMINGUEZ","C","Unassigned",null,"2026-04-08",null,null,false,0],["GAMAL HARDING","C","Unassigned","2026-06-17","2026-06-23","2025-10-17",null,false,0],["HOLLY BLANKEN","C","Unassigned",null,"2026-05-14",null,null,false,0],["JIMMY LIEU","C","Unassigned","2026-04-26",null,null,null,false,0],["KRISTY BROWN","C","Unassigned","2025-01-25","2026-03-29","2025-01-29",null,false,0],["LAUREN MICHELLE","C","Unassigned","2026-04-29",null,null,null,false,0],["LEZLEY MCCURRY","C","Unassigned",null,"2026-05-01",null,null,false,0],["MATT BRADDY","C","Unassigned","2026-06-19",null,null,null,false,0],["NANCY BAKER","C","Unassigned","2026-04-30",null,null,null,false,0],["TINA ALLEN","C","Unassigned",null,"2026-04-29",null,null,false,0],["TINA THOMPSON","C","Unassigned",null,"2026-04-07",null,null,false,0],["TONY AMOS","C","Unassigned","2026-04-19","2026-04-01","2024-02-27",null,false,0],["AMANDA HOWARD","C","Unassigned","2026-07-01","2026-07-01","2025-11-25","2025-12-23",false,0],["JUANE MADARIS","C","Unassigned","2026-06-27",null,null,null,false,0],["COLIN BURNHEIMER - THRIVE","C","Unassigned",null,"2026-06-30",null,null,false,0],["GEORGENA XAMMAR","C","Unassigned","2026-07-09","2026-07-09","2023-03-07",null,false,0],["MICHELLE HOLTZ","C","Unassigned",null,"2026-06-29",null,null,false,0],["MORGAN STONE","C","Unassigned","2026-06-29","2026-06-29",null,null,false,0],["RAMIRO SOLIS","C","Unassigned",null,"2026-07-01",null,null,false,0]];
 
 // ── LP sub-tab switching ──
+
+function switchDanielTab4(tabId, btn){
+  document.querySelectorAll("#view-daniel .d-tab").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll("#view-daniel .d-tab-panel").forEach(function(p){p.classList.remove("active");});
+  btn.classList.add("active");
+  document.getElementById("d-tab4-"+tabId).classList.add("active");
+  if(tabId==="pipeline"){renderChurnRisk();renderLpEffectiveness();renderGrowthScoreboard();renderVelocifyLeaderboard();renderLeaderboard();}
+  if(tabId==="agents"){renderActivationPanel();renderTierUpgradePanel();}
+  if(tabId==="week"){renderRmSummary();renderLpScorecardSummary();renderTeamsMsg();}
+}
+
+function openLeadsView(btn){
+  rmStopPolling();lpStopPolling();
+  currentUser="Leads";
+  document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+  document.getElementById("view-leads").classList.add("active");
+  loadReferralLeads(false);
+  setTimeout(renderLeadsViewSync,600);
+}
+
+function renderLeadsViewSync(){
+  var ids=["mtd-leads","file-starts","ltf","needs-touch"];
+  ids.forEach(function(id){
+    var s=document.getElementById("ref-"+id);
+    var d=document.getElementById("ref-"+id+"-v2");
+    if(s&&d)d.textContent=s.textContent;
+  });
+  var lu=document.getElementById("ref-last-updated");
+  var lu2=document.getElementById("ref-last-updated-v2");
+  if(lu&&lu2)lu2.textContent=lu.textContent;
+  var tables=["needs-touch-table","today-table","prior-table","uncovered-table"];
+  tables.forEach(function(id){
+    var s=document.getElementById("ref-"+id);
+    var d=document.getElementById("ref-"+id+"-v2");
+    if(s&&d)d.innerHTML=s.innerHTML;
+  });
+  var counts=["needs-touch-count","today-count","prior-day-count","uncovered-count","today-label","prior-label"];
+  counts.forEach(function(id){
+    var s=document.getElementById("ref-"+id);
+    var d=document.getElementById("ref-"+id+"-v2");
+    if(s&&d)d.textContent=s.textContent;
+  });
+  var ntSrc=document.getElementById("ref-needs-touch-section");
+  var ntDst=document.getElementById("ref-needs-touch-section-v2");
+  if(ntSrc&&ntDst)ntDst.style.display=ntSrc.style.display;
+}
+
+function renderActivationPanel(){
+  var el=document.getElementById("d-activation-section");
+  if(!el)return;
+  var newAgents=agents.filter(function(a){
+    var fc=agentFirstCall[a[0]]||null;
+    if(!fc)return false;
+    var days=Math.floor((TODAY-new Date(fc+"T12:00:00"))/86400000);
+    return days<=90&&a[2]!=="Unassigned";
+  });
+  if(!newAgents.length){el.innerHTML="";return;}
+  var html='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem">'
+    +'<div style="background:#1F4E79;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em">New agent activation &mdash; last 90 days</div>'
+    +'<div style="font-size:10px;color:#93c5fd">Called &rarr; Amanda &rarr; Lead &rarr; File</div>'
+    +'</div>';
+  newAgents.slice(0,12).forEach(function(a){
+    var nameU=a[0].toUpperCase();
+    var vel=VELOCIFY_SEED[nameU]||null;
+    var step1=!!(agentFirstCall[a[0]]);
+    var step2=!!(agentMilestones[nameU]&&agentMilestones[nameU].first_amanda_visit_date);
+    var step3=!!(vel&&vel.total>0);
+    var step4=!!(vel&&vel.file_starts>0);
+    var steps=[step1,step2,step3,step4];
+    var nextLabels=["needs LP call","needs Amanda visit","no lead yet","no file start yet"];
+    var nextStep=steps.indexOf(false);
+    var status=nextStep===-1?"&#10003; Fully activated":nextLabels[nextStep];
+    var statusColor=nextStep===-1?"var(--green)":nextStep===0?"var(--red)":"#d97706";
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:9px 16px;border-bottom:0.5px solid var(--border-light);flex-wrap:wrap">'
+      +'<span style="font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:110px">'+a[0]+'</span>'
+      +'<span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span>'
+      +'<div style="display:flex;gap:4px">';
+    ["Called","Amanda","Lead","File"].forEach(function(lbl,i){
+      html+='<div title="'+lbl+'" style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;'
+        +(steps[i]?'background:#dcfce7;color:#15803d;border:1px solid #86efac':'background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0')
+        +'">'+( steps[i]?'&#10003;':''+(i+1))+'</div>';
+    });
+    html+='</div><span style="font-size:11px;color:'+statusColor+';font-weight:600">'+status+'</span></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderTierUpgradePanel(){
+  var el=document.getElementById("d-tier-upgrade-section");
+  if(!el)return;
+  var suggestions=[];
+  agents.forEach(function(a){
+    if(!isActive(a))return;
+    var vel=VELOCIFY_SEED[a[0].toUpperCase()]||null;
+    var leads=vel?vel.total||0:0;
+    if(a[1]==="C"&&leads>=2)suggestions.push({name:a[0],lp:a[2],leads:leads,cur:"C",sug:"B"});
+    else if(a[1]==="B"&&leads>=5)suggestions.push({name:a[0],lp:a[2],leads:leads,cur:"B",sug:"A"});
+  });
+  suggestions.sort(function(a,b){return b.leads-a.leads;});
+  if(!suggestions.length){el.innerHTML="";return;}
+  var html='<div style="background:var(--surface);border:1px solid #86efac;border-radius:10px;overflow:hidden;margin-bottom:1rem">'
+    +'<div style="background:#15803d;padding:10px 16px">'
+    +'<div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em">&#8679; Tier upgrade suggestions ('+suggestions.length+')</div>'
+    +'</div>';
+  suggestions.slice(0,8).forEach(function(s){
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:0.5px solid var(--border-light)">'
+      +'<span style="font-size:12px;font-weight:600;color:var(--text);flex:1">'+s.name+'</span>'
+      +'<span class="lp-tag lp-tag-'+s.lp+'">'+s.lp+'</span>'
+      +'<span style="font-size:11px;color:var(--text-2)">'+s.leads+' leads</span>'
+      +'<span style="font-size:11px;color:#15803d;font-weight:700">&rarr; consider '+s.sug+'-tier</span>'
+      +'</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 function switchDanielTab(tabId, btn){
   document.querySelectorAll(".d-tab").forEach(function(t){t.classList.remove("active");});
   document.querySelectorAll(".d-tab-panel").forEach(function(p){p.classList.remove("active");});
@@ -866,7 +1079,7 @@ function loadCallLogs(){
     if(res[0])res[0].forEach(function(r){callLogs[r.agent_name]=r;});
     if(res[1])res[1].forEach(function(r){lastWeekLogs[r.agent_name]=r;});
     setSyncStatus("live");
-    Promise.all([loadPrevNotes(),loadRmActivity(),loadAgentFirstCalls(),loadVelocifyLeads(),loadCoMarketing(),loadAgentAssignments()]).catch(function(){});
+    Promise.all([loadPrevNotes(),loadRmActivity(),loadAgentFirstCalls(),loadVelocifyLeads(),loadCoMarketing(),loadAgentAssignments(),loadAgentMilestones(),loadChurnRisk(),loadLpEffectiveness()]).catch(function(){});
   }).catch(function(){
     setSyncStatus("error");
     return Promise.resolve();
@@ -881,7 +1094,17 @@ function upsertCallLog(name,lp,note){
   setSyncStatus("saving");
   return sbFetch("POST","call_logs",data).then(function(){
     return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||""});
-  }).then(function(){setSyncStatus("live");}).catch(function(e){setSyncStatus("error");console.error("Call log save failed for "+name+":",e);});
+  }).then(function(){
+    // Phase 2: upsert activation milestone for first LP call
+    var nameUpper=name.toUpperCase();
+    if(!agentMilestones[nameUpper]||!agentMilestones[nameUpper].first_lp_call_date){
+      sbFetch("POST","agent_milestones",{agent_name:name,first_lp_call_date:localDateStr(TODAY),first_lp_call_by:lp,activation_status:"contacted"}).catch(function(){});
+      if(!agentMilestones[nameUpper])agentMilestones[nameUpper]={};
+      agentMilestones[nameUpper].first_lp_call_date=localDateStr(TODAY);
+      agentMilestones[nameUpper].first_lp_call_by=lp;
+    }
+    setSyncStatus("live");
+  }).catch(function(e){setSyncStatus("error");console.error("Call log save failed for "+name+":",e);});
 }
 
 function deleteCallLog(name){
@@ -961,7 +1184,6 @@ function selectUser(btn,u){
     document.getElementById("view-daniel").classList.add("active");
     renderDaniel();
     loadCallLogs().then(function(){renderDaniel();});
-    loadReferralLeads(false);
   } else if(u==="Admin"){
     document.getElementById("view-admin").classList.add("active");
     renderAdmin();
@@ -1004,6 +1226,9 @@ function calcStreak(lp){
 }
 
 function renderLP(lp){
+  // Save scroll position + focused element before re-render
+  var _scrollY=window.scrollY;
+  var _focusId=document.activeElement?document.activeElement.getAttribute("data-name"):null;
   var all=agents.filter(function(a){return a[2]===lp;});
   var ac=all.filter(isActive).length,ic=all.filter(function(a){return!isActive(a);}).length;
   var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
@@ -1110,6 +1335,14 @@ function renderLP(lp){
     var allCalled2=Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey;});
     allCalled2.forEach(function(l){loadAgentContact(l.agent_name,l.agent_name.replace(/\s+/g,'_'));});
   }
+  // Restore scroll position and re-focus the active note field
+  setTimeout(function(){
+    window.scrollTo(0,_scrollY);
+    if(_focusId){
+      var ta=document.querySelector('.note-field[data-name="'+_focusId+'"]');
+      if(ta){ta.focus();try{ta.setSelectionRange(ta.value.length,ta.value.length);}catch(e){}}
+    }
+  },0);
 }
 
 function countWords(s){return s.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;}
@@ -1179,17 +1412,42 @@ function renderCallCard(a,lp,isBonus){
   if(act)html+='<span style="color:var(--text-3)">Last activity: '+fmt(act)+'</span>';
   html+='</div>';
 
-  // MTD leads badge — prominent under name
-  if(velMtd>0){
-    html+='<div style="margin-top:5px"><span style="display:inline-flex;align-items:center;gap:5px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:4px;padding:3px 10px;font-size:12px;font-weight:700;color:#1d4ed8">'+velMtd+' lead'+(velMtd>1?'s':'')+' sent MTD</span></div>';
-  } else if(velTotal>0){
-    html+='<div style="margin-top:5px"><span style="display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 10px;font-size:12px;color:var(--text-3)">'+velTotal+' total leads, none this month</span></div>';
+  // Live lead panel — rich data from agent_lead_summary view
+  var velFileStarts=velData?velData.file_starts||0:0;
+  var velMtdFileStarts=velData?velData.mtd_file_starts||0:0;
+  var velLastBuyer=velData?velData.last_buyer_name||null:null;
+  var velLastStatus=velData?velData.last_status||null:null;
+  var velLastNote=velData?velData.last_action_note||null:null;
+  var velLastDate=velData?velData.last_lead_date||null:null;
+  if(velTotal>0){
+    var leadBg=velMtd>0?"#eff6ff":"var(--bg)";
+    var leadBorder=velMtd>0?"#bfdbfe":"var(--border)";
+    var leadColor=velMtd>0?"#1d4ed8":"var(--text-3)";
+    html+='<div style="margin-top:6px;background:'+leadBg+';border:1px solid '+leadBorder+';border-radius:6px;padding:7px 10px">';
+    html+='<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">';
+    html+='<span style="font-size:12px;font-weight:700;color:'+leadColor+'">🎯 '+velMtd+' lead'+(velMtd!==1?'s':'')+' MTD</span>';
+    if(velMtdFileStarts>0)html+='<span style="font-size:11px;color:var(--green);font-weight:600">✓ '+velMtdFileStarts+' file'+(velMtdFileStarts!==1?'s':'')+' started</span>';
+    html+='<span style="font-size:11px;color:var(--text-3)">'+velTotal+' total · '+velFileStarts+' files ever</span>';
+    html+='</div>';
+    if(velLastBuyer||velLastDate){
+      html+='<div style="margin-top:4px;font-size:11px;color:var(--text-2)">Last: '+(velLastBuyer?'<b>'+escHtml(velLastBuyer)+'</b> ':'')+(velLastDate?'· '+fmt(velLastDate)+' ':'')+(velLastStatus?'· <span style="font-style:italic">'+escHtml(velLastStatus)+'</span>':'')+'</div>';
+    }
+    if(velLastNote&&velLastNote.trim()&&velLastNote.toLowerCase()!=='empty'){
+      html+='<div style="margin-top:3px;font-size:11px;color:var(--text-3);font-style:italic">"'+escHtml(velLastNote.length>80?velLastNote.substring(0,80)+'...':velLastNote)+'"</div>';
+    }
+    html+='</div>';
   } else if(noReferralFlag){
     html+='<div style="margin-top:5px"><span style="display:inline-flex;align-items:center;gap:5px;background:var(--red-light);border:1px solid var(--red-border);border-radius:4px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--red)">0 leads · 90+ days</span></div>';
   }
 
+  // Phase 3: churn risk badge
+  var nameUpper=a[0].toUpperCase();
+  var churnRisk=churnRiskData[nameUpper]?churnRiskData[nameUpper].churn_risk:null;
+
   // Extra tags row (RM activity, co-marketing, tenure)
   var tagsHtml="";
+  if(churnRisk==="HIGH")tagsHtml+='<span style="display:inline-flex;align-items:center;gap:4px;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#991b1b">🔴 CHURN RISK</span>';
+  else if(churnRisk==="MEDIUM")tagsHtml+='<span style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;border:1px solid #fde68a;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#92400e">⚠ Going quiet</span>';
   if(rmAct)tagsHtml+='<span class="rm-tag">RM visited: '+fmt(rmAct)+'</span>';
   if(coMarketingAgents[a[0]])tagsHtml+='<span class="co-mkt-tag">Co-marketing active</span>';
   var tenureDays=firstCall?Math.floor((TODAY-new Date(firstCall+"T12:00:00"))/86400000):0;
@@ -1278,7 +1536,10 @@ function selectOutcome(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp"),outc=btn.getAttribute("data-outcome");
   var log=callLogs[name];var cur=log?log.outcome||"":"";var newOutc=cur===outc?"":outc;
   if(callLogs[name])callLogs[name].outcome=newOutc;
-  upsertCallLogWithOutcome(name,lp,callLogs[name]?callLogs[name].note||"":"",newOutc).then(function(){renderLP(currentUser);});
+  var clsMap2={"Answered":"sel-answered","Left VM":"sel-voicemail","Sent Follow-up Text":"sel-text","In Person":"sel-noanswer"};
+  var card2=btn.closest(".call-card");
+  if(card2)card2.querySelectorAll(".outcome-btn").forEach(function(ob){ob.className="outcome-btn"+(ob.getAttribute("data-outcome")===newOutc&&newOutc?" "+(clsMap2[newOutc]||""):"");});
+  upsertCallLogWithOutcome(name,lp,callLogs[name]?callLogs[name].note||"":"",newOutc).catch(function(){});
 }
 
 var agentHistoryCache={};
@@ -1363,6 +1624,7 @@ function renderLpSearch(){
     results.forEach(function(a){
       var histId="hist-"+a[0].replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"");
       loadAgentHistory(a[0],histId);
+      loadAgentContact(a[0],a[0].replace(/\s+/g,"_"));
     });
     return;
   }
@@ -1422,29 +1684,45 @@ function renderLpSearch(){
   results.forEach(function(a){
     var histId="hist-"+a[0].replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"");
     loadAgentHistory(a[0],histId);
+    loadAgentContact(a[0],a[0].replace(/\s+/g,"_"));
   });
 }
 
 function toggleCallFromCard(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp")||currentUser;
   if(calledThisWeek(name)){
+    if(!confirm("Remove this logged call for "+name+"?"))return;
     delete pendingNote[name];
     deleteCallLog(name).then(function(){renderLP(currentUser);});
   } else {
     pendingNote[name]={draft:"",outcome:""};
-    renderLP(currentUser);
-    setTimeout(function(){
-      var ta=document.querySelector('.note-field[data-name="'+name+'"]');
-      if(ta)ta.focus();
-    },100);
+    var srEl=document.getElementById("lp-search-results");
+    var inSearch=srEl&&srEl.innerHTML.length>10;
+    if(inSearch){
+      renderLpSearch();
+      setTimeout(function(){
+        var ta=document.querySelector('#lp-search-results .note-field[data-name="'+name+'"]');
+        if(ta){ta.scrollIntoView({behavior:"smooth",block:"center"});ta.focus();}
+      },120);
+    } else {
+      renderLP(currentUser);
+      setTimeout(function(){
+        var ta=document.querySelector('.note-field[data-name="'+name+'"]');
+        if(ta)ta.focus();
+      },100);
+    }
   }
 }
 
 function selectPendingOutcome(btn){
   var name=btn.getAttribute("data-name"),outc=btn.getAttribute("data-outcome");
   if(!pendingNote[name])pendingNote[name]={draft:"",outcome:""};
-  pendingNote[name].outcome=pendingNote[name].outcome===outc?"":outc;
-  renderLP(currentUser);
+  var newOutc=pendingNote[name].outcome===outc?"":outc;
+  pendingNote[name].outcome=newOutc;
+  var clsMap={"Answered":"sel-answered","Left VM":"sel-voicemail","Sent Follow-up Text":"sel-text","In Person":"sel-noanswer"};
+  var card=btn.closest(".call-card")||btn.parentNode;
+  while(card&&!card.querySelector&&card.parentNode)card=card.parentNode;
+  if(card&&card.querySelectorAll)card.querySelectorAll(".outcome-btn").forEach(function(ob){ob.className="outcome-btn"+(ob.getAttribute("data-outcome")===newOutc&&newOutc?" "+(clsMap[newOutc]||""):"");});
 }
 
 function tryConfirmCall(name,lp){
@@ -1453,10 +1731,23 @@ function tryConfirmCall(name,lp){
   var outcome=pending.outcome||"";
   var flagRm=pending.flagRm||false;
   var words=countWords(draft);
-  if(!outcome){alert("Please select what happened (Answered, Left VM, etc.) before saving.");return;}
-  if(words<10){alert("Please add at least 10 words to your note before saving. You have "+words+".");return;}
+  if(!outcome){
+    // Show inline error on the save button
+    var saveBtn=document.querySelector('.btn-primary[onclick*="tryConfirmCall"][onclick*="'+name.replace(/'/g,"\\'")+'"]');
+    if(saveBtn){var ob=saveBtn.innerHTML;saveBtn.innerHTML="⚠ Select outcome first";saveBtn.style.background="#dc2626";setTimeout(function(){saveBtn.innerHTML=ob;saveBtn.style.background="";},2000);}
+    return;
+  }
+  if(words<10){
+    var saveBtn2=document.querySelector('.btn-primary[onclick*="tryConfirmCall"][onclick*="'+name.replace(/'/g,"\\'")+'"]');
+    if(saveBtn2){var ob2=saveBtn2.innerHTML;saveBtn2.innerHTML="⚠ Need "+Math.max(0,10-words)+" more words";saveBtn2.style.background="#dc2626";setTimeout(function(){saveBtn2.innerHTML=ob2;saveBtn2.style.background="";},2500);}
+    return;
+  }
   delete pendingNote[name];
-  upsertCallLogWithOutcome(name,lp,draft.trim(),outcome,flagRm).then(function(){renderLP(currentUser);});
+  var srEl2=document.getElementById("lp-search-results");
+  var searchWasActive=srEl2&&srEl2.innerHTML.length>10;
+  upsertCallLogWithOutcome(name,lp,draft.trim(),outcome,flagRm).then(function(){
+    if(searchWasActive){renderLpSearch();}else{renderLP(currentUser);}
+  });
 }
 
 function queueNote(ta){
@@ -1491,8 +1782,8 @@ function loadAgentContact(name,safeId){
 
 function renderInlineContact(name,safeId,data){
   var p=document.getElementById("ci-phone-"+safeId),e=document.getElementById("ci-email-"+safeId);
-  if(p)p.innerHTML='📞 '+(data.phone?'<span style="font-weight:500;color:#333">'+data.phone+'</span>':'<span style="color:#ccc">No phone</span>');
-  if(e)e.innerHTML='✉️ '+(data.email?'<span style="font-weight:500;color:#333">'+data.email+'</span>':'<span style="color:#ccc">No email</span>');
+  if(p)p.innerHTML='📞 '+(data.phone?'<a href="tel:'+data.phone+'" style="font-weight:600;color:#1d4ed8;text-decoration:none">'+data.phone+'</a>':'<span style="color:#ccc">No phone</span>');
+  if(e)e.innerHTML='✉️ '+(data.email?'<a href="mailto:'+data.email+'" style="font-weight:500;color:#1d4ed8;text-decoration:none">'+data.email+'</a>':'<span style="color:#ccc">No email</span>');
 }
 
 function toggleCall(btn){
@@ -1858,9 +2149,11 @@ function carryoverQuickLog(btn){
   pendingNote[name]={draft:"",outcome:""};
   renderLP(lp);
   setTimeout(function(){
-    var card=document.querySelector('.note-field[data-name="'+name+'"]');
-    if(card){card.scrollIntoView({behavior:"smooth",block:"center"});card.focus();}
-  },120);
+    var ta=document.querySelector('.note-field[data-name="'+name+'"]');
+    if(ta){ta.scrollIntoView({behavior:"smooth",block:"center"});ta.focus();}
+    var listEl=document.getElementById("carryover-list-el");
+    if(listEl)listEl.style.display="none";
+  },150);
 }
 
 function renderCarryoverAlerts(){
@@ -1900,6 +2193,10 @@ function renderNoteQuality(){
     words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
     var maxRep=Math.max.apply(null,Object.values(freq));
     if(maxRep>=4)return true; // same word repeated 4+ times
+    // Keyword flag: note signals removal request or wrong agent
+    var noteLower=note.toLowerCase();
+    var removeSignals=["remove from my list","not my realtor","not for me","not the right person","please remove","wrong person"];
+    if(removeSignals.some(function(sig){return noteLower.indexOf(sig)>=0;}))return true;
     return false;
   }
 
@@ -1919,7 +2216,7 @@ function renderNoteQuality(){
   var html='<div style="background:var(--surface);border:1px solid #fde68a;border-radius:10px;overflow:hidden;margin-bottom:1rem">'
     +'<div style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
     +'<div style="font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em">⚠️ Note Quality Flags — '+flags.length+' this week</div>'
-    +'<div style="font-size:10px;color:#b45309;font-weight:500">Low-effort or repetitive notes</div>'
+    +'<div style="font-size:10px;color:#b45309;font-weight:500">Low-effort, repetitive, or removal-flagged</div>'
     +'</div>';
 
   flags.forEach(function(f){
@@ -1934,6 +2231,68 @@ function renderNoteQuality(){
       +'</div>';
   });
 
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderChurnRisk(){
+  var el=document.getElementById("d-churn-risk-section");
+  if(!el)return;
+  var highRisk=Object.values(churnRiskData).filter(function(r){return r.churn_risk==="HIGH";});
+  var medRisk=Object.values(churnRiskData).filter(function(r){return r.churn_risk==="MEDIUM";});
+  if(!highRisk.length&&!medRisk.length){el.innerHTML="";return;}
+  var html='<div style="background:var(--surface);border:1px solid #fca5a5;border-radius:10px;overflow:hidden;margin-bottom:1rem">'
+    +'<div style="background:#fee2e2;border-bottom:1px solid #fca5a5;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:12px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.04em">🔴 Agent Churn Risk — '+(highRisk.length+medRisk.length)+' at risk</div>'
+    +'<div style="font-size:10px;color:#dc2626">Producing agents going quiet</div>'
+    +'</div>';
+  highRisk.concat(medRisk).slice(0,10).forEach(function(r){
+    var isHigh=r.churn_risk==="HIGH";
+    var ag=agents.find(function(a){return a[0].toUpperCase()===r.agent_name_upper;});
+    var lpName=r.assigned_lp||"?";
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid #fee2e2;flex-wrap:wrap">'
+      +'<span style="font-size:11px;width:8px;height:8px;border-radius:50%;background:'+(isHigh?"#dc2626":"#d97706")+';display:inline-block;flex-shrink:0"></span>'
+      +'<span style="font-weight:600;font-size:13px;flex:1">'+(ag?ag[0]:r.agent_name_upper)+'</span>'
+      +'<span class="lp-tag lp-tag-'+lpName+'">'+lpName+'</span>'
+      +'<span style="font-size:11px;color:#991b1b">'+r.total_leads+' leads · last: '+fmt(r.last_lead_date)+'</span>'
+      +'<span style="font-size:11px;color:var(--text-3)">'+r.days_since_lead+'d no lead · '+r.days_since_call+'d no call</span>'
+      +'</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderLpEffectiveness(){
+  var el=document.getElementById("d-lp-effectiveness-section");
+  if(!el||!Object.keys(lpEffectiveness).length)return;
+  var html='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem">'
+    +'<div style="background:#1F4E79;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em">LP Effectiveness — Calls to Leads</div>'
+    +'<div style="font-size:10px;color:#93c5fd">MTD referrals per LP</div>'
+    +'</div>';
+  var sorted=Object.values(lpEffectiveness).sort(function(a,b){return(b.mtd_leads_received||0)-(a.mtd_leads_received||0);});
+  sorted.forEach(function(r){
+    var lp=r.lp;
+    var leads=r.mtd_leads_received||0;
+    var files=r.mtd_file_starts||0;
+    var calls=r.total_calls_logged||0;
+    var ratio=r.leads_per_100_calls||0;
+    var ltf=leads>0?Math.round(files/leads*100):0;
+    var barPct=Math.min(leads/10,1);
+    var barColor=leads>=5?"#15803d":leads>=2?"#d97706":"#94a3b8";
+    html+='<div style="padding:10px 16px;border-bottom:1px solid var(--border-light)">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px">'
+      +'<span style="font-size:13px;font-weight:700;color:'+LP_COLORS[lp]+';width:55px">'+lp+'</span>'
+      +'<span style="font-size:12px;font-weight:700;color:'+barColor+'">'+leads+' lead'+(leads!==1?'s':'')+' MTD</span>'
+      +(files>0?'<span style="font-size:11px;color:var(--green)">· '+files+' file'+(files!==1?'s':'')+' started</span>':'')
+      +(ltf>0?'<span style="font-size:11px;color:var(--text-3)">'+ltf+'% LTF</span>':'')
+      +'<span style="font-size:10px;color:var(--text-3);margin-left:auto">'+calls+' calls · '+ratio+'/100</span>'
+      +'</div>'
+      +'<div style="height:4px;background:var(--border-light);border-radius:2px;overflow:hidden">'
+      +'<div style="height:100%;width:'+Math.round(barPct*100)+'%;background:'+barColor+';border-radius:2px"></div>'
+      +'</div>'
+      +'</div>';
+  });
   html+='</div>';
   el.innerHTML=html;
 }
@@ -2089,7 +2448,17 @@ function handleUpload(input){
         if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];if(!isActive(a))flagged++;updated++;}
         else{agents.push(u);added++;}
       });
-      res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged. (This session only — to make it permanent, send the new Power BI .xlsx to Claude to update the file.)";
+      // Phase 5: persist updates to Supabase agent_assignments
+      var rows=up.map(function(u){return{agent_name:u[0],level:u[1]||"C",lp:u[2]||"Unassigned",priority:u[7]||false,added:false};});
+      if(rows.length){
+        sbFetch("POST","agent_assignments",rows).then(function(){
+          res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged. Synced to Supabase ✓";
+        }).catch(function(){
+          res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged. (Supabase sync failed — changes are session only)";
+        });
+      } else {
+        res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged.";
+      }
       renderAdmin();
     }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
   };
@@ -2104,6 +2473,9 @@ var selfReportedReferrals={};
 var agentFirstCall={};
 var agentLastCall={};
 var coMarketingAgents={};
+var agentMilestones={};  // Phase 2: activation tracking
+var churnRiskData={};    // Phase 3: churn risk by agent
+var lpEffectiveness={};  // Phase 4: LP effectiveness scores
 
 function loadCoMarketing(){
   return sbFetch("GET","agent_profiles?co_marketing=eq.true&select=agent_name&limit=500").then(function(res){
@@ -2155,20 +2527,65 @@ function toggleCoMarketing(btn){
 }
 
 function loadVelocifyLeads(){
-  return sbFetch("GET","velocify_leads?select=referral_partner_name,date_added&order=date_added.desc&limit=1000").then(function(res){
-    if(!res||!res.length)return;
-    var now=new Date(),ms=new Date(now.getFullYear(),now.getMonth(),1),ws=new Date(now);ws.setDate(now.getDate()-now.getDay()+1);
+  // Pull rich data from agent_lead_summary view
+  return sbFetch("GET","agent_lead_summary?select=agent_name_upper,total_leads,mtd_leads,wtd_leads,file_starts,mtd_file_starts,last_lead_date,last_buyer_name,last_status,last_action_note,assigned_lp&limit=500").then(function(res){
+    if(!res||!res.length){
+      // Fallback to raw velocify_leads if view not ready
+      return sbFetch("GET","velocify_leads?select=referral_partner_name,date_added&order=date_added.desc&limit=1000").then(function(res2){
+        if(!res2||!res2.length)return;
+        var now=new Date(),ms=new Date(now.getFullYear(),now.getMonth(),1),ws=new Date(now);ws.setDate(now.getDate()-now.getDay()+1);
+        var fresh={};
+        res2.forEach(function(r){
+          var name=(r.referral_partner_name||"").trim().toUpperCase();
+          if(!name)return;
+          var d=new Date(r.date_added);
+          if(!fresh[name])fresh[name]={total:0,mtd:0,wtd:0,file_starts:0,last_lead_date:null,last_buyer_name:null,last_status:null,last_action_note:null};
+          fresh[name].total++;
+          if(d>=ms)fresh[name].mtd++;
+          if(d>=ws)fresh[name].wtd++;
+        });
+        if(Object.keys(fresh).length>0)VELOCIFY_SEED=fresh;
+      });
+    }
     var fresh={};
     res.forEach(function(r){
-      var name=(r.referral_partner_name||"").trim().toUpperCase();
+      var name=(r.agent_name_upper||"").trim();
       if(!name)return;
-      var d=new Date(r.date_added);
-      if(!fresh[name])fresh[name]={total:0,mtd:0,wtd:0};
-      fresh[name].total++;
-      if(d>=ms)fresh[name].mtd++;
-      if(d>=ws)fresh[name].wtd++;
+      fresh[name]={
+        total:r.total_leads||0,
+        mtd:r.mtd_leads||0,
+        wtd:r.wtd_leads||0,
+        file_starts:r.file_starts||0,
+        mtd_file_starts:r.mtd_file_starts||0,
+        last_lead_date:r.last_lead_date||null,
+        last_buyer_name:r.last_buyer_name||null,
+        last_status:r.last_status||null,
+        last_action_note:r.last_action_note||null,
+        assigned_lp:r.assigned_lp||null
+      };
     });
     if(Object.keys(fresh).length>0)VELOCIFY_SEED=fresh;
+  }).catch(function(){});
+}
+
+function loadAgentMilestones(){
+  return sbFetch("GET","agent_milestones?select=agent_name,first_lp_call_date,first_lp_call_by,first_amanda_visit_date,first_lead_date,first_file_start_date,activation_status&limit=500").then(function(res){
+    agentMilestones={};
+    if(res)res.forEach(function(r){agentMilestones[r.agent_name.toUpperCase()]=r;});
+  }).catch(function(){});
+}
+
+function loadChurnRisk(){
+  return sbFetch("GET","agent_churn_risk?select=agent_name_upper,assigned_lp,total_leads,last_lead_date,days_since_lead,days_since_call,churn_risk&limit=500").then(function(res){
+    churnRiskData={};
+    if(res)res.forEach(function(r){churnRiskData[r.agent_name_upper]=r;});
+  }).catch(function(){});
+}
+
+function loadLpEffectiveness(){
+  return sbFetch("GET","lp_effectiveness?select=lp,total_calls_logged,mtd_leads_received,mtd_file_starts,leads_per_100_calls&limit=10").then(function(res){
+    lpEffectiveness={};
+    if(res)res.forEach(function(r){lpEffectiveness[r.lp]=r;});
   }).catch(function(){});
 }
 
@@ -2243,8 +2660,11 @@ function toggleRmFlag(btn){
 function togglePendingRmFlag(btn){
   var name=btn.getAttribute("data-name");
   if(!pendingNote[name])pendingNote[name]={draft:"",outcome:""};
-  pendingNote[name].flagRm=!pendingNote[name].flagRm;
-  renderLP(currentUser);
+  var flagged=!pendingNote[name].flagRm;
+  pendingNote[name].flagRm=flagged;
+  btn.className="rm-flag-btn"+(flagged?" is-flagged":"");
+  btn.querySelector(".rm-flag-icon").textContent=flagged?"\uD83D\uDEA9":"\uD83C\uDFF3\uFE0F";
+  btn.querySelector("span:last-child").textContent=flagged?"Flagged for RM follow-up":"Flag for RM follow-up";
 }
 
 function renderVelocifyLeaderboard(){
