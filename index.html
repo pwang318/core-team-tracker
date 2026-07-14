@@ -421,6 +421,7 @@ tr:hover td{background:var(--bg)}
   <div class="contact-modal-box">
     <div class="cm-header"><span class="cm-title">Edit contact info</span><button class="cm-close" onclick="closeLpContactModal()">×</button></div>
     <div style="font-size:12px;color:#888;margin-bottom:14px" id="lpContactModalName"></div>
+    <div id="lpContactModalStatus" style="display:none;font-size:12px;font-weight:600;padding:8px 12px;border-radius:6px;margin-bottom:10px"></div>
     <div class="cm-field"><label>Phone</label><input type="text" id="lp-cm-phone" placeholder="Phone number"></div>
     <div class="cm-field"><label>Email</label><input type="email" id="lp-cm-email" placeholder="Email address"></div>
     <div class="cm-field"><label>Birthday</label><input type="text" id="lp-cm-birthday" placeholder="e.g. Mar 14"></div>
@@ -1167,7 +1168,7 @@ function loadAgentAssignments(){
 var lpPollInterval=null;
 function lpStartPolling(lp){
   if(lpPollInterval)clearInterval(lpPollInterval);
-  lpPollInterval=setInterval(function(){loadCallLogs().then(function(){if(currentUser===lp)renderLP(lp);});},30000);
+  lpPollInterval=setInterval(function(){loadCallLogs().then(function(){if(currentUser===lp&&Object.keys(pendingNote).length===0)renderLP(lp);});},30000);
 }
 function lpStopPolling(){
   if(lpPollInterval){clearInterval(lpPollInterval);lpPollInterval=null;}
@@ -1229,6 +1230,11 @@ function renderLP(lp){
   // Save scroll position + focused element before re-render
   var _scrollY=window.scrollY;
   var _focusId=document.activeElement?document.activeElement.getAttribute("data-name"):null;
+  // Preserve draft text from any open note fields before re-render
+  document.querySelectorAll(".note-field").forEach(function(ta){
+    var n=ta.getAttribute("data-name");
+    if(n&&pendingNote[n]&&ta.value)pendingNote[n].draft=ta.value;
+  });
   var all=agents.filter(function(a){return a[2]===lp;});
   var ac=all.filter(isActive).length,ic=all.filter(function(a){return!isActive(a);}).length;
   var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
@@ -1823,8 +1829,15 @@ function saveLpContactModal(){
   }).then(function(){
     if(!contactCache[editingLpContact])contactCache[editingLpContact]={agent_name:editingLpContact};
     Object.assign(contactCache[editingLpContact],payload);
-    closeLpContactModal();setSyncStatus("live");alert("Saved!");
-  }).catch(function(e){alert("Save failed: "+e);});
+    setSyncStatus("live");
+    var st=document.getElementById("lpContactModalStatus");
+    if(st){st.style.display="block";st.style.background="#f0fdf4";st.style.color="#15803d";st.textContent="Saved!";}
+    setTimeout(function(){closeLpContactModal();if(st)st.style.display="none";},800);
+  }).catch(function(e){
+    var st=document.getElementById("lpContactModalStatus");
+    if(st){st.style.display="block";st.style.background="#fff1f2";st.style.color="#be123c";st.textContent="Save failed. Try again.";}
+    else console.error("Save failed:",e);
+  });
 }
 
 function renderScorecard(which,logs,wkKey,rotFn){
@@ -2930,7 +2943,7 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
 
 
 
-setInterval(function(){if(currentUser==="Daniel")loadCallLogs().then(function(){renderDaniel();});},30000);
+setInterval(function(){if(currentUser==="Daniel"&&Object.keys(pendingNote).length===0)loadCallLogs().then(function(){renderDaniel();});},30000);
 document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 loadAgents();
 loadCallLogs();
