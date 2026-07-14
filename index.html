@@ -1735,14 +1735,32 @@ function renderLpSearch(){
 
 function toggleCallFromCard(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp")||currentUser;
+  var srEl=document.getElementById("lp-search-results");
+  var inSearch=!!(srEl&&srEl.innerHTML.length>10);
   if(calledThisWeek(name)){
-    if(!confirm("Remove this logged call for "+name+"?"))return;
+    // Uncheck — ask to confirm, then open pending note flow instead of just deleting
+    // This lets LP update their note before re-saving rather than losing the entry
+    if(!confirm("Remove this logged call for "+name+" so you can update the note?"))return;
     delete pendingNote[name];
-    deleteCallLog(name).then(function(){renderLP(currentUser);});
+    deleteCallLog(name).then(function(){
+      // Immediately re-open pending flow so LP can re-log with correct note
+      pendingNote[name]={draft:"",outcome:""};
+      if(inSearch){
+        renderLpSearch();
+        setTimeout(function(){
+          var ta=document.querySelector('#lp-search-results .note-field[data-name="'+name+'"]');
+          if(ta){ta.scrollIntoView({behavior:"smooth",block:"center"});ta.focus();}
+        },120);
+      } else {
+        renderLP(currentUser);
+        setTimeout(function(){
+          var ta=document.querySelector('.note-field[data-name="'+name+'"]');
+          if(ta){ta.focus();}
+        },100);
+      }
+    });
   } else {
     pendingNote[name]={draft:"",outcome:""};
-    var srEl=document.getElementById("lp-search-results");
-    var inSearch=srEl&&srEl.innerHTML.length>10;
     if(inSearch){
       renderLpSearch();
       setTimeout(function(){
