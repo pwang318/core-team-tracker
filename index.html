@@ -2274,8 +2274,8 @@ function renderCarryoverAlerts(){
   var html='<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:14px;margin-bottom:1rem">'
     +'<div style="font-size:13px;font-weight:700;color:#856404;margin-bottom:10px">⚠️ Call carryover active — incomplete calls from last week roll into this week</div>';
   list.forEach(function(a){
-    html+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:10px;margin-bottom:6px;border-left:3px solid #ffc107">'
-      +'<div style="font-size:12px;font-weight:700;color:'+(LP_COLORS[a.lp]||"#856404")+'">'+a.lp+'</div>'
+    html+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:10px;margin-bottom:6px;border-left:3px solid #ffc107;cursor:pointer" onclick="selectUser(document.querySelector(\'button.wb-'+a.lp+'\'),\''+a.lp+'\')">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:12px;font-weight:700;color:'+(LP_COLORS[a.lp]||"#856404")+'">'+a.lp+'</div><span style="font-size:10px;color:#92600a">tap to open ↗</span></div>'
       +'<div style="font-size:12px;color:#856404;margin-top:4px">Last week incomplete: <b>'+a.incomplete+' call'+(a.incomplete>1?"s":"")+'</b></div>'
       +'<div style="font-size:11px;color:#92600a;margin-top:2px">This week target: '+WEEKLY_TARGET+' new + '+a.incomplete+' carryover = <b>'+(WEEKLY_TARGET+a.incomplete)+' total</b></div>'
       +'</div>';
@@ -2533,7 +2533,7 @@ function renderLeadPipelinePanels(raw){
       var col=r.daily>0?"var(--green)":r.wtd>0?"var(--amber-text)":"var(--text-3)";
       var quietCount=r.quiet_agents.length;
       s+='<div style="display:flex;align-items:center;gap:8px;padding:9px 16px;border-bottom:0.5px solid var(--border-light);flex-wrap:wrap">';
-      s+='<span style="font-size:12px;font-weight:700;color:'+LP_COLORS[lp]+';width:52px">'+lp+'</span>';
+      s+='<span style="font-size:12px;font-weight:700;color:'+LP_COLORS[lp]+';width:52px;cursor:pointer" data-lp-go="'+lp+'" onclick="var l=this.getAttribute(\'data-lp-go\');selectUser(document.querySelector(\'button.wb-\'+l),l)">'+lp+' &#8599;</span>';
       s+='<span style="font-size:13px;font-weight:700;color:'+col+';width:20px;text-align:center">'+r.daily+'</span>';
       s+='<span style="font-size:12px;color:var(--text-2);width:20px;text-align:center">'+r.wtd+'</span>';
       s+='<span style="font-size:12px;color:var(--text-2);width:28px;text-align:center">'+r.mtd+'</span>';
@@ -2541,7 +2541,24 @@ function renderLeadPipelinePanels(raw){
       s+='<span style="font-size:11px;color:var(--green);width:36px;text-align:center">'+r.file_starts_mtd+' files</span>';
       s+=(ltf>0?'<span style="font-size:10px;background:'+(ltf>=20?"#dcfce7":ltf>=10?"#fef3c7":"#fee2e2")
         +';color:'+(ltf>=20?"#15803d":ltf>=10?"#92400e":"#991b1b")+';padding:2px 7px;border-radius:4px">'+ltf+'% lead-to-file</span>':'');
-      s+=(quietCount>0?'<span style="font-size:10px;color:#991b1b;margin-left:auto">'+quietCount+' agent'+(quietCount>1?'s':'')+' gone quiet</span>':'<span style="font-size:10px;color:var(--text-3);margin-left:auto">'+r.agents_mtd.size+' agents sending</span>');
+      var quietId='quiet-'+lp;
+      s+=(quietCount>0?'<span style="font-size:10px;color:#991b1b;margin-left:auto;cursor:pointer;text-decoration:underline" onclick="var el=document.getElementById(\"'+quietId+'\");el.style.display=el.style.display===\"none\"?\"block\":\"none\"">'+quietCount+' agent'+(quietCount>1?'s':'')+' gone quiet ▾</span>':'<span style="font-size:10px;color:var(--text-3);margin-left:auto">'+r.agents_mtd.size+' agents active</span>');
+      s+='</div>';
+      if(quietCount>0){
+        s+='<div id="'+quietId+'" style="display:none;margin-top:6px;padding:6px 0;border-top:1px solid var(--border-light)">';
+        r.quiet_agents.slice(0,8).forEach(function(qa){
+          var daysSince=qa.lastLead?Math.floor((new Date()-new Date(qa.lastLead+"T12:00:00"))/86400000):null;
+          s+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px">';
+          s+='<span style="flex:1;font-weight:500;color:var(--text)">'+escHtml(qa.name)+'</span>';
+          s+='<span style="color:var(--text-2)">'+qa.total+' leads ever</span>';
+          s+=(daysSince!==null?'<span style="color:#991b1b;font-weight:600">'+daysSince+'d silent</span>':'');
+          s+='</div>';
+        });
+        s+='</div>';
+        s+='<div style="display:none">'; // dummy to fix the extra </div> below
+      } else {
+        s+='<div style="display:none">'; // dummy
+      }
       s+='</div>';
     });
     s+='<div style="display:flex;gap:20px;padding:6px 16px;background:var(--bg);font-size:9px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">';
@@ -2634,7 +2651,7 @@ function renderDaniel(){
     var all=agents.filter(function(a){return a[2]===lp;}),ic=all.filter(function(a){return!isActive(a);}).length;
     var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
     var col=pct===100?"#43A047":pct>50?"#FB8C00":"#E53935";
-    gh+='<div class="d-card"><div class="d-name"><span style="width:10px;height:10px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block;flex-shrink:0"></span><span class="lp-c-'+lp+'">'+lp+'</span></div>';
+    gh+='<div class="d-card" style="cursor:pointer" onclick="selectUser(document.querySelector(\'button.wb-'+lp+'\'),\''+lp+'\')" title="Go to '+lp+'\'s view"><div class="d-name"><span style="width:10px;height:10px;border-radius:50%;background:'+LP_COLORS[lp]+';display:inline-block;flex-shrink:0"></span><span class="lp-c-'+lp+'">'+lp+'</span><span style="font-size:9px;color:var(--text-3);margin-left:auto">tap to open ↗</span></div>';
     gh+='<div class="d-pct" style="color:'+col+'">'+pct+'%</div>';
     gh+='<div class="d-bar-track"><div class="d-bar-fill bar-'+lp+'" style="width:'+pct+'%"></div></div>';
     gh+='<div class="d-meta"><span>'+done+"/"+WEEKLY_TARGET+' this week</span><span>'+all.length+' agents</span></div>';
