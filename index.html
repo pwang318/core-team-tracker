@@ -1463,7 +1463,10 @@ function renderCallCard(a,lp,isBonus){
     html+='<span style="font-size:11px;color:var(--text-3)">'+velTotal+' total · '+velFileStarts+' files ever</span>';
     html+='</div>';
     if(velLastBuyer||velLastDate){
-      html+='<div style="margin-top:4px;font-size:11px;color:var(--text-2)">Last: '+(velLastBuyer?'<b>'+escHtml(velLastBuyer)+'</b> ':'')+(velLastDate?'· '+fmt(velLastDate)+' ':'')+(velLastStatus?'· <span style="font-style:italic">'+escHtml(velLastStatus)+'</span>':'')+'</div>';
+      var daysSinceLead=velLastDate?Math.floor((TODAY-new Date(velLastDate+"T12:00:00"))/86400000):null;
+      var leadDateColor=daysSinceLead!==null&&daysSinceLead>=30?"var(--red)":"var(--text-2)";
+      var daysAgoStr=daysSinceLead!==null?' <b style="color:'+leadDateColor+'">'+daysSinceLead+'d ago</b>':"";
+      html+='<div style="margin-top:4px;font-size:11px">Last lead: <span style="color:'+leadDateColor+'">'+(velLastDate?fmt(velLastDate):"--")+'</span>'+daysAgoStr+(velLastBuyer?' · <b>'+escHtml(velLastBuyer)+'</b>':'')+(velLastStatus?' · <span style="font-style:italic">'+escHtml(velLastStatus)+'</span>':'')+'</div>';
     }
     if(velLastNote&&velLastNote.trim()&&velLastNote.toLowerCase()!=='empty'){
       html+='<div style="margin-top:3px;font-size:11px;color:var(--text-3);font-style:italic">"'+escHtml(velLastNote.length>80?velLastNote.substring(0,80)+'...':velLastNote)+'"</div>';
@@ -2269,16 +2272,27 @@ function renderNoteQuality(){
 
   // Detect low-quality notes: unique word count < 6 OR any word repeated 4+ times
   function isLowQuality(note){
-    if(!note||!note.trim())return false; // empty handled elsewhere
-    var words=note.trim().toLowerCase().split(/\s+/).filter(function(w){return w.length>0;});
-    if(words.length<3)return true; // too short
-    var unique=new Set(words).size;
-    if(unique<6)return true; // not enough different words
+    if(!note||!note.trim())return false;
+    // Strip punctuation and split
+    var words=note.trim().toLowerCase().split(/\s+/).map(function(w){return w.replace(/[.,!?;:\-"'()]+/g,"");}).filter(function(w){return w.length>0;});
+    if(words.length<4)return true; // genuinely too short
+    // Exclude common stop words before checking quality
+    var stopWords={"the":1,"to":1,"a":1,"an":1,"and":1,"or":1,"but":1,"in":1,"on":1,"at":1,
+      "for":1,"of":1,"with":1,"that":1,"this":1,"is":1,"are":1,"was":1,"were":1,"be":1,
+      "been":1,"have":1,"has":1,"had":1,"do":1,"does":1,"did":1,"will":1,"would":1,"could":1,
+      "should":1,"may":1,"can":1,"not":1,"no":1,"it":1,"its":1,"they":1,"them":1,"their":1,
+      "we":1,"he":1,"she":1,"his":1,"her":1,"i":1,"you":1,"so":1,"up":1,"out":1,"as":1,
+      "by":1,"from":1,"about":1,"if":1,"me":1,"my":1,"us":1,"our":1,"how":1,"who":1,"what":1,
+      "just":1,"also":1,"then":1,"than":1,"when":1,"very":1,"more":1,"some":1};
+    var meaningful=words.filter(function(w){return !stopWords[w]&&w.length>1;});
+    var uniqueMeaningful=new Set(meaningful).size;
+    if(uniqueMeaningful<4)return true; // not enough substance
+    // Check repetition of meaningful words only
     var freq={};
-    words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
-    var maxRep=Math.max.apply(null,Object.values(freq));
-    if(maxRep>=4)return true; // same word repeated 4+ times
-    // Keyword flag: note signals removal request or wrong agent
+    meaningful.forEach(function(w){freq[w]=(freq[w]||0)+1;});
+    var maxRep=meaningful.length>0?Math.max.apply(null,Object.values(freq)):0;
+    if(maxRep>=5)return true; // same meaningful word 5+ times = likely gaming
+    // Removal keyword flag
     var noteLower=note.toLowerCase();
     var removeSignals=["remove from my list","not my realtor","not for me","not the right person","please remove","wrong person"];
     if(removeSignals.some(function(sig){return noteLower.indexOf(sig)>=0;}))return true;
@@ -2309,7 +2323,7 @@ function renderNoteQuality(){
     html+='<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 16px;border-bottom:1px solid #fef3c7">'
       +'<span class="lp-tag lp-tag-'+f.lp+'" style="flex-shrink:0;margin-top:2px">'+f.lp+'</span>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">'+escHtml(f.agent)+'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px;cursor:pointer;text-decoration:underline" onclick="openLpContactModal(this.getAttribute(&quot;data-n&quot;))" data-n="'+escHtml(f.agent)+'">'+escHtml(f.agent)+'</div>'
       +'<div style="font-size:11px;color:#92400e;font-style:italic;word-break:break-word">'+noteDisplay+'</div>'
       +'</div>'
       +'<div style="font-size:11px;color:var(--text-3);flex-shrink:0;white-space:nowrap">'+fmt(f.date)+'</div>'
@@ -2382,7 +2396,7 @@ function renderLpEffectiveness(){
       +'<span style="font-size:13px;font-weight:700;color:'+LP_COLORS[lp]+';width:55px">'+lp+'</span>'
       +'<span style="font-size:12px;font-weight:700;color:'+barColor+'">'+leads+' lead'+(leads!==1?'s':'')+' MTD</span>'
       +(files>0?'<span style="font-size:11px;color:var(--green)">· '+files+' file'+(files!==1?'s':'')+' started</span>':'')
-      +(ltf>0?'<span style="font-size:11px;color:var(--text-3)">'+ltf+'% LTF</span>':'')
+      +(ltf>0?'<span style="font-size:11px;color:var(--text-3)">'+ltf+'% lead-to-file</span>':'')
       +'<span style="font-size:10px;color:var(--text-3);margin-left:auto">'+calls+' calls · '+ratio+'/100</span>'
       +'</div>'
       +'<div style="height:4px;background:var(--border-light);border-radius:2px;overflow:hidden">'
@@ -2508,7 +2522,7 @@ function renderLeadPipelinePanels(raw){
       s+='<span style="font-size:12px;color:var(--text-3);width:28px;text-align:center">'+r.ytd+'</span>';
       s+='<span style="font-size:11px;color:var(--green);width:36px;text-align:center">'+r.file_starts_mtd+' files</span>';
       s+=(ltf>0?'<span style="font-size:10px;background:'+(ltf>=20?"#dcfce7":ltf>=10?"#fef3c7":"#fee2e2")
-        +';color:'+(ltf>=20?"#15803d":ltf>=10?"#92400e":"#991b1b")+';padding:2px 7px;border-radius:4px">'+ltf+'% LTF</span>':'');
+        +';color:'+(ltf>=20?"#15803d":ltf>=10?"#92400e":"#991b1b")+';padding:2px 7px;border-radius:4px">'+ltf+'% lead-to-file</span>':'');
       s+=(quietCount>0?'<span style="font-size:10px;color:#991b1b;margin-left:auto">'+quietCount+' agent'+(quietCount>1?'s':'')+' gone quiet</span>':'<span style="font-size:10px;color:var(--text-3);margin-left:auto">'+r.agents_mtd.size+' agents sending</span>');
       s+='</div>';
     });
@@ -2541,7 +2555,7 @@ function renderLeadPipelinePanels(raw){
       f+='<span style="font-size:11px"><b>'+r.mtd+'</b> <span style="color:var(--text-3)">MTD</span></span>';
       f+='<span style="font-size:11px"><b>'+r.ytd+'</b> <span style="color:var(--text-3)">YTD</span></span>';
       f+='<span style="font-size:11px;color:var(--green)"><b>'+r.file_starts_mtd+'</b> files MTD</span>';
-      f+=(ltfMtd>0?'<span style="font-size:10px;background:'+(ltfMtd>=20?"#dcfce7":ltfMtd>=10?"#fef3c7":"#fee2e2")+';color:'+(ltfMtd>=20?"#15803d":ltfMtd>=10?"#92400e":"#991b1b")+';padding:2px 8px;border-radius:4px;font-weight:600">'+ltfMtd+'% LTF</span>':"");
+      f+=(ltfMtd>0?'<span style="font-size:10px;background:'+(ltfMtd>=20?"#dcfce7":ltfMtd>=10?"#fef3c7":"#fee2e2")+';color:'+(ltfMtd>=20?"#15803d":ltfMtd>=10?"#92400e":"#991b1b")+';padding:2px 8px;border-radius:4px;font-weight:600">'+ltfMtd+'% lead-to-file</span>':"");
       f+='</div>';
       f+='<span style="font-size:11px;color:var(--text-3)">'+r.agents_mtd.size+' agents active MTD · '+r.agents_ytd.size+' YTD</span>';
       f+='</div>';
