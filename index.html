@@ -494,7 +494,8 @@ tr:hover td{background:var(--bg)}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
     <div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px">Flagged by LPs</div>
-      <div id="rm-flagged-count" style="font-size:22px;font-weight:700;color:#1F4E79">—</div>
+      <div id="rm-flagged-count" style="font-size:22px;font-weight:700;color:#1F4E79;cursor:pointer" onclick="toggleRmFlaggedPanel()">—</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:2px;cursor:pointer" onclick="toggleRmFlaggedPanel()">tap to see agents</div>
     </div>
     <div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px">Going-quiet coverage</div>
@@ -502,6 +503,13 @@ tr:hover td{background:var(--bg)}
     </div>
   </div>
 
+  <div id="rm-flagged-panel" style="display:none;background:#fff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:12px;overflow:hidden">
+    <div style="background:#eff6ff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:12px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.04em">🚩 Flagged for RM follow-up</div>
+      <button onclick="toggleRmFlaggedPanel()" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:16px">×</button>
+    </div>
+    <div id="rm-flagged-list" style="padding:0"><div style="padding:12px 16px;font-size:12px;color:#94a3b8">Loading...</div></div>
+  </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px">
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999">Activity feed</div>
     <select id="rm-feed-type" onchange="rmRenderFeed()" style="padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;color:#333;background:#fff;min-width:170px">
@@ -915,7 +923,8 @@ function renderReferralLeadsDirect(data){
   var todayStr=localDateStr(now);
   var prior=new Date(now);prior.setDate(prior.getDate()-1);
   var priorStr=localDateStr(prior);
-  var activeFilters=window._refFilters||{status:[],lp:[]};
+  // Use refFilters (the main filter state object)
+  var activeFilters={status:refFilters.status?[refFilters.status]:[],lp:refFilters.lp?[refFilters.lp]:[]};
 
   function lpMatch(r){
     var lpMap={"Gavin":["Dill","Gavin"],"Karen":["De La Riva","Karen"],"Osgood":["McMahon","Osgood"],"Jordan":["Johnston","Jordan"],"Said":["Saleh","Said"]};
@@ -926,12 +935,15 @@ function renderReferralLeadsDirect(data){
   }
   function statusMatch(r){
     if(!activeFilters.status||!activeFilters.status.length)return true;
+    var st=(r.status||"").toLowerCase();
     return activeFilters.status.some(function(s){
-      if(s==="File Started")return(r.status||"").toLowerCase().indexOf("start")>=0;
-      if(s==="Contact Attempt")return(r.status||"").toLowerCase().indexOf("contact attempt")>=0;
-      if(s==="Contacted")return(r.status||"").toLowerCase()==="contacted";
-      if(s==="Nurture")return(r.status||"").toLowerCase().indexOf("nurture")>=0;
-      if(s==="App Withdrawn")return(r.status||"").toLowerCase().indexOf("withdrawn")>=0;
+      if(s==="File Started")return st.indexOf("start")>=0;
+      if(s==="Contact Attempt")return st.indexOf("contact attempt")>=0||st.indexOf("contact_attempt")>=0;
+      if(s==="Contacted")return st==="contacted";
+      if(s==="Nurture")return st.indexOf("nurture")>=0;
+      if(s==="App Withdrawn")return st.indexOf("withdrawn")>=0||st.indexOf("app withdrawn")>=0;
+      if(s==="Scheduled")return st.indexOf("scheduled")>=0;
+      if(s==="Other")return st===""||st==="new"||["started","contacted","contact attempt","nurture","withdrawn","scheduled"].every(function(k){return st.indexOf(k)<0;});
       return true;
     });
   }
@@ -1229,7 +1241,7 @@ function loadCallLogs(){
     if(res[0])res[0].forEach(function(r){callLogs[r.agent_name]=r;});
     if(res[1])res[1].forEach(function(r){lastWeekLogs[r.agent_name]=r;});
     setSyncStatus("live");
-    Promise.all([loadPrevNotes(),loadRmActivity(),loadAgentFirstCalls(),loadVelocifyLeads(),loadCoMarketing(),loadAgentAssignments(),loadAgentMilestones(),loadChurnRisk(),loadLpEffectiveness(),loadReceivedLeads()]).catch(function(){});
+    Promise.all([loadPrevNotes(),loadRmActivity(),loadAgentFirstCalls(),loadVelocifyLeads(),loadCoMarketing(),loadAgentAssignments(),loadAgentMilestones(),loadChurnRisk(),loadLpEffectiveness(),loadReceivedLeads(),loadRmFollowups()]).catch(function(){});
   }).catch(function(){
     setSyncStatus("error");
     return Promise.resolve();
@@ -1690,7 +1702,16 @@ function renderCallCard(a,lp,isBonus){
 
     // RM flag toggle — lets LP signal Amanda needs to follow up on this agent
     var curFlag=callLogs[a[0]]?(callLogs[a[0]].flag_rm||false):(pendingNote[a[0]]?(pendingNote[a[0]].flagRm||false):false);
-    html+='<div style="margin-top:10px"><button type="button" class="rm-flag-btn'+(curFlag?' is-flagged':'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="'+(called?'toggleRmFlag(this)':'togglePendingRmFlag(this)')+'"><span class="rm-flag-icon">'+(curFlag?'🚩':'🏳️')+'</span><span>'+(curFlag?'Flagged for RM follow-up':'Flag for RM follow-up')+'</span></button></div>';
+    var amandaFU=rmFollowupsData[a[0].toUpperCase()]||null;
+    if(amandaFU){
+      var fuDate=amandaFU.followup_date?new Date(amandaFU.followup_date+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"recently";
+      html+='<div style="margin-top:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--radius-sm);padding:8px 12px">';
+      html+='<div style="font-size:11px;font-weight:700;color:#276749;margin-bottom:'+(amandaFU.amanda_note?4:0)+'px">&#10003; Amanda followed up &middot; '+fuDate+(amandaFU.activity_type?' &middot; '+escHtml(amandaFU.activity_type):'')+'</div>';
+      if(amandaFU.amanda_note)html+='<div style="font-size:11px;color:#475569;font-style:italic">&quot;'+escHtml(amandaFU.amanda_note.substring(0,120))+'&quot;</div>';
+      html+='</div>';
+    } else {
+      html+='<div style="margin-top:10px"><button type="button" class="rm-flag-btn'+(curFlag?' is-flagged':'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="'+(called?'toggleRmFlag(this)':'togglePendingRmFlag(this)')+'"><span class="rm-flag-icon">'+(curFlag?'🚩':'🏳️')+'</span><span>'+(curFlag?'Flagged for RM follow-up':'Flag for RM follow-up')+'</span></button></div>';
+    }
 
     // Speed-to-lead signal — if agent sent a lead recently, show how fast team responded
   var velStl=VELOCIFY_SEED[a[0].toUpperCase()]||null;
@@ -3135,6 +3156,7 @@ var prevNotes={};
 var rmActivity={};
 var selfReportedReferrals={};
 var receivedLeadsData={};
+var rmFollowupsData={};
 var agentFirstCall={};
 var agentLastCall={};
 var coMarketingAgents={};
@@ -3274,6 +3296,18 @@ function loadRmActivity(){
   return sbFetch("GET","amanda_activities?act_date=gte."+weekKey+"&act_date=lte."+wEnd+"&select=agent_name,act_date&limit=500").then(function(res){
     rmActivity={};
     if(res)res.forEach(function(r){if(!rmActivity[r.agent_name]||r.act_date>rmActivity[r.agent_name])rmActivity[r.agent_name]=r.act_date;});
+  }).catch(function(){});
+}
+
+function loadRmFollowups(){
+  var cutoff=new Date(TODAY);cutoff.setDate(cutoff.getDate()-30);
+  var cutoffStr=cutoff.getFullYear()+"-"+String(cutoff.getMonth()+1).padStart(2,"0")+"-"+String(cutoff.getDate()).padStart(2,"0");
+  return sbFetch("GET","rm_followups?followup_date=gte."+cutoffStr+"&select=agent_name,lp,amanda_note,followup_date,activity_type&order=followup_date.desc&limit=500").then(function(res){
+    rmFollowupsData={};
+    if(res)res.forEach(function(r){
+      var key=r.agent_name.toUpperCase();
+      if(!rmFollowupsData[key])rmFollowupsData[key]=r;
+    });
   }).catch(function(){});
 }
 
@@ -3431,23 +3465,41 @@ var refSort={col:"",dir:1};
 function toggleRefFilter(type,val,el){
   if(refFilters[type]===val){refFilters[type]="";}
   else{refFilters[type]=val;}
+  // Sync to _refFilters format used by standalone view
+  window._refFilters={
+    status:refFilters.status?[refFilters.status]:[],
+    lp:refFilters.lp?[refFilters.lp]:[]
+  };
+  // Update visual state of ALL filter buttons (both Daniel + standalone views)
   document.querySelectorAll(".ref-filter-btn").forEach(function(b){
-    b.style.outline="none";
+    b.style.outline="none";b.style.fontWeight="";
   });
   document.querySelectorAll(".ref-filter-btn").forEach(function(b){
     var bval=b.textContent.trim();
     var btype=b.classList.contains("lp-tag")?"lp":"status";
     if(refFilters[btype]&&bval.toLowerCase().indexOf(refFilters[btype].toLowerCase())>=0){
-      b.style.outline="2px solid var(--navy)";b.style.outlineOffset="2px";
+      b.style.outline="2px solid var(--navy)";b.style.outlineOffset="2px";b.style.fontWeight="700";
     }
   });
-  renderReferralLeads(referralLeadsCache||[]);
+  // Render into whichever view is active
+  if(currentUser==="Leads"){
+    renderReferralLeadsDirect(referralLeadsCache||[]);
+  } else {
+    renderReferralLeads(referralLeadsCache||[]);
+  }
 }
 
 function clearRefFilters(){
   refFilters={status:"",lp:""};
-  document.querySelectorAll(".ref-filter-btn").forEach(function(b){b.style.outline="none";});
-  renderReferralLeads(referralLeadsCache||[]);
+  window._refFilters={status:[],lp:[]};
+  document.querySelectorAll(".ref-filter-btn").forEach(function(b){
+    b.style.outline="none";b.style.fontWeight="";
+  });
+  if(currentUser==="Leads"){
+    renderReferralLeadsDirect(referralLeadsCache||[]);
+  } else {
+    renderReferralLeads(referralLeadsCache||[]);
+  }
 }
 
 function sortRefTable(col){
@@ -4061,13 +4113,104 @@ function rmRenderGoals(){
   body.innerHTML=html;
 }
 
+function openRmFollowupForm(btn){
+  var agentName=btn.getAttribute("data-agent");
+  var lp=btn.getAttribute("data-lp");
+  var rid=btn.getAttribute("data-rid");
+  var row=btn.closest("[style*='padding:10px 16px']")||btn.parentNode.parentNode;
+  var today=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"});
+  var fh='<div style="padding:10px 16px;border-bottom:1px solid #f1f5f9;background:#f8fafc">'
+    +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:8px">Log Amanda follow-up for '+escHtml(agentName)+'</div>'
+    +'<select id="fu-type-'+rid+'" style="width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;margin-bottom:6px;font-family:inherit">'
+    +'<option>Agent visit</option><option>Phone call</option><option>Co-marketing meeting</option><option>Email follow-up</option><option>Other</option>'
+    +'</select>'
+    +'<textarea id="fu-note-'+rid+'" placeholder="What did Amanda discuss? What was the outcome?" style="width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;min-height:70px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
+    +'<div style="display:flex;gap:6px;margin-top:6px">'
+    +'<button data-agent="'+escHtml(agentName)+'" data-lp="'+escHtml(lp)+'" data-rid="'+rid+'" onclick="saveRmFollowup(this)" style="background:#1F4E79;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit">Save &amp; notify LP</button>'
+    +'<button onclick="document.getElementById(\'rm-flagged-panel\').style.display=\'none\'" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;color:#64748b;font-family:inherit">Cancel</button>'
+    +'</div></div>';
+  if(row)row.outerHTML=fh;
+}
+
+function saveRmFollowup(btn){
+  var agentName=btn.getAttribute("data-agent");
+  var lp=btn.getAttribute("data-lp");
+  var rid=btn.getAttribute("data-rid");
+  var noteEl=document.getElementById("fu-note-"+rid);
+  var typeEl=document.getElementById("fu-type-"+rid);
+  var note=noteEl?noteEl.value.trim():"";
+  var actType=typeEl?typeEl.value:"Agent visit";
+  if(!note){if(noteEl){noteEl.style.borderColor="#dc2626";}return;}
+  btn.textContent="Saving...";btn.disabled=true;
+  sbFetch("POST","rm_followups",{agent_name:agentName,lp:lp,amanda_note:note,followup_date:localDateStr(TODAY),activity_type:actType}).then(function(){
+    if(rid)sbFetch("PATCH","call_logs?id=eq."+encodeURIComponent(rid),{flag_rm:false}).catch(function(){});
+    rmFollowupsData[agentName.toUpperCase()]={agent_name:agentName,lp:lp,amanda_note:note,followup_date:localDateStr(TODAY),activity_type:actType};
+    var panel=document.getElementById("rm-flagged-panel");
+    if(panel)panel.style.display="none";
+    rmLoadFlagged();
+    // Refresh LP view so banner appears
+    if(currentUser&&currentUser!=="Daniel"&&currentUser!=="Leads"&&currentUser!=="Admin")renderLP(currentUser);
+    // Show toast
+    var toast=document.createElement("div");
+    toast.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1F4E79;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.15)";
+    toast.textContent="Follow-up saved \u2014 "+agentName+" notified to LP";
+    document.body.appendChild(toast);
+    setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast);},3000);
+  }).catch(function(){btn.textContent="Save & notify LP";btn.disabled=false;});
+}
+
+function toggleRmFlaggedPanel(){
+  var panel=document.getElementById("rm-flagged-panel");
+  if(!panel)return;
+  var isOpen=panel.style.display!=="none";
+  if(isOpen){panel.style.display="none";return;}
+  panel.style.display="block";
+  // Load full flagged list
+  fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome&order=call_date.desc",
+    {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}})
+  .then(function(r){return r.json();})
+  .then(function(rows){
+    var listEl=document.getElementById("rm-flagged-list");
+    if(!listEl)return;
+    if(!rows||!rows.length){listEl.innerHTML='<div style="padding:16px;font-size:12px;color:#94a3b8;text-align:center">No flagged agents this week</div>';return;}
+    var h="";
+    rows.forEach(function(r){
+      var lpColor=LP_COLORS[r.lp]||"#64748b";
+      h+='<div style="padding:10px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:10px">';
+      h+='<span style="font-size:16px;flex-shrink:0">🚩</span>';
+      h+='<div style="flex:1;min-width:0">';
+      h+='<div style="font-size:13px;font-weight:700;color:#0f172a">'+escHtml(r.agent_name)+'</div>';
+      h+='<div style="font-size:11px;color:#64748b;margin-top:2px">';
+      h+='<span style="font-weight:600;color:'+lpColor+'">'+escHtml(r.lp)+'</span>';
+      h+=' · '+(r.call_date?new Date(r.call_date+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"—");
+      h+=(r.outcome?' · '+escHtml(r.outcome):"");
+      h+='</div>';
+      if(r.note)h+='<div style="font-size:11px;color:#475569;font-style:italic;margin-top:3px">"'+escHtml(r.note.substring(0,100))+'"</div>';
+      h+='</div>';
+      h+='<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">';
+      h+='<button data-agent="'+escHtml(r.agent_name)+'" data-lp="'+escHtml(r.lp||"")+'" data-rid="'+r.id+'" onclick="openRmFollowupForm(this)" style="font-size:10px;background:#1F4E79;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;color:#fff;font-family:inherit">Log follow-up</button>';
+      h+='<button data-rid="'+r.id+'" onclick="rmClearFlag(this.getAttribute(&quot;data-rid&quot;))" style="font-size:10px;background:none;border:1px solid #e2e8f0;border-radius:6px;padding:3px 8px;cursor:pointer;color:#64748b;font-family:inherit">Clear flag</button>';
+      h+='</div>';
+      h+='</div>';
+    });
+    listEl.innerHTML=h;
+  }).catch(function(){
+    var listEl=document.getElementById("rm-flagged-list");
+    if(listEl)listEl.innerHTML='<div style="padding:16px;font-size:12px;color:#94a3b8">Could not load — check connection</div>';
+  });
+}
+
 async function rmLoadFlagged(){
   try{
-    var res=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id",
+    var res=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date",
       {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
     var rows=await res.json();
-    document.getElementById("rm-flagged-count").textContent=rows.length;
-  }catch(e){console.warn(e);document.getElementById("rm-flagged-count").textContent="—";}
+    var countEl=document.getElementById("rm-flagged-count");
+    if(countEl)countEl.textContent=rows.length;
+    // If panel is already open, refresh it
+    var panel=document.getElementById("rm-flagged-panel");
+    if(panel&&panel.style.display!=="none")toggleRmFlaggedPanel();
+  }catch(e){console.warn(e);var el=document.getElementById("rm-flagged-count");if(el)el.textContent="—";}
 }
 
 async function rmLoadCoverage(){
