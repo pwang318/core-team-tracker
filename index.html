@@ -712,7 +712,7 @@ tr:hover td{background:var(--bg)}
     <div style="font-size:18px;font-weight:700;color:var(--text)">Referral Leads</div>
     <div style="display:flex;align-items:center;gap:10px">
       <div style="font-size:11px;color:var(--text-3)" id="ref-last-updated-v2">Loading...</div>
-      <button class="ref-refresh-btn" onclick="loadReferralLeads(true)">&#8635; Refresh</button>
+      <button class="ref-refresh-btn" onclick="loadReferralLeadsDirect()">&#8635; Refresh</button>
     </div>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem">
@@ -886,8 +886,119 @@ function openLeadsView(btn){
   if(btn)btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-leads").classList.add("active");
-  loadReferralLeads(false);
-  setTimeout(renderLeadsViewSync,600);
+  // Load directly into the standalone view — don't depend on Daniel view elements
+  loadReferralLeadsDirect();
+}
+
+function loadReferralLeadsDirect(){
+  var lu2=document.getElementById("ref-last-updated-v2");
+  if(lu2)lu2.textContent="Loading...";
+  var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
+  sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
+    var CORE_LP_KEYWORDS=["Dill","Gavin","De La Riva","Karen","Saleh","Said","McMahon","Osgood","Johnston","Jordan"];
+    var filtered=(res||[]).filter(function(r){
+      var lp=r.lp_user||"";
+      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
+    });
+    referralLeadsCache=filtered;
+    renderReferralLeadsDirect(filtered);
+    if(lu2)lu2.textContent="Updated "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+  }).catch(function(){
+    if(lu2)lu2.textContent="Could not load — check connection";
+    renderReferralLeadsDirect([]);
+  });
+}
+
+function renderReferralLeadsDirect(data){
+  // Compute stats
+  var now=new Date();
+  var todayStr=localDateStr(now);
+  var prior=new Date(now);prior.setDate(prior.getDate()-1);
+  var priorStr=localDateStr(prior);
+  var activeFilters=window._refFilters||{status:[],lp:[]};
+
+  function lpMatch(r){
+    var lpMap={"Gavin":["Dill","Gavin"],"Karen":["De La Riva","Karen"],"Osgood":["McMahon","Osgood"],"Jordan":["Johnston","Jordan"],"Said":["Saleh","Said"]};
+    if(!activeFilters.lp||!activeFilters.lp.length)return true;
+    return activeFilters.lp.some(function(lp){
+      return lpMap[lp]&&lpMap[lp].some(function(k){return(r.lp_user||"").indexOf(k)>=0;});
+    });
+  }
+  function statusMatch(r){
+    if(!activeFilters.status||!activeFilters.status.length)return true;
+    return activeFilters.status.some(function(s){
+      if(s==="File Started")return(r.status||"").toLowerCase().indexOf("start")>=0;
+      if(s==="Contact Attempt")return(r.status||"").toLowerCase().indexOf("contact attempt")>=0;
+      if(s==="Contacted")return(r.status||"").toLowerCase()==="contacted";
+      if(s==="Nurture")return(r.status||"").toLowerCase().indexOf("nurture")>=0;
+      if(s==="App Withdrawn")return(r.status||"").toLowerCase().indexOf("withdrawn")>=0;
+      return true;
+    });
+  }
+
+  var filtered=data.filter(function(r){return lpMatch(r)&&statusMatch(r);});
+  var mtd=filtered.length;
+  var fileStarts=filtered.filter(function(r){return(r.status||"").toLowerCase().indexOf("start")>=0;}).length;
+  var ltf=mtd>0?Math.round(fileStarts/mtd*100):0;
+  var todayLeads=filtered.filter(function(r){return r.date_added===todayStr;});
+  var priorLeads=filtered.filter(function(r){return r.date_added===priorStr;});
+  var unconverted=filtered.filter(function(r){return(r.status||"").toLowerCase().indexOf("start")<0;});
+  var needsTouch=filtered.filter(function(r){
+    if(!r.last_update)return true;
+    var lastUp=new Date(r.last_update+"T12:00:00");
+    return(now-lastUp)>86400000;
+  });
+
+  // Update stat cards
+  var el=function(id){return document.getElementById(id);};
+  if(el("ref-mtd-leads-v2"))el("ref-mtd-leads-v2").textContent=mtd;
+  if(el("ref-file-starts-v2"))el("ref-file-starts-v2").textContent=fileStarts;
+  if(el("ref-ltf-v2"))el("ref-ltf-v2").textContent=ltf+"%";
+  if(el("ref-needs-touch-v2"))el("ref-needs-touch-v2").textContent=needsTouch.length;
+
+  // Today label
+  var todayLabel=now.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+  var priorLabel=prior.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+  if(el("ref-today-label-v2"))el("ref-today-label-v2").textContent=todayLabel;
+  if(el("ref-prior-label-v2"))el("ref-prior-label-v2").textContent=priorLabel;
+
+  // Needs touch
+  var ntSect=el("ref-needs-touch-section-v2");
+  if(ntSect)ntSect.style.display=needsTouch.length?"block":"none";
+  if(el("ref-needs-touch-count-v2"))el("ref-needs-touch-count-v2").textContent=needsTouch.length+" lead"+(needsTouch.length!==1?"s":"");
+
+  // Render table helper
+  function renderTable(leads,containerId,countId){
+    var c=el(containerId),cnt=el(countId);
+    if(cnt)cnt.textContent=leads.length+" lead"+(leads.length!==1?"s":"");
+    if(!c)return;
+    if(!leads.length){c.innerHTML='<div style="padding:12px 16px;font-size:12px;color:var(--text-3)">No leads</div>';return;}
+    var h="";
+    leads.forEach(function(r){
+      var agent=escHtml(r.referral_partner_name||"Unknown");
+      var buyer=r.buyer_name?escHtml(r.buyer_name):"—";
+      var date=r.date_added?new Date(r.date_added+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"—";
+      var status=r.status||"—";
+      var lpDisp=r.lp_user?r.lp_user.split(",").reverse().join(" ").trim():"—";
+      var note=r.last_action_note&&r.last_action_note.toLowerCase()!=="empty"?r.last_action_note:"";
+      h+='<div style="padding:10px 16px;border-bottom:1px solid var(--border-light);display:flex;gap:10px;align-items:flex-start">';
+      h+='<div style="flex:1;min-width:0">';
+      h+='<div style="font-size:12px;font-weight:700;color:var(--text)">'+agent+'</div>';
+      h+='<div style="font-size:11px;color:var(--text-2)">Buyer: '+buyer+' · '+lpDisp+'</div>';
+      if(note)h+='<div style="font-size:11px;color:var(--text-3);font-style:italic;margin-top:2px">"'+escHtml(note.substring(0,80))+'"</div>';
+      h+='</div>';
+      h+='<div style="text-align:right;flex-shrink:0">';
+      h+='<div style="font-size:11px;font-weight:600;color:var(--text)">'+date+'</div>';
+      h+='<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:#f1f5f9;color:#475569">'+status+'</span>';
+      h+='</div></div>';
+    });
+    c.innerHTML=h;
+  }
+
+  renderTable(needsTouch,"ref-needs-touch-table-v2","ref-needs-touch-count-v2");
+  renderTable(todayLeads,"ref-today-table-v2","ref-today-count-v2");
+  renderTable(priorLeads,"ref-prior-table-v2","ref-prior-day-count-v2");
+  renderTable(unconverted,"ref-uncovered-table-v2","ref-uncovered-count-v2");
 }
 
 function renderLeadsViewSync(){
