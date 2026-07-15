@@ -700,7 +700,7 @@ tr:hover td{background:var(--bg)}
         <input type="text" id="d-q" placeholder="Search..." oninput="renderDaniel()" style="width:120px">
       </div>
     </div>
-    <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last LP call</th><th>Last activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
   </div>
 
 </div>
@@ -845,6 +845,15 @@ function getWeekLabel(k){var mon=new Date(k+'T12:00:00'),sun=new Date(mon);sun.s
 function fmt(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
 function fmtShort(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'numeric',day:'numeric'});}
 function mostRecent(a){return[a[3],a[4],a[5],a[6]].filter(Boolean).sort().reverse()[0]||null;}
+function mostRecentWithType(a){
+  var pairs=[
+    {date:a[3],label:"Lead in Velocify",icon:"🎯"},
+    {date:a[4],label:"File started",icon:"📄"},
+    {date:a[5],label:"Contract",icon:"✍️"},
+    {date:a[6],label:"Close",icon:"🏆"}
+  ].filter(function(p){return!!p.date;}).sort(function(x,y){return y.date.localeCompare(x.date);});
+  return pairs.length?pairs[0]:null;
+}
 function isActive(a){var d=mostRecent(a);return d?new Date(d+'T12:00:00')>=CUTOFF:false;}
 function calledThisWeek(name){return !!(callLogs[name]&&callLogs[name].week_key===weekKey);}
 function lpDays(name){var log=callLogs[name];if(!log||!log.call_date)return null;var dt=new Date(log.call_date+'T12:00:00');dt.setHours(0,0,0,0);return Math.floor((TODAY-dt)/86400000);}
@@ -3037,8 +3046,25 @@ function renderDaniel(){
       '<td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td>'+
       '<td>'+(act?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
       '<td><button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="font-size:11px">View/Edit</button></td>'+
-      '<td style="font-size:12px;'+dsc+'">'+(ds===null?"Never":ds+"d ago")+'</td>'+
-      '<td style="font-size:12px;color:#888">'+(mr?fmt(mr):"--")+'</td>'+
+      '<td style="font-size:12px">'+(function(){
+        var lastCall=agentLastCall[a[0]]||null;
+        if(!lastCall)return '<span style="color:#E53935">Never called</span>';
+        var d=new Date(lastCall+"T12:00:00");
+        var days=Math.floor((TODAY-d)/86400000);
+        var dateStr=d.toLocaleDateString("en-US",{month:"numeric",day:"numeric",year:"2-digit"});
+        var color=days>=60?"#E53935":days>=30?"#FB8C00":"#43A047";
+        return '<span style="color:'+color+';font-weight:600">'+dateStr+'</span><br><span style="font-size:10px;color:#94a3b8">'+days+'d ago</span>';
+      }())+'</td>'+
+      '<td style="font-size:12px">'+(function(){
+        var mrt=mostRecentWithType(a);
+        if(!mrt)return '<span style="color:#ccc">--</span>';
+        var d=new Date(mrt.date+"T12:00:00");
+        var days=Math.floor((TODAY-d)/86400000);
+        var dateStr=d.toLocaleDateString("en-US",{month:"numeric",day:"numeric",year:"2-digit"});
+        var color=days>=90?"#E53935":days>=45?"#FB8C00":"#43A047";
+        return '<span style="color:'+color+';font-weight:600">'+dateStr+'</span><br>'
+          +'<span style="font-size:10px;color:#94a3b8">'+mrt.icon+" "+mrt.label+'</span>';
+      }())+'</td>'+
       '<td style="text-align:center">'+(cal?'<b style="color:#43A047">Yes</b>':'<span style="color:#ccc">-</span>')+'</td></tr>';
   }).join("");
 }
