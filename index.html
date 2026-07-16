@@ -4178,19 +4178,26 @@ document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 loadAgents();
 // Auto-open Snapshot on load
 (function(){
-  var pulseBtn=document.querySelector(".wb-Snapshot");
+  var snapBtn=document.querySelector(".wb-Snapshot");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-snapshot").classList.add("active");
-  if(pulseBtn)pulseBtn.classList.add("active");
-  setTimeout(function(){
-    loadCallLogs().then(function(){
-      renderDaniel();
-      loadLeadPipeline().then(function(){buildSnapshot();});
-      buildSnapshot();
-    });
-  },100);
+  if(snapBtn)snapBtn.classList.add("active");
+  // Show loading state immediately
+  var el=document.getElementById("d-snapshot-body");
+  if(el)el.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div>';
+  // Load data, then build snapshot
+  Promise.all([
+    loadCallLogs(),
+    loadAgentFirstCalls(),
+    loadRmActivity()
+  ]).then(function(){
+    buildSnapshot(); // first pass — calls + scorecard
+    loadLeadPipeline(); // leads load async, snapshot auto-rebuilds when done
+  }).catch(function(e){
+    console.warn("Snapshot load error:",e);
+    buildSnapshot();
+  });
 })();
-loadCallLogs();
 
 // ── TEAM-WIDE ROLLUP (Scorecards tab) ────────────────────────────────────
 const LPSC_TEAM_LPS=["Gavin","Karen","Osgood","Said","Jordan"];
