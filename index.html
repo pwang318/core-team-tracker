@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="version" content="20260716202643">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,6 +59,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px
 .wb-Leads.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:600}
 
 .view{display:none}.view.active{display:block}
+#d-snapshot-body{width:100%}
 
 /* LP Hero */
 .lp-hero{background:linear-gradient(135deg,#1A1A2E 0%,#2D3561 100%);border-radius:var(--radius-md);padding:1.25rem 1.5rem;margin-bottom:1rem}
@@ -421,8 +423,7 @@ tr:hover td{background:var(--bg)}
 </div>
 <div class="who-bar">
   <button class="who-btn wb-Snapshot" onclick="openSnapshotView(this)">Snapshot</button>
-  <button class="who-btn wb-Daniel" onclick="selectUser(this,'Daniel')">Management</button>
-  <button class="who-btn wb-Leads" onclick="openLeadsView(this)">Referral Leads</button>
+  <button class="who-btn wb-Leads" onclick="openLeadsView(this)">Realtor/Builder Leads</button>
   <button class="who-btn wb-Gavin" onclick="selectUser(this,'Gavin')">Gavin</button>
   <button class="who-btn wb-Karen" onclick="selectUser(this,'Karen')">Karen</button>
   <button class="who-btn wb-Osgood" onclick="selectUser(this,'Osgood')">Osgood</button>
@@ -579,7 +580,6 @@ tr:hover td{background:var(--bg)}
       <button class="lpsc-btn" onclick="lpscSelectLP('Karen',this)">Karen</button>
       <button class="lpsc-btn" onclick="lpscSelectLP('Osgood',this)">Osgood</button>
       <button class="lpsc-btn" onclick="lpscSelectLP('Said',this)">Said</button>
-      <button class="lpsc-btn" onclick="lpscSelectLP('Jordan',this)">Jordan</button>
       <button class="lpsc-btn" onclick="lpscSelectLP('Amanda',this)">Amanda (RM)</button>
     </div>
   </div>
@@ -638,116 +638,21 @@ tr:hover td{background:var(--bg)}
 </div>
 
 <!-- DANIEL VIEW -->
-<div id="view-snapshot" class="view"><div class="app" style="padding-top:.75rem">
+<!-- DANIEL VIEW -->
+<div id="view-snapshot" class="view">
   <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'DM Mono',monospace;font-size:10px"></span></div>
   <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div></div>
-</div></div>
-
-<div id="view-daniel" class="view">
-  <div class="d-tab-bar">
-    <div class="d-tab active" onclick="switchDanielTab4('today',this)">Today</div>
-    <div class="d-tab" onclick="switchDanielTab4('week',this)">This week</div>
-    <div class="d-tab" onclick="switchDanielTab4('pipeline',this)">Active Agent Roster</div>
-    <div class="d-tab" onclick="switchDanielTab4('agents',this)">Growth</div>
-  </div>
-
-  <!-- TAB: TODAY -->
-  <div id="d-tab4-today" class="d-tab-panel active">
-        <div id="d-team-streak-section" style="margin-bottom:.75rem"></div>
-    <div id="d-allclear-section" style="margin-bottom:.75rem"></div>
-    <div id="d-carryover-section" style="margin-bottom:1rem"></div>
-    <div id="d-alerts-section" style="margin-bottom:1rem"></div>
-    <div id="d-note-quality-section" style="margin-bottom:1rem"></div>
-    <div class="section-head" id="pipeline-section-head">Lead pipeline — <span id="pipeline-date-label"></span> <button class="btn btn-sm" onclick="loadLeadPipeline()" style="text-transform:none;font-size:11px">Refresh</button></div>
-    <div id="d-lead-pipeline-today" style="margin-bottom:1rem"><div style="text-align:center;padding:16px;color:var(--text-3);font-size:12px">Loading...</div></div>
-    <div class="section-head">LP calls this week <button class="btn btn-sm" onclick="loadCallLogs().then(function(){renderDaniel();})" style="text-transform:none;font-size:11px">Refresh</button></div>
-    <div class="d-grid" id="d-grid"></div>
-    <div class="section-head" style="margin-top:1rem">Birthdays this week</div>
-    <div id="daniel-bday-list" style="margin-bottom:1rem"></div>
-  </div>
-
-  <!-- TAB: THIS WEEK -->
-  <div id="d-tab4-week" class="d-tab-panel">
-    <div class="scorecard">
-      <div class="sc-header" onclick="toggleSC('tw-body','tw-chev')">
-        <div class="sc-title">This week <span style="font-size:11px;font-weight:400;color:var(--text-3)" id="tw-lbl"></span><div class="pills" id="tw-pills"></div></div>
-        <span id="tw-chev" style="font-size:13px;color:var(--text-3)">&#9662;</span>
-      </div>
-      <div id="tw-body" style="display:none;border-top:1px solid var(--border-light);padding:.9rem 1.25rem"><div id="tw-content"></div></div>
-    </div>
-    <div class="scorecard">
-      <div class="sc-header" onclick="toggleSC('lw-body','lw-chev')">
-        <div class="sc-title">Last week <span style="font-size:11px;font-weight:400;color:var(--text-3)" id="lw-lbl"></span><div class="pills" id="lw-pills"></div></div>
-        <span id="lw-chev" style="font-size:13px;color:var(--text-3)">&#9662;</span>
-      </div>
-      <div id="lw-body" style="display:none;border-top:1px solid var(--border-light);padding:.9rem 1.25rem"><div id="lw-content"></div></div>
-    </div>
-    <div class="section-head" style="margin-top:.5rem">Amanda &#8212; this week</div>
-    <div id="d-rm-summary" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem">
-      <div style="text-align:center;padding:12px;color:#aaa;font-size:13px">Loading...</div>
-    </div>
-    <div class="section-head">LP scorecard summary</div>
-    <div id="d-lp-scorecard-summary" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem">
-      <div style="text-align:center;padding:12px;color:#aaa;font-size:13px">Loading...</div>
-    </div>
-    <div class="section-head">Weekly Teams summary</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem">
-      <p style="font-size:12px;color:var(--text-2);margin-bottom:.75rem">Copy and paste into your Core Team channel every Monday.</p>
-      <div class="teams-msg-box" id="teams-message"></div>
-      <button class="btn btn-primary btn-sm" onclick="copyTeamsMsg()" style="margin-top:.75rem">Copy message</button>
-      <span id="copy-confirm" style="font-size:12px;color:#15803d;margin-left:8px;display:none">Copied!</span>
-    </div>
-  </div>
-
-  <!-- TAB: PIPELINE -->
-  <div id="d-tab4-pipeline" class="d-tab-panel">
-    <div id="d-lead-pipeline-full" style="margin-bottom:1rem"><div style="text-align:center;padding:16px;color:var(--text-3);font-size:12px">Loading lead data...</div></div>
-    <div id="d-churn-risk-section" style="margin-bottom:1rem"></div>
-    <div id="d-lp-effectiveness-section" style="margin-bottom:1rem"></div>
-    <div class="section-head">Growth scoreboard</div>
-    <div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div>
-    <div class="section-head">Lead leaderboard</div>
-    <div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading...</div></div>
-    <div class="section-head" style="margin-top:1rem">All-time leaderboard</div>
-    <div id="leaderboard"></div>
-  </div>
-
-  <!-- TAB: GROWTH -->
-  <div id="d-tab4-agents" class="d-tab-panel">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Growth tracking</div>
-      <div style="font-size:12px;color:var(--text-2);line-height:1.6">
-        <b>Tier criteria:</b> C = 1+ lead &amp; 1+ close &nbsp;·&nbsp; B = 2+ leads &amp; 2-3 closes &nbsp;·&nbsp; A = 4+ closes with NFM.<br>
-        Updates automatically when you upload the Power BI export in Admin.
-      </div>
-    </div>
-    <div id="d-activation-section" style="margin-bottom:1rem"></div>
-    <div id="d-tier-upgrade-section" style="margin-bottom:1rem"></div>
-    <div class="section-head">Full roster
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
-        <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
-        <select id="d-lvl" onchange="renderDaniel()"><option value="">All levels</option><option>A</option><option>B</option><option>C</option></select>
-        <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
-        <input type="text" id="d-q" placeholder="Search..." oninput="renderDaniel()" style="width:120px">
-      </div>
-    </div>
-    <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
-  </div>
-
 </div>
-<!-- LEAD DRILL-DOWN MODAL -->
-<div id="lead-drilldown-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)closeDrilldown()">
-  <div style="background:var(--surface);border-radius:12px;width:100%;max-width:560px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border)">
-    <div id="drilldown-header" style="background:#1F4E79;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
-      <div id="drilldown-title" style="color:#fff;font-size:14px;font-weight:700"></div>
-      <button onclick="closeDrilldown()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1">×</button>
-    </div>
-    <div id="drilldown-body" style="overflow-y:auto;padding:0"></div>
-  </div>
-</div>
-<!-- REFERRAL LEADS VIEW (standalone) -->
+
+<!-- REALTOR BUILDER LEADS VIEW -->
 <div id="view-leads" class="view">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+  <div class="d-tab-bar" style="margin-bottom:.75rem">
+    <div class="d-tab active" onclick="switchLeadsTab('leads',this)">Leads</div>
+    <div class="d-tab" onclick="switchLeadsTab('roster',this)">Roster</div>
+    <div class="d-tab" onclick="switchLeadsTab('growth',this)">Growth</div>
+  </div>
+  <div id="leads-tab-leads" class="d-tab-panel active">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
     <div style="font-size:18px;font-weight:700;color:var(--text)">Referral Leads</div>
     <div style="display:flex;align-items:center;gap:10px">
       <div style="font-size:11px;color:var(--text-3)" id="ref-last-updated-v2">Loading...</div>
@@ -808,6 +713,60 @@ tr:hover td{background:var(--bg)}
   </div>
 </div>
 <!-- ADMIN VIEW -->
+  </div>
+  </div>
+  <div id="leads-tab-roster" class="d-tab-panel">
+    <div id="d-allclear-section" style="margin-bottom:.75rem"></div>
+    <div id="d-rm-summary" style="margin-bottom:1rem"></div>
+    <div id="d-lp-scorecard-summary" style="margin-bottom:1rem"></div>
+    <div id="velocify-leaderboard" style="margin-bottom:1rem"></div>
+    <div id="d-lead-pipeline-full" style="margin-bottom:1rem"><div style="text-align:center;padding:16px;color:var(--text-3);font-size:12px">Loading lead data...</div></div>
+    <div id="d-churn-risk-section" style="margin-bottom:1rem"></div>
+    <div id="d-lp-effectiveness-section" style="margin-bottom:1rem"></div>
+    <div class="section-head">Growth scoreboard</div>
+    <div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div>
+    <div class="section-head">Lead leaderboard</div>
+    <div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading...</div></div>
+    <div class="section-head" style="margin-top:1rem">All-time leaderboard</div>
+    <div id="leaderboard"></div>
+  </div>
+
+  <!-- TAB: GROWTH -->
+  <div id="leads-tab-growth" class="d-tab-panel">
+    <div id="d-growth-scoreboard" style="margin-bottom:1rem"></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Growth tracking</div>
+      <div style="font-size:12px;color:var(--text-2);line-height:1.6">
+        <b>Tier criteria:</b> C = 1+ lead &amp; 1+ close &nbsp;·&nbsp; B = 2+ leads &amp; 2-3 closes &nbsp;·&nbsp; A = 4+ closes with NFM.<br>
+        Updates automatically when you upload the Power BI export in Admin.
+      </div>
+    </div>
+    <div id="d-activation-section" style="margin-bottom:1rem"></div>
+    <div id="d-tier-upgrade-section" style="margin-bottom:1rem"></div>
+    <div class="section-head">Full roster
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+        <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
+        <select id="d-lvl" onchange="renderDaniel()"><option value="">All levels</option><option>A</option><option>B</option><option>C</option></select>
+        <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+        <input type="text" id="d-q" placeholder="Search..." oninput="renderDaniel()" style="width:120px">
+      </div>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
+  </div>
+  </div>
+</div>
+
+<!-- LEAD DRILL-DOWN MODAL -->
+<div id="lead-drilldown-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)closeDrilldown()">
+  <div style="background:var(--surface);border-radius:12px;width:100%;max-width:560px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border)">
+    <div id="drilldown-header" style="background:#1F4E79;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div id="drilldown-title" style="color:#fff;font-size:14px;font-weight:700"></div>
+      <button onclick="closeDrilldown()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div id="drilldown-body" style="overflow-y:auto;padding:0"></div>
+  </div>
+</div>
+
 <div id="view-admin" class="view">
   <div class="admin-section">
     <h3>Upload Power BI export</h3>
@@ -844,16 +803,62 @@ tr:hover td{background:var(--bg)}
     <h3>Co-marketing active agents</h3>
     <p style="font-size:12px;color:#888;margin-bottom:.75rem">Mark agents who have an active co-marketing setup (flyer, Total Expert, etc.).</p>
     <div style="margin-bottom:8px"><input type="text" id="comkt-q" placeholder="Search agent name..." oninput="renderCoMktList()" style="width:100%"></div>
-    <div id="comkt-list" style="max-height:260px;overflow-y:auto"></div>
-  </div>
-  <div class="admin-section">
-    <h3>Flagged inactive <span style="font-weight:400;font-size:12px;color:#888" id="inactive-count-label"></span></h3>
-    <p style="font-size:12px;color:#888;margin-bottom:.75rem">No lead activity
+    <
 </p>
-</div>
-</div>
-</div>
 <script>
+var STORAGE_KEY="ct_agents_v3";
+var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
+var LP_COLORS={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
+var WEEKLY_TARGET=15;
+var TODAY=new Date();TODAY.setHours(0,0,0,0);
+var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
+
+function localDateStr(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
+function getWeekKey(d){
+  var day=d.getDay(); // 0=Sun,1=Mon,...,6=Sat
+  var diff=day===0?-6:1-day; // days to subtract to get to Monday
+  var mon=new Date(d.getFullYear(),d.getMonth(),d.getDate()+diff);
+  return localDateStr(mon);
+}
+function getLastWeekKey(d){var dt=new Date(d);dt.setDate(dt.getDate()-7);return getWeekKey(dt);}
+function getWeekLabel(k){var mon=new Date(k+'T12:00:00'),sun=new Date(mon);sun.setDate(mon.getDate()+6);var o={month:'short',day:'numeric'};return 'Week of '+mon.toLocaleDateString('en-US',o)+' - '+sun.toLocaleDateString('en-US',o);}
+function fmt(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
+function fmtShort(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'numeric',day:'numeric'});}
+function mostRecent(a){return[a[3],a[4],a[5],a[6]].filter(Boolean).sort().reverse()[0]||null;}
+function mostRecentWithType(a){
+  var pairs=[
+    {date:a[3],label:"Lead in Velocify",icon:"🎯"},
+    {date:a[4],label:"File started",icon:"📄"},
+    {date:a[5],label:"Contract",icon:"✍️"},
+    {date:a[6],label:"Close",icon:"🏆"}
+  ].filter(function(p){return!!p.date;}).sort(function(x,y){return y.date.localeCompare(x.date);});
+  return pairs.length?pairs[0]:null;
+}
+function isActive(a){var d=mostRecent(a);return d?new Date(d+'T12:00:00')>=CUTOFF:false;}
+function calledThisWeek(name){return !!(callLogs[name]&&callLogs[name].week_key===weekKey);}
+function lpDays(name){var log=callLogs[name];if(!log||!log.call_date)return null;var dt=new Date(log.call_date+'T12:00:00');dt.setHours(0,0,0,0);return Math.floor((TODAY-dt)/86400000);}
+function isPriority(a){return a[7]===true;}
+function isMonday(){return TODAY.getDay()===1;}
+
+function getLpCallsThisWeek(lp){return Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey;}).length;}
+function getLpCallsLastWeek(lp){return Object.values(lastWeekLogs).filter(function(l){return l.lp===lp&&l.week_key===lastWeekKey;}).length;}
+function getLpPctThisWeek(lp){return Math.min(100,Math.round(getLpCallsThisWeek(lp)/WEEKLY_TARGET*100));}
+function getLpPctLastWeek(lp){return Math.min(100,Math.round(getLpCallsLastWeek(lp)/WEEKLY_TARGET*100));}
+
+// ─── INCOMPLETE CALLS CARRYOVER SYSTEM ───
+function getLpIncompleteFromLastWeek(lp){
+  var lastWeekCalls=getLpCallsLastWeek(lp);
+  return Math.max(0,WEEKLY_TARGET-lastWeekCalls);
+}
+function getLpTotalTargetThisWeek(lp){
+  var raw=WEEKLY_TARGET+getLpIncompleteFromLastWeek(lp);
+  // Cap at the LP's active agent count - can't call more unique agents than exist
+  var activeCount=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
+  return Math.min(raw,Math.max(WEEKLY_TARGET,activeCount));
+}
+
+var weekKey=getWeekKey(TODAY);
+var lastWeekKey=g
 // v2026-07-16 19:04 — amandaFlagged fix
 var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
@@ -911,6 +916,7 @@ function getLpTotalTargetThisWeek(lp){
 var weekKey=getWeekKey(TODAY);
 var lastWeekKey=getLastWeekKey(TODAY);
 var agents=[],callLogs={},lastWeekLogs={},currentUser=null,noteTimers={},contactCache={},editingLpContact=null,pendingNote={};
+var userTyping=false;
 var referralLeadsCache=null;
 
 var SEED=[["ALEXIS AKERS","C",null,"2026-05-12","2026-03-25",null,null,false,1],["ALEXIS REED","C","Said","2026-07-06","2026-07-07","2026-01-30","2026-02-27",false,1],["ALI SWEAZY","C","Unassigned","2026-05-09","2026-05-09",null,null,false,1],["AMANDA HOWARD","C","Unassigned","2026-07-01","2026-07-01","2025-11-25","2025-12-23",false,1],["AMY AGRESTA","C","Gavin","2026-06-16","2026-06-16","2025-07-08","2025-08-05",false,1],["ANA SORIA","C","Karen","2026-04-19",null,null,null,false,1],["ANGELA PEREZ","C","Gavin","2026-04-27","2026-05-06","2026-04-06","2026-04-24",false,1],["ANGELA POTTS","C","Osgood","2026-05-10","2026-05-10",null,null,false,1],["ANGIE BRONOWSKI","B",null,"2025-12-03","2025-12-02","2025-12-29","2026-07-23",false,1],["ANNIE MORENO","B","Karen","2026-06-17","2026-06-18","2026-07-13","2026-06-12",false,1],["ANTHONY AMOS","C",null,"2026-06-03","2026-06-04","2024-08-28",null,false,1],["ASHLEY HENRY","C","Osgood","2026-04-22","2026-04-21",null,null,false,1],["AVA LAIRD","C","Jordan","2026-07-09","2026-07-09",null,null,false,1],["BAILEY STRATHIE","C","Osgood","2026-05-30","2026-05-30","2024-11-21",null,false,1],["BENJAMIN GAYTAN","C","Gavin","2026-05-16","2026-05-22",null,null,false,1],["BRAD GILLIAM","C","Gavin","2026-05-14",null,null,null,false,1],["BRANDON KIDD","C","Said","2026-05-01",null,null,null,false,1],["BRANDON MCCLENDON","C","Said","2026-06-08","2026-06-08",null,null,false,1],["BRANDON THOMPSON","A","Osgood","2026-07-12","2026-07-12","2026-05-04","2026-06-01",false,1],["BRIAN ZINN","C","Jordan","2026-07-14","2026-07-09",null,null,false,1],["CAROLE MCMAHON","C","Osgood","2026-05-31","2026-05-31","2026-05-08","2026-05-26",false,1],["CARRIE SISTARE-KOLIN CAUSEY","C","Unassigned",null,"2026-03-12","2026-04-03","2026-05-20",false,1],["CELINE WILLIAMS","C","Jordan","2026-06-01",null,null,null,false,1],["CESIA ESPINOZA YOUNG","C","Karen","2026-03-11","2026-03-10","2026-03-26","2026-04-17",false,1],["CHELSEA ANDERSON","C","Osgood","2026-02-07","2026-02-06","2026-03-28","2026-04-17",false,1],["CHERYL KINSEY","C","Jordan","2026-05-05","2026-05-04",null,null,false,1],["CHRIS REED","A","Said","2026-07-01","2026-07-15","2026-07-08","2026-06-26",false,1],["CHRISTIAN CHALKIAS","C","Osgood","2026-07-08","2026-04-08",null,null,false,1],["CHRISTINA COUGHLIN","C","Osgood","2026-07-13","2026-07-13","2026-07-10",null,false,1],["CINDA ERICKSON","B","Gavin","2026-04-23","2026-04-21","2026-02-24","2026-03-26",false,1],["CLAUDIA CHUECA","C",null,null,"2026-07-02",null,null,false,1],["CLAUDIA CHUECO","C","Karen","2026-07-02",null,null,null,false,1],["CODA GAHRIS","C","Jordan","2026-04-29","2026-04-29","2026-05-25",null,false,1],["COLIN BURNHEIMER - THRIVE","C","Unassigned",null,"2026-06-30",null,null,false,1],["CONNER KOCHANSKY","A","Gavin","2026-07-10","2026-07-10","2026-06-22","2026-07-14",false,1],["CONNOR KOCHANSKY","C",null,"2025-07-18","2026-06-25",null,null,false,1],["COURTNEY HAMILTON","C","Osgood","2026-05-27","2026-05-27","2026-06-02","2026-06-17",false,1],["CRAIG MAURER","C","Osgood","2026-05-13","2026-05-19",null,null,false,1],["DAIRDRE SCRIVEN","C","Said","2026-05-19","2026-05-19",null,null,false,1],["DAN MANLEY","B","Gavin","2025-11-23","2026-04-29","2026-05-01","2026-05-19",false,1],["DARREN HOGG","C","Said","2026-04-22","2026-04-28",null,null,false,1],["DEANNE RHYNEHARDT","B","Osgood","2026-07-14","2026-07-14","2026-05-05","2026-06-12",false,1],["DERON BENDEN","C",null,null,"2026-06-15","2026-06-25",null,false,1],["DERON BENDER","A","Gavin","2025-08-11","2026-04-24","2026-04-28","2026-07-24",false,1],["DONALD PAYNE","C",null,null,"2026-06-07","2021-08-11",null,false,1],["DONALD PAYNE JR","C","Osgood","2026-06-04",null,null,null,false,1],["DUSTIN GOLDMAN","A","Osgood","2026-06-22","2026-04-24","2026-03-30","2026-03-27",false,1],["ELIAS PAPPAN","C","Karen","2026-04-30",null,null,null,false,1],["ELIZABETH BONAUDI","C","Osgood","2026-04-17","2026-04-17",null,null,false,1],["ELIZABETH ELLINGER","B","Jordan","2026-03-16","2026-04-01","2026-06-18","2026-07-20",false,1],["ELIZABETH HOWARD","C","Osgood","2026-07-05","2026-07-05","2024-11-08",null,false,1],["ERIKA (ROCKFORD)","C",null,null,"2026-06-17","2026-06-23",null,false,1],["ERIKA WEHNER","B","Gavin",null,"2026-04-13","2026-05-28","2026-05-11",false,1],["GAMAL HARDING","C","Unassigned","2026-06-17","2026-06-23","2025-10-17",null,false,1],["GEORGENA STARR","C",null,"2024-04-19","2026-07-09","2023-10-28",null,false,1],["GEORGENA XAMMAR","C","Unassigned","2026-07-09","2026-07-09","2023-03-07",null,false,1],["GLADIS CHAVEZ","C","Karen","2026-05-15","2026-05-05",null,null,false,1],["HAIFA BRUNNEY","B","Karen","2026-07-06","2026-07-03","2026-06-15","2026-07-14",false,1],["HEATHER EMMERT","C","Jordan","2026-06-11","2026-06-11","2024-09-06",null,false,1],["HEATHER HENRY-MINOR","B","Jordan","2026-04-07","2026-04-15","2026-05-05","2026-05-28",false,1],["HOLLY BLANKEN","C","Unassigned",null,"2026-05-14",null,null,false,1],["HYPATIA ESPINAL","C","Karen","2026-06-02","2026-06-02",null,null,false,1],["INGRID CORREA","C",null,null,"2026-07-15","2024-10-18",null,false,1],["INGRID CORREIA","B","Gavin","2026-07-15","2026-05-08","2025-12-11","2026-01-05",false,1],["IZXEL MARTINEZ","C","Karen","2026-05-20","2026-05-20","2026-06-02","2026-07-17",false,1],["JACOB ENGLISH","C","Jordan",null,"2026-03-18","2026-04-23","2026-06-12",false,1],["JAIDEN BALLAH","C","Said","2026-06-02","2026-06-03",null,null,false,1],["JASMIN MONTOYA","C","Karen","2026-06-25","2026-06-19",null,null,false,1],["JASMINE MCKENZIE","C","Osgood","2026-06-30","2026-05-04","2026-05-06","2026-05-29",false,1],["JEFF MESSMER","C","Gavin","2026-07-14","2026-05-12","2025-10-01",null,false,1],["JENNIFER BLACKMORE","C","Jordan","2026-05-02",null,null,null,false,1],["JESSE MCCRERRY","C","Said",null,"2026-04-06","2026-04-13","2026-05-26",false,1],["JESSICA TOWER","C","Jordan","2026-05-27","2026-05-30","2023-04-03",null,false,1],["JIMMY LIEU","C","Unassigned","2026-04-26",null,null,null,false,1],["JOHN BRUNNER","A","Jordan","2026-06-01","2026-06-01","2026-06-30","2026-07-17",false,1],["JOHN LUBINSKY","C","Said","2026-06-17","2026-06-17","2026-06-23","2026-03-20",false,1],["JONNATHAN AGUDELO","C","Karen","2026-06-23","2026-05-19",null,null,false,1],["JORDAN HOLLIBAUGH","C","Gavin",null,"2026-06-28","2026-07-15","2026-04-16",false,1],["JUANE MADARIS","C","Unassigned","2026-06-27",null,null,null,false,1],["JUSTIN BIERY","C","Karen","2026-05-27","2026-05-28",null,null,false,1],["KANDIS HALL","B","Osgood","2026-01-04","2026-07-14","2026-02-25","2026-03-17",false,1],["KATHERIE DE LA ROSA","C",null,null,"2026-06-29",null,null,false,1],["KATHERINE DE LA ROSA","B","Karen","2026-06-29","2026-06-23","2026-06-10","2026-07-15",false,1],["KATHY HAYES","C","Jordan","2026-07-08","2026-07-08","2024-12-09",null,false,1],["KATIE MANSOR","C","Jordan","2026-04-27","2026-04-26",null,null,false,1],["KATIE SUMMERS","B","Gavin",null,"2026-06-23","2026-02-26","2026-05-29",false,1],["KELSY YODER","C","Said","2026-04-28","2026-01-09","2026-01-12","2026-02-05",false,1],["KEVIN SPEERT","A","Gavin","2026-07-11","2026-06-24","2026-06-01","2026-06-26",false,1],["KHADIJA FARAH","B","Jordan","2026-07-09","2026-07-16","2026-02-09","2026-03-06",false,1],["KINSIE HUSKINS","C","Jordan",null,"2026-03-17","2026-04-28","2026-06-01",false,1],["KISHMA JAMES","C","Said","2026-07-10","2026-07-10","2025-06-09",null,false,1],["KRISTINA MURPHY","C","Osgood","2026-06-02","2026-05-11","2025-10-03","2025-10-21",false,1],["KUNLAVEE","C",null,null,"2026-06-03",null,null,false,1],["LAUREN MCCLINTON","C","Said",null,"2026-04-29",null,null,false,1],["LAUREN MICHELLE","C","Unassigned","2026-04-29",null,null,null,false,1],["LESLIE HERNANDEZ","C","Karen","2026-06-19","2026-06-29","2026-07-15","2026-06-18",false,1],["LETIKA WHITE","C","Osgood","2026-05-11","2026-06-15","2025-07-31","2025-08-29",false,1],["LEXIS GRANDY","C","Osgood","2026-06-11","2025-09-26","2025-09-29","2025-10-29",false,1],["LEZLEY MCCURRY","C","Unassigned",null,"2026-05-01",null,null,false,1],["LILIAN FUENTES","C","Karen","2026-04-21","2026-04-21",null,null,false,1],["LISA SIMMONS","C","Osgood",null,"2026-03-19","2026-04-14","2026-05-27",false,1],["LIZBEL CONTRERAS","C","Karen","2026-07-06","2026-06-12","2024-09-18",null,false,1],["LUIS GIL","C","Karen","2026-07-15","2026-06-30","2026-06-12","2025-09-26",false,1],["MAKAYLA & CONNER KOCHANSKY","C",null,null,"2025-11-06","2026-06-22","2026-07-14",false,1],["MARIA COMAS","B","Karen","2026-04-27","2026-03-02","2025-06-19","2025-07-21",false,1],["MARK VENNITTI","C","Jordan","2026-04-08","2026-04-08","2026-06-01","2026-06-18",false,1],["MARTIN HOPKINS","B","Karen","2026-02-12","2026-07-01","2026-01-29","2026-02-20",false,1],["MARY MCMICHAEL","B","Said","2026-04-13","2026-04-13","2026-06-14","2026-07-09",false,1],["MATHEA ARUDDA","C","Karen",null,"2026-03-16","2026-03-23","2026-07-17",false,1],["MATT BRADDY","C","Unassigned","2026-06-19",null,null,null,false,1],["MATT PIPER","B","Osgood","2026-05-19","2026-07-08","2026-07-09","2025-12-01",false,1],["MATTHEW MONTALVO","A","Karen","2026-04-09","2026-04-08","2026-05-29","2026-06-29",false,1],["MEGAN LYNCH","A","Gavin","2026-07-15","2026-07-14","2026-06-11","2026-07-13",false,1],["MICHELE FREDERICK","C","Osgood",null,"2026-05-31","2026-07-02",null,false,1],["MICHELLE ERICKSON","A","Gavin","2025-08-04","2026-03-25","2026-04-20","2026-04-10",false,1],["MICHELLE HOLTZ","C","Unassigned",null,"2026-06-29",null,null,false,1],["MIKE WHITEMAN","C","Osgood",null,"2025-07-24","2025-07-31","2026-05-11",false,1],["MORGAN STONE","C","Unassigned","2026-06-29","2026-06-29",null,null,false,1],["NANCY BAKER","C","Unassigned","2026-04-30",null,null,null,false,1],["NANCY PRICE","B","Jordan","2026-01-03","2026-01-02","2026-05-08","2026-06-26",false,1],["NATALIE ESTRELLA","B","Karen","2026-06-14","2026-05-25","2026-07-01","2026-08-04",false,1],["NATHAN WHITE","C","Karen","2026-06-12","2026-06-16",null,null,false,1],["NIA HARRINGTON","C","Said","2026-05-13","2026-05-05","2024-10-17",null,false,1],["NICK ZATEZALO","C","Osgood","2026-07-09","2026-07-09","2024-03-12",null,false,1],["NINA AVERY","C","Jordan",null,"2026-04-23",null,null,false,1],["NORA KERELIUK","C","Said","2026-04-24",null,null,null,false,1],["OSCAR MARTINEZ","A","Karen","2026-07-13","2026-07-14","2026-05-05","2026-06-15",false,1],["PAIGE LUDWIG","C","Said","2026-06-08","2026-03-05","2026-03-17","2026-04-14",false,1],["PATRICK ARQUETTE","C","Said","2026-04-22","2026-01-14","2025-09-09","2025-10-07",false,1],["PAULA PALLESCHI","C","Said",null,"2026-04-21","2026-04-27","2026-05-26",false,1],["PILAR BENNETT","C","Karen","2026-07-10","2026-07-10","2025-07-23","2025-08-15",false,1],["RACHELLE PARSLEY","C","Said","2024-09-03","2026-04-15","2026-04-22","2026-05-13",false,1],["RACQUEL LUDAWAY","A","Gavin","2026-05-29","2026-05-19","2026-06-17","2026-07-10",false,1],["RAMI TAMIMI","C","Jordan","2026-03-27","2026-04-20","2026-05-07","2026-03-27",false,1],["RAMIRO SOLIS","C","Unassigned",null,"2026-07-01",null,null,false,1],["ROBERT HAYNER","C","Jordan",null,"2026-04-20","2026-04-23","2026-05-15",false,1],["ROCKFORD","C",null,null,"2026-06-22","2026-06-24",null,false,1],["ROSALIA PABLO","C","Karen","2026-07-14","2026-07-12","2024-11-08",null,false,1],["ROSS DIGIORGIO","C","Osgood","2026-06-25","2026-06-25","2025-07-14","2026-04-30",false,1],["RUTH ESPINOZA","C","Karen",null,"2026-02-26","2026-03-26","2026-04-17",false,1],["RUTH GONZALEZ","C","Karen","2026-05-19","2026-05-19",null,null,false,1],["SAHAR SHALASH","A","Said","2026-07-09","2026-07-06","2026-05-09","2026-05-29",false,1],["SAHEL ALAM","C","Said","2026-05-10","2026-05-08","2026-07-10",null,false,1],["SAM BAMRICK","C","Jordan",null,"2026-04-14","2026-04-20","2026-05-15",false,1],["SARA BUSH","C","Said",null,"2026-03-27","2026-04-13","2026-05-27",false,1],["SARAH HERNANDEZ","C","Osgood","2026-05-28","2026-05-29","2024-10-21",null,false,1],["SETH COLBURN","B","Said","2025-04-23","2026-03-31","2026-04-06","2026-04-30",false,1],["SHARON PANTELIS","C","Jordan","2026-04-28","2025-03-21","2025-04-01",null,false,1],["SHAYNE D. BOYD","C","Said","2026-05-04","2026-05-07",null,null,false,1],["SHIRRELL BURNSIDE","C","Osgood","2026-06-26","2026-06-26",null,null,false,1],["SLAVI JORDANOV","C","Unassigned","2026-05-30","2025-10-06","2025-10-10","2025-11-07",false,1],["SLAVISHA JORDANOV","C",null,null,"2026-06-02",null,null,false,1],["STEVEN OSBORN","C","Jordan","2026-04-30","2026-02-03",null,null,false,1],["SUMMER MAXSON","A","Unassigned","2026-04-12","2026-04-17","2026-03-10","2026-04-01",false,1],["SUNI RIVAS","C","Karen","2026-06-12","2026-07-06",null,null,false,1],["TATIANA GRIGORITA","C","Jordan","2026-06-08","2026-06-08",null,null,false,1],["TIARA VILLATORO","A","Karen","2026-07-15","2026-07-15","2026-06-04","2026-06-26",false,1],["TIMOTHY OLIVER","C","Osgood","2026-06-09","2026-06-02",null,null,false,1],["TINA ALLEN","C","Unassigned",null,"2026-04-29",null,null,false,1],["TINA HOFFMAN","A","Gavin","2023-10-10","2026-05-06","2026-05-27","2026-02-10",false,1],["TINA HOFFMAN (ROCKFORD)","C",null,null,"2026-06-03","2026-06-05",null,false,1],["TINA-DUTT-HIREN","C","Osgood",null,"2026-05-11",null,null,false,1],["TODD STONE","A","Said","2026-07-14","2026-07-15","2026-06-25","2026-07-22",false,1],["TOM NEWMAN","C","Gavin","2026-06-08","2026-06-08","2024-01-08",null,false,1],["TONY AMOS","C","Unassigned","2026-07-15","2026-04-01","2024-02-27",null,false,1],["TRACI WILLIAMS-JONES","C","Jordan",null,"2026-04-09","2026-03-23","2026-05-21",false,1],["TRACY BERARD","B","Jordan",null,"2026-04-04","2026-04-14","2026-05-27",false,1],["TROY BORDEN","C","Gavin","2026-04-28","2026-04-30","2026-04-22","2026-05-13",false,1],["YASMIN DE JESUS","C","Karen","2024-03-27","2025-11-18","2026-04-01","2026-04-29",false,1],["YVETTA HARRISON","C","Osgood","2026-06-04",null,null,null,false,1],["ZILLOW","C",null,null,"2026-04-25",null,null,false,1]];
@@ -927,16 +933,27 @@ function switchDanielTab4(tabId, btn){
   if(tabId==="week"){renderRmSummary();renderLpScorecardSummary();renderTeamsMsg();}
 }
 
+function switchLeadsTab(tab, btn){
+  document.querySelectorAll("#view-leads .d-tab").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll("#view-leads .d-tab-panel").forEach(function(p){p.classList.remove("active");});
+  if(btn) btn.classList.add("active");
+  var panel = document.getElementById("leads-tab-"+tab);
+  if(panel) panel.classList.add("active");
+  if(tab==="leads") loadReferralLeadsDirect();
+  if(tab==="roster") renderGrowthScoreboard();
+  if(tab==="growth") renderGrowthScoreboard();
+}
+
 function openLeadsView(btn){
-  rmStopPolling();lpStopPolling();
+  rmStopPolling(); lpStopPolling();
   currentUser="Leads";
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
-  if(btn)btn.classList.add("active");
+  if(btn) btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-leads").classList.add("active");
-  // Load directly into the standalone view — don't depend on Daniel view elements
   loadReferralLeadsDirect();
 }
+
 
 function loadReferralLeadsDirect(){
   var lu2=document.getElementById("ref-last-updated-v2");
@@ -1373,7 +1390,7 @@ function loadAgentAssignments(){
 var lpPollInterval=null;
 function lpStartPolling(lp){
   if(lpPollInterval)clearInterval(lpPollInterval);
-  lpPollInterval=setInterval(function(){loadCallLogs().then(function(){if(currentUser===lp&&Object.keys(pendingNote).length===0)renderLP(lp);});},30000);
+  lpPollInterval=setInterval(function(){if(userTyping)return;loadCallLogs().then(function(){if(currentUser===lp&&Object.keys(pendingNote).length===0)renderLP(lp);});},30000);
 }
 function lpStopPolling(){
   if(lpPollInterval){clearInterval(lpPollInterval);lpPollInterval=null;}
@@ -2722,7 +2739,7 @@ function loadLeadPipeline(){
     });
     lpCallCounts[lp]=calledMtd;
   });
-  return sbFetch("GET","velocify_leads?date_added=gte."+ytdStart+"&select=referral_partner_name,date_added,lp_user,status,buyer_name&order=date_added.desc&limit=5000").then(function(res){
+  return sbFetch("GET","velocify_leads?date_added=gte."+ytdStart+"&select=referral_partner_name,date_added,lp_user,status&order=date_added.desc&limit=5000").then(function(res){
     if(!res||!res.length){renderLeadPipelinePanels([]);return;}
 
     var lpMap={"Dill":"Gavin","Gavin":"Gavin","De La Riva":"Karen","Karen":"Karen",
@@ -2792,8 +2809,9 @@ function loadLeadPipeline(){
   renderLeadPipelinePanels(res);
   if(typeof buildDailyDigest==="function")buildDailyDigest();
   }).catch(function(e){
+    console.warn("loadLeadPipeline error:",e);
     var el=document.getElementById("d-lead-pipeline-today");
-    if(el)el.innerHTML='<div style="font-size:12px;color:var(--text-3);padding:8px">Could not load lead data.</div>';
+    if(el)el.innerHTML='<div style="font-size:12px;color:var(--text-3);padding:8px">Lead data unavailable — check Supabase connection.</div>';
   });
 }
 
@@ -3047,6 +3065,14 @@ function loadAmandaSnapshot(){
   }).catch(function(){});
 }
 
+function renderDanielRoster(){
+  renderCarryoverAlerts();
+  renderAllClear();
+  renderRmSummary();
+  renderLpScorecardSummary();
+  renderVelocifyLeaderboard();
+}
+
 function openSnapshotView(btn){
   if(typeof rmStopPolling==="function")rmStopPolling();
   if(typeof lpStopPolling==="function")lpStopPolling();
@@ -3128,16 +3154,31 @@ function buildSnapshot(){
     return t;
   }
 
-  // Motivating headlines
+  // Motivating headlines + rotating quotes
+  var QUOTES=[
+    "The best mortgage is the one you close. Make the call.",
+    "Every realtor call is a future closing.",
+    "Pick up the phone. Your competition already did.",
+    "Relationships are built one conversation at a time.",
+    "Consistency beats intensity. Show up every day.",
+    "A call today is a commission next month.",
+    "Your next biggest referral partner hasn't heard from you yet.",
+    "The market rewards the persistent.",
+    "One more call can change everything.",
+    "Champions make calls when they don't feel like it."
+  ];
+  var QUOTE=QUOTES[now.getDay()%QUOTES.length+(now.getDate()%3)>QUOTES.length?0:now.getDay()%QUOTES.length+(now.getDate()%3)];
+  QUOTE=QUOTES[(now.getDate()+now.getDay())%QUOTES.length];
   var headlines=[];
   var allHit=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
   if(allHit)headlines.push("🔥 Full team hit their call targets this week!");
   var ahead=LPS.filter(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
-  if(ahead.length===1&&!allHit)headlines.push("🌟 "+ahead[0]+" finished calls — who's next?");
-  if(leadsToday>0)headlines.push("📨 "+leadsToday+" lead"+(leadsToday>1?"s":"")+" came in today — follow up!");
+  if(ahead.length===1&&!allHit)headlines.push(ahead[0]+" hit 15/15 this week — who's next?");
+  if(ahead.length>1&&!allHit)headlines.push(ahead.join(", ")+" finished calls — keep pushing!");
+  if(leadsToday>0)headlines.push(leadsToday+" lead"+(leadsToday>1?"s":"")+" came in today — follow up!");
   var behind=LPS.filter(function(lp){return callsLogged[lp]<Math.round(WEEKLY_TARGET*paceFraction*.65);});
-  if(behind.length&&paceFraction>.3)headlines.push("⏰ "+behind.join(", ")+" — time to pick up the pace");
-  if(!headlines.length)headlines.push("💪 Team is moving — keep making those calls");
+  if(behind.length&&paceFraction>.3)headlines.push(behind.join(", ")+" — time to pick up the pace");
+  if(!headlines.length)headlines.push("Team is moving — keep making those calls");
   var headline=headlines[Math.floor(now.getSeconds()/10)%headlines.length];
 
   var todayFmt=now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
@@ -3151,6 +3192,7 @@ function buildSnapshot(){
   h+='<div style="color:#fff;font-size:16px;font-weight:700">'+todayFmt+'</div></div>';
   h+='<div style="background:rgba(255,255,255,.06);border-radius:8px;padding:7px 12px;font-size:11px;font-style:italic;color:rgba(255,255,255,.85);font-size:14px;font-weight:600">'+headline+'</div>';
   h+='</div>';
+  h+='<div style="font-size:11px;color:rgba(255,255,255,.35);font-style:italic;margin-bottom:10px">“'+QUOTE+'”</div>';
   h+='<div style="display:flex;gap:22px;flex-wrap:wrap">';
   [{v:totalCallsWTD+" / "+(LPS.length*WEEKLY_TARGET),l:"Team calls WTD",c:"#fff"},
    {v:leadsToday,l:"Leads today",c:"var(--accent)"},
@@ -3163,127 +3205,99 @@ function buildSnapshot(){
   h+='</div></div>';
 
   // Cards grid
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;margin-bottom:1rem">';
+  // ── SCOREBOARD ROWS (no grid, works at any width) ──
+  h+='<div style="width:100%;margin-bottom:1rem">';
 
-  // LP cards
+  // ── LP rows ──
   LPS.forEach(function(lp){
     var called=callsLogged[lp]||0;
     var target=WEEKLY_TARGET;
     var paceTarget=Math.round(target*paceFraction);
     var pct=Math.round(called/target*100);
-    var lpColor=LP_COLORS[lp]||"var(--accent)";
+    var lpColor=LP_COLORS[lp]||'var(--accent)';
     var leadsW=lpLeadsWTD[lp]||0;
     var leadsT=lpLeadsToday[lp]||0;
-    // Scorecard metrics for this LP
     var scData=snapScData[lp]||{};
-    var rltrTalks=scTotal(scData,"rltr_talks");
-    var referredLeads=scTotal(scData,"referred_leads");
-    var apps=scTotal(scData,"apps_1003");
-    var preApps=scTotal(scData,"pre_approvals");
-    var contracts=scTotal(scData,"contracts");
-
-    var status,sc,sb;
-    if(called>=target){status="🔥 Week complete!";sc="var(--green)";sb="var(--green-bg)";}
-    else if(called>=paceTarget){status="✓ On pace";sc="var(--green)";sb="var(--green-bg)";}
-    else if(called>=Math.round(paceTarget*.7)){status="⚡ Almost there";sc="var(--amber)";sb="var(--amber-bg)";}
-    else{status="🚨 Pick it up";sc="var(--red)";sb="var(--red-bg)";}
-
-    h+='<div style="background:var(--surface);border:'+(called>=target?"1px solid rgba(22,163,148,.4)":called>=paceTarget?"1px solid var(--border)":called>=Math.round(paceTarget*.7)?"1px solid rgba(212,130,10,.3)":"1px solid rgba(224,88,88,.3)")+';border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="goToLP(\''+lp+'\')">';
-    h+='<div style="background:var(--surface);border:'+(called>=target?"1px solid rgba(22,163,148,.4)":called>=paceTarget?"1px solid var(--border)":called>=Math.round(paceTarget*.7)?"1px solid rgba(212,130,10,.3)":"1px solid rgba(224,88,88,.3)")+';border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="goToLP(\''+lp+'\')">';
-    h+=(called>=target?'<div style="height:3px;background:linear-gradient(90deg,'+lpColor+',rgba(14,159,142,.1))"></div>':'');
-    // Header
-    h+='<div style="padding:11px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
-    h+='<div><div style="font-size:14px;font-weight:800;color:'+lpColor+'">'+lp+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px">LP2</div></div>';
-    h+='<div style="font-size:10px;font-weight:600;color:'+sc+';background:'+sb+';padding:3px 9px;border-radius:20px">'+status+'</div>';
+    var rltrTalks=scTotal(scData,'rltr_talks');
+    var referredLeads=scTotal(scData,'referred_leads');
+    var apps=scTotal(scData,'apps_1003');
+    var preApps=scTotal(scData,'pre_approvals');
+    var contracts=scTotal(scData,'contracts');
+    var status,sc;
+    if(called>=target){status='Week complete!';sc='#1D9E75';}
+    else if(called>=paceTarget){status='On pace';sc='#1D9E75';}
+    else if(called>=Math.round(paceTarget*.7)){status='Almost there';sc='#BA7517';}
+    else{status='Pick it up';sc='#E24B4A';}
+    var barW=Math.min(pct,100);
+    h+='<div onclick="goToLP(\''+lp+'\',)" style="cursor:pointer;border-left:4px solid '+lpColor+';padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'var(--surface)\'">';
+    h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
+    h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:'+lpColor+'">'+lp+'</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP2</span></div>';
+    h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+called+'</span>';
+    h+='<span style="font-size:11px;color:var(--text-3)">/ '+target+' calls</span>';
+    h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
+    h+='<span style="font-size:11px;color:'+sc+';font-weight:500">'+status+'</span>';
+    h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Velocify: <b style="color:'+(leadsW?'#1D9E75':'var(--text-3)')+'">'+leadsW+' WTD</b> · '+leadsT+' today · <a style="color:var(--accent)" onclick="event.stopPropagation();goToLP(\''+lp+'\')">open ↗</a></span>';
     h+='</div>';
-    // Big call number + progress
-    h+='<div style="padding:13px 14px 8px">';
-    h+='<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:8px">';
-    h+='<div style="font-size:32px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+called+'</div>';
-    h+='<div style="font-size:12px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ '+target+' calls</div>';
-    h+='<div style="margin-left:auto;text-align:right"><div style="font-size:26px;font-weight:800;color:'+lpColor+';font-family:\'DM Mono\',monospace;line-height:1">'+pct+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of target</div></div>';
-    h+='</div>';
-    h+='<div style="height:4px;background:var(--border-light);border-radius:2px;overflow:hidden;margin-bottom:3px">';
-    h+='<div style="height:100%;background:'+lpColor+';opacity:.7;border-radius:2px;width:'+Math.min(pct,100)+'%;transition:width .7s"></div></div>';
-    h+='<div style="font-size:9px;color:var(--text-3);margin-bottom:0">pace marker: '+paceTarget+' by now</div>';
-    h+='</div>';
-    // Scorecard metrics grid
-    h+='<div style="padding:8px 14px;border-top:1px solid var(--border-light);display:grid;grid-template-columns:repeat(5,1fr);gap:4px">';
-    [{v:rltrTalks,l:"Talk-to's",g:10},
-     {v:referredLeads,l:"Leads",g:16},
-     {v:apps,l:"1003's",g:13},
-     {v:preApps,l:"Pre-apps",g:6},
-     {v:contracts,l:"Contracts",g:3}
-    ].forEach(function(m){
-      var mpct=m.g>0?m.v/m.g:0;
-      var mc=mpct>=1?"var(--green)":mpct>=.6?"var(--amber)":"var(--text-3)";
-      h+='<div style="text-align:center"><div style="font-size:13px;font-weight:700;color:'+mc+';font-family:\'DM Mono\',monospace">'+m.v+'<span style="font-size:9px;color:var(--text-3);font-weight:400">/'+m.g+'</span></div>';
-      h+='<div style="font-size:8.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:1px">'+m.l+'</div></div>';
+    h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+    h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+barW+'%;background:'+lpColor+'"></div></div></div>';
+    var mets=[['Talk\'s',rltrTalks,10],['Leads',referredLeads,16],['1003\'s',apps,13],['Pre-apps',preApps,6],['Contracts',contracts,3]];
+    mets.forEach(function(m){
+      var mc=m[1]>=m[2]?'#1D9E75':m[1]>0?'#BA7517':'var(--text-3)';
+      h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+mc+';font-family:\'DM Mono\',monospace">'+m[1]+'<span style="font-size:9px;color:var(--text-3);">/'+m[2]+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m[0]+'</div></div>';
     });
     h+='</div>';
-    // Leads footer
-    h+='<div style="padding:7px 14px;background:var(--bg);border-top:1px solid var(--border-light);display:flex;gap:10px;align-items:center">';
-    h+='<div style="font-size:11px;color:var(--text-3)">Velocify leads:</div>';
-    h+='<div style="font-size:12px;font-weight:600;color:var(--accent);font-family:\'DM Mono\',monospace">'+leadsW+' WTD</div>';
-    h+='<div style="font-size:11px;color:var(--text-3)">·</div>';
-    h+='<div style="font-size:12px;font-weight:600;color:'+(leadsT>0?"var(--accent)":"var(--text-3)")+';font-family:\'DM Mono\',monospace">'+leadsT+' today</div>';
-    h+='<div style="margin-left:auto;font-size:10px;color:var(--accent)">tap to open ↗</div>';
-    h+='</div></div>';
+    h+='</div>';
   });
 
-  // Isaak card
+  h+='<div style="height:1px;background:var(--border);margin:10px 0 8px"></div>';
+
+  // ── Isaak row (LP1) ──
+// Isaak card
   var isaakData2=snapScData["Isaak"]||{};
   var isaakApps=scTotal(isaakData2,"apps_1003");
   var isaakRCalls=scTotal(isaakData2,"realtor_calls");
   var isaakMeetings=scTotal(isaakData2,"meetings");
   // Also use lpHistoryCallCounts as fallback
-  if(!isaakRCalls)isaakRCalls=lpHistoryCallCounts&&(lpHistoryCallCounts["Isaak"]||lpHistoryCallCounts["isaak"])||0;
   var isaakTarget=100;
   var isaakPct=Math.min(Math.round(isaakRCalls/isaakTarget*100),100);
   var isaakPaceT=Math.round(isaakTarget*paceFraction);
   var iSt,iSc,iSb;
-  if(isaakRCalls>=isaakTarget){iSt="🔥 Crushing it";iSc="var(--green)";iSb="var(--green-bg)";}
-  else if(isaakRCalls>=isaakPaceT){iSt="✓ On track";iSc="var(--green)";iSb="var(--green-bg)";}
-  else if(isaakRCalls>=Math.round(isaakPaceT*.7)){iSt="⚡ Close";iSc="var(--amber)";iSb="var(--amber-bg)";}
-  else{iSt="⚠ Behind pace";iSc="var(--red)";iSb="var(--red-bg)";}
 
-  h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm)">';
-  h+='<div style="padding:11px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
-  h+='<div><div style="font-size:14px;font-weight:800;color:#0891B2">Isaak</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px">LP1</div></div>';
-  h+='<div style="font-size:10px;font-weight:600;color:'+iSc+';background:'+iSb+';padding:3px 9px;border-radius:20px">'+iSt+'</div>';
+  var isaakPct=Math.min(Math.round(isaakRCalls/100*100),100);
+  var isaakStatus,isaakSc;
+  var isaakPace=Math.round(100*paceFraction);
+  if(isaakRCalls>=100){isaakStatus='Complete!';isaakSc='#1D9E75';}
+  else if(isaakRCalls>=isaakPace){isaakStatus='On pace';isaakSc='#1D9E75';}
+  else if(isaakRCalls>=Math.round(isaakPace*.7)){isaakStatus='Close';isaakSc='#BA7517';}
+  else{isaakStatus='Behind pace';isaakSc='#E24B4A';}
+  h+='<div style="border-left:4px solid #0891B2;padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)">';
+  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
+  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#0891B2">Isaak</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP1</span></div>';
+  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+isaakRCalls+'</span>';
+  h+='<span style="font-size:11px;color:var(--text-3)">/ 100 calls</span>';
+  h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#0891B2">'+isaakPct+'%</span>';
+  h+='<span style="font-size:11px;color:'+isaakSc+';font-weight:500">'+isaakStatus+'</span>';
   h+='</div>';
-  h+='<div style="padding:13px 14px 8px">';
-  h+='<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:8px">';
-  h+='<div style="font-size:32px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+isaakRCalls+'</div>';
-  h+='<div style="font-size:12px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ 100 calls</div>';
-  h+='<div style="margin-left:auto;text-align:right"><div style="font-size:20px;font-weight:700;color:#0891B2;font-family:\'DM Mono\',monospace;line-height:1">'+isaakPct+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of target</div></div>';
+  h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+isaakPct+'%;background:#0891B2"></div></div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakRCalls>=100?'#1D9E75':isaakRCalls>0?'#BA7517':'var(--text-3)')+'">'+isaakRCalls+'<span style="font-size:9px;color:var(--text-3)">/100</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Calls</div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakApps>=10?'#1D9E75':isaakApps>0?'#BA7517':'var(--text-3)')+'">'+isaakApps+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">1003\'s</div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakMeetings>=10?'#1D9E75':isaakMeetings>0?'#BA7517':'var(--text-3)')+'">'+isaakMeetings+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Meetings</div></div>';
   h+='</div>';
-  h+='<div style="height:4px;background:var(--border-light);border-radius:2px;overflow:hidden;margin-bottom:3px">';
-  h+='<div style="height:100%;background:#0891B2;opacity:.7;border-radius:2px;width:'+isaakPct+'%"></div></div>';
-  h+='<div style="font-size:9px;color:var(--text-3)">pace marker: '+isaakPaceT+' by now</div>';
   h+='</div>';
-  h+='<div style="padding:8px 14px;border-top:1px solid var(--border-light);display:grid;grid-template-columns:repeat(3,1fr);gap:4px">';
-  [{v:isaakRCalls,l:"Realtor calls",g:100},{v:isaakApps,l:"1003's",g:10},{v:isaakMeetings,l:"Meetings",g:10}].forEach(function(m){
-    var mpct=m.g>0?m.v/m.g:0;
-    var mc=mpct>=1?"var(--green)":mpct>=.6?"var(--amber)":"var(--text-3)";
-    h+='<div style="text-align:center"><div style="font-size:13px;font-weight:700;color:'+mc+';font-family:\'DM Mono\',monospace">'+m.v+'<span style="font-size:9px;color:var(--text-3);font-weight:400">/'+m.g+'</span></div>';
-    h+='<div style="font-size:8.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:1px">'+m.l+'</div></div>';
-  });
-  h+='</div></div>';
 
-  // Amanda card
+  h+='<div style="height:1px;background:var(--border);margin:10px 0 8px"></div>';
+
+  // ── Amanda row (RM) ──
+// Amanda card
   var amData=snapScData["Amanda"]||{};
   // Amanda activity counts — today / WTD / MTD / YTD from rmActsCache
   var amCache=window.rmActsCache;
-  var amActs=amCache&&amCache.acts?amCache.acts:
-    (window.rmFeedCache&&window.rmFeedCache.week?window.rmFeedCache.week:[]);
-  if(!amActs.length&&window.rmFeedCache&&window.rmFeedCache.week){amActs=window.rmFeedCache.week;}
+  var amActs=amCache&&amCache.acts?amCache.acts:(window.rmFeedCache&&window.rmFeedCache.week?window.rmFeedCache.week:[]);
   var amTodayStr=amCache&&amCache.todayStr?amCache.todayStr:localDateStr(now);
   var amWeekObj=amCache&&amCache.week?amCache.week:{start:"",end:""};
-  var amMonthStart2=amCache&&amCache.monthStart?amCache.monthStart:
-    now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
+  var amMonthStart2=amCache&&amCache.monthStart?amCache.monthStart:now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
   var amYearStart=now.getFullYear()+"-01-01";
-  function amCnt(src,type){return src.filter(function(a){return(a.act_type||"").trim()===type;}).length;}
   var amTodayActs=amActs.filter(function(a){return a.act_date===amTodayStr;});
   var amWeekActs=amActs.filter(function(a){return a.act_date>=amWeekObj.start&&a.act_date<=amWeekObj.end;});
   var amMonthActs=amActs.filter(function(a){return a.act_date>=amMonthStart2;});
@@ -3294,7 +3308,6 @@ function buildSnapshot(){
   var amColdCalls=amCnt(amMonthActs,"Cold Calls");
   var amBreakBreads=amCnt(amMonthActs,"Break Breads");
   var TALKTO_TYPES=["Talk-to's","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","CTC Call","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Recruiting Conversation"];
-  function amCntTalkTo(src){return src.filter(function(a){return TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length;}
   var amTalkTos=amCntTalkTo(amMonthActs);
   var amBuddyAsks=amCnt(amMonthActs,"Realtor Buddy Referral Ask");
   var amWeeklyGoal=238; // 125 cold calls + 100 talk-tos + 5 meetings + 5 break breads + 3 buddy asks
@@ -3303,59 +3316,30 @@ function buildSnapshot(){
   var amPaceT=Math.round(amWeeklyGoal*paceFraction);
   var amPctOfGoal=amWeeklyGoal>0?Math.min(Math.round(amTotalWTD/amWeeklyGoal*100),100):0;
   var aSt,aSc,aSb;
-  if(amTotalWTD>=amWeeklyGoal){aSt="🔥 Crushing it";aSc="var(--green)";aSb="var(--green-bg)";}
-  else if(amTotalWTD>=amPaceT){aSt="✓ On track";aSc="var(--green)";aSb="var(--green-bg)";}
-  else if(amandaToday>0){aSt="⚡ Active today";aSc="var(--amber)";aSb="var(--amber-bg)";}
-  else{aSt="⚠ Needs activity";aSc="var(--red)";aSb="var(--red-bg)";}
 
-  h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="openRmView(document.querySelector(\'.wb-RM\'))">';
-  h+='<div style="padding:11px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
-  h+='<div><div style="font-size:14px;font-weight:800;color:#B45309">Amanda</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px">Relationship Manager</div></div>';
-  h+='<div style="font-size:10px;font-weight:600;color:'+aSc+';background:'+aSb+';padding:3px 9px;border-radius:20px">'+aSt+'</div>';
+  h+='<div style="border-left:4px solid #B45309;padding:10px 14px;border-radius:0 6px 6px 0;background:var(--surface)">';
+  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
+  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#B45309">Amanda</span><br><span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">RM</span></div>';
+  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+amTotalToday+'</span>';
+  h+='<span style="font-size:11px;color:var(--text-3)">/ '+amDailyTotalGoal+' today</span>';
+  h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#B45309">'+amPctOfGoal+'%</span>';
+  h+='<span style="font-size:11px;color:'+aSc+';font-weight:500">'+aSt+'</span>';
+  h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">WTD: '+amTotalWTD+' · MTD: '+amTotalMTD+'</span>';
   h+='</div>';
-  h+='<div style="padding:13px 14px 8px">';
-  var amDailyGoal=48; var amDailyPct=amDailyGoal>0?Math.min(Math.round(amTotalToday/amDailyGoal*100),100):0;
-  var amPctOfGoal=amTotalGoal>0?Math.min(Math.round(amTotalMTD/amTotalGoal*100),100):0;
-  h+='<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:8px">';
-  h+='<div style="font-size:32px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+amTotalToday+'</div>';
-  h+='<div style="font-size:12px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ '+amDailyTotalGoal+' today</div>';
-  h+='<div style="margin-left:auto;text-align:right"><div style="font-size:20px;font-weight:700;color:#B45309;font-family:\'DM Mono\',monospace;line-height:1">'+amPctOfGoal+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of daily</div></div>';
-  h+='</div>';
-  h+='<div style="height:4px;background:var(--border-light);border-radius:2px;overflow:hidden;margin-bottom:3px">';
-  h+='<div style="height:100%;background:#B45309;opacity:.7;border-radius:2px;width:'+amPctOfGoal+'%"></div></div>';
-  h+='<div style="font-size:9px;color:var(--text-3)">WTD: '+amTotalWTD+' · MTD: '+amTotalMTD+'</div>';
-  h+='</div>';
-  h+='<div style="padding:3px 14px 0;border-top:1px solid var(--border-light);display:flex;justify-content:space-between">';
-  h+='<span style="font-size:9px;color:var(--text-3)">Today / Daily</span>';
-  h+='<span style="font-size:9px;color:var(--text-3)">WTD / Weekly</span>';
-  h+='</div>';
-  h+='<div style="padding:6px 14px 8px;border-bottom:1px solid var(--border-light);display:grid;grid-template-columns:repeat(5,1fr);gap:4px">';
-  [
-    {label:"New realtor mtg",type:"New Realtor Meeting",daily:1,weekly:5},
-    {label:"Cold calls",type:"Cold Calls",daily:25,weekly:125},
-    {label:"Break breads",type:"Break Breads",daily:1,weekly:5},
-    {label:"Talk-to's",type:"Talk-to's",daily:20,weekly:100},
-    {label:"Buddy asks",type:"Realtor Buddy Referral Ask",daily:1,weekly:3}
-  ].forEach(function(m){
-    var todayCount=m.type==="Talk-to's"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
-    var wtdCount=m.type==="Talk-to's"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
-    var dayOk=todayCount>=m.daily;
-    var wtdPct=m.weekly>0?wtdCount/m.weekly:0;
-    var dc=dayOk?"var(--green)":"var(--text-3)";
-    var mc=wtdPct>=1?"var(--green)":wtdPct>=.6?"var(--amber)":"var(--text-3)";
-    h+='<div style="text-align:center">';
-    h+='<div style="font-size:13px;font-weight:700;color:'+dc+';font-family:\'DM Mono\',monospace;line-height:1.2">'+todayCount+'<span style="font-size:9px;color:var(--text-3);font-weight:400">/'+m.daily+'</span></div>';
-    h+='<div style="font-size:11px;color:'+mc+';font-family:\'DM Mono\',monospace">'+wtdCount+'<span style="font-size:9px;color:var(--text-3)">/'+m.weekly+'</span></div>';
-    h+='<div style="font-size:8px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:1px;white-space:nowrap">'+m.label+'</div>';
-    h+='</div>';
+  h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:#B45309"></div></div></div>';
+  [{type:"New Realtor Meeting",daily:1,weekly:5,label:"Mtgs"},{type:"Cold Calls",daily:25,weekly:125,label:"Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Breads"},{type:"Talk-to\'s",daily:20,weekly:100,label:"Talk-to\'s"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy"}].forEach(function(m){
+    var td=m.type==="Talk-to\'s"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
+    var tw=m.type==="Talk-to\'s"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
+    var dc=td>=m.daily?'#1D9E75':'var(--text-3)';
+    var wc=tw>=m.weekly?'#1D9E75':tw>0?'#BA7517':'var(--text-3)';
+    h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+dc+';font-family:\'DM Mono\',monospace">'+td+'<span style="font-size:9px;color:var(--text-3)">/'+m.daily+'</span></div><div style="font-size:10px;font-weight:500;color:'+wc+';font-family:\'DM Mono\',monospace">'+tw+'<span style="font-size:8px;color:var(--text-3)">/'+m.weekly+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m.label+'</div></div>';
   });
+  h+='<span style="margin-left:auto;font-size:10px"><a style="color:var(--accent);cursor:pointer" onclick="openRmView(document.querySelector(\'.wb-RM\'))">open RM ↗</a></span>';
   h+='</div>';
-  h+='<div style="padding:7px 14px;background:var(--bg);border-top:1px solid var(--border-light);display:flex;gap:10px;align-items:center">';
-  h+=(amandaFlagged>0?'<div style="font-size:11px;font-weight:600;color:var(--red)">🚩 '+amandaFlagged+' agent'+(amandaFlagged>1?"s":"")+" flagged for follow-up</div>":'<div style="font-size:11px;color:var(--text-3)">No agents flagged</div>');
-  h+='<div style="margin-left:auto;font-size:10px;color:var(--accent)">open RM view ↗</div>';
-  h+='</div></div>';
+  h+='</div>';
 
-  h+='</div>'; // close grid
+  h+='</div>'; // close scoreboard
 
   // Footer
   var nextR=new Date(now);nextR.setHours(18,0,0,0);
@@ -3479,7 +3463,8 @@ function renderTeamStreak(){
 }
 
 function renderDaniel(){
-  if(!document.getElementById("view-daniel")||!document.getElementById("view-daniel").classList.contains("active"))return;
+  var dv=document.getElementById("view-daniel");
+  if(!dv||!dv.classList.contains("active"))return;
   renderTeamStreak();
   renderCarryoverAlerts();
   renderNoteQuality();
@@ -4222,6 +4207,9 @@ setInterval(function(){
   }
 },30000);
 document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
+// Pause auto-refresh while user is typing in any input or textarea
+document.addEventListener("focusin",function(e){if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"){userTyping=true;}});
+document.addEventListener("focusout",function(e){if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"){userTyping=false;}});
 loadAgents();
 // Auto-open Snapshot on load
 (function(){
@@ -4334,6 +4322,7 @@ function rmStartPolling(){
   rmCoverageLastLoaded=0; // reset so coverage loads immediately on tab open
   rmPollInterval=setInterval(function(){
     var now=Date.now();
+    if(userTyping)return; // don't refresh while typing
     // Coverage is expensive (3 fetches) — throttle to every 5 minutes
     if(now-rmCoverageLastLoaded>=300000){
       rmLoadAll();
@@ -4683,10 +4672,8 @@ function openRmFollowupForm(btn){
   var today=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"});
   var fh='<div style="padding:10px 16px;border-bottom:1px solid #f1f5f9;background:#f8fafc">'
     +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:8px">Log Amanda follow-up for '+escHtml(agentName)+'</div>'
-    +'<select id="fu-type-'+rid+'" style="width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;margin-bottom:6px;font-family:inherit">'
-    +'<option>Active Agent Check-in</option><option>CTC Call</option><option>New Agent Follow-up</option><option>Active Agent Talk-to</option><option>Market Update Call</option><option>Closed Deal Thank You</option><option>Birthday Outreach</option><option>Co-Marketing Discussion</option><option>Agent Appreciation</option>'
-    +'</select>'
-    +'<textarea id="fu-note-'+rid+'" placeholder="What did Amanda discuss? What was the outcome?" style="width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;min-height:70px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
+    
+    +'<textarea id="fu-note-'+rid+'" placeholder="What did Amanda do? (e.g. called, met for coffee, sent market update...)" style="width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;min-height:70px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
     +'<div style="display:flex;gap:6px;margin-top:6px">'
     +'<button data-agent="'+escHtml(agentName)+'" data-lp="'+escHtml(lp)+'" data-rid="'+rid+'" onclick="saveRmFollowup(this)" style="background:#1F4E79;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit">Save &amp; notify LP</button>'
     +'<button onclick="document.getElementById(\'rm-flagged-panel\').style.display=\'none\'" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;color:#64748b;font-family:inherit">Cancel</button>'
