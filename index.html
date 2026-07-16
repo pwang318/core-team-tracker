@@ -38,7 +38,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px
 .brand{display:flex;align-items:center;gap:12px}
 .brand-logo{color:var(--text);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-family:'Plus Jakarta Sans',sans-serif}
 .brand-sub{font-size:10px;color:var(--text-3);font-weight:400;letter-spacing:.02em}
-.week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:20px;color:var(--text-2);font-weight:500;font-family:'DM Mono',monospace;letter-spacing:.02em}
+.week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:20px;color:var(--text-2);font-weight:500;letter-spacing:.02em}
 .save-ind{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#cbd5e1;flex-shrink:0}
 .sync-dot.live{background:#15803d}.sync-dot.saving{background:#d97706}.sync-dot.error{background:#dc2626}
@@ -120,7 +120,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px
 .d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem}
 .d-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.1rem 1.25rem;box-shadow:var(--shadow-sm)}
 .d-name{font-weight:600;font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
-.d-pct{font-size:30px;font-weight:600;margin-bottom:4px;letter-spacing:-.02em;font-family:'DM Mono',monospace;color:var(--text)}
+.d-pct{font-size:30px;font-weight:600;margin-bottom:4px;letter-spacing:-.02em;color:var(--text)}
 .d-bar-track{background:var(--border-light);border-radius:20px;height:4px;margin-bottom:8px;overflow:hidden}
 .d-bar-fill{height:4px;border-radius:20px}
 .d-meta{font-size:11px;color:var(--text-3);display:flex;justify-content:space-between}
@@ -640,7 +640,7 @@ tr:hover td{background:var(--bg)}
 <!-- DANIEL VIEW -->
 <!-- DANIEL VIEW -->
 <div id="view-snapshot" class="view">
-  <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'DM Mono',monospace;font-size:10px"></span></div>
+  <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-size:10px"></span></div>
   <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div></div>
 </div>
 
@@ -808,7 +808,7 @@ tr:hover td{background:var(--bg)}
 <script>
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
-var LP_COLORS={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
+var LP_COLORS={Gavin:"#4F46E5",Karen:"#4F46E5",Osgood:"#4F46E5",Jordan:"#4F46E5",Said:"#4F46E5"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
@@ -863,7 +863,7 @@ var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
-var LP_COLORS={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
+var LP_COLORS={Gavin:"#4F46E5",Karen:"#4F46E5",Osgood:"#4F46E5",Jordan:"#4F46E5",Said:"#4F46E5"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
@@ -2404,9 +2404,10 @@ async function renderRmSummary(){
     var flagCount=flagList.length;
 
     var goals=[
-      {type:"Cold Calls",label:"Cold calls",weekly:25},
+      {type:"Cold Calls",label:"Cold calls",weekly:125},
       {type:"New Realtor Meeting",label:"New meetings",weekly:5},
       {type:"Break Breads",label:"Break breads",weekly:5},
+      {type:"Active Agent Talk-to",label:"Talk-to's",weekly:100},
       {type:"Realtor Buddy Referral Ask",label:"Buddy intros",weekly:3}
     ];
     var cards=goals.map(function(g){
@@ -3196,7 +3197,7 @@ function buildSnapshot(){
   var allLPsDone=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
   h+='<div style="background:'+(allLPsDone?"linear-gradient(135deg,#064e3b,#0D7377)":"var(--text)")+';border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:1rem">';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px">';
-  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-family:\'DM Mono\',monospace;margin-bottom:3px">NFM Lending Ohio</div>';
+  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;margin-bottom:3px">NFM Lending Ohio</div>';
   h+='<div style="color:#fff;font-size:16px;font-weight:700">'+todayFmt+'</div></div>';
   h+='<div style="background:rgba(255,255,255,.06);border-radius:8px;padding:7px 12px;font-size:11px;font-style:italic;color:rgba(255,255,255,.85);font-size:14px;font-weight:600">'+headline+'</div>';
   h+='</div>';
@@ -3207,7 +3208,7 @@ function buildSnapshot(){
    {v:leadsWTD,l:"Leads WTD",c:"#a78bfa"},
    {v:leadsMTD,l:"Leads MTD",c:"#60a5fa"}
   ].forEach(function(s){
-    h+='<div><div style="color:'+s.c+';font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;line-height:1">'+s.v+'</div>';
+    h+='<div><div style="color:'+s.c+';font-size:22px;font-weight:700;line-height:1">'+s.v+'</div>';
     h+='<div style="color:rgba(255,255,255,.35);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-top:3px">'+s.l+'</div></div>';
   });
   h+='</div></div>';
@@ -3237,21 +3238,21 @@ function buildSnapshot(){
     else if(called>=Math.round(paceTarget*.7)){status='Almost there';sc='#BA7517';}
     else{status='Pick it up';sc='#E24B4A';}
     var barW=Math.min(pct,100);
-    h+='<div onclick="goToLP(\''+lp+'\',)" style="cursor:pointer;border-left:4px solid '+lpColor+';padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'var(--surface)\'">';
+    h+='<div onclick="goToLP(\''+lp+'\',)" style="cursor:pointer;border:1px solid var(--border);padding:12px 16px;margin-bottom:8px;border-radius:10px;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(79,70,229,.1)\'" onmouseout="this.style.boxShadow=\'none\'">';
     h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
-    h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:'+lpColor+'">'+lp+'</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP2</span></div>';
-    h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+called+'</span>';
+    h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:700;color:var(--text)">'+lp+'</span> <span style="font-size:10px;color:var(--text-3);font-weight:500">LP2</span></div>';
+    h+='<span style="font-size:24px;font-weight:700;color:var(--text)">'+called+'</span>';
     h+='<span style="font-size:11px;color:var(--text-3)">/ '+target+' calls</span>';
-    h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
+    h+='<span style="font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
     h+='<span style="font-size:11px;color:'+sc+';font-weight:500">'+status+'</span>';
     h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Velocify: <b style="color:'+(leadsW?'#1D9E75':'var(--text-3)')+'">'+leadsW+' WTD</b> · '+leadsT+' today · <a style="color:var(--accent)" onclick="event.stopPropagation();goToLP(\''+lp+'\')">open ↗</a></span>';
     h+='</div>';
     h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
     h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+barW+'%;background:'+lpColor+'"></div></div></div>';
-    var mets=[['Talk\'s',rltrTalks,10],['Leads',referredLeads,16],['1003\'s',apps,13],['Pre-apps',preApps,6],['Contracts',contracts,3]];
+    var mets=[['Realtor Talk-to\'s',rltrTalks,10],['Referred Leads',referredLeads,16],['1003\'s',apps,13],['Pre-Approvals',preApps,6],['Contracts',contracts,3]];
     mets.forEach(function(m){
-      var mc=m[1]>=m[2]?'#1D9E75':m[1]>0?'#BA7517':'var(--text-3)';
-      h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+mc+';font-family:\'DM Mono\',monospace">'+m[1]+'<span style="font-size:9px;color:var(--text-3);">/'+m[2]+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m[0]+'</div></div>';
+      var mc=m[1]>=m[2]?'#1D9E75':m[1]>0?'#BA7517':'var(--text-2)';
+      h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+mc+';line-height:1.2">'+m[1]+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/'+m[2]+'</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em;margin-top:2px">'+m[0]+'</div></div>';
     });
     h+='</div>';
     h+='</div>';
@@ -3278,19 +3279,19 @@ function buildSnapshot(){
   else if(isaakRCalls>=isaakPace){isaakStatus='On pace';isaakSc='#1D9E75';}
   else if(isaakRCalls>=Math.round(isaakPace*.7)){isaakStatus='Close';isaakSc='#BA7517';}
   else{isaakStatus='Behind pace';isaakSc='#E24B4A';}
-  h+='<div style="border-left:4px solid #0891B2;padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)">';
+  h+='<div style="border:1px solid var(--border);padding:12px 16px;margin-bottom:8px;border-radius:10px;background:var(--surface)">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
-  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#0891B2">Isaak</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP1</span></div>';
-  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+isaakRCalls+'</span>';
-  h+='<span style="font-size:11px;color:var(--text-3)">/ 100 calls</span>';
-  h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#0891B2">'+isaakPct+'%</span>';
+  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:700;color:var(--text)">Isaak</span> <span style="font-size:10px;color:var(--text-3);font-weight:500">LP1</span></div>';
+  h+='<span style="font-size:24px;font-weight:700;color:var(--text)">'+isaakRCalls+'</span>';
+  h+='<span style="font-size:12px;color:var(--text-2)">/ 100 calls</span>';
+  h+='<span style="font-size:16px;font-weight:700;color:var(--accent)">'+isaakPct+'%</span>';
   h+='<span style="font-size:11px;color:'+isaakSc+';font-weight:500">'+isaakStatus+'</span>';
   h+='</div>';
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+isaakPct+'%;background:#0891B2"></div></div></div>';
-  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakRCalls>=100?'#1D9E75':isaakRCalls>0?'#BA7517':'var(--text-3)')+'">'+isaakRCalls+'<span style="font-size:9px;color:var(--text-3)">/100</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Calls</div></div>';
-  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakApps>=10?'#1D9E75':isaakApps>0?'#BA7517':'var(--text-3)')+'">'+isaakApps+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">1003\'s</div></div>';
-  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakMeetings>=10?'#1D9E75':isaakMeetings>0?'#BA7517':'var(--text-3)')+'">'+isaakMeetings+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Meetings</div></div>';
+  h+='<div style="flex:1;min-width:120px"><div style="height:5px;background:var(--border);border-radius:20px;overflow:hidden"><div style="height:100%;width:'+isaakPct+'%;background:var(--accent);border-radius:20px"></div></div></div>';
+  h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+(isaakRCalls>=100?'#1D9E75':isaakRCalls>0?'#BA7517':'var(--text-2)')+'">'+isaakRCalls+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/100</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;margin-top:2px">Realtor Calls</div></div>';
+  h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+(isaakApps>=10?'#1D9E75':isaakApps>0?'#BA7517':'var(--text-2)')+'">'+isaakApps+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/10</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;margin-top:2px">1003\'s</div></div>';
+  h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+(isaakMeetings>=10?'#1D9E75':isaakMeetings>0?'#BA7517':'var(--text-2)')+'">'+isaakMeetings+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/10</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;margin-top:2px">Meetings Scheduled</div></div>';
   h+='</div>';
   h+='</div>';
 
@@ -3323,27 +3324,31 @@ function buildSnapshot(){
   var amTotalGoal=852;
   var amPaceT=Math.round(amWeeklyGoal*paceFraction);
   var amPctOfGoal=amWeeklyGoal>0?Math.min(Math.round(amTotalWTD/amWeeklyGoal*100),100):0;
-  var aSt,aSc,aSb;
+  var aSt,aSc;
+  if(amPctOfGoal>=100){aSt="Week complete!";aSc="#1D9E75";}
+  else if(amTotalWTD>=amPaceT){aSt="On pace";aSc="#BA7517";}
+  else if(amPctOfGoal>=80){aSt="Almost there";aSc="#BA7517";}
+  else{aSt="Needs push";aSc="#dc2626";}
 
-  h+='<div style="border-left:4px solid #B45309;padding:10px 14px;border-radius:0 6px 6px 0;background:var(--surface)">';
+  h+='<div style="border:1px solid var(--border);padding:12px 16px;border-radius:10px;background:var(--surface)">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
-  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#B45309">Amanda</span><br><span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">RM</span></div>';
-  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+amTotalToday+'</span>';
-  h+='<span style="font-size:11px;color:var(--text-3)">/ '+amDailyTotalGoal+' today</span>';
-  h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#B45309">'+amPctOfGoal+'%</span>';
-  h+='<span style="font-size:11px;color:'+aSc+';font-weight:500">'+aSt+'</span>';
-  h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">WTD: '+amTotalWTD+' · MTD: '+amTotalMTD+'</span>';
+  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:700;color:var(--text)">Amanda</span><br><span style="font-size:10px;color:var(--text-3);font-weight:500">RM</span></div>';
+  h+='<span style="font-size:24px;font-weight:700;color:var(--text)">'+amTotalToday+'</span>';
+  h+='<span style="font-size:12px;color:var(--text-2)">/ '+amDailyTotalGoal+' today</span>';
+  h+='<span style="font-size:16px;font-weight:700;color:var(--accent)">'+amPctOfGoal+'%</span>';
+  h+='<span style="font-size:12px;color:'+aSc+';font-weight:600">'+aSt+'</span>';
+  h+='<span style="margin-left:auto;font-size:11px;color:var(--text-2)">WTD: '+amTotalWTD+' · MTD: '+amTotalMTD+'</span>';
   h+='</div>';
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:#B45309"></div></div></div>';
-  [{type:"New Realtor Meeting",daily:1,weekly:5,label:"Mtgs"},{type:"Cold Calls",daily:25,weekly:125,label:"Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Breads"},{type:"Talk-to\'s",daily:20,weekly:100,label:"Talk-to\'s"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy"}].forEach(function(m){
-    var td=m.type==="Talk-to\'s"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
-    var tw=m.type==="Talk-to\'s"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
-    var dc=td>=m.daily?'#1D9E75':'var(--text-3)';
-    var wc=tw>=m.weekly?'#1D9E75':tw>0?'#BA7517':'var(--text-3)';
-    h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+dc+';font-family:\'DM Mono\',monospace">'+td+'<span style="font-size:9px;color:var(--text-3)">/'+m.daily+'</span></div><div style="font-size:10px;font-weight:500;color:'+wc+';font-family:\'DM Mono\',monospace">'+tw+'<span style="font-size:8px;color:var(--text-3)">/'+m.weekly+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m.label+'</div></div>';
+  h+='<div style="flex:1;min-width:120px"><div style="height:5px;background:var(--border);border-radius:20px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:var(--accent);border-radius:20px"></div></div></div>';
+  [{type:"New Realtor Meeting",daily:1,weekly:5,label:"New Meetings"},{type:"Cold Calls",daily:25,weekly:125,label:"Cold Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Break Breads"},{type:"Active Agent Talk-to",daily:20,weekly:100,label:"Agent Talk-to's"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy Referrals"}].forEach(function(m){
+    var td=amCnt(amTodayActs,m.type);
+    var tw=amCnt(amWeekActs,m.type);
+    var dc=td>=m.daily?'#1D9E75':'var(--text-2)';
+    var wc=tw>=m.weekly?'#1D9E75':tw>0?'#BA7517':'var(--text-2)';
+    h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+dc+';line-height:1.2">'+td+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/'+m.daily+'</span></div><div style="font-size:11px;font-weight:600;color:'+wc+';line-height:1.2">'+tw+'<span style="font-size:9px;color:var(--text-3);font-weight:400">/'+m.weekly+'</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px">'+m.label+'</div></div>';
   });
-  h+='<span style="margin-left:auto;font-size:10px"><a style="color:var(--accent);cursor:pointer" onclick="openRmView(document.querySelector(\'.wb-RM\'))">open RM ↗</a></span>';
+  h+='<span style="margin-left:auto;font-size:11px"><a style="color:var(--accent);cursor:pointer;font-weight:500" onclick="openRmView(document.querySelector(\'.wb-RM\'))">open RM ↗</a></span>';
   h+='</div>';
   h+='</div>';
 
@@ -3416,7 +3421,7 @@ function buildDailyDigest(){
     h+='<div style="flex:1">';
     h+='<div style="display:flex;align-items:center;gap:8px">';
     h+='<div style="flex:1;height:4px;background:var(--border-light);border-radius:2px;overflow:hidden"><div style="height:100%;background:'+lpColor+';opacity:.7;border-radius:2px;width:'+pct+'%;transition:width .6s ease"></div></div>';
-    h+='<span style="font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text-2);white-space:nowrap">'+called+' / '+total+'</span>';
+    h+='<span style="font-size:11px;color:var(--text-2);white-space:nowrap">'+called+' / '+total+'</span>';
     h+='</div></div>';
     h+='<div style="text-align:right;flex-shrink:0">';
     h+=leads>0?'<span style="font-size:12px;font-weight:700;color:var(--accent)">+'+leads+' lead'+(leads!==1?'s':'')+'</span>':'<span style="font-size:11px;color:var(--text-3)">—</span>';
@@ -4385,7 +4390,7 @@ const LPSC_AMANDA_GOALS=[
   {key:"New Realtor Meeting",label:"New realtor meeting",goal:20},
   {key:"Cold Calls",label:"Cold calls",goal:400},
   {key:"Break Breads",label:"Break breads",goal:20},
-  {key:"Talk-to's",label:"Talk-to's",goal:400},
+  {key:"Active Agent Talk-to",label:"Talk-to's",goal:400},
   {key:"Realtor Buddy Referral Ask",label:"Buddy asks",goal:12}
 ];
 
@@ -4546,9 +4551,9 @@ async function lpscSaveEdit(){
 // ── RELATIONSHIP MANAGER TAB (Amanda) ────────────────────────────────────
 const RM_GOALS=[
   {label:"New realtor meeting",type:"New Realtor Meeting",daily:1,weekly:5,monthly:20},
-  {label:"Cold calls",type:"Cold Calls",daily:25,weekly:125,monthly:400},
+  {label:"Cold calls",type:"Cold Calls",daily:25,weekly:125,monthly:500},
   {label:"Break breads",type:"Break Breads",daily:1,weekly:5,monthly:20},
-  {label:"Talk-to's",type:"Talk-to's",daily:20,weekly:100,monthly:400},
+  {label:"Active Agent Talk-to's",type:"Active Agent Talk-to",daily:20,weekly:100,monthly:400},
   {label:"Buddy asks",type:"Realtor Buddy Referral Ask",daily:1,weekly:3,monthly:12}
 ];
 var rmCurrentPeriod="today";
