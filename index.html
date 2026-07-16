@@ -3371,15 +3371,12 @@ function buildSnapshot(){
   h+='</div>'; // close scoreboard
 
   // Footer
-  var nextR=new Date(now);nextR.setHours(18,0,0,0);
-  if(now>=nextR)nextR.setDate(nextR.getDate()+1);
-  var hrs=Math.ceil((nextR-now)/3600000);
-  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3);font-family:\'DM Mono\',monospace">Auto-refreshes at 6:00 PM · ~'+hrs+'h until next refresh</div>';
+  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3)">Live · refreshes every 30s · last updated '+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})+'</div>';
 
   el.innerHTML=h;
+  // Clear any existing timer and set a 5-minute auto-refresh
   clearTimeout(window._snapshotTimer);
-  var ms=nextR-now;
-  if(ms>0&&ms<86400000)window._snapshotTimer=setTimeout(buildSnapshot,ms);
+  window._snapshotTimer=setTimeout(buildSnapshot, 30 * 1000);
 }
 
 
