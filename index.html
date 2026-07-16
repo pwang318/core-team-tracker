@@ -3088,7 +3088,7 @@ function amCnt(src,type){
   return (src||[]).filter(function(a){return (a.act_type||"").trim()===type;}).length;
 }
 function amCntTalkTo(src){
-  var TALKTO_TYPES=["Talk-to's","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","CTC Call","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Recruiting Conversation"];
+  var TALKTO_TYPES=["Active Agent Talk-to","Active Agent Check-in","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Closed Deal Thank You","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion"];
   return (src||[]).filter(function(a){return TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length;
 }
 
@@ -3316,7 +3316,7 @@ function buildSnapshot(){
   var amMeetings=amCnt(amMonthActs,"New Realtor Meeting");
   var amColdCalls=amCnt(amMonthActs,"Cold Calls");
   var amBreakBreads=amCnt(amMonthActs,"Break Breads");
-  var TALKTO_TYPES=["Talk-to's","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","CTC Call","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Recruiting Conversation"];
+  var TALKTO_TYPES=["Active Agent Talk-to","Active Agent Check-in","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Closed Deal Thank You","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion"];
   var amTalkTos=amCntTalkTo(amMonthActs);
   var amBuddyAsks=amCnt(amMonthActs,"Realtor Buddy Referral Ask");
   var amWeeklyGoal=238; // 125 cold calls + 100 talk-tos + 5 meetings + 5 break breads + 3 buddy asks
@@ -3342,8 +3342,8 @@ function buildSnapshot(){
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
   h+='<div style="flex:1;min-width:120px"><div style="height:5px;background:var(--border);border-radius:20px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:var(--accent);border-radius:20px"></div></div></div>';
   [{type:"New Realtor Meeting",daily:1,weekly:5,label:"New Meetings"},{type:"Cold Calls",daily:25,weekly:125,label:"Cold Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Break Breads"},{type:"Active Agent Talk-to",daily:20,weekly:100,label:"Agent Talk-to's"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy Referrals"}].forEach(function(m){
-    var td=amCnt(amTodayActs,m.type);
-    var tw=amCnt(amWeekActs,m.type);
+    var td=m.type==="Active Agent Talk-to"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
+    var tw=m.type==="Active Agent Talk-to"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
     var dc=td>=m.daily?'#1D9E75':'var(--text-2)';
     var wc=tw>=m.weekly?'#1D9E75':tw>0?'#BA7517':'var(--text-2)';
     h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+dc+';line-height:1.2">'+td+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/'+m.daily+'</span></div><div style="font-size:11px;font-weight:600;color:'+wc+';line-height:1.2">'+tw+'<span style="font-size:9px;color:var(--text-3);font-weight:400">/'+m.weekly+'</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px">'+m.label+'</div></div>';
