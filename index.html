@@ -3188,7 +3188,9 @@ function buildSnapshot(){
     else if(called>=Math.round(paceTarget*.7)){status="⚡ Almost there";sc="var(--amber)";sb="var(--amber-bg)";}
     else{status="🚨 Pick it up";sc="var(--red)";sb="var(--red-bg)";}
 
-    h+=(called>=target?'<div style="height:2px;background:linear-gradient(90deg,#0E9F8E,rgba(14,159,142,.1))"></div>':'')+'<div style="background:var(--surface);border:'+(called>=target?"1px solid rgba(22,163,148,.4)":called>=paceTarget?"1px solid var(--border)":called>=Math.round(paceTarget*.7)?"1px solid rgba(212,130,10,.3)":"1px solid rgba(224,88,88,.3)")+';border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="goToLP(\''+lp+'\')">';
+    h+='<div style="background:var(--surface);border:'+(called>=target?"1px solid rgba(22,163,148,.4)":called>=paceTarget?"1px solid var(--border)":called>=Math.round(paceTarget*.7)?"1px solid rgba(212,130,10,.3)":"1px solid rgba(224,88,88,.3)")+';border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="goToLP(\''+lp+'\')">';
+    h+='<div style="background:var(--surface);border:'+(called>=target?"1px solid rgba(22,163,148,.4)":called>=paceTarget?"1px solid var(--border)":called>=Math.round(paceTarget*.7)?"1px solid rgba(212,130,10,.3)":"1px solid rgba(224,88,88,.3)")+';border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="goToLP(\''+lp+'\')">';
+    h+=(called>=target?'<div style="height:3px;background:linear-gradient(90deg,'+lpColor+',rgba(14,159,142,.1))"></div>':'');
     // Header
     h+='<div style="padding:11px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
     h+='<div><div style="font-size:14px;font-weight:800;color:'+lpColor+'">'+lp+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px">LP2</div></div>';
