@@ -3083,6 +3083,15 @@ function openSnapshotView(btn){
   buildSnapshot();
 }
 
+function amCnt(src,type){
+  return (src||[]).filter(function(a){return (a.act_type||"").trim()===type;}).length;
+}
+function amCntTalkTo(src){
+  var TALKTO_TYPES=["Talk-to's","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","CTC Call","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Recruiting Conversation"];
+  return (src||[]).filter(function(a){return TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length;
+}
+
+
 function buildSnapshot(){
   var el=document.getElementById("d-snapshot-body");
   var timeEl=document.getElementById("snapshot-time");
@@ -4221,20 +4230,30 @@ loadAgents();
   var el=document.getElementById("d-snapshot-body");
   if(el)el.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div>';
   // Load data, then build snapshot
-  Promise.all([
+  // Use allSettled so one failure doesn't block everything
+  var _bootPromises = [
     loadCallLogs(),
     loadAgentFirstCalls(),
     loadRmActivity(),
     loadAmandaSnapshot()
-  ]).then(function(){
-    // Re-assert Snapshot is active in case anything changed during load
+  ];
+  // Timeout safety: build snapshot after 8s even if some loads hang
+  var _bootTimer = setTimeout(function(){
+    buildSnapshot();
+    loadLeadPipeline();
+  }, 8000);
+  Promise.all(_bootPromises.map(function(p){
+    return p ? p.catch(function(){return null;}) : Promise.resolve(null);
+  })).then(function(){
+    clearTimeout(_bootTimer);
     document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
     document.getElementById("view-snapshot").classList.add("active");
     document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
     var sb=document.querySelector(".wb-Snapshot");if(sb)sb.classList.add("active");
-    buildSnapshot(); // first pass — calls + scorecard + amanda
-    loadLeadPipeline(); // leads load async, snapshot auto-rebuilds when done
+    buildSnapshot();
+    loadLeadPipeline();
   }).catch(function(e){
+    clearTimeout(_bootTimer);
     console.warn("Snapshot load error:",e);
     buildSnapshot();
   });
