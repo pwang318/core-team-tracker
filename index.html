@@ -537,8 +537,10 @@ tr:hover td{background:var(--bg)}
     <select id="rm-feed-type" onchange="rmRenderFeed()" style="padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;color:#333;background:#fff;min-width:170px">
       <option value="">All activity types</option>
       <option>Cold Calls</option><option>New Realtor Meeting</option><option>Break Breads</option>
-      <option>Active Agent Check-in</option><option>CTC Call</option><option>Realtor Buddy Referral Ask</option>
-      <option>Coffee Meeting</option><option>Lunch or Dinner</option><option>Pop-By</option><option>Market Update Call</option>
+      <option>New Agent Follow-up</option><option>Active Agent Talk-to</option><option>Active Agent Check-in</option>
+      <option>CTC Call</option><option>Market Update Call</option><option>Realtor Buddy Referral Ask</option>
+      <option>Closed Deal Thank You</option><option>Birthday Outreach</option><option>Holiday Outreach</option>
+      <option>Agent Appreciation</option><option>Co-Marketing Discussion</option>
     </select>
   </div>
   <div id="rm-feed-list" style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px;max-height:420px;overflow-y:auto">
@@ -573,8 +575,9 @@ tr:hover td{background:var(--bg)}
     <div style="display:flex;gap:8px;flex-wrap:wrap" id="lpsc-tabs">
       <button class="lpsc-btn active" onclick="lpscSelectLP('Isaak',this)">Isaak</button>
       <button class="lpsc-btn" onclick="lpscSelectLP('Gavin',this)">Gavin</button>
-      <button class="lpsc-btn" onclick="lpscSelectLP('Osgood',this)">Osgood</button>
+      <button class="lpsc-btn" onclick="lpscSelectLP('Jordan',this)">Jordan</button>
       <button class="lpsc-btn" onclick="lpscSelectLP('Karen',this)">Karen</button>
+      <button class="lpsc-btn" onclick="lpscSelectLP('Osgood',this)">Osgood</button>
       <button class="lpsc-btn" onclick="lpscSelectLP('Said',this)">Said</button>
       <button class="lpsc-btn" onclick="lpscSelectLP('Jordan',this)">Jordan</button>
       <button class="lpsc-btn" onclick="lpscSelectLP('Amanda',this)">Amanda (RM)</button>
@@ -650,9 +653,7 @@ tr:hover td{background:var(--bg)}
 
   <!-- TAB: TODAY -->
   <div id="d-tab4-today" class="d-tab-panel active">
-    <div class="section-head">Daily digest <span id="digest-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'DM Mono',monospace;font-size:10px"></span> <button class="btn btn-sm" onclick="buildDailyDigest()" style="text-transform:none;font-size:11px">Refresh</button></div>
-    <div id="d-daily-digest" style="margin-bottom:1.5rem"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;text-align:center;color:var(--text-3);font-size:12px">Loading digest...</div></div>
-    <div id="d-team-streak-section" style="margin-bottom:.75rem"></div>
+        <div id="d-team-streak-section" style="margin-bottom:.75rem"></div>
     <div id="d-allclear-section" style="margin-bottom:.75rem"></div>
     <div id="d-carryover-section" style="margin-bottom:1rem"></div>
     <div id="d-alerts-section" style="margin-bottom:1rem"></div>
@@ -847,12 +848,11 @@ tr:hover td{background:var(--bg)}
   </div>
   <div class="admin-section">
     <h3>Flagged inactive <span style="font-weight:400;font-size:12px;color:#888" id="inactive-count-label"></span></h3>
-    <p style="font-size:12px;color:#888;margin-bottom:.75rem">No lead activity in 90+ days.</p>
-    <div id="inactive-list"></div>
-  </div>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">No lead activity
+</p>
 </div>
 </div>
-
+</div>
 <script>
 // v2026-07-16 19:04 — amandaFlagged fix
 var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
@@ -3095,7 +3095,7 @@ function buildSnapshot(){
   });
 
   // Scorecard data — load from lp_scorecards for this week
-  var weekKey=lpscGetMonday(now);
+  var weekKey=getWeekKey(now);
   var snapScData=window._snapScData||{};
 
   // Fetch scorecard data if not cached
@@ -3119,6 +3119,9 @@ function buildSnapshot(){
   // Isaak scorecard data
   var isaakData=snapScData["Isaak"]||{};
   var isaakCalls=lpHistoryCallCounts&&(lpHistoryCallCounts["Isaak"]||lpHistoryCallCounts["isaak"])||0;
+  // Also try scorecard data for Isaak calls
+  var isaakScCalls=scTotal(snapScData["Isaak"]||{},"realtor_calls");
+  if(isaakScCalls>isaakCalls)isaakCalls=isaakScCalls;
   function scTotal(data,key){
     var t=0;
     ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function(d){t+=parseInt(data[key+"_"+d]||0)||0;});
@@ -3288,7 +3291,9 @@ function buildSnapshot(){
   var amMeetings=amCnt(amMonthActs,"New Realtor Meeting");
   var amColdCalls=amCnt(amMonthActs,"Cold Calls");
   var amBreakBreads=amCnt(amMonthActs,"Break Breads");
-  var amTalkTos=amCnt(amMonthActs,"Talk-to's");
+  var TALKTO_TYPES=["Talk-to's","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","CTC Call","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Recruiting Conversation"];
+  function amCntTalkTo(src){return src.filter(function(a){return TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length;}
+  var amTalkTos=amCntTalkTo(amMonthActs);
   var amBuddyAsks=amCnt(amMonthActs,"Realtor Buddy Referral Ask");
   var amWeeklyGoal=238; // 125 cold calls + 100 talk-tos + 5 meetings + 5 break breads + 3 buddy asks
   var amDailyTotalGoal=48; // 25 cold calls + 20 talk-tos + 1 meeting + 1 break bread + 1 buddy ask
@@ -3330,8 +3335,8 @@ function buildSnapshot(){
     {label:"Talk-to's",type:"Talk-to's",daily:20,weekly:100},
     {label:"Buddy asks",type:"Realtor Buddy Referral Ask",daily:1,weekly:3}
   ].forEach(function(m){
-    var todayCount=amCnt(amTodayActs,m.type);
-    var wtdCount=amCnt(amWeekActs,m.type);
+    var todayCount=m.type==="Talk-to's"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
+    var wtdCount=m.type==="Talk-to's"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
     var dayOk=todayCount>=m.daily;
     var wtdPct=m.weekly>0?wtdCount/m.weekly:0;
     var dc=dayOk?"var(--green)":"var(--text-3)";
@@ -3365,6 +3370,7 @@ function buildSnapshot(){
 
 
 function buildDailyDigest(){
+  if(!document.getElementById("view-daniel")||!document.getElementById("view-daniel").classList.contains("active"))return;
   var el=document.getElementById("d-daily-digest");
   var timeEl=document.getElementById("digest-time");
   if(!el)return;
@@ -3471,6 +3477,7 @@ function renderTeamStreak(){
 }
 
 function renderDaniel(){
+  if(!document.getElementById("view-daniel")||!document.getElementById("view-daniel").classList.contains("active"))return;
   renderTeamStreak();
   renderCarryoverAlerts();
   renderNoteQuality();
@@ -4205,7 +4212,13 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
 
 
 
-setInterval(function(){if(currentUser==="Daniel"&&Object.keys(pendingNote).length===0)loadCallLogs().then(function(){renderDaniel();});},30000);
+setInterval(function(){
+  if(currentUser==="Daniel"&&Object.keys(pendingNote).length===0){
+    loadCallLogs().then(function(){renderDaniel();});
+  } else if(currentUser==="Snapshot"&&Object.keys(pendingNote).length===0){
+    loadCallLogs().then(function(){buildSnapshot();});
+  }
+},30000);
 document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 loadAgents();
 // Auto-open Snapshot on load
@@ -4225,6 +4238,11 @@ loadAgents();
     loadRmActivity(),
     loadAmandaSnapshot()
   ]).then(function(){
+    // Re-assert Snapshot is active in case anything changed during load
+    document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+    document.getElementById("view-snapshot").classList.add("active");
+    document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
+    var sb=document.querySelector(".wb-Snapshot");if(sb)sb.classList.add("active");
     buildSnapshot(); // first pass — calls + scorecard + amanda
     loadLeadPipeline(); // leads load async, snapshot auto-rebuilds when done
   }).catch(function(e){
@@ -4463,7 +4481,10 @@ function lpscRenderEditTable(){
 function lpscEditTotalCell(goalSum){
   var metrics=LPSC_METRICS_MAP[lpscCurrentLP];
   var tot=metrics.reduce(function(s,m){return s+lpscGetTotal(m.key,lpscEditData);},0);
-  var pct=goalSum?tot/goalSum:0;
+  // For Isaak, use realtor_calls goal (100) as the primary target denominator
+  var displayGoal=lpscCurrentLP==="Isaak"?100:goalSum;
+  var displayTot=lpscCurrentLP==="Isaak"?lpscGetTotal("realtor_calls",lpscEditData):tot;
+  var pct=displayGoal?displayTot/displayGoal:0;
   var color=pct>=1?"#1a5c2a":pct>=0.6?"#7a4f0a":"#555";
   var bg=pct>=1?"#dcf5e3":pct>=0.6?"#fef3dc":"#f0f0f0";
   return '<span style="display:inline-block;padding:4px 10px;border-radius:8px;font-size:14px;font-weight:800;background:'+bg+';color:'+color+'">'+tot+' / '+goalSum+' <span style="font-size:10px;font-weight:600">('+Math.round(pct*100)+'%)</span></span>';
@@ -4661,7 +4682,7 @@ function openRmFollowupForm(btn){
   var fh='<div style="padding:10px 16px;border-bottom:1px solid #f1f5f9;background:#f8fafc">'
     +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:8px">Log Amanda follow-up for '+escHtml(agentName)+'</div>'
     +'<select id="fu-type-'+rid+'" style="width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;margin-bottom:6px;font-family:inherit">'
-    +'<option>Agent visit</option><option>Phone call</option><option>Co-marketing meeting</option><option>Email follow-up</option><option>Other</option>'
+    +'<option>Active Agent Check-in</option><option>CTC Call</option><option>New Agent Follow-up</option><option>Active Agent Talk-to</option><option>Market Update Call</option><option>Closed Deal Thank You</option><option>Birthday Outreach</option><option>Co-Marketing Discussion</option><option>Agent Appreciation</option>'
     +'</select>'
     +'<textarea id="fu-note-'+rid+'" placeholder="What did Amanda discuss? What was the outcome?" style="width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;min-height:70px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
     +'<div style="display:flex;gap:6px;margin-top:6px">'
