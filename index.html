@@ -3165,16 +3165,21 @@ function buildSnapshot(){
 
   // Motivating headlines + rotating quotes
   var QUOTES=[
-    "The best mortgage is the one you close. Make the call.",
-    "Every realtor call is a future closing.",
-    "Pick up the phone. Your competition already did.",
-    "Relationships are built one conversation at a time.",
-    "Consistency beats intensity. Show up every day.",
-    "A call today is a commission next month.",
-    "Your next biggest referral partner hasn't heard from you yet.",
-    "The market rewards the persistent.",
-    "One more call can change everything.",
-    "Champions make calls when they don't feel like it."
+    "The secret of getting ahead is getting started. — Mark Twain",
+    "It always seems impossible until it's done. — Nelson Mandela",
+    "You miss 100% of the shots you don't take. — Wayne Gretzky",
+    "Hard work beats talent when talent doesn't work hard. — Tim Notke",
+    "The only way to do great work is to love what you do. — Steve Jobs",
+    "I have not failed. I've just found 10,000 ways that won't work. — Thomas Edison",
+    "Success is not final, failure is not fatal: it is the courage to continue that counts. — Churchill",
+    "The difference between ordinary and extraordinary is that little extra. — Jimmy Johnson",
+    "Done is better than perfect. — Sheryl Sandberg",
+    "If you're going through hell, keep going. — Winston Churchill",
+    "It does not matter how slowly you go as long as you do not stop. — Confucius",
+    "Everything you've ever wanted is on the other side of fear. — George Addair",
+    "Whether you think you can or you think you can't, you're right. — Henry Ford",
+    "The best time to plant a tree was 20 years ago. The second best time is now. — Chinese Proverb",
+    "Act as if what you do makes a difference. It does. — William James"
   ];
   var QUOTE=QUOTES[now.getDay()%QUOTES.length+(now.getDate()%3)>QUOTES.length?0:now.getDay()%QUOTES.length+(now.getDate()%3)];
   QUOTE=QUOTES[(now.getDate()+now.getDay())%QUOTES.length];
@@ -3203,10 +3208,21 @@ function buildSnapshot(){
   h+='</div>';
   h+='<div style="font-size:11px;color:rgba(255,255,255,.35);font-style:italic;margin-bottom:10px">“'+QUOTE+'”</div>';
   h+='<div style="display:flex;gap:22px;flex-wrap:wrap">';
-  [{v:totalCallsWTD+" / "+(LPS.length*WEEKLY_TARGET),l:"Team calls WTD",c:"#fff"},
-   {v:leadsToday,l:"Leads today",c:"var(--accent)"},
-   {v:leadsWTD,l:"Leads WTD",c:"#a78bfa"},
-   {v:leadsMTD,l:"Leads MTD",c:"#60a5fa"}
+  // Sum LP2 scorecard totals across all LPs
+  var teamTalkTos=0,teamLeads=0,team1003s=0,teamPreApps=0,teamContracts=0;
+  LPS.forEach(function(lp){
+    var sc=snapScData[lp]||{};
+    teamTalkTos+=scTotal(sc,'rltr_talks');
+    teamLeads+=scTotal(sc,'referred_leads');
+    team1003s+=scTotal(sc,'apps_1003');
+    teamPreApps+=scTotal(sc,'pre_approvals');
+    teamContracts+=scTotal(sc,'contracts');
+  });
+  [{v:teamTalkTos,l:"Realtor Talk-to's WTD",c:"#fff"},
+   {v:teamLeads,l:"Referred Leads WTD",c:"var(--accent)"},
+   {v:team1003s,l:"1003's WTD",c:"#a78bfa"},
+   {v:teamPreApps,l:"Pre-Approvals WTD",c:"#60a5fa"},
+   {v:teamContracts,l:"Contracts WTD",c:"#34d399"}
   ].forEach(function(s){
     h+='<div><div style="color:'+s.c+';font-size:22px;font-weight:700;line-height:1">'+s.v+'</div>';
     h+='<div style="color:rgba(255,255,255,.35);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-top:3px">'+s.l+'</div></div>';
