@@ -3035,193 +3035,290 @@ function buildSnapshot(){
   if(!el)return;
   var now=new Date();
   if(timeEl)timeEl.textContent="as of "+now.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
-  if(!callLogs||Object.keys(callLogs).length===0){
-    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div>';
-    setTimeout(buildSnapshot,2000);return;
+
+  if(!agents||!agents.length){
+    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading team data...</div>';
+    setTimeout(buildSnapshot,1500);return;
   }
 
-  // ── Pace calculation ──
-  // What % of the week is gone (Mon=0, Fri=1, weekends count as full)
-  var dayOfWeek=now.getDay(); // 0=Sun,1=Mon...5=Fri,6=Sat
-  var workDaysGone=[0,0,.2,.4,.6,.8,1][dayOfWeek]; // rough pace by day
-  var hourFraction=now.getHours()/17; // 0-1 through 9am-5pm
-  var paceFraction=Math.min(workDaysGone+(dayOfWeek>=1&&dayOfWeek<=5?hourFraction*.2:0),1);
+  // Pace: what % of week is done by now (Mon-Fri, 8am-6pm)
+  var dow=now.getDay();
+  var workDaysGone=[0,0,.2,.4,.6,.8,1][dow];
+  var hourPct=Math.max(0,Math.min((now.getHours()-8)/10,1));
+  var paceFraction=Math.min(workDaysGone+(dow>=1&&dow<=5?hourPct*.2:0),1);
 
-  // ── LP calls this week ──
+  // LP call counts this week
   var callsLogged={};
   LPS.forEach(function(lp){callsLogged[lp]=0;});
   agents.forEach(function(a){
     if(callLogs[a[0]]&&isActive(a)&&a[2]&&callsLogged[a[2]]!==undefined)callsLogged[a[2]]++;
   });
+  var totalCallsWTD=Object.values(callsLogged).reduce(function(s,n){return s+n;},0);
 
-  // ── Leads & conversion data ──
+  // Leads from pipeline
   var lpd=window.leadPipelineData;
   var leadsToday=0,leadsWTD=0,leadsMTD=0;
-  var lpLeadsToday={},lpLeadsWTD={},lpLTF={};
+  var lpLeadsToday={},lpLeadsWTD={};
   LPS.forEach(function(lp){
-    var r=lpd&&lpd.lps&&lpd.lps[lp]?lpd.lps[lp]:{daily:0,wtd:0,mtd:0,ytd:0,file_starts_mtd:0};
-    lpLeadsToday[lp]=r.daily||0;
-    lpLeadsWTD[lp]=r.wtd||0;
-    var ltf=r.mtd>0?Math.round((r.file_starts_mtd||0)/r.mtd*100):0;
-    lpLTF[lp]=ltf;
-    leadsToday+=r.daily||0;
-    leadsWTD+=r.wtd||0;
-    leadsMTD+=r.mtd||0;
+    var r=lpd&&lpd.lps&&lpd.lps[lp]?lpd.lps[lp]:{};
+    lpLeadsToday[lp]=r.daily||0;lpLeadsWTD[lp]=r.wtd||0;
+    leadsToday+=r.daily||0;leadsWTD+=r.wtd||0;leadsMTD+=r.mtd||0;
   });
-  var totalCallsWTD=Object.values(callsLogged).reduce(function(s,n){return s+n;},0);
-  var totalTarget=LPS.length*WEEKLY_TARGET;
 
-  // ── Isaak (LP1) — from lp_call_history_counts ──
-  var isaakCalls=lpHistoryCallCounts["Isaak"]||lpHistoryCallCounts["isaak"]||0;
-  var isaakTarget=100; // Isaak's weekly target
-  var isaakPace=Math.round(isaakTarget*paceFraction);
+  // Scorecard data — load from lp_scorecards for this week
+  var weekKey=lpscGetMonday(now);
+  var snapScData=window._snapScData||{};
 
-  // ── Amanda (RM) — from rmFeedCache ──
-  var amandaToday=(window.rmFeedCache&&window.rmFeedCache.today)?window.rmFeedCache.today.length:0;
+  // Fetch scorecard data if not cached
+  if(!window._snapScWeek||window._snapScWeek!==weekKey){
+    window._snapScWeek=weekKey;
+    var persons=LPS.concat(["Isaak","Amanda"]);
+    sbFetch("GET","lp_scorecards?week_key=eq."+weekKey+"&select=person,data").then(function(res){
+      window._snapScData={};
+      if(res)res.forEach(function(r){window._snapScData[r.person]=r.data||{};});
+      buildSnapshot();
+    }).catch(function(){});
+    // Render with call data while scorecard loads
+  }
+
+  // Amanda activity counts this week
   var amandaWeek=(window.rmFeedCache&&window.rmFeedCache.week)?window.rmFeedCache.week.length:0;
+  var amandaToday=(window.rmFeedCache&&window.rmFeedCache.today)?window.rmFeedCache.today.length:0;
   var amandaFlagged=0;
   try{var fc=document.getElementById("rm-flagged-count");if(fc)amandaFlagged=parseInt(fc.textContent)||0;}catch(e){}
 
-  // ── Motivating headline ──
-  var headlines=[];
-  var allHit15=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
-  if(allHit15)headlines.push("🔥 Full team hit their targets — keep the momentum!");
-  var leaders=LPS.filter(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
-  if(leaders.length===1)headlines.push("🌟 "+leaders[0]+" hit 15 calls — who's next?");
-  if(leadsToday>0)headlines.push("📨 "+leadsToday+" lead"+(leadsToday>1?"s":"")+" came in today — follow up fast!");
-  var bestLTF=LPS.reduce(function(best,lp){return lpLTF[lp]>lpLTF[best]?lp:best;},LPS[0]);
-  if(lpLTF[bestLTF]>=20)headlines.push("📈 "+bestLTF+" is converting at "+lpLTF[bestLTF]+"% lead-to-file this month");
-  var behindLPs=LPS.filter(function(lp){return callsLogged[lp]<Math.round(WEEKLY_TARGET*paceFraction*0.7);});
-  if(behindLPs.length>0&&paceFraction>.4)headlines.push("⏰ "+behindLPs.join(", ")+" — time to pick up the pace");
-  if(!headlines.length)headlines.push("💪 Team is moving — keep making those calls");
-  var headline=headlines[Math.floor(now.getSeconds()/10)%headlines.length]||headlines[0];
+  // Isaak scorecard data
+  var isaakData=snapScData["Isaak"]||{};
+  var isaakCalls=lpHistoryCallCounts&&(lpHistoryCallCounts["Isaak"]||lpHistoryCallCounts["isaak"])||0;
+  function scTotal(data,key){
+    var t=0;
+    ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function(d){t+=parseInt(data[key+"_"+d]||0)||0;});
+    return t;
+  }
 
-  // ══ BUILD HTML ══
+  // Motivating headlines
+  var headlines=[];
+  var allHit=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
+  if(allHit)headlines.push("🔥 Full team hit their call targets this week!");
+  var ahead=LPS.filter(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
+  if(ahead.length===1&&!allHit)headlines.push("🌟 "+ahead[0]+" finished calls — who's next?");
+  if(leadsToday>0)headlines.push("📨 "+leadsToday+" lead"+(leadsToday>1?"s":"")+" came in today — follow up!");
+  var behind=LPS.filter(function(lp){return callsLogged[lp]<Math.round(WEEKLY_TARGET*paceFraction*.65);});
+  if(behind.length&&paceFraction>.3)headlines.push("⏰ "+behind.join(", ")+" — time to pick up the pace");
+  if(!headlines.length)headlines.push("💪 Team is moving — keep making those calls");
+  var headline=headlines[Math.floor(now.getSeconds()/10)%headlines.length];
+
   var todayFmt=now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
   var h="";
 
-  // ── Hero bar ──
-  h+='<div style="background:var(--text);border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:1rem">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:14px">';
-  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-family:\'DM Mono\',monospace">NFM Lending Ohio</div>';
-  h+='<div style="color:#fff;font-size:16px;font-weight:700;margin-top:2px">'+todayFmt+'</div></div>';
-  h+='<div style="background:rgba(255,255,255,.06);border-radius:var(--radius-sm);padding:8px 14px;font-size:12px;font-style:italic;color:rgba(255,255,255,.8);max-width:320px;text-align:right">'+headline+'</div>';
+  // Hero
+  var allLPsDone=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
+  h+='<div style="background:'+(allLPsDone?"linear-gradient(135deg,#064e3b,#0D7377)":"var(--text)")+';border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:1rem">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px">';
+  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-family:\'DM Mono\',monospace;margin-bottom:3px">NFM Lending Ohio</div>';
+  h+='<div style="color:#fff;font-size:16px;font-weight:700">'+todayFmt+'</div></div>';
+  h+='<div style="background:rgba(255,255,255,.06);border-radius:8px;padding:7px 12px;font-size:11px;font-style:italic;color:rgba(255,255,255,.85);font-size:14px;font-weight:600">'+headline+'</div>';
   h+='</div>';
-  // Team totals row
-  h+='<div style="display:flex;gap:20px;flex-wrap:wrap">';
-  var stats=[
-    {val:totalCallsWTD+"/"+totalTarget,label:"Team calls WTD",color:"#fff"},
-    {val:leadsToday,label:"Leads today",color:"var(--accent)"},
-    {val:leadsWTD,label:"Leads WTD",color:"#a78bfa"},
-    {val:leadsMTD,label:"Leads MTD",color:"#60a5fa"},
-  ];
-  stats.forEach(function(s){
-    h+='<div><div style="color:'+s.color+';font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;line-height:1">'+s.val+'</div>';
-    h+='<div style="color:rgba(255,255,255,.35);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-top:3px">'+s.label+'</div></div>';
+  h+='<div style="display:flex;gap:22px;flex-wrap:wrap">';
+  [{v:totalCallsWTD+" / "+(LPS.length*WEEKLY_TARGET),l:"Team calls WTD",c:"#fff"},
+   {v:leadsToday,l:"Leads today",c:"var(--accent)"},
+   {v:leadsWTD,l:"Leads WTD",c:"#a78bfa"},
+   {v:leadsMTD,l:"Leads MTD",c:"#60a5fa"}
+  ].forEach(function(s){
+    h+='<div><div style="color:'+s.c+';font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;line-height:1">'+s.v+'</div>';
+    h+='<div style="color:rgba(255,255,255,.35);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-top:3px">'+s.l+'</div></div>';
   });
   h+='</div></div>';
 
-  // ── LP Cards ──
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:1rem">';
+  // Cards grid
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;margin-bottom:1rem">';
 
+  // LP cards
   LPS.forEach(function(lp){
     var called=callsLogged[lp]||0;
     var target=WEEKLY_TARGET;
     var paceTarget=Math.round(target*paceFraction);
     var pct=Math.round(called/target*100);
     var lpColor=LP_COLORS[lp]||"var(--accent)";
-    var leadsT=lpLeadsToday[lp]||0;
     var leadsW=lpLeadsWTD[lp]||0;
-    var ltf=lpLTF[lp]||0;
-    var totalAgents=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
+    var leadsT=lpLeadsToday[lp]||0;
+    // Scorecard metrics for this LP
+    var scData=snapScData[lp]||{};
+    var rltrTalks=scTotal(scData,"rltr_talks");
+    var referredLeads=scTotal(scData,"referred_leads");
+    var apps=scTotal(scData,"apps_1003");
+    var preApps=scTotal(scData,"pre_approvals");
+    var contracts=scTotal(scData,"contracts");
 
-    // Status
-    var status,statusColor,statusBg;
-    if(called>=target){status="🔥 Crushing it";statusColor="var(--accent)";statusBg="var(--green-bg)";}
-    else if(called>=paceTarget){status="✓ On track";statusColor="var(--accent)";statusBg="var(--green-bg)";}
-    else if(called>=paceTarget*.7){status="⚡ Close";statusColor="var(--amber)";statusBg="var(--amber-bg)";}
-    else{status="⚠ Behind pace";statusColor="var(--red)";statusBg="var(--red-bg)";}
+    var status,sc,sb;
+    if(called>=target){status="🔥 Week complete!";sc="var(--green)";sb="var(--green-bg)";}
+    else if(called>=paceTarget){status="✓ On pace";sc="var(--green)";sb="var(--green-bg)";}
+    else if(called>=Math.round(paceTarget*.7)){status="⚡ Almost there";sc="var(--amber)";sb="var(--amber-bg)";}
+    else{status="🚨 Pick it up";sc="var(--red)";sb="var(--red-bg)";}
 
-    h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="goToLP(\''+lp+'\')">';
-    // LP header
-    h+='<div style="padding:12px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
+    h+=(called>=target?'<div style="height:2px;background:linear-gradient(90deg,#0E9F8E,rgba(14,159,142,.1))"></div>':'')+'<div style="background:var(--surface);border:'+(called>=target?"1px solid rgba(22,163,148,.4)":called>=paceTarget?"1px solid var(--border)":called>=Math.round(paceTarget*.7)?"1px solid rgba(212,130,10,.3)":"1px solid rgba(224,88,88,.3)")+';border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="goToLP(\''+lp+'\')">';
+    // Header
+    h+='<div style="padding:11px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
     h+='<div style="font-size:14px;font-weight:800;color:'+lpColor+'">'+lp+'</div>';
-    h+='<div style="font-size:11px;font-weight:600;color:'+statusColor+';background:'+statusBg+';padding:3px 9px;border-radius:20px">'+status+'</div>';
+    h+='<div style="font-size:10px;font-weight:600;color:'+sc+';background:'+sb+';padding:3px 9px;border-radius:20px">'+status+'</div>';
     h+='</div>';
-    // Big number
-    h+='<div style="padding:14px 14px 10px;display:flex;align-items:flex-end;gap:8px">';
-    h+='<div style="font-size:36px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+called+'</div>';
-    h+='<div style="font-size:14px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ '+target+'</div>';
-    h+='<div style="margin-left:auto;text-align:right"><div style="font-size:22px;font-weight:700;color:'+lpColor+';font-family:\'DM Mono\',monospace;line-height:1">'+pct+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of target</div></div>';
+    // Big call number + progress
+    h+='<div style="padding:13px 14px 8px">';
+    h+='<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:8px">';
+    h+='<div style="font-size:32px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+called+'</div>';
+    h+='<div style="font-size:12px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ '+target+' calls</div>';
+    h+='<div style="margin-left:auto;text-align:right"><div style="font-size:26px;font-weight:800;color:'+lpColor+';font-family:\'DM Mono\',monospace;line-height:1">'+pct+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of target</div></div>';
     h+='</div>';
-    // Progress bar
-    h+='<div style="margin:0 14px 10px;height:5px;background:var(--border-light);border-radius:3px;overflow:hidden">';
-    h+='<div style="height:100%;background:'+lpColor+';border-radius:3px;width:'+Math.min(pct,100)+'%;transition:width .7s ease"></div></div>';
-    // Pace marker
-    h+='<div style="margin:0 14px 10px;position:relative;height:12px">';
-    h+='<div style="font-size:9px;color:var(--text-3);position:absolute;left:'+Math.min(paceTarget/target*100,95)+'%;transform:translateX(-50%)">↑ pace</div>';
+    h+='<div style="height:4px;background:var(--border-light);border-radius:2px;overflow:hidden;margin-bottom:3px">';
+    h+='<div style="height:100%;background:'+lpColor+';opacity:.7;border-radius:2px;width:'+Math.min(pct,100)+'%;transition:width .7s"></div></div>';
+    h+='<div style="font-size:9px;color:var(--text-3);margin-bottom:0">pace marker: '+paceTarget+' by now</div>';
     h+='</div>';
-    // Stats row
-    h+='<div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--border-light);display:flex;gap:14px">';
-    h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+leadsW+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Leads WTD</div></div>';
-    h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+leadsT+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Today</div></div>';
-    h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:'+(ltf>=20?"var(--accent)":ltf>=10?"var(--amber)":"var(--red)")+';font-family:\'DM Mono\',monospace">'+ltf+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">L→F Rate</div></div>';
-    h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+totalAgents+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Agents</div></div>';
+    // Scorecard metrics grid
+    h+='<div style="padding:8px 14px;border-top:1px solid var(--border-light);display:grid;grid-template-columns:repeat(5,1fr);gap:4px">';
+    [{v:rltrTalks,l:"Talk-to's",g:10},
+     {v:referredLeads,l:"Leads",g:16},
+     {v:apps,l:"1003's",g:13},
+     {v:preApps,l:"Pre-apps",g:6},
+     {v:contracts,l:"Contracts",g:3}
+    ].forEach(function(m){
+      var mpct=m.g>0?m.v/m.g:0;
+      var mc=mpct>=1?"var(--green)":mpct>=.6?"var(--amber)":"var(--text-3)";
+      h+='<div style="text-align:center"><div style="font-size:13px;font-weight:700;color:'+mc+';font-family:\'DM Mono\',monospace">'+m.v+'<span style="font-size:9px;color:var(--text-3);font-weight:400">/'+m.g+'</span></div>';
+      h+='<div style="font-size:8.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:1px">'+m.l+'</div></div>';
+    });
+    h+='</div>';
+    // Leads footer
+    h+='<div style="padding:7px 14px;background:var(--bg);border-top:1px solid var(--border-light);display:flex;gap:10px;align-items:center">';
+    h+='<div style="font-size:11px;color:var(--text-3)">Velocify leads:</div>';
+    h+='<div style="font-size:12px;font-weight:600;color:var(--accent);font-family:\'DM Mono\',monospace">'+leadsW+' WTD</div>';
+    h+='<div style="font-size:11px;color:var(--text-3)">·</div>';
+    h+='<div style="font-size:12px;font-weight:600;color:'+(leadsT>0?"var(--accent)":"var(--text-3)")+';font-family:\'DM Mono\',monospace">'+leadsT+' today</div>';
+    h+='<div style="margin-left:auto;font-size:10px;color:var(--accent)">tap to open ↗</div>';
     h+='</div></div>';
   });
 
-  // ── Isaak card (LP1) ──
-  var isaakPct=Math.round(isaakCalls/isaakTarget*100);
-  var isaakStatus,isaakStatusColor,isaakStatusBg;
-  var isaakPaceTarget=Math.round(isaakTarget*paceFraction);
-  if(isaakCalls>=isaakTarget){isaakStatus="🔥 Crushing it";isaakStatusColor="var(--accent)";isaakStatusBg="var(--green-bg)";}
-  else if(isaakCalls>=isaakPaceTarget){isaakStatus="✓ On track";isaakStatusColor="var(--accent)";isaakStatusBg="var(--green-bg)";}
-  else if(isaakCalls>=isaakPaceTarget*.7){isaakStatus="⚡ Close";isaakStatusColor="var(--amber)";isaakStatusBg="var(--amber-bg)";}
-  else{isaakStatus="⚠ Behind pace";isaakStatusColor="var(--red)";isaakStatusBg="var(--red-bg)";}
+  // Isaak card
+  var isaakData2=snapScData["Isaak"]||{};
+  var isaakApps=scTotal(isaakData2,"apps_1003");
+  var isaakRCalls=scTotal(isaakData2,"realtor_calls");
+  var isaakMeetings=scTotal(isaakData2,"meetings");
+  // Also use lpHistoryCallCounts as fallback
+  if(!isaakRCalls)isaakRCalls=lpHistoryCallCounts&&(lpHistoryCallCounts["Isaak"]||lpHistoryCallCounts["isaak"])||0;
+  var isaakTarget=100;
+  var isaakPct=Math.min(Math.round(isaakRCalls/isaakTarget*100),100);
+  var isaakPaceT=Math.round(isaakTarget*paceFraction);
+  var iSt,iSc,iSb;
+  if(isaakRCalls>=isaakTarget){iSt="🔥 Crushing it";iSc="var(--green)";iSb="var(--green-bg)";}
+  else if(isaakRCalls>=isaakPaceT){iSt="✓ On track";iSc="var(--green)";iSb="var(--green-bg)";}
+  else if(isaakRCalls>=Math.round(isaakPaceT*.7)){iSt="⚡ Close";iSc="var(--amber)";iSb="var(--amber-bg)";}
+  else{iSt="⚠ Behind pace";iSc="var(--red)";iSb="var(--red-bg)";}
 
   h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm)">';
-  h+='<div style="padding:12px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
-  h+='<div><div style="font-size:14px;font-weight:800;color:var(--text-2)">Isaak</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px">LP1 · Realtor Calls</div></div>';
-  h+='<div style="font-size:11px;font-weight:600;color:'+isaakStatusColor+';background:'+isaakStatusBg+';padding:3px 9px;border-radius:20px">'+isaakStatus+'</div>';
+  h+='<div style="padding:11px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
+  h+='<div><div style="font-size:14px;font-weight:800;color:var(--text-2)">Isaak</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px">LP1</div></div>';
+  h+='<div style="font-size:10px;font-weight:600;color:'+iSc+';background:'+iSb+';padding:3px 9px;border-radius:20px">'+iSt+'</div>';
   h+='</div>';
-  h+='<div style="padding:14px 14px 10px;display:flex;align-items:flex-end;gap:8px">';
-  h+='<div style="font-size:36px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+isaakCalls+'</div>';
-  h+='<div style="font-size:14px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ '+isaakTarget+'</div>';
-  h+='<div style="margin-left:auto;text-align:right"><div style="font-size:22px;font-weight:700;color:var(--text-2);font-family:\'DM Mono\',monospace;line-height:1">'+isaakPct+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of target</div></div>';
+  h+='<div style="padding:13px 14px 8px">';
+  h+='<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:8px">';
+  h+='<div style="font-size:32px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+isaakRCalls+'</div>';
+  h+='<div style="font-size:12px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ 100 calls</div>';
+  h+='<div style="margin-left:auto;text-align:right"><div style="font-size:20px;font-weight:700;color:var(--text-2);font-family:\'DM Mono\',monospace;line-height:1">'+isaakPct+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of target</div></div>';
   h+='</div>';
-  h+='<div style="margin:0 14px 12px;height:5px;background:var(--border-light);border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--text-2);border-radius:3px;width:'+Math.min(isaakPct,100)+'%"></div></div>';
-  h+='<div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--border-light);font-size:11px;color:var(--text-3)">100 realtor calls/week target · Scorecards track daily breakdown</div>';
+  h+='<div style="height:4px;background:var(--border-light);border-radius:2px;overflow:hidden;margin-bottom:3px">';
+  h+='<div style="height:100%;background:var(--text-2);opacity:.4;border-radius:2px;width:'+isaakPct+'%"></div></div>';
+  h+='<div style="font-size:9px;color:var(--text-3)">pace marker: '+isaakPaceT+' by now</div>';
   h+='</div>';
+  h+='<div style="padding:8px 14px;border-top:1px solid var(--border-light);display:grid;grid-template-columns:repeat(3,1fr);gap:4px">';
+  [{v:isaakRCalls,l:"Realtor calls",g:100},{v:isaakApps,l:"1003's",g:10},{v:isaakMeetings,l:"Meetings",g:10}].forEach(function(m){
+    var mpct=m.g>0?m.v/m.g:0;
+    var mc=mpct>=1?"var(--green)":mpct>=.6?"var(--amber)":"var(--text-3)";
+    h+='<div style="text-align:center"><div style="font-size:13px;font-weight:700;color:'+mc+';font-family:\'DM Mono\',monospace">'+m.v+'<span style="font-size:9px;color:var(--text-3);font-weight:400">/'+m.g+'</span></div>';
+    h+='<div style="font-size:8.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:1px">'+m.l+'</div></div>';
+  });
+  h+='</div></div>';
 
-  // ── Amanda card (RM) ──
-  var amandaGoal=8; // activities per week
-  var amandaWeekPct=Math.round(amandaWeek/amandaGoal*100);
-  var amandaStatus,amandaSC,amandaSB;
-  if(amandaWeek>=amandaGoal){amandaStatus="🔥 On fire";amandaSC="var(--accent)";amandaSB="var(--green-bg)";}
-  else if(amandaWeek>=Math.round(amandaGoal*paceFraction)){amandaStatus="✓ On track";amandaSC="var(--accent)";amandaSB="var(--green-bg)";}
-  else if(amandaToday>0){amandaStatus="⚡ Active today";amandaSC="var(--amber)";amandaSB="var(--amber-bg)";}
-  else{amandaStatus="⚠ Needs activity";amandaSC="var(--red)";amandaSB="var(--red-bg)";}
+  // Amanda card
+  var amData=snapScData["Amanda"]||{};
+  // Amanda activity counts — today / WTD / MTD / YTD from rmActsCache
+  var amCache=window.rmActsCache;
+  var amActs=amCache&&amCache.acts?amCache.acts:
+    (window.rmFeedCache&&window.rmFeedCache.week?window.rmFeedCache.week:[]);
+  var amTodayStr=amCache&&amCache.todayStr?amCache.todayStr:localDateStr(now);
+  var amWeekObj=amCache&&amCache.week?amCache.week:{start:"",end:""};
+  var amMonthStart2=amCache&&amCache.monthStart?amCache.monthStart:
+    now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
+  var amYearStart=now.getFullYear()+"-01-01";
+  function amCnt(src,type){return src.filter(function(a){return(a.act_type||"").trim()===type;}).length;}
+  var amTodayActs=amActs.filter(function(a){return a.act_date===amTodayStr;});
+  var amWeekActs=amActs.filter(function(a){return a.act_date>=amWeekObj.start&&a.act_date<=amWeekObj.end;});
+  var amMonthActs=amActs.filter(function(a){return a.act_date>=amMonthStart2;});
+  var amYearActs=amActs.filter(function(a){return a.act_date>=amYearStart;});
+  var amTotalToday=amTodayActs.length,amTotalWTD=amWeekActs.length;
+  var amTotalMTD=amMonthActs.length,amTotalYTD=amYearActs.length;
+  var amMeetings=amCnt(amMonthActs,"New Realtor Meeting");
+  var amColdCalls=amCnt(amMonthActs,"Cold Calls");
+  var amBreakBreads=amCnt(amMonthActs,"Break Breads");
+  var amTalkTos=amCnt(amMonthActs,"Talk-to's");
+  var amBuddyAsks=amCnt(amMonthActs,"Realtor Buddy Referral Ask");
+  var amTotalGoal=852; // 400 cold calls + 20 meetings + 20 break breads + 400 talk-tos + 12 buddy asks
+  var daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  var dayOfMonth2=now.getDate();
+  var amPaceT=Math.round(amTotalGoal*(dayOfMonth2/daysInMonth));
+  var aSt,aSc,aSb;
+  if(amTotalMTD>=amTotalGoal){aSt="🔥 Crushing it";aSc="var(--green)";aSb="var(--green-bg)";}
+  else if(amTotalMTD>=amPaceT){aSt="✓ On track";aSc="var(--green)";aSb="var(--green-bg)";}
+  else if(amandaToday>0){aSt="⚡ Active today";aSc="var(--amber)";aSb="var(--amber-bg)";}
+  else{aSt="⚠ Needs activity";aSc="var(--red)";aSb="var(--red-bg)";}
 
   h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="openRmView(document.querySelector(\'.wb-RM\'))">';
-  h+='<div style="padding:12px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
+  h+='<div style="padding:11px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
   h+='<div><div style="font-size:14px;font-weight:800;color:var(--text-2)">Amanda</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px">Relationship Manager</div></div>';
-  h+='<div style="font-size:11px;font-weight:600;color:'+amandaSC+';background:'+amandaSB+';padding:3px 9px;border-radius:20px">'+amandaStatus+'</div>';
+  h+='<div style="font-size:10px;font-weight:600;color:'+aSc+';background:'+aSb+';padding:3px 9px;border-radius:20px">'+aSt+'</div>';
   h+='</div>';
-  h+='<div style="padding:14px 14px 10px;display:flex;align-items:flex-end;gap:8px">';
-  h+='<div style="font-size:36px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+amandaWeek+'</div>';
-  h+='<div style="font-size:14px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">activities</div>';
-  h+='<div style="margin-left:auto;text-align:right"><div style="font-size:22px;font-weight:700;color:var(--text-2);font-family:\'DM Mono\',monospace;line-height:1">'+amandaToday+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">today</div></div>';
+  h+='<div style="padding:13px 14px 8px">';
+  var amPctOfGoal=amTotalGoal>0?Math.min(Math.round(amTotalMTD/amTotalGoal*100),100):0;
+  h+='<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:8px">';
+  h+='<div style="font-size:32px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+amTotalMTD+'</div>';
+  h+='<div style="font-size:12px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ '+amTotalGoal+' activities</div>';
+  h+='<div style="margin-left:auto;text-align:right"><div style="font-size:20px;font-weight:700;color:var(--text-2);font-family:\'DM Mono\',monospace;line-height:1">'+amPctOfGoal+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of target</div></div>';
   h+='</div>';
-  h+='<div style="margin:0 14px 12px;height:5px;background:var(--border-light);border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--text-2);border-radius:3px;width:'+Math.min(amandaWeekPct,100)+'%"></div></div>';
-  h+='<div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--border-light);display:flex;gap:14px">';
-  h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+amandaFlagged+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Flagged</div></div>';
-  h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+amandaWeek+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">This week</div></div>';
-  h+='<div style="flex:1;display:flex;align-items:center;justify-content:flex-end"><span style="font-size:11px;color:var(--accent)">Open RM view ↗</span></div>';
+  h+='<div style="height:4px;background:var(--border-light);border-radius:2px;overflow:hidden;margin-bottom:3px">';
+  h+='<div style="height:100%;background:var(--text-2);opacity:.4;border-radius:2px;width:'+amPct+'%"></div></div>';
+  h+='<div style="font-size:9px;color:var(--text-3)">monthly pace: '+amPaceT+' by day '+dayOfMonth2+'</div>';
+  h+='</div>';
+  h+='<div style="padding:3px 14px 0;border-top:1px solid var(--border-light);display:flex;justify-content:space-between">';
+  h+='<span style="font-size:9px;color:var(--text-3)">Today / Daily</span>';
+  h+='<span style="font-size:9px;color:var(--text-3)">MTD / Monthly</span>';
+  h+='</div>';
+  h+='<div style="padding:6px 14px 8px;border-bottom:1px solid var(--border-light);display:grid;grid-template-columns:repeat(5,1fr);gap:4px">';
+  [
+    {label:"New realtor meeting",type:"New Realtor Meeting",daily:1,monthly:20},
+    {label:"Cold calls",type:"Cold Calls",daily:25,monthly:400},
+    {label:"Break breads",type:"Break Breads",daily:1,monthly:20},
+    {label:"Talk-to's",type:"Talk-to's",daily:20,monthly:400},
+    {label:"Buddy asks",type:"Realtor Buddy Referral Ask",daily:1,monthly:12}
+  ].forEach(function(m){
+    var todayCount=amCnt(amTodayActs,m.type);
+    var mtdCount=amCnt(amMonthActs,m.type);
+    var dayOk=todayCount>=m.daily;
+    var mtdPct=m.monthly>0?mtdCount/m.monthly:0;
+    var dc=dayOk?"var(--green)":"var(--text-3)";
+    var mc=mtdPct>=1?"var(--green)":mtdPct>=.6?"var(--amber)":"var(--text-3)";
+    h+='<div style="text-align:center">';
+    h+='<div style="font-size:13px;font-weight:700;color:'+dc+';font-family:\'DM Mono\',monospace;line-height:1.2">'+todayCount+'<span style="font-size:9px;color:var(--text-3);font-weight:400">/'+m.daily+'</span></div>';
+    h+='<div style="font-size:11px;color:'+mc+';font-family:\'DM Mono\',monospace">'+mtdCount+'<span style="font-size:9px;color:var(--text-3)">/'+m.monthly+'</span></div>';
+    h+='<div style="font-size:8px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:1px;white-space:nowrap">'+m.label+'</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+  h+='<div style="padding:7px 14px;background:var(--bg);border-top:1px solid var(--border-light);display:flex;gap:10px;align-items:center">';
+  h+=(amandaFlaggedCount>0?'<div style="font-size:11px;font-weight:600;color:var(--red)">🚩 '+amandaFlaggedCount+' agent'+(amandaFlaggedCount>1?"s":"")+" flagged for follow-up</div>":'<div style="font-size:11px;color:var(--text-3)">No agents flagged</div>');
+  h+='<div style="margin-left:auto;font-size:10px;color:var(--accent)">open RM view ↗</div>';
   h+='</div></div>';
 
   h+='</div>'; // close grid
 
-  // ── Footer ──
+  // Footer
   var nextR=new Date(now);nextR.setHours(18,0,0,0);
   if(now>=nextR)nextR.setDate(nextR.getDate()+1);
   var hrs=Math.ceil((nextR-now)/3600000);
@@ -4085,7 +4182,13 @@ loadAgents();
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-snapshot").classList.add("active");
   if(pulseBtn)pulseBtn.classList.add("active");
-  setTimeout(function(){renderDaniel();loadLeadPipeline();setTimeout(buildSnapshot,800);},100);
+  setTimeout(function(){
+    loadCallLogs().then(function(){
+      renderDaniel();
+      loadLeadPipeline().then(function(){buildSnapshot();});
+      buildSnapshot();
+    });
+  },100);
 })();
 loadCallLogs();
 
@@ -4211,11 +4314,13 @@ const LPSC_METRICS_MAP={
 ["Gavin","Osgood","Karen","Said","Jordan"].forEach(function(n){LPSC_METRICS_MAP[n]=LPSC_METRICS_MAP._lp2;});
 
 const LPSC_AMANDA_GOALS=[
-  {key:"Cold Calls",label:"Cold calls",goal:25},
-  {key:"New Realtor Meeting",label:"New realtor meetings",goal:5},
-  {key:"Break Breads",label:"Break breads",goal:5},
-  {key:"Realtor Buddy Referral Ask",label:"Realtor buddy intro",goal:3}
+  {key:"New Realtor Meeting",label:"New realtor meeting",goal:20},
+  {key:"Cold Calls",label:"Cold calls",goal:400},
+  {key:"Break Breads",label:"Break breads",goal:20},
+  {key:"Talk-to's",label:"Talk-to's",goal:400},
+  {key:"Realtor Buddy Referral Ask",label:"Buddy asks",goal:12}
 ];
+
 
 const LPSC_DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const LPSC_CHART_COLORS=["#1F4E79","#b8922a","#2a7a3b","#c0392b","#8e44ad"];
@@ -4369,10 +4474,11 @@ async function lpscSaveEdit(){
 
 // ── RELATIONSHIP MANAGER TAB (Amanda) ────────────────────────────────────
 const RM_GOALS=[
-  {label:"Cold calls",type:"Cold Calls",weekly:25,monthly:100},
-  {label:"New realtor meetings",type:"New Realtor Meeting",weekly:5,monthly:20},
-  {label:"Break breads",type:"Break Breads",weekly:5,monthly:20},
-  {label:"Realtor buddy intro",type:"Realtor Buddy Referral Ask",weekly:3,monthly:12}
+  {label:"New realtor meeting",type:"New Realtor Meeting",daily:1,weekly:5,monthly:20},
+  {label:"Cold calls",type:"Cold Calls",daily:25,weekly:125,monthly:400},
+  {label:"Break breads",type:"Break Breads",daily:1,weekly:5,monthly:20},
+  {label:"Talk-to's",type:"Talk-to's",daily:20,weekly:100,monthly:400},
+  {label:"Buddy asks",type:"Realtor Buddy Referral Ask",daily:1,weekly:3,monthly:12}
 ];
 var rmCurrentPeriod="today";
 
