@@ -3,34 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Core Team Agent Tracker</title>
+<title>Core Team Intelligence Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --navy:#0f172a;--navy-soft:#1e293b;
-  --red:#9B2C2C;--red-bg:#FFF8F8;--red-border:#F7C1C1;--red-light:#FCEBEB;
-  --green:#276749;--green-bg:#EAF3DE;--green-border:#C0DD97;--green-var:#15803d;
-  --amber:#7A5C00;--amber-bg:#FAEEDA;--amber-text:#854F0B;
-  --border:#e3e6ec;--border-light:#f1f5f9;
-  --text:#0f172a;--text-2:#475569;--text-3:#94a3b8;
-  --bg:#f7f8fa;--surface:#ffffff;
-  --lp-gavin:#0D7377;--lp-gavin-bg:#eef7f7;
-  --lp-karen:#2c4a8f;--lp-karen-bg:#eef1f9;
-  --lp-osgood:#8a5c1a;--lp-osgood-bg:#faf4e6;
-  --lp-jordan:#7a3558;--lp-jordan-bg:#f8eef4;
-  --lp-said:#4d3d7a;--lp-said-bg:#efecf8;
-}
-body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px;background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased}
+  --navy:#1A1A2E;--navy-soft:#2D3561;
+  --accent:#0E9F8E;--accent-dim:rgba(14,159,142,.08);--accent-glow:rgba(14,159,142,.15);
+  --red:#E05858;--red-bg:#FEF2F2;--red-border:#FECACA;--red-light:#FEF7F7;
+  --green:#0E9F8E;--green-bg:#ECFDF5;--green-border:#6EE7B7;--green-var:#0E9F8E;
+  --amber:#8C7355;--amber-bg:#FAF7F2;--amber-text:#6B5740;
+  --border:#EDF0F4;--border-light:#F4F6F9;
+  --text:#18181B;--text-2:#71717A;--text-3:#A1A1AA;
+  --bg:#F9FAFB;--surface:#FFFFFF;
+  --lp-gavin:#0E9F8E;--lp-gavin-bg:#F0FAF9;
+  --lp-karen:#2563EB;--lp-karen-bg:#EFF6FF;
+  --lp-osgood:#C2692B;--lp-osgood-bg:#FFF4EC;
+  --lp-jordan:#BE185D;--lp-jordan-bg:#FDF2F8;
+  --lp-said:#7C3AED;--lp-said-bg:#F5F3FF;
+  --shadow-sm:0 1px 4px rgba(26,26,46,.06),0 1px 2px rgba(26,26,46,.04);
+  --shadow-md:0 4px 16px rgba(26,26,46,.08),0 2px 6px rgba(26,26,46,.04);
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+  --navy-mid:#0E9F8E}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px;background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;margin:0;padding:0;line-height:1.5}
 .app{max-width:960px;margin:0 auto;padding:1.25rem 1.25rem 4rem}
 
 /* Header */
-.app-header{padding:1rem 0 .75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:2px solid #1F4E79;margin-bottom:1rem}
+.app-header{padding:1rem 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);margin-bottom:1.5rem;position:sticky;top:0;z-index:50;background:var(--bg);box-shadow:0 1px 0 var(--border)}
 .brand{display:flex;align-items:center;gap:12px}
-.brand-logo{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:6px 14px;border-radius:6px;letter-spacing:.08em;text-transform:uppercase}
-.brand-sub{font-size:12px;color:var(--text-3);letter-spacing:.01em}
-.week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:4px 12px;border-radius:20px;color:var(--text-2);font-weight:500}
+.brand-logo{color:var(--text);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-family:'Plus Jakarta Sans',sans-serif}
+.brand-sub{font-size:10px;color:var(--text-3);font-weight:400;letter-spacing:.02em}
+.week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:20px;color:var(--text-2);font-weight:500;font-family:'DM Mono',monospace;letter-spacing:.02em}
 .save-ind{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#cbd5e1;flex-shrink:0}
 .sync-dot.live{background:#15803d}.sync-dot.saving{background:#d97706}.sync-dot.error{background:#dc2626}
@@ -38,55 +42,55 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px;backgroun
 /* Who bar */
 .who-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;background:var(--surface);padding:.75rem 1rem;border-radius:var(--radius-md);border:1px solid var(--border)}
 .who-label{font-size:11px;color:var(--text-3);margin-right:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-.who-btn{padding:6px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-2);font-family:inherit;transition:all .15s;box-shadow:var(--shadow-sm)}
-.who-btn:hover{background:var(--bg);border-color:#cbd5e1}
-.wb-Gavin.active{background:var(--lp-gavin-bg);border-color:var(--lp-gavin);color:var(--lp-gavin);font-weight:700}
-.wb-Karen.active{background:var(--lp-karen-bg);border-color:var(--lp-karen);color:var(--lp-karen);font-weight:700}
-.wb-Osgood.active{background:var(--lp-osgood-bg);border-color:var(--lp-osgood);color:var(--lp-osgood);font-weight:700}
-.wb-Jordan.active{background:var(--lp-jordan-bg);border-color:var(--lp-jordan);color:var(--lp-jordan);font-weight:700}
-.wb-Said.active{background:var(--lp-said-bg);border-color:var(--lp-said);color:var(--lp-said);font-weight:700}
+.who-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:500;color:var(--text-2);font-family:inherit;transition:all .15s}
+.who-btn:hover{background:var(--bg);border-color:#CBD5E1;color:var(--text)}
+.wb-Gavin.active{background:#F0FAF9;border-color:#0E9F8E;color:#0E9F8E;font-weight:600}
+.wb-Karen.active{background:#EFF6FF;border-color:#2563EB;color:#2563EB;font-weight:600}
+.wb-Osgood.active{background:#FFF4EC;border-color:#C2692B;color:#C2692B;font-weight:600}
+.wb-Jordan.active{background:#FDF2F8;border-color:#BE185D;color:#BE185D;font-weight:600}
+.wb-Said.active{background:#F5F3FF;border-color:#7C3AED;color:#7C3AED;font-weight:600}
 .wb-Daniel,.wb-Daniel:not(.active){background:#0f172a;border-color:#0f172a;color:#fff;font-weight:700}.wb-Daniel:hover{background:#1e293b;border-color:#1e293b;color:#fff}.wb-Daniel.active{background:#1F4E79;border-color:#3b82f6;color:#fff;font-weight:700;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
-.wb-RM.active{background:#f0fdf4;border-color:#15803d;color:#15803d}
-.wb-Admin.active{background:#fff7ed;border-color:#c2410c;color:#c2410c;font-weight:700}
-.wb-Leads.active{background:#eff6ff;border-color:#1d4ed8;color:#1d4ed8;font-weight:700}
+.wb-RM.active{background:#FAF7F2;border-color:#8C7355;color:#8C7355;font-weight:600}
+.wb-Admin.active{background:#FAF7F2;border-color:#8C7355;color:#8C7355;font-weight:600}
+.wb-Leads.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:600}
 
 .view{display:none}.view.active{display:block}
 
 /* LP Hero */
-.lp-hero{background:linear-gradient(135deg,#1a2744 0%,#0f172a 100%);border-radius:var(--radius-md);padding:1.25rem 1.5rem;margin-bottom:1rem}
+.lp-hero{background:linear-gradient(135deg,#1A1A2E 0%,#2D3561 100%);border-radius:var(--radius-md);padding:1.25rem 1.5rem;margin-bottom:1rem}
 .lp-hero-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
 .lp-hero-name{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.02em;margin-bottom:4px}
 .lp-hero-sub{font-size:12px;color:rgba(255,255,255,.45);font-weight:400}
 .prog-wrap{display:flex;align-items:center;gap:10px}
-.prog-track{width:140px;background:rgba(255,255,255,.15);border-radius:20px;height:6px;overflow:hidden}
-.prog-fill{height:7px;border-radius:20px;transition:width .8s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,#86efac,#4ade80)}
+.prog-track{width:140px;background:rgba(255,255,255,.1);border-radius:20px;height:4px;overflow:hidden}
+.prog-fill{height:4px;border-radius:20px;transition:width .8s cubic-bezier(.4,0,.2,1);background:#4ade80}
 .prog-txt{font-size:15px;color:#fff;font-weight:500;white-space:nowrap;font-family:'DM Mono',monospace}
 
 /* Banners */
 .priority-banner{background:#FCEBEB;border:1px solid var(--red-border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:600}
 .monday-banner{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;font-size:12px;color:#1d4ed8;margin-bottom:.75rem;font-weight:500}
-.carryover-banner{background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 14px;font-size:12px;color:#856404;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:600;flex-wrap:wrap}
-.streak-bar{background:var(--surface);border:1px solid #fde68a;border-radius:8px;padding:9px 14px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#92400e}
+.carryover-banner{background:#FAF7F2;border:1px solid #E8DDD0;border-radius:8px;padding:10px 14px;font-size:12px;color:#5C4A35;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:600;flex-wrap:wrap}
+.streak-bar{background:var(--surface);border:1px solid #E8DDD0;border-radius:8px;padding:9px 14px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#5C4A35}
 .inactive-banner{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 14px;font-size:12px;color:#c2410c;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
 .bday-banner{background:#fdf2f8;border:1px solid #fbcfe8;border-radius:8px;padding:10px 14px;font-size:12px;color:#9d174d;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:500;flex-wrap:wrap}
 .target-complete-bar{background:#f0fdf4;border:1px solid var(--green-border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--green);margin-bottom:.75rem;font-weight:600;display:flex;align-items:center;gap:8px}
 
 /* Call cards */
-.call-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.1rem;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px;box-shadow:var(--shadow-sm);transition:box-shadow .15s}
+.call-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.1rem;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px;transition:border-color .15s;box-shadow:var(--shadow-sm)}
 .call-card.priority{border-color:#fca5a5;border-left:3px solid #dc2626;background:#fffbfb}
-.call-card.done{background:#f0fdf4;border-color:#86efac;opacity:.85}
+.call-card.done{background:#F0FAF9;border-color:#A7DED9;opacity:.95}
 .call-card.bonus{border-color:#bfdbfe;background:#f8fbff}
-.call-card.pending{border-color:#fcd34d;background:#fffdf0}
+.call-card.pending{border-color:#C8B8A8;background:#fffdf0}
 .check-btn{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s}
 .check-btn:hover{border-color:#94a3b8;background:var(--bg)}
 .check-btn.checked{background:#f0fdf4;border-color:#4ade80}
 .call-info{flex:1;min-width:0}
 .call-name{font-weight:600;font-size:14px;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.priority-tag{background:#fee2e2;color:#991b1b;font-size:9px;padding:2px 9px;border-radius:20px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
-.carryover-tag{background:#fef3c7;color:#92400e;font-size:9px;padding:2px 9px;border-radius:20px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.priority-tag{background:#fee2e2;color:#991b1b;font-size:9px;padding:1px 7px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.carryover-tag{background:#FAF7F2;color:#5C4A35;font-size:9px;padding:1px 7px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
 .bonus-tag{background:#dbeafe;color:#1e40af;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .call-meta{font-size:12px;color:var(--text-2);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.note-field{width:100%;margin-top:8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;resize:none;height:52px;transition:border-color .15s}
+.note-field{width:100%;margin-top:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;resize:vertical;min-height:70px;transition:border-color .2s;line-height:1.5}
 .note-field:focus{outline:none;border-color:#94a3b8}
 
 /* Badges */
@@ -105,25 +109,25 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px;backgroun
 .bar-Gavin{background:var(--lp-gavin)}.bar-Karen{background:var(--lp-karen)}.bar-Osgood{background:var(--lp-osgood)}.bar-Jordan{background:var(--lp-jordan)}.bar-Said{background:var(--lp-said)}
 
 /* Section heads */
-.section-head{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin:1.25rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.section-head{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin:1.1rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-family:'DM Mono',monospace}
 
 /* Daniel stat cards */
 .d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem}
-.d-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid #1F4E79;border-radius:var(--radius-md);padding:1.1rem 1.25rem;box-shadow:var(--shadow-sm)}
+.d-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.1rem 1.25rem;box-shadow:var(--shadow-sm)}
 .d-name{font-weight:600;font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
-.d-pct{font-size:30px;font-weight:600;margin-bottom:6px;letter-spacing:-.02em;font-family:'DM Mono',monospace}
+.d-pct{font-size:30px;font-weight:600;margin-bottom:4px;letter-spacing:-.02em;font-family:'DM Mono',monospace;color:var(--text)}
 .d-bar-track{background:var(--border-light);border-radius:20px;height:4px;margin-bottom:8px;overflow:hidden}
 .d-bar-fill{height:4px;border-radius:20px}
 .d-meta{font-size:11px;color:var(--text-3);display:flex;justify-content:space-between}
 
 /* Scorecards */
-.scorecard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
+.scorecard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:.75rem;box-shadow:var(--shadow-sm)}
 .sc-header{padding:.9rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .sc-header:hover{background:var(--bg)}
 .sc-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--text)}
 .pills{display:flex;gap:5px;flex-wrap:wrap}
 .pill{font-size:10px;font-weight:700;padding:2px 9px;border-radius:4px;text-transform:uppercase;letter-spacing:.03em}
-.pill-green{background:#dcfce7;color:#15803d}.pill-amber{background:#fef3c7;color:#92400e}.pill-red{background:#fee2e2;color:#991b1b}
+.pill-green{background:#dcfce7;color:#15803d}.pill-amber{background:#FAF7F2;color:#5C4A35}.pill-red{background:#fee2e2;color:#991b1b}
 .sc-row{padding:10px 0;border-bottom:1px solid var(--border-light)}
 .sc-row:last-child{border-bottom:none}
 .sc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
@@ -151,7 +155,7 @@ input[type=text]:focus,select:focus{outline:none;border-color:#94a3b8}
 .upload-zone:hover{background:var(--surface);border-color:#94a3b8}
 .btn{border:1px solid var(--border);background:var(--surface);border-radius:7px;padding:7px 14px;cursor:pointer;font-size:12px;color:var(--text);font-weight:600;font-family:inherit;transition:all .15s}
 .btn:hover{background:var(--bg);border-color:#94a3b8}
-.btn-primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-primary{background:var(--accent);color:#fff;font-weight:600;border-color:var(--accent)}
 .btn-primary:hover{background:var(--navy-soft)}
 .btn-danger{background:#fff1f1;color:#991b1b;border-color:#fca5a5}
 .btn-success{background:#f0fdf4;color:#15803d;border-color:#86efac}
@@ -176,7 +180,7 @@ tr:hover td{background:var(--bg)}
 .teams-msg-box{background:var(--bg);border-radius:8px;padding:.85rem 1rem;font-size:12px;line-height:1.8;white-space:pre-wrap;font-family:inherit;border:1px solid var(--border);color:var(--text-2)}
 
 /* Contact modal */
-.contact-modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:500;align-items:center;justify-content:center;padding:20px}
+.contact-modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,26,46,.4);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;padding:20px}
 .contact-modal-overlay.open{display:flex}
 .contact-modal-box{background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:420px;border:1px solid var(--border);box-shadow:var(--shadow-md)}
 .cm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
@@ -188,7 +192,7 @@ tr:hover td{background:var(--bg)}
 .cm-field input:focus{outline:none;border-color:#94a3b8}
 
 /* Search panel */
-.search-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
+.search-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.1rem 1.25rem;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
 .search-panel-title{font-size:12px;font-weight:700;margin-bottom:.5rem;color:var(--text);text-transform:uppercase;letter-spacing:.05em}
 .search-input-row{display:flex;gap:8px;align-items:center;margin-bottom:.6rem}
 .search-input-row input{flex:1}
@@ -202,16 +206,16 @@ tr:hover td{background:var(--bg)}
 .rm-tag{display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;border:1px solid var(--green-border);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--green)}
 .vel-tag{display:inline-flex;align-items:center;gap:4px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#1d4ed8}
 .no-ref-tag{display:inline-flex;align-items:center;gap:4px;background:var(--red-light);border:1px solid var(--red-border);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--red)}
-.co-mkt-tag{display:inline-flex;align-items:center;gap:4px;background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#92400e}
+.co-mkt-tag{display:inline-flex;align-items:center;gap:4px;background:#FAF7F2;border:1px solid #E8DDD0;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#5C4A35}
 .tags-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .tenure-tag{font-size:10px;color:var(--text-3);font-weight:400;margin-top:3px}
 
 /* Outcome buttons */
 .outcome-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.outcome-btn{border:1.5px solid var(--border);background:var(--surface);border-radius:var(--radius-sm);padding:6px 12px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text-2);font-family:inherit;transition:all .15s;box-shadow:var(--shadow-sm)}
+.outcome-btn{border:1.5px solid var(--border);background:var(--surface);border-radius:var(--radius-sm);padding:7px 10px;cursor:pointer;font-size:11.5px;font-weight:500;color:var(--text-2);font-family:inherit;transition:all .12s}
 .outcome-btn:hover{background:var(--bg)}
 .outcome-btn.sel-answered{background:#f0fdf4;border-color:#4ade80;color:#15803d}
-.outcome-btn.sel-voicemail{background:#fefce8;border-color:#fde047;color:#854d0e}
+.outcome-btn.sel-voicemail{background:#FAF7F2;border-color:#fde047;color:#854d0e}
 .outcome-btn.sel-noanswer{background:var(--red-light);border-color:var(--red-border);color:var(--red)}
 .outcome-btn.sel-text{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8}
 .outcome-label{font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block}
@@ -229,9 +233,9 @@ tr:hover td{background:var(--bg)}
 
 /* ── REFERRAL LEADS — Executive design ── */
 .d-tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
-.d-tab{padding:10px 20px;font-size:13px;font-weight:600;color:var(--text-3);border-bottom:2px solid transparent;cursor:pointer;margin-bottom:-1px;transition:all .15s;letter-spacing:.01em}
+.d-tab{padding:8px 18px;font-size:12.5px;font-weight:500;color:var(--text-3);border-bottom:2px solid transparent;cursor:pointer;margin-bottom:-1px;transition:all .15s;white-space:nowrap}
 .d-tab:hover{color:var(--text-2)}
-.d-tab.active{color:#1F4E79;border-bottom-color:#1F4E79;font-weight:700}
+.d-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 .d-tab-panel{display:none}.d-tab-panel.active{display:block}
 
 .ref-stat-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--navy);border-radius:var(--radius-md);padding:1rem 1.1rem}
@@ -264,7 +268,7 @@ tr:hover td{background:var(--bg)}
 .lead-card-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
 .lead-card-note{font-size:11px;margin-top:6px;padding:6px 9px;border-radius:6px;line-height:1.5}
 .lead-card-note.missing{background:var(--red-light);color:var(--red);font-style:italic}
-.lead-card-note.lazy{background:var(--amber-bg);color:var(--amber)}
+.lead-card-note.lazy{background:#FAF7F2;color:#8C7355}
 .lead-card-note.good{background:var(--bg);color:var(--text-2)}
 @media(min-width:600px){.lead-card-view{display:none}.ref-leads-table-wrap{display:block}}
 @media(max-width:599px){.lead-card-view{display:block}.ref-leads-table-wrap{display:none}}
@@ -272,7 +276,7 @@ tr:hover td{background:var(--bg)}
 .ref-badge{display:inline-block;padding:2px 9px;border-radius:4px;font-size:11px;font-weight:600}
 .rs-started{background:#dcfce7;color:#15803d}
 .rs-contact{background:#dbeafe;color:#1e40af}
-.rs-nurture{background:#fef3c7;color:#92400e}
+.rs-nurture{background:#FAF7F2;color:#5C4A35}
 .rs-contacted{background:#ede9fe;color:#5b21b6}
 .rs-withdrawn{background:#fee2e2;color:#991b1b}
 .rs-other{background:#f1f5f9;color:#475569}
@@ -282,8 +286,8 @@ tr:hover td{background:var(--bg)}
 .ref-refresh-btn{font-size:11px;color:var(--text-2);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:600}
 .ref-refresh-btn:hover{background:var(--bg)}
 .touch-badge{display:inline-flex;align-items:center;gap:4px;background:var(--red-light);border:1px solid var(--red-border);color:var(--red);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px}
-.rm-flag-btn{display:flex;align-items:center;gap:8px;width:100%;padding:11px 14px;border-radius:8px;border:2px solid #f59e0b;background:#fffbeb;color:#92400e;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
-.rm-flag-btn:hover{background:#fef3c7}
+.rm-flag-btn{display:flex;align-items:center;gap:8px;width:100%;padding:11px 14px;border-radius:8px;border:2px solid #f59e0b;background:#FAF7F2;color:#5C4A35;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.rm-flag-btn:hover{background:#FAF7F2}
 .rm-flag-btn.is-flagged{border-color:#dc2626;background:#fef2f2;color:#991b1b}
 .rm-flag-btn.is-flagged:hover{background:#fee2e2}
 .rm-flag-icon{font-size:16px;flex-shrink:0}
@@ -359,7 +363,7 @@ tr:hover td{background:var(--bg)}
   /* Search panel */
   .search-panel{padding:.85rem}
   .search-panel-title{font-size:13px}
-  #lp-search-input{font-size:16px;padding:10px 13px} /* 16px prevents iOS zoom */
+  #lp-search-input{font-size:14px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);width:100%;font-family:inherit;color:var(--text);outline:none;box-sizing:border-box;transition:border-color .2s} /* 16px prevents iOS zoom */
 
   /* Section heads */
   .section-head{font-size:11px}
@@ -396,7 +400,14 @@ tr:hover td{background:var(--bg)}
 <body>
 <div class="app">
 <div class="app-header">
-  <div class="brand"><div class="brand-logo">CORE TEAM</div><div class="brand-sub">Agent Tracker</div></div>
+  <div class="brand">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div>
+        <div class="brand-logo">CORE TEAM</div>
+        <div class="brand-sub">NFM Lending Ohio</div>
+      </div>
+    </div>
+  </div>
   <div style="display:flex;gap:8px;align-items:center">
     <span class="week-pill" id="weekPill"></span>
     <span class="save-ind"><span class="sync-dot" id="syncDot"></span><span id="saveInd">Connecting...</span></span>
@@ -406,7 +417,7 @@ tr:hover td{background:var(--bg)}
   <button class="btn" id="scorecardsTopBtn" onclick="openScorecardsView()" style="display:flex;align-items:center;gap:6px;font-size:12px">&#128202; Scorecards</button>
 </div>
 <div class="who-bar">
-  
+  <button class="who-btn wb-Snapshot" onclick="openSnapshotView(this)">Snapshot</button>
   <button class="who-btn wb-Daniel" onclick="selectUser(this,'Daniel')">Management</button>
   <button class="who-btn wb-Leads" onclick="openLeadsView(this)">Referral Leads</button>
   <button class="who-btn wb-Gavin" onclick="selectUser(this,'Gavin')">Gavin</button>
@@ -434,7 +445,7 @@ tr:hover td{background:var(--bg)}
 
 <!-- WELCOME -->
 <div id="view-welcome" class="view">
-  <div class="welcome"><div class="welcome-logo">CORE TEAM</div><h2>Agent Tracker</h2><p>Select your name to see your 15 calls for this week. All updates sync in real time.</p></div>
+  <div class="welcome"><div class="welcome-logo">CORE TEAM</div><h2>Intelligence Platform</h2><p>Select your name to see your 15 calls for this week. All updates sync in real time.</p></div>
 </div>
 
 <!-- LP VIEW -->
@@ -498,8 +509,9 @@ tr:hover td{background:var(--bg)}
       <div style="font-size:10px;color:#94a3b8;margin-top:2px;cursor:pointer" onclick="toggleRmFlaggedPanel()">tap to see agents</div>
     </div>
     <div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px">Going-quiet coverage</div>
-      <div id="rm-coverage-pct" style="font-size:22px;font-weight:700;color:#1F4E79">—</div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px">Agents needing RM visit</div>
+      <div id="rm-coverage-pct" style="font-size:22px;font-weight:700;color:#1F4E79;cursor:pointer" onclick="toggleCoveragePanel()">—</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:2px;cursor:pointer" onclick="toggleCoveragePanel()">% covered this week · tap to see list</div>
     </div>
   </div>
 
@@ -509,6 +521,13 @@ tr:hover td{background:var(--bg)}
       <button onclick="toggleRmFlaggedPanel()" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:16px">×</button>
     </div>
     <div id="rm-flagged-list" style="padding:0"><div style="padding:12px 16px;font-size:12px;color:#94a3b8">Loading...</div></div>
+  </div>
+  <div id="rm-coverage-panel" style="display:none;background:#fff;border:1px solid #E8DDD0;border-radius:10px;margin-bottom:12px;overflow:hidden">
+    <div style="background:#FAF7F2;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:12px;font-weight:700;color:#5C4A35;text-transform:uppercase;letter-spacing:.04em">⚠ Agents gone quiet — not yet visited this week</div>
+      <button onclick="toggleCoveragePanel()" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:16px">×</button>
+    </div>
+    <div id="rm-coverage-list" style="padding:0"><div style="padding:12px 16px;font-size:12px;color:#94a3b8">Loading...</div></div>
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px">
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999">Activity feed</div>
@@ -560,12 +579,12 @@ tr:hover td{background:var(--bg)}
   </div>
 
   <!-- EDITABLE CURRENT WEEK -->
-  <div id="lpsc-edit-wrap" style="display:none;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-bottom:18px">
+  <div id="lpsc-edit-wrap" style="display:none;background:var(--surface);border-radius:var(--radius-md);border:1px solid var(--border);overflow:hidden;margin-bottom:18px">
     <div style="background:#1F4E79;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <span style="color:#fff;font-size:13px;font-weight:600" id="lpsc-edit-label">Edit this week</span>
       <div style="display:flex;align-items:center;gap:8px">
         <button class="btn btn-sm" onclick="lpscEditPrevWeek()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">&larr; Prev</button>
-        <span id="lpsc-edit-range" style="color:#f0c84a;font-size:12px;font-weight:600"></span>
+        <span id="lpsc-edit-range" style="color:var(--accent);font-size:12px;font-weight:600"></span>
         <button class="btn btn-sm" onclick="lpscEditNextWeek()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">Next &rarr;</button>
       </div>
     </div>
@@ -594,7 +613,7 @@ tr:hover td{background:var(--bg)}
   <div style="background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px">
     <div style="background:#1F4E79;padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
       <span style="color:#fff;font-size:13px;font-weight:600" id="lpsc-person-label">Weekly History</span>
-      <span style="color:#f0c84a;font-size:11px" class="lpsc-no-print">Click a week to see daily breakdown</span>
+      <span style="color:var(--accent);font-size:11px" class="lpsc-no-print">Click a week to see daily breakdown</span>
     </div>
     <div id="lpsc-table-wrap" style="overflow-x:auto">
       <div style="text-align:center;padding:40px;color:#888;font-size:14px">Select a name above to load their scorecard history.</div>
@@ -623,7 +642,10 @@ tr:hover td{background:var(--bg)}
 
   <!-- TAB: TODAY -->
   <div id="d-tab4-today" class="d-tab-panel active">
+    <div class="section-head">Daily digest <span id="digest-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'DM Mono',monospace;font-size:10px"></span> <button class="btn btn-sm" onclick="buildDailyDigest()" style="text-transform:none;font-size:11px">Refresh</button></div>
+    <div id="d-daily-digest" style="margin-bottom:1.5rem"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;text-align:center;color:var(--text-3);font-size:12px">Loading digest...</div></div>
     <div id="d-team-streak-section" style="margin-bottom:.75rem"></div>
+    <div id="d-allclear-section" style="margin-bottom:.75rem"></div>
     <div id="d-carryover-section" style="margin-bottom:1rem"></div>
     <div id="d-alerts-section" style="margin-bottom:1rem"></div>
     <div id="d-note-quality-section" style="margin-bottom:1rem"></div>
@@ -828,7 +850,7 @@ var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Karen","Osgood","Jordan","Said"];
-var LP_COLORS={Gavin:"#0D7377",Karen:"#2c4a8f",Osgood:"#8a5c1a",Jordan:"#7a3558",Said:"#4d3d7a"};
+var LP_COLORS={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
@@ -965,6 +987,10 @@ function renderReferralLeadsDirect(data){
   var priorLeads=filtered.filter(function(r){return r.date_added===priorStr;});
   var unconverted=filtered.filter(function(r){return(r.status||"").toLowerCase().indexOf("start")<0;});
   var needsTouch=filtered.filter(function(r){
+    var st=(r.status||"").toLowerCase();
+    // Exclude started and scheduled — those are handled
+    if(st.indexOf("start")>=0||st.indexOf("scheduled")>=0)return false;
+    // Include new, contact attempt, nurture, contacted-but-stale
     if(!r.last_update)return true;
     var lastUp=new Date(r.last_update+"T12:00:00");
     return(now-lastUp)>86400000;
@@ -1354,7 +1380,7 @@ function selectUser(btn,u){
   if(u==="Daniel"){
     document.getElementById("view-daniel").classList.add("active");
     renderDaniel();
-    loadCallLogs().then(function(){renderDaniel();});
+    loadCallLogs().then(function(){renderDaniel();setTimeout(buildDailyDigest,500);});
   } else if(u==="Admin"){
     document.getElementById("view-admin").classList.add("active");
     renderAdmin();
@@ -1374,6 +1400,11 @@ function openScorecardsView(){
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-scorecards").classList.add("active");
+  // Always set sensible date range
+  var fromEl=document.getElementById("lpsc-from");
+  var toEl=document.getElementById("lpsc-to");
+  if(fromEl){var d=new Date(TODAY);d.setDate(d.getDate()-84);while(d.getDay()!==1)d.setDate(d.getDate()-1);fromEl.value=localDateStr(d);}
+  if(toEl){toEl.value=localDateStr(TODAY);}
   lpscLoadTeamTotals();
   // Auto-load Isaak's history if no one is selected yet
   if(lpscCurrentLP==="Isaak"){
@@ -1516,7 +1547,7 @@ function renderLP(lp){
     window.scrollTo(0,_scrollY);
     if(_focusId){
       var ta=document.querySelector('.note-field[data-name="'+_focusId+'"]');
-      if(ta){ta.focus();try{ta.setSelectionRange(ta.value.length,ta.value.length);}catch(e){}}
+      if(ta){ta.focus();try{var pos=_focusPos!==null?_focusPos:ta.value.length;ta.setSelectionRange(pos,pos);}catch(e){}}
     }
   },0);
 }
@@ -1567,7 +1598,7 @@ function renderCallCard(a,lp,isBonus){
   var chkPending='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
   var chkN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
   var chk=called?chkY:(isPending?chkPending:chkN);
-  var btnStyle=isPending?"border-color:#d97706;background:#fffbeb":"";
+  var btnStyle=isPending?"border-color:#d97706;background:#FAF7F2":"";
   html+='<button class="check-btn'+(called?" checked":"")+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="toggleCallFromCard(this)" style="'+btnStyle+'">'+chk+'</button>';
 
   html+='<div class="call-info">';
@@ -1640,7 +1671,7 @@ function renderCallCard(a,lp,isBonus){
   // Extra tags row (RM activity, co-marketing, tenure)
   var tagsHtml="";
   if(churnRisk==="HIGH")tagsHtml+='<span style="display:inline-flex;align-items:center;gap:4px;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#991b1b">&#128308; At risk</span>';
-  else if(churnRisk==="MEDIUM")tagsHtml+='<span style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;border:1px solid #fde68a;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#92400e">&#9888; Fading — follow up</span>';
+  else if(churnRisk==="MEDIUM")tagsHtml+='<span style="display:inline-flex;align-items:center;gap:4px;background:#FAF7F2;border:1px solid #E8DDD0;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#5C4A35">&#9888; Fading — follow up</span>';
   if(rmAct)tagsHtml+='<span class="rm-tag">RM visited: '+fmt(rmAct)+'</span>';
   if(coMarketingAgents[a[0]])tagsHtml+='<span class="co-mkt-tag">Co-marketing active</span>';
   var tenureDays=firstCall?Math.floor((TODAY-new Date(firstCall+"T12:00:00"))/86400000):0;
@@ -1715,7 +1746,7 @@ function renderCallCard(a,lp,isBonus){
     if(amandaFU){
       var fuDate=amandaFU.followup_date?new Date(amandaFU.followup_date+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"recently";
       html+='<div style="margin-top:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--radius-sm);padding:8px 12px">';
-      html+='<div style="font-size:11px;font-weight:700;color:#276749;margin-bottom:'+(amandaFU.amanda_note?4:0)+'px">&#10003; Amanda followed up &middot; '+fuDate+(amandaFU.activity_type?' &middot; '+escHtml(amandaFU.activity_type):'')+'</div>';
+      html+='<div style="font-size:11px;font-weight:700;color:#276749;margin-bottom:'+(amandaFU.amanda_note?4:0)+'px">&#10003; RM follow-up complete &middot; '+fuDate+(amandaFU.activity_type?' &middot; '+escHtml(amandaFU.activity_type):'')+'</div>';
       if(amandaFU.amanda_note)html+='<div style="font-size:11px;color:#475569;font-style:italic">&quot;'+escHtml(amandaFU.amanda_note.substring(0,120))+'&quot;</div>';
       html+='</div>';
     } else {
@@ -1739,7 +1770,7 @@ function renderCallCard(a,lp,isBonus){
           +'<span>⚡</span><span>Lead received '+daysSinceLead2+'d ago — team contacted '+contactLabel+'</span>'
           +'</div>';
       } else {
-        html+='<div style="display:flex;align-items:center;gap:6px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#92400e;margin-top:4px">'
+        html+='<div style="display:flex;align-items:center;gap:6px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#5C4A35;margin-top:4px">'
           +'<span>⚠</span><span>Lead received '+daysSinceLead2+'d ago — no call logged after lead. Follow up now!</span>'
           +'</div>';
       }
@@ -1767,7 +1798,7 @@ function renderCallCard(a,lp,isBonus){
       ?Math.floor((TODAY-new Date(velCheck.last_lead_date+"T12:00:00"))/86400000):999;
     var noLeadMtd=!velCheck||velCheck.mtd===0;
     if(noLeadMtd&&lastLeadDays>=90){
-      html+='<div style="display:flex;align-items:center;gap:6px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#92400e;margin-top:4px">'
+      html+='<div style="display:flex;align-items:center;gap:6px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#5C4A35;margin-top:4px">'
         +'<span>📋</span><span>Co-marketing active — no lead in '+lastLeadDays+'d. Is it working?</span>'
         +'</div>';
     }
@@ -1783,7 +1814,7 @@ function renderCallCard(a,lp,isBonus){
       var nextBday=thisYearBday<now?new Date(now.getFullYear()+1,bday.getMonth(),bday.getDate()):thisYearBday;
       var daysUntil=Math.floor((nextBday-now)/86400000);
       if(daysUntil<=7){
-        html+='<div style="display:flex;align-items:center;gap:6px;background:#fefce8;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#78350f;margin-top:4px">'
+        html+='<div style="display:flex;align-items:center;gap:6px;background:#FAF7F2;border:1px solid #E8DDD0;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#4A3728;margin-top:4px">'
           +'<span>🎂</span>'
           +(daysUntil===0?'<span>Birthday TODAY! Great reason to call</span>'
             :daysUntil===1?'<span>Birthday TOMORROW!</span>'
@@ -1883,7 +1914,7 @@ function renderLpSearch(){
     var safeId=a[0].replace(/\s+/g,"_");
     var isPending=!!(pendingNote[a[0]]);
     var pending=isPending?(pendingNote[a[0]]||{}):{};
-    var cardBorder=isPending?"border:1px solid #fcd34d;background:#fffdf0":"border:1px solid var(--border);background:var(--surface)";
+    var cardBorder=isPending?"border:1px solid #C8B8A8;background:#fffdf0":"border:1px solid var(--border);background:var(--surface)";
 
     h+='<div style="'+cardBorder+';border-radius:10px;padding:12px 14px;margin-bottom:8px">';
     h+='<div style="display:flex;align-items:flex-start;gap:12px">';
@@ -1894,7 +1925,7 @@ function renderLpSearch(){
     var chkN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
     var chkIcon=called?chkY:(isPending?chkPending:chkN);
     var chkClass="check-btn"+(called?" checked":"");
-    var chkStyle=isPending?"border-color:#d97706;background:#fffbeb":"";
+    var chkStyle=isPending?"border-color:#d97706;background:#FAF7F2":"";
     h+='<button class="'+chkClass+'" style="width:36px;height:36px;flex-shrink:0;margin-top:2px;'+chkStyle+'" data-name="'+a[0]+'" data-lp="'+currentUser+'" onclick="toggleCallFromCard(this)">'+chkIcon+'</button>';
 
     h+='<div style="flex:1;min-width:0">';
@@ -2031,8 +2062,10 @@ function tryConfirmCall(name,lp){
   delete pendingNote[name];
   var srEl2=document.getElementById("lp-search-results");
   var searchWasActive=srEl2&&srEl2.innerHTML.length>10;
+  var _saveSY=window.scrollY;
   upsertCallLogWithOutcome(name,lp,draft.trim(),outcome,flagRm).then(function(){
-    if(searchWasActive){renderLpSearch();}else{renderLP(currentUser);}
+    if(searchWasActive){renderLpSearch();}
+    else{renderLP(currentUser);setTimeout(function(){window.scrollTo(0,_saveSY);},50);}
   });
 }
 
@@ -2052,7 +2085,11 @@ function queueNote(ta){
   } else {
     ta.style.borderColor=words>=10?"var(--green)":"var(--border)";
     if(noteTimers[name])clearTimeout(noteTimers[name]);
-    noteTimers[name]=setTimeout(function(){upsertCallLog(name,lp,val);},800);
+    noteTimers[name]=setTimeout(function(){
+      var _sy=window.scrollY;
+      upsertCallLog(name,lp,val);
+      requestAnimationFrame(function(){window.scrollTo(0,_sy);});
+    },800);
   }
 }
 
@@ -2261,7 +2298,7 @@ function renderAlerts(){
     return;
   }
   el.innerHTML=alerts.map(function(a){
-    var bg=a.level==="red"?"#fff1f2":"#fffbeb",border=a.level==="red"?"#fecdd3":"#fde68a",color=a.level==="red"?"#be123c":"#92400e";
+    var bg=a.level==="red"?"#fff1f2":"#FAF7F2",border=a.level==="red"?"#fecdd3":"#E8DDD0",color=a.level==="red"?"#be123c":"#5C4A35";
     return'<div style="background:'+bg+';border:1px solid '+border+';border-radius:8px;padding:10px 14px;font-size:12px;color:'+color+';font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:8px">'+a.msg+'</div>';
   }).join("");
 }
@@ -2366,7 +2403,7 @@ async function renderRmSummary(){
       return'<div style="padding:9px 0;border-bottom:1px solid #fde6cc;display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:12px;font-weight:700;color:#7c2d12">'+escHtml(r.agent_name||"")+' <span style="font-size:10px;color:#c2853f;font-weight:500">via '+escHtml(r.lp||"LP")+'</span></div>'
-        +(shortNote?'<div style="font-size:11px;color:#92400e;margin-top:2px;font-style:italic">&ldquo;'+escHtml(shortNote)+'&rdquo;</div>':'')
+        +(shortNote?'<div style="font-size:11px;color:#5C4A35;margin-top:2px;font-style:italic">&ldquo;'+escHtml(shortNote)+'&rdquo;</div>':'')
         +'<div style="font-size:10px;color:#c2853f;margin-top:2px">'+fmt(r.call_date)+(r.outcome?" &middot; "+escHtml(r.outcome):"")+'</div>'
         +'</div>'
         +'<button class="btn btn-sm" onclick="dResolveFlag(\''+String(r.id)+'\')" style="font-size:10px;flex-shrink:0">Mark handled</button>'
@@ -2451,9 +2488,9 @@ function toggleCarryoverList(lp){
   if(!el)return;
   if(el.style.display!=="none"){el.style.display="none";el.innerHTML="";return;}
   var missed=getLpMissedLastWeek(lp);
-  var html='<div style="font-size:11px;font-weight:700;color:#92600a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Not called last week ('+missed.length+')</div>';
+  var html='<div style="font-size:11px;font-weight:700;color:#8C7355;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Not called last week ('+missed.length+')</div>';
   if(!missed.length){
-    html+='<div style="font-size:12px;color:#92600a">Every agent in last week\'s rotation was called. The carryover number reflects rotation size vs. logged calls.</div>';
+    html+='<div style="font-size:12px;color:#8C7355">Every agent in last week\'s rotation was called. The carryover number reflects rotation size vs. logged calls.</div>';
   } else {
     missed.forEach(function(a){
       var calledNow=calledThisWeek(a[0]);
@@ -2494,13 +2531,13 @@ function renderCarryoverAlerts(){
     if(incomplete>0)list.push({lp:lp,incomplete:incomplete});
   });
   if(!list.length){el.innerHTML="";return;}
-  var html='<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:14px;margin-bottom:1rem">'
-    +'<div style="font-size:13px;font-weight:700;color:#856404;margin-bottom:10px">&#9888;&#65039; Call carryover active — incomplete calls from last week roll into this week</div>';
+  var html='<div style="background:#FAF7F2;border:1px solid #E8DDD0;border-radius:8px;padding:14px;margin-bottom:1rem">'
+    +'<div style="font-size:13px;font-weight:700;color:#5C4A35;margin-bottom:10px">&#9888;&#65039; Call carryover active — incomplete calls from last week roll into this week</div>';
   list.forEach(function(a){
-    html+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:10px;margin-bottom:6px;border-left:3px solid #ffc107;cursor:pointer" onclick="goToLP(\''+a.lp+'\')">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:12px;font-weight:700;color:'+(LP_COLORS[a.lp]||"#856404")+'">'+a.lp+'</div><span style="font-size:10px;color:#92600a">tap to open &#8599;</span></div>'
-      +'<div style="font-size:12px;color:#856404;margin-top:4px">Last week incomplete: <b>'+a.incomplete+' call'+(a.incomplete>1?"s":"")+'</b></div>'
-      +'<div style="font-size:11px;color:#92600a;margin-top:2px">This week target: '+WEEKLY_TARGET+' new + '+a.incomplete+' carryover = <b>'+(WEEKLY_TARGET+a.incomplete)+' total</b></div>'
+    html+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:10px;margin-bottom:6px;border-left:3px solid #B5A090;cursor:pointer" onclick="goToLP(\''+a.lp+'\')">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:12px;font-weight:700;color:'+(LP_COLORS[a.lp]||"#5C4A35")+'">'+a.lp+'</div><span style="font-size:10px;color:#8C7355">tap to open &#8599;</span></div>'
+      +'<div style="font-size:12px;color:#5C4A35;margin-top:4px">Last week incomplete: <b>'+a.incomplete+' call'+(a.incomplete>1?"s":"")+'</b></div>'
+      +'<div style="font-size:11px;color:#6B5740;margin-top:2px">This week target: '+WEEKLY_TARGET+' new + '+a.incomplete+' carryover = <b>'+(WEEKLY_TARGET+a.incomplete)+' total</b></div>'
       +'</div>';
   });
   html+='</div>';
@@ -2553,19 +2590,19 @@ function renderNoteQuality(){
     return;
   }
 
-  var html='<div style="background:var(--surface);border:1px solid #fde68a;border-radius:10px;overflow:hidden;margin-bottom:1rem">'
-    +'<div style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
-    +'<div style="font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em">⚠️ Note Quality Flags — '+flags.length+' this week</div>'
+  var html='<div style="background:var(--surface);border:1px solid #E8DDD0;border-radius:10px;overflow:hidden;margin-bottom:1rem">'
+    +'<div style="background:#FAF7F2;border-bottom:1px solid #E8DDD0;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:12px;font-weight:700;color:#5C4A35;text-transform:uppercase;letter-spacing:.04em">⚠️ Note Quality Flags — '+flags.length+' this week</div>'
     +'<div style="font-size:10px;color:#b45309;font-weight:500">Low-effort, repetitive, or removal-flagged</div>'
     +'</div>';
 
   flags.forEach(function(f){
     var noteDisplay=f.note?'"'+escHtml(f.note)+'"':'<span style="color:#dc2626;font-style:italic">No note</span>';
-    html+='<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 16px;border-bottom:1px solid #fef3c7">'
+    html+='<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 16px;border-bottom:1px solid #FAF7F2">'
       +'<span class="lp-tag lp-tag-'+f.lp+'" style="flex-shrink:0;margin-top:2px">'+f.lp+'</span>'
       +'<div style="flex:1;min-width:0">'
       +'<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px;cursor:pointer;text-decoration:underline" onclick="openLpContactModal(this.getAttribute(&quot;data-n&quot;))" data-n="'+escHtml(f.agent)+'">'+escHtml(f.agent)+'</div>'
-      +'<div style="font-size:11px;color:#92400e;font-style:italic;word-break:break-word">'+noteDisplay+'</div>'
+      +'<div style="font-size:11px;color:#5C4A35;font-style:italic;word-break:break-word">'+noteDisplay+'</div>'
       +'</div>'
       +'<div style="font-size:11px;color:var(--text-3);flex-shrink:0;white-space:nowrap">'+fmt(f.date)+'</div>'
       +'</div>';
@@ -2744,6 +2781,7 @@ function loadLeadPipeline(){
   var dlEl=document.getElementById("pipeline-date-label");
   if(dlEl)dlEl.textContent=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
   renderLeadPipelinePanels(res);
+  if(typeof buildDailyDigest==="function")buildDailyDigest();
   }).catch(function(e){
     var el=document.getElementById("d-lead-pipeline-today");
     if(el)el.innerHTML='<div style="font-size:12px;color:var(--text-3);padding:8px">Could not load lead data.</div>';
@@ -2766,7 +2804,7 @@ function renderLeadPipelinePanels(raw){
     s+='<div style="text-align:center"><div style="color:#fff;font-size:16px;font-weight:700">'+totals.wtd+'</div><div style="color:#93c5fd;font-size:9px">WTD</div></div>';
     s+='<div style="text-align:center"><div style="color:#fff;font-size:16px;font-weight:700">'+totals.mtd+'</div><div style="color:#93c5fd;font-size:9px">MTD</div></div>';
     s+='<div style="text-align:center"><div style="color:#fff;font-size:16px;font-weight:700">'+totals.ytd+'</div><div style="color:#93c5fd;font-size:9px">YTD</div></div>';
-    s+='<div style="text-align:center"><div style="color:#f0c84a;font-size:16px;font-weight:700">'+totals.file_starts_mtd+'</div><div style="color:#93c5fd;font-size:9px">FILES MTD</div></div>';
+    s+='<div style="text-align:center"><div style="color:var(--accent);font-size:16px;font-weight:700">'+totals.file_starts_mtd+'</div><div style="color:#93c5fd;font-size:9px">FILES MTD</div></div>';
     s+='</div></div>';
 
     // Column header row
@@ -2793,8 +2831,8 @@ function renderLeadPipelinePanels(raw){
       s+='<span style="font-size:12px;color:var(--text-2);width:28px;text-align:center">'+r.mtd+'</span>';
       s+='<span style="font-size:12px;color:var(--text-3);width:28px;text-align:center">'+r.ytd+'</span>';
       s+='<span style="font-size:11px;color:var(--green);width:36px;text-align:center">'+r.file_starts_mtd+' files</span>';
-      s+=(ltf>0?'<span style="font-size:10px;background:'+(ltf>=20?"#dcfce7":ltf>=10?"#fef3c7":"#fee2e2")
-        +';color:'+(ltf>=20?"#15803d":ltf>=10?"#92400e":"#991b1b")+';padding:2px 7px;border-radius:4px">'+ltf+'% lead-to-file</span>':'');
+      s+=(ltf>0?'<span style="font-size:10px;background:'+(ltf>=20?"#dcfce7":ltf>=10?"#FAF7F2":"#fee2e2")
+        +';color:'+(ltf>=20?"#15803d":ltf>=10?"#5C4A35":"#991b1b")+';padding:2px 7px;border-radius:4px">'+ltf+'% lead-to-file</span>':'');
       var quietId='quiet-'+lp;
       var mtdCalled=lpCallCounts[lp]||0;
       var totalLpAgents=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
@@ -2846,7 +2884,7 @@ function renderLeadPipelinePanels(raw){
       f+='<span style="font-size:11px"><b>'+r.mtd+'</b> <span style="color:var(--text-3)">MTD</span></span>';
       f+='<span style="font-size:11px"><b>'+r.ytd+'</b> <span style="color:var(--text-3)">YTD</span></span>';
       f+='<span style="font-size:11px;color:var(--green)"><b>'+r.file_starts_mtd+'</b> files MTD</span>';
-      f+=(ltfMtd>0?'<span style="font-size:10px;background:'+(ltfMtd>=20?"#dcfce7":ltfMtd>=10?"#fef3c7":"#fee2e2")+';color:'+(ltfMtd>=20?"#15803d":ltfMtd>=10?"#92400e":"#991b1b")+';padding:2px 8px;border-radius:4px;font-weight:600">'+ltfMtd+'% lead-to-file</span>':"");
+      f+=(ltfMtd>0?'<span style="font-size:10px;background:'+(ltfMtd>=20?"#dcfce7":ltfMtd>=10?"#FAF7F2":"#fee2e2")+';color:'+(ltfMtd>=20?"#15803d":ltfMtd>=10?"#5C4A35":"#991b1b")+';padding:2px 8px;border-radius:4px;font-weight:600">'+ltfMtd+'% lead-to-file</span>':"");
       f+='</div>';
       f+='<span style="font-size:11px;color:var(--text-3)">'+r.agents_mtd.size+' agents active MTD · '+r.agents_ytd.size+' YTD</span>';
       f+='</div>';
@@ -2957,6 +2995,322 @@ function goToLP(lp){
   selectUser(btn,lp);
 }
 
+function renderAllClear(){
+  var el=document.getElementById("d-allclear-section");
+  if(!el)return;
+  var carryoverEl=document.getElementById("d-carryover-section");
+  var qualityEl=document.getElementById("d-note-quality-section");
+  var hasCarryover=carryoverEl&&carryoverEl.innerHTML.trim().length>10;
+  var hasQualityFlags=qualityEl&&qualityEl.innerHTML.trim().length>10;
+  if(hasCarryover||hasQualityFlags){el.innerHTML="";return;}
+  var totalOverdue=0;
+  LPS.forEach(function(lp){
+    agents.filter(function(a){return a[2]===lp&&isActive(a);}).forEach(function(a){
+      if(daysOverdue(a)>0)totalOverdue++;
+    });
+  });
+  if(totalOverdue>5){el.innerHTML="";return;}
+  el.innerHTML='<div style="display:flex;align-items:center;gap:12px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-md);padding:14px 18px">'
+    +'<div style="width:34px;height:34px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:16px;font-weight:700">✓</div>'
+    +'<div><div style="font-size:13px;font-weight:700;color:var(--text)">Team is on track</div>'
+    +'<div style="font-size:12px;color:var(--text-2);margin-top:2px">No carryover · No note flags · '
+    +(totalOverdue===0?"All agents contacted on schedule":totalOverdue+" agents slightly overdue")
+    +'</div></div></div>';
+}
+
+function openSnapshotView(btn){
+  if(typeof rmStopPolling==="function")rmStopPolling();
+  if(typeof lpStopPolling==="function")lpStopPolling();
+  currentUser="Snapshot";
+  document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+  document.getElementById("view-snapshot").classList.add("active");
+  buildSnapshot();
+}
+
+function buildSnapshot(){
+  var el=document.getElementById("d-snapshot-body");
+  var timeEl=document.getElementById("snapshot-time");
+  if(!el)return;
+  var now=new Date();
+  if(timeEl)timeEl.textContent="as of "+now.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+  if(!callLogs||Object.keys(callLogs).length===0){
+    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div>';
+    setTimeout(buildSnapshot,2000);return;
+  }
+
+  // ── Pace calculation ──
+  // What % of the week is gone (Mon=0, Fri=1, weekends count as full)
+  var dayOfWeek=now.getDay(); // 0=Sun,1=Mon...5=Fri,6=Sat
+  var workDaysGone=[0,0,.2,.4,.6,.8,1][dayOfWeek]; // rough pace by day
+  var hourFraction=now.getHours()/17; // 0-1 through 9am-5pm
+  var paceFraction=Math.min(workDaysGone+(dayOfWeek>=1&&dayOfWeek<=5?hourFraction*.2:0),1);
+
+  // ── LP calls this week ──
+  var callsLogged={};
+  LPS.forEach(function(lp){callsLogged[lp]=0;});
+  agents.forEach(function(a){
+    if(callLogs[a[0]]&&isActive(a)&&a[2]&&callsLogged[a[2]]!==undefined)callsLogged[a[2]]++;
+  });
+
+  // ── Leads & conversion data ──
+  var lpd=window.leadPipelineData;
+  var leadsToday=0,leadsWTD=0,leadsMTD=0;
+  var lpLeadsToday={},lpLeadsWTD={},lpLTF={};
+  LPS.forEach(function(lp){
+    var r=lpd&&lpd.lps&&lpd.lps[lp]?lpd.lps[lp]:{daily:0,wtd:0,mtd:0,ytd:0,file_starts_mtd:0};
+    lpLeadsToday[lp]=r.daily||0;
+    lpLeadsWTD[lp]=r.wtd||0;
+    var ltf=r.mtd>0?Math.round((r.file_starts_mtd||0)/r.mtd*100):0;
+    lpLTF[lp]=ltf;
+    leadsToday+=r.daily||0;
+    leadsWTD+=r.wtd||0;
+    leadsMTD+=r.mtd||0;
+  });
+  var totalCallsWTD=Object.values(callsLogged).reduce(function(s,n){return s+n;},0);
+  var totalTarget=LPS.length*WEEKLY_TARGET;
+
+  // ── Isaak (LP1) — from lp_call_history_counts ──
+  var isaakCalls=lpHistoryCallCounts["Isaak"]||lpHistoryCallCounts["isaak"]||0;
+  var isaakTarget=100; // Isaak's weekly target
+  var isaakPace=Math.round(isaakTarget*paceFraction);
+
+  // ── Amanda (RM) — from rmFeedCache ──
+  var amandaToday=(window.rmFeedCache&&window.rmFeedCache.today)?window.rmFeedCache.today.length:0;
+  var amandaWeek=(window.rmFeedCache&&window.rmFeedCache.week)?window.rmFeedCache.week.length:0;
+  var amandaFlagged=0;
+  try{var fc=document.getElementById("rm-flagged-count");if(fc)amandaFlagged=parseInt(fc.textContent)||0;}catch(e){}
+
+  // ── Motivating headline ──
+  var headlines=[];
+  var allHit15=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
+  if(allHit15)headlines.push("🔥 Full team hit their targets — keep the momentum!");
+  var leaders=LPS.filter(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
+  if(leaders.length===1)headlines.push("🌟 "+leaders[0]+" hit 15 calls — who's next?");
+  if(leadsToday>0)headlines.push("📨 "+leadsToday+" lead"+(leadsToday>1?"s":"")+" came in today — follow up fast!");
+  var bestLTF=LPS.reduce(function(best,lp){return lpLTF[lp]>lpLTF[best]?lp:best;},LPS[0]);
+  if(lpLTF[bestLTF]>=20)headlines.push("📈 "+bestLTF+" is converting at "+lpLTF[bestLTF]+"% lead-to-file this month");
+  var behindLPs=LPS.filter(function(lp){return callsLogged[lp]<Math.round(WEEKLY_TARGET*paceFraction*0.7);});
+  if(behindLPs.length>0&&paceFraction>.4)headlines.push("⏰ "+behindLPs.join(", ")+" — time to pick up the pace");
+  if(!headlines.length)headlines.push("💪 Team is moving — keep making those calls");
+  var headline=headlines[Math.floor(now.getSeconds()/10)%headlines.length]||headlines[0];
+
+  // ══ BUILD HTML ══
+  var todayFmt=now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  var h="";
+
+  // ── Hero bar ──
+  h+='<div style="background:var(--text);border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:1rem">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:14px">';
+  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-family:\'DM Mono\',monospace">NFM Lending Ohio</div>';
+  h+='<div style="color:#fff;font-size:16px;font-weight:700;margin-top:2px">'+todayFmt+'</div></div>';
+  h+='<div style="background:rgba(255,255,255,.06);border-radius:var(--radius-sm);padding:8px 14px;font-size:12px;font-style:italic;color:rgba(255,255,255,.8);max-width:320px;text-align:right">'+headline+'</div>';
+  h+='</div>';
+  // Team totals row
+  h+='<div style="display:flex;gap:20px;flex-wrap:wrap">';
+  var stats=[
+    {val:totalCallsWTD+"/"+totalTarget,label:"Team calls WTD",color:"#fff"},
+    {val:leadsToday,label:"Leads today",color:"var(--accent)"},
+    {val:leadsWTD,label:"Leads WTD",color:"#a78bfa"},
+    {val:leadsMTD,label:"Leads MTD",color:"#60a5fa"},
+  ];
+  stats.forEach(function(s){
+    h+='<div><div style="color:'+s.color+';font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;line-height:1">'+s.val+'</div>';
+    h+='<div style="color:rgba(255,255,255,.35);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-top:3px">'+s.label+'</div></div>';
+  });
+  h+='</div></div>';
+
+  // ── LP Cards ──
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:1rem">';
+
+  LPS.forEach(function(lp){
+    var called=callsLogged[lp]||0;
+    var target=WEEKLY_TARGET;
+    var paceTarget=Math.round(target*paceFraction);
+    var pct=Math.round(called/target*100);
+    var lpColor=LP_COLORS[lp]||"var(--accent)";
+    var leadsT=lpLeadsToday[lp]||0;
+    var leadsW=lpLeadsWTD[lp]||0;
+    var ltf=lpLTF[lp]||0;
+    var totalAgents=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
+
+    // Status
+    var status,statusColor,statusBg;
+    if(called>=target){status="🔥 Crushing it";statusColor="var(--accent)";statusBg="var(--green-bg)";}
+    else if(called>=paceTarget){status="✓ On track";statusColor="var(--accent)";statusBg="var(--green-bg)";}
+    else if(called>=paceTarget*.7){status="⚡ Close";statusColor="var(--amber)";statusBg="var(--amber-bg)";}
+    else{status="⚠ Behind pace";statusColor="var(--red)";statusBg="var(--red-bg)";}
+
+    h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="goToLP(\''+lp+'\')">';
+    // LP header
+    h+='<div style="padding:12px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
+    h+='<div style="font-size:14px;font-weight:800;color:'+lpColor+'">'+lp+'</div>';
+    h+='<div style="font-size:11px;font-weight:600;color:'+statusColor+';background:'+statusBg+';padding:3px 9px;border-radius:20px">'+status+'</div>';
+    h+='</div>';
+    // Big number
+    h+='<div style="padding:14px 14px 10px;display:flex;align-items:flex-end;gap:8px">';
+    h+='<div style="font-size:36px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+called+'</div>';
+    h+='<div style="font-size:14px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ '+target+'</div>';
+    h+='<div style="margin-left:auto;text-align:right"><div style="font-size:22px;font-weight:700;color:'+lpColor+';font-family:\'DM Mono\',monospace;line-height:1">'+pct+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of target</div></div>';
+    h+='</div>';
+    // Progress bar
+    h+='<div style="margin:0 14px 10px;height:5px;background:var(--border-light);border-radius:3px;overflow:hidden">';
+    h+='<div style="height:100%;background:'+lpColor+';border-radius:3px;width:'+Math.min(pct,100)+'%;transition:width .7s ease"></div></div>';
+    // Pace marker
+    h+='<div style="margin:0 14px 10px;position:relative;height:12px">';
+    h+='<div style="font-size:9px;color:var(--text-3);position:absolute;left:'+Math.min(paceTarget/target*100,95)+'%;transform:translateX(-50%)">↑ pace</div>';
+    h+='</div>';
+    // Stats row
+    h+='<div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--border-light);display:flex;gap:14px">';
+    h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+leadsW+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Leads WTD</div></div>';
+    h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+leadsT+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Today</div></div>';
+    h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:'+(ltf>=20?"var(--accent)":ltf>=10?"var(--amber)":"var(--red)")+';font-family:\'DM Mono\',monospace">'+ltf+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">L→F Rate</div></div>';
+    h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+totalAgents+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Agents</div></div>';
+    h+='</div></div>';
+  });
+
+  // ── Isaak card (LP1) ──
+  var isaakPct=Math.round(isaakCalls/isaakTarget*100);
+  var isaakStatus,isaakStatusColor,isaakStatusBg;
+  var isaakPaceTarget=Math.round(isaakTarget*paceFraction);
+  if(isaakCalls>=isaakTarget){isaakStatus="🔥 Crushing it";isaakStatusColor="var(--accent)";isaakStatusBg="var(--green-bg)";}
+  else if(isaakCalls>=isaakPaceTarget){isaakStatus="✓ On track";isaakStatusColor="var(--accent)";isaakStatusBg="var(--green-bg)";}
+  else if(isaakCalls>=isaakPaceTarget*.7){isaakStatus="⚡ Close";isaakStatusColor="var(--amber)";isaakStatusBg="var(--amber-bg)";}
+  else{isaakStatus="⚠ Behind pace";isaakStatusColor="var(--red)";isaakStatusBg="var(--red-bg)";}
+
+  h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm)">';
+  h+='<div style="padding:12px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
+  h+='<div><div style="font-size:14px;font-weight:800;color:var(--text-2)">Isaak</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px">LP1 · Realtor Calls</div></div>';
+  h+='<div style="font-size:11px;font-weight:600;color:'+isaakStatusColor+';background:'+isaakStatusBg+';padding:3px 9px;border-radius:20px">'+isaakStatus+'</div>';
+  h+='</div>';
+  h+='<div style="padding:14px 14px 10px;display:flex;align-items:flex-end;gap:8px">';
+  h+='<div style="font-size:36px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+isaakCalls+'</div>';
+  h+='<div style="font-size:14px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">/ '+isaakTarget+'</div>';
+  h+='<div style="margin-left:auto;text-align:right"><div style="font-size:22px;font-weight:700;color:var(--text-2);font-family:\'DM Mono\',monospace;line-height:1">'+isaakPct+'%</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">of target</div></div>';
+  h+='</div>';
+  h+='<div style="margin:0 14px 12px;height:5px;background:var(--border-light);border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--text-2);border-radius:3px;width:'+Math.min(isaakPct,100)+'%"></div></div>';
+  h+='<div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--border-light);font-size:11px;color:var(--text-3)">100 realtor calls/week target · Scorecards track daily breakdown</div>';
+  h+='</div>';
+
+  // ── Amanda card (RM) ──
+  var amandaGoal=8; // activities per week
+  var amandaWeekPct=Math.round(amandaWeek/amandaGoal*100);
+  var amandaStatus,amandaSC,amandaSB;
+  if(amandaWeek>=amandaGoal){amandaStatus="🔥 On fire";amandaSC="var(--accent)";amandaSB="var(--green-bg)";}
+  else if(amandaWeek>=Math.round(amandaGoal*paceFraction)){amandaStatus="✓ On track";amandaSC="var(--accent)";amandaSB="var(--green-bg)";}
+  else if(amandaToday>0){amandaStatus="⚡ Active today";amandaSC="var(--amber)";amandaSB="var(--amber-bg)";}
+  else{amandaStatus="⚠ Needs activity";amandaSC="var(--red)";amandaSB="var(--red-bg)";}
+
+  h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer" onclick="openRmView(document.querySelector(\'.wb-RM\'))">';
+  h+='<div style="padding:12px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between">';
+  h+='<div><div style="font-size:14px;font-weight:800;color:var(--text-2)">Amanda</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px">Relationship Manager</div></div>';
+  h+='<div style="font-size:11px;font-weight:600;color:'+amandaSC+';background:'+amandaSB+';padding:3px 9px;border-radius:20px">'+amandaStatus+'</div>';
+  h+='</div>';
+  h+='<div style="padding:14px 14px 10px;display:flex;align-items:flex-end;gap:8px">';
+  h+='<div style="font-size:36px;font-weight:800;color:var(--text);font-family:\'DM Mono\',monospace;line-height:1">'+amandaWeek+'</div>';
+  h+='<div style="font-size:14px;color:var(--text-3);margin-bottom:4px;font-family:\'DM Mono\',monospace">activities</div>';
+  h+='<div style="margin-left:auto;text-align:right"><div style="font-size:22px;font-weight:700;color:var(--text-2);font-family:\'DM Mono\',monospace;line-height:1">'+amandaToday+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">today</div></div>';
+  h+='</div>';
+  h+='<div style="margin:0 14px 12px;height:5px;background:var(--border-light);border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--text-2);border-radius:3px;width:'+Math.min(amandaWeekPct,100)+'%"></div></div>';
+  h+='<div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--border-light);display:flex;gap:14px">';
+  h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+amandaFlagged+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Flagged</div></div>';
+  h+='<div style="text-align:center"><div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'DM Mono\',monospace">'+amandaWeek+'</div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">This week</div></div>';
+  h+='<div style="flex:1;display:flex;align-items:center;justify-content:flex-end"><span style="font-size:11px;color:var(--accent)">Open RM view ↗</span></div>';
+  h+='</div></div>';
+
+  h+='</div>'; // close grid
+
+  // ── Footer ──
+  var nextR=new Date(now);nextR.setHours(18,0,0,0);
+  if(now>=nextR)nextR.setDate(nextR.getDate()+1);
+  var hrs=Math.ceil((nextR-now)/3600000);
+  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3);font-family:\'DM Mono\',monospace">Auto-refreshes at 6:00 PM · ~'+hrs+'h until next refresh</div>';
+
+  el.innerHTML=h;
+  clearTimeout(window._snapshotTimer);
+  var ms=nextR-now;
+  if(ms>0&&ms<86400000)window._snapshotTimer=setTimeout(buildSnapshot,ms);
+}
+
+
+
+function buildDailyDigest(){
+  var el=document.getElementById("d-daily-digest");
+  var timeEl=document.getElementById("digest-time");
+  if(!el)return;
+  var now=new Date();
+  var todayStr=localDateStr(TODAY);
+  if(timeEl)timeEl.textContent="as of "+now.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+
+  // If data not loaded yet, show loading and retry
+  if(!callLogs||Object.keys(callLogs).length===0){
+    el.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;text-align:center;color:var(--text-3);font-size:12px">Loading digest...</div>';
+    setTimeout(buildDailyDigest,2000);
+    return;
+  }
+
+  // Calls logged this week per LP (proxy for today — call_logs resets weekly)
+  var callsLogged={};
+  LPS.forEach(function(lp){callsLogged[lp]=0;});
+  agents.forEach(function(a){
+    if(callLogs[a[0]]&&isActive(a)&&a[2]&&callsLogged[a[2]]!==undefined)callsLogged[a[2]]++;
+  });
+  var totalCalls=Object.values(callsLogged).reduce(function(s,n){return s+n;},0);
+
+  // Leads today from pipeline data
+  var leadsToday=0;var lpLeadsToday={};
+  var lpd=window.leadPipelineData;
+  LPS.forEach(function(lp){
+    var n=lpd&&lpd.lps&&lpd.lps[lp]?lpd.lps[lp].daily||0:0;
+    lpLeadsToday[lp]=n;leadsToday+=n;
+  });
+
+  var todayFmt=now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  var h='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm)">';
+  h+='<div style="background:var(--text);padding:12px 18px;display:flex;justify-content:space-between;align-items:center">';
+  h+='<div style="color:#fff;font-size:13px;font-weight:700">'+todayFmt+'</div>';
+  h+='<div style="display:flex;gap:20px">';
+  h+='<div style="text-align:center"><div style="color:#fff;font-size:20px;font-weight:700;font-family:\'DM Mono\',monospace">'+totalCalls+'</div><div style="color:rgba(255,255,255,.5);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Calls this week</div></div>';
+  h+='<div style="text-align:center"><div style="color:var(--accent);font-size:20px;font-weight:700;font-family:\'DM Mono\',monospace">'+leadsToday+'</div><div style="color:rgba(255,255,255,.5);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Leads today</div></div>';
+  h+='</div></div>';
+  LPS.forEach(function(lp){
+    var called=callsLogged[lp]||0;
+    var total=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
+    var pct=total>0?Math.min(Math.round(called/total*100),100):0;
+    var lpColor=LP_COLORS[lp]||"var(--accent)";
+    var leads=lpLeadsToday[lp]||0;
+    var dot=called===0?"rgba(200,200,200,.5)":leads>0?"var(--accent)":"var(--green)";
+    h+='<div style="display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border-light)">';
+    h+='<div style="width:8px;height:8px;border-radius:50%;background:'+dot+';flex-shrink:0"></div>';
+    h+='<div style="width:56px;font-size:12px;font-weight:700;color:'+lpColor+'">'+lp+'</div>';
+    h+='<div style="flex:1">';
+    h+='<div style="display:flex;align-items:center;gap:8px">';
+    h+='<div style="flex:1;height:4px;background:var(--border-light);border-radius:2px;overflow:hidden"><div style="height:100%;background:'+lpColor+';opacity:.7;border-radius:2px;width:'+pct+'%;transition:width .6s ease"></div></div>';
+    h+='<span style="font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text-2);white-space:nowrap">'+called+' / '+total+'</span>';
+    h+='</div></div>';
+    h+='<div style="text-align:right;flex-shrink:0">';
+    h+=leads>0?'<span style="font-size:12px;font-weight:700;color:var(--accent)">+'+leads+' lead'+(leads!==1?'s':'')+'</span>':'<span style="font-size:11px;color:var(--text-3)">—</span>';
+    h+='</div></div>';
+  });
+  h+='<div style="display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border-light)">';
+  h+='<div style="width:8px;height:8px;border-radius:50%;background:rgba(200,200,200,.4);flex-shrink:0"></div>';
+  h+='<div style="width:56px;font-size:12px;font-weight:600;color:var(--text-3)">RM</div>';
+  h+='<div style="flex:1;font-size:11px;color:var(--text-3)">Amanda — see Relationship Manager for today\'s activities</div>';
+  h+='</div>';
+  var nextRefresh=new Date(now);nextRefresh.setHours(18,0,0,0);
+  if(now>=nextRefresh)nextRefresh.setDate(nextRefresh.getDate()+1);
+  var hoursUntil=Math.ceil((nextRefresh-now)/3600000);
+  h+='<div style="padding:8px 18px;background:var(--bg);display:flex;justify-content:space-between;align-items:center">';
+  h+='<span style="font-size:10px;color:var(--text-3)">Refreshes daily at 6:00 PM</span>';
+  h+='<span style="font-size:10px;color:var(--text-3);font-family:\'DM Mono\',monospace">~'+hoursUntil+'h until next refresh</span>';
+  h+='</div></div>';
+  el.innerHTML=h;
+  clearTimeout(window._digestTimer);
+  var ms=nextRefresh-now;
+  if(ms>0&&ms<86400000)window._digestTimer=setTimeout(buildDailyDigest,ms);
+}
+
 function renderTeamStreak(){
   var el=document.getElementById("d-team-streak-section");
   if(!el)return;
@@ -2992,6 +3346,7 @@ function renderDaniel(){
   renderCarryoverAlerts();
   renderNoteQuality();
   renderAlerts();
+  renderAllClear();
   loadLeadPipeline();
   renderGrowthScoreboard();
   renderRmSummary();
@@ -3350,10 +3705,14 @@ function logReceivedLead(name,lp,btn){
   var existing=receivedLeadsData[name.toUpperCase()];
   if(existing){
     if(!confirm("Remove the received lead logged for "+name+"?"))return;
-    sbFetch("DELETE","received_leads?id=eq."+existing.id).then(function(){
-      delete receivedLeadsData[name.toUpperCase()];
-      updateReceivedLeadBtn(btn,name,false,null);
-    }).catch(function(){});
+    // Optimistically update UI immediately so it doesn't feel stuck
+    delete receivedLeadsData[name.toUpperCase()];
+    updateReceivedLeadBtn(btn,name,false,null);
+    sbFetch("DELETE","received_leads?id=eq."+existing.id).catch(function(){
+      // Revert on failure
+      receivedLeadsData[name.toUpperCase()]=existing;
+      updateReceivedLeadBtn(btn,name,true,existing.buyer_name||null);
+    });
   } else {
     var buyerName=prompt("Buyer name (optional — press OK to skip):")||"";
     var data={agent_name:name,lp:lp,logged_date:localDateStr(TODAY),week_key:weekKey,buyer_name:buyerName||null,note:""};
@@ -3417,7 +3776,13 @@ function toggleRmFlag(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp");
   var log=callLogs[name];var cur=log?log.flag_rm||false:false;var newFlag=!cur;
   if(callLogs[name])callLogs[name].flag_rm=newFlag;
-  upsertCallLogWithOutcome(name,lp,log?log.note||"":"",log?log.outcome||"":"",newFlag).then(function(){renderLP(currentUser);});
+  // Direct DOM update — no renderLP, no scroll jump
+  btn.className="rm-flag-btn"+(newFlag?" is-flagged":"");
+  var iconEl=btn.querySelector(".rm-flag-icon");
+  var txtEl=btn.querySelector("span:last-child");
+  if(iconEl)iconEl.textContent=newFlag?"🚩":"🏳️";
+  if(txtEl)txtEl.textContent=newFlag?"Flagged for RM follow-up":"Flag for RM follow-up";
+  upsertCallLogWithOutcome(name,lp,log?log.note||"":"",log?log.outcome||"":"",newFlag).catch(function(){});
 }
 
 function togglePendingRmFlag(btn){
@@ -3650,7 +4015,7 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
     var days=Math.floor((new Date()-new Date(lu+"T00:00:00"))/86400000);
     var date=new Date(lu+"T12:00:00").toLocaleDateString("en-US",{month:"numeric",day:"numeric"});
     if(days===0)return{days:0,label:"Today",date:date,cls:"color:var(--green)"};
-    if(days<=2)return{days:days,label:days+"d ago",date:date,cls:"color:var(--amber)"};
+    if(days<=2)return{days:days,label:days+"d ago",date:date,cls:"color:#8C7355"};
     return{days:days,label:days+"d ago",date:date,cls:"color:var(--red);font-weight:700"};
   }
   function lpTag(r){
@@ -3699,7 +4064,7 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
     table+='<td style="font-size:12px;color:var(--text-2)">'+escHtml(r.buyer_name||"--")+'</td>';
     table+='<td>'+lpTag(r)+'</td>';
     table+='<td><span class="ref-badge '+badgeCls+'">'+escHtml(r.status||"--")+'</span></td>';
-    table+='<td style="font-size:11px;'+(ni.cls==="missing"?"color:var(--red);font-style:italic":ni.cls==="lazy"?"color:var(--amber)":"color:var(--text-2)")+'">'+ni.text+noteFlagHtml+'</td>';
+    table+='<td style="font-size:11px;'+(ni.cls==="missing"?"color:var(--red);font-style:italic":ni.cls==="lazy"?"color:#8C7355":"color:var(--text-2)")+'">'+ni.text+noteFlagHtml+'</td>';
     table+='<td style="font-size:12px;'+di.cls+'">'+di.date+'<br><span style="font-size:10px">'+di.label+'</span></td>';
     if(showUrgency)table+='<td style="font-size:12px;'+di.cls+'">'+di.label+'</td>';
     table+='</tr>';
@@ -3714,14 +4079,13 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
 setInterval(function(){if(currentUser==="Daniel"&&Object.keys(pendingNote).length===0)loadCallLogs().then(function(){renderDaniel();});},30000);
 document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 loadAgents();
-// Auto-open Management dashboard on load
+// Auto-open Snapshot on load
 (function(){
-  var danielBtn=document.querySelector(".wb-Daniel");
+  var pulseBtn=document.querySelector(".wb-Snapshot");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  document.getElementById("view-daniel").classList.add("active");
-  if(danielBtn)danielBtn.classList.add("active");
-  // Render Daniel after a tick so all data vars are initialized
-  setTimeout(function(){renderDaniel();loadLeadPipeline();},100);
+  document.getElementById("view-snapshot").classList.add("active");
+  if(pulseBtn)pulseBtn.classList.add("active");
+  setTimeout(function(){renderDaniel();loadLeadPipeline();setTimeout(buildSnapshot,800);},100);
 })();
 loadCallLogs();
 
@@ -4175,7 +4539,8 @@ function saveRmFollowup(btn){
     if(panel)panel.style.display="none";
     rmLoadFlagged();
     // Refresh LP view so banner appears
-    if(currentUser&&currentUser!=="Daniel"&&currentUser!=="Leads"&&currentUser!=="Admin")renderLP(currentUser);
+    // Only re-render LP if no pending notes open (to avoid clearing in-progress work)
+    if(currentUser&&currentUser!=="Daniel"&&currentUser!=="Leads"&&currentUser!=="Admin"&&Object.keys(pendingNote).length===0)renderLP(currentUser);
     // Show toast
     var toast=document.createElement("div");
     toast.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1F4E79;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.15)";
@@ -4183,6 +4548,55 @@ function saveRmFollowup(btn){
     document.body.appendChild(toast);
     setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast);},3000);
   }).catch(function(){btn.textContent="Save & notify LP";btn.disabled=false;});
+}
+
+function toggleCoveragePanel(){
+  var panel=document.getElementById("rm-coverage-panel");
+  if(!panel)return;
+  var isOpen=panel.style.display!=="none";
+  if(isOpen){panel.style.display="none";return;}
+  panel.style.display="block";
+  var listEl=document.getElementById("rm-coverage-list");
+  // Recompute who is uncovered
+  var week=rmWeekRange();
+  Promise.all([
+    fetch(SB_URL+"/rest/v1/agent_profiles?select=agent_name&order=agent_name.asc&limit=500",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+"/rest/v1/amanda_activities?select=agent_name,act_date&act_date=lt."+week.start+"&order=act_date.desc&limit=3000",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+"/rest/v1/amanda_activities?select=agent_name&act_date=gte."+week.start+"&act_date=lte."+week.end,{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();})
+  ]).then(function(results){
+    var allAgents=results[0],priorActs=results[1],weekActs=results[2];
+    var lastSeen={};
+    priorActs.forEach(function(a){var n=(a.agent_name||"").trim();if(n&&!lastSeen[n])lastSeen[n]=a.act_date;});
+    var touchedThisWeek={};
+    weekActs.forEach(function(a){var n=(a.agent_name||"").trim();if(n)touchedThisWeek[n]=true;});
+    var mondayDate=new Date(week.start+"T12:00:00");
+    var uncovered=allAgents.map(function(a){
+      var name=(a.agent_name||"").trim();if(!name)return null;
+      var last=lastSeen[name];
+      var days=last?Math.round((mondayDate-new Date(last+"T12:00:00"))/86400000):null;
+      if(days!==null&&days<60)return null;
+      if(touchedThisWeek[name])return null;
+      return{name:name,lastDate:last,days:days};
+    }).filter(Boolean).sort(function(a,b){return(b.days||999)-(a.days||999);});
+
+    if(!uncovered.length){
+      listEl.innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:#276749;font-weight:600">✓ All quiet agents covered this week!</div>';
+      return;
+    }
+    var h="";
+    uncovered.forEach(function(a){
+      var since=a.lastDate?new Date(a.lastDate+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"2-digit"}):"Never visited";
+      var daysStr=a.days!==null?a.days+"d since last visit":"No visits on record";
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid #FAF7F2">';
+      h+='<div style="flex:1"><div style="font-size:12px;font-weight:600;color:#0f172a">'+escHtml(a.name)+'</div>';
+      h+='<div style="font-size:11px;color:#5C4A35">'+daysStr+'</div></div>';
+      h+='<div style="font-size:11px;color:#94a3b8;text-align:right">Last: '+since+'</div>';
+      h+='</div>';
+    });
+    listEl.innerHTML=h;
+  }).catch(function(){
+    listEl.innerHTML='<div style="padding:16px;font-size:12px;color:#94a3b8">Could not load — check connection</div>';
+  });
 }
 
 function toggleRmFlaggedPanel(){
@@ -4346,7 +4760,7 @@ async function lpscLoad(){
     var thead='<thead><tr><th style="background:#1F4E79;color:#fff;padding:9px 12px;text-align:left;font-size:11px;font-weight:600">Week</th>';
     metrics.forEach(function(m){thead+='<th style="background:#1F4E79;color:#fff;padding:9px 8px;text-align:center;font-size:11px;font-weight:600">'+m.label+'</th>';});
     var lpscGoalSum=metrics.reduce(function(s,m){return s+m.goal;},0);
-    thead+='<th style="background:#16385c;color:#f0c84a;padding:9px 10px;text-align:center;font-size:11px;font-weight:700">TOTAL<br><span style="font-size:9px;color:#cbd5e1;font-weight:400">/ '+lpscGoalSum+'</span></th>';
+    thead+='<th style="background:#16385c;color:var(--accent);padding:9px 10px;text-align:center;font-size:11px;font-weight:700">TOTAL<br><span style="font-size:9px;color:#cbd5e1;font-weight:400">/ '+lpscGoalSum+'</span></th>';
     thead+="</tr></thead>";
 
     var tbody="<tbody>";
@@ -4504,7 +4918,7 @@ function lpscShowDaily(wk,data){
 
   var thead='<thead><tr><th style="background:#243d7a;color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:600">Metric</th>';
   LPSC_DAYS.forEach(function(d){thead+='<th style="background:#243d7a;color:#fff;padding:8px 10px;text-align:center;font-size:11px;font-weight:600">'+d+'</th>';});
-  thead+='<th style="background:#243d7a;color:#f0c84a;padding:8px 10px;text-align:center;font-size:11px;font-weight:600">Total</th></tr></thead>';
+  thead+='<th style="background:#243d7a;color:var(--accent);padding:8px 10px;text-align:center;font-size:11px;font-weight:600">Total</th></tr></thead>';
 
   var tbody="<tbody>";
   metrics.forEach(function(m){
