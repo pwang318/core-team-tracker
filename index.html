@@ -4669,10 +4669,11 @@ function rmRenderGoals(){
   var period=rmCurrentPeriod;
   var html="";
 
+  var RM_TALKTO_TYPES=["Active Agent Talk-to","Active Agent Check-in","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Closed Deal Thank You","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion"];
   if(period==="today"){
     var todaysActs=acts.filter(function(a){return a.act_date===todayStr;});
     RM_GOALS.forEach(function(g){
-      var count=todaysActs.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="Active Agent Talk-to"?todaysActs.filter(function(a){return RM_TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length:todaysActs.filter(function(a){return a.act_type===g.type;}).length;
       var dailyTarget=Math.ceil(g.weekly/5);
       var hit=count>=dailyTarget;
       html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f8">'
@@ -4683,7 +4684,7 @@ function rmRenderGoals(){
   }else if(period==="week"){
     var weekActs=acts.filter(function(a){return a.act_date>=week.start&&a.act_date<=week.end;});
     RM_GOALS.forEach(function(g){
-      var count=weekActs.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="Active Agent Talk-to"?weekActs.filter(function(a){return RM_TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length:weekActs.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.weekly,1);
       var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
       html+='<div style="margin-bottom:12px">'
@@ -4692,7 +4693,7 @@ function rmRenderGoals(){
     });
   }else{
     RM_GOALS.forEach(function(g){
-      var count=acts.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="Active Agent Talk-to"?acts.filter(function(a){return RM_TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length:acts.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.monthly,1);
       var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
       html+='<div style="margin-bottom:12px">'
