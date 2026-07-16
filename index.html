@@ -632,6 +632,11 @@ tr:hover td{background:var(--bg)}
 </div>
 
 <!-- DANIEL VIEW -->
+<div id="view-snapshot" class="view">
+  <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'DM Mono',monospace;font-size:10px"></span></div>
+  <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div></div>
+</div>
+
 <div id="view-daniel" class="view">
   <div class="d-tab-bar">
     <div class="d-tab active" onclick="switchDanielTab4('today',this)">Today</div>
@@ -2371,7 +2376,7 @@ async function renderRmSummary(){
     var res=await fetch(SB_URL+"/rest/v1/amanda_activities?act_date=gte."+week.start+"&act_date=lte."+week.end+"&select=act_type,act_date,agent_name",
       {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
     var acts=await res.json();
-    if(!Array.isArray(acts)){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load Amanda&#39;s data.</div>';return;}
+    if(!Array.isArray(acts)){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load Amanda data.</div>';return;}
 
     var flagRes=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome&order=call_date.desc",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
     var flagRows=await flagRes.json();
@@ -2417,7 +2422,7 @@ async function renderRmSummary(){
       +'<div style="font-size:11px;color:#94a3b8;display:flex;align-items:center">'+acts.length+' total activities this week</div>'
       +'</div>'
       +'<div id="d-flagged-detail" style="display:none;margin-top:10px;background:#fffaf3;border:1px solid #fde6cc;border-radius:8px;padding:4px 14px">'+flagDetail+'</div>';
-  }catch(e){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load Amanda&#39;s data.</div>';}
+  }catch(e){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load Amanda data.</div>';}
 }
 
 function toggleDFlagged(){
@@ -3433,7 +3438,7 @@ function renderTeamStreak(){
     var hitNames=results.filter(function(r){return r.hit;}).map(function(r){return r.lp;}).join(", ");
     el.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-sm)">'
       +'<span style="font-size:18px">🔥</span>'
-      +'<div style="font-size:12px;color:var(--text-2)"><b style="color:var(--text)">'+hitNames+'</b> hit 15/15 last week. '+(5-hitCount)+' LP'+(5-hitCount>1?'s':'')+' missed &#8212; let&#39;s get everyone there this week.</div>'
+      +'<div style="font-size:12px;color:var(--text-2)"><b style="color:var(--text)">'+hitNames+'</b> hit 15/15 last week. '+(5-hitCount)+' LP'+(5-hitCount>1?'s':'')+' missed &#8212; let\'s get everyone there this week.</div>'
       +'</div>';
   }
 }
