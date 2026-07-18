@@ -2398,7 +2398,7 @@ async function renderRmSummary(){
     var acts=await res.json();
     if(!Array.isArray(acts)){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load Amanda data.</div>';return;}
 
-    var flagRes=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome&order=call_date.desc",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
+    var flagRes=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome,rm_note,rm_note_at&order=call_date.desc",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
     var flagRows=await flagRes.json();
     var flagList=Array.isArray(flagRows)?flagRows:[];
     var flagCount=flagList.length;
@@ -2426,13 +2426,21 @@ async function renderRmSummary(){
     var flagDetail=flagList.length?flagList.map(function(r){
       var note=(r.note||"").trim();
       var shortNote=note.length>120?note.substring(0,120)+"...":note;
-      return'<div style="padding:9px 0;border-bottom:1px solid #fde6cc;display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
+      var hasReply=r.rm_note&&r.rm_note.trim();
+      return'<div style="padding:9px 0;border-bottom:1px solid #fde6cc">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:12px;font-weight:700;color:#7c2d12">'+escHtml(r.agent_name||"")+' <span style="font-size:10px;color:#c2853f;font-weight:500">via '+escHtml(r.lp||"LP")+'</span></div>'
         +(shortNote?'<div style="font-size:11px;color:#5C4A35;margin-top:2px;font-style:italic">&ldquo;'+escHtml(shortNote)+'&rdquo;</div>':'')
         +'<div style="font-size:10px;color:#c2853f;margin-top:2px">'+fmt(r.call_date)+(r.outcome?" &middot; "+escHtml(r.outcome):"")+'</div>'
         +'</div>'
         +'<button class="btn btn-sm" onclick="dResolveFlag(\''+String(r.id)+'\')" style="font-size:10px;flex-shrink:0">Mark handled</button>'
+        +'</div>'
+        +(hasReply
+          ?'<div style="margin-top:6px;padding:6px 10px;background:#E8F5E9;border:1px solid #81C784;border-radius:6px;font-size:11px;color:#1B5E20">'
+            +'<span style="font-weight:700">Amanda replied</span> · '+fmt(r.rm_note_at)+'<br>'+escHtml(r.rm_note)
+            +'</div>'
+          :'<div style="margin-top:4px;font-size:10px;color:#c2853f;font-style:italic">No response from Amanda yet</div>')
         +'</div>';
     }).join(""):'<div style="font-size:12px;color:#aaa;padding:8px 0">No flagged agents right now.</div>';
 
@@ -3371,12 +3379,15 @@ function buildSnapshot(){
   h+='</div>'; // close scoreboard
 
   // Footer
-  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3)">Live · refreshes every 30s · last updated '+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})+'</div>';
+  var nextR=new Date(now);nextR.setHours(18,0,0,0);
+  if(now>=nextR)nextR.setDate(nextR.getDate()+1);
+  var hrs=Math.ceil((nextR-now)/3600000);
+  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3);font-family:\'DM Mono\',monospace">Auto-refreshes at 6:00 PM · ~'+hrs+'h until next refresh</div>';
 
   el.innerHTML=h;
-  // Clear any existing timer and set a 5-minute auto-refresh
   clearTimeout(window._snapshotTimer);
-  window._snapshotTimer=setTimeout(buildSnapshot, 30 * 1000);
+  var ms=nextR-now;
+  if(ms>0&&ms<86400000)window._snapshotTimer=setTimeout(buildSnapshot,ms);
 }
 
 
@@ -4666,11 +4677,10 @@ function rmRenderGoals(){
   var period=rmCurrentPeriod;
   var html="";
 
-  var RM_TALKTO_TYPES=["Active Agent Talk-to","Active Agent Check-in","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Closed Deal Thank You","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion"];
   if(period==="today"){
     var todaysActs=acts.filter(function(a){return a.act_date===todayStr;});
     RM_GOALS.forEach(function(g){
-      var count=g.type==="Active Agent Talk-to"?todaysActs.filter(function(a){return RM_TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length:todaysActs.filter(function(a){return a.act_type===g.type;}).length;
+      var count=todaysActs.filter(function(a){return a.act_type===g.type;}).length;
       var dailyTarget=Math.ceil(g.weekly/5);
       var hit=count>=dailyTarget;
       html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f8">'
@@ -4681,7 +4691,7 @@ function rmRenderGoals(){
   }else if(period==="week"){
     var weekActs=acts.filter(function(a){return a.act_date>=week.start&&a.act_date<=week.end;});
     RM_GOALS.forEach(function(g){
-      var count=g.type==="Active Agent Talk-to"?weekActs.filter(function(a){return RM_TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length:weekActs.filter(function(a){return a.act_type===g.type;}).length;
+      var count=weekActs.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.weekly,1);
       var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
       html+='<div style="margin-bottom:12px">'
@@ -4690,7 +4700,7 @@ function rmRenderGoals(){
     });
   }else{
     RM_GOALS.forEach(function(g){
-      var count=g.type==="Active Agent Talk-to"?acts.filter(function(a){return RM_TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length:acts.filter(function(a){return a.act_type===g.type;}).length;
+      var count=acts.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.monthly,1);
       var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
       html+='<div style="margin-bottom:12px">'
@@ -4802,7 +4812,7 @@ function toggleRmFlaggedPanel(){
   if(isOpen){panel.style.display="none";return;}
   panel.style.display="block";
   // Load full flagged list
-  fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome&order=call_date.desc",
+  fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome,rm_note,rm_note_at&order=call_date.desc",
     {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}})
   .then(function(r){return r.json();})
   .then(function(rows){
