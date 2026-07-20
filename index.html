@@ -802,7 +802,21 @@ tr:hover td{background:var(--bg)}
   <div class="admin-section">
     <h3>Co-marketing active agents</h3>
     <p style="font-size:12px;color:#888;margin-bottom:.75rem">Mark agents who have an active co-marketing setup (flyer, Total Expert, etc.).</p>
-    <div style="margin-bottom:8px"><input type="text" id="comkt-q" placeholder="Search agent name..." oninput="renderCoMktList()" style="width:100%"></div>
+    <div style="margin-bottom:8px"><input type="text" id="comkt-q" placeholder="Search agent name..." oninput="renderCoMktList()" style="width:100%">
+    <!-- LP ASSIGNMENT SECTION -->
+    <div class="admin-section" id="lp-assign-section">
+      <h3>Assign LPs to Agents</h3>
+      <p style="font-size:12px;color:#888;margin-bottom:.75rem">Agents without an LP assignment. Changes save instantly to the agent list.</p>
+      <div style="margin-bottom:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="lp-assign-search" placeholder="Filter agents..." oninput="renderLpAssignList()" style="flex:1;min-width:160px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
+        <label style="font-size:12px;color:#888;display:flex;align-items:center;gap:5px;cursor:pointer">
+          <input type="checkbox" id="lp-assign-show-all" onchange="renderLpAssignList()" style="cursor:pointer">
+          Show all agents
+        </label>
+      </div>
+      <div id="lp-assign-list" style="max-height:500px;overflow-y:auto"></div>
+    </div>
+</div>
     <
 </p>
 <script>
@@ -1426,6 +1440,8 @@ function selectUser(btn,u){
   } else if(u==="Admin"){
     document.getElementById("view-admin").classList.add("active");
     renderAdmin();
+    loadLpOverrides();
+    renderLpAssignList();
   } else if(u==="Welcome"){
     document.getElementById("view-welcome").classList.add("active");
   } else {
@@ -4240,6 +4256,7 @@ document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 document.addEventListener("focusin",function(e){if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"){userTyping=true;}});
 document.addEventListener("focusout",function(e){if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"){userTyping=false;}});
 loadAgents();
+loadLpOverrides();
 // Auto-open Snapshot on load
 (function(){
   var snapBtn=document.querySelector(".wb-Snapshot");
@@ -5149,6 +5166,85 @@ function lpscShowDaily(wk,data){
   wrap.style.display="block";
   wrap.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
+
+
+// ── LP ASSIGNMENT ────────────────────────────────────────────────────────
+function renderLpAssignList(){
+  var q=(document.getElementById("lp-assign-search").value||"").toLowerCase();
+  var showAll=document.getElementById("lp-assign-show-all").checked;
+  var LPS_OPTS=["Gavin","Jordan","Karen","Osgood","Said","Unassigned"];
+  var list=SEED.filter(function(e){
+    if(!showAll&&e[2]&&e[2]!=="Unassigned")return false; // only unassigned by default
+    if(q&&!e[0].toLowerCase().includes(q))return false;
+    return true;
+  }).sort(function(a,b){return a[0].localeCompare(b[0]);});
+
+  if(!list.length){
+    document.getElementById("lp-assign-list").innerHTML=
+      '<div style="padding:16px;text-align:center;color:#aaa;font-size:13px">'+(showAll?"No agents found":"All agents assigned!")+"</div>";
+    return;
+  }
+
+  var html='<table style="width:100%;border-collapse:collapse;font-size:13px">'
+    +'<thead><tr style="border-bottom:2px solid var(--border)">'
+    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888;font-weight:600">Agent</th>'
+    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888;font-weight:600">Tier</th>'
+    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888;font-weight:600">Current LP</th>'
+    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888;font-weight:600">Assign to</th>'
+    +'</tr></thead><tbody>';
+
+  list.forEach(function(e){
+    var name=e[0],tier=e[1]||"",lp=e[2]||"";
+    var tierColor=tier==="A"?"#B45309":tier==="B"?"#1D4ED8":"#888";
+    var lpColor={"Gavin":"#0E9F8E","Karen":"#2563EB","Osgood":"#C2692B","Jordan":"#BE185D","Said":"#7C3AED"}[lp]||"#888";
+    var safeN=name.replace(/'/g,"\'");
+    var opts=LPS_OPTS.map(function(opt){
+      return '<option value="'+opt+'"'+(lp===opt?" selected":"")+">"+opt+"</option>";
+    }).join("");
+    html+='<tr style="border-bottom:1px solid var(--border)">'
+      +'<td style="padding:8px 10px;font-weight:500">'+name+'</td>'
+      +'<td style="padding:8px 10px"><span style="font-size:11px;font-weight:700;color:'+tierColor+'">'+tier+'</span></td>'
+      +'<td style="padding:8px 10px"><span style="font-size:11px;font-weight:600;color:'+lpColor+'">'+( lp||"—")+'</span></td>'
+      +'<td style="padding:8px 10px">'
+      +'<select data-name="'+safeN+'" onchange="setAgentLP(this.dataset.name,this.value,this)" '
+      +'style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">'
+      +opts+'</select>'
+      +' <span id="lp-saved-'+name.replace(/[^a-zA-Z0-9]/g,"_")+'" style="font-size:11px;color:#1D9E75;display:none">✓ Saved</span>'
+      +'</td></tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById("lp-assign-list").innerHTML=html;
+}
+
+function setAgentLP(name,lp,selectEl){
+  // Update SEED in memory
+  var entry=SEED.find(function(e){return e[0]===name;});
+  if(!entry)return;
+  entry[2]=lp==="Unassigned"?"Unassigned":lp||null;
+
+  // Show saved indicator
+  var savedId="lp-saved-"+name.replace(/[^a-zA-Z0-9]/g,"_");
+  var savedEl=document.getElementById(savedId);
+  if(savedEl){savedEl.style.display="inline";setTimeout(function(){savedEl.style.display="none";},2000);}
+
+  // Persist to localStorage so assignments survive refresh
+  try{
+    var saved=JSON.parse(localStorage.getItem("lp_overrides")||"{}");
+    saved[name]=lp==="Unassigned"?"Unassigned":lp||null;
+    localStorage.setItem("lp_overrides",JSON.stringify(saved));
+  }catch(e){}
+}
+
+function loadLpOverrides(){
+  try{
+    var saved=JSON.parse(localStorage.getItem("lp_overrides")||"{}");
+    Object.keys(saved).forEach(function(name){
+      var entry=SEED.find(function(e){return e[0]===name;});
+      if(entry)entry[2]=saved[name];
+    });
+  }catch(e){}
+}
+
 </script>
 </body>
 </html>
