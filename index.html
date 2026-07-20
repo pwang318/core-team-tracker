@@ -1036,7 +1036,8 @@ function renderReferralLeadsDirect(data){
     if(!nurtureActive&&(r.status||"").toLowerCase().indexOf("nurture")>=0)return false;
     return true;
   });
-  var mtd=filtered.length;
+  // MTD = all leads including nurture (total volume)
+  var mtd=data.filter(function(r){return lpMatch(r);}).length;
   var fileStarts=filtered.filter(function(r){return(r.status||"").toLowerCase().indexOf("start")>=0;}).length;
   var ltf=mtd>0?Math.round(fileStarts/mtd*100):0;
   var todayLeads=filtered.filter(function(r){return r.date_added===todayStr;});
