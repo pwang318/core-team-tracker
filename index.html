@@ -56,6 +56,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px
 .wb-Daniel{}.wb-Daniel:hover{background:#1e293b;border-color:#1e293b;color:#fff}.wb-Daniel.active{background:#1F4E79;border-color:#3b82f6;color:#fff;font-weight:700;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
 .wb-RM.active{background:#FAF7F2;border-color:#8C7355;color:#8C7355;font-weight:600}
 .wb-Admin.active{background:#FAF7F2;border-color:#8C7355;color:#8C7355;font-weight:600}
+.wb-FaceTime{color:#0F766E;border-color:#0F766E20}
+.wb-FaceTime.active{background:#F0FDFA;border-color:#0F766E;color:#0F766E;font-weight:600}
+.ft-tier-hdr{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:10px 0 7px;border-bottom:2px solid;margin-bottom:9px;margin-top:16px}
+.ft-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ft-row:last-child{border-bottom:none}
+.ft-name{font-size:13px;font-weight:600;flex:1;min-width:120px}
+.ft-days{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.ft-days.ok{background:#E8F5F1;color:#0A6B4C}
+.ft-days.warn{background:#FEF3C7;color:#92400E}
+.ft-days.red{background:#FEE2E2;color:#991B1B}
+.ft-days.critical{background:#7F1D1D;color:#fff}
+.ft-meta{font-size:11px;color:var(--text-3);white-space:nowrap}
+.ft-log-form{display:none;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px;width:100%}
+.ft-log-form.show{display:block}
+.ft-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.ft-stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.ft-stat-num{font-size:26px;font-weight:700;font-family:'DM Mono',monospace}
+.ft-stat-label{font-size:10px;color:var(--text-3);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
 .wb-Leads.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:600}
 
 .view{display:none}.view.active{display:block}
@@ -430,6 +448,7 @@ tr:hover td{background:var(--bg)}
   <button class="who-btn wb-Jordan" onclick="selectUser(this,'Jordan')">Jordan</button>
   <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
   <button class="who-btn wb-RM" onclick="openRmView(this)">Relationship Manager</button>
+  <button class="who-btn wb-FaceTime" onclick="selectUser(this,'FaceTime')">Face Time</button>
   <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button>
 </div>
 <div class="contact-modal-overlay" id="lpContactModal">
@@ -819,6 +838,49 @@ tr:hover td{background:var(--bg)}
 </div>
     <
 </p>
+<!-- FACE TIME VIEW -->
+<div id="view-facetime" class="view" style="display:none;padding:18px 20px;max-width:960px;margin:0 auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:16px;font-weight:700;color:var(--text-1)">Face Time Tracker</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:2px">Break breads & in-person meetings — last touch by tier</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <select id="ft-lp-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
+        <option value="all">All LPs</option>
+        <option value="Gavin">Gavin</option>
+        <option value="Karen">Karen</option>
+        <option value="Osgood">Osgood</option>
+        <option value="Jordan">Jordan</option>
+        <option value="Said">Said</option>
+      </select>
+      <select id="ft-tier-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
+        <option value="all">All tiers</option>
+        <option value="A">A-tier only</option>
+        <option value="B">B-tier only</option>
+        <option value="C">C-tier only</option>
+      </select>
+      <select id="ft-status-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
+        <option value="all">All statuses</option>
+        <option value="critical">Critical only</option>
+        <option value="overdue">Overdue + Critical</option>
+        <option value="warn">Needs attention</option>
+      </select>
+      <button onclick="loadFaceTime()" style="background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500">↺ Refresh</button>
+    </div>
+  </div>
+  <div class="ft-summary">
+    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-critical" style="color:#991B1B">—</div><div class="ft-stat-label">Critical (21/45/90d+)</div></div>
+    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-overdue" style="color:#DC2626">—</div><div class="ft-stat-label">Overdue</div></div>
+    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-warn" style="color:#D97706">—</div><div class="ft-stat-label">Due soon</div></div>
+    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-ok" style="color:#0A6B4C">—</div><div class="ft-stat-label">On track</div></div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
+    <div id="ft-list"><div style="text-align:center;color:var(--text-4);padding:30px;font-size:13px">Loading...</div></div>
+  </div>
+</div>
+
+
 <script>
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
@@ -1440,6 +1502,9 @@ function selectUser(btn,u){
     document.getElementById("view-daniel").classList.add("active");
     renderDaniel();
     loadCallLogs().then(function(){renderDaniel();setTimeout(buildDailyDigest,500);});
+  } else if(u==="FaceTime"){
+    document.getElementById("view-facetime").classList.add("active");
+    loadFaceTime();
   } else if(u==="Admin"){
     document.getElementById("view-admin").classList.add("active");
     renderAdmin();
@@ -5314,6 +5379,211 @@ function setAgentLP(name,lp,selectEl){
 function loadLpOverrides(){
   // Now handled by loadAgentAssignments() which reads from Supabase
   // Called on boot already — this is a no-op kept for compatibility
+}
+
+
+// ── FACE TIME ─────────────────────────────────────────────────────────────
+// Thresholds (days): [warn, red, critical]
+var FT_THRESHOLDS={A:[10,14,21],B:[21,30,45],C:[45,60,90]};
+var FT_TARGETS={A:14,B:30,C:60};
+var ftData={};  // agent_name → {lastDate, source, notes}
+
+async function loadFaceTime(){
+  var listEl=document.getElementById("ft-list");
+  if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px;font-size:13px">Loading...</div>';
+  try{
+    // Load from both sources in parallel
+    var r=await Promise.all([
+      sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=2000"),
+      sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=2000").catch(function(){return[];})
+    ]);
+    // Build map: agent → latest date from either source
+    ftData={};
+    // Amanda activities
+    (r[0]||[]).forEach(function(a){
+      var n=(a.agent_name||"").trim();if(!n)return;
+      if(!ftData[n]||a.act_date>ftData[n].lastDate){
+        ftData[n]={lastDate:a.act_date,source:"Amanda",notes:a.notes||""};
+      }
+    });
+    // LP break_breads table
+    (r[1]||[]).forEach(function(b){
+      var n=(b.agent_name||"").trim();if(!n)return;
+      if(!ftData[n]||b.date>ftData[n].lastDate){
+        ftData[n]={lastDate:b.date,source:b.logged_by||"LP",notes:b.notes||""};
+      }
+    });
+    renderFaceTime();
+  }catch(e){
+    if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--red);padding:30px;font-size:13px">Error loading — '+e.message+'</div>';
+  }
+}
+
+function ftStatus(tier,days){
+  var t=FT_THRESHOLDS[tier]||FT_THRESHOLDS.C;
+  if(days===null)return"critical";
+  if(days>=t[2])return"critical";
+  if(days>=t[1])return"red";
+  if(days>=t[0])return"warn";
+  return"ok";
+}
+
+function ftDaysLabel(days,status){
+  if(days===null)return"Never";
+  return days+"d ago";
+}
+
+function renderFaceTime(){
+  var listEl=document.getElementById("ft-list");if(!listEl)return;
+  var lpF=(document.getElementById("ft-lp-filter")||{value:"all"}).value;
+  var tierF=(document.getElementById("ft-tier-filter")||{value:"all"}).value;
+  var statusF=(document.getElementById("ft-status-filter")||{value:"all"}).value;
+  var now=new Date();
+
+  var agentList=SEED.map(function(e){
+    var name=e[0],tier=e[1]||"C",lp=(e[2]&&e[2]!=="null")?e[2]:"Unassigned";
+    var ft=ftData[name];
+    var days=null;
+    if(ft&&ft.lastDate){days=Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000);}
+    var status=ftStatus(tier,days);
+    return{name:name,tier:tier,lp:lp,days:days,status:status,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:""};
+  });
+
+  if(lpF!=="all")agentList=agentList.filter(function(a){return a.lp===lpF;});
+  if(tierF!=="all")agentList=agentList.filter(function(a){return a.tier===tierF;});
+  if(statusF==="critical")agentList=agentList.filter(function(a){return a.status==="critical";});
+  else if(statusF==="overdue")agentList=agentList.filter(function(a){return a.status==="critical"||a.status==="red";});
+  else if(statusF==="warn")agentList=agentList.filter(function(a){return a.status!=="ok";});
+
+  var order={critical:0,red:1,warn:2,ok:3};
+  agentList.sort(function(a,b){
+    var od=order[a.status]-order[b.status];if(od!==0)return od;
+    return(b.days===null?9999:b.days)-(a.days===null?9999:a.days);
+  });
+
+  var full=SEED.map(function(e){
+    var ft=ftData[e[0]];var days=null;
+    if(ft&&ft.lastDate){days=Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000);}
+    return ftStatus(e[1]||"C",days);
+  });
+  document.getElementById("ft-s-critical").textContent=full.filter(function(s){return s==="critical";}).length;
+  document.getElementById("ft-s-overdue").textContent=full.filter(function(s){return s==="red";}).length;
+  document.getElementById("ft-s-warn").textContent=full.filter(function(s){return s==="warn";}).length;
+  document.getElementById("ft-s-ok").textContent=full.filter(function(s){return s==="ok";}).length;
+
+  if(!agentList.length){listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px">No agents match these filters</div>';return;}
+
+  var tierColors={A:"#B45309",B:"#1D4ED8",C:"#64748B"};
+  var tierLabels={
+    A:"A-Tier — target every 14 days · 🟡 10d · 🔴 14d · 🚨 21d",
+    B:"B-Tier — target every 30 days · 🟡 21d · 🔴 30d · 🚨 45d",
+    C:"C-Tier — target every 60 days · 🟡 45d · 🔴 60d · 🚨 90d"
+  };
+  var lpColors={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
+
+  // Build rows using DOM-safe approach (no inline onclick with dynamic strings)
+  var rows=[];
+  ["A","B","C"].forEach(function(tier){
+    var tList=agentList.filter(function(a){return a.tier===tier;});
+    if(!tList.length)return;
+    rows.push({type:"hdr",tier:tier,label:tierLabels[tier],count:tList.length,color:tierColors[tier]});
+    tList.forEach(function(a,i){
+      var target=FT_TARGETS[tier];
+      var nextLabel=a.days===null?"Never logged":a.days<target?"Next in "+(target-a.days)+"d":"Overdue by "+(a.days-target)+"d";
+      var overdue=a.days===null||a.days>=target;
+      rows.push({type:"agent",a:a,target:target,nextLabel:nextLabel,overdue:overdue,lc:lpColors[a.lp]||"#888",formId:"ftf"+tier+i});
+    });
+  });
+
+  // Build HTML string — all onclick use data attrs, no dynamic string in onclick
+  var html2="";
+  rows.forEach(function(r){
+    if(r.type==="hdr"){
+      html2+='<div class="ft-tier-hdr" style="color:'+r.color+';border-color:'+r.color+'">'+r.label+' <span style="font-weight:400;font-size:9px;margin-left:8px">('+r.count+' agents)</span></div>';
+    } else {
+      var a=r.a,fid=r.formId;
+      html2+='<div class="ft-row">'
+        +'<div class="ft-name">'+a.name+'</div>'
+        +'<span style="font-size:11px;font-weight:600;color:'+r.lc+';min-width:50px">'+a.lp+'</span>'
+        +'<span class="ft-days '+a.status+'">'+(a.days===null?"Never":a.days+"d ago")+'</span>'
+        +'<span class="ft-meta">'+(a.lastDate?fmtDate(a.lastDate)+(a.source?" via "+a.source:""):"No record")+'</span>'
+        +'<span class="ft-meta" style="color:'+(r.overdue?"#DC2626":"#0A6B4C")+'">'+r.nextLabel+'</span>'
+        +'<button class="ft-log-btn btn-ft-log" data-fid="'+fid+'" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Log visit</button>'
+        +'</div>'
+        +'<div class="ft-log-form" id="'+fid+'">'
+          +'<div style="font-size:11px;font-weight:600;color:var(--brand);margin-bottom:8px">Log break bread — '+a.name+'</div>'
+          +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+            +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Date</label>'
+            +'<input type="date" id="'+fid+'-date" value="'+today2()+'" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"></div>'
+            +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Logged by</label>'
+            +'<select id="'+fid+'-by" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"><option>Amanda</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option></select></div>'
+          +'</div>'
+          +'<textarea id="'+fid+'-notes" placeholder="Notes (optional)..." style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical;min-height:50px;margin-bottom:8px"></textarea>'
+          +'<div style="display:flex;gap:7px">'
+            +'<button class="ft-save-btn" data-agent="'+a.name.replace(/"/g,"&quot;")+'" data-fid="'+fid+'" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer">Save</button>'
+            +'<button class="ft-cancel-btn" data-fid="'+fid+'" style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer">Cancel</button>'
+          +'</div>'
+        +'</div>';
+    }
+  });
+  listEl.innerHTML=html2;
+
+  // Attach events after render (avoids all inline onclick issues)
+  listEl.querySelectorAll(".ft-log-btn,.ft-cancel-btn").forEach(function(btn){
+    btn.addEventListener("click",function(){ftToggleLog(this.dataset.fid);});
+  });
+  listEl.querySelectorAll(".ft-save-btn").forEach(function(btn){
+    btn.addEventListener("click",function(){ftSaveLog(this.dataset.agent,this.dataset.fid);});
+  });
+}
+
+
+function today2(){
+  var d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function ftToggleLog(id){
+  var el=document.getElementById(id);if(!el)return;
+  el.classList.toggle("show");
+  if(el.classList.contains("show"))el.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+async function ftSaveLog(agentName,formId){
+  var date=document.getElementById(formId+"-date").value;
+  var by=document.getElementById(formId+"-by").value;
+  var notes=document.getElementById(formId+"-notes").value.trim()||null;
+  if(!date){alert("Select a date.");return;}
+  var btn=document.querySelector("#"+formId+" button");
+  if(btn){btn.disabled=true;btn.textContent="Saving...";}
+  try{
+    await sbFetch("POST","break_breads",{agent_name:agentName,date:date,logged_by:by,notes:notes});
+    // Update ftData in memory
+    if(!ftData[agentName]||date>ftData[agentName].lastDate){
+      ftData[agentName]={lastDate:date,source:by,notes:notes||""};
+    }
+    document.getElementById(formId+"-notes").value="";
+    document.getElementById(formId).classList.remove("show");
+    renderFaceTime();
+    showToast("Break bread logged for "+agentName+" ✓","success");
+  }catch(e){
+    showToast("Save failed: "+e.message,"error");
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="Save";}
+  }
+}
+
+function showToast(msg,type){
+  var el=document.getElementById("globalToast");
+  if(!el){el=document.createElement("div");el.id="globalToast";el.style.cssText="position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(8px);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;color:#fff;max-width:360px";document.body.appendChild(el);}
+  el.style.background=type==="success"?"#0A6B4C":type==="error"?"#8B1F1F":"#1C2B2A";
+  el.textContent=msg;el.style.opacity="1";el.style.transform="translateX(-50%) translateY(0)";
+  setTimeout(function(){el.style.opacity="0";el.style.transform="translateX(-50%) translateY(8px)";},3000);
+}
+
+function fmtDate(d){
+  if(!d)return"—";
+  return new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 }
 
 </script>
