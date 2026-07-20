@@ -38,7 +38,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px
 .brand{display:flex;align-items:center;gap:12px}
 .brand-logo{color:var(--text);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-family:'Plus Jakarta Sans',sans-serif}
 .brand-sub{font-size:10px;color:var(--text-3);font-weight:400;letter-spacing:.02em}
-.week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:20px;color:var(--text-2);font-weight:500;letter-spacing:.02em}
+.week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:20px;color:var(--text-2);font-weight:500;font-family:'DM Mono',monospace;letter-spacing:.02em}
 .save-ind{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#cbd5e1;flex-shrink:0}
 .sync-dot.live{background:#15803d}.sync-dot.saving{background:#d97706}.sync-dot.error{background:#dc2626}
@@ -120,7 +120,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px
 .d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem}
 .d-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.1rem 1.25rem;box-shadow:var(--shadow-sm)}
 .d-name{font-weight:600;font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
-.d-pct{font-size:30px;font-weight:600;margin-bottom:4px;letter-spacing:-.02em;color:var(--text)}
+.d-pct{font-size:30px;font-weight:600;margin-bottom:4px;letter-spacing:-.02em;font-family:'DM Mono',monospace;color:var(--text)}
 .d-bar-track{background:var(--border-light);border-radius:20px;height:4px;margin-bottom:8px;overflow:hidden}
 .d-bar-fill{height:4px;border-radius:20px}
 .d-meta{font-size:11px;color:var(--text-3);display:flex;justify-content:space-between}
@@ -640,7 +640,7 @@ tr:hover td{background:var(--bg)}
 <!-- DANIEL VIEW -->
 <!-- DANIEL VIEW -->
 <div id="view-snapshot" class="view">
-  <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-size:10px"></span></div>
+  <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'DM Mono',monospace;font-size:10px"></span></div>
   <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div></div>
 </div>
 
@@ -669,7 +669,7 @@ tr:hover td{background:var(--bg)}
     <span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Status:</span>
     <span class="ref-badge rs-started ref-filter-btn" onclick="toggleRefFilter('status','File Started',this)" style="cursor:pointer">File Started</span>
     <span class="ref-badge rs-contact ref-filter-btn" onclick="toggleRefFilter('status','Contact Attempt',this)" style="cursor:pointer">Contact Attempt</span>
-    <span class="ref-badge rs-nurture ref-filter-btn" onclick="toggleRefFilter('status','Nurture',this)" style="cursor:pointer">Nurture</span>
+    
     <span class="ref-badge rs-contacted ref-filter-btn" onclick="toggleRefFilter('status','Contacted',this)" style="cursor:pointer">Contacted</span>
     <span class="ref-badge rs-withdrawn ref-filter-btn" onclick="toggleRefFilter('status','App Withdrawn',this)" style="cursor:pointer">App Withdrawn</span>
     <span class="ref-badge rs-other ref-filter-btn" onclick="toggleRefFilter('status','Other',this)" style="cursor:pointer">Other</span>
@@ -808,7 +808,7 @@ tr:hover td{background:var(--bg)}
 <script>
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
-var LP_COLORS={Gavin:"#4F46E5",Karen:"#4F46E5",Osgood:"#4F46E5",Jordan:"#4F46E5",Said:"#4F46E5"};
+var LP_COLORS={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
@@ -863,7 +863,7 @@ var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
-var LP_COLORS={Gavin:"#4F46E5",Karen:"#4F46E5",Osgood:"#4F46E5",Jordan:"#4F46E5",Said:"#4F46E5"};
+var LP_COLORS={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
@@ -918,7 +918,7 @@ var agents=[],callLogs={},lastWeekLogs={},currentUser=null,noteTimers={},contact
 var userTyping=false;
 var referralLeadsCache=null;
 
-var SEED=[["ALEXIS AKERS","C",null,"2026-05-12","2026-03-25",null,null,false,1],["ALEXIS REED","C","Said","2026-07-06","2026-07-07","2026-01-30","2026-02-27",false,1],["ALI SWEAZY","C","Unassigned","2026-05-09","2026-05-09",null,null,false,1],["AMANDA HOWARD","C","Unassigned","2026-07-01","2026-07-01","2025-11-25","2025-12-23",false,1],["AMY AGRESTA","C","Gavin","2026-06-16","2026-06-16","2025-07-08","2025-08-05",false,1],["ANA SORIA","C","Karen","2026-04-19",null,null,null,false,1],["ANGELA PEREZ","C","Gavin","2026-04-27","2026-05-06","2026-04-06","2026-04-24",false,1],["ANGELA POTTS","C","Osgood","2026-05-10","2026-05-10",null,null,false,1],["ANGIE BRONOWSKI","B",null,"2025-12-03","2025-12-02","2025-12-29","2026-07-23",false,1],["ANNIE MORENO","B","Karen","2026-06-17","2026-06-18","2026-07-13","2026-06-12",false,1],["ANTHONY AMOS","C",null,"2026-06-03","2026-06-04","2024-08-28",null,false,1],["ASHLEY HENRY","C","Osgood","2026-04-22","2026-04-21",null,null,false,1],["AVA LAIRD","C","Jordan","2026-07-09","2026-07-09",null,null,false,1],["BAILEY STRATHIE","C","Osgood","2026-05-30","2026-05-30","2024-11-21",null,false,1],["BENJAMIN GAYTAN","C","Gavin","2026-05-16","2026-05-22",null,null,false,1],["BRAD GILLIAM","C","Gavin","2026-05-14",null,null,null,false,1],["BRANDON KIDD","C","Said","2026-05-01",null,null,null,false,1],["BRANDON MCCLENDON","C","Said","2026-06-08","2026-06-08",null,null,false,1],["BRANDON THOMPSON","A","Osgood","2026-07-12","2026-07-12","2026-05-04","2026-06-01",false,1],["BRIAN ZINN","C","Jordan","2026-07-14","2026-07-09",null,null,false,1],["CAROLE MCMAHON","C","Osgood","2026-05-31","2026-05-31","2026-05-08","2026-05-26",false,1],["CARRIE SISTARE-KOLIN CAUSEY","C","Unassigned",null,"2026-03-12","2026-04-03","2026-05-20",false,1],["CELINE WILLIAMS","C","Jordan","2026-06-01",null,null,null,false,1],["CESIA ESPINOZA YOUNG","C","Karen","2026-03-11","2026-03-10","2026-03-26","2026-04-17",false,1],["CHELSEA ANDERSON","C","Osgood","2026-02-07","2026-02-06","2026-03-28","2026-04-17",false,1],["CHERYL KINSEY","C","Jordan","2026-05-05","2026-05-04",null,null,false,1],["CHRIS REED","A","Said","2026-07-01","2026-07-15","2026-07-08","2026-06-26",false,1],["CHRISTIAN CHALKIAS","C","Osgood","2026-07-08","2026-04-08",null,null,false,1],["CHRISTINA COUGHLIN","C","Osgood","2026-07-13","2026-07-13","2026-07-10",null,false,1],["CINDA ERICKSON","B","Gavin","2026-04-23","2026-04-21","2026-02-24","2026-03-26",false,1],["CLAUDIA CHUECA","C",null,null,"2026-07-02",null,null,false,1],["CLAUDIA CHUECO","C","Karen","2026-07-02",null,null,null,false,1],["CODA GAHRIS","C","Jordan","2026-04-29","2026-04-29","2026-05-25",null,false,1],["COLIN BURNHEIMER - THRIVE","C","Unassigned",null,"2026-06-30",null,null,false,1],["CONNER KOCHANSKY","A","Gavin","2026-07-10","2026-07-10","2026-06-22","2026-07-14",false,1],["CONNOR KOCHANSKY","C",null,"2025-07-18","2026-06-25",null,null,false,1],["COURTNEY HAMILTON","C","Osgood","2026-05-27","2026-05-27","2026-06-02","2026-06-17",false,1],["CRAIG MAURER","C","Osgood","2026-05-13","2026-05-19",null,null,false,1],["DAIRDRE SCRIVEN","C","Said","2026-05-19","2026-05-19",null,null,false,1],["DAN MANLEY","B","Gavin","2025-11-23","2026-04-29","2026-05-01","2026-05-19",false,1],["DARREN HOGG","C","Said","2026-04-22","2026-04-28",null,null,false,1],["DEANNE RHYNEHARDT","B","Osgood","2026-07-14","2026-07-14","2026-05-05","2026-06-12",false,1],["DERON BENDEN","C",null,null,"2026-06-15","2026-06-25",null,false,1],["DERON BENDER","A","Gavin","2025-08-11","2026-04-24","2026-04-28","2026-07-24",false,1],["DONALD PAYNE","C",null,null,"2026-06-07","2021-08-11",null,false,1],["DONALD PAYNE JR","C","Osgood","2026-06-04",null,null,null,false,1],["DUSTIN GOLDMAN","A","Osgood","2026-06-22","2026-04-24","2026-03-30","2026-03-27",false,1],["ELIAS PAPPAN","C","Karen","2026-04-30",null,null,null,false,1],["ELIZABETH BONAUDI","C","Osgood","2026-04-17","2026-04-17",null,null,false,1],["ELIZABETH ELLINGER","B","Jordan","2026-03-16","2026-04-01","2026-06-18","2026-07-20",false,1],["ELIZABETH HOWARD","C","Osgood","2026-07-05","2026-07-05","2024-11-08",null,false,1],["ERIKA (ROCKFORD)","C",null,null,"2026-06-17","2026-06-23",null,false,1],["ERIKA WEHNER","B","Gavin",null,"2026-04-13","2026-05-28","2026-05-11",false,1],["GAMAL HARDING","C","Unassigned","2026-06-17","2026-06-23","2025-10-17",null,false,1],["GEORGENA STARR","C",null,"2024-04-19","2026-07-09","2023-10-28",null,false,1],["GEORGENA XAMMAR","C","Unassigned","2026-07-09","2026-07-09","2023-03-07",null,false,1],["GLADIS CHAVEZ","C","Karen","2026-05-15","2026-05-05",null,null,false,1],["HAIFA BRUNNEY","B","Karen","2026-07-06","2026-07-03","2026-06-15","2026-07-14",false,1],["HEATHER EMMERT","C","Jordan","2026-06-11","2026-06-11","2024-09-06",null,false,1],["HEATHER HENRY-MINOR","B","Jordan","2026-04-07","2026-04-15","2026-05-05","2026-05-28",false,1],["HOLLY BLANKEN","C","Unassigned",null,"2026-05-14",null,null,false,1],["HYPATIA ESPINAL","C","Karen","2026-06-02","2026-06-02",null,null,false,1],["INGRID CORREA","C",null,null,"2026-07-15","2024-10-18",null,false,1],["INGRID CORREIA","B","Gavin","2026-07-15","2026-05-08","2025-12-11","2026-01-05",false,1],["IZXEL MARTINEZ","C","Karen","2026-05-20","2026-05-20","2026-06-02","2026-07-17",false,1],["JACOB ENGLISH","C","Jordan",null,"2026-03-18","2026-04-23","2026-06-12",false,1],["JAIDEN BALLAH","C","Said","2026-06-02","2026-06-03",null,null,false,1],["JASMIN MONTOYA","C","Karen","2026-06-25","2026-06-19",null,null,false,1],["JASMINE MCKENZIE","C","Osgood","2026-06-30","2026-05-04","2026-05-06","2026-05-29",false,1],["JEFF MESSMER","C","Gavin","2026-07-14","2026-05-12","2025-10-01",null,false,1],["JENNIFER BLACKMORE","C","Jordan","2026-05-02",null,null,null,false,1],["JESSE MCCRERRY","C","Said",null,"2026-04-06","2026-04-13","2026-05-26",false,1],["JESSICA TOWER","C","Jordan","2026-05-27","2026-05-30","2023-04-03",null,false,1],["JIMMY LIEU","C","Unassigned","2026-04-26",null,null,null,false,1],["JOHN BRUNNER","A","Jordan","2026-06-01","2026-06-01","2026-06-30","2026-07-17",false,1],["JOHN LUBINSKY","C","Said","2026-06-17","2026-06-17","2026-06-23","2026-03-20",false,1],["JONNATHAN AGUDELO","C","Karen","2026-06-23","2026-05-19",null,null,false,1],["JORDAN HOLLIBAUGH","C","Gavin",null,"2026-06-28","2026-07-15","2026-04-16",false,1],["JUANE MADARIS","C","Unassigned","2026-06-27",null,null,null,false,1],["JUSTIN BIERY","C","Karen","2026-05-27","2026-05-28",null,null,false,1],["KANDIS HALL","B","Osgood","2026-01-04","2026-07-14","2026-02-25","2026-03-17",false,1],["KATHERIE DE LA ROSA","C",null,null,"2026-06-29",null,null,false,1],["KATHERINE DE LA ROSA","B","Karen","2026-06-29","2026-06-23","2026-06-10","2026-07-15",false,1],["KATHY HAYES","C","Jordan","2026-07-08","2026-07-08","2024-12-09",null,false,1],["KATIE MANSOR","C","Jordan","2026-04-27","2026-04-26",null,null,false,1],["KATIE SUMMERS","B","Gavin",null,"2026-06-23","2026-02-26","2026-05-29",false,1],["KELSY YODER","C","Said","2026-04-28","2026-01-09","2026-01-12","2026-02-05",false,1],["KEVIN SPEERT","A","Gavin","2026-07-11","2026-06-24","2026-06-01","2026-06-26",false,1],["KHADIJA FARAH","B","Jordan","2026-07-09","2026-07-16","2026-02-09","2026-03-06",false,1],["KINSIE HUSKINS","C","Jordan",null,"2026-03-17","2026-04-28","2026-06-01",false,1],["KISHMA JAMES","C","Said","2026-07-10","2026-07-10","2025-06-09",null,false,1],["KRISTINA MURPHY","C","Osgood","2026-06-02","2026-05-11","2025-10-03","2025-10-21",false,1],["KUNLAVEE","C",null,null,"2026-06-03",null,null,false,1],["LAUREN MCCLINTON","C","Said",null,"2026-04-29",null,null,false,1],["LAUREN MICHELLE","C","Unassigned","2026-04-29",null,null,null,false,1],["LESLIE HERNANDEZ","C","Karen","2026-06-19","2026-06-29","2026-07-15","2026-06-18",false,1],["LETIKA WHITE","C","Osgood","2026-05-11","2026-06-15","2025-07-31","2025-08-29",false,1],["LEXIS GRANDY","C","Osgood","2026-06-11","2025-09-26","2025-09-29","2025-10-29",false,1],["LEZLEY MCCURRY","C","Unassigned",null,"2026-05-01",null,null,false,1],["LILIAN FUENTES","C","Karen","2026-04-21","2026-04-21",null,null,false,1],["LISA SIMMONS","C","Osgood",null,"2026-03-19","2026-04-14","2026-05-27",false,1],["LIZBEL CONTRERAS","C","Karen","2026-07-06","2026-06-12","2024-09-18",null,false,1],["LUIS GIL","C","Karen","2026-07-15","2026-06-30","2026-06-12","2025-09-26",false,1],["MAKAYLA & CONNER KOCHANSKY","C",null,null,"2025-11-06","2026-06-22","2026-07-14",false,1],["MARIA COMAS","B","Karen","2026-04-27","2026-03-02","2025-06-19","2025-07-21",false,1],["MARK VENNITTI","C","Jordan","2026-04-08","2026-04-08","2026-06-01","2026-06-18",false,1],["MARTIN HOPKINS","B","Karen","2026-02-12","2026-07-01","2026-01-29","2026-02-20",false,1],["MARY MCMICHAEL","B","Said","2026-04-13","2026-04-13","2026-06-14","2026-07-09",false,1],["MATHEA ARUDDA","C","Karen",null,"2026-03-16","2026-03-23","2026-07-17",false,1],["MATT BRADDY","C","Unassigned","2026-06-19",null,null,null,false,1],["MATT PIPER","B","Osgood","2026-05-19","2026-07-08","2026-07-09","2025-12-01",false,1],["MATTHEW MONTALVO","A","Karen","2026-04-09","2026-04-08","2026-05-29","2026-06-29",false,1],["MEGAN LYNCH","A","Gavin","2026-07-15","2026-07-14","2026-06-11","2026-07-13",false,1],["MICHELE FREDERICK","C","Osgood",null,"2026-05-31","2026-07-02",null,false,1],["MICHELLE ERICKSON","A","Gavin","2025-08-04","2026-03-25","2026-04-20","2026-04-10",false,1],["MICHELLE HOLTZ","C","Unassigned",null,"2026-06-29",null,null,false,1],["MIKE WHITEMAN","C","Osgood",null,"2025-07-24","2025-07-31","2026-05-11",false,1],["MORGAN STONE","C","Unassigned","2026-06-29","2026-06-29",null,null,false,1],["NANCY BAKER","C","Unassigned","2026-04-30",null,null,null,false,1],["NANCY PRICE","B","Jordan","2026-01-03","2026-01-02","2026-05-08","2026-06-26",false,1],["NATALIE ESTRELLA","B","Karen","2026-06-14","2026-05-25","2026-07-01","2026-08-04",false,1],["NATHAN WHITE","C","Karen","2026-06-12","2026-06-16",null,null,false,1],["NIA HARRINGTON","C","Said","2026-05-13","2026-05-05","2024-10-17",null,false,1],["NICK ZATEZALO","C","Osgood","2026-07-09","2026-07-09","2024-03-12",null,false,1],["NINA AVERY","C","Jordan",null,"2026-04-23",null,null,false,1],["NORA KERELIUK","C","Said","2026-04-24",null,null,null,false,1],["OSCAR MARTINEZ","A","Karen","2026-07-13","2026-07-14","2026-05-05","2026-06-15",false,1],["PAIGE LUDWIG","C","Said","2026-06-08","2026-03-05","2026-03-17","2026-04-14",false,1],["PATRICK ARQUETTE","C","Said","2026-04-22","2026-01-14","2025-09-09","2025-10-07",false,1],["PAULA PALLESCHI","C","Said",null,"2026-04-21","2026-04-27","2026-05-26",false,1],["PILAR BENNETT","C","Karen","2026-07-10","2026-07-10","2025-07-23","2025-08-15",false,1],["RACHELLE PARSLEY","C","Said","2024-09-03","2026-04-15","2026-04-22","2026-05-13",false,1],["RACQUEL LUDAWAY","A","Gavin","2026-05-29","2026-05-19","2026-06-17","2026-07-10",false,1],["RAMI TAMIMI","C","Jordan","2026-03-27","2026-04-20","2026-05-07","2026-03-27",false,1],["RAMIRO SOLIS","C","Unassigned",null,"2026-07-01",null,null,false,1],["ROBERT HAYNER","C","Jordan",null,"2026-04-20","2026-04-23","2026-05-15",false,1],["ROCKFORD","C",null,null,"2026-06-22","2026-06-24",null,false,1],["ROSALIA PABLO","C","Karen","2026-07-14","2026-07-12","2024-11-08",null,false,1],["ROSS DIGIORGIO","C","Osgood","2026-06-25","2026-06-25","2025-07-14","2026-04-30",false,1],["RUTH ESPINOZA","C","Karen",null,"2026-02-26","2026-03-26","2026-04-17",false,1],["RUTH GONZALEZ","C","Karen","2026-05-19","2026-05-19",null,null,false,1],["SAHAR SHALASH","A","Said","2026-07-09","2026-07-06","2026-05-09","2026-05-29",false,1],["SAHEL ALAM","C","Said","2026-05-10","2026-05-08","2026-07-10",null,false,1],["SAM BAMRICK","C","Jordan",null,"2026-04-14","2026-04-20","2026-05-15",false,1],["SARA BUSH","C","Said",null,"2026-03-27","2026-04-13","2026-05-27",false,1],["SARAH HERNANDEZ","C","Osgood","2026-05-28","2026-05-29","2024-10-21",null,false,1],["SETH COLBURN","B","Said","2025-04-23","2026-03-31","2026-04-06","2026-04-30",false,1],["SHARON PANTELIS","C","Jordan","2026-04-28","2025-03-21","2025-04-01",null,false,1],["SHAYNE D. BOYD","C","Said","2026-05-04","2026-05-07",null,null,false,1],["SHIRRELL BURNSIDE","C","Osgood","2026-06-26","2026-06-26",null,null,false,1],["SLAVI JORDANOV","C","Unassigned","2026-05-30","2025-10-06","2025-10-10","2025-11-07",false,1],["SLAVISHA JORDANOV","C",null,null,"2026-06-02",null,null,false,1],["STEVEN OSBORN","C","Jordan","2026-04-30","2026-02-03",null,null,false,1],["SUMMER MAXSON","A","Unassigned","2026-04-12","2026-04-17","2026-03-10","2026-04-01",false,1],["SUNI RIVAS","C","Karen","2026-06-12","2026-07-06",null,null,false,1],["TATIANA GRIGORITA","C","Jordan","2026-06-08","2026-06-08",null,null,false,1],["TIARA VILLATORO","A","Karen","2026-07-15","2026-07-15","2026-06-04","2026-06-26",false,1],["TIMOTHY OLIVER","C","Osgood","2026-06-09","2026-06-02",null,null,false,1],["TINA ALLEN","C","Unassigned",null,"2026-04-29",null,null,false,1],["TINA HOFFMAN","A","Gavin","2023-10-10","2026-05-06","2026-05-27","2026-02-10",false,1],["TINA HOFFMAN (ROCKFORD)","C",null,null,"2026-06-03","2026-06-05",null,false,1],["TINA-DUTT-HIREN","C","Osgood",null,"2026-05-11",null,null,false,1],["TODD STONE","A","Said","2026-07-14","2026-07-15","2026-06-25","2026-07-22",false,1],["TOM NEWMAN","C","Gavin","2026-06-08","2026-06-08","2024-01-08",null,false,1],["TONY AMOS","C","Unassigned","2026-07-15","2026-04-01","2024-02-27",null,false,1],["TRACI WILLIAMS-JONES","C","Jordan",null,"2026-04-09","2026-03-23","2026-05-21",false,1],["TRACY BERARD","B","Jordan",null,"2026-04-04","2026-04-14","2026-05-27",false,1],["TROY BORDEN","C","Gavin","2026-04-28","2026-04-30","2026-04-22","2026-05-13",false,1],["YASMIN DE JESUS","C","Karen","2024-03-27","2025-11-18","2026-04-01","2026-04-29",false,1],["YVETTA HARRISON","C","Osgood","2026-06-04",null,null,null,false,1],["ZILLOW","C",null,null,"2026-04-25",null,null,false,1]];
+var SEED=[["ALEXIS AKERS","C",null,"2026-05-12","2026-03-25",null,null,false,1],["ALEXIS REED","C","Said","2026-07-06","2026-07-07","2026-01-30","2026-02-27",false,1],["ALI SWEAZY","C","Unassigned","2026-05-09","2026-05-09",null,null,false,1],["AMANDA HOWARD","C","Unassigned","2026-07-01","2026-07-01","2025-11-25","2025-12-23",false,1],["AMY AGRESTA","C","Gavin","2026-06-16","2026-06-16","2025-07-08","2025-08-05",false,1],["ANGELA PEREZ","C","Gavin","2026-04-27","2026-05-06","2026-04-06","2026-04-24",false,1],["ANGELA POTTS","C","Osgood","2026-05-10","2026-05-10",null,null,false,1],["ANGIE BRONOWSKI","B",null,"2025-12-03","2025-12-02","2025-12-29","2026-07-23",false,1],["ANNIE MORENO","B","Karen","2026-06-17","2026-06-18","2026-07-13","2026-06-12",false,1],["ANTHONY AMOS","C",null,"2026-06-03","2026-06-04","2024-08-28",null,false,1],["ASHLEY HENRY","C","Osgood","2026-04-22","2026-04-21",null,null,false,1],["AVA LAIRD","C","Jordan","2026-07-09","2026-07-09",null,null,false,1],["BAILEY STRATHIE","C","Osgood","2026-05-30","2026-05-30","2024-11-21",null,false,1],["BENJAMIN GAYTAN","C","Gavin","2026-05-16","2026-05-22",null,null,false,1],["BRAD GILLIAM","C","Gavin","2026-05-14",null,null,null,false,1],["BRANDON KIDD","C","Said","2026-05-01",null,null,null,false,1],["BRANDON MCCLENDON","C","Said","2026-06-08","2026-06-08",null,null,false,1],["BRANDON THOMPSON","A","Osgood","2026-07-12","2026-07-12","2026-05-04","2026-06-01",false,1],["BRIAN ZINN","C","Jordan","2026-07-14","2026-07-09",null,null,false,1],["CAROLE MCMAHON","C","Osgood","2026-05-31","2026-05-31","2026-05-08","2026-05-26",false,1],["CARRIE SISTARE-KOLIN CAUSEY","C","Unassigned",null,"2026-03-12","2026-04-03","2026-05-20",false,1],["CELINE WILLIAMS","C","Jordan","2026-06-01",null,null,null,false,1],["CHERYL KINSEY","C","Jordan","2026-05-05","2026-05-04",null,null,false,1],["CHRIS REED","A","Said","2026-07-01","2026-07-15","2026-07-08","2026-06-26",false,1],["CHRISTIAN CHALKIAS","C","Osgood","2026-07-08","2026-04-08",null,null,false,1],["CHRISTINA COUGHLIN","C","Osgood","2026-07-13","2026-07-13","2026-07-10",null,false,1],["CINDA ERICKSON","B","Gavin","2026-04-23","2026-04-21","2026-02-24","2026-03-26",false,1],["CLAUDIA CHUECA","C",null,null,"2026-07-02",null,null,false,1],["CLAUDIA CHUECO","C","Karen","2026-07-02",null,null,null,false,1],["CODA GAHRIS","C","Jordan","2026-04-29","2026-04-29","2026-05-25",null,false,1],["COLIN BURNHEIMER - THRIVE","C","Unassigned",null,"2026-06-30",null,null,false,1],["CONNER KOCHANSKY","A","Gavin","2026-07-10","2026-07-10","2026-06-22","2026-07-14",false,1],["CONNOR KOCHANSKY","C",null,"2025-07-18","2026-06-25",null,null,false,1],["COURTNEY HAMILTON","C","Osgood","2026-05-27","2026-05-27","2026-06-02","2026-06-17",false,1],["CRAIG MAURER","C","Osgood","2026-05-13","2026-05-19",null,null,false,1],["DAIRDRE SCRIVEN","C","Said","2026-05-19","2026-05-19",null,null,false,1],["DAN MANLEY","B","Gavin","2025-11-23","2026-04-29","2026-05-01","2026-05-19",false,1],["DARREN HOGG","C","Said","2026-04-22","2026-04-28",null,null,false,1],["DEANNE RHYNEHARDT","B","Osgood","2026-07-14","2026-07-14","2026-05-05","2026-06-12",false,1],["DERON BENDEN","C",null,null,"2026-06-15","2026-06-25",null,false,1],["DERON BENDER","A","Gavin","2025-08-11","2026-04-24","2026-04-28","2026-07-24",false,1],["DONALD PAYNE","C",null,null,"2026-06-07","2021-08-11",null,false,1],["DONALD PAYNE JR","C","Osgood","2026-06-04",null,null,null,false,1],["DUSTIN GOLDMAN","A","Osgood","2026-06-22","2026-04-24","2026-03-30","2026-03-27",false,1],["ELIAS PAPPAN","C","Karen","2026-04-30",null,null,null,false,1],["ELIZABETH ELLINGER","B","Jordan","2026-03-16","2026-04-01","2026-06-18","2026-07-20",false,1],["ELIZABETH HOWARD","C","Osgood","2026-07-05","2026-07-05","2024-11-08",null,false,1],["ERIKA (ROCKFORD)","C",null,null,"2026-06-17","2026-06-23",null,false,1],["ERIKA WEHNER","B","Gavin",null,"2026-04-13","2026-05-28","2026-05-11",false,1],["GAMAL HARDING","C","Unassigned","2026-06-17","2026-06-23","2025-10-17",null,false,1],["GEORGENA STARR","C",null,"2024-04-19","2026-07-09","2023-10-28",null,false,1],["GEORGENA XAMMAR","C","Unassigned","2026-07-09","2026-07-09","2023-03-07",null,false,1],["GLADIS CHAVEZ","C","Karen","2026-05-15","2026-05-05",null,null,false,1],["HAIFA BRUNNEY","B","Karen","2026-07-06","2026-07-03","2026-06-15","2026-07-14",false,1],["HEATHER EMMERT","C","Jordan","2026-06-11","2026-06-11","2024-09-06",null,false,1],["HEATHER HENRY-MINOR","B","Jordan","2026-04-07","2026-04-15","2026-05-05","2026-05-28",false,1],["HOLLY BLANKEN","C","Unassigned",null,"2026-05-14",null,null,false,1],["HYPATIA ESPINAL","C","Karen","2026-06-02","2026-06-02",null,null,false,1],["INGRID CORREA","C",null,null,"2026-07-15","2024-10-18",null,false,1],["INGRID CORREIA","B","Gavin","2026-07-15","2026-05-08","2025-12-11","2026-01-05",false,1],["IZXEL MARTINEZ","C","Karen","2026-05-20","2026-05-20","2026-06-02","2026-07-17",false,1],["JACOB ENGLISH","C","Jordan",null,"2026-03-18","2026-04-23","2026-06-12",false,1],["JAIDEN BALLAH","C","Said","2026-06-02","2026-06-03",null,null,false,1],["JASMIN MONTOYA","C","Karen","2026-06-25","2026-06-19",null,null,false,1],["JASMINE MCKENZIE","C","Osgood","2026-06-30","2026-05-04","2026-05-06","2026-05-29",false,1],["JEFF MESSMER","C","Gavin","2026-07-14","2026-05-12","2025-10-01",null,false,1],["JENNIFER BLACKMORE","C","Jordan","2026-05-02",null,null,null,false,1],["JESSE MCCRERRY","C","Said",null,"2026-04-06","2026-04-13","2026-05-26",false,1],["JESSICA TOWER","C","Jordan","2026-05-27","2026-05-30","2023-04-03",null,false,1],["JIMMY LIEU","C","Unassigned","2026-04-26",null,null,null,false,1],["JOHN BRUNNER","A","Jordan","2026-06-01","2026-06-01","2026-06-30","2026-07-17",false,1],["JOHN LUBINSKY","C","Said","2026-06-17","2026-06-17","2026-06-23","2026-03-20",false,1],["JONNATHAN AGUDELO","C","Karen","2026-06-23","2026-05-19",null,null,false,1],["JORDAN HOLLIBAUGH","C","Gavin",null,"2026-06-28","2026-07-15","2026-04-16",false,1],["JUANE MADARIS","C","Unassigned","2026-06-27",null,null,null,false,1],["JUSTIN BIERY","C","Karen","2026-05-27","2026-05-28",null,null,false,1],["KANDIS HALL","B","Osgood","2026-01-04","2026-07-14","2026-02-25","2026-03-17",false,1],["KATHERIE DE LA ROSA","C",null,null,"2026-06-29",null,null,false,1],["KATHERINE DE LA ROSA","B","Karen","2026-06-29","2026-06-23","2026-06-10","2026-07-15",false,1],["KATHY HAYES","C","Jordan","2026-07-08","2026-07-08","2024-12-09",null,false,1],["KATIE MANSOR","C","Jordan","2026-04-27","2026-04-26",null,null,false,1],["KATIE SUMMERS","B","Gavin",null,"2026-06-23","2026-02-26","2026-05-29",false,1],["KELSY YODER","C","Said","2026-04-28","2026-01-09","2026-01-12","2026-02-05",false,1],["KEVIN SPEERT","A","Gavin","2026-07-11","2026-06-24","2026-06-01","2026-06-26",false,1],["KHADIJA FARAH","B","Jordan","2026-07-09","2026-07-16","2026-02-09","2026-03-06",false,1],["KINSIE HUSKINS","C","Jordan",null,"2026-03-17","2026-04-28","2026-06-01",false,1],["KISHMA JAMES","C","Said","2026-07-10","2026-07-10","2025-06-09",null,false,1],["KRISTINA MURPHY","C","Osgood","2026-06-02","2026-05-11","2025-10-03","2025-10-21",false,1],["KUNLAVEE","C",null,null,"2026-06-03",null,null,false,1],["LAUREN MCCLINTON","C","Said",null,"2026-04-29",null,null,false,1],["LAUREN MICHELLE","C","Unassigned","2026-04-29",null,null,null,false,1],["LESLIE HERNANDEZ","C","Karen","2026-06-19","2026-06-29","2026-07-15","2026-06-18",false,1],["LETIKA WHITE","C","Osgood","2026-05-11","2026-06-15","2025-07-31","2025-08-29",false,1],["LEXIS GRANDY","C","Osgood","2026-06-11","2025-09-26","2025-09-29","2025-10-29",false,1],["LEZLEY MCCURRY","C","Unassigned",null,"2026-05-01",null,null,false,1],["LILIAN FUENTES","C","Karen","2026-04-21","2026-04-21",null,null,false,1],["LISA SIMMONS","C","Osgood",null,"2026-03-19","2026-04-14","2026-05-27",false,1],["LIZBEL CONTRERAS","C","Karen","2026-07-06","2026-06-12","2024-09-18",null,false,1],["LUIS GIL","C","Karen","2026-07-15","2026-06-30","2026-06-12","2025-09-26",false,1],["MAKAYLA & CONNER KOCHANSKY","C",null,null,"2025-11-06","2026-06-22","2026-07-14",false,1],["MARIA COMAS","C","Karen","2026-04-27","2026-03-02","2025-06-19","2025-07-21",false,1],["MARK VENNITTI","C","Jordan","2026-04-08","2026-04-08","2026-06-01","2026-06-18",false,1],["MARTIN HOPKINS","B","Karen","2026-02-12","2026-07-01","2026-01-29","2026-02-20",false,1],["MARY MCMICHAEL","B","Said","2026-04-13","2026-04-13","2026-06-14","2026-07-09",false,1],["MATHEA ARUDDA","C","Karen",null,"2026-03-16","2026-03-23","2026-07-17",false,1],["MATT BRADDY","C","Unassigned","2026-06-19",null,null,null,false,1],["MATT PIPER","A","Osgood","2026-05-19","2026-07-08","2026-07-09","2025-12-01",false,1],["MATTHEW MONTALVO","A","Karen","2026-04-09","2026-04-08","2026-05-29","2026-06-29",false,1],["MEGAN LYNCH","A","Gavin","2026-07-15","2026-07-14","2026-06-11","2026-07-13",false,1],["MICHELE FREDERICK","C","Osgood",null,"2026-05-31","2026-07-02",null,false,1],["MICHELLE HOLTZ","C","Unassigned",null,"2026-06-29",null,null,false,1],["MIKE WHITEMAN","C","Osgood",null,"2025-07-24","2025-07-31","2026-05-11",false,1],["MORGAN STONE","C","Unassigned","2026-06-29","2026-06-29",null,null,false,1],["NANCY BAKER","C","Unassigned","2026-04-30",null,null,null,false,1],["NANCY PRICE","B","Jordan","2026-01-03","2026-01-02","2026-05-08","2026-06-26",false,1],["NATALIE ESTRELLA","C","Karen","2026-06-14","2026-05-25","2026-07-01","2026-08-04",false,1],["NATHAN WHITE","C","Karen","2026-06-12","2026-06-16",null,null,false,1],["NIA HARRINGTON","C","Said","2026-05-13","2026-05-05","2024-10-17",null,false,1],["NICK ZATEZALO","C","Osgood","2026-07-09","2026-07-09","2024-03-12",null,false,1],["NINA AVERY","C","Jordan",null,"2026-04-23",null,null,false,1],["NORA KERELIUK","C","Said","2026-04-24",null,null,null,false,1],["OSCAR MARTINEZ","A","Karen","2026-07-13","2026-07-14","2026-05-05","2026-06-15",false,1],["PAIGE LUDWIG","C","Said","2026-06-08","2026-03-05","2026-03-17","2026-04-14",false,1],["PATRICK ARQUETTE","C","Said","2026-04-22","2026-01-14","2025-09-09","2025-10-07",false,1],["PAULA PALLESCHI","C","Said",null,"2026-04-21","2026-04-27","2026-05-26",false,1],["PILAR BENNETT","C","Karen","2026-07-10","2026-07-10","2025-07-23","2025-08-15",false,1],["RACHELLE PARSLEY","C","Said","2024-09-03","2026-04-15","2026-04-22","2026-05-13",false,1],["RACQUEL LUDAWAY","A","Gavin","2026-05-29","2026-05-19","2026-06-17","2026-07-10",false,1],["RAMI TAMIMI","C","Jordan","2026-03-27","2026-04-20","2026-05-07","2026-03-27",false,1],["RAMIRO SOLIS","C","Unassigned",null,"2026-07-01",null,null,false,1],["ROBERT HAYNER","C","Jordan",null,"2026-04-20","2026-04-23","2026-05-15",false,1],["ROCKFORD","C",null,null,"2026-06-22","2026-06-24",null,false,1],["ROSALIA PABLO","C","Karen","2026-07-14","2026-07-12","2024-11-08",null,false,1],["ROSS DIGIORGIO","C","Osgood","2026-06-25","2026-06-25","2025-07-14","2026-04-30",false,1],["RUTH GONZALEZ","C","Karen","2026-05-19","2026-05-19",null,null,false,1],["SAHAR SHALASH","A","Said","2026-07-09","2026-07-06","2026-05-09","2026-05-29",false,1],["SAHEL ALAM","C","Said","2026-05-10","2026-05-08","2026-07-10",null,false,1],["SAM BAMRICK","C","Jordan",null,"2026-04-14","2026-04-20","2026-05-15",false,1],["SARA BUSH","C","Said",null,"2026-03-27","2026-04-13","2026-05-27",false,1],["SARAH HERNANDEZ","C","Osgood","2026-05-28","2026-05-29","2024-10-21",null,false,1],["SETH COLBURN","B","Said","2025-04-23","2026-03-31","2026-04-06","2026-04-30",false,1],["SHARON PANTELIS","C","Jordan","2026-04-28","2025-03-21","2025-04-01",null,false,1],["SHAYNE D. BOYD","C","Said","2026-05-04","2026-05-07",null,null,false,1],["SHIRRELL BURNSIDE","C","Osgood","2026-06-26","2026-06-26",null,null,false,1],["SLAVI JORDANOV","C","Unassigned","2026-05-30","2025-10-06","2025-10-10","2025-11-07",false,1],["SLAVISHA JORDANOV","C",null,null,"2026-06-02",null,null,false,1],["STEVEN OSBORN","C","Jordan","2026-04-30","2026-02-03",null,null,false,1],["SUNI RIVAS","C","Karen","2026-06-12","2026-07-06",null,null,false,1],["TATIANA GRIGORITA","C","Jordan","2026-06-08","2026-06-08",null,null,false,1],["TIARA VILLATORO","A","Karen","2026-07-15","2026-07-15","2026-06-04","2026-06-26",false,1],["TIMOTHY OLIVER","C","Osgood","2026-06-09","2026-06-02",null,null,false,1],["TINA ALLEN","C","Unassigned",null,"2026-04-29",null,null,false,1],["TINA HOFFMAN","A","Gavin","2023-10-10","2026-05-06","2026-05-27","2026-02-10",false,1],["TINA HOFFMAN (ROCKFORD)","C",null,null,"2026-06-03","2026-06-05",null,false,1],["TINA-DUTT-HIREN","C","Osgood",null,"2026-05-11",null,null,false,1],["TODD STONE","A","Said","2026-07-14","2026-07-15","2026-06-25","2026-07-22",false,1],["TOM NEWMAN","C","Gavin","2026-06-08","2026-06-08","2024-01-08",null,false,1],["TONY AMOS","C","Unassigned","2026-07-15","2026-04-01","2024-02-27",null,false,1],["TRACI WILLIAMS-JONES","C","Jordan",null,"2026-04-09","2026-03-23","2026-05-21",false,1],["TRACY BERARD","B","Jordan",null,"2026-04-04","2026-04-14","2026-05-27",false,1],["TROY BORDEN","C","Gavin","2026-04-28","2026-04-30","2026-04-22","2026-05-13",false,1],["YASMIN DE JESUS","C","Karen","2024-03-27","2025-11-18","2026-04-01","2026-04-29",false,1],["YVETTA HARRISON","C","Osgood","2026-06-04",null,null,null,false,1],["ZILLOW","C",null,null,"2026-04-25",null,null,false,1]];
 
 // ── LP sub-tab switching ──
 
@@ -973,6 +973,17 @@ function loadReferralLeadsDirect(){
   });
 }
 
+var refSortState={col:null,dir:1};
+function sortArrow(col){
+  if(refSortState.col!==col)return'<span style="color:#cbd5e1;font-size:9px"> ⇅</span>';
+  return refSortState.dir===1?'<span style="color:var(--accent);font-size:9px"> ▲</span>':'<span style="color:var(--accent);font-size:9px"> ▼</span>';
+}
+function sortRefTable(col){
+  if(refSortState.col===col){refSortState.dir*=-1;}else{refSortState.col=col;refSortState.dir=1;}
+  if(referralLeadsCache)renderReferralLeadsDirect(referralLeadsCache);
+}
+
+
 function renderReferralLeadsDirect(data){
   // Compute stats
   var now=new Date();
@@ -1004,7 +1015,13 @@ function renderReferralLeadsDirect(data){
     });
   }
 
-  var filtered=data.filter(function(r){return lpMatch(r)&&statusMatch(r);});
+  // Exclude nurture by default unless nurture filter is explicitly active
+  var nurtureActive=(refFilters.status||"").toLowerCase().indexOf("nurture")>=0;
+  var filtered=data.filter(function(r){
+    if(!lpMatch(r)||!statusMatch(r))return false;
+    if(!nurtureActive&&(r.status||"").toLowerCase().indexOf("nurture")>=0)return false;
+    return true;
+  });
   var mtd=filtered.length;
   var fileStarts=filtered.filter(function(r){return(r.status||"").toLowerCase().indexOf("start")>=0;}).length;
   var ltf=mtd>0?Math.round(fileStarts/mtd*100):0;
@@ -2224,7 +2241,7 @@ function renderScorecard(which,logs,wkKey,rotFn){
   LPS.forEach(function(lp){
     var done=Object.values(logs).filter(function(l){return l.lp===lp&&l.week_key===wkKey;}).length;
     var pct=Math.min(100,Math.round(done/WEEKLY_TARGET*100));
-    var rot=rotFn(lp);
+    var rot=getRotation(lp);
     var missed=rot.filter(function(a){return !(logs[a[0]]&&logs[a[0]].week_key===wkKey);});
     var col=pct===100?"#43A047":pct>=80?"#FB8C00":"#E53935";
     var bg=pct===100?"pill-green":pct>=80?"pill-amber":"pill-red";
@@ -2398,16 +2415,15 @@ async function renderRmSummary(){
     var acts=await res.json();
     if(!Array.isArray(acts)){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load Amanda data.</div>';return;}
 
-    var flagRes=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome,rm_note,rm_note_at&order=call_date.desc",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
+    var flagRes=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome&order=call_date.desc",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
     var flagRows=await flagRes.json();
     var flagList=Array.isArray(flagRows)?flagRows:[];
     var flagCount=flagList.length;
 
     var goals=[
-      {type:"Cold Calls",label:"Cold calls",weekly:125},
+      {type:"Cold Calls",label:"Cold calls",weekly:25},
       {type:"New Realtor Meeting",label:"New meetings",weekly:5},
       {type:"Break Breads",label:"Break breads",weekly:5},
-      {type:"Active Agent Talk-to",label:"Talk-to's",weekly:100},
       {type:"Realtor Buddy Referral Ask",label:"Buddy intros",weekly:3}
     ];
     var cards=goals.map(function(g){
@@ -2426,21 +2442,13 @@ async function renderRmSummary(){
     var flagDetail=flagList.length?flagList.map(function(r){
       var note=(r.note||"").trim();
       var shortNote=note.length>120?note.substring(0,120)+"...":note;
-      var hasReply=r.rm_note&&r.rm_note.trim();
-      return'<div style="padding:9px 0;border-bottom:1px solid #fde6cc">'
-        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
+      return'<div style="padding:9px 0;border-bottom:1px solid #fde6cc;display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:12px;font-weight:700;color:#7c2d12">'+escHtml(r.agent_name||"")+' <span style="font-size:10px;color:#c2853f;font-weight:500">via '+escHtml(r.lp||"LP")+'</span></div>'
         +(shortNote?'<div style="font-size:11px;color:#5C4A35;margin-top:2px;font-style:italic">&ldquo;'+escHtml(shortNote)+'&rdquo;</div>':'')
         +'<div style="font-size:10px;color:#c2853f;margin-top:2px">'+fmt(r.call_date)+(r.outcome?" &middot; "+escHtml(r.outcome):"")+'</div>'
         +'</div>'
         +'<button class="btn btn-sm" onclick="dResolveFlag(\''+String(r.id)+'\')" style="font-size:10px;flex-shrink:0">Mark handled</button>'
-        +'</div>'
-        +(hasReply
-          ?'<div style="margin-top:6px;padding:6px 10px;background:#E8F5E9;border:1px solid #81C784;border-radius:6px;font-size:11px;color:#1B5E20">'
-            +'<span style="font-weight:700">Amanda replied</span> · '+fmt(r.rm_note_at)+'<br>'+escHtml(r.rm_note)
-            +'</div>'
-          :'<div style="margin-top:4px;font-size:10px;color:#c2853f;font-style:italic">No response from Amanda yet</div>')
         +'</div>';
     }).join(""):'<div style="font-size:12px;color:#aaa;padding:8px 0">No flagged agents right now.</div>';
 
@@ -3096,7 +3104,7 @@ function amCnt(src,type){
   return (src||[]).filter(function(a){return (a.act_type||"").trim()===type;}).length;
 }
 function amCntTalkTo(src){
-  var TALKTO_TYPES=["Active Agent Talk-to","Active Agent Check-in","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Closed Deal Thank You","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion"];
+  var TALKTO_TYPES=["Active Agent Talk-to","Active Agent Check-in","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Closed Deal Thank You","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Recruiting Conversation"];
   return (src||[]).filter(function(a){return TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length;
 }
 
@@ -3173,21 +3181,16 @@ function buildSnapshot(){
 
   // Motivating headlines + rotating quotes
   var QUOTES=[
-    "The secret of getting ahead is getting started. — Mark Twain",
-    "It always seems impossible until it's done. — Nelson Mandela",
-    "You miss 100% of the shots you don't take. — Wayne Gretzky",
-    "Hard work beats talent when talent doesn't work hard. — Tim Notke",
-    "The only way to do great work is to love what you do. — Steve Jobs",
-    "I have not failed. I've just found 10,000 ways that won't work. — Thomas Edison",
-    "Success is not final, failure is not fatal: it is the courage to continue that counts. — Churchill",
-    "The difference between ordinary and extraordinary is that little extra. — Jimmy Johnson",
-    "Done is better than perfect. — Sheryl Sandberg",
-    "If you're going through hell, keep going. — Winston Churchill",
-    "It does not matter how slowly you go as long as you do not stop. — Confucius",
-    "Everything you've ever wanted is on the other side of fear. — George Addair",
-    "Whether you think you can or you think you can't, you're right. — Henry Ford",
-    "The best time to plant a tree was 20 years ago. The second best time is now. — Chinese Proverb",
-    "Act as if what you do makes a difference. It does. — William James"
+    "The best mortgage is the one you close. Make the call.",
+    "Every realtor call is a future closing.",
+    "Pick up the phone. Your competition already did.",
+    "Relationships are built one conversation at a time.",
+    "Consistency beats intensity. Show up every day.",
+    "A call today is a commission next month.",
+    "Your next biggest referral partner hasn't heard from you yet.",
+    "The market rewards the persistent.",
+    "One more call can change everything.",
+    "Champions make calls when they don't feel like it."
   ];
   var QUOTE=QUOTES[now.getDay()%QUOTES.length+(now.getDate()%3)>QUOTES.length?0:now.getDay()%QUOTES.length+(now.getDate()%3)];
   QUOTE=QUOTES[(now.getDate()+now.getDay())%QUOTES.length];
@@ -3210,29 +3213,18 @@ function buildSnapshot(){
   var allLPsDone=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
   h+='<div style="background:'+(allLPsDone?"linear-gradient(135deg,#064e3b,#0D7377)":"var(--text)")+';border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:1rem">';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px">';
-  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;margin-bottom:3px">NFM Lending Ohio</div>';
+  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-family:\'DM Mono\',monospace;margin-bottom:3px">NFM Lending Ohio</div>';
   h+='<div style="color:#fff;font-size:16px;font-weight:700">'+todayFmt+'</div></div>';
   h+='<div style="background:rgba(255,255,255,.06);border-radius:8px;padding:7px 12px;font-size:11px;font-style:italic;color:rgba(255,255,255,.85);font-size:14px;font-weight:600">'+headline+'</div>';
   h+='</div>';
   h+='<div style="font-size:11px;color:rgba(255,255,255,.35);font-style:italic;margin-bottom:10px">“'+QUOTE+'”</div>';
   h+='<div style="display:flex;gap:22px;flex-wrap:wrap">';
-  // Sum LP2 scorecard totals across all LPs
-  var teamTalkTos=0,teamLeads=0,team1003s=0,teamPreApps=0,teamContracts=0;
-  LPS.forEach(function(lp){
-    var sc=snapScData[lp]||{};
-    teamTalkTos+=scTotal(sc,'rltr_talks');
-    teamLeads+=scTotal(sc,'referred_leads');
-    team1003s+=scTotal(sc,'apps_1003');
-    teamPreApps+=scTotal(sc,'pre_approvals');
-    teamContracts+=scTotal(sc,'contracts');
-  });
-  [{v:teamTalkTos,l:"Realtor Talk-to's WTD",c:"#fff"},
-   {v:teamLeads,l:"Referred Leads WTD",c:"var(--accent)"},
-   {v:team1003s,l:"1003's WTD",c:"#a78bfa"},
-   {v:teamPreApps,l:"Pre-Approvals WTD",c:"#60a5fa"},
-   {v:teamContracts,l:"Contracts WTD",c:"#34d399"}
+  [{v:totalCallsWTD+" / "+(LPS.length*WEEKLY_TARGET),l:"Team calls WTD",c:"#fff"},
+   {v:leadsToday,l:"Leads today",c:"var(--accent)"},
+   {v:leadsWTD,l:"Leads WTD",c:"#a78bfa"},
+   {v:leadsMTD,l:"Leads MTD",c:"#60a5fa"}
   ].forEach(function(s){
-    h+='<div><div style="color:'+s.c+';font-size:22px;font-weight:700;line-height:1">'+s.v+'</div>';
+    h+='<div><div style="color:'+s.c+';font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;line-height:1">'+s.v+'</div>';
     h+='<div style="color:rgba(255,255,255,.35);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-top:3px">'+s.l+'</div></div>';
   });
   h+='</div></div>';
@@ -3262,21 +3254,21 @@ function buildSnapshot(){
     else if(called>=Math.round(paceTarget*.7)){status='Almost there';sc='#BA7517';}
     else{status='Pick it up';sc='#E24B4A';}
     var barW=Math.min(pct,100);
-    h+='<div onclick="goToLP(\''+lp+'\',)" style="cursor:pointer;border:1px solid var(--border);padding:12px 16px;margin-bottom:8px;border-radius:10px;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(79,70,229,.1)\'" onmouseout="this.style.boxShadow=\'none\'">';
+    h+='<div onclick="goToLP(\''+lp+'\',)" style="cursor:pointer;border-left:4px solid '+lpColor+';padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'var(--surface)\'">';
     h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
-    h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:700;color:var(--text)">'+lp+'</span> <span style="font-size:10px;color:var(--text-3);font-weight:500">LP2</span></div>';
-    h+='<span style="font-size:24px;font-weight:700;color:var(--text)">'+called+'</span>';
+    h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:'+lpColor+'">'+lp+'</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP2</span></div>';
+    h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+called+'</span>';
     h+='<span style="font-size:11px;color:var(--text-3)">/ '+target+' calls</span>';
-    h+='<span style="font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
+    h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
     h+='<span style="font-size:11px;color:'+sc+';font-weight:500">'+status+'</span>';
     h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Velocify: <b style="color:'+(leadsW?'#1D9E75':'var(--text-3)')+'">'+leadsW+' WTD</b> · '+leadsT+' today · <a style="color:var(--accent)" onclick="event.stopPropagation();goToLP(\''+lp+'\')">open ↗</a></span>';
     h+='</div>';
     h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
     h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+barW+'%;background:'+lpColor+'"></div></div></div>';
-    var mets=[['Realtor Talk-to\'s',rltrTalks,10],['Referred Leads',referredLeads,16],['1003\'s',apps,13],['Pre-Approvals',preApps,6],['Contracts',contracts,3]];
+    var mets=[['Talk\'s',rltrTalks,10],['Leads',referredLeads,16],['1003\'s',apps,13],['Pre-apps',preApps,6],['Contracts',contracts,3]];
     mets.forEach(function(m){
-      var mc=m[1]>=m[2]?'#1D9E75':m[1]>0?'#BA7517':'var(--text-2)';
-      h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+mc+';line-height:1.2">'+m[1]+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/'+m[2]+'</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em;margin-top:2px">'+m[0]+'</div></div>';
+      var mc=m[1]>=m[2]?'#1D9E75':m[1]>0?'#BA7517':'var(--text-3)';
+      h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+mc+';font-family:\'DM Mono\',monospace">'+m[1]+'<span style="font-size:9px;color:var(--text-3);">/'+m[2]+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m[0]+'</div></div>';
     });
     h+='</div>';
     h+='</div>';
@@ -3303,19 +3295,19 @@ function buildSnapshot(){
   else if(isaakRCalls>=isaakPace){isaakStatus='On pace';isaakSc='#1D9E75';}
   else if(isaakRCalls>=Math.round(isaakPace*.7)){isaakStatus='Close';isaakSc='#BA7517';}
   else{isaakStatus='Behind pace';isaakSc='#E24B4A';}
-  h+='<div style="border:1px solid var(--border);padding:12px 16px;margin-bottom:8px;border-radius:10px;background:var(--surface)">';
+  h+='<div style="border-left:4px solid #0891B2;padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
-  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:700;color:var(--text)">Isaak</span> <span style="font-size:10px;color:var(--text-3);font-weight:500">LP1</span></div>';
-  h+='<span style="font-size:24px;font-weight:700;color:var(--text)">'+isaakRCalls+'</span>';
-  h+='<span style="font-size:12px;color:var(--text-2)">/ 100 calls</span>';
-  h+='<span style="font-size:16px;font-weight:700;color:var(--accent)">'+isaakPct+'%</span>';
+  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#0891B2">Isaak</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP1</span></div>';
+  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+isaakRCalls+'</span>';
+  h+='<span style="font-size:11px;color:var(--text-3)">/ 100 calls</span>';
+  h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#0891B2">'+isaakPct+'%</span>';
   h+='<span style="font-size:11px;color:'+isaakSc+';font-weight:500">'+isaakStatus+'</span>';
   h+='</div>';
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-  h+='<div style="flex:1;min-width:120px"><div style="height:5px;background:var(--border);border-radius:20px;overflow:hidden"><div style="height:100%;width:'+isaakPct+'%;background:var(--accent);border-radius:20px"></div></div></div>';
-  h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+(isaakRCalls>=100?'#1D9E75':isaakRCalls>0?'#BA7517':'var(--text-2)')+'">'+isaakRCalls+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/100</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;margin-top:2px">Realtor Calls</div></div>';
-  h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+(isaakApps>=10?'#1D9E75':isaakApps>0?'#BA7517':'var(--text-2)')+'">'+isaakApps+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/10</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;margin-top:2px">1003\'s</div></div>';
-  h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+(isaakMeetings>=10?'#1D9E75':isaakMeetings>0?'#BA7517':'var(--text-2)')+'">'+isaakMeetings+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/10</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;margin-top:2px">Meetings Scheduled</div></div>';
+  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+isaakPct+'%;background:#0891B2"></div></div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakRCalls>=100?'#1D9E75':isaakRCalls>0?'#BA7517':'var(--text-3)')+'">'+isaakRCalls+'<span style="font-size:9px;color:var(--text-3)">/100</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Calls</div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakApps>=10?'#1D9E75':isaakApps>0?'#BA7517':'var(--text-3)')+'">'+isaakApps+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">1003\'s</div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakMeetings>=10?'#1D9E75':isaakMeetings>0?'#BA7517':'var(--text-3)')+'">'+isaakMeetings+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Meetings</div></div>';
   h+='</div>';
   h+='</div>';
 
@@ -3340,7 +3332,7 @@ function buildSnapshot(){
   var amMeetings=amCnt(amMonthActs,"New Realtor Meeting");
   var amColdCalls=amCnt(amMonthActs,"Cold Calls");
   var amBreakBreads=amCnt(amMonthActs,"Break Breads");
-  var TALKTO_TYPES=["Active Agent Talk-to","Active Agent Check-in","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Closed Deal Thank You","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion"];
+  var TALKTO_TYPES=["Talk-to's","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","CTC Call","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Recruiting Conversation"];
   var amTalkTos=amCntTalkTo(amMonthActs);
   var amBuddyAsks=amCnt(amMonthActs,"Realtor Buddy Referral Ask");
   var amWeeklyGoal=238; // 125 cold calls + 100 talk-tos + 5 meetings + 5 break breads + 3 buddy asks
@@ -3348,31 +3340,31 @@ function buildSnapshot(){
   var amTotalGoal=852;
   var amPaceT=Math.round(amWeeklyGoal*paceFraction);
   var amPctOfGoal=amWeeklyGoal>0?Math.min(Math.round(amTotalWTD/amWeeklyGoal*100),100):0;
-  var aSt,aSc;
-  if(amPctOfGoal>=100){aSt="Week complete!";aSc="#1D9E75";}
-  else if(amTotalWTD>=amPaceT){aSt="On pace";aSc="#BA7517";}
-  else if(amPctOfGoal>=80){aSt="Almost there";aSc="#BA7517";}
-  else{aSt="Needs push";aSc="#dc2626";}
+  // Amanda status badge
+  if(amPctOfGoal>=100){aSt="Week complete!";aSc="#15803d";aSb="#dcfce7";}
+  else if(amPctOfGoal>=paceFraction*100*0.85){aSt="On pace";aSc="#1d4ed8";aSb="#dbeafe";}
+  else if(amPctOfGoal>=paceFraction*100*0.65){aSt="Almost there";aSc="#92400e";aSb="#fef3c7";}
+  else{aSt="Pick it up";aSc="#991b1b";aSb="#fee2e2";}
 
-  h+='<div style="border:1px solid var(--border);padding:12px 16px;border-radius:10px;background:var(--surface)">';
+  h+='<div style="border-left:4px solid #B45309;padding:10px 14px;border-radius:0 6px 6px 0;background:var(--surface)">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
-  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:700;color:var(--text)">Amanda</span><br><span style="font-size:10px;color:var(--text-3);font-weight:500">RM</span></div>';
-  h+='<span style="font-size:24px;font-weight:700;color:var(--text)">'+amTotalToday+'</span>';
-  h+='<span style="font-size:12px;color:var(--text-2)">/ '+amDailyTotalGoal+' today</span>';
-  h+='<span style="font-size:16px;font-weight:700;color:var(--accent)">'+amPctOfGoal+'%</span>';
-  h+='<span style="font-size:12px;color:'+aSc+';font-weight:600">'+aSt+'</span>';
-  h+='<span style="margin-left:auto;font-size:11px;color:var(--text-2)">WTD: '+amTotalWTD+' · MTD: '+amTotalMTD+'</span>';
+  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#B45309">Amanda</span><br><span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">RM</span></div>';
+  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+amTotalToday+'</span>';
+  h+='<span style="font-size:11px;color:var(--text-3)">/ '+amDailyTotalGoal+' today</span>';
+  h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#B45309">'+amPctOfGoal+'%</span>';
+  h+='<span style="font-size:11px;color:'+aSc+';font-weight:500">'+aSt+'</span>';
+  h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">WTD: '+amTotalWTD+' · MTD: '+amTotalMTD+'</span>';
   h+='</div>';
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-  h+='<div style="flex:1;min-width:120px"><div style="height:5px;background:var(--border);border-radius:20px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:var(--accent);border-radius:20px"></div></div></div>';
-  [{type:"New Realtor Meeting",daily:1,weekly:5,label:"New Meetings"},{type:"Cold Calls",daily:25,weekly:125,label:"Cold Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Break Breads"},{type:"Active Agent Talk-to",daily:20,weekly:100,label:"Agent Talk-to's"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy Referrals"}].forEach(function(m){
-    var td=m.type==="Active Agent Talk-to"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
-    var tw=m.type==="Active Agent Talk-to"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
-    var dc=td>=m.daily?'#1D9E75':'var(--text-2)';
-    var wc=tw>=m.weekly?'#1D9E75':tw>0?'#BA7517':'var(--text-2)';
-    h+='<div style="text-align:center;min-width:48px"><div style="font-size:13px;font-weight:700;color:'+dc+';line-height:1.2">'+td+'<span style="font-size:10px;color:var(--text-3);font-weight:400">/'+m.daily+'</span></div><div style="font-size:11px;font-weight:600;color:'+wc+';line-height:1.2">'+tw+'<span style="font-size:9px;color:var(--text-3);font-weight:400">/'+m.weekly+'</span></div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px">'+m.label+'</div></div>';
+  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:#B45309"></div></div></div>';
+  [{type:"New Realtor Meeting",daily:1,weekly:5,label:"Mtgs"},{type:"Cold Calls",daily:25,weekly:125,label:"Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Breads"},{type:"__talkto__",daily:20,weekly:100,label:"Talk-to\'s"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy"}].forEach(function(m){
+    var td=m.type==="__talkto__"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
+    var tw=m.type==="__talkto__"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
+    var dc=td>=m.daily?'#1D9E75':'var(--text-3)';
+    var wc=tw>=m.weekly?'#1D9E75':tw>0?'#BA7517':'var(--text-3)';
+    h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+dc+';font-family:\'DM Mono\',monospace">'+td+'<span style="font-size:9px;color:var(--text-3)">/'+m.daily+'</span></div><div style="font-size:10px;font-weight:500;color:'+wc+';font-family:\'DM Mono\',monospace">'+tw+'<span style="font-size:8px;color:var(--text-3)">/'+m.weekly+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m.label+'</div></div>';
   });
-  h+='<span style="margin-left:auto;font-size:11px"><a style="color:var(--accent);cursor:pointer;font-weight:500" onclick="openRmView(document.querySelector(\'.wb-RM\'))">open RM ↗</a></span>';
+  h+='<span style="margin-left:auto;font-size:10px"><a style="color:var(--accent);cursor:pointer" onclick="openRmView(document.querySelector(\'.wb-RM\'))">open RM ↗</a></span>';
   h+='</div>';
   h+='</div>';
 
@@ -3382,7 +3374,7 @@ function buildSnapshot(){
   var nextR=new Date(now);nextR.setHours(18,0,0,0);
   if(now>=nextR)nextR.setDate(nextR.getDate()+1);
   var hrs=Math.ceil((nextR-now)/3600000);
-  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3);font-family:\'DM Mono\',monospace">Auto-refreshes at 6:00 PM · ~'+hrs+'h until next refresh</div>';
+  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3);font-family:\'DM Mono\',monospace">Refreshes every 30s · updated '+now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'})+'</div>';
 
   el.innerHTML=h;
   clearTimeout(window._snapshotTimer);
@@ -3445,7 +3437,7 @@ function buildDailyDigest(){
     h+='<div style="flex:1">';
     h+='<div style="display:flex;align-items:center;gap:8px">';
     h+='<div style="flex:1;height:4px;background:var(--border-light);border-radius:2px;overflow:hidden"><div style="height:100%;background:'+lpColor+';opacity:.7;border-radius:2px;width:'+pct+'%;transition:width .6s ease"></div></div>';
-    h+='<span style="font-size:11px;color:var(--text-2);white-space:nowrap">'+called+' / '+total+'</span>';
+    h+='<span style="font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text-2);white-space:nowrap">'+called+' / '+total+'</span>';
     h+='</div></div>';
     h+='<div style="text-align:right;flex-shrink:0">';
     h+=leads>0?'<span style="font-size:12px;font-weight:700;color:var(--accent)">+'+leads+' lead'+(leads!==1?'s':'')+'</span>':'<span style="font-size:11px;color:var(--text-3)">—</span>';
@@ -4414,7 +4406,7 @@ const LPSC_AMANDA_GOALS=[
   {key:"New Realtor Meeting",label:"New realtor meeting",goal:20},
   {key:"Cold Calls",label:"Cold calls",goal:400},
   {key:"Break Breads",label:"Break breads",goal:20},
-  {key:"Active Agent Talk-to",label:"Talk-to's",goal:400},
+  {key:"Talk-to's",label:"Talk-to's",goal:400},
   {key:"Realtor Buddy Referral Ask",label:"Buddy asks",goal:12}
 ];
 
@@ -4575,9 +4567,9 @@ async function lpscSaveEdit(){
 // ── RELATIONSHIP MANAGER TAB (Amanda) ────────────────────────────────────
 const RM_GOALS=[
   {label:"New realtor meeting",type:"New Realtor Meeting",daily:1,weekly:5,monthly:20},
-  {label:"Cold calls",type:"Cold Calls",daily:25,weekly:125,monthly:500},
+  {label:"Cold calls",type:"Cold Calls",daily:25,weekly:125,monthly:400},
   {label:"Break breads",type:"Break Breads",daily:1,weekly:5,monthly:20},
-  {label:"Active Agent Talk-to's",type:"Active Agent Talk-to",daily:20,weekly:100,monthly:400},
+  {label:"Talk-to's",type:"Talk-to's",daily:20,weekly:100,monthly:400},
   {label:"Buddy asks",type:"Realtor Buddy Referral Ask",daily:1,weekly:3,monthly:12}
 ];
 var rmCurrentPeriod="today";
@@ -4728,6 +4720,14 @@ function openRmFollowupForm(btn){
   if(row)row.outerHTML=fh;
 }
 
+function rmClearFlag(id){
+  if(!id)return;
+  sbFetch("PATCH","rm_followups?id=eq."+encodeURIComponent(id),{flagged:false})
+    .then(function(){loadRmFollowups();renderRmView();})
+    .catch(function(){});
+}
+
+
 function saveRmFollowup(btn){
   var agentName=btn.getAttribute("data-agent");
   var lp=btn.getAttribute("data-lp");
@@ -4812,7 +4812,7 @@ function toggleRmFlaggedPanel(){
   if(isOpen){panel.style.display="none";return;}
   panel.style.display="block";
   // Load full flagged list
-  fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome,rm_note,rm_note_at&order=call_date.desc",
+  fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome&order=call_date.desc",
     {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}})
   .then(function(r){return r.json();})
   .then(function(rows){
@@ -4853,9 +4853,14 @@ async function rmLoadFlagged(){
     var rows=await res.json();
     var countEl=document.getElementById("rm-flagged-count");
     if(countEl)countEl.textContent=rows.length;
-    // If panel is already open, refresh it
+    // If panel is already open, refresh it — but NOT if user is mid-note
     var panel=document.getElementById("rm-flagged-panel");
-    if(panel&&panel.style.display!=="none")toggleRmFlaggedPanel();
+    if(panel&&panel.style.display!=="none"){
+      var activeNote=document.querySelector("[id^='fu-note-']");
+      if(!activeNote||!activeNote.value.trim()){
+        toggleRmFlaggedPanel();
+      }
+    }
   }catch(e){console.warn(e);var el=document.getElementById("rm-flagged-count");if(el)el.textContent="—";}
 }
 
