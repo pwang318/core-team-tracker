@@ -3607,13 +3607,14 @@ function renderReassign(){
   var list=agents.filter(function(a){return(!q||a[0].toLowerCase().indexOf(q)>=0)&&(!flp||a[2]===flp);});
   document.getElementById("admin-tbody").innerHTML=list.map(function(a){
     var idx=agents.indexOf(a),pri=isPriority(a);
-    var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said"].map(function(lp){return'<option'+(a[2]===lp?" selected":"")+' value="'+lp+'">'+lp+'</option>';}).join("");
+    var curLp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";
+    var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said"].map(function(lp){return'<option'+(curLp===lp?" selected":"")+' value="'+lp+'">'+lp+'</option>';}).join("");
     return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
       '<td style="font-weight:600">'+a[0]+'</td>'+
       '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
       '<td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
       '<td><button class="btn btn-sm'+(pri?" btn-danger":" btn-success")+'" data-idx="'+idx+'" onclick="togglePriority(this)">'+(pri?"Remove":"Set Priority")+'</button></td>'+
-      '<td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td>'+
+      '<td><span class="lp-tag lp-tag-'+curLp+'">'+curLp+'</span></td>'+
       '<td><select data-idx="'+idx+'" onchange="reassign(this)" style="font-size:12px">'+opts+'</select></td></tr>';
   }).join("");
 }
@@ -5172,62 +5173,74 @@ function lpscShowDaily(wk,data){
 
 // ── LP ASSIGNMENT ────────────────────────────────────────────────────────
 function renderLpAssignList(){
+  var el=document.getElementById("lp-assign-list");
+  if(!el){console.warn("lp-assign-list not found");return;}
+  var LPS=["Gavin","Jordan","Karen","Osgood","Said","Unassigned"];
+  var LP_COLORS={"Gavin":"#0E9F8E","Karen":"#2563EB","Osgood":"#C2692B","Jordan":"#BE185D","Said":"#7C3AED"};
   var searchEl=document.getElementById("lp-assign-search");
   var showAllEl=document.getElementById("lp-assign-show-all");
-  var listEl=document.getElementById("lp-assign-list");
-  if(!searchEl||!showAllEl||!listEl){
-    // Elements not in DOM yet — retry once Admin is visible
-    setTimeout(renderLpAssignList,200);
-    return;
+  var q=searchEl?searchEl.value.toLowerCase():"";
+  var showAll=showAllEl?showAllEl.checked:false;
+
+  var list=[];
+  for(var i=0;i<SEED.length;i++){
+    var e=SEED[i];
+    var name=e[0]||"";
+    var tier=e[1]||"C";
+    var lp=e[2]||"";
+    if(lp==="null"||lp==="undefined")lp="";
+    if(!showAll&&lp&&lp!=="Unassigned")continue;
+    if(q&&name.toLowerCase().indexOf(q)<0)continue;
+    list.push({name:name,tier:tier,lp:lp});
   }
-  var q=(searchEl.value||"").toLowerCase();
-  var showAll=showAllEl.checked;
-  var LPS_OPTS=["Gavin","Jordan","Karen","Osgood","Said","Unassigned"];
-  var list=SEED.filter(function(e){
-    var rawLp2=e[2];var effLp=(rawLp2&&rawLp2!=="null"&&rawLp2!=="undefined")?rawLp2:null;
-    if(!showAll&&effLp&&effLp!=="Unassigned")return false; // only unassigned by default
-    if(q&&!e[0].toLowerCase().includes(q))return false;
-    return true;
-  }).sort(function(a,b){return a[0].localeCompare(b[0]);});
+  list.sort(function(a,b){return a.name.localeCompare(b.name);});
 
   if(!list.length){
-    listEl.innerHTML=
-      '<div style="padding:16px;text-align:center;color:#aaa;font-size:13px">'+(showAll?"No agents found":"All agents assigned!")+"</div>";
+    el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px">'+(showAll?"No agents match.":"All agents are assigned! Check \"Show all agents\" to edit.")+'</div>';
     return;
   }
 
-  var html='<table style="width:100%;border-collapse:collapse;font-size:13px">'
-    +'<thead><tr style="border-bottom:2px solid var(--border)">'
-    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888;font-weight:600">Agent</th>'
-    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888;font-weight:600">Tier</th>'
-    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888;font-weight:600">Current LP</th>'
-    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888;font-weight:600">Assign to</th>'
-    +'</tr></thead><tbody>';
-
-  list.forEach(function(e){
-    var name=e[0],tier=e[1]||"",rawLp=e[2],lp=(rawLp&&rawLp!=="null"&&rawLp!=="undefined")?rawLp:"";
-    var tierColor=tier==="A"?"#B45309":tier==="B"?"#1D4ED8":"#888";
-    var lpColor={"Gavin":"#0E9F8E","Karen":"#2563EB","Osgood":"#C2692B","Jordan":"#BE185D","Said":"#7C3AED"}[lp]||"#888";
-    var safeN=name.replace(/'/g,"\'");
-    var opts=LPS_OPTS.map(function(opt){
-      var curLp=(rawLp&&rawLp!=="null"&&rawLp!=="undefined")?rawLp:"Unassigned";
-      return '<option value="'+opt+'"'+(curLp===opt?" selected":"")+'>'+opt+'</option>';
-    }).join("");
-    html+='<tr style="border-bottom:1px solid var(--border)">'
-      +'<td style="padding:8px 10px;font-weight:500">'+name+'</td>'
-      +'<td style="padding:8px 10px"><span style="font-size:11px;font-weight:700;color:'+tierColor+'">'+tier+'</span></td>'
-      +'<td style="padding:8px 10px"><span style="font-size:11px;font-weight:600;color:'+lpColor+'">'+( lp||"—")+'</span></td>'
-      +'<td style="padding:8px 10px">'
-      +'<select data-name="'+safeN+'" onchange="setAgentLP(this.dataset.name,this.value,this)" '
-      +'style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">'
+  var rows="";
+  _lpAssignNames=list.map(function(x){return x.name;});
+  for(var j=0;j<list.length;j++){
+    var ag=list[j];
+    var tc=ag.tier==="A"?"#B45309":ag.tier==="B"?"#1D4ED8":"#888";
+    var lc=LP_COLORS[ag.lp]||"#aaa";
+    var opts="";
+    for(var k=0;k<LPS.length;k++){
+      opts+='<option value="'+LPS[k]+'"'+(ag.lp===LPS[k]?" selected":"")+'>'+LPS[k]+'</option>';
+    }
+    var sid="lpsi_"+j;
+    rows+='<tr style="border-bottom:1px solid var(--border)">'
+      +'<td style="padding:8px 10px;font-size:13px;font-weight:500">'+ag.name+'</td>'
+      +'<td style="padding:8px 10px"><span style="font-size:11px;font-weight:700;color:'+tc+'">'+ag.tier+'</span></td>'
+      +'<td style="padding:8px 10px"><span style="font-size:11px;font-weight:600;color:'+lc+'">'+(ag.lp||"—")+'</span></td>'
+      +'<td style="padding:8px 10px;display:flex;align-items:center;gap:8px">'
+      +'<select style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit" '
+      +'<select data-idx="'+j+'" onchange="setAgentLPByIdx(this)" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit">'
       +opts+'</select>'
-      +' <span id="lp-saved-'+name.replace(/[^a-zA-Z0-9]/g,"_")+'" style="font-size:11px;color:#1D9E75;display:none">✓ Saved</span>'
+      +'<span id="'+sid+'" style="font-size:11px;color:var(--green);display:none">✓</span>'
       +'</td></tr>';
-  });
-  html+='</tbody></table>';
-  listEl.innerHTML=html;
+  }
+
+  el.innerHTML='<div style="font-size:12px;color:#888;margin-bottom:8px">'+list.length+' agent'+(list.length!==1?'s':'')+(showAll?' total':' unassigned')+'</div>'
+    +'<table style="width:100%;border-collapse:collapse">'
+    +'<thead><tr style="border-bottom:2px solid var(--border)">'
+    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888">Agent</th>'
+    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888">Tier</th>'
+    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888">Current LP</th>'
+    +'<th style="padding:7px 10px;text-align:left;font-size:11px;color:#888">Assign to</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
+
+var _lpAssignNames=[];
+function setAgentLPByIdx(sel){
+  var idx=parseInt(sel.getAttribute("data-idx"));
+  var name=_lpAssignNames[idx];
+  if(!name)return;
+  setAgentLP(name,sel.value);
+}
 function setAgentLP(name,lp,selectEl){
   // Update SEED in memory immediately
   var entry=SEED.find(function(e){return e[0]===name;});
