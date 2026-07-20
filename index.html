@@ -3604,7 +3604,12 @@ function renderAdmin(){
 function renderReassign(){
   var q=document.getElementById("reassign-q").value.toLowerCase();
   var flp=document.getElementById("reassign-filter-lp").value;
-  var list=agents.filter(function(a){return(!q||a[0].toLowerCase().indexOf(q)>=0)&&(!flp||a[2]===flp);});
+  var list=agents.filter(function(a){
+    if(q&&a[0].toLowerCase().indexOf(q)<0)return false;
+    if(!flp)return true;
+    var agLp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";
+    return agLp===flp;
+  });
   document.getElementById("admin-tbody").innerHTML=list.map(function(a){
     var idx=agents.indexOf(a),pri=isPriority(a);
     var curLp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";
