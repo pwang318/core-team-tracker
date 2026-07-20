@@ -5172,8 +5172,16 @@ function lpscShowDaily(wk,data){
 
 // ── LP ASSIGNMENT ────────────────────────────────────────────────────────
 function renderLpAssignList(){
-  var q=(document.getElementById("lp-assign-search").value||"").toLowerCase();
-  var showAll=document.getElementById("lp-assign-show-all").checked;
+  var searchEl=document.getElementById("lp-assign-search");
+  var showAllEl=document.getElementById("lp-assign-show-all");
+  var listEl=document.getElementById("lp-assign-list");
+  if(!searchEl||!showAllEl||!listEl){
+    // Elements not in DOM yet — retry once Admin is visible
+    setTimeout(renderLpAssignList,200);
+    return;
+  }
+  var q=(searchEl.value||"").toLowerCase();
+  var showAll=showAllEl.checked;
   var LPS_OPTS=["Gavin","Jordan","Karen","Osgood","Said","Unassigned"];
   var list=SEED.filter(function(e){
     var rawLp2=e[2];var effLp=(rawLp2&&rawLp2!=="null"&&rawLp2!=="undefined")?rawLp2:null;
@@ -5183,7 +5191,7 @@ function renderLpAssignList(){
   }).sort(function(a,b){return a[0].localeCompare(b[0]);});
 
   if(!list.length){
-    document.getElementById("lp-assign-list").innerHTML=
+    listEl.innerHTML=
       '<div style="padding:16px;text-align:center;color:#aaa;font-size:13px">'+(showAll?"No agents found":"All agents assigned!")+"</div>";
     return;
   }
@@ -5217,7 +5225,7 @@ function renderLpAssignList(){
       +'</td></tr>';
   });
   html+='</tbody></table>';
-  document.getElementById("lp-assign-list").innerHTML=html;
+  listEl.innerHTML=html;
 }
 
 function setAgentLP(name,lp,selectEl){
