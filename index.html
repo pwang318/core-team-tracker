@@ -753,7 +753,6 @@ tr:hover td{background:var(--bg)}
     </div>
     <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
   </div>
-  </div>
 </div>
 
 <!-- LEAD DRILL-DOWN MODAL -->
@@ -802,7 +801,8 @@ tr:hover td{background:var(--bg)}
   <div class="admin-section">
     <h3>Co-marketing active agents</h3>
     <p style="font-size:12px;color:#888;margin-bottom:.75rem">Mark agents who have an active co-marketing setup (flyer, Total Expert, etc.).</p>
-    <div style="margin-bottom:8px"><input type="text" id="comkt-q" placeholder="Search agent name..." oninput="renderCoMktList()" style="width:100%">
+    <div style="margin-bottom:8px"><input type="text" id="comkt-q" placeholder="Search agent name..." oninput="renderCoMktList()" style="width:100%"></div>
+    <div id="comkt-list"></div>
     <!-- LP ASSIGNMENT SECTION -->
     <div class="admin-section" id="lp-assign-section">
       <h3>Assign LPs to Agents</h3>
@@ -3752,11 +3752,39 @@ function getBirthdayAgentsThisWeek(){
 function renderCoMktList(){
   var q=(document.getElementById("comkt-q")||{value:""}).value.toLowerCase();
   var el=document.getElementById("comkt-list");if(!el)return;
-  var list=agents.filter(function(a){return!q||a[0].toLowerCase().indexOf(q)>=0;}).slice(0,20);
-  el.innerHTML=list.map(function(a){
-    var active=coMarketingAgents[a[0]]||false;
-    return'<div class="alert-item"><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm '+(active?"btn-danger":"btn-success")+'" data-name="'+a[0]+'" data-active="'+(active?"true":"false")+'" onclick="toggleCoMarketing(this)">'+(active?"Remove co-mkt":"Set co-mkt active")+'</button></div>';
-  }).join("");
+
+  // Active co-marketing agents (always shown at top)
+  var activeAgents=agents.filter(function(a){return coMarketingAgents[a[0]];});
+  // Search results (non-active matching query)
+  var searchResults=q?agents.filter(function(a){
+    return!coMarketingAgents[a[0]]&&a[0].toLowerCase().indexOf(q)>=0;
+  }).slice(0,15):[];
+
+  function agentRow(a,active){
+    var lp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"—";
+    var lpClass=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?"lp-tag lp-tag-"+a[2]:"";
+    var lpSpan=lpClass?'<span class="'+lpClass+'">'+lp+'</span>':'<span style="color:#aaa;font-size:12px">'+lp+'</span>';
+    return'<div class="alert-item" style="'+(active?"background:#E8F5F0;border-color:#6EE7C4;":"")+'">'+
+      '<span style="font-weight:600;flex:1">'+a[0]+'</span>'+
+      '<span class="badge badge-'+(a[1]||"c").toLowerCase()+'" style="margin-right:6px">'+a[1]+'</span>'+
+      lpSpan+
+      '<button class="btn btn-sm '+(active?"btn-danger":"btn-success")+'" style="margin-left:10px" data-name="'+a[0]+'" data-active="'+(active?"true":"false")+'" onclick="toggleCoMarketing(this)">'+
+      (active?"✕ Remove":"✓ Mark active")+'</button></div>';
+  }
+
+  var html2="";
+  if(activeAgents.length){
+    html2+='<div style="font-size:11px;font-weight:700;color:#0A6B4C;text-transform:uppercase;letter-spacing:.5px;padding:8px 4px 6px">Active co-marketing ('+activeAgents.length+')</div>';
+    html2+=activeAgents.map(function(a){return agentRow(a,true);}).join("");
+  }
+  if(searchResults.length){
+    html2+='<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;padding:12px 4px 6px;margin-top:'+(activeAgents.length?'8px':'0')+'">Search results</div>';
+    html2+=searchResults.map(function(a){return agentRow(a,false);}).join("");
+  }
+  if(!activeAgents.length&&!searchResults.length){
+    html2='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px">'+(q?"No agents found matching \""+q+"\"":"No active co-marketing agents. Search above to add one.")+"</div>";
+  }
+  el.innerHTML=html2;
 }
 
 function toggleCoMarketing(btn){
