@@ -1410,6 +1410,8 @@ function loadAgentAssignments(){
         } else {
           var a=agents.find(function(x){return x[0]===r.agent_name;});
           if(a){a[2]=r.lp;a[7]=r.priority||false;if(r.level)a[1]=r.level;}
+          var s=SEED.find(function(x){return x[0]===r.agent_name;});
+          if(s){s[2]=r.lp;if(r.level)s[1]=r.level;}
           else if(r.added){agents.push([r.agent_name,r.level||"C",r.lp,null,null,null,null,r.priority||false,0]);}
         }
       }catch(e){}
@@ -1441,7 +1443,7 @@ function selectUser(btn,u){
     document.getElementById("view-admin").classList.add("active");
     renderAdmin();
     loadLpOverrides();
-    renderLpAssignList();
+    loadAgentAssignments().then(function(){renderLpAssignList();});
   } else if(u==="Welcome"){
     document.getElementById("view-welcome").classList.add("active");
   } else {
