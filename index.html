@@ -4256,7 +4256,7 @@ document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 document.addEventListener("focusin",function(e){if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"){userTyping=true;}});
 document.addEventListener("focusout",function(e){if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"){userTyping=false;}});
 loadAgents();
-loadLpOverrides();
+loadAgentAssignments();
 // Auto-open Snapshot on load
 (function(){
   var snapBtn=document.querySelector(".wb-Snapshot");
@@ -5174,7 +5174,8 @@ function renderLpAssignList(){
   var showAll=document.getElementById("lp-assign-show-all").checked;
   var LPS_OPTS=["Gavin","Jordan","Karen","Osgood","Said","Unassigned"];
   var list=SEED.filter(function(e){
-    if(!showAll&&e[2]&&e[2]!=="Unassigned")return false; // only unassigned by default
+    var rawLp2=e[2];var effLp=(rawLp2&&rawLp2!=="null"&&rawLp2!=="undefined")?rawLp2:null;
+    if(!showAll&&effLp&&effLp!=="Unassigned")return false; // only unassigned by default
     if(q&&!e[0].toLowerCase().includes(q))return false;
     return true;
   }).sort(function(a,b){return a[0].localeCompare(b[0]);});
@@ -5194,12 +5195,13 @@ function renderLpAssignList(){
     +'</tr></thead><tbody>';
 
   list.forEach(function(e){
-    var name=e[0],tier=e[1]||"",lp=e[2]||"";
+    var name=e[0],tier=e[1]||"",rawLp=e[2],lp=(rawLp&&rawLp!=="null"&&rawLp!=="undefined")?rawLp:"";
     var tierColor=tier==="A"?"#B45309":tier==="B"?"#1D4ED8":"#888";
     var lpColor={"Gavin":"#0E9F8E","Karen":"#2563EB","Osgood":"#C2692B","Jordan":"#BE185D","Said":"#7C3AED"}[lp]||"#888";
     var safeN=name.replace(/'/g,"\'");
     var opts=LPS_OPTS.map(function(opt){
-      return '<option value="'+opt+'"'+(lp===opt?" selected":"")+">"+opt+"</option>";
+      var curLp=(rawLp&&rawLp!=="null"&&rawLp!=="undefined")?rawLp:"Unassigned";
+      return '<option value="'+opt+'"'+(curLp===opt?" selected":"")+'>'+opt+'</option>';
     }).join("");
     html+='<tr style="border-bottom:1px solid var(--border)">'
       +'<td style="padding:8px 10px;font-weight:500">'+name+'</td>'
@@ -5217,32 +5219,44 @@ function renderLpAssignList(){
 }
 
 function setAgentLP(name,lp,selectEl){
-  // Update SEED in memory
+  // Update SEED in memory immediately
   var entry=SEED.find(function(e){return e[0]===name;});
   if(!entry)return;
-  entry[2]=lp==="Unassigned"?"Unassigned":lp||null;
+  var lpVal=lp==="Unassigned"?"Unassigned":lp||null;
+  entry[2]=lpVal;
 
-  // Show saved indicator
+  // Show saving indicator
   var savedId="lp-saved-"+name.replace(/[^a-zA-Z0-9]/g,"_");
   var savedEl=document.getElementById(savedId);
-  if(savedEl){savedEl.style.display="inline";setTimeout(function(){savedEl.style.display="none";},2000);}
+  if(savedEl){savedEl.textContent="Saving...";savedEl.style.color="var(--text-3)";savedEl.style.display="inline";}
 
-  // Persist to localStorage so assignments survive refresh
-  try{
-    var saved=JSON.parse(localStorage.getItem("lp_overrides")||"{}");
-    saved[name]=lp==="Unassigned"?"Unassigned":lp||null;
-    localStorage.setItem("lp_overrides",JSON.stringify(saved));
-  }catch(e){}
+  // Persist to Supabase agent_assignments
+  sbFetch("POST","agent_assignments",{
+    agent_name:name,
+    lp:lpVal||"Unassigned",
+    level:entry[1]||"C",
+    priority:entry[7]||false,
+    added:false
+  }).then(function(){
+    if(savedEl){savedEl.textContent="✓ Saved";savedEl.style.color="var(--green)";
+      setTimeout(function(){if(savedEl)savedEl.style.display="none";},2000);}
+    renderLpAssignList();
+  }).catch(function(e){
+    // Try PATCH if POST fails (row exists)
+    sbFetch("PATCH","agent_assignments?agent_name=eq."+encodeURIComponent(name),{lp:lpVal||"Unassigned"})
+      .then(function(){
+        if(savedEl){savedEl.textContent="✓ Saved";savedEl.style.color="var(--green)";
+          setTimeout(function(){if(savedEl)savedEl.style.display="none";},2000);}
+        renderLpAssignList();
+      }).catch(function(){
+        if(savedEl){savedEl.textContent="✗ Error";savedEl.style.color="var(--red)";}
+      });
+  });
 }
 
 function loadLpOverrides(){
-  try{
-    var saved=JSON.parse(localStorage.getItem("lp_overrides")||"{}");
-    Object.keys(saved).forEach(function(name){
-      var entry=SEED.find(function(e){return e[0]===name;});
-      if(entry)entry[2]=saved[name];
-    });
-  }catch(e){}
+  // Now handled by loadAgentAssignments() which reads from Supabase
+  // Called on boot already — this is a no-op kept for compatibility
 }
 
 </script>
