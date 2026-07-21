@@ -5614,12 +5614,10 @@ function loadCoMktPartners(){
   var ytdStart=new Date().getFullYear()+"-01-01";
   return Promise.all([
     sbFetch("GET","co_marketing_partners?select=*&order=partner_name.asc"),
-    sbFetch("GET","velocify_leads?date_added=gte."+ytdStart+"&select=referral_partner_name&limit=5000"),
-    sbFetch("GET","agent_assignments?select=agent_name,closed_past_year&closed_past_year=gt.0&limit=1000")
+    sbFetch("GET","velocify_leads?date_added=gte."+ytdStart+"&select=referral_partner_name&limit=5000")
   ]).then(function(res){
     coMktPartners=res[0]||[];
     var rawLeads=res[1]||[];
-    var closedRows=res[2]||[];
     coMktLeadCounts={};
     rawLeads.forEach(function(r){
       var name=(r.referral_partner_name||"").trim().toUpperCase();
@@ -5627,11 +5625,6 @@ function loadCoMktPartners(){
       coMktLeadCounts[name]=(coMktLeadCounts[name]||0)+1;
     });
     coMktClosedCounts={};
-    closedRows.forEach(function(r){
-      var name=(r.agent_name||"").trim().toUpperCase();
-      if(!name)return;
-      coMktClosedCounts[name]=(coMktClosedCounts[name]||0)+(r.closed_past_year||0);
-    });
     renderDirectorView();
   }).catch(function(){
     el.innerHTML='<div style="text-align:center;padding:30px;color:var(--red);font-size:13px">Could not load — check connection or run the setup SQL</div>';
