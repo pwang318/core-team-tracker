@@ -865,6 +865,11 @@ tr:hover td{background:var(--bg)}
         <option value="overdue">Overdue + Critical</option>
         <option value="warn">Needs attention</option>
       </select>
+      <select id="ft-comkt-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
+        <option value="all">Co-marketing: all</option>
+        <option value="yes">Co-marketing only</option>
+        <option value="no">Not co-marketing</option>
+      </select>
       <button onclick="loadFaceTime()" style="background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500">↺ Refresh</button>
     </div>
   </div>
@@ -5404,23 +5409,25 @@ async function loadFaceTime(){
   var listEl=document.getElementById("ft-list");
   if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px;font-size:13px">Loading...</div>';
   try{
-    // Load from both sources in parallel
+    // Load from both sources in parallel, plus co-marketing flags so the tab can show/filter on them
     var r=await Promise.all([
       sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=2000"),
-      sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=2000").catch(function(){return[];})
+      sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=2000").catch(function(){return[];}),
+      loadCoMarketing()
     ]);
-    // Build map: agent → latest date from either source
+    // Build map: agent → latest date from either source.
+    // Keys are normalized to uppercase because the roster (SEED) stores names in ALL CAPS,
+    // while agent_name as logged by Amanda/LPs is typically Title Case — without normalizing,
+    // every lookup below misses and every agent shows "Never" even when visits are logged.
     ftData={};
-    // Amanda activities
     (r[0]||[]).forEach(function(a){
-      var n=(a.agent_name||"").trim();if(!n)return;
+      var n=(a.agent_name||"").trim().toUpperCase();if(!n)return;
       if(!ftData[n]||a.act_date>ftData[n].lastDate){
         ftData[n]={lastDate:a.act_date,source:"Amanda",notes:a.notes||""};
       }
     });
-    // LP break_breads table
     (r[1]||[]).forEach(function(b){
-      var n=(b.agent_name||"").trim();if(!n)return;
+      var n=(b.agent_name||"").trim().toUpperCase();if(!n)return;
       if(!ftData[n]||b.date>ftData[n].lastDate){
         ftData[n]={lastDate:b.date,source:b.logged_by||"LP",notes:b.notes||""};
       }
@@ -5450,6 +5457,7 @@ function renderFaceTime(){
   var lpF=(document.getElementById("ft-lp-filter")||{value:"all"}).value;
   var tierF=(document.getElementById("ft-tier-filter")||{value:"all"}).value;
   var statusF=(document.getElementById("ft-status-filter")||{value:"all"}).value;
+  var comktF=(document.getElementById("ft-comkt-filter")||{value:"all"}).value;
   var now=new Date();
 
   var agentList=SEED.map(function(e){
@@ -5458,7 +5466,7 @@ function renderFaceTime(){
     var days=null;
     if(ft&&ft.lastDate){days=Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000);}
     var status=ftStatus(tier,days);
-    return{name:name,tier:tier,lp:lp,days:days,status:status,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:""};
+    return{name:name,tier:tier,lp:lp,days:days,status:status,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name]};
   });
 
   if(lpF!=="all")agentList=agentList.filter(function(a){return a.lp===lpF;});
@@ -5466,6 +5474,8 @@ function renderFaceTime(){
   if(statusF==="critical")agentList=agentList.filter(function(a){return a.status==="critical";});
   else if(statusF==="overdue")agentList=agentList.filter(function(a){return a.status==="critical"||a.status==="red";});
   else if(statusF==="warn")agentList=agentList.filter(function(a){return a.status!=="ok";});
+  if(comktF==="yes")agentList=agentList.filter(function(a){return a.coMkt;});
+  else if(comktF==="no")agentList=agentList.filter(function(a){return !a.coMkt;});
 
   var order={critical:0,red:1,warn:2,ok:3};
   agentList.sort(function(a,b){
@@ -5514,12 +5524,14 @@ function renderFaceTime(){
       html2+='<div class="ft-tier-hdr" style="color:'+r.color+';border-color:'+r.color+'">'+r.label+' <span style="font-weight:400;font-size:9px;margin-left:8px">('+r.count+' agents)</span></div>';
     } else {
       var a=r.a,fid=r.formId;
+      var coBadge=a.coMkt?'<span class="co-mkt-tag" style="cursor:pointer" data-name="'+escHtml(a.name)+'" data-active="true">Co-marketing ✓</span>':'<span class="ft-comkt-off" data-name="'+escHtml(a.name)+'" data-active="false" style="cursor:pointer;font-size:10px;color:var(--text-3);border:1px dashed var(--border);border-radius:4px;padding:2px 8px">+ Co-marketing</span>';
       html2+='<div class="ft-row">'
         +'<div class="ft-name">'+a.name+'</div>'
         +'<span style="font-size:11px;font-weight:600;color:'+r.lc+';min-width:50px">'+a.lp+'</span>'
         +'<span class="ft-days '+a.status+'">'+(a.days===null?"Never":a.days+"d ago")+'</span>'
         +'<span class="ft-meta">'+(a.lastDate?fmtDate(a.lastDate)+(a.source?" via "+a.source:""):"No record")+'</span>'
         +'<span class="ft-meta" style="color:'+(r.overdue?"#DC2626":"#0A6B4C")+'">'+r.nextLabel+'</span>'
+        +'<span class="ft-comkt-toggle">'+coBadge+'</span>'
         +'<button class="ft-log-btn btn-ft-log" data-fid="'+fid+'" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Log visit</button>'
         +'</div>'
         +'<div class="ft-log-form" id="'+fid+'">'
@@ -5546,6 +5558,25 @@ function renderFaceTime(){
   });
   listEl.querySelectorAll(".ft-save-btn").forEach(function(btn){
     btn.addEventListener("click",function(){ftSaveLog(this.dataset.agent,this.dataset.fid);});
+  });
+  listEl.querySelectorAll(".co-mkt-tag,.ft-comkt-off").forEach(function(el){
+    el.addEventListener("click",function(){ftToggleCoMarketing(this.dataset.name,this.dataset.active==="true");});
+  });
+}
+
+function ftToggleCoMarketing(name,isActive){
+  var newVal=!isActive;
+  coMarketingAgents[name]=newVal;
+  sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(name)+"&limit=1").then(function(res){
+    var method=(res&&res.length)?"PATCH":"POST";
+    var path=method==="PATCH"?"agent_profiles?agent_name=eq."+encodeURIComponent(name):"agent_profiles";
+    return sbFetch(method,path,{agent_name:name,co_marketing:newVal});
+  }).then(function(){
+    renderFaceTime();
+    showToast((newVal?"Marked":"Unmarked")+" "+name+" as co-marketing","success");
+  }).catch(function(){
+    coMarketingAgents[name]=isActive; // revert on failure
+    showToast("Save failed — try again","error");
   });
 }
 
