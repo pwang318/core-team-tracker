@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260716202643">
+  <meta name="version" content="20260721220000">
+  <meta name="build-notes" content="Face Time fixes, co-marketing bulk spend editor, closed_past_year sync, Director renamed to Co-Marketing">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -889,10 +890,7 @@ tr:hover td{background:var(--bg)}
 <div id="view-director" class="view" style="padding:18px 20px;max-width:1140px;margin:0 auto">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div style="font-size:16px;font-weight:700;color:var(--text-1)">Co-Marketing Report</div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-sm" onclick="zillowSpendQuickFillGlobal()" title="For Zillow's per-agent monthly billing export specifically. Realtor.com / Power BI spend gets entered via each partner's Total cost and Your spend fields below." style="background:#EFF6FF;border-color:#93C5FD;color:#1D4ED8">⤓ Import Zillow agent spend</button>
-      <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
-    </div>
+    <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
   </div>
   <div style="background:#FAF7F2;border:1px solid #E8DDD0;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:600;color:#5C4A35">
     Target: 1 opportunity per $250 spent each month — either a buddy intro or warm lead. Goal: 80%
