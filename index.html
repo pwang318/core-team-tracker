@@ -5719,21 +5719,17 @@ function renderDirectorView(){
   // ── Bulk spend editor — update several partners' verified monthly spend without opening each card ──
   var bulkHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px">';
   bulkHtml+='<div style="padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">Quick spend update — verified monthly numbers, not Power BI estimates</div>';
-  bulkHtml+='<div style="padding:6px 14px;font-size:10px;color:var(--text-3);background:var(--bg);border-bottom:1px solid var(--border)">For "Both" partners, Total cost should be the full combined Zillow + Realtor.com amount — the Zillow-side column below is broken out separately so it doesn\'t get missed.</div>';
   bulkHtml+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
-  ["Partner","Platform","Total cost","Your spend (lender)","Agent spend","Zillow-side spend"].forEach(function(h){
+  ["Partner","Platform","Total cost","Your spend"].forEach(function(h){
     bulkHtml+='<th style="text-align:left;padding:6px 14px;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border-light)">'+h+'</th>';
   });
   bulkHtml+='</tr></thead><tbody>';
   coMktPartners.forEach(function(p){
-    var isBoth=(p.platform||"").toLowerCase()==="both";
     bulkHtml+='<tr>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light);font-weight:600">'+escHtml(p.partner_name)+'</td>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)">'+platTag(p.platform)+'</td>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.total_cost||0)+'" onchange="dmSaveField('+p.id+',\'total_cost\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.your_spend||0)+'" onchange="dmSaveField('+p.id+',\'your_spend\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
-    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.agent_spend||0)+'" onchange="dmSaveField('+p.id+',\'agent_spend\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
-    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)">'+(isBoth?'<input type="number" step="0.01" value="'+(p.your_spend_zillow||0)+'" onchange="dmSaveField('+p.id+',\'your_spend_zillow\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit">':'<span style="color:var(--text-3)">—</span>')+'</td>';
     bulkHtml+='</tr>';
   });
   bulkHtml+='</tbody></table></div>';
