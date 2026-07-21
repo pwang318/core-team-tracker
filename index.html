@@ -449,7 +449,7 @@ tr:hover td{background:var(--bg)}
   <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
   <button class="who-btn wb-RM" onclick="openRmView(this)">Relationship Manager</button>
   <button class="who-btn wb-FaceTime" onclick="selectUser(this,'FaceTime')">Face Time</button>
-  <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button>
+  <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button> <button class="who-btn wb-Director" onclick="openDirectorView(this)">Director</button>
 </div>
 <div class="contact-modal-overlay" id="lpContactModal">
   <div class="contact-modal-box">
@@ -836,8 +836,7 @@ tr:hover td{background:var(--bg)}
       <div id="lp-assign-list" style="max-height:500px;overflow-y:auto"></div>
     </div>
 </div>
-    <
-</p>
+    
 <!-- FACE TIME VIEW -->
 <div id="view-facetime" class="view" style="display:none;padding:18px 20px;max-width:960px;margin:0 auto">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
@@ -881,6 +880,16 @@ tr:hover td{background:var(--bg)}
 </div>
 
 
+<div id="view-director" class="view" style="padding:18px 20px;max-width:1140px;margin:0 auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div style="font-size:16px;font-weight:700;color:var(--text-1)">Co-Marketing Report</div>
+    <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
+  </div>
+  <div style="background:#FAF7F2;border:1px solid #E8DDD0;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:600;color:#5C4A35">
+    Target: 1 opportunity per $250 spent each month — either a buddy intro or warm lead. Goal: 80%
+  </div>
+  <div id="director-cards"></div>
+</div 
 <script>
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
@@ -5585,6 +5594,224 @@ function fmtDate(d){
   if(!d)return"—";
   return new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 }
+var coMktPartners=[];
+var coMktLeadCounts={};
+var coMktClosedCounts={};
+
+function openDirectorView(btn){
+  rmStopPolling(); lpStopPolling();
+  currentUser="Director";
+  document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
+  if(btn) btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+  document.getElementById("view-director").classList.add("active");
+  loadCoMktPartners();
+}
+
+function loadCoMktPartners(){
+  var el=document.getElementById("director-cards");
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text-3);font-size:13px">Loading...</div>';
+  var ytdStart=new Date().getFullYear()+"-01-01";
+  return Promise.all([
+    sbFetch("GET","co_marketing_partners?select=*&order=partner_name.asc"),
+    sbFetch("GET","velocify_leads?date_added=gte."+ytdStart+"&select=referral_partner_name&limit=5000"),
+    sbFetch("GET","agent_assignments?select=agent_name,closed_past_year&closed_past_year=gt.0&limit=1000")
+  ]).then(function(res){
+    coMktPartners=res[0]||[];
+    var rawLeads=res[1]||[];
+    var closedRows=res[2]||[];
+    coMktLeadCounts={};
+    rawLeads.forEach(function(r){
+      var name=(r.referral_partner_name||"").trim().toUpperCase();
+      if(!name)return;
+      coMktLeadCounts[name]=(coMktLeadCounts[name]||0)+1;
+    });
+    coMktClosedCounts={};
+    closedRows.forEach(function(r){
+      var name=(r.agent_name||"").trim().toUpperCase();
+      if(!name)return;
+      coMktClosedCounts[name]=(coMktClosedCounts[name]||0)+(r.closed_past_year||0);
+    });
+    renderDirectorView();
+  }).catch(function(){
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--red);font-size:13px">Could not load — check connection or run the setup SQL</div>';
+  });
+}
+
+function coMktLeadsForRoster(roster){
+  var total=0,closedTotal=0,perAgent=[];
+  (roster||[]).forEach(function(r){
+    var names=[r.name];
+    if(r.alias)names.push(r.alias);
+    var leads=0,closed=0;
+    names.forEach(function(n){
+      var key=n.trim().toUpperCase();
+      leads+=coMktLeadCounts[key]||0;
+      closed+=coMktClosedCounts[key]||0;
+    });
+    perAgent.push({name:r.name,alias:r.alias,leads:leads,closed:closed});
+    total+=leads;closedTotal+=closed;
+  });
+  return{total:total,closed:closedTotal,perAgent:perAgent};
+}
+
+function platTag(p){
+  if(p==="zillow")return'<span style="background:#EFF6FF;color:#006AFF;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">Zillow</span>';
+  if(p==="both")return'<span style="background:#F5F3FF;color:#7C3AED;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">Both</span>';
+  return'<span style="background:#FFF1F2;color:#D92424;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">Realtor.com</span>';
+}
+
+function renderDirectorView(){
+  var el=document.getElementById("director-cards");
+  if(!coMktPartners.length){el.innerHTML='<div style="padding:20px;color:var(--text-3);font-size:13px">No partners yet — run the setup SQL to seed them.</div>';return;}
+
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
+  var summaryRows=[];
+
+  coMktPartners.forEach(function(p,idx){
+    var roster=p.agent_roster||[];
+    var lc=coMktLeadsForRoster(roster);
+    var req=p.your_spend?Math.max(1,Math.ceil(p.your_spend/250)):0;
+    var pct=req>0?Math.min(999,Math.round(lc.total/req*100)):0;
+    var goalColor=pct>=80?"#2E7D6A":pct>=50?"#B87333":"#8B3A3A";
+    var goalBg=pct>=80?"#34D399":pct>=50?"#FBBF24":"#F87171";
+    var costPerLead=lc.total>0&&p.your_spend?("$"+(p.your_spend/lc.total).toFixed(0)):"—";
+    var statusLabel=pct>=80?"✅ Working":pct>=50?"⚠ Watch":"🚨 Concern";
+
+    summaryRows.push({id:idx,name:p.partner_name,platform:p.platform,yourSpend:p.your_spend||0,req:req,leads:lc.total,pct:pct,color:goalColor,status:statusLabel});
+
+    html+='<div id="dmwrap-'+idx+'" style="background:var(--surface);border:1px solid var(--border);border-left:4px solid '+goalBg+';border-radius:10px;overflow:hidden">';
+    html+='<div style="padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="dmToggleCard('+idx+')">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">';
+    html+='<div><div style="font-size:14px;font-weight:700">'+escHtml(p.partner_name)+'</div>';
+    html+='<div style="font-size:11px;color:var(--text-3)">'+escHtml(p.brokerage||"")+(p.since_date?" · Since "+fmt(p.since_date):"")+'</div></div>';
+    html+='<div style="text-align:right">'+platTag(p.platform)+'<div style="font-size:11px;font-weight:700;color:'+goalColor+';margin-top:4px">'+statusLabel+'</div></div>';
+    html+='</div></div>';
+
+    html+='<div id="dmcard-'+idx+'" style="display:none;padding:12px 14px">';
+    html+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Spend breakdown</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
+    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Total cost</label>';
+    html+='<input type="number" step="0.01" value="'+(p.total_cost||0)+'" onchange="dmSaveField('+p.id+',\'total_cost\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Your spend</label>';
+    html+='<input type="number" step="0.01" value="'+(p.your_spend||0)+'" onchange="dmSaveField('+p.id+',\'your_spend\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Agent spend</label>';
+    html+='<input type="number" step="0.01" value="'+(p.agent_spend||0)+'" onchange="dmSaveField('+p.id+',\'agent_spend\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Lender budget</label>';
+    html+='<input type="number" step="0.01" value="'+(p.lender_budget||0)+'" onchange="dmSaveField('+p.id+',\'lender_budget\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+    html+='</div>';
+    if(p.platform==="both"){
+      html+='<div style="margin-bottom:10px"><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Your spend (Zillow side)</label>';
+      html+='<input type="number" step="0.01" value="'+(p.your_spend_zillow||0)+'" onchange="dmSaveField('+p.id+',\'your_spend_zillow\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+    }
+
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px">';
+    html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">YTD leads</div><div style="font-size:14px;font-weight:800">'+lc.total+'</div></div>';
+    html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Cost/lead</div><div style="font-size:14px;font-weight:800">'+costPerLead+'</div></div>';
+    html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Closed</div><div style="font-size:14px;font-weight:800;color:#2E7D6A">'+lc.closed+'</div></div>';
+    html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Goal %</div><div style="font-size:14px;font-weight:800;color:'+goalColor+'">'+pct+'%</div></div>';
+    html+='</div>';
+
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">';
+    html+='<span style="font-size:10px;color:var(--text-3);white-space:nowrap">$250 rule (need '+req+')</span>';
+    html+='<div style="flex:1;background:#EAEAEA;border-radius:20px;height:5px;overflow:hidden"><div style="height:5px;border-radius:20px;width:'+Math.min(100,pct)+'%;background:'+goalBg+'"></div></div>';
+    html+='<span style="font-size:11px;font-weight:800;color:'+goalColor+'">'+lc.total+' leads</span>';
+    html+='</div>';
+
+    html+='<div style="font-size:11px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">Agent roster';
+    html+='<button onclick="dmAddAgent('+idx+')" style="font-size:10px;border:1px solid var(--border);background:var(--bg);border-radius:6px;padding:2px 8px;cursor:pointer">+ Add agent</button></div>';
+    html+='<div id="dmroster-'+idx+'">';
+    lc.perAgent.forEach(function(a,ai){
+      html+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border-light)">';
+      html+='<input value="'+escHtml(a.name)+'" onchange="dmRosterField('+idx+','+ai+',\'name\',this.value)" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:11px">';
+      html+='<input value="'+escHtml(a.alias||"")+'" placeholder="alias" onchange="dmRosterField('+idx+','+ai+',\'alias\',this.value)" style="width:100px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:10px;color:var(--text-3)">';
+      html+='<span style="font-size:10px;color:var(--text-3);font-family:var(--font-mono);min-width:50px;text-align:right">'+a.leads+' leads</span>';
+      html+='<button onclick="dmRemoveAgent('+idx+','+ai+')" style="font-size:11px;color:var(--red);border:none;background:none;cursor:pointer">✕</button>';
+      html+='</div>';
+    });
+    html+='</div>';
+
+    html+='<textarea placeholder="Add note..." onchange="dmSaveField('+p.id+',\'note\',this.value)" style="width:100%;margin-top:10px;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:11px;font-family:inherit;min-height:40px">'+escHtml(p.note||"")+'</textarea>';
+    html+='</div></div>';
+  });
+  html+='</div>';
+
+  var totalYourSpend=summaryRows.reduce(function(s,r){return s+r.yourSpend;},0);
+  var totalLeads=summaryRows.reduce(function(s,r){return s+r.leads;},0);
+  var totalReq=summaryRows.reduce(function(s,r){return s+r.req;},0);
+  var overallPct=totalReq>0?Math.round(totalLeads/totalReq*100):0;
+  var overallColor=overallPct>=80?"#2E7D6A":overallPct>=50?"#B87333":"#8B3A3A";
+  var concernCount=summaryRows.filter(function(r){return r.pct<50;}).length;
+  var watchCount=summaryRows.filter(function(r){return r.pct>=50&&r.pct<80;}).length;
+
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px">';
+  html+='<div style="font-size:13px;font-weight:700;margin-bottom:4px">Is co-marketing working?</div>';
+  html+='<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">'+overallPct+'% of expected opportunities delivered across '+summaryRows.length+' partners'+(concernCount||watchCount?" — "+concernCount+" need attention, "+watchCount+" to watch":" — all on track")+'</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total your spend</div><div style="font-size:18px;font-weight:800">$'+totalYourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total YTD leads</div><div style="font-size:18px;font-weight:800">'+totalLeads+'</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Opps required</div><div style="font-size:18px;font-weight:800">'+totalReq+'</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Team goal %</div><div style="font-size:18px;font-weight:800;color:'+overallColor+'">'+overallPct+'%</div></div>';
+  html+='</div>';
+
+  html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html+='<thead><tr>';
+  ["Partner","Platform","Your spend","Req.","YTD leads","Status"].forEach(function(h){
+    html+='<th style="background:var(--bg);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border)">'+h+'</th>';
+  });
+  html+='</tr></thead><tbody>';
+  summaryRows.sort(function(a,b){return a.pct-b.pct;}).forEach(function(r){
+    html+='<tr style="cursor:pointer" onclick="dmScrollTo('+r.id+')" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'\'">';
+    html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);font-weight:600">'+escHtml(r.name)+'</td>';
+    html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border)">'+platTag(r.platform)+'</td>';
+    html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--font-mono)">$'+r.yourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'</td>';
+    html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--font-mono)">'+r.req+'</td>';
+    html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--font-mono);color:'+r.color+'">'+r.leads+'</td>';
+    html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);color:'+r.color+';font-weight:600">'+r.status+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+
+function dmToggleCard(idx){
+  var c=document.getElementById("dmcard-"+idx);
+  if(c)c.style.display=c.style.display==="none"?"block":"none";
+}
+function dmSaveField(id,field,val){
+  var payload={};
+  payload[field]=(field.indexOf("spend")>=0||field==="total_cost"||field==="lender_budget"||field==="agent_spend")?parseFloat(val)||0:val;
+  sbFetch("PATCH","co_marketing_partners?id=eq."+id,payload).then(function(){
+    var p=coMktPartners.find(function(x){return x.id===id;});
+    if(p)p[field]=payload[field];
+    renderDirectorView();
+  }).catch(function(){alert("Save failed — try again");});
+}
+function dmRosterField(idx,agentIdx,field,val){
+  var p=coMktPartners[idx];
+  if(!p.agent_roster[agentIdx])return;
+  p.agent_roster[agentIdx][field]=val;
+  sbFetch("PATCH","co_marketing_partners?id=eq."+p.id,{agent_roster:p.agent_roster}).then(function(){renderDirectorView();}).catch(function(){});
+}
+function dmAddAgent(idx){
+  var p=coMktPartners[idx];
+  p.agent_roster.push({name:"New agent",alias:""});
+  sbFetch("PATCH","co_marketing_partners?id=eq."+p.id,{agent_roster:p.agent_roster}).then(function(){renderDirectorView();}).catch(function(){});
+}
+function dmRemoveAgent(idx,agentIdx){
+  var p=coMktPartners[idx];
+  p.agent_roster.splice(agentIdx,1);
+  sbFetch("PATCH","co_marketing_partners?id=eq."+p.id,{agent_roster:p.agent_roster}).then(function(){renderDirectorView();}).catch(function(){});
+}
+function dmScrollTo(idx){
+  var wrap=document.getElementById("dmwrap-"+idx);
+  var card=document.getElementById("dmcard-"+idx);
+  if(!wrap)return;
+  card.style.display="block";
+  wrap.scrollIntoView({behavior:"smooth",block:"center"});
+  wrap.style.boxShadow="0 0 0 3px #4A7C6F";
+  setTimeout(function(){wrap.style.boxShadow="";},1300);
+}  
 
 </script>
 </body>
