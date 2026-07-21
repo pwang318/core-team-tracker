@@ -450,7 +450,7 @@ tr:hover td{background:var(--bg)}
   <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
   <button class="who-btn wb-RM" onclick="openRmView(this)">Relationship Manager</button>
   <button class="who-btn wb-FaceTime" onclick="selectUser(this,'FaceTime')">Face Time</button>
-  <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button> <button class="who-btn wb-Director" onclick="openDirectorView(this)">Director</button>
+  <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button> <button class="who-btn wb-Director" onclick="openDirectorView(this)">Co-Marketing</button>
 </div>
 <div class="contact-modal-overlay" id="lpContactModal">
   <div class="contact-modal-box">
@@ -896,6 +896,20 @@ tr:hover td{background:var(--bg)}
   </div>
   <div style="background:#FAF7F2;border:1px solid #E8DDD0;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:600;color:#5C4A35">
     Target: 1 opportunity per $250 spent each month — either a buddy intro or warm lead. Goal: 80%
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Lead Definition</div>
+      <ol style="font-size:12px;color:var(--text-2);line-height:1.7;padding-left:18px;margin:0">
+        <li>Agent speaks to buyer</li>
+        <li>Buyer is expecting our call</li>
+        <li>Agent sends an email (preferably) or text with buyer's contact (name, phone, email)</li>
+      </ol>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Realtor Introduction Definition</div>
+      <div style="font-size:12px;color:var(--text-2);line-height:1.7">Realtor sends group text with another agent and the LO with the following script: "Meet (LO), he is my preferred lender and he is awesome. I figured you two should meet at some point. I'll let you take it from here..."</div>
+    </div>
   </div>
   <div id="director-cards"></div>
 </div>
@@ -1490,10 +1504,10 @@ function loadAgentAssignments(){
           agents=agents.filter(function(a){return a[0]!==r.agent_name;});
         } else {
           var a=agents.find(function(x){return x[0]===r.agent_name;});
-          if(a){a[2]=r.lp;a[7]=r.priority||false;if(r.level)a[1]=r.level;}
+          if(a){a[2]=r.lp;a[7]=r.priority||false;if(r.level)a[1]=r.level;if(r.closed_past_year!==undefined&&r.closed_past_year!==null)a[8]=r.closed_past_year;}
           var s=SEED.find(function(x){return x[0]===r.agent_name;});
           if(s){s[2]=r.lp;if(r.level)s[1]=r.level;}
-          else if(r.added){agents.push([r.agent_name,r.level||"C",r.lp,null,null,null,null,r.priority||false,0]);}
+          else if(r.added){agents.push([r.agent_name,r.level||"C",r.lp,null,null,null,null,r.priority||false,r.closed_past_year||0]);}
         }
       }catch(e){}
     });
@@ -3768,10 +3782,12 @@ function handleUpload(input){
         var gd=function(c){var v=row[c];if(!v)return null;try{var d=new Date(v);return isNaN(d)?null:d.toISOString().split("T")[0];}catch(e){return null;}};
         var closedPastYear=parseInt(row["Closed Past Year"])||0;
         var totalLeadsPY=parseInt(row["Total Leads Past Year"])||0;
-        var u=[n,lv||"C","Unassigned",gd("Latest Lead (In Velocify)"),gd("Latest File Started"),gd("Latest Contract"),gd("Latest Close"),false,closedPastYear];
+        var existing=agents.find(function(x){return x[0]===n;});
+        var preservedLp=existing?existing[2]:"Unassigned";
+        var preservedPriority=existing?existing[7]:false;
+        var u=[n,lv||"C",preservedLp,gd("Latest Lead (In Velocify)"),gd("Latest File Started"),gd("Latest Contract"),gd("Latest Close"),preservedPriority,closedPastYear];
         up.push(u);
-        var a=agents.find(function(x){return x[0]===n;});
-        if(a){a[1]=u[1]||a[1];a[3]=u[3];a[4]=u[4];a[5]=u[5];a[6]=u[6];a[8]=u[8]||a[8]||0;if(!isActive(a))flagged++;updated++;}
+        if(existing){existing[1]=u[1]||existing[1];existing[3]=u[3];existing[4]=u[4];existing[5]=u[5];existing[6]=u[6];existing[8]=u[8]||existing[8]||0;if(!isActive(existing))flagged++;updated++;}
         else{agents.push(u);added++;}
       });
       // Phase 5: persist updates to Supabase agent_assignments
@@ -5661,6 +5677,11 @@ function loadCoMktPartners(){
       coMktLeadCounts[name]=(coMktLeadCounts[name]||0)+1;
     });
     coMktClosedCounts={};
+    agents.forEach(function(a){
+      var name=(a[0]||"").trim().toUpperCase();
+      if(!name)return;
+      coMktClosedCounts[name]=a[8]||0;
+    });
     renderDirectorView();
   }).catch(function(){
     el.innerHTML='<div style="text-align:center;padding:30px;color:var(--red);font-size:13px">Could not load — check connection or run the setup SQL</div>';
@@ -5700,16 +5721,21 @@ function renderDirectorView(){
   // ── Bulk spend editor — update several partners' verified monthly spend without opening each card ──
   var bulkHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px">';
   bulkHtml+='<div style="padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">Quick spend update — verified monthly numbers, not Power BI estimates</div>';
+  bulkHtml+='<div style="padding:6px 14px;font-size:10px;color:var(--text-3);background:var(--bg);border-bottom:1px solid var(--border)">For "Both" partners, Total cost should be the full combined Zillow + Realtor.com amount — the Zillow-side column below is broken out separately so it doesn\'t get missed.</div>';
   bulkHtml+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
-  ["Partner","Total cost","Your spend"].forEach(function(h){
+  ["Partner","Platform","Total cost","Your spend (lender)","Agent spend","Zillow-side spend"].forEach(function(h){
     bulkHtml+='<th style="text-align:left;padding:6px 14px;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border-light)">'+h+'</th>';
   });
   bulkHtml+='</tr></thead><tbody>';
   coMktPartners.forEach(function(p){
+    var isBoth=(p.platform||"").toLowerCase()==="both";
     bulkHtml+='<tr>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light);font-weight:600">'+escHtml(p.partner_name)+'</td>';
-    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.total_cost||0)+'" onchange="dmSaveField('+p.id+',\'total_cost\',this.value)" style="width:100px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
-    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.your_spend||0)+'" onchange="dmSaveField('+p.id+',\'your_spend\',this.value)" style="width:100px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
+    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)">'+platTag(p.platform)+'</td>';
+    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.total_cost||0)+'" onchange="dmSaveField('+p.id+',\'total_cost\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
+    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.your_spend||0)+'" onchange="dmSaveField('+p.id+',\'your_spend\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
+    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.agent_spend||0)+'" onchange="dmSaveField('+p.id+',\'agent_spend\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
+    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)">'+(isBoth?'<input type="number" step="0.01" value="'+(p.your_spend_zillow||0)+'" onchange="dmSaveField('+p.id+',\'your_spend_zillow\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit">':'<span style="color:var(--text-3)">—</span>')+'</td>';
     bulkHtml+='</tr>';
   });
   bulkHtml+='</tbody></table></div>';
