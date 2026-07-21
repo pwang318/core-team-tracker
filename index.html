@@ -5526,7 +5526,8 @@ function renderFaceTime(){
     } else {
       var a=r.a,fid=r.formId;
       var coBadge=a.coMkt?'<span class="co-mkt-tag" style="cursor:pointer" data-name="'+escHtml(a.name)+'" data-active="true">Co-marketing ✓</span>':'<span class="ft-comkt-off" data-name="'+escHtml(a.name)+'" data-active="false" style="cursor:pointer;font-size:10px;color:var(--text-3);border:1px dashed var(--border);border-radius:4px;padding:2px 8px">+ Co-marketing</span>';
-      html2+='<div class="ft-row">'
+      var rowStyle=a.coMkt?' style="background:#FAF7F2;border-left:3px solid #B45309;padding-left:8px;margin-left:-11px"':'';
+      html2+='<div class="ft-row"'+rowStyle+'>'
         +'<div class="ft-name">'+a.name+'</div>'
         +'<span style="font-size:11px;font-weight:600;color:'+r.lc+';min-width:50px">'+a.lp+'</span>'
         +'<span class="ft-days '+a.status+'">'+(a.days===null?"Never":a.days+"d ago")+'</span>'
@@ -5541,7 +5542,7 @@ function renderFaceTime(){
             +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Date</label>'
             +'<input type="date" id="'+fid+'-date" value="'+today2()+'" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"></div>'
             +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Logged by</label>'
-            +'<select id="'+fid+'-by" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"><option>Amanda</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option></select></div>'
+            +'<select id="'+fid+'-by" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"><option>Amanda</option><option>Gavin</option><option>Jordan</option><option>Karen</option><option>Nyny</option><option>Osgood</option><option>Said</option></select></div>'
           +'</div>'
           +'<textarea id="'+fid+'-notes" placeholder="Notes (optional)..." style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical;min-height:50px;margin-bottom:8px"></textarea>'
           +'<div style="display:flex;gap:7px">'
