@@ -838,7 +838,7 @@ tr:hover td{background:var(--bg)}
   </div>
 </div>
 <!-- FACE TIME VIEW -->
-<div id="view-facetime" class="view" style="display:none;padding:18px 20px;max-width:960px;margin:0 auto">
+<div id="view-facetime" class="view" style="padding:18px 20px;max-width:960px;margin:0 auto">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-size:16px;font-weight:700;color:var(--text-1)">Face Time Tracker</div>
@@ -883,7 +883,10 @@ tr:hover td{background:var(--bg)}
 <div id="view-director" class="view" style="padding:18px 20px;max-width:1140px;margin:0 auto">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div style="font-size:16px;font-weight:700;color:var(--text-1)">Co-Marketing Report</div>
-    <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm" onclick="zillowSpendQuickFillGlobal()" style="background:#EFF6FF;border-color:#93C5FD;color:#1D4ED8">⤓ Load latest Zillow spend</button>
+      <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
+    </div>
   </div>
   <div style="background:#FAF7F2;border:1px solid #E8DDD0;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:600;color:#5C4A35">
     Target: 1 opportunity per $250 spent each month — either a buddy intro or warm lead. Goal: 80%
@@ -5642,7 +5645,10 @@ function coMktLeadsForRoster(roster){
       leads+=coMktLeadCounts[key]||0;
       closed+=coMktClosedCounts[key]||0;
     });
-    perAgent.push({name:r.name,alias:r.alias,leads:leads,closed:closed});
+    var spend=parseFloat(r.spend)||0;
+    var req=spend>0?Math.max(1,Math.ceil(spend/250)):0;
+    var pct=req>0?Math.round(leads/req*100):null;
+    perAgent.push({name:r.name,alias:r.alias,leads:leads,closed:closed,spend:spend,req:req,pct:pct,billingEnds:r.billing_ends||""});
     total+=leads;closedTotal+=closed;
   });
   return{total:total,closed:closedTotal,perAgent:perAgent};
@@ -5711,14 +5717,21 @@ function renderDirectorView(){
     html+='<span style="font-size:11px;font-weight:800;color:'+goalColor+'">'+lc.total+' leads</span>';
     html+='</div>';
 
-    html+='<div style="font-size:11px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">Agent roster';
-    html+='<button onclick="dmAddAgent('+idx+')" style="font-size:10px;border:1px solid var(--border);background:var(--bg);border-radius:6px;padding:2px 8px;cursor:pointer">+ Add agent</button></div>';
+    html+='<div style="font-size:11px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">Agent roster &amp; monthly spend';
+    html+='<span style="display:flex;gap:6px">';
+    html+='<button onclick="dmAddAgent('+idx+')" style="font-size:10px;border:1px solid var(--border);background:var(--bg);border-radius:6px;padding:2px 8px;cursor:pointer">+ Add agent</button>';
+    html+='</span></div>';
+    html+='<div style="display:flex;gap:6px;padding:2px 0 4px;font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700"><span style="flex:1">Agent</span><span style="width:90px">Alias</span><span style="width:78px;text-align:right">Spend/mo</span><span style="min-width:44px;text-align:right">Leads</span><span style="min-width:32px;text-align:right">%</span><span style="width:14px"></span></div>';
     html+='<div id="dmroster-'+idx+'">';
     lc.perAgent.forEach(function(a,ai){
+      var aColor=a.pct===null?"var(--text-3)":a.pct>=80?"#2E7D6A":a.pct>=50?"#B87333":"#8B3A3A";
+      var aBadge=a.pct===null?'<span style="font-size:9px;color:var(--text-3)">—</span>':'<span style="font-size:9px;font-weight:700;color:'+aColor+'">'+a.pct+'%</span>';
       html+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border-light)">';
       html+='<input value="'+escHtml(a.name)+'" onchange="dmRosterField('+idx+','+ai+',\'name\',this.value)" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:11px">';
-      html+='<input value="'+escHtml(a.alias||"")+'" placeholder="alias" onchange="dmRosterField('+idx+','+ai+',\'alias\',this.value)" style="width:100px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:10px;color:var(--text-3)">';
-      html+='<span style="font-size:10px;color:var(--text-3);font-family:var(--font-mono);min-width:50px;text-align:right">'+a.leads+' leads</span>';
+      html+='<input value="'+escHtml(a.alias||"")+'" placeholder="alias" onchange="dmRosterField('+idx+','+ai+',\'alias\',this.value)" style="width:90px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:10px;color:var(--text-3)">';
+      html+='<input type="number" step="1" value="'+(a.spend||"")+'" placeholder="$" onchange="dmRosterField('+idx+','+ai+',\'spend\',this.value)" style="width:78px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:10px;text-align:right">';
+      html+='<span style="font-size:10px;color:var(--text-3);font-family:var(--font-mono);min-width:44px;text-align:right">'+a.leads+'</span>';
+      html+='<span style="min-width:32px;text-align:right">'+aBadge+'</span>';
       html+='<button onclick="dmRemoveAgent('+idx+','+ai+')" style="font-size:11px;color:var(--red);border:none;background:none;cursor:pointer">✕</button>';
       html+='</div>';
     });
@@ -5783,13 +5796,63 @@ function dmSaveField(id,field,val){
 function dmRosterField(idx,agentIdx,field,val){
   var p=coMktPartners[idx];
   if(!p.agent_roster[agentIdx])return;
-  p.agent_roster[agentIdx][field]=val;
+  p.agent_roster[agentIdx][field]=field==="spend"?(parseFloat(val)||0):val;
   sbFetch("PATCH","co_marketing_partners?id=eq."+p.id,{agent_roster:p.agent_roster}).then(function(){renderDirectorView();}).catch(function(){});
 }
 function dmAddAgent(idx){
   var p=coMktPartners[idx];
-  p.agent_roster.push({name:"New agent",alias:""});
+  p.agent_roster.push({name:"New agent",alias:"",spend:0});
   sbFetch("PATCH","co_marketing_partners?id=eq."+p.id,{agent_roster:p.agent_roster}).then(function(){renderDirectorView();}).catch(function(){});
+}
+// One-click loader for the latest per-agent Zillow monthly spend (from the Zillow billing dashboard screenshot).
+// Matches each name against every partner's existing roster first (an agent's spend can live under
+// a team partner like "Sam Cooper Team" or a paired partner like "Kristina Murphy + Nancy Price") —
+// only creates a brand-new partner row when the agent isn't found anywhere.
+var ZILLOW_SPEND_LATEST={
+  "BRANDON THOMPSON":2000,
+  "KRISTINA MURPHY":1000,
+  "SAM COOPER":855,
+  "HOLLY DOZER":748,
+  "JOHN MEYERS":375,
+  "THE JAMES TEAM":620
+};
+function zillowSpendQuickFillGlobal(){
+  var touchedPartnerIdx=[],toCreate=[];
+  Object.keys(ZILLOW_SPEND_LATEST).forEach(function(nameKey){
+    var amt=ZILLOW_SPEND_LATEST[nameKey];
+    var found=false;
+    coMktPartners.forEach(function(p,pi){
+      (p.agent_roster||[]).forEach(function(r){
+        var rn=(r.name||"").trim().toUpperCase();
+        var ra=(r.alias||"").trim().toUpperCase();
+        if(rn===nameKey||ra===nameKey){
+          r.spend=amt;
+          found=true;
+          if(touchedPartnerIdx.indexOf(pi)<0)touchedPartnerIdx.push(pi);
+        }
+      });
+    });
+    if(!found)toCreate.push({key:nameKey,amt:amt});
+  });
+
+  var savePromises=touchedPartnerIdx.map(function(pi){
+    var p=coMktPartners[pi];
+    return sbFetch("PATCH","co_marketing_partners?id=eq."+p.id,{agent_roster:p.agent_roster});
+  });
+  toCreate.forEach(function(item){
+    var prettyName=item.key.split(" ").map(function(w){return w.charAt(0)+w.slice(1).toLowerCase();}).join(" ");
+    savePromises.push(sbFetch("POST","co_marketing_partners",{
+      partner_name:prettyName,platform:"zillow",brokerage:"",since_date:null,
+      total_cost:0,your_spend:item.amt,agent_spend:0,lender_budget:0,
+      agent_roster:[{name:prettyName,alias:"",spend:item.amt}]
+    }));
+  });
+
+  Promise.all(savePromises).then(function(){
+    return loadCoMktPartners();
+  }).then(function(){
+    showToast("Zillow spend loaded — "+touchedPartnerIdx.length+" partner(s) updated, "+toCreate.length+" new added","success");
+  }).catch(function(){alert("Some updates failed — check connection and try again");});
 }
 function dmRemoveAgent(idx,agentIdx){
   var p=coMktPartners[idx];
