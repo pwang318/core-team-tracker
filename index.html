@@ -5693,8 +5693,9 @@ function coMktLeadsForRoster(roster){
       closed+=coMktClosedCounts[key]||0;
     });
     var spend=parseFloat(r.spend)||0;
-    var req=spend>0?Math.max(1,Math.ceil(spend/250)):0;
-    var pct=req>0?Math.round(leads/req*100):null;
+    var req=spend>0?Math.max(1,Math.floor(spend/250)):0;
+    var rawReq=spend/250;
+    var pct=rawReq>0?Math.round(leads/rawReq*100):null;
     perAgent.push({name:r.name,alias:r.alias,leads:leads,closed:closed,spend:spend,req:req,pct:pct,billingEnds:r.billing_ends||""});
     total+=leads;closedTotal+=closed;
   });
@@ -5710,6 +5711,7 @@ function platTag(p){
 function renderDirectorView(){
   var el=document.getElementById("director-cards");
   if(!coMktPartners.length){el.innerHTML='<div style="padding:20px;color:var(--text-3);font-size:13px">No partners yet — run the setup SQL to seed them.</div>';return;}
+  coMktPartners.sort(function(a,b){return(a.partner_name||"").localeCompare(b.partner_name||"");});
 
   // ── Bulk spend editor — update several partners' verified monthly spend without opening each card ──
   var bulkHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px">';
@@ -5724,7 +5726,8 @@ function renderDirectorView(){
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light);font-weight:600">'+escHtml(p.partner_name)+'</td>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)">'+platTag(p.platform)+'</td>';
     var bulkComputedTotal=(parseFloat(p.your_spend)||0)+(parseFloat(p.agent_spend)||0);
-    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light);font-family:var(--font-mono)" title="Computed: your spend + agent spend">$'+bulkComputedTotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>';
+    var bulkTotalVal=p.total_cost?p.total_cost:bulkComputedTotal;
+    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+bulkTotalVal+'" title="Defaults to your spend + agent spend — edit to override" onchange="dmSaveField('+p.id+',\'total_cost\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.your_spend||0)+'" onchange="dmSaveField('+p.id+',\'your_spend\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
     bulkHtml+='</tr>';
   });
@@ -5736,14 +5739,16 @@ function renderDirectorView(){
   coMktPartners.forEach(function(p,idx){
     var roster=p.agent_roster||[];
     var lc=coMktLeadsForRoster(roster);
-    var req=p.your_spend?Math.max(1,Math.ceil(p.your_spend/250)):0;
-    var pct=req>0?Math.min(999,Math.round(lc.total/req*100)):0;
+    var req=p.your_spend?Math.max(1,Math.floor(p.your_spend/250)):0;
+    var rawReq=(parseFloat(p.your_spend)||0)/250;
+    var pct=rawReq>0?Math.min(999,Math.round(lc.total/rawReq*100)):0;
     var goalColor=pct>=80?"#2E7D6A":pct>=50?"#B87333":"#8B3A3A";
     var goalBg=pct>=80?"#34D399":pct>=50?"#FBBF24":"#F87171";
     var costPerLead=lc.total>0&&p.your_spend?("$"+(p.your_spend/lc.total).toFixed(0)):"—";
     var statusLabel=pct>=80?"✅ Working":pct>=50?"⚠ Watch":"🚨 Concern";
+    var combinedYourSpend=(parseFloat(p.your_spend)||0)+(p.platform==="both"?(parseFloat(p.your_spend_zillow)||0):0);
 
-    summaryRows.push({id:idx,name:p.partner_name,platform:p.platform,yourSpend:p.your_spend||0,req:req,leads:lc.total,pct:pct,color:goalColor,status:statusLabel});
+    summaryRows.push({id:idx,name:p.partner_name,platform:p.platform,yourSpend:combinedYourSpend,req:req,rawReq:rawReq,leads:lc.total,pct:pct,color:goalColor,status:statusLabel});
 
     html+='<div id="dmwrap-'+idx+'" style="background:var(--surface);border:1px solid var(--border);border-left:4px solid '+goalBg+';border-radius:10px;overflow:hidden">';
     html+='<div style="padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="dmToggleCard('+idx+')">';
@@ -5757,8 +5762,9 @@ function renderDirectorView(){
     html+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Spend breakdown</div>';
     html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
     var cardComputedTotal=(parseFloat(p.your_spend)||0)+(parseFloat(p.agent_spend)||0);
-    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Total cost <span style="text-transform:none;font-weight:400">(= your spend + agent spend)</span></label>';
-    html+='<div style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:var(--font-mono);background:var(--surface-2)">$'+cardComputedTotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</div></div>';
+    var cardTotalVal=p.total_cost?p.total_cost:cardComputedTotal;
+    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Total cost <span style="text-transform:none;font-weight:400">(defaults to spend + agent spend)</span></label>';
+    html+='<input type="number" step="0.01" value="'+cardTotalVal+'" onchange="dmSaveField('+p.id+',\'total_cost\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
     html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Your spend</label>';
     html+='<input type="number" step="0.01" value="'+(p.your_spend||0)+'" onchange="dmSaveField('+p.id+',\'your_spend\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
     html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Agent spend</label>';
@@ -5767,8 +5773,10 @@ function renderDirectorView(){
     html+='<input type="number" step="0.01" value="'+(p.lender_budget||0)+'" onchange="dmSaveField('+p.id+',\'lender_budget\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
     html+='</div>';
     if(p.platform==="both"){
+      var combinedTotal=cardTotalVal+(parseFloat(p.your_spend_zillow)||0);
       html+='<div style="margin-bottom:10px"><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Your spend (Zillow side)</label>';
       html+='<input type="number" step="0.01" value="'+(p.your_spend_zillow||0)+'" onchange="dmSaveField('+p.id+',\'your_spend_zillow\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+      html+='<div style="margin-bottom:10px;background:var(--surface-2);border-radius:6px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase">Total — both platforms</span><span style="font-size:14px;font-weight:800;font-family:var(--font-mono)">$'+combinedTotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</span></div>';
     }
 
     html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px">';
@@ -5777,6 +5785,17 @@ function renderDirectorView(){
     html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Closed</div><div style="font-size:14px;font-weight:800;color:#2E7D6A">'+lc.closed+'</div></div>';
     html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Goal %</div><div style="font-size:14px;font-weight:800;color:'+goalColor+'">'+pct+'%</div></div>';
     html+='</div>';
+
+    var spend12=parseFloat(p.spend_12mo)||0,vol12=parseFloat(p.closed_vol_12mo)||0;
+    var cta=vol12>0?(spend12/vol12*100).toFixed(2)+"%":"—";
+    html+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;margin:10px 0 4px">12-month performance <span style="text-transform:none;font-weight:400">(type in your own verified numbers — don\'t rely on Power BI\'s cache)</span></div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">';
+    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">12mo expenditure ($)</label>';
+    html+='<input type="number" step="0.01" value="'+(p.spend_12mo||0)+'" onchange="dmSaveField('+p.id+',\'spend_12mo\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">12mo closed volume ($)</label>';
+    html+='<input type="number" step="0.01" value="'+(p.closed_vol_12mo||0)+'" onchange="dmSaveField('+p.id+',\'closed_vol_12mo\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+    html+='</div>';
+    html+='<div style="margin-bottom:10px;background:var(--surface-2);border-radius:6px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase">Avg cost to acquire <span style="text-transform:none;font-weight:400">(expenditure ÷ closed volume)</span></span><span style="font-size:14px;font-weight:800;font-family:var(--font-mono)">'+cta+'</span></div>';
 
     html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">';
     html+='<span style="font-size:10px;color:var(--text-3);white-space:nowrap">$250 rule (need '+req+')</span>';
@@ -5810,7 +5829,8 @@ function renderDirectorView(){
   var totalYourSpend=summaryRows.reduce(function(s,r){return s+r.yourSpend;},0);
   var totalLeads=summaryRows.reduce(function(s,r){return s+r.leads;},0);
   var totalReq=summaryRows.reduce(function(s,r){return s+r.req;},0);
-  var overallPct=totalReq>0?Math.round(totalLeads/totalReq*100):0;
+  var totalRawReq=summaryRows.reduce(function(s,r){return s+r.rawReq;},0);
+  var overallPct=totalRawReq>0?Math.round(totalLeads/totalRawReq*100):0;
   var overallColor=overallPct>=80?"#2E7D6A":overallPct>=50?"#B87333":"#8B3A3A";
   var concernCount=summaryRows.filter(function(r){return r.pct<50;}).length;
   var watchCount=summaryRows.filter(function(r){return r.pct>=50&&r.pct<80;}).length;
@@ -5819,7 +5839,7 @@ function renderDirectorView(){
   html+='<div style="font-size:13px;font-weight:700;margin-bottom:4px">Is co-marketing working?</div>';
   html+='<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">'+overallPct+'% of expected opportunities delivered across '+summaryRows.length+' partners'+(concernCount||watchCount?" — "+concernCount+" need attention, "+watchCount+" to watch":" — all on track")+'</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
-  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total your spend</div><div style="font-size:18px;font-weight:800">$'+totalYourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total spend</div><div style="font-size:18px;font-weight:800">$'+totalYourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total YTD leads</div><div style="font-size:18px;font-weight:800">'+totalLeads+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Opps required</div><div style="font-size:18px;font-weight:800">'+totalReq+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Team goal %</div><div style="font-size:18px;font-weight:800;color:'+overallColor+'">'+overallPct+'%</div></div>';
@@ -5827,7 +5847,7 @@ function renderDirectorView(){
 
   html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
   html+='<thead><tr>';
-  ["Partner","Platform","Your spend","Req.","YTD leads","Status"].forEach(function(h){
+  ["Partner","Platform","Total spend","Req.","YTD leads","Status"].forEach(function(h){
     html+='<th style="background:var(--bg);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border)">'+h+'</th>';
   });
   html+='</tr></thead><tbody>';
@@ -5851,7 +5871,7 @@ function dmToggleCard(idx){
 }
 function dmSaveField(id,field,val){
   var payload={};
-  payload[field]=(field.indexOf("spend")>=0||field==="total_cost"||field==="lender_budget"||field==="agent_spend")?parseFloat(val)||0:val;
+  payload[field]=(field.indexOf("spend")>=0||field==="total_cost"||field==="lender_budget"||field==="agent_spend"||field==="closed_vol_12mo")?parseFloat(val)||0:val;
   sbFetch("PATCH","co_marketing_partners?id=eq."+id,payload).then(function(){
     var p=coMktPartners.find(function(x){return x.id===id;});
     if(p)p[field]=payload[field];
