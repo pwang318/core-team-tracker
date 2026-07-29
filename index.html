@@ -812,7 +812,7 @@ tr:hover td{background:var(--bg)}
       <input type="text" id="reassign-q" placeholder="Search agent..." oninput="renderReassign()" style="flex:1;min-width:140px">
       <select id="reassign-filter-lp" onchange="renderReassign()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
     </div>
-    <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign to</th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
+    <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign to</th><th></th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
   </div>
   <div class="admin-section">
     <h3>Inactive agents <span id="inactive-count-label" style="font-weight:400;color:#888;font-size:12px"></span></h3>
@@ -3786,7 +3786,8 @@ function renderReassign(){
       '<td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
       '<td><button class="btn btn-sm'+(pri?" btn-danger":" btn-success")+'" data-idx="'+idx+'" onclick="togglePriority(this)">'+(pri?"Remove":"Set Priority")+'</button></td>'+
       '<td><span class="lp-tag lp-tag-'+curLp+'">'+curLp+'</span></td>'+
-      '<td><select data-idx="'+idx+'" onchange="reassign(this)" style="font-size:12px">'+opts+'</select></td></tr>';
+      '<td><select data-idx="'+idx+'" onchange="reassign(this)" style="font-size:12px">'+opts+'</select></td>'+
+      '<td><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)" style="font-size:11px;padding:2px 8px">Remove</button></td></tr>';
   }).join("");
 }
 
