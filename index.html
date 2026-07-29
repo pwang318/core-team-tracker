@@ -3879,16 +3879,16 @@ function handleUpload(input){
       });
 
       // ── Co-marketing partner sync from same Power BI export ──
-      if(coMktPartners.length){
+      var doCmSync=function(){
+        if(!coMktPartners.length)return;
         var cmUpdates=[];
         coMktPartners.forEach(function(p){
-          // Collect all agent names in this partner's roster
+          if(!p.id)return; // skip if id missing
           var rosterNames=(p.agent_roster||[]).map(function(r){return(r.name||r.alias||"").trim().toUpperCase();}).filter(Boolean);
-          // Also try the partner name itself as a lookup
           var partnerNameKey=(p.partner_name||"").trim().toUpperCase().replace(/ TEAM$/,"").replace(/ MEJIA$/,"");
           var matchedRows=[];
           Object.keys(pbMap).forEach(function(pbName){
-            if(rosterNames.some(function(rn){return pbName.indexOf(rn)>=0||rn.indexOf(pbName)>=0;})
+            if(rosterNames.some(function(rn){return pbName===rn||pbName.indexOf(rn)>=0||rn.indexOf(pbName)>=0;})
                ||pbName.indexOf(partnerNameKey)>=0||partnerNameKey.indexOf(pbName)>=0){
               matchedRows.push(pbMap[pbName]);
             }
@@ -3898,16 +3898,19 @@ function handleUpload(input){
           var totalLeads=matchedRows.reduce(function(s,r){return s+(parseInt(r["Total Leads Past Year"])||0);},0);
           var totalClosed=matchedRows.reduce(function(s,r){return s+(parseInt(r["Closed Past Year"])||0);},0);
           var totalVol=matchedRows.reduce(function(s,r){return s+(parseFloat(r["Closed Past Year Vol"])||0);},0);
-          var latestLead=gd("Latest Lead (In Velocify)");
-          var latestContract=gd("Latest Contract");
-          var latestClose=gd("Latest Close");
-          var payload={pb_leads_12mo:totalLeads,pb_closed_12mo:totalClosed,pb_vol_12mo:totalVol,pb_latest_lead:latestLead,pb_latest_contract:latestContract,pb_latest_close:latestClose,pb_synced_at:new Date().toISOString().split("T")[0]};
-          // Update local object for immediate re-render
+          var payload={pb_leads_12mo:totalLeads,pb_closed_12mo:totalClosed,pb_vol_12mo:totalVol,pb_latest_lead:gd("Latest Lead (In Velocify)"),pb_latest_contract:gd("Latest Contract"),pb_latest_close:gd("Latest Close"),pb_synced_at:new Date().toISOString().split("T")[0]};
           Object.assign(p,payload);
-          cmUpdates.push(sbFetch("PATCH","co_marketing_partners?id=eq."+p.id,payload));
+          cmUpdates.push(sbFetch("PATCH","co_marketing_partners?id=eq."+p.id,payload).catch(function(e){console.error("co-mkt sync failed for",p.partner_name,e);}));
         });
-        if(cmUpdates.length){Promise.all(cmUpdates).catch(function(){});}
-      }
+        if(cmUpdates.length){
+          Promise.all(cmUpdates).then(function(){
+            console.log("Co-marketing Power BI sync complete for",cmUpdates.length,"partners");
+            if(typeof renderDirectorView==="function"&&currentUser==="Director")renderDirectorView();
+          }).catch(function(e){console.error("co-mkt sync error",e);});
+        }
+      };
+      if(coMktPartners.length){doCmSync();}
+      else{loadCoMktPartners().then(function(){setTimeout(doCmSync,500);});}
 
       // Phase 5: persist agent_assignments updates
       var agentRows=up.map(function(u){return{agent_name:u[0],level:u[1]||"C",lp:u[2]||"Unassigned",priority:u[7]||false,added:false,closed_past_year:u[8]||0};});
