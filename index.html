@@ -3894,7 +3894,23 @@ function handleUpload(input){
             }
           });
           if(!matchedRows.length)return;
-          var gd=function(col){var vals=matchedRows.map(function(r){var v=r[col];if(!v)return null;try{return new Date(v);}catch(e){return null;}}).filter(Boolean);return vals.length?vals.sort(function(a,b){return b-a;})[0].toISOString().split("T")[0]:null;};
+          var gd=function(col){
+            var vals=matchedRows.map(function(r){
+              var v=r[col];
+              if(v===null||v===undefined||v==="")return null;
+              try{
+                var d;
+                if(v instanceof Date){d=v;}
+                else if(typeof v==="number"&&v>1){
+                  // Excel serial: days since 1900-01-01, adjust for leap year bug
+                  d=new Date(Math.round((v-25569)*86400*1000));
+                }
+                else{d=new Date(v);}
+                return(!isNaN(d.getTime())&&d.getFullYear()>1971)?d:null;
+              }catch(e){return null;}
+            }).filter(Boolean);
+            return vals.length?vals.sort(function(a,b){return b-a;})[0].toISOString().split("T")[0]:null;
+          };
           var totalLeads=matchedRows.reduce(function(s,r){return s+(parseInt(r["Total Leads Past Year"])||0);},0);
           var totalClosed=matchedRows.reduce(function(s,r){return s+(parseInt(r["Closed Past Year"])||0);},0);
           var totalVol=matchedRows.reduce(function(s,r){return s+(parseFloat(r["Closed Past Year Vol"])||0);},0);
