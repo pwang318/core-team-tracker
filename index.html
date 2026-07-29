@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3206,13 +3205,19 @@ function toggleQuiet(id){
   if(el)el.style.display=el.style.display==="none"?"block":"none";
 }
 
-function goToLP(lp){
+function goToLP(lp, showCarryover){
   var btns=document.querySelectorAll(".who-btn");
   var btn=null;
   for(var i=0;i<btns.length;i++){
     if(btns[i].textContent.trim()===lp){btn=btns[i];break;}
   }
   selectUser(btn,lp);
+  if(showCarryover){
+    loadCallLogs().then(function(){
+      renderLP(lp);
+      setTimeout(function(){toggleCarryoverList(lp);},200);
+    });
+  }
 }
 
 function renderAllClear(){
@@ -3441,7 +3446,7 @@ function buildSnapshot(){
     h+='<span style="font-size:11px;color:var(--text-3)">/ '+target+' calls this week</span>';
     h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
     h+='<span style="font-size:11px;color:'+sc+';font-weight:500">'+status+'</span>';
-    if(missedLastWeek>0)h+='<span class="carryover-tag" title="Agents from last week\'s rotation with no call logged, now pinned to the top of this week\'s list">'+missedLastWeek+' carried over from last week</span>';
+    if(missedLastWeek>0)h+='<span class="carryover-tag" style="cursor:pointer" title="Click to see which agents weren\'t called last week" onclick="event.stopPropagation();goToLP(\''+lp+'\',true)">'+missedLastWeek+' carried over from last week &#8250;</span>';
     h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Velocify: <b style="color:'+(leadsW?'#1D9E75':'var(--text-3)')+'">'+leadsW+' WTD</b> · '+leadsT+' today · <a style="color:var(--accent)" onclick="event.stopPropagation();goToLP(\''+lp+'\')">open ↗</a></span>';
     h+='</div>';
     h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
