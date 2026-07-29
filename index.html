@@ -753,7 +753,6 @@ tr:hover td{background:var(--bg)}
     <div id="d-allclear-section" style="margin-bottom:.75rem"></div>
     <div id="d-rm-summary" style="margin-bottom:1rem"></div>
     <div id="d-lp-scorecard-summary" style="margin-bottom:1rem"></div>
-    <div id="velocify-leaderboard" style="margin-bottom:1rem"></div>
     <div id="d-lead-pipeline-full" style="margin-bottom:1rem"><div style="text-align:center;padding:16px;color:var(--text-3);font-size:12px">Loading lead data...</div></div>
     <div id="d-churn-risk-section" style="margin-bottom:1rem"></div>
     <div id="d-lp-effectiveness-section" style="margin-bottom:1rem"></div>
@@ -767,7 +766,7 @@ tr:hover td{background:var(--bg)}
 
   <!-- TAB: GROWTH -->
   <div id="leads-tab-growth" class="d-tab-panel">
-    <div id="d-growth-scoreboard" style="margin-bottom:1rem"></div>
+    <div id="d-growth-scoreboard-tab" style="margin-bottom:1rem"></div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
       <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Growth tracking</div>
       <div style="font-size:12px;color:var(--text-2);line-height:1.6">
@@ -1499,14 +1498,16 @@ function loadAgents(){
 
 function saveAgents(){
   var ov=agents.filter(function(a){var s=SEED.find(function(x){return x[0]===a[0];});return!s||s[2]!==a[2]||s[7]!==a[7];}).map(function(a){return{n:a[0],lp:a[2],lv:a[1],pr:a[7],added:!SEED.find(function(s){return s[0]===a[0];})};});
-  var rm=SEED.map(function(s){return s[0];}).filter(function(n){return!agents.find(function(a){return a[0]===n;});});
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify({ov:ov,rm:rm}));}catch(e){}
+  try{
+    var s=localStorage.getItem(STORAGE_KEY);
+    var d=s?JSON.parse(s):{};
+    d.ov=ov;
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
+  }catch(e){}
   // Save to Supabase async — don't block or error on failure
   try{
     var rows=ov.map(function(o){return{agent_name:o.n,lp:o.lp,priority:o.pr||false,added:o.added||false,level:o.lv||"C"};});
-    var removedRows=rm.map(function(n){return{agent_name:n,lp:"__REMOVED__",priority:false,added:false,level:"C"};});
-    var allRows=rows.concat(removedRows);
-    if(allRows.length)sbFetch("POST","agent_assignments?on_conflict=agent_name",allRows).catch(function(){});
+    if(rows.length)sbFetch("POST","agent_assignments?on_conflict=agent_name",rows).catch(function(){});
   }catch(e){}
 }
 
@@ -2478,7 +2479,8 @@ function renderAlerts(){
 
 function renderGrowthScoreboard(){
   var el=document.getElementById("d-growth-scoreboard");
-  if(!el)return;
+  var el2=document.getElementById("d-growth-scoreboard-tab");
+  if(!el&&!el2)return;
   var activeAgents=agents.filter(isActive);
   var total=activeAgents.length;
   var aTier=activeAgents.filter(function(a){return a[1]==="A";}).length;
@@ -2509,7 +2511,7 @@ function renderGrowthScoreboard(){
       +'</div>';
   });
 
-  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">'
+  var scoreboardHtml='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">'
     +'<div style="background:#f8fafc;border-radius:8px;padding:14px;border:1px solid var(--border)">'
       +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Active agents</div>'
       +'<div style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-.02em">'+total+'</div>'
@@ -2533,6 +2535,8 @@ function renderGrowthScoreboard(){
   +'</div>'
   +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:8px">By LP</div>'
   +lpRows;
+  if(el)el.innerHTML=scoreboardHtml;
+  if(el2)el2.innerHTML=scoreboardHtml;
 }
 
 async function renderRmSummary(){
@@ -3440,7 +3444,7 @@ function buildSnapshot(){
     h+='<span style="font-size:11px;color:var(--text-3)">/ '+target+' calls this week</span>';
     h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
     h+='<span style="font-size:11px;color:'+sc+';font-weight:500">'+status+'</span>';
-    if(missedLastWeek>0)h+='<span class="carryover-tag" title="Agents from last week\'s rotation with no call logged, now pinned to the top of this week\'s list">'+missedLastWeek+' carried over from last week</span>';
+    if(missedLastWeek>0)h+='<span class="carryover-tag" style="cursor:pointer" title="Click to see which agents weren\'t called last week" onclick="event.stopPropagation();goToLP(\''+lp+'\')">'+missedLastWeek+' carried over from last week &#8250;</span>';
     h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Velocify: <b style="color:'+(leadsW?'#1D9E75':'var(--text-3)')+'">'+leadsW+' WTD</b> · '+leadsT+' today · <a style="color:var(--accent)" onclick="event.stopPropagation();goToLP(\''+lp+'\')">open ↗</a></span>';
     h+='</div>';
     h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
@@ -3799,7 +3803,20 @@ function addAgent(){
   agents.push([name,lv,lp,null,null,null,null,pri,0]);
   document.getElementById("add-name").value="";saveAgents();renderAdmin();alert(name+" added!");
 }
-function removeAgent(btn){var name=btn.getAttribute("data-name");if(!confirm("Remove "+name+"?"))return;agents=agents.filter(function(a){return a[0]!==name;});saveAgents();renderAdmin();}
+function removeAgent(btn){
+  var name=btn.getAttribute("data-name");
+  if(!confirm("Remove "+name+"?"))return;
+  agents=agents.filter(function(a){return a[0]!==name;});
+  try{
+    var s=localStorage.getItem(STORAGE_KEY);
+    var d=s?JSON.parse(s):{};
+    d.rm=d.rm||[];
+    if(d.rm.indexOf(name)<0)d.rm.push(name);
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
+  }catch(e){}
+  sbFetch("POST","agent_assignments?on_conflict=agent_name",[{agent_name:name,lp:"__REMOVED__",priority:false,added:false,level:"C"}]).catch(function(){});
+  renderAdmin();
+}
 function reactivate(btn){var a=agents.find(function(x){return x[0]===btn.getAttribute("data-name");});if(a)a[3]=localDateStr(TODAY);saveAgents();renderAdmin();}
 
 function loadXLSX(){
@@ -5821,17 +5838,21 @@ function loadVelocifyLeadsCsv(input){
     try{
       var rawRows=parseCsvSimple(e.target.result);
       var dbRows=[],dates=[],skipped=0;
-      rawRows.forEach(function(r){
+      rawRows.forEach(function(r,idx){
         var name=(r["Referral Partner Name"]||"").trim();
         var iso=csvDateToISO(r["Date Added"]);
         if(!name||!iso){skipped++;return;}
         dates.push(iso);
+        var buyer=((r["First Name"]||"").trim()+" "+(r["Last Name"]||"").trim()).trim();
+        var leadKey="csvsync-"+iso+"-"+name.replace(/[^a-zA-Z0-9]/g,"").toUpperCase()+"-"+buyer.replace(/[^a-zA-Z0-9]/g,"").toUpperCase()+"-"+idx;
         dbRows.push({
+          lead_key:leadKey,
           referral_partner_name:name,
           date_added:iso,
           lp_user:(r["User"]||"").trim(),
           status:(r["Status"]||"").trim(),
           lead_source:(r["Lead Source"]||"").trim(),
+          buyer_name:buyer,
           last_action_note:(r["Last Action Note"]||"").trim()
         });
       });
