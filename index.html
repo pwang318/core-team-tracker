@@ -662,6 +662,7 @@ tr:hover td{background:var(--bg)}
 <!-- DANIEL VIEW -->
 <div id="view-snapshot" class="view">
   <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'DM Mono',monospace;font-size:10px"></span></div>
+  <div style="font-size:11px;color:var(--text-3);margin:-6px 0 10px">Calls, Talk's, Leads, 1003's, Pre-apps, and Contracts below are all <b>week-to-date</b> (Monday through now) — not just today. Only the "Leads Today / WTD / MTD" totals up top reset daily.</div>
   <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div></div>
 </div>
 
@@ -802,6 +803,11 @@ tr:hover td{background:var(--bg)}
       <select id="reassign-filter-lp" onchange="renderReassign()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
     </div>
     <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign to</th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
+  </div>
+  <div class="admin-section">
+    <h3>Inactive agents <span id="inactive-count-label" style="font-weight:400;color:#888;font-size:12px"></span></h3>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">Agents with no activity in 90+ days — fallen off the active rotation. Reactivate if they're working leads again.</p>
+    <div id="inactive-list" style="max-height:320px;overflow-y:auto"></div>
   </div>
   <div class="admin-section">
     <h3>Add agent manually</h3>
@@ -1045,8 +1051,8 @@ function switchLeadsTab(tab, btn){
   var panel = document.getElementById("leads-tab-"+tab);
   if(panel) panel.classList.add("active");
   if(tab==="leads") loadReferralLeadsDirect();
-  if(tab==="roster") renderGrowthScoreboard();
-  if(tab==="growth") renderGrowthScoreboard();
+  if(tab==="roster"){renderGrowthScoreboard();renderVelocifyLeaderboard();renderLeaderboard();}
+  if(tab==="growth"){renderGrowthScoreboard();renderDaniel();}
 }
 
 function openLeadsView(btn){
@@ -1484,7 +1490,7 @@ function saveAgents(){
     var rows=ov.map(function(o){return{agent_name:o.n,lp:o.lp,priority:o.pr||false,added:o.added||false,level:o.lv||"C"};});
     var removedRows=rm.map(function(n){return{agent_name:n,lp:"__REMOVED__",priority:false,added:false,level:"C"};});
     var allRows=rows.concat(removedRows);
-    if(allRows.length)sbFetch("POST","agent_assignments",allRows).catch(function(){});
+    if(allRows.length)sbFetch("POST","agent_assignments?on_conflict=agent_name",allRows).catch(function(){});
   }catch(e){}
 }
 
@@ -1534,7 +1540,7 @@ function selectUser(btn,u){
     document.getElementById("view-admin").classList.add("active");
     renderAdmin();
     loadLpOverrides();
-    loadAgentAssignments().then(function(){renderLpAssignList();});
+    loadAgentAssignments().then(function(){renderLpAssignList();renderAdmin();});
   } else if(u==="Welcome"){
     document.getElementById("view-welcome").classList.add("active");
   } else {
@@ -3207,6 +3213,8 @@ function openSnapshotView(btn){
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-snapshot").classList.add("active");
   buildSnapshot();
+  loadCallLogs().then(buildSnapshot);
+  if(typeof loadAmandaSnapshot==="function")loadAmandaSnapshot();
 }
 
 function amCnt(src,type){
@@ -3357,6 +3365,7 @@ function buildSnapshot(){
     var apps=scTotal(scData,'apps_1003');
     var preApps=scTotal(scData,'pre_approvals');
     var contracts=scTotal(scData,'contracts');
+    var missedLastWeek=getLpMissedLastWeek(lp).filter(function(a){return isActive(a);}).length;
     var status,sc;
     if(called>=target){status='Week complete!';sc='#1D9E75';}
     else if(called>=paceTarget){status='On pace';sc='#1D9E75';}
@@ -3367,9 +3376,10 @@ function buildSnapshot(){
     h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
     h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:'+lpColor+'">'+lp+'</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP2</span></div>';
     h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+called+'</span>';
-    h+='<span style="font-size:11px;color:var(--text-3)">/ '+target+' calls</span>';
+    h+='<span style="font-size:11px;color:var(--text-3)">/ '+target+' calls this week</span>';
     h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
     h+='<span style="font-size:11px;color:'+sc+';font-weight:500">'+status+'</span>';
+    if(missedLastWeek>0)h+='<span class="carryover-tag" title="Agents from last week\'s rotation with no call logged, now pinned to the top of this week\'s list">'+missedLastWeek+' carried over from last week</span>';
     h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Velocify: <b style="color:'+(leadsW?'#1D9E75':'var(--text-3)')+'">'+leadsW+' WTD</b> · '+leadsT+' today · <a style="color:var(--accent)" onclick="event.stopPropagation();goToLP(\''+lp+'\')">open ↗</a></span>';
     h+='</div>';
     h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
@@ -3408,7 +3418,7 @@ function buildSnapshot(){
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
   h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#0891B2">Isaak</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP1</span></div>';
   h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+isaakRCalls+'</span>';
-  h+='<span style="font-size:11px;color:var(--text-3)">/ 100 calls</span>';
+  h+='<span style="font-size:11px;color:var(--text-3)">/ 100 calls this week</span>';
   h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#0891B2">'+isaakPct+'%</span>';
   h+='<span style="font-size:11px;color:'+isaakSc+';font-weight:500">'+isaakStatus+'</span>';
   h+='</div>';
@@ -3458,11 +3468,11 @@ function buildSnapshot(){
   h+='<div style="border-left:4px solid #B45309;padding:10px 14px;border-radius:0 6px 6px 0;background:var(--surface)">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
   h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#B45309">Amanda</span><br><span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">RM</span></div>';
-  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+amTotalToday+'</span>';
-  h+='<span style="font-size:11px;color:var(--text-3)">/ '+amDailyTotalGoal+' today</span>';
+  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+amTotalWTD+'</span>';
+  h+='<span style="font-size:11px;color:var(--text-3)">/ '+amWeeklyGoal+' this week</span>';
   h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#B45309">'+amPctOfGoal+'%</span>';
   h+='<span style="font-size:11px;color:'+aSc+';font-weight:500">'+aSt+'</span>';
-  h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">WTD: '+amTotalWTD+' · MTD: '+amTotalMTD+'</span>';
+  h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Today: '+amTotalToday+' · MTD: '+amTotalMTD+'</span>';
   h+='</div>';
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
   h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:#B45309"></div></div></div>';
@@ -3601,8 +3611,6 @@ function renderTeamStreak(){
 }
 
 function renderDaniel(){
-  var dv=document.getElementById("view-daniel");
-  if(!dv||!dv.classList.contains("active"))return;
   renderTeamStreak();
   renderCarryoverAlerts();
   renderNoteQuality();
@@ -3610,8 +3618,6 @@ function renderDaniel(){
   renderAllClear();
   loadLeadPipeline();
   renderGrowthScoreboard();
-  renderRmSummary();
-  renderLpScorecardSummary();
   renderVelocifyLeaderboard();
   var bdayEl=document.getElementById("daniel-bday-list");
   if(bdayEl){
@@ -3625,9 +3631,7 @@ function renderDaniel(){
       bdayEl.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px 0">🎂 No birthdays this week. Tap Edit on any agent card to add one.</div>';
     }
   }
-  renderScorecard("tw",callLogs,weekKey,getRotation);
-  renderScorecard("lw",lastWeekLogs,lastWeekKey,getLastWeekRotation);
-  renderLeaderboard();renderTeamsMsg();
+  renderLeaderboard();
   var flp=document.getElementById("d-lp").value,flv=document.getElementById("d-lvl").value;
   var fst=document.getElementById("d-status").value,q=document.getElementById("d-q").value.toLowerCase();
   var gh="";
@@ -3644,7 +3648,8 @@ function renderDaniel(){
     if(ic)gh+='<div style="font-size:11px;color:#E65100;margin-top:2px">'+ic+' inactive</div>';
     gh+='</div>';
   });
-  document.getElementById("d-grid").innerHTML=gh;
+  var gridEl=document.getElementById("d-grid");
+  if(gridEl)gridEl.innerHTML=gh;
   var list=agents.filter(function(a){return a[2]&&a[2]!=="Unassigned";});
   if(flp)list=list.filter(function(a){return a[2]===flp;});
   if(flv)list=list.filter(function(a){return a[1]===flv;});
@@ -3786,7 +3791,7 @@ function handleUpload(input){
       // Phase 5: persist updates to Supabase agent_assignments
       var rows=up.map(function(u){return{agent_name:u[0],level:u[1]||"C",lp:u[2]||"Unassigned",priority:u[7]||false,added:false,closed_past_year:u[8]||0};});
       if(rows.length){
-        sbFetch("POST","agent_assignments",rows).then(function(){
+        sbFetch("POST","agent_assignments?on_conflict=agent_name",rows).then(function(){
           res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged. Synced to Supabase ✓";
         }).catch(function(){
           res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged. (Supabase sync failed — changes are session only)";
@@ -4374,10 +4379,17 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
 
 
 setInterval(function(){
+  if(userTyping)return;
   if(currentUser==="Daniel"&&Object.keys(pendingNote).length===0){
     loadCallLogs().then(function(){renderDaniel();});
   } else if(currentUser==="Snapshot"&&Object.keys(pendingNote).length===0){
     loadCallLogs().then(function(){buildSnapshot();});
+    if(typeof loadAmandaSnapshot==="function")loadAmandaSnapshot();
+  } else if(currentUser==="Leads"){
+    loadReferralLeadsDirect();
+    renderGrowthScoreboard();renderVelocifyLeaderboard();renderLeaderboard();
+  } else if(currentUser==="Director"){
+    loadCoMktPartners();
   }
 },30000);
 document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
@@ -4869,7 +4881,7 @@ function openRmFollowupForm(btn){
 function rmClearFlag(id){
   if(!id)return;
   sbFetch("PATCH","rm_followups?id=eq."+encodeURIComponent(id),{flagged:false})
-    .then(function(){loadRmFollowups();renderRmView();})
+    .then(function(){loadRmFollowups();rmLoadFlagged();})
     .catch(function(){});
 }
 
@@ -5380,7 +5392,7 @@ function setAgentLP(name,lp,selectEl){
   if(savedEl){savedEl.textContent="Saving...";savedEl.style.color="var(--text-3)";savedEl.style.display="inline";}
 
   // Persist to Supabase agent_assignments
-  sbFetch("POST","agent_assignments",{
+  sbFetch("POST","agent_assignments?on_conflict=agent_name",{
     agent_name:name,
     lp:lpVal||"Unassigned",
     level:entry[1]||"C",
@@ -5642,6 +5654,7 @@ function fmtDate(d){
 var coMktPartners=[];
 var coMktLeadCounts={};
 var coMktClosedCounts={};
+var coMktLeadCountsSource="Live sync (velocify_leads, year-to-date)";
 
 function openDirectorView(btn){
   rmStopPolling(); lpStopPolling();
@@ -5664,6 +5677,7 @@ function loadCoMktPartners(){
     coMktPartners=res[0]||[];
     var rawLeads=res[1]||[];
     coMktLeadCounts={};
+    coMktLeadCountsSource="Live sync (velocify_leads, year-to-date)";
     rawLeads.forEach(function(r){
       var name=(r.referral_partner_name||"").trim().toUpperCase();
       if(!name)return;
@@ -5702,6 +5716,91 @@ function coMktLeadsForRoster(roster){
   return{total:total,closed:closedTotal,perAgent:perAgent};
 }
 
+// Minimal RFC4180-ish CSV parser — handles quoted fields with embedded commas (e.g. "De La Riva, Karen")
+function parseCsvSimple(text){
+  var rows=[],row=[],field="",inQuotes=false;
+  for(var i=0;i<text.length;i++){
+    var c=text[i];
+    if(inQuotes){
+      if(c==='"'){
+        if(text[i+1]==='"'){field+='"';i++;}
+        else inQuotes=false;
+      } else field+=c;
+    } else {
+      if(c==='"')inQuotes=true;
+      else if(c===','){row.push(field);field="";}
+      else if(c==='\r'){}
+      else if(c==='\n'){row.push(field);rows.push(row);row=[];field="";}
+      else field+=c;
+    }
+  }
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  if(!rows.length)return[];
+  var headers=rows[0];
+  return rows.slice(1).filter(function(r){return r.length>1||r[0];}).map(function(r){
+    var o={};
+    headers.forEach(function(h,i){o[h]=r[i]!==undefined?r[i]:"";});
+    return o;
+  });
+}
+function csvDateToISO(s){
+  if(!s)return null;
+  var d=new Date(s);
+  if(isNaN(d.getTime()))return null;
+  var mm=("0"+(d.getMonth()+1)).slice(-2);
+  var dd=("0"+d.getDate()).slice(-2);
+  return d.getFullYear()+"-"+mm+"-"+dd;
+}
+function loadVelocifyLeadsCsv(input){
+  var file=input.files[0];if(!file)return;
+  var res=document.getElementById("velocify-csv-result");
+  if(res){res.textContent="Reading "+file.name+"...";res.style.color="";}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var rawRows=parseCsvSimple(e.target.result);
+      var dbRows=[],dates=[],skipped=0;
+      rawRows.forEach(function(r){
+        var name=(r["Referral Partner Name"]||"").trim();
+        var iso=csvDateToISO(r["Date Added"]);
+        if(!name||!iso){skipped++;return;}
+        dates.push(iso);
+        dbRows.push({
+          referral_partner_name:name,
+          date_added:iso,
+          lp_user:(r["User"]||"").trim(),
+          status:(r["Status"]||"").trim(),
+          lead_source:(r["Lead Source"]||"").trim(),
+          last_action_note:(r["Last Action Note"]||"").trim()
+        });
+      });
+      if(!dbRows.length){if(res){res.style.color="#E53935";res.textContent="No usable rows found in "+file.name+".";}return;}
+      dates.sort();
+      var minDate=dates[0],maxDate=dates[dates.length-1];
+      var msg="This will DELETE all velocify_leads rows dated "+minDate+" through "+maxDate+", then re-insert the "+dbRows.length+" leads from "+file.name+" ("+skipped+" rows skipped for missing name/date).\n\nThis updates the shared database for everyone, not just this session. Continue?";
+      if(!confirm(msg)){if(res){res.textContent="Cancelled.";}input.value="";return;}
+      if(res){res.style.color="";res.textContent="Deleting "+minDate+" – "+maxDate+" and inserting "+dbRows.length+" leads...";}
+      sbFetch("DELETE","velocify_leads?date_added=gte."+minDate+"&date_added=lte."+maxDate)
+        .then(function(){return sbFetch("POST","velocify_leads",dbRows);})
+        .then(function(){
+          if(res){res.style.color="#43A047";res.textContent="Synced: replaced "+minDate+" – "+maxDate+" with "+dbRows.length+" leads from "+file.name+". Reloading live counts...";}
+          coMktLeadCountsSource="Live sync (velocify_leads, year-to-date)";
+          return loadCoMktPartners();
+        })
+        .then(function(){
+          if(res){res.style.color="#43A047";res.textContent="Synced "+dbRows.length+" leads to Supabase ("+minDate+" – "+maxDate+"). Live counts below are up to date.";}
+        })
+        .catch(function(err){
+          if(res){res.style.color="#E53935";res.textContent="Sync failed: "+err.message+" — no changes may have been saved, please verify in Supabase before retrying.";}
+        });
+    }catch(err){
+      if(res){res.style.color="#E53935";res.textContent="Error reading CSV: "+err.message;}
+    }
+  };
+  reader.readAsText(file);
+  input.value="";
+}
+
 function platTag(p){
   if(p==="zillow")return'<span style="background:#EFF6FF;color:#006AFF;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">Zillow</span>';
   if(p==="both")return'<span style="background:#F5F3FF;color:#7C3AED;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">Both</span>';
@@ -5712,6 +5811,14 @@ function renderDirectorView(){
   var el=document.getElementById("director-cards");
   if(!coMktPartners.length){el.innerHTML='<div style="padding:20px;color:var(--text-3);font-size:13px">No partners yet — run the setup SQL to seed them.</div>';return;}
   coMktPartners.sort(function(a,b){return(a.partner_name||"").localeCompare(b.partner_name||"");});
+
+  // ── Verify lead counts against a fresh Velocify export instead of trusting the live sync blindly ──
+  var csvHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">';
+  csvHtml+='<div><div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">Lead count source</div>';
+  csvHtml+='<div style="font-size:12px;margin-top:2px">'+escHtml(coMktLeadCountsSource)+'</div>';
+  csvHtml+='<div id="velocify-csv-result" style="font-size:11px;margin-top:4px"></div></div>';
+  csvHtml+='<div><label style="font-size:11px;border:1px solid var(--border);background:var(--bg);border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:600">Sync Velocify leads CSV to database<input type="file" accept=".csv" style="display:none" onchange="loadVelocifyLeadsCsv(this)"></label></div>';
+  csvHtml+='</div>';
 
   // ── Bulk spend editor — update several partners' verified monthly spend without opening each card ──
   var bulkHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px">';
@@ -5733,7 +5840,7 @@ function renderDirectorView(){
   });
   bulkHtml+='</tbody></table></div>';
 
-  var html=bulkHtml+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
+  var html=csvHtml+bulkHtml+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
   var summaryRows=[];
 
   coMktPartners.forEach(function(p,idx){
