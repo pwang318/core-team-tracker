@@ -5994,7 +5994,7 @@ function renderDirectorView(){
   var bulkHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px">';
   bulkHtml+='<div style="padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">Quick spend update — verified monthly numbers, not Power BI estimates</div>';
   bulkHtml+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
-  ["Partner","Platform","Total cost","Your spend"].forEach(function(h){
+  ["Partner","Platform","Agent Spend","Lender Spend"].forEach(function(h){
     bulkHtml+='<th style="text-align:left;padding:6px 14px;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border-light)">'+h+'</th>';
   });
   bulkHtml+='</tr></thead><tbody>';
@@ -6002,9 +6002,7 @@ function renderDirectorView(){
     bulkHtml+='<tr>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light);font-weight:600">'+escHtml(p.partner_name)+'</td>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)">'+platTag(p.platform)+'</td>';
-    var bulkComputedTotal=(parseFloat(p.your_spend)||0)+(parseFloat(p.agent_spend)||0);
-    var bulkTotalVal=p.total_cost?p.total_cost:bulkComputedTotal;
-    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+bulkTotalVal+'" title="Defaults to your spend + agent spend — edit to override" onchange="dmSaveField('+p.id+',\'total_cost\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
+    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.agent_spend||0)+'" onchange="dmSaveField('+p.id+',\'agent_spend\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.your_spend||0)+'" onchange="dmSaveField('+p.id+',\'your_spend\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
     bulkHtml+='</tr>';
   });
@@ -6032,9 +6030,10 @@ function renderDirectorView(){
     var pb_vol=p.pb_vol_12mo||0;
     var spend12mo=parseFloat(p.spend_12mo)||combinedYourSpend;
     var pb_cta_num=pb_vol>0?(spend12mo/pb_vol)*100:null;
-    var pb_cta=pb_cta_num!==null?pb_cta_num.toFixed(2)+"%":"—";
+    var pb_notSynced=!p.pb_synced_at;
+    var pb_cta=pb_cta_num!==null?pb_cta_num.toFixed(2)+"%":(pb_notSynced?"—":"No Closes");
     var pb_cta_color=pb_cta_num===null?"var(--text-3)":pb_cta_num<=0.50?"#2E7D6A":pb_cta_num<=1.0?"#B87333":"#E53935";
-    var pb_cta_label=pb_cta_num===null?"—":pb_cta_num<=0.50?"✅ On target":pb_cta_num<=1.0?"⚠ Watch":"🚨 Above goal";
+    var pb_cta_label=pb_cta_num!==null?(pb_cta_num<=0.50?"✅ On target":pb_cta_num<=1.0?"⚠ Watch":"🚨 Above goal"):(pb_notSynced?"—":"No closes yet");
 
     summaryRows.push({id:idx,name:p.partner_name,platform:p.platform,yourSpend:combinedYourSpend,req:req,rawReq:rawReq,leads:lc.total,pct:pct,color:goalColor,status:statusLabel,cta:pb_cta,ctaColor:pb_cta_color});
 
@@ -6049,15 +6048,11 @@ function renderDirectorView(){
     html+='<div id="dmcard-'+idx+'" style="display:none;padding:12px 14px">';
     html+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Spend breakdown</div>';
     html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
-    var cardComputedTotal=(parseFloat(p.your_spend)||0)+(parseFloat(p.agent_spend)||0);
-    var cardTotalVal=p.total_cost?p.total_cost:cardComputedTotal;
-    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Total cost <span style="text-transform:none;font-weight:400">(defaults to spend + agent spend)</span></label>';
-    html+='<input type="number" step="0.01" value="'+cardTotalVal+'" onchange="dmSaveField('+p.id+',\'total_cost\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
-    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Your spend</label>';
+    var cardTotalVal=(parseFloat(p.agent_spend)||0)+(parseFloat(p.your_spend)||0);
+    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Agent spend</label>';
+    html+='<input type="number" step="0.01" value="'+(p.agent_spend||0)+'" onchange="dmSaveField('+p.id+',\'agent_spend\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Lender spend</label>';
     html+='<input type="number" step="0.01" value="'+(p.your_spend||0)+'" onchange="dmSaveField('+p.id+',\'your_spend\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
-    
-    html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Lender budget</label>';
-    html+='<input type="number" step="0.01" value="'+(p.lender_budget||0)+'" onchange="dmSaveField('+p.id+',\'lender_budget\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
     html+='<div style="grid-column:span 2"><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">12mo expenditure ($) <span style="text-transform:none;font-weight:400;color:#1F4E79">— enter from Power BI "12 Months Expenditure" tile — used for Cost to Acquire</span></label>';
     html+='<input type="number" step="0.01" value="'+(p.spend_12mo||0)+'" onchange="dmSaveField('+p.id+',\'spend_12mo\',this.value)" style="width:100%;border:1px solid #BFD4E8;border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit;background:#F0F6FF"></div>';
     html+='</div>';
@@ -6070,7 +6065,7 @@ function renderDirectorView(){
 
     // ── Power BI synced metrics ──
     var pb_synced=p.pb_synced_at?"Last Power BI sync: "+p.pb_synced_at:"Not yet synced — upload Power BI export in Admin";
-    var cleanDate=function(d){return(!d||d==="1970-01-01"||d.indexOf("1970")==0)?"—":d;};
+    var cleanDate=function(d){return(!d||d==="1970-01-01"||d.indexOf("1970")==0)?(p.pb_synced_at?"No closes yet":"—"):d;};
     var pb12Goal=Math.floor(combinedYourSpend/250)*12;
     var pb12Pct=pb12Goal>0?Math.round(pb_leads/pb12Goal*100):0;
     var pb12Color=pb12Pct>=80?"#2E7D6A":pb12Pct>=50?"#B87333":"#8B3A3A";
