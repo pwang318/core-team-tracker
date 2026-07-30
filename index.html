@@ -5994,7 +5994,7 @@ function renderDirectorView(){
   var bulkHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px">';
   bulkHtml+='<div style="padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">Quick spend update — verified monthly numbers, not Power BI estimates</div>';
   bulkHtml+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
-  ["Partner","Platform","Agent Spend","Lender Spend"].forEach(function(h){
+  ["Partner","Platform","Agent Spend","Lender Spend","Zillow Total","Realtor.com Total"].forEach(function(h){
     bulkHtml+='<th style="text-align:left;padding:6px 14px;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border-light)">'+h+'</th>';
   });
   bulkHtml+='</tr></thead><tbody>';
@@ -6004,6 +6004,10 @@ function renderDirectorView(){
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)">'+platTag(p.platform)+'</td>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.agent_spend||0)+'" onchange="dmSaveField('+p.id+',\'agent_spend\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light)"><input type="number" step="0.01" value="'+(p.your_spend||0)+'" onchange="dmSaveField('+p.id+',\'your_spend\',this.value)" style="width:95px;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit"></td>';
+    var bulkZillowTotal=(p.platform==="both")?((parseFloat(p.agent_spend_zillow)||0)+(parseFloat(p.your_spend_zillow)||0)):(p.platform==="zillow"?((parseFloat(p.agent_spend)||0)+(parseFloat(p.your_spend)||0)):null);
+    var bulkRealtorTotal=(p.platform==="both")?((parseFloat(p.agent_spend)||0)+(parseFloat(p.your_spend)||0)):(p.platform!=="zillow"?((parseFloat(p.agent_spend)||0)+(parseFloat(p.your_spend)||0)):null);
+    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light);font-family:var(--font-mono);color:var(--text-3)">'+(bulkZillowTotal!==null?"$"+bulkZillowTotal.toLocaleString(undefined,{maximumFractionDigits:0}):"—")+'</td>';
+    bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light);font-family:var(--font-mono);color:var(--text-3)">'+(bulkRealtorTotal!==null?"$"+bulkRealtorTotal.toLocaleString(undefined,{maximumFractionDigits:0}):"—")+'</td>';
     bulkHtml+='</tr>';
   });
   bulkHtml+='</tbody></table></div>';
@@ -6046,7 +6050,7 @@ function renderDirectorView(){
     html+='</div></div>';
 
     html+='<div id="dmcard-'+idx+'" style="display:none;padding:12px 14px">';
-    html+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Spend breakdown</div>';
+    html+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Spend breakdown'+(p.platform==="both"?' <span style="text-transform:none;font-weight:400">(Realtor.com side)</span>':'')+'</div>';
     html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
     var cardTotalVal=(parseFloat(p.agent_spend)||0)+(parseFloat(p.your_spend)||0);
     html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Agent spend</label>';
@@ -6057,10 +6061,19 @@ function renderDirectorView(){
     html+='<input type="number" step="0.01" value="'+(p.spend_12mo||0)+'" onchange="dmSaveField('+p.id+',\'spend_12mo\',this.value)" style="width:100%;border:1px solid #BFD4E8;border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit;background:#F0F6FF"></div>';
     html+='</div>';
     if(p.platform==="both"){
-      var combinedTotal=cardTotalVal+(parseFloat(p.your_spend_zillow)||0);
-      html+='<div style="margin-bottom:10px"><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Your spend (Zillow side)</label>';
+      var zillowTotal=(parseFloat(p.agent_spend_zillow)||0)+(parseFloat(p.your_spend_zillow)||0);
+      var realtorTotal=cardTotalVal;
+      html+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Spend breakdown <span style="text-transform:none;font-weight:400">(Zillow side)</span></div>';
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
+      html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Agent spend</label>';
+      html+='<input type="number" step="0.01" value="'+(p.agent_spend_zillow||0)+'" onchange="dmSaveField('+p.id+',\'agent_spend_zillow\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
+      html+='<div><label style="font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700">Lender spend</label>';
       html+='<input type="number" step="0.01" value="'+(p.your_spend_zillow||0)+'" onchange="dmSaveField('+p.id+',\'your_spend_zillow\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit"></div>';
-      html+='<div style="margin-bottom:10px;background:var(--surface-2);border-radius:6px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase">Total — both platforms</span><span style="font-size:14px;font-weight:800;font-family:var(--font-mono)">$'+combinedTotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</span></div>';
+      html+='</div>';
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
+      html+='<div style="background:var(--surface-2);border-radius:6px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase">Realtor.com total</span><span style="font-size:14px;font-weight:800;font-family:var(--font-mono)">$'+realtorTotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</span></div>';
+      html+='<div style="background:var(--surface-2);border-radius:6px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase">Zillow total</span><span style="font-size:14px;font-weight:800;font-family:var(--font-mono)">$'+zillowTotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</span></div>';
+      html+='</div>';
     }
 
     // ── Power BI synced metrics ──
@@ -6221,7 +6234,7 @@ function zillowSpendQuickFillGlobal(){
     var prettyName=item.key.split(" ").map(function(w){return w.charAt(0)+w.slice(1).toLowerCase();}).join(" ");
     savePromises.push(sbFetch("POST","co_marketing_partners",{
       partner_name:prettyName,platform:"zillow",brokerage:"",since_date:null,
-      total_cost:0,your_spend:item.amt,agent_spend:0,lender_budget:0,
+      total_cost:0,your_spend:item.amt,agent_spend:0,lender_budget:0,your_spend_zillow:0,agent_spend_zillow:0,
       agent_roster:[{name:prettyName,alias:"",spend:item.amt}]
     }));
   });
