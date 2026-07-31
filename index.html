@@ -1576,14 +1576,25 @@ function openScorecardsView(){
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-scorecards").classList.add("active");
-  // Always set sensible date range
+  // Always set sensible date range — recompute fresh every time this view opens,
+  // so it never gets stuck on a stale range from an earlier visit or a browser-
+  // remembered form value.
   var fromEl=document.getElementById("lpsc-from");
   var toEl=document.getElementById("lpsc-to");
-  if(fromEl&&!fromEl.value){var d=new Date(TODAY);d.setDate(d.getDate()-84);while(d.getDay()!==1)d.setDate(d.getDate()-1);fromEl.value=localDateStr(d);}
-  if(toEl&&!toEl.value){toEl.value=localDateStr(TODAY);}
+  if(fromEl){var d=new Date(TODAY);d.setDate(d.getDate()-84);while(d.getDay()!==1)d.setDate(d.getDate()-1);fromEl.value=localDateStr(d);}
+  if(toEl){toEl.value=localDateStr(TODAY);}
   lpscLoadTeamTotals();
-  // Auto-load Isaak's history if no one is selected yet
+  // Reload whichever person is currently selected, so the visible table always
+  // reflects the freshly-computed date range above — not just when Isaak is selected.
   if(lpscCurrentLP==="Isaak"){
+    document.getElementById("lpsc-edit-wrap").style.display="block";
+    lpscEditMonday=lpscGetMonday(new Date());
+    lpscLoadEditWeek();
+    lpscLoad();
+  }else if(lpscCurrentLP==="Amanda"){
+    document.getElementById("lpsc-edit-wrap").style.display="none";
+    lpscLoadAmanda();
+  }else if(lpscCurrentLP){
     document.getElementById("lpsc-edit-wrap").style.display="block";
     lpscEditMonday=lpscGetMonday(new Date());
     lpscLoadEditWeek();
@@ -4720,6 +4731,7 @@ const LPSC_AMANDA_GOALS=[
 const LPSC_DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const LPSC_CHART_COLORS=["#1F4E79","#b8922a","#2a7a3b","#c0392b","#8e44ad"];
 var lpscCurrentLP="Isaak",lpscCharts=[];
+var lpscAmandaActsByWeek={};
 
 function lpscSelectLP(name,btn){
   document.querySelectorAll(".lpsc-btn").forEach(function(b){b.classList.remove("active");});
@@ -4978,7 +4990,7 @@ function rmRenderGoals(){
   if(period==="today"){
     var todaysActs=acts.filter(function(a){return a.act_date===todayStr;});
     RM_GOALS.forEach(function(g){
-      var count=todaysActs.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="Talk-to's"?amCntTalkTo(todaysActs):todaysActs.filter(function(a){return a.act_type===g.type;}).length;
       var dailyTarget=Math.ceil(g.weekly/5);
       var hit=count>=dailyTarget;
       html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f8">'
@@ -4989,7 +5001,7 @@ function rmRenderGoals(){
   }else if(period==="week"){
     var weekActs=acts.filter(function(a){return a.act_date>=week.start&&a.act_date<=week.end;});
     RM_GOALS.forEach(function(g){
-      var count=weekActs.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="Talk-to's"?amCntTalkTo(weekActs):weekActs.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.weekly,1);
       var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
       html+='<div style="margin-bottom:12px">'
@@ -4998,7 +5010,7 @@ function rmRenderGoals(){
     });
   }else{
     RM_GOALS.forEach(function(g){
-      var count=acts.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="Talk-to's"?amCntTalkTo(acts):acts.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.monthly,1);
       var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
       html+='<div style="margin-bottom:12px">'
@@ -5358,16 +5370,26 @@ async function lpscLoadAmanda(){
     }
 
     var byWeek={};
+    var actsByWeek={};
     acts.forEach(function(a){
       var wk=lpscAmWeekKeyOf(a.act_date);
       if(!byWeek[wk])byWeek[wk]={};
       byWeek[wk][a.act_type]=(byWeek[wk][a.act_type]||0)+1;
+      if(!actsByWeek[wk])actsByWeek[wk]=[];
+      actsByWeek[wk].push(a);
     });
     var weekKeys=Object.keys(byWeek).sort().reverse();
+    // Helper: for the Talk-to's goal, count via the same aggregation used everywhere
+    // else (amCntTalkTo bundles Active Agent Talk-to, CTC Call, Birthday Outreach, etc).
+    // Every other goal is a literal, single act_type and reads straight from byWeek.
+    function amGoalCount(g,weekActsArr,weekCounts){
+      if(g.key==="Talk-to's")return amCntTalkTo(weekActsArr||[]);
+      return(weekCounts&&weekCounts[g.key])||0;
+    }
 
     summaryEl.innerHTML="";
     LPSC_AMANDA_GOALS.forEach(function(g){
-      var grandTotal=acts.filter(function(a){return a.act_type===g.key;}).length;
+      var grandTotal=g.key==="Talk-to's"?amCntTalkTo(acts):acts.filter(function(a){return a.act_type===g.key;}).length;
       var avgPerWeek=Math.round(grandTotal/Math.max(1,weekKeys.length));
       var pct=Math.min(avgPerWeek/g.goal,1);
       var color=pct>=1?"#2a7a3b":pct>=0.6?"#b8922a":"#9ca3af";
@@ -5388,19 +5410,21 @@ async function lpscLoadAmanda(){
     var tbody="<tbody>";
     weekKeys.forEach(function(wk){
       var label=lpscFmtRange(wk);
-      tbody+='<tr><td style="padding:9px 12px;font-size:12px;font-weight:500;border-bottom:1px solid #f0f2f8;white-space:nowrap">'+label+'</td>';
+      tbody+='<tr style="cursor:pointer" onclick=\'lpscShowAmandaDaily("'+wk+'")\'>'
+        +'<td style="padding:9px 12px;font-size:12px;font-weight:500;border-bottom:1px solid #f0f2f8;white-space:nowrap">'+label+'</td>';
       LPSC_AMANDA_GOALS.forEach(function(g){
-        var t=byWeek[wk][g.key]||0;
+        var t=amGoalCount(g,actsByWeek[wk],byWeek[wk]);
         tbody+='<td style="padding:9px 8px;text-align:center;font-size:12px;border-bottom:1px solid #f0f2f8">'+t+" "+lpscPctBadge(t,g.goal)+'</td>';
       });
       tbody+="</tr>";
     });
     tbody+="</tbody>";
     wrap.innerHTML='<table style="width:100%;border-collapse:collapse">'+thead+tbody+"</table>";
+    lpscAmandaActsByWeek=actsByWeek;
 
     var weekLabels=weekKeys.map(function(wk){return lpscFmtRange(wk);}).reverse();
     LPSC_AMANDA_GOALS.forEach(function(g,i){
-      var vals=weekKeys.map(function(wk){return byWeek[wk][g.key]||0;}).reverse();
+      var vals=weekKeys.map(function(wk){return amGoalCount(g,actsByWeek[wk],byWeek[wk]);}).reverse();
       var div=document.createElement("div");
       div.style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:12px";
       div.innerHTML='<div style="font-size:13px;font-weight:600;color:#1a1f2e;margin-bottom:12px">'+g.label+' — weekly trend</div>'
@@ -5448,6 +5472,49 @@ function lpscShowDaily(wk,data){
       tbody+='<td style="padding:9px 10px;text-align:center;font-size:13px;font-weight:500;border-bottom:1px solid #f0f2f8">'+v+'</td>';
     });
     tbody+='<td style="padding:9px 10px;text-align:center;font-size:13px;font-weight:700;color:'+color+';border-bottom:1px solid #f0f2f8">'+total+' <span style="font-size:10px;color:#aaa">/'+m.goal+'</span></td></tr>';
+  });
+  tbody+="</tbody>";
+
+  content.innerHTML='<table style="width:100%;border-collapse:collapse">'+thead+tbody+"</table>";
+  wrap.style.display="block";
+  wrap.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+// Amanda's data comes in as individual activity records (agent_name, act_type, act_date),
+// not the pre-aggregated day-of-week columns the LP scorecards store — so her drilldown
+// groups the raw records by day of week and activity type instead of reading a data blob.
+function lpscShowAmandaDaily(wk){
+  var weekActs=lpscAmandaActsByWeek[wk]||[];
+  var wrap=document.getElementById("lpsc-daily-wrap");
+  var label=document.getElementById("lpsc-daily-label");
+  var content=document.getElementById("lpsc-daily-content");
+  label.textContent="Amanda — "+lpscFmtRange(wk)+" (Daily Breakdown)";
+
+  var byDay={};
+  LPSC_DAYS.forEach(function(d){byDay[d]=[];});
+  var dayAbbr=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  weekActs.forEach(function(a){
+    var d=new Date(a.act_date+"T12:00:00");
+    var abbr=dayAbbr[d.getDay()];
+    if(byDay[abbr])byDay[abbr].push(a);
+  });
+
+  var thead='<thead><tr><th style="background:#243d7a;color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:600">Metric</th>';
+  LPSC_DAYS.forEach(function(d){thead+='<th style="background:#243d7a;color:#fff;padding:8px 10px;text-align:center;font-size:11px;font-weight:600">'+d+'</th>';});
+  thead+='<th style="background:#243d7a;color:var(--accent);padding:8px 10px;text-align:center;font-size:11px;font-weight:600">Total</th></tr></thead>';
+
+  var tbody="<tbody>";
+  LPSC_AMANDA_GOALS.forEach(function(g){
+    var total=g.key==="Talk-to's"?amCntTalkTo(weekActs):weekActs.filter(function(a){return a.act_type===g.key;}).length;
+    var pct=Math.min(total/g.goal,1);
+    var color=pct>=1?"#2a7a3b":pct>=0.6?"#b8922a":"#9ca3af";
+    tbody+='<tr><td style="padding:9px 12px;font-size:12px;font-weight:500;border-bottom:1px solid #f0f2f8">'+g.label+'</td>';
+    LPSC_DAYS.forEach(function(day){
+      var dayActs=byDay[day]||[];
+      var v=g.key==="Talk-to's"?amCntTalkTo(dayActs):dayActs.filter(function(a){return a.act_type===g.key;}).length;
+      tbody+='<td style="padding:9px 10px;text-align:center;font-size:13px;font-weight:500;border-bottom:1px solid #f0f2f8">'+(v||"")+'</td>';
+    });
+    tbody+='<td style="padding:9px 10px;text-align:center;font-size:13px;font-weight:700;color:'+color+';border-bottom:1px solid #f0f2f8">'+total+' <span style="font-size:10px;color:#aaa">/'+g.goal+'</span></td></tr>';
   });
   tbody+="</tbody>";
 
