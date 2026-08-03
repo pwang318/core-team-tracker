@@ -560,10 +560,10 @@ tr:hover td{background:var(--bg)}
     <select id="rm-feed-type" onchange="rmRenderFeed()" style="padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;color:#333;background:#fff;min-width:170px">
       <option value="">All activity types</option>
       <option>Cold Calls</option><option>New Realtor Meeting</option><option>Break Breads</option>
-      <option>New Agent Follow-up</option><option>Active Agent Talk-to</option><option>Active Agent Check-in</option>
-      <option>CTC Call</option><option>Market Update Call</option><option>Realtor Buddy Referral Ask</option>
-      <option>Closed Deal Thank You</option><option>Birthday Outreach</option><option>Holiday Outreach</option>
-      <option>Agent Appreciation</option><option>Co-Marketing Discussion</option>
+      <option>New Agent Follow-up</option><option>Active Agent Talk-to</option><option>Reconnect Outreach</option>
+      <option>CTC Call</option><option>Market Update</option><option>Realtor Buddy Referral Ask</option>
+      <option>Birthday Outreach</option><option>Holiday Outreach</option>
+      <option>Agent Appreciation</option><option>Co-hosted Event</option>
     </select>
   </div>
   <div id="rm-feed-list" style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px;max-height:420px;overflow-y:auto">
@@ -2567,13 +2567,14 @@ async function renderRmSummary(){
     var flagCount=flagList.length;
 
     var goals=[
-      {type:"Cold Calls",label:"Cold calls",weekly:25},
+      {type:"Cold Calls",label:"Cold calls",weekly:125},
       {type:"New Realtor Meeting",label:"New meetings",weekly:5},
       {type:"Break Breads",label:"Break breads",weekly:5},
+      {type:"__talkto__",label:"Talk-to's",weekly:100},
       {type:"Realtor Buddy Referral Ask",label:"Buddy intros",weekly:3}
     ];
     var cards=goals.map(function(g){
-      var count=acts.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="__talkto__"?amCntTalkTo(acts):acts.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.weekly,1);
       var color=pct>=1?"#15803d":pct>=0.6?"#b8922a":"#9ca3af";
       return'<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:12px;border:1px solid var(--border)">'
@@ -3303,7 +3304,7 @@ function amCnt(src,type){
   return (src||[]).filter(function(a){return (a.act_type||"").trim()===type;}).length;
 }
 function amCntTalkTo(src){
-  var TALKTO_TYPES=["Active Agent Talk-to","Active Agent Check-in","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Closed Deal Thank You","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Recruiting Conversation"];
+  var TALKTO_TYPES=["Agent Talk-to","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Market Update","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Closed Deal Thank You","Recruiting Conversation"];
   return (src||[]).filter(function(a){return TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length;
 }
 
@@ -3533,7 +3534,7 @@ function buildSnapshot(){
   var amMeetings=amCnt(amMonthActs,"New Realtor Meeting");
   var amColdCalls=amCnt(amMonthActs,"Cold Calls");
   var amBreakBreads=amCnt(amMonthActs,"Break Breads");
-  var TALKTO_TYPES=["Talk-to's","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","CTC Call","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Recruiting Conversation"];
+  var TALKTO_TYPES=["Agent Talk-to","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Market Update","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Sent Referral","Sent Market Report","Recruiting Conversation"];
   var amTalkTos=amCntTalkTo(amMonthActs);
   var amBuddyAsks=amCnt(amMonthActs,"Realtor Buddy Referral Ask");
   var amWeeklyGoal=238; // 125 cold calls + 100 talk-tos + 5 meetings + 5 break breads + 3 buddy asks
