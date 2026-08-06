@@ -6970,6 +6970,113 @@ if(typeof window.openRmView==="function"){
 }
 
 })();
+
+/* ══════════════════════════════════════════════════════════
+   ROUND 6 — real week-over-week trend, backed by an actual
+   weekly_metrics_snapshot table (see tracker-metrics-table.sql).
+   Auto-captures once per week on first Snapshot view, so 90 days
+   from now there's real history to show, not a live-only number.
+   ══════════════════════════════════════════════════════════ */
+(function(){
+
+function ctComputeWeeklyMetrics(){
+  // Duplicate notes flagged this week — retroactively checks each LP's
+  // notes against each other using the same similarity logic as the
+  // live duplicate-check, since flagged events aren't stored individually.
+  var dupCount=0;
+  LPS.forEach(function(lp){
+    var notes=Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey&&l.note;});
+    for(var i=0;i<notes.length;i++){
+      for(var j=i+1;j<notes.length;j++){
+        if(ctSimilarity(notes[i].note,notes[j].note)>0.6){ dupCount++; break; }
+      }
+    }
+  });
+
+  // Stale contacts — active agents 14+ days since last touch
+  var staleCount=agents.filter(function(a){
+    if(!isActive(a)) return false;
+    var d=effectiveDays(a);
+    return d!==null && d>=14;
+  }).length;
+
+  // RM-flagged — resolved=false rows in lp_flags, plus legacy flag_rm on call_logs
+  var flagRmCount=Object.values(callLogs).filter(function(l){return l.flag_rm;}).length;
+
+  // Team avg talk-to completion %
+  var pcts=LPS.map(function(lp){ return getLpPctThisWeek(lp); });
+  var avgTalkTo=Math.round(pcts.reduce(function(a,b){return a+b;},0)/pcts.length);
+
+  // Lead-to-file % from whatever pipeline data is already loaded
+  var ltf=0;
+  if(window.leadPipelineData && window.leadPipelineData.totals && window.leadPipelineData.totals.mtd>0){
+    ltf=Math.round(window.leadPipelineData.totals.file_starts_mtd/window.leadPipelineData.totals.mtd*100);
+  }
+
+  return {duplicate_notes_flagged:dupCount, stale_contacts:staleCount, rm_flagged_count:flagRmCount, team_avg_talkto_pct:avgTalkTo, lead_to_file_pct:ltf};
+}
+
+var ctSnapshotCapturedThisSession=false;
+function ctCaptureWeeklySnapshotIfNeeded(){
+  if(ctSnapshotCapturedThisSession) return;
+  ctSnapshotCapturedThisSession=true;
+  sbFetch("GET","weekly_metrics_snapshot?week_key=eq."+weekKey+"&select=id").then(function(rows){
+    if(rows && rows.length) return; // already captured this week
+    var m=ctComputeWeeklyMetrics();
+    m.week_key=weekKey;
+    return sbFetch("POST","weekly_metrics_snapshot",m);
+  }).catch(function(e){ console.warn("weekly snapshot capture skipped:",e); });
+}
+
+function ctRenderTrendPanel(){
+  var host=document.getElementById("d-snapshot-body");
+  if(!host) return;
+  var old=document.getElementById("ct-trend-panel");
+  if(old) old.remove();
+
+  sbFetch("GET","weekly_metrics_snapshot?select=*&order=week_key.desc&limit=13").then(function(rows){
+    if(!rows || rows.length<2) return; // need at least 2 weeks of real history to show a trend
+    var current=ctComputeWeeklyMetrics();
+    var prior=rows[0]; // most recent captured week (last week, since this week captures on first visit)
+
+    var metrics=[
+      {key:"duplicate_notes_flagged",label:"Duplicate notes flagged",lowerIsBetter:true},
+      {key:"stale_contacts",label:"Stale contacts (14d+)",lowerIsBetter:true},
+      {key:"rm_flagged_count",label:"Flagged by RM",lowerIsBetter:true},
+      {key:"team_avg_talkto_pct",label:"Team avg talk-to rate",lowerIsBetter:false,suffix:"%"},
+      {key:"lead_to_file_pct",label:"Lead-to-file rate",lowerIsBetter:false,suffix:"%"}
+    ];
+
+    var box=document.createElement("div");
+    box.id="ct-trend-panel";
+    box.style.cssText="background:#fff;border:1px solid #E4E6EA;border-radius:12px;padding:14px 18px;margin-bottom:18px;";
+    var cellsHtml=metrics.map(function(m){
+      var curVal=current[m.key], priorVal=prior[m.key]||0;
+      var diff=curVal-priorVal;
+      var improving = m.lowerIsBetter ? diff<0 : diff>0;
+      var trendHtml = diff===0 ? '<span style="color:#94a3b8">— no change</span>'
+        : '<span style="color:'+(improving?'#3E8E5A':'#B54B42')+';font-weight:700">'+(diff>0?'▲':'▼')+Math.abs(diff)+(m.suffix||'')+' vs last captured week</span>';
+      return '<div style="flex:1;min-width:140px"><div style="font-size:20px;font-weight:800;color:var(--text)">'+curVal+(m.suffix||'')+'</div>'
+        +'<div style="font-size:10.5px;color:#6B7280;font-weight:600;margin-bottom:2px">'+m.label+'</div>'
+        +'<div style="font-size:10.5px">'+trendHtml+'</div></div>';
+    }).join('');
+    box.innerHTML='<div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#6B7280;margin-bottom:10px">Trend vs. last captured week <span style="font-weight:600;text-transform:none;color:#94a3b8">· '+rows.length+' week'+(rows.length!==1?'s':'')+' of history</span></div>'
+      +'<div style="display:flex;gap:16px;flex-wrap:wrap">'+cellsHtml+'</div>';
+    host.insertBefore(box, host.firstChild);
+  }).catch(function(e){ console.warn("trend panel load failed:",e); });
+}
+
+if(typeof window.buildSnapshot==="function"){
+  var origBuildSnapshot2=window.buildSnapshot;
+  window.buildSnapshot=function(){
+    var result=origBuildSnapshot2.apply(this,arguments);
+    ctCaptureWeeklySnapshotIfNeeded();
+    setTimeout(ctRenderTrendPanel, 400);
+    return result;
+  };
+}
+
+})();
 </script>
 </div>
 </body>
