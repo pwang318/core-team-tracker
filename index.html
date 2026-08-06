@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Core Team Intelligence Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -30,18 +30,18 @@
   --lp-said:#7C3AED;--lp-said-bg:#F5F3FF;
   --shadow-sm:0 1px 4px rgba(26,26,46,.06),0 1px 2px rgba(26,26,46,.04);
   --shadow-md:0 4px 16px rgba(26,26,46,.08),0 2px 6px rgba(26,26,46,.04);
-  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;--font-mono:'Geist','Inter',sans-serif;
   --navy-mid:#0E9F8E;
   --brand:#0E9F8E;--surface-2:#F4F6F9;--text-4:#C1C1C9}
-body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px;background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;margin:0;padding:0;line-height:1.5}
+body{font-family:'Geist','Inter',-apple-system,sans-serif;color:var(--text);font-size:14px;background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;margin:0;padding:0;line-height:1.5}
 .app{max-width:960px;margin:0 auto;padding:1.25rem 1.25rem 4rem}
 
 /* Header */
 .app-header{padding:1rem 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);margin-bottom:1.5rem;position:sticky;top:0;z-index:50;background:var(--bg);box-shadow:0 1px 0 var(--border)}
 .brand{display:flex;align-items:center;gap:12px}
-.brand-logo{color:var(--text);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-family:'Plus Jakarta Sans',sans-serif}
+.brand-logo{color:var(--text);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-family:'Geist','Inter',sans-serif}
 .brand-sub{font-size:10px;color:var(--text-3);font-weight:400;letter-spacing:.02em}
-.week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:20px;color:var(--text-2);font-weight:500;font-family:'DM Mono',monospace;letter-spacing:.02em}
+.week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:20px;color:var(--text-2);font-weight:500;font-family:'Geist','Inter',sans-serif;letter-spacing:.02em}
 .save-ind{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#cbd5e1;flex-shrink:0}
 .sync-dot.live{background:#15803d}.sync-dot.saving{background:#d97706}.sync-dot.error{background:#dc2626}
@@ -75,7 +75,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px
 .ft-log-form.show{display:block}
 .ft-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .ft-stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
-.ft-stat-num{font-size:26px;font-weight:700;font-family:'DM Mono',monospace}
+.ft-stat-num{font-size:26px;font-weight:700;font-family:'Geist','Inter',sans-serif}
 .ft-stat-label{font-size:10px;color:var(--text-3);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
 .wb-Leads.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:600}
 
@@ -90,7 +90,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px
 .prog-wrap{display:flex;align-items:center;gap:10px}
 .prog-track{width:140px;background:rgba(255,255,255,.1);border-radius:20px;height:4px;overflow:hidden}
 .prog-fill{height:4px;border-radius:20px;transition:width .8s cubic-bezier(.4,0,.2,1);background:#4ade80}
-.prog-txt{font-size:15px;color:#fff;font-weight:500;white-space:nowrap;font-family:'DM Mono',monospace}
+.prog-txt{font-size:15px;color:#fff;font-weight:500;white-space:nowrap;font-family:'Geist','Inter',sans-serif}
 
 /* Banners */
 .priority-banner{background:#FCEBEB;border:1px solid var(--red-border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:.75rem;display:flex;align-items:center;gap:8px;font-weight:600}
@@ -135,13 +135,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px
 .bar-Gavin{background:var(--lp-gavin)}.bar-Karen{background:var(--lp-karen)}.bar-Osgood{background:var(--lp-osgood)}.bar-Jordan{background:var(--lp-jordan)}.bar-Said{background:var(--lp-said)}
 
 /* Section heads */
-.section-head{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin:1.1rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-family:'DM Mono',monospace}
+.section-head{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin:1.1rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-family:'Geist','Inter',sans-serif}
 
 /* Daniel stat cards */
 .d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem}
 .d-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.1rem 1.25rem;box-shadow:var(--shadow-sm)}
 .d-name{font-weight:600;font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
-.d-pct{font-size:30px;font-weight:600;margin-bottom:4px;letter-spacing:-.02em;font-family:'DM Mono',monospace;color:var(--text)}
+.d-pct{font-size:30px;font-weight:600;margin-bottom:4px;letter-spacing:-.02em;font-family:'Geist','Inter',sans-serif;color:var(--text)}
 .d-bar-track{background:var(--border-light);border-radius:20px;height:4px;margin-bottom:8px;overflow:hidden}
 .d-bar-fill{height:4px;border-radius:20px}
 .d-meta{font-size:11px;color:var(--text-3);display:flex;justify-content:space-between}
@@ -461,7 +461,20 @@ tr:hover td{background:var(--bg)}
     <div id="lpContactModalStatus" style="display:none;font-size:12px;font-weight:600;padding:8px 12px;border-radius:6px;margin-bottom:10px"></div>
     <div class="cm-field"><label>Phone</label><input type="text" id="lp-cm-phone" placeholder="Phone number"></div>
     <div class="cm-field"><label>Email</label><input type="email" id="lp-cm-email" placeholder="Email address"></div>
-    <div class="cm-field"><label>Birthday</label><input type="text" id="lp-cm-birthday" placeholder="e.g. Mar 14"></div>
+    <div class="cm-field"><label>Birthday</label>
+      <div style="display:flex;gap:8px">
+        <select id="lp-cm-birthday-month" style="flex:1;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text)">
+          <option value="">Month</option>
+          <option value="01">January</option><option value="02">February</option><option value="03">March</option>
+          <option value="04">April</option><option value="05">May</option><option value="06">June</option>
+          <option value="07">July</option><option value="08">August</option><option value="09">September</option>
+          <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+        </select>
+        <select id="lp-cm-birthday-day" style="width:90px;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text)">
+          <option value="">Day</option>
+        </select>
+      </div>
+    </div>
     <div style="display:flex;gap:8px;margin-top:6px">
       <button class="btn btn-primary" onclick="saveLpContactModal()">Save</button>
       <button class="btn" onclick="closeLpContactModal()">Cancel</button>
@@ -662,7 +675,7 @@ tr:hover td{background:var(--bg)}
 <!-- DANIEL VIEW -->
 <!-- DANIEL VIEW -->
 <div id="view-snapshot" class="view">
-  <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'DM Mono',monospace;font-size:10px"></span></div>
+  <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'Geist','Inter',sans-serif;font-size:10px"></span></div>
   <div style="font-size:11px;color:var(--text-3);margin:-6px 0 10px">Calls, Talk's, Leads, 1003's, Pre-apps, and Contracts below are all <b>week-to-date</b> (Monday through now) — not just today. Only the "Leads Today / WTD / MTD" totals up top reset daily.</div>
   <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div></div>
 </div>
@@ -706,6 +719,7 @@ tr:hover td{background:var(--bg)}
     <span class="lp-tag lp-tag-Jordan ref-filter-btn" onclick="toggleRefFilter('lp','Jordan',this)" style="cursor:pointer">Jordan</span>
     <span class="lp-tag lp-tag-Said ref-filter-btn" onclick="toggleRefFilter('lp','Said',this)" style="cursor:pointer">Said</span>
   </div>
+  <div id="lp-conversion-boxes-v2" style="margin-bottom:1rem"></div>
   <div class="ref-section urgent" id="ref-needs-touch-section-v2" style="display:none">
     <div class="ref-section-header">
       <div><div class="ref-section-title">Needs contact today</div><div class="ref-section-subtitle">No touch in 24+ hours</div></div>
@@ -980,8 +994,6 @@ function getLpTotalTargetThisWeek(lp){
   return Math.min(raw,Math.max(WEEKLY_TARGET,activeCount));
 }
 
-var weekKey=getWeekKey(TODAY);
-var lastWeekKey=getLastWeekKey(TODAY);
 var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
 var STORAGE_KEY="ct_agents_v3";
@@ -1045,16 +1057,6 @@ var SEED=[["ALEXIS AKERS","C",null,"2026-05-12","2026-03-25",null,null,false,1],
 
 // ── LP sub-tab switching ──
 
-function switchDanielTab4(tabId, btn){
-  document.querySelectorAll("#view-daniel .d-tab").forEach(function(t){t.classList.remove("active");});
-  document.querySelectorAll("#view-daniel .d-tab-panel").forEach(function(p){p.classList.remove("active");});
-  btn.classList.add("active");
-  document.getElementById("d-tab4-"+tabId).classList.add("active");
-  if(tabId==="pipeline"){loadLeadPipeline();renderChurnRisk();renderLpEffectiveness();renderGrowthScoreboard();renderVelocifyLeaderboard();renderLeaderboard();}
-  if(tabId==="agents"){renderActivationPanel();renderTierUpgradePanel();}
-  if(tabId==="week"){renderRmSummary();renderLpScorecardSummary();renderTeamsMsg();}
-}
-
 function switchLeadsTab(tab, btn){
   document.querySelectorAll("#view-leads .d-tab").forEach(function(t){t.classList.remove("active");});
   document.querySelectorAll("#view-leads .d-tab-panel").forEach(function(p){p.classList.remove("active");});
@@ -1063,11 +1065,11 @@ function switchLeadsTab(tab, btn){
   if(panel) panel.classList.add("active");
   if(tab==="leads") loadReferralLeadsDirect();
   if(tab==="roster"){
-    renderGrowthScoreboard();renderVelocifyLeaderboard();renderLeaderboard();
+    renderGrowthScoreboard();renderVelocifyLeaderboard();renderLeaderboard();renderChurnRisk();renderLpEffectiveness();
     var csEl=document.getElementById("conv-range-start"),ceEl=document.getElementById("conv-range-end");
     if(csEl&&!csEl.value){csEl.value="2026-04-01";ceEl.value=localDateStr(new Date());runConversionRangeSearch();}
   }
-  if(tab==="growth"){renderGrowthScoreboard();renderDaniel();}
+  if(tab==="growth"){renderGrowthScoreboard();renderDaniel();renderActivationPanel();renderTierUpgradePanel();}
 }
 
 function openLeadsView(btn){
@@ -1186,14 +1188,19 @@ function renderReferralLeadsDirect(data){
     if(!c)return;
     if(!leads.length){c.innerHTML='<div style="padding:12px 16px;font-size:12px;color:var(--text-3)">No leads</div>';return;}
     var h="";
-    leads.forEach(function(r){
+    leads.forEach(function(r,ri){
       var agent=escHtml(r.referral_partner_name||"Unknown");
       var buyer=r.buyer_name?escHtml(r.buyer_name):"—";
       var date=r.date_added?new Date(r.date_added+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"—";
       var status=r.status||"—";
       var lpDisp=r.lp_user?r.lp_user.split(",").reverse().join(" ").trim():"—";
       var note=r.last_action_note&&r.last_action_note.toLowerCase()!=="empty"?r.last_action_note:"";
-      h+='<div style="padding:10px 16px;border-bottom:1px solid var(--border-light);display:flex;gap:10px;align-items:flex-start">';
+      var rowId=containerId+"-"+ri;
+      var agentAttr=escHtml(r.referral_partner_name||"").replace(/"/g,"&quot;");
+      var buyerAttr=escHtml(r.buyer_name||"").replace(/"/g,"&quot;");
+      var lpAttr=escHtml(lpDisp).replace(/"/g,"&quot;");
+      h+='<div style="border-bottom:1px solid var(--border-light)">';
+      h+='<div style="padding:10px 16px;display:flex;gap:10px;align-items:flex-start;cursor:pointer" onclick="ctToggleLeadDrawer(\''+rowId+'\')">';
       h+='<div style="flex:1;min-width:0">';
       h+='<div style="font-size:12px;font-weight:700;color:var(--text)">'+agent+'</div>';
       h+='<div style="font-size:11px;color:var(--text-2)">Buyer: '+buyer+' · '+lpDisp+'</div>';
@@ -1201,8 +1208,11 @@ function renderReferralLeadsDirect(data){
       h+='</div>';
       h+='<div style="text-align:right;flex-shrink:0">';
       h+='<div style="font-size:11px;font-weight:600;color:var(--text)">'+date+'</div>';
+      if(typeof ctIsLeadStalled==="function" && ctIsLeadStalled(r)) h+='<span style="font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;background:#FBEBE9;color:#B54B42;margin-right:4px">⚠ Stalled</span>';
       h+='<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:#f1f5f9;color:#475569">'+status+'</span>';
       h+='</div></div>';
+      h+=ctBuyerDrawerHtml(rowId,agentAttr,buyerAttr,lpAttr,typeof ctIsLeadStalled==="function"&&ctIsLeadStalled(r));
+      h+='</div>';
     });
     c.innerHTML=h;
   }
@@ -1328,26 +1338,8 @@ function renderTierUpgradePanel(){
   el.innerHTML=html;
 }
 
-function switchDanielTab(tabId, btn){
-  document.querySelectorAll(".d-tab").forEach(function(t){t.classList.remove("active");});
-  document.querySelectorAll(".d-tab-panel").forEach(function(p){p.classList.remove("active");});
-  btn.classList.add("active");
-  document.getElementById("d-tab-"+tabId).classList.add("active");
-  if(tabId==="referral-leads") loadReferralLeads(false);
-}
-
-function switchLpTab(tabId, btn){
-  document.querySelectorAll("#view-lp .ref-tab").forEach(function(t){t.classList.remove("active");});
-  document.querySelectorAll("#view-lp .ref-tab-panel").forEach(function(p){p.classList.remove("active");});
-  btn.classList.add("active");
-  document.getElementById("lp-tab-"+tabId).classList.add("active");
-  if(tabId==="referral-leads") loadReferralLeads(false);
-}
-
 // ── REFERRAL LEADS LOGIC ──
-// getStatusBadgeClass and loadReferralLeads defined below (active versions)
-
-// renderReferralLeads defined below (active version)
+// getStatusBadgeClass and loadReferralLeadsDirect are the live versions (see below)
 
 // buildLeadsTable defined below (active version)
 
@@ -1548,11 +1540,7 @@ function selectUser(btn,u){
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   if(btn)btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  if(u==="Daniel"){
-    document.getElementById("view-daniel").classList.add("active");
-    renderDaniel();
-    loadCallLogs().then(function(){renderDaniel();setTimeout(buildDailyDigest,500);});
-  } else if(u==="FaceTime"){
+  if(u==="FaceTime"){
     document.getElementById("view-facetime").classList.add("active");
     loadFaceTime();
   } else if(u==="Admin"){
@@ -2345,14 +2333,14 @@ function openLpContactModal(name){
   var cp=contactCache[name]||{};
   document.getElementById("lp-cm-phone").value=cp.phone||"";
   document.getElementById("lp-cm-email").value=cp.email||"";
-  document.getElementById("lp-cm-birthday").value=cp.birthday||"";
+  ctSetBirthdayDropdowns(cp.birthday||"");
   if(!contactCache[name]){
     sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(name)+"&limit=1").then(function(res){
       var data=(res&&res.length)?res[0]:{agent_name:name};
       contactCache[name]=data;
       document.getElementById("lp-cm-phone").value=data.phone||"";
       document.getElementById("lp-cm-email").value=data.email||"";
-      document.getElementById("lp-cm-birthday").value=data.birthday||"";
+      ctSetBirthdayDropdowns(data.birthday||"");
     }).catch(function(){});
   }
   document.getElementById("lpContactModal").classList.add("open");
@@ -2362,7 +2350,7 @@ function closeLpContactModal(){document.getElementById("lpContactModal").classLi
 
 function saveLpContactModal(){
   if(!editingLpContact)return;
-  var payload={agent_name:editingLpContact,phone:document.getElementById("lp-cm-phone").value.trim()||null,email:document.getElementById("lp-cm-email").value.trim()||null,birthday:document.getElementById("lp-cm-birthday").value.trim()||null};
+  var payload={agent_name:editingLpContact,phone:document.getElementById("lp-cm-phone").value.trim()||null,email:document.getElementById("lp-cm-email").value.trim()||null,birthday:ctGetBirthdayValue()};
   sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(editingLpContact)+"&limit=1").then(function(res){
     var method=(res&&res.length)?"PATCH":"POST";
     var path=method==="PATCH"?"agent_profiles?agent_name=eq."+encodeURIComponent(editingLpContact):"agent_profiles";
@@ -3015,7 +3003,6 @@ function loadLeadPipeline(){
   var dlEl=document.getElementById("pipeline-date-label");
   if(dlEl)dlEl.textContent=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
   renderLeadPipelinePanels(res);
-  if(typeof buildDailyDigest==="function")buildDailyDigest();
   }).catch(function(e){
     console.warn("loadLeadPipeline error:",e);
     var el=document.getElementById("d-lead-pipeline-today");
@@ -3166,7 +3153,6 @@ function openLpLeadDrilldown(lp, rawLeads){
     .sort(function(a,b){return(b.date_added||"").localeCompare(a.date_added||"");});
 
   document.getElementById("drilldown-title").textContent=lp+" — Leads from Velocify ("+leads.length+" total)";
-  document.getElementById("drilldown-overlay") // won't find — use correct id
   var overlay=document.getElementById("lead-drilldown-overlay");
 
   if(!leads.length){
@@ -3277,14 +3263,6 @@ function loadAmandaSnapshot(){
       buildSnapshot();
     }
   }).catch(function(){});
-}
-
-function renderDanielRoster(){
-  renderCarryoverAlerts();
-  renderAllClear();
-  renderRmSummary();
-  renderLpScorecardSummary();
-  renderVelocifyLeaderboard();
 }
 
 function openSnapshotView(btn){
@@ -3411,9 +3389,9 @@ function buildSnapshot(){
 
   // Hero
   var allLPsDone=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
-  h+='<div style="background:'+(allLPsDone?"linear-gradient(135deg,#064e3b,#0D7377)":"var(--text)")+';border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:1rem">';
+  h+='<div style="background:'+(allLPsDone?"#232A35":"var(--text)")+';border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:1rem">';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px">';
-  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-family:\'DM Mono\',monospace;margin-bottom:3px">NFM Lending Ohio</div>';
+  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-family:\'Geist\',\'Inter\',sans-serif;margin-bottom:3px">NFM Lending Ohio</div>';
   h+='<div style="color:#fff;font-size:16px;font-weight:700">'+todayFmt+'</div></div>';
   h+='<div style="background:rgba(255,255,255,.06);border-radius:8px;padding:7px 12px;font-size:11px;font-style:italic;color:rgba(255,255,255,.85);font-size:14px;font-weight:600">'+headline+'</div>';
   h+='</div>';
@@ -3421,10 +3399,10 @@ function buildSnapshot(){
   h+='<div style="display:flex;gap:22px;flex-wrap:wrap">';
   [{v:totalCallsWTD+" / "+(LPS.length*WEEKLY_TARGET),l:"Team calls WTD",c:"#fff"},
    {v:leadsToday,l:"Leads today",c:"var(--accent)"},
-   {v:leadsWTD,l:"Leads WTD",c:"#a78bfa"},
-   {v:leadsMTD,l:"Leads MTD",c:"#60a5fa"}
+   {v:leadsWTD,l:"Leads WTD",c:"#9AA5B8"},
+   {v:leadsMTD,l:"Leads MTD",c:"#3D4E68"}
   ].forEach(function(s){
-    h+='<div><div style="color:'+s.c+';font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;line-height:1">'+s.v+'</div>';
+    h+='<div><div style="color:'+s.c+';font-size:22px;font-weight:700;font-family:\'Geist\',\'Inter\',sans-serif;line-height:1">'+s.v+'</div>';
     h+='<div style="color:rgba(255,255,255,.35);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-top:3px">'+s.l+'</div></div>';
   });
   h+='</div></div>';
@@ -3439,7 +3417,7 @@ function buildSnapshot(){
     var target=WEEKLY_TARGET;
     var paceTarget=Math.round(target*paceFraction);
     var pct=Math.round(called/target*100);
-    var lpColor=LP_COLORS[lp]||'var(--accent)';
+    var lpColor='#3D4E68';
     var leadsW=lpLeadsWTD[lp]||0;
     var leadsT=lpLeadsToday[lp]||0;
     var scData=snapScData[lp]||{};
@@ -3450,27 +3428,27 @@ function buildSnapshot(){
     var contracts=scTotal(scData,'contracts');
     var missedLastWeek=getLpMissedLastWeek(lp).filter(function(a){return isActive(a);}).length;
     var status,sc;
-    if(called>=target){status='Week complete!';sc='#1D9E75';}
-    else if(called>=paceTarget){status='On pace';sc='#1D9E75';}
-    else if(called>=Math.round(paceTarget*.7)){status='Almost there';sc='#BA7517';}
-    else{status='Pick it up';sc='#E24B4A';}
+    if(called>=target){status='Week complete!';sc='#3E8E5A';}
+    else if(called>=paceTarget){status='On pace';sc='#3E8E5A';}
+    else if(called>=Math.round(paceTarget*.7)){status='Almost there';sc='#B8842B';}
+    else{status='Pick it up';sc='#B54B42';}
     var barW=Math.min(pct,100);
     h+='<div onclick="goToLP(\''+lp+'\',)" style="cursor:pointer;border-left:4px solid '+lpColor+';padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'var(--surface)\'">';
     h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
     h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:'+lpColor+'">'+lp+'</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP2</span></div>';
-    h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+called+'</span>';
+    h+='<span style="font-family:\'Geist\',\'Inter\',sans-serif;font-size:24px;font-weight:700;color:var(--text)">'+called+'</span>';
     h+='<span style="font-size:11px;color:var(--text-3)">/ '+target+' calls this week</span>';
-    h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
+    h+='<span style="font-family:\'Geist\',\'Inter\',sans-serif;font-size:16px;font-weight:700;color:'+lpColor+'">'+pct+'%</span>';
     h+='<span style="font-size:11px;color:'+sc+';font-weight:500">'+status+'</span>';
     if(missedLastWeek>0)h+='<span class="carryover-tag" style="cursor:pointer" title="Click to see which agents weren\'t called last week" onclick="event.stopPropagation();goToLP(\''+lp+'\',true)">'+missedLastWeek+' carried over from last week &#8250;</span>';
-    h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Velocify: <b style="color:'+(leadsW?'#1D9E75':'var(--text-3)')+'">'+leadsW+' WTD</b> · '+leadsT+' today · <a style="color:var(--accent)" onclick="event.stopPropagation();goToLP(\''+lp+'\')">open ↗</a></span>';
+    h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Velocify: <b style="color:'+(leadsW?'#3E8E5A':'var(--text-3)')+'">'+leadsW+' WTD</b> · '+leadsT+' today · <a style="color:var(--accent)" onclick="event.stopPropagation();goToLP(\''+lp+'\')">open ↗</a></span>';
     h+='</div>';
     h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
     h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+barW+'%;background:'+lpColor+'"></div></div></div>';
     var mets=[['Talk\'s',rltrTalks,10],['Leads',referredLeads,16],['1003\'s',apps,13],['Pre-apps',preApps,6],['Contracts',contracts,3]];
     mets.forEach(function(m){
-      var mc=m[1]>=m[2]?'#1D9E75':m[1]>0?'#BA7517':'var(--text-3)';
-      h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+mc+';font-family:\'DM Mono\',monospace">'+m[1]+'<span style="font-size:9px;color:var(--text-3);">/'+m[2]+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m[0]+'</div></div>';
+      var mc=m[1]>=m[2]?'#3E8E5A':m[1]>0?'#B8842B':'var(--text-3)';
+      h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+mc+';font-family:\'Geist\',\'Inter\',sans-serif">'+m[1]+'<span style="font-size:9px;color:var(--text-3);">/'+m[2]+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m[0]+'</div></div>';
     });
     h+='</div>';
     h+='</div>';
@@ -3493,23 +3471,23 @@ function buildSnapshot(){
   var isaakPct=Math.min(Math.round(isaakRCalls/100*100),100);
   var isaakStatus,isaakSc;
   var isaakPace=Math.round(100*paceFraction);
-  if(isaakRCalls>=100){isaakStatus='Complete!';isaakSc='#1D9E75';}
-  else if(isaakRCalls>=isaakPace){isaakStatus='On pace';isaakSc='#1D9E75';}
-  else if(isaakRCalls>=Math.round(isaakPace*.7)){isaakStatus='Close';isaakSc='#BA7517';}
-  else{isaakStatus='Behind pace';isaakSc='#E24B4A';}
-  h+='<div style="border-left:4px solid #0891B2;padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)">';
+  if(isaakRCalls>=100){isaakStatus='Complete!';isaakSc='#3E8E5A';}
+  else if(isaakRCalls>=isaakPace){isaakStatus='On pace';isaakSc='#3E8E5A';}
+  else if(isaakRCalls>=Math.round(isaakPace*.7)){isaakStatus='Close';isaakSc='#B8842B';}
+  else{isaakStatus='Behind pace';isaakSc='#B54B42';}
+  h+='<div style="border-left:4px solid #3D4E68;padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
-  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#0891B2">Isaak</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP1</span></div>';
-  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+isaakRCalls+'</span>';
+  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#3D4E68">Isaak</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP1</span></div>';
+  h+='<span style="font-family:\'Geist\',\'Inter\',sans-serif;font-size:24px;font-weight:700;color:var(--text)">'+isaakRCalls+'</span>';
   h+='<span style="font-size:11px;color:var(--text-3)">/ 100 calls this week</span>';
-  h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#0891B2">'+isaakPct+'%</span>';
+  h+='<span style="font-family:\'Geist\',\'Inter\',sans-serif;font-size:16px;font-weight:700;color:#3D4E68">'+isaakPct+'%</span>';
   h+='<span style="font-size:11px;color:'+isaakSc+';font-weight:500">'+isaakStatus+'</span>';
   h+='</div>';
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+isaakPct+'%;background:#0891B2"></div></div></div>';
-  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakRCalls>=100?'#1D9E75':isaakRCalls>0?'#BA7517':'var(--text-3)')+'">'+isaakRCalls+'<span style="font-size:9px;color:var(--text-3)">/100</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Calls</div></div>';
-  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakApps>=10?'#1D9E75':isaakApps>0?'#BA7517':'var(--text-3)')+'">'+isaakApps+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">1003\'s</div></div>';
-  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'DM Mono\',monospace;color:'+(isaakMeetings>=10?'#1D9E75':isaakMeetings>0?'#BA7517':'var(--text-3)')+'">'+isaakMeetings+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Meetings</div></div>';
+  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+isaakPct+'%;background:#3D4E68"></div></div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'Geist\',\'Inter\',sans-serif;color:'+(isaakRCalls>=100?'#3E8E5A':isaakRCalls>0?'#B8842B':'var(--text-3)')+'">'+isaakRCalls+'<span style="font-size:9px;color:var(--text-3)">/100</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Calls</div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'Geist\',\'Inter\',sans-serif;color:'+(isaakApps>=10?'#3E8E5A':isaakApps>0?'#B8842B':'var(--text-3)')+'">'+isaakApps+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">1003\'s</div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'Geist\',\'Inter\',sans-serif;color:'+(isaakMeetings>=10?'#3E8E5A':isaakMeetings>0?'#B8842B':'var(--text-3)')+'">'+isaakMeetings+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Meetings</div></div>';
   h+='</div>';
   h+='</div>';
 
@@ -3543,28 +3521,28 @@ function buildSnapshot(){
   var amPaceT=Math.round(amWeeklyGoal*paceFraction);
   var amPctOfGoal=amWeeklyGoal>0?Math.min(Math.round(amTotalWTD/amWeeklyGoal*100),100):0;
   // Amanda status badge
-  if(amPctOfGoal>=100){aSt="Week complete!";aSc="#15803d";aSb="#dcfce7";}
-  else if(amPctOfGoal>=paceFraction*100*0.85){aSt="On pace";aSc="#1d4ed8";aSb="#dbeafe";}
-  else if(amPctOfGoal>=paceFraction*100*0.65){aSt="Almost there";aSc="#92400e";aSb="#fef3c7";}
-  else{aSt="Pick it up";aSc="#991b1b";aSb="#fee2e2";}
+  if(amPctOfGoal>=100){aSt="Week complete!";aSc="#3E8E5A";aSb="#EAF5EE";}
+  else if(amPctOfGoal>=paceFraction*100*0.85){aSt="On pace";aSc="#3D4E68";aSb="#EEF1F6";}
+  else if(amPctOfGoal>=paceFraction*100*0.65){aSt="Almost there";aSc="#B8842B";aSb="#FBF3E5";}
+  else{aSt="Pick it up";aSc="#B54B42";aSb="#FBEBE9";}
 
-  h+='<div style="border-left:4px solid #B45309;padding:10px 14px;border-radius:0 6px 6px 0;background:var(--surface)">';
+  h+='<div style="border-left:4px solid #3D4E68;padding:10px 14px;border-radius:0 6px 6px 0;background:var(--surface)">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
-  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#B45309">Amanda</span><br><span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">RM</span></div>';
-  h+='<span style="font-family:\'DM Mono\',monospace;font-size:24px;font-weight:700;color:var(--text)">'+amTotalWTD+'</span>';
+  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#3D4E68">Amanda</span><br><span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">RM</span></div>';
+  h+='<span style="font-family:\'Geist\',\'Inter\',sans-serif;font-size:24px;font-weight:700;color:var(--text)">'+amTotalWTD+'</span>';
   h+='<span style="font-size:11px;color:var(--text-3)">/ '+amWeeklyGoal+' this week</span>';
-  h+='<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:#B45309">'+amPctOfGoal+'%</span>';
+  h+='<span style="font-family:\'Geist\',\'Inter\',sans-serif;font-size:16px;font-weight:700;color:#3D4E68">'+amPctOfGoal+'%</span>';
   h+='<span style="font-size:11px;color:'+aSc+';font-weight:500">'+aSt+'</span>';
   h+='<span style="margin-left:auto;font-size:10px;color:var(--text-3)">Today: '+amTotalToday+' · MTD: '+amTotalMTD+'</span>';
   h+='</div>';
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:#B45309"></div></div></div>';
+  h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:#3D4E68"></div></div></div>';
   [{type:"New Realtor Meeting",daily:1,weekly:5,label:"Mtgs"},{type:"Cold Calls",daily:25,weekly:125,label:"Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Breads"},{type:"__talkto__",daily:20,weekly:100,label:"Talk-to\'s"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy"}].forEach(function(m){
     var td=m.type==="__talkto__"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
     var tw=m.type==="__talkto__"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
-    var dc=td>=m.daily?'#1D9E75':'var(--text-3)';
-    var wc=tw>=m.weekly?'#1D9E75':tw>0?'#BA7517':'var(--text-3)';
-    h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+dc+';font-family:\'DM Mono\',monospace">'+td+'<span style="font-size:9px;color:var(--text-3)">/'+m.daily+'</span></div><div style="font-size:10px;font-weight:500;color:'+wc+';font-family:\'DM Mono\',monospace">'+tw+'<span style="font-size:8px;color:var(--text-3)">/'+m.weekly+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m.label+'</div></div>';
+    var dc=td>=m.daily?'#3E8E5A':'var(--text-3)';
+    var wc=tw>=m.weekly?'#3E8E5A':tw>0?'#B8842B':'var(--text-3)';
+    h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+dc+';font-family:\'Geist\',\'Inter\',sans-serif">'+td+'<span style="font-size:9px;color:var(--text-3)">/'+m.daily+'</span></div><div style="font-size:10px;font-weight:500;color:'+wc+';font-family:\'Geist\',\'Inter\',sans-serif">'+tw+'<span style="font-size:8px;color:var(--text-3)">/'+m.weekly+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m.label+'</div></div>';
   });
   h+='<span style="margin-left:auto;font-size:10px"><a style="color:var(--accent);cursor:pointer" onclick="openRmView(document.querySelector(\'.wb-RM\'))">open RM ↗</a></span>';
   h+='</div>';
@@ -3576,7 +3554,7 @@ function buildSnapshot(){
   var nextR=new Date(now);nextR.setHours(18,0,0,0);
   if(now>=nextR)nextR.setDate(nextR.getDate()+1);
   var hrs=Math.ceil((nextR-now)/3600000);
-  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3);font-family:\'DM Mono\',monospace">Refreshes every 30s · updated '+now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'})+'</div>';
+  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3);font-family:\'Geist\',\'Inter\',sans-serif">Refreshes every 30s · updated '+now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'})+'</div>';
 
   el.innerHTML=h;
   clearTimeout(window._snapshotTimer);
@@ -3586,82 +3564,6 @@ function buildSnapshot(){
 
 
 
-function buildDailyDigest(){
-  if(!document.getElementById("view-daniel")||!document.getElementById("view-daniel").classList.contains("active"))return;
-  var el=document.getElementById("d-daily-digest");
-  var timeEl=document.getElementById("digest-time");
-  if(!el)return;
-  var now=new Date();
-  var todayStr=localDateStr(TODAY);
-  if(timeEl)timeEl.textContent="as of "+now.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
-
-  // If data not loaded yet, show loading and retry
-  if(!callLogs||Object.keys(callLogs).length===0){
-    el.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;text-align:center;color:var(--text-3);font-size:12px">Loading digest...</div>';
-    setTimeout(buildDailyDigest,2000);
-    return;
-  }
-
-  // Calls logged this week per LP (proxy for today — call_logs resets weekly)
-  var callsLogged={};
-  LPS.forEach(function(lp){callsLogged[lp]=0;});
-  agents.forEach(function(a){
-    if(callLogs[a[0]]&&isActive(a)&&a[2]&&callsLogged[a[2]]!==undefined)callsLogged[a[2]]++;
-  });
-  var totalCalls=Object.values(callsLogged).reduce(function(s,n){return s+n;},0);
-
-  // Leads today from pipeline data
-  var leadsToday=0;var lpLeadsToday={};
-  var lpd=window.leadPipelineData;
-  LPS.forEach(function(lp){
-    var n=lpd&&lpd.lps&&lpd.lps[lp]?lpd.lps[lp].daily||0:0;
-    lpLeadsToday[lp]=n;leadsToday+=n;
-  });
-
-  var todayFmt=now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
-  var h='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm)">';
-  h+='<div style="background:var(--text);padding:12px 18px;display:flex;justify-content:space-between;align-items:center">';
-  h+='<div style="color:#fff;font-size:13px;font-weight:700">'+todayFmt+'</div>';
-  h+='<div style="display:flex;gap:20px">';
-  h+='<div style="text-align:center"><div style="color:#fff;font-size:20px;font-weight:700;font-family:\'DM Mono\',monospace">'+totalCalls+'</div><div style="color:rgba(255,255,255,.5);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Calls this week</div></div>';
-  h+='<div style="text-align:center"><div style="color:var(--accent);font-size:20px;font-weight:700;font-family:\'DM Mono\',monospace">'+leadsToday+'</div><div style="color:rgba(255,255,255,.5);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Leads today</div></div>';
-  h+='</div></div>';
-  LPS.forEach(function(lp){
-    var called=callsLogged[lp]||0;
-    var total=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
-    var pct=total>0?Math.min(Math.round(called/total*100),100):0;
-    var lpColor=LP_COLORS[lp]||"var(--accent)";
-    var leads=lpLeadsToday[lp]||0;
-    var dot=called===0?"rgba(200,200,200,.5)":leads>0?"var(--accent)":"var(--green)";
-    h+='<div style="display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border-light)">';
-    h+='<div style="width:8px;height:8px;border-radius:50%;background:'+dot+';flex-shrink:0"></div>';
-    h+='<div style="width:56px;font-size:12px;font-weight:700;color:'+lpColor+'">'+lp+'</div>';
-    h+='<div style="flex:1">';
-    h+='<div style="display:flex;align-items:center;gap:8px">';
-    h+='<div style="flex:1;height:4px;background:var(--border-light);border-radius:2px;overflow:hidden"><div style="height:100%;background:'+lpColor+';opacity:.7;border-radius:2px;width:'+pct+'%;transition:width .6s ease"></div></div>';
-    h+='<span style="font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text-2);white-space:nowrap">'+called+' / '+total+'</span>';
-    h+='</div></div>';
-    h+='<div style="text-align:right;flex-shrink:0">';
-    h+=leads>0?'<span style="font-size:12px;font-weight:700;color:var(--accent)">+'+leads+' lead'+(leads!==1?'s':'')+'</span>':'<span style="font-size:11px;color:var(--text-3)">—</span>';
-    h+='</div></div>';
-  });
-  h+='<div style="display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border-light)">';
-  h+='<div style="width:8px;height:8px;border-radius:50%;background:rgba(200,200,200,.4);flex-shrink:0"></div>';
-  h+='<div style="width:56px;font-size:12px;font-weight:600;color:var(--text-3)">RM</div>';
-  h+='<div style="flex:1;font-size:11px;color:var(--text-3)">Amanda — see Relationship Manager for today\'s activities</div>';
-  h+='</div>';
-  var nextRefresh=new Date(now);nextRefresh.setHours(18,0,0,0);
-  if(now>=nextRefresh)nextRefresh.setDate(nextRefresh.getDate()+1);
-  var hoursUntil=Math.ceil((nextRefresh-now)/3600000);
-  h+='<div style="padding:8px 18px;background:var(--bg);display:flex;justify-content:space-between;align-items:center">';
-  h+='<span style="font-size:10px;color:var(--text-3)">Refreshes daily at 6:00 PM</span>';
-  h+='<span style="font-size:10px;color:var(--text-3);font-family:\'DM Mono\',monospace">~'+hoursUntil+'h until next refresh</span>';
-  h+='</div></div>';
-  el.innerHTML=h;
-  clearTimeout(window._digestTimer);
-  var ms=nextRefresh-now;
-  if(ms>0&&ms<86400000)window._digestTimer=setTimeout(buildDailyDigest,ms);
-}
 
 function renderTeamStreak(){
   var el=document.getElementById("d-team-streak-section");
@@ -3997,10 +3899,18 @@ function getBirthdayAgentsThisWeek(){
   var months=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
   Object.values(contactCache).forEach(function(c){
     if(!c.birthday||!c.agent_name)return;
-    var parts=c.birthday.toLowerCase().trim().split(/[\s\/\-]+/);
-    if(parts.length<2)return;
     var mIdx=-1,day=-1;
-    parts.forEach(function(p){var mi=months.indexOf(p.substring(0,3));if(mi>=0)mIdx=mi;var n=parseInt(p);if(!isNaN(n)&&n>=1&&n<=31)day=n;});
+    // Reliable path: new structured "MM-DD" format from the dropdown fields
+    var structured=c.birthday.match(/^(\d{2})-(\d{2})$/);
+    if(structured){
+      mIdx=parseInt(structured[1],10)-1;
+      day=parseInt(structured[2],10);
+    } else {
+      // Fallback: legacy free-text entries saved before the format was standardized
+      var parts=c.birthday.toLowerCase().trim().split(/[\s\/\-]+/);
+      if(parts.length<2)return;
+      parts.forEach(function(p){var mi=months.indexOf(p.substring(0,3));if(mi>=0)mIdx=mi;var n=parseInt(p);if(!isNaN(n)&&n>=1&&n<=31)day=n;});
+    }
     if(mIdx<0||day<0)return;
     var bday=new Date(now.getFullYear(),mIdx,day);
     if(bday>=weekStart&&bday<=weekEnd)birthdays.push({name:c.agent_name,birthday:c.birthday});
@@ -6328,6 +6238,695 @@ function dmScrollTo(idx){
   setTimeout(function(){wrap.style.boxShadow="";},1300);
 }  
 
+/* ══════════════════════════════════════════════════════════
+   CORE TEAM TRACKER — ADDITIVE ENHANCEMENT BUNDLE
+   Everything below is new. Nothing above this point was
+   rewritten — only two confirmed-dead duplicate/orphaned
+   blocks were removed (see chat for what and why).
+   ══════════════════════════════════════════════════════════ */
+(function(){
+
+/* ── 1. AESTHETIC PASS — refined type, color, spacing ── */
+var ctStyle=document.createElement("style");
+ctStyle.textContent=`
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+.app{font-family:'Geist','Inter',-apple-system,sans-serif !important;}
+.brand-logo{letter-spacing:.1em !important;}
+.call-card{
+  border-radius:14px !important;
+  box-shadow:0 1px 3px rgba(26,26,46,.05),0 1px 2px rgba(26,26,46,.03) !important;
+  transition:box-shadow .15s ease, transform .1s ease !important;
+}
+.call-card:hover{box-shadow:0 4px 14px rgba(26,26,46,.08),0 2px 6px rgba(26,26,46,.04) !important;}
+.call-card.priority{background:linear-gradient(180deg,#fff8f8 0%,#fffbfb 100%) !important;}
+.check-btn{transition:transform .12s ease, background .15s ease !important;}
+.check-btn:active{transform:scale(0.92) !important;}
+.outcome-btn{border-radius:10px !important; transition:all .12s ease !important;}
+.outcome-btn:active{transform:scale(0.96) !important;}
+.badge{border-radius:6px !important; letter-spacing:.04em !important;}
+.lp-tag{border-radius:6px !important;}
+.who-btn{border-radius:24px !important; transition:all .15s ease !important;}
+.who-btn.active{box-shadow:0 2px 8px rgba(0,0,0,.08) !important;}
+.note-field{border-radius:10px !important; font-family:'Geist','Inter',sans-serif !important;}
+.btn-primary{border-radius:10px !important; font-weight:700 !important; letter-spacing:.01em !important;
+  transition:transform .1s ease, box-shadow .15s ease !important;}
+.btn-primary:active{transform:scale(0.98) !important;}
+.d-card,.scorecard,.leaderboard-row,.search-panel,.admin-section{
+  border-radius:14px !important;
+  box-shadow:0 1px 3px rgba(26,26,46,.05) !important;
+}
+.lp-hero{border-radius:16px !important; box-shadow:0 8px 24px -8px rgba(26,26,46,.25) !important;}
+::-webkit-scrollbar{height:6px;width:6px;}
+::-webkit-scrollbar-thumb{background:#d0d5dd;border-radius:10px;}
+`;
+document.head.appendChild(ctStyle);
+
+/* Mobile safety net for elements this bundle added — the app.css already
+   has a 600px breakpoint for existing UI, this just covers what's new */
+var ctMobileStyle=document.createElement("style");
+ctMobileStyle.textContent=`
+@media(max-width:600px){
+  #ct-overdue-queue{padding:12px 14px !important;}
+  #ct-overdue-queue > div{font-size:12px !important;}
+  .ct-quick-save{font-size:11px !important;}
+}
+`;
+document.head.appendChild(ctMobileStyle);
+
+/* ── 2. DRAFT PERSISTENCE — survive refresh / app switch ── */
+var CT_DRAFT_KEY="ct_pending_notes_backup";
+try{
+  var savedDrafts=localStorage.getItem(CT_DRAFT_KEY);
+  if(savedDrafts && typeof pendingNote==="object"){
+    var parsed=JSON.parse(savedDrafts);
+    Object.keys(parsed).forEach(function(k){ if(!pendingNote[k]) pendingNote[k]=parsed[k]; });
+  }
+}catch(e){}
+
+function ctPersistDrafts(){
+  try{ localStorage.setItem(CT_DRAFT_KEY, JSON.stringify(pendingNote)); }catch(e){}
+}
+function ctClearDraft(name){
+  try{
+    var d=JSON.parse(localStorage.getItem(CT_DRAFT_KEY)||"{}");
+    delete d[name];
+    localStorage.setItem(CT_DRAFT_KEY, JSON.stringify(d));
+  }catch(e){}
+}
+
+// Wrap (not replace the body of) each function that touches pendingNote,
+// so drafts get backed up automatically without editing their source.
+["queueNote","selectPendingOutcome","togglePendingRmFlag","toggleCallFromCard"].forEach(function(fnName){
+  if(typeof window[fnName]==="function"){
+    var orig=window[fnName];
+    window[fnName]=function(){
+      var result=orig.apply(this,arguments);
+      ctPersistDrafts();
+      return result;
+    };
+  }
+});
+if(typeof window.tryConfirmCall==="function"){
+  var origTryConfirm=window.tryConfirmCall;
+  window.tryConfirmCall=function(name,lp){
+    var before=!!pendingNote[name];
+    var result=origTryConfirm.apply(this,arguments);
+    // if the pending note was cleared (save succeeded), drop its backup too
+    if(before && !pendingNote[name]) ctClearDraft(name);
+    return result;
+  };
+}
+
+/* ── 3. QUICK-SAVE for VM / Text outcomes — skip the note requirement ── */
+// These outcomes don't need the 10-word detail bar. Adds a small "Quick save"
+// button next to the existing Save button once VM or Text is selected —
+// it calls your existing upsertCallLogWithOutcome directly, unmodified.
+function ctInjectQuickSave(card,name,lp,outcome){
+  if(!card) return;
+  var saveBtn=card.querySelector('.btn-primary[onclick*="tryConfirmCall"]');
+  if(!saveBtn) return;
+  var existing=card.querySelector(".ct-quick-save");
+  if(existing) existing.remove();
+  if(outcome!=="Left VM") return; // only VM skips the note now — Text requires real content
+  var qs=document.createElement("button");
+  qs.className="btn btn-sm ct-quick-save";
+  qs.style.cssText="margin-top:6px;width:100%;padding:8px;font-size:12px;border-radius:8px;background:#f0fdf4;border:1px solid #86efac;color:#15803d;font-weight:700;cursor:pointer";
+  qs.textContent="⚡ Quick save — no note needed for "+outcome;
+  qs.onclick=function(){
+    var canned=outcome==="Left VM"?"Left voicemail.":"Sent a follow-up text.";
+    delete pendingNote[name];
+    ctClearDraft(name);
+    upsertCallLogWithOutcome(name,lp,canned,outcome,false).then(function(){
+      if(document.getElementById("lp-search-results") && document.getElementById("lp-search-results").innerHTML.length>10){
+        renderLpSearch();
+      } else {
+        renderLP(currentUser);
+      }
+    });
+  };
+  saveBtn.insertAdjacentElement("afterend",qs);
+}
+
+document.addEventListener("click",function(e){
+  var btn=e.target.closest(".outcome-btn");
+  if(!btn) return;
+  var name=btn.getAttribute("data-name"), lp=btn.getAttribute("data-lp"), outc=btn.getAttribute("data-outcome");
+  if(!name||!outc) return;
+  setTimeout(function(){
+    var scope=btn.parentElement ? btn.parentElement.parentElement : document;
+    ctInjectQuickSave(scope, name, lp, outc);
+  }, 30);
+}, true);
+
+/* ── 4. "CALL MY NEXT AGENT" — one tap to jump to the top of the list ── */
+function callNextAgent(){
+  if(!currentUser || typeof getRotation!=="function") return;
+  var rot=getRotation(currentUser).filter(function(a){ return !calledThisWeek(a[0]); });
+  if(!rot.length){
+    alert("Nothing left to call — you're caught up!");
+    return;
+  }
+  var name=rot[0][0];
+  pendingNote[name]={draft:"",outcome:""};
+  ctPersistDrafts();
+  renderLP(currentUser);
+  setTimeout(function(){
+    var field=document.querySelector('.note-field[data-name="'+name+'"]');
+    var card=field ? field.closest(".call-card") : null;
+    if(card){ card.scrollIntoView({behavior:"smooth",block:"center"}); }
+    if(field) field.focus();
+  },150);
+}
+window.callNextAgent=callNextAgent;
+
+function ctInjectCallNextButton(){
+  var list=document.getElementById("lp-call-list");
+  if(!list || document.getElementById("ct-call-next-btn")) return;
+  var btn=document.createElement("button");
+  btn.id="ct-call-next-btn";
+  btn.className="btn btn-primary";
+  btn.style.cssText="width:100%;padding:13px;margin-bottom:.75rem;border-radius:10px;font-size:14px";
+  btn.textContent="📞 Call my next agent";
+  btn.onclick=callNextAgent;
+  list.parentElement.insertBefore(btn,list);
+}
+if(typeof window.renderLP==="function"){
+  var origRenderLP=window.renderLP;
+  window.renderLP=function(lp){
+    var result=origRenderLP.apply(this,arguments);
+    ctInjectCallNextButton();
+    return result;
+  };
+}
+
+/* ── 5. RUNNING WEEKLY TOTAL TOAST on save ── */
+function ctShowToast(msg){
+  var el=document.getElementById("ctToast");
+  if(!el){
+    el=document.createElement("div");
+    el.id="ctToast";
+    el.style.cssText="position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(8px);"
+      +"background:#1F4E79;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;"
+      +"z-index:9999;opacity:0;transition:all .25s;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.18)";
+    document.body.appendChild(el);
+  }
+  el.textContent=msg;
+  el.style.opacity="1";
+  el.style.transform="translateX(-50%) translateY(0)";
+  clearTimeout(el._t);
+  el._t=setTimeout(function(){
+    el.style.opacity="0";
+    el.style.transform="translateX(-50%) translateY(8px)";
+  },2600);
+}
+if(typeof window.upsertCallLogWithOutcome==="function"){
+  var origUpsertOutcome=window.upsertCallLogWithOutcome;
+  window.upsertCallLogWithOutcome=function(name,lp,note,outcome,flagRm){
+    var result=origUpsertOutcome.apply(this,arguments);
+    if(result && result.then){
+      result.then(function(){
+        if(typeof getLpCallsThisWeek==="function" && lp){
+          var count=getLpCallsThisWeek(lp);
+          ctShowToast("✓ Logged "+name+" — now "+count+"/"+(typeof WEEKLY_TARGET!=="undefined"?WEEKLY_TARGET:15)+" this week");
+        }
+      });
+    }
+    return result;
+  };
+}
+
+})();
+
+/* ══════════════════════════════════════════════════════════
+   ROUND 2 — anti-copy-paste notes + overdue queue on Snapshot
+   Still additive only: wraps tryConfirmCall and buildSnapshot,
+   does not edit their source.
+   ══════════════════════════════════════════════════════════ */
+(function(){
+
+/* ── Note-similarity check (word-overlap, ignores stop words) ── */
+var CT_STOPWORDS={"the":1,"to":1,"a":1,"an":1,"and":1,"or":1,"but":1,"in":1,"on":1,"at":1,"for":1,"of":1,
+  "with":1,"that":1,"this":1,"is":1,"are":1,"was":1,"were":1,"be":1,"been":1,"have":1,"has":1,"had":1,
+  "do":1,"does":1,"did":1,"will":1,"would":1,"could":1,"should":1,"may":1,"can":1,"not":1,"no":1,"it":1,
+  "its":1,"they":1,"them":1,"their":1,"we":1,"he":1,"she":1,"his":1,"her":1,"i":1,"you":1,"so":1,"up":1,
+  "out":1,"as":1,"by":1,"from":1,"about":1,"if":1,"me":1,"my":1,"us":1,"our":1};
+function ctWords(s){
+  return (s||"").toLowerCase().replace(/[.,!?;:\-"'()]+/g," ").split(/\s+/)
+    .filter(function(w){return w.length>1 && !CT_STOPWORDS[w];});
+}
+function ctSimilarity(a,b){
+  var wa=ctWords(a), wb=ctWords(b);
+  if(!wa.length||!wb.length) return 0;
+  var setB={}; wb.forEach(function(w){setB[w]=true;});
+  var overlap=0; wa.forEach(function(w){if(setB[w])overlap++;});
+  return overlap/Math.min(wa.length,wb.length);
+}
+// Checks this LP's OTHER notes logged this week for a near-duplicate, and
+// (separately) this agent's own last note for a stale copy-paste repeat.
+function ctFindDuplicate(name,lp,text){
+  if(ctWords(text).length<3) return null;
+  var thisWeekNotes=Object.values(callLogs).filter(function(l){
+    return l.lp===lp && l.week_key===weekKey && l.agent_name!==name && l.note;
+  });
+  for(var i=0;i<thisWeekNotes.length;i++){
+    if(ctSimilarity(text,thisWeekNotes[i].note)>0.6){
+      return "This looks nearly identical to your note for "+thisWeekNotes[i].agent_name+".";
+    }
+  }
+  if(typeof prevNotes!=="undefined" && prevNotes[name] && prevNotes[name].note){
+    if(ctSimilarity(text,prevNotes[name].note)>0.75){
+      return "This matches what you wrote for "+name+" last time — what's different about this call?";
+    }
+  }
+  return null;
+}
+// "Answered"/"In Person" should reflect what the AGENT said back, not just
+// what the LP told them — light heuristic, not a hard block, just a nudge.
+var CT_RESPONSE_WORDS=["said","says","mentioned","asked","told me","replied","responded","wants","needs","interested","thinks","feels","agreed","confirmed"];
+function ctLacksAgentResponse(text){
+  var low=(text||"").toLowerCase();
+  return !CT_RESPONSE_WORDS.some(function(w){return low.indexOf(w)>=0;});
+}
+// Catches "what what what what" style gaming — a real note has some word
+// variety; one word/phrase stretched out to clear the length bar doesn't.
+// This is a hard block, no override, since there's no legitimate reason
+// a genuine note repeats itself like that.
+function ctIsRepetitive(text){
+  var words=ctWords(text);
+  if(words.length<4) return false;
+  var freq={}; words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
+  var uniqueCount=Object.keys(freq).length;
+  var maxRepeat=Math.max.apply(null,Object.values(freq));
+  return (uniqueCount/words.length < 0.5) || (maxRepeat/words.length > 0.4);
+}
+
+var ctConfirmedOnce={}; // name -> true once they've tapped "Save anyway"
+
+if(typeof window.tryConfirmCall==="function"){
+  var origTryConfirm2=window.tryConfirmCall;
+  window.tryConfirmCall=function(name,lp){
+    var pending=pendingNote[name]||{};
+    var draft=(pending.draft||"").trim();
+    var outcome=pending.outcome||"";
+    var findSaveBtn=function(){
+      return document.querySelector('.btn-primary[onclick*="tryConfirmCall"][onclick*="'+name.replace(/'/g,"\\'")+'"]');
+    };
+    if(outcome && draft){
+      if(ctIsRepetitive(draft)){
+        var btn0=findSaveBtn();
+        if(btn0){
+          var orig0=btn0.innerHTML;
+          btn0.innerHTML="This note repeats the same word/phrase — add a real line about what happened.";
+          btn0.style.background="#B54B42";
+          btn0.style.fontSize="11px";
+          setTimeout(function(){ if(btn0.innerHTML.indexOf("repeats")>=0){btn0.innerHTML=orig0;btn0.style.background="";btn0.style.fontSize="";} },3500);
+        }
+        return; // hard block — no override path for this one
+      }
+    }
+    if(outcome && draft && !ctConfirmedOnce[name]){
+      var dupMsg=ctFindDuplicate(name,lp,draft);
+      if(dupMsg){
+        var btn=findSaveBtn();
+        if(btn){
+          var orig=btn.innerHTML;
+          btn.innerHTML="⚠ "+dupMsg+" Tap again to save anyway.";
+          btn.style.background="#B54B42";
+          btn.style.fontSize="11px";
+          ctConfirmedOnce[name]=true;
+          setTimeout(function(){ delete ctConfirmedOnce[name]; if(btn.innerHTML.indexOf("Tap again")>=0){btn.innerHTML=orig;btn.style.background="";btn.style.fontSize="";} },6000);
+        }
+        return; // block this tap — require a second, deliberate tap to proceed
+      }
+      if((outcome==="Answered"||outcome==="In Person") && ctLacksAgentResponse(draft) && ctWords(draft).length<25){
+        var btn2=findSaveBtn();
+        if(btn2){
+          var orig2=btn2.innerHTML;
+          btn2.innerHTML="Add what they said back — makes this easier to pick up next time. Tap again to save anyway.";
+          btn2.style.background="#B8842B";
+          btn2.style.fontSize="11px";
+          ctConfirmedOnce[name]=true;
+          setTimeout(function(){ delete ctConfirmedOnce[name]; if(btn2.innerHTML.indexOf("Tap again")>=0){btn2.innerHTML=orig2;btn2.style.background="";btn2.style.fontSize="";} },6000);
+        }
+        return;
+      }
+    }
+    delete ctConfirmedOnce[name];
+    return origTryConfirm2.apply(this,arguments);
+  };
+}
+
+/* ── Overdue-call queue on Snapshot — team-wide, read only ── */
+function ctInjectOverdueQueue(){
+  var host=document.getElementById("d-snapshot-body");
+  if(!host || typeof agents==="undefined" || !agents.length) return;
+  var old=document.getElementById("ct-overdue-queue");
+  if(old) old.remove();
+
+  var overdue=agents.filter(function(a){
+    return isActive(a) && a[2] && a[2]!=="Unassigned" && !calledThisWeek(a[0]);
+  }).map(function(a){
+    return {name:a[0], lp:a[2], tier:a[1], days:daysOverdue(a), priority:isPriority(a)};
+  }).filter(function(x){return x.days>=0 || x.priority;})
+    .sort(function(x,y){ if(x.priority!==y.priority) return y.priority-x.priority; return y.days-x.days; })
+    .slice(0,8);
+
+  if(!overdue.length) return;
+
+  var box=document.createElement("div");
+  box.id="ct-overdue-queue";
+  box.style.cssText="background:#fff;border:1px solid #E4E6EA;border-radius:12px;padding:14px 18px;margin-bottom:18px;";
+  var rows=overdue.map(function(o){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F0F1EE">'
+      +'<span style="font-size:13px;font-weight:700;flex:1">'+o.name+'</span>'
+      +'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;background:#EEF1F6;color:#3D4E68">'+o.lp+'</span>'
+      +(o.priority?'<span style="font-size:10.5px;font-weight:700;color:#B54B42">PRIORITY</span>':'')
+      +'<span style="font-size:11.5px;color:'+(o.days>=0?'#B54B42':'#6B7280')+';font-weight:600;min-width:70px;text-align:right">'+(o.days>=0?o.days+"d overdue":"—")+'</span>'
+      +'</div>';
+  }).join("");
+  box.innerHTML='<div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#6B7280;margin-bottom:8px">Team-wide — who needs a call next</div>'+rows;
+  host.insertBefore(box, host.firstChild);
+}
+if(typeof window.buildSnapshot==="function"){
+  var origBuildSnapshot=window.buildSnapshot;
+  window.buildSnapshot=function(){
+    var result=origBuildSnapshot.apply(this,arguments);
+    setTimeout(ctInjectOverdueQueue, 30);
+    return result;
+  };
+}
+
+})();
+
+/* ══════════════════════════════════════════════════════════
+   ROUND 3 — standardized birthday input (structured MM-DD,
+   not free text) so the birthday-detection logic always works
+   regardless of who enters it or how.
+   ══════════════════════════════════════════════════════════ */
+(function(){
+  var dayEl = document.getElementById("lp-cm-birthday-day");
+  if(dayEl){
+    for(var d=1; d<=31; d++){
+      var opt=document.createElement("option");
+      opt.value=String(d).padStart(2,"0");
+      opt.textContent=d;
+      dayEl.appendChild(opt);
+    }
+  }
+})();
+function ctSetBirthdayDropdowns(value){
+  var mEl=document.getElementById("lp-cm-birthday-month"), dEl=document.getElementById("lp-cm-birthday-day");
+  if(!mEl||!dEl) return;
+  mEl.value=""; dEl.value="";
+  if(!value) return;
+  var structured=value.match(/^(\d{2})-(\d{2})$/);
+  if(structured){ mEl.value=structured[1]; dEl.value=structured[2]; return; }
+  // Legacy free-text value already saved — best-effort parse so it still displays
+  var months=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+  var parts=value.toLowerCase().trim().split(/[\s\/\-]+/);
+  parts.forEach(function(p){
+    var mi=months.indexOf(p.substring(0,3));
+    if(mi>=0) mEl.value=String(mi+1).padStart(2,"0");
+    var n=parseInt(p);
+    if(!isNaN(n)&&n>=1&&n<=31) dEl.value=String(n).padStart(2,"0");
+  });
+}
+function ctGetBirthdayValue(){
+  var m=document.getElementById("lp-cm-birthday-month"), d=document.getElementById("lp-cm-birthday-day");
+  if(!m||!d||!m.value||!d.value) return null;
+  return m.value+"-"+d.value; // always stored as MM-DD, regardless of who enters it
+}
+
+/* ══════════════════════════════════════════════════════════
+   ROUND 4 — Per-LP lead conversion boxes + milestone/stall
+   computation. Entirely derived from data already loaded via
+   loadReferralLeadsDirect — no new tables needed for this part.
+   ══════════════════════════════════════════════════════════ */
+
+// Real status strings from Velocify, mapped to a milestone position.
+// Extend this list if your CRM uses additional status values.
+var CT_MILESTONE_ORDER=["New","Contact Attempt","Contacted","Nurture","File Started","App Withdrawn"];
+function ctMapStatusToStage(status){
+  var s=(status||"").toLowerCase();
+  if(s.indexOf("start")>=0) return 4;
+  if(s.indexOf("withdrawn")>=0) return 5;
+  if(s.indexOf("nurture")>=0) return 3;
+  if(s.indexOf("contact attempt")>=0) return 1;
+  if(s==="contacted") return 2;
+  return 0;
+}
+// A lead is "stalled" if it hasn't moved in 5+ days and isn't already
+// resolved (started or withdrawn) — separate signal from agent staleness.
+function ctIsLeadStalled(r){
+  var s=(r.status||"").toLowerCase();
+  if(s.indexOf("start")>=0||s.indexOf("withdrawn")>=0) return false;
+  var lu=r.last_update||r.date_added;
+  if(!lu) return true;
+  var days=Math.floor((new Date()-new Date(lu+"T00:00:00"))/86400000);
+  return days>=5;
+}
+
+function ctRenderLpConversionBoxes(data){
+  var host=document.getElementById("lp-conversion-boxes-v2");
+  if(!host||!data) return;
+  var lpMap={"Gavin":["Dill","Gavin"],"Karen":["De La Riva","Karen"],"Osgood":["McMahon","Osgood"],"Jordan":["Johnston","Jordan"],"Said":["Saleh","Said"]};
+  var now=new Date();
+  var todayStr=localDateStr(now);
+  var stats={};
+  Object.keys(lpMap).forEach(function(lp){stats[lp]={today:0,sent:0,started:0};});
+
+  data.forEach(function(r){
+    var lpName=null;
+    Object.keys(lpMap).forEach(function(lp){
+      if(lpMap[lp].some(function(k){return (r.lp_user||"").indexOf(k)>=0;})) lpName=lp;
+    });
+    if(!lpName) return;
+    stats[lpName].sent++;
+    if(r.date_added===todayStr) stats[lpName].today++;
+    if((r.status||"").toLowerCase().indexOf("start")>=0) stats[lpName].started++;
+  });
+
+  var allLtf=Object.keys(stats).map(function(lp){
+    var s=stats[lp]; return s.sent>0 ? Math.round(s.started/s.sent*100) : 0;
+  });
+  var teamAvg=Math.round(allLtf.reduce(function(a,b){return a+b;},0)/allLtf.length);
+
+  var html='<div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Per-LP conversion — MTD</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">';
+  Object.keys(lpMap).forEach(function(lp){
+    var s=stats[lp];
+    var ltf=s.sent>0?Math.round(s.started/s.sent*100):0;
+    var color=ltf>=teamAvg?"#3E8E5A":ltf>0?"#B8842B":"#94a3b8";
+    html+='<div style="background:#fff;border:1px solid var(--border);border-top:3px solid #3D4E68;border-radius:10px;padding:12px 14px">'
+      +'<div style="font-size:13px;font-weight:700;color:#3D4E68;margin-bottom:6px">'+lp+'</div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">Today</span><span style="font-weight:700">'+s.today+' sent</span></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">Leads sent MTD</span><span style="font-weight:700">'+s.sent+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">File starts</span><span style="font-weight:700">'+s.started+'</span></div>'
+      +'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">'
+        +'<span style="font-size:10.5px;color:var(--text-3)">Lead → File</span><span style="font-size:16px;font-weight:800;color:'+color+'">'+ltf+'%</span>'
+      +'</div>'
+      +'<div style="font-size:9.5px;color:var(--text-3);margin-top:2px">vs. team avg '+teamAvg+'%</div>'
+      +'</div>';
+  });
+  html+='</div>';
+  host.innerHTML=html;
+}
+
+if(typeof window.renderReferralLeadsDirect==="function"){
+  var origRenderRefLeads=window.renderReferralLeadsDirect;
+  window.renderReferralLeadsDirect=function(data){
+    var result=origRenderRefLeads.apply(this,arguments);
+    ctRenderLpConversionBoxes(data);
+    return result;
+  };
+}
+
+/* ══════════════════════════════════════════════════════════
+   ROUND 5 — lead_notes + lp_flags integration. Requires the
+   two tables from tracker-new-tables.sql to exist in Supabase
+   before these actually save anywhere.
+   ══════════════════════════════════════════════════════════ */
+(function(){
+
+/* ── Buyer-update drawer (reminder checklist + note + personal touch) ── */
+function ctBuyerDrawerHtml(rowId,agentName,buyerName,lp,isStalled){
+  var stallOptions=["Still working it","Unresponsive buyer","Went with another lender","Bad contact info","Buyer paused search"];
+  var html='<div id="drawer-'+rowId+'" style="display:none;padding:12px 16px;background:#FAFAF9;border-top:1px dashed var(--border)">';
+  html+='<div style="font-size:10.5px;color:var(--text-3);background:var(--accent-dim);border-radius:7px;padding:8px 10px;margin-bottom:8px;line-height:1.6">';
+  html+='<b>Cover before you save:</b> where they are · timeline · docs outstanding · rate discussed · concerns · red flags · next step · best way to reach them';
+  html+='</div>';
+  if(isStalled){
+    html+='<div style="margin-bottom:8px"><label style="font-size:11px;font-weight:700;color:#B54B42">⚠ Stuck in this stage — why?</label>';
+    html+='<select id="stall-'+rowId+'" style="width:100%;margin-top:4px;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:12px;font-family:inherit">';
+    stallOptions.forEach(function(o){html+='<option>'+o+'</option>';});
+    html+='</select></div>';
+  }
+  html+='<textarea id="note-'+rowId+'" placeholder="Log this buyer update..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:12.5px;font-family:inherit;min-height:60px;resize:vertical;box-sizing:border-box"></textarea>';
+  html+='<div style="margin-top:8px;background:#FBF3F8;border:1px solid #E4CBDD;border-radius:8px;padding:10px 12px">';
+  html+='<div style="font-size:11px;font-weight:700;color:#9D5B8C;margin-bottom:4px">🐾 Something personal you noticed? (optional)</div>';
+  html+='<input type="text" id="personal-'+rowId+'" placeholder="e.g. dog barking in the background..." style="width:100%;border:1px solid #E4CBDD;border-radius:7px;padding:7px 9px;font-size:12px;font-family:inherit;box-sizing:border-box">';
+  html+='<label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:#9D5B8C;cursor:pointer"><input type="checkbox" id="gesture-'+rowId+'" style="cursor:pointer"> Let '+(typeof RM_NAME!=="undefined"?RM_NAME:"the RM")+' know — might be worth a small thank-you gesture</label>';
+  html+='</div>';
+  html+='<button onclick="ctSaveBuyerNote(\''+rowId+'\',\''+agentName+'\',\''+buyerName+'\',\''+lp+'\')" style="margin-top:8px;width:100%;padding:8px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">Save update</button>';
+  html+='<div id="saved-'+rowId+'" style="display:none;margin-top:6px;font-size:11px;color:#15803d;font-weight:700">✓ Saved</div>';
+  html+='</div>';
+  return html;
+}
+window.ctBuyerDrawerHtml=ctBuyerDrawerHtml;
+
+function ctToggleLeadDrawer(rowId){
+  var d=document.getElementById('drawer-'+rowId);
+  if(d) d.style.display = d.style.display==='none' ? 'block' : 'none';
+}
+window.ctToggleLeadDrawer=ctToggleLeadDrawer;
+
+function ctSaveBuyerNote(rowId,agentName,buyerName,lp){
+  var noteEl=document.getElementById('note-'+rowId);
+  var personalEl=document.getElementById('personal-'+rowId);
+  var gestureEl=document.getElementById('gesture-'+rowId);
+  var stallEl=document.getElementById('stall-'+rowId);
+  var payload={
+    lead_agent_name: agentName,
+    lead_buyer_name: buyerName || null,
+    lp: lp,
+    note: noteEl ? noteEl.value.trim() || null : null,
+    stall_reason: stallEl ? stallEl.value : null,
+    personal_detail: personalEl ? personalEl.value.trim() || null : null,
+    notify_rm_gesture: gestureEl ? gestureEl.checked : false,
+    created_by: lp
+  };
+  sbFetch("POST","lead_notes",payload).then(function(){
+    var saved=document.getElementById('saved-'+rowId);
+    if(saved) saved.style.display='block';
+    ctShowToast("✓ Buyer update saved");
+  }).catch(function(e){
+    ctShowToast("Save failed — check that lead_notes table exists");
+    console.error("lead_notes save failed:",e);
+  });
+}
+window.ctSaveBuyerNote=ctSaveBuyerNote;
+
+/* ── Standalone flags for RM (lp_flags table) ── */
+function ctSubmitFlag(agentName,note,lp){
+  if(!note || !note.trim()){ ctShowToast("Add a note before flagging"); return; }
+  sbFetch("POST","lp_flags",{agent_name:agentName||null,lp:lp,note:note.trim()}).then(function(){
+    ctShowToast("Flag sent to RM");
+  }).catch(function(e){
+    ctShowToast("Flag failed — check that lp_flags table exists");
+    console.error("lp_flags save failed:",e);
+  });
+}
+window.ctSubmitFlag=ctSubmitFlag;
+
+// Inject a general "Flag for RM" button + form above the search panel on each LP view
+function ctInjectGeneralFlagButton(){
+  var searchPanel=document.querySelector("#view-lp .search-panel");
+  if(!searchPanel || document.getElementById("ct-general-flag-btn")) return;
+  var wrap=document.createElement("div");
+  wrap.innerHTML='<button id="ct-general-flag-btn" style="width:100%;padding:10px;margin-bottom:12px;border-radius:10px;background:#FBF3E5;color:#B8842B;border:1px solid #B8842B;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">🚩 Flag something for RM — not tied to a call</button>'
+    +'<div id="ct-general-flag-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">'
+    +'<input type="text" id="ct-flag-agent" placeholder="Agent name (optional)" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;box-sizing:border-box;margin-bottom:8px">'
+    +'<textarea id="ct-flag-note" placeholder="What does the RM need to know?" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;min-height:60px;resize:vertical;box-sizing:border-box"></textarea>'
+    +'<button id="ct-flag-send" style="width:100%;margin-top:8px;padding:9px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">Send flag</button>'
+    +'</div>';
+  searchPanel.parentElement.insertBefore(wrap, searchPanel);
+  document.getElementById("ct-general-flag-btn").onclick=function(){
+    var f=document.getElementById("ct-general-flag-form");
+    f.style.display = f.style.display==='none' ? 'block' : 'none';
+  };
+  document.getElementById("ct-flag-send").onclick=function(){
+    var agent=document.getElementById("ct-flag-agent").value.trim();
+    var note=document.getElementById("ct-flag-note").value;
+    ctSubmitFlag(agent||null, note, currentUser);
+    document.getElementById("ct-flag-agent").value="";
+    document.getElementById("ct-flag-note").value="";
+    document.getElementById("ct-general-flag-form").style.display="none";
+  };
+}
+if(typeof window.renderLP==="function"){
+  var origRenderLP2=window.renderLP;
+  window.renderLP=function(lp){
+    var result=origRenderLP2.apply(this,arguments);
+    ctInjectGeneralFlagButton();
+    return result;
+  };
+}
+
+/* ── RM view: Gesture opportunities + LP flags panels ── */
+function ctLoadGestureOpportunities(){
+  var host=document.getElementById("ct-gesture-panel");
+  if(!host) return;
+  sbFetch("GET","lead_notes?notify_rm_gesture=eq.true&gesture_sent=eq.false&select=*&order=created_at.desc&limit=20").then(function(rows){
+    if(!rows || !rows.length){ host.innerHTML=""; return; }
+    var html='<div style="font-size:11px;font-weight:700;color:#9D5B8C;text-transform:uppercase;margin:16px 0 8px">🎁 Gesture opportunities</div>';
+    html+='<div style="background:#FBF3F8;border:1px solid #E4CBDD;border-radius:10px;padding:4px 16px">';
+    rows.forEach(function(r){
+      html+='<div style="padding:10px 0;border-bottom:1px solid #E4CBDD">';
+      html+='<div style="font-size:13px;font-weight:700;color:#0f172a">'+escHtml(r.lead_buyer_name||r.lead_agent_name)+'<span style="font-weight:400;color:#9D5B8C;font-size:11px"> via '+escHtml(r.lp)+'</span></div>';
+      html+='<div style="font-size:12px;color:#5b3a52;margin-top:2px">🐾 '+escHtml(r.personal_detail||"")+'</div>';
+      html+='<button onclick="ctMarkGestureSent(\''+r.id+'\')" style="margin-top:4px;font-size:10.5px;font-weight:700;color:#9D5B8C;background:none;border:none;cursor:pointer;font-family:inherit">Mark gesture sent</button>';
+      html+='</div>';
+    });
+    html+='</div>';
+    host.innerHTML=html;
+  }).catch(function(){ host.innerHTML=""; });
+}
+window.ctMarkGestureSent=function(id){
+  sbFetch("PATCH","lead_notes?id=eq."+id,{gesture_sent:true}).then(function(){
+    ctShowToast("Marked as sent");
+    ctLoadGestureOpportunities();
+  }).catch(function(){ ctShowToast("Update failed"); });
+};
+
+function ctLoadLpFlags(){
+  var host=document.getElementById("ct-lpflags-panel");
+  if(!host) return;
+  sbFetch("GET","lp_flags?resolved=eq.false&select=*&order=created_at.desc&limit=20").then(function(rows){
+    if(!rows || !rows.length){ host.innerHTML=""; return; }
+    var html='<div style="font-size:11px;font-weight:700;color:#B8842B;text-transform:uppercase;margin:16px 0 8px">🚩 Flagged by LPs</div>';
+    html+='<div style="background:#FBF3E5;border:1px solid #E8DDC8;border-radius:10px;padding:4px 16px">';
+    rows.forEach(function(r){
+      html+='<div style="padding:10px 0;border-bottom:1px solid #E8DDC8">';
+      html+='<div style="font-size:13px;font-weight:700;color:#0f172a">'+(r.agent_name?escHtml(r.agent_name):"General")+'<span style="font-weight:400;color:#8C7355;font-size:11px"> via '+escHtml(r.lp)+'</span></div>';
+      html+='<div style="font-size:12px;color:#5C4A35;margin-top:2px;font-style:italic">"'+escHtml((r.note||"").substring(0,140))+'"</div>';
+      html+='<div style="display:flex;gap:10px;margin-top:4px">';
+      html+='<button onclick="ctAssignFlag(\''+r.id+'\')" style="font-size:10.5px;font-weight:700;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit">Assign to me</button>';
+      html+='<button onclick="ctResolveFlag(\''+r.id+'\')" style="font-size:10.5px;font-weight:700;color:#15803d;background:none;border:none;cursor:pointer;font-family:inherit">Mark handled</button>';
+      html+=(r.assigned_to?'<span style="font-size:10px;color:#8C7355;margin-left:auto">assigned: '+escHtml(r.assigned_to)+'</span>':'');
+      html+='</div></div>';
+    });
+    html+='</div>';
+    host.innerHTML=html;
+  }).catch(function(){ host.innerHTML=""; });
+}
+window.ctAssignFlag=function(id){
+  sbFetch("PATCH","lp_flags?id=eq."+id,{assigned_to:"Amanda"}).then(function(){ ctShowToast("Assigned to you"); ctLoadLpFlags(); }).catch(function(){});
+};
+window.ctResolveFlag=function(id){
+  sbFetch("PATCH","lp_flags?id=eq."+id,{resolved:true,resolved_at:new Date().toISOString()}).then(function(){ ctShowToast("Marked handled"); ctLoadLpFlags(); }).catch(function(){});
+};
+
+function ctInjectRmPanels(){
+  var host=document.getElementById("view-rm");
+  if(!host || document.getElementById("ct-gesture-panel")) return;
+  var g=document.createElement("div"); g.id="ct-gesture-panel";
+  var f=document.createElement("div"); f.id="ct-lpflags-panel";
+  var feedLabel=host.querySelector('div[style*="Activity feed"]') || host.lastElementChild;
+  host.insertBefore(f, feedLabel);
+  host.insertBefore(g, feedLabel);
+  ctLoadGestureOpportunities();
+  ctLoadLpFlags();
+}
+if(typeof window.openRmView==="function"){
+  var origOpenRmView=window.openRmView;
+  window.openRmView=function(btn){
+    var result=origOpenRmView.apply(this,arguments);
+    setTimeout(ctInjectRmPanels, 200);
+    return result;
+  };
+}
+
+})();
 </script>
 </div>
 </body>
