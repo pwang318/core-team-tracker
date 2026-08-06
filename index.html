@@ -3387,23 +3387,23 @@ function buildSnapshot(){
   var todayFmt=now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
   var h="";
 
-  // Hero
+  // Hero — light card matching the rest of the page, not a leftover dark gradient
   var allLPsDone=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
-  h+='<div style="background:'+(allLPsDone?"#232A35":"var(--text)")+';border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:1rem">';
+  h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:1rem">';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px">';
-  h+='<div><div style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-family:\'Geist\',\'Inter\',sans-serif;margin-bottom:3px">NFM Lending Ohio</div>';
-  h+='<div style="color:#fff;font-size:16px;font-weight:700">'+todayFmt+'</div></div>';
-  h+='<div style="background:rgba(255,255,255,.06);border-radius:8px;padding:7px 12px;font-size:11px;font-style:italic;color:rgba(255,255,255,.85);font-size:14px;font-weight:600">'+headline+'</div>';
+  h+='<div><div style="color:var(--text-3);font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-family:\'Geist\',\'Inter\',sans-serif;margin-bottom:3px">NFM Lending Ohio</div>';
+  h+='<div style="color:var(--text);font-size:16px;font-weight:700">'+todayFmt+'</div></div>';
+  h+='<div style="background:#EEF1F6;border-radius:8px;padding:7px 12px;font-size:14px;font-weight:600;color:#3D4E68">'+headline+'</div>';
   h+='</div>';
-  h+='<div style="font-size:11px;color:rgba(255,255,255,.35);font-style:italic;margin-bottom:10px">“'+QUOTE+'”</div>';
+  h+='<div style="font-size:11px;color:var(--text-3);font-style:italic;margin-bottom:10px">“'+QUOTE+'”</div>';
   h+='<div style="display:flex;gap:22px;flex-wrap:wrap">';
-  [{v:totalCallsWTD+" / "+(LPS.length*WEEKLY_TARGET),l:"Team calls WTD",c:"#fff"},
-   {v:leadsToday,l:"Leads today",c:"var(--accent)"},
-   {v:leadsWTD,l:"Leads WTD",c:"#9AA5B8"},
-   {v:leadsMTD,l:"Leads MTD",c:"#3D4E68"}
+  [{v:totalCallsWTD+" / "+(LPS.length*WEEKLY_TARGET),l:"Team calls WTD",c:"#3D4E68"},
+   {v:leadsToday,l:"Leads today",c:"#3E8E5A"},
+   {v:leadsWTD,l:"Leads WTD",c:"var(--text-2)"},
+   {v:leadsMTD,l:"Leads MTD",c:"var(--text-2)"}
   ].forEach(function(s){
     h+='<div><div style="color:'+s.c+';font-size:22px;font-weight:700;font-family:\'Geist\',\'Inter\',sans-serif;line-height:1">'+s.v+'</div>';
-    h+='<div style="color:rgba(255,255,255,.35);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-top:3px">'+s.l+'</div></div>';
+    h+='<div style="color:var(--text-3);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-top:3px">'+s.l+'</div></div>';
   });
   h+='</div></div>';
 
@@ -3507,14 +3507,25 @@ function buildSnapshot(){
   var amWeekActs=amActs.filter(function(a){return a.act_date>=amWeekObj.start&&a.act_date<=amWeekObj.end;});
   var amMonthActs=amActs.filter(function(a){return a.act_date>=amMonthStart2;});
   var amYearActs=amActs.filter(function(a){return a.act_date>=amYearStart;});
-  var amTotalToday=amTodayActs.length,amTotalWTD=amWeekActs.length;
-  var amTotalMTD=amMonthActs.length,amTotalYTD=amYearActs.length;
+  var amTotalToday = amCnt(amTodayActs,"New Realtor Meeting")+amCnt(amTodayActs,"Cold Calls")+amCnt(amTodayActs,"Break Breads")+amCntTalkTo(amTodayActs)+amCnt(amTodayActs,"Realtor Buddy Referral Ask");
+  var amTotalMTD = amCnt(amMonthActs,"New Realtor Meeting")+amCnt(amMonthActs,"Cold Calls")+amCnt(amMonthActs,"Break Breads")+amCntTalkTo(amMonthActs)+amCnt(amMonthActs,"Realtor Buddy Referral Ask");
+  var amTotalYTD=amYearActs.length;
   var amMeetings=amCnt(amMonthActs,"New Realtor Meeting");
   var amColdCalls=amCnt(amMonthActs,"Cold Calls");
   var amBreakBreads=amCnt(amMonthActs,"Break Breads");
   var TALKTO_TYPES=["Agent Talk-to","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Market Update","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Sent Referral","Sent Market Report","Recruiting Conversation"];
   var amTalkTos=amCntTalkTo(amMonthActs);
   var amBuddyAsks=amCnt(amMonthActs,"Realtor Buddy Referral Ask");
+  // amTotalWTD must be the SUM of the 5 tracked goal categories for the week —
+  // not a raw count of every logged activity row. Activity types outside
+  // those 5 categories (e.g. "Co-hosted Event") were previously inflating
+  // this number well past what Amanda's own tool shows, since her tool only
+  // ever sums these same 5 categories.
+  var amTotalWTD = amCnt(amWeekActs,"New Realtor Meeting")
+    + amCnt(amWeekActs,"Cold Calls")
+    + amCnt(amWeekActs,"Break Breads")
+    + amCntTalkTo(amWeekActs)
+    + amCnt(amWeekActs,"Realtor Buddy Referral Ask");
   var amWeeklyGoal=238; // 125 cold calls + 100 talk-tos + 5 meetings + 5 break breads + 3 buddy asks
   var amDailyTotalGoal=48; // 25 cold calls + 20 talk-tos + 1 meeting + 1 break bread + 1 buddy ask
   var amTotalGoal=852;
@@ -6577,6 +6588,32 @@ if(typeof window.tryConfirmCall==="function"){
 }
 
 /* ── Overdue-call queue on Snapshot — team-wide, read only ── */
+// Jumps from Snapshot's team-wide queue straight to that agent's card on
+// their LP's own tab, with the log-call flow already open — same pattern
+// the carryover quick-log already uses.
+function ctJumpToAgentAndLog(name, lp){
+  var btn=null;
+  document.querySelectorAll(".who-btn").forEach(function(b){ if(b.textContent.trim()===lp) btn=b; });
+  selectUser(btn, lp);
+  pendingNote[name]={draft:"",outcome:""};
+  setTimeout(function(){
+    renderLP(lp);
+    setTimeout(function(){
+      var ta=document.querySelector('.note-field[data-name="'+name+'"]');
+      if(ta){ ta.scrollIntoView({behavior:"smooth",block:"center"}); ta.focus(); }
+      else {
+        // Not in the top-15 rotation shown — fall back to search
+        var search=document.getElementById("lp-search-input");
+        if(search){ search.value=name; renderLpSearch();
+          setTimeout(function(){
+            var ta2=document.querySelector('#lp-search-results .note-field[data-name="'+name+'"]');
+            if(ta2){ ta2.scrollIntoView({behavior:"smooth",block:"center"}); }
+          },150);
+        }
+      }
+    },150);
+  },200);
+}
 function ctInjectOverdueQueue(){
   var host=document.getElementById("d-snapshot-body");
   if(!host || typeof agents==="undefined" || !agents.length) return;
@@ -6597,15 +6634,21 @@ function ctInjectOverdueQueue(){
   box.id="ct-overdue-queue";
   box.style.cssText="background:#fff;border:1px solid #E4E6EA;border-radius:12px;padding:14px 18px;margin-bottom:18px;";
   var rows=overdue.map(function(o){
-    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F0F1EE">'
+    return '<div class="ct-overdue-row" data-name="'+o.name.replace(/"/g,"&quot;")+'" data-lp="'+o.lp+'" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0F1EE;cursor:pointer" onmouseover="this.style.background=\'#FAFAF9\'" onmouseout="this.style.background=\'\'">'
       +'<span style="font-size:13px;font-weight:700;flex:1">'+o.name+'</span>'
       +'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;background:#EEF1F6;color:#3D4E68">'+o.lp+'</span>'
       +(o.priority?'<span style="font-size:10.5px;font-weight:700;color:#B54B42">PRIORITY</span>':'')
       +'<span style="font-size:11.5px;color:'+(o.days>=0?'#B54B42':'#6B7280')+';font-weight:600;min-width:70px;text-align:right">'+(o.days>=0?o.days+"d overdue":"—")+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:#3D4E68;padding:5px 10px;border-radius:7px;background:#EEF1F6">Log call →</span>'
       +'</div>';
   }).join("");
-  box.innerHTML='<div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#6B7280;margin-bottom:8px">Team-wide — who needs a call next</div>'+rows;
+  box.innerHTML='<div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#6B7280;margin-bottom:8px">Team-wide — who needs a call next <span style="font-weight:600;text-transform:none;color:#94a3b8">· click a row to log it</span></div>'+rows;
   host.insertBefore(box, host.firstChild);
+  box.querySelectorAll(".ct-overdue-row").forEach(function(row){
+    row.addEventListener("click", function(){
+      ctJumpToAgentAndLog(row.getAttribute("data-name"), row.getAttribute("data-lp"));
+    });
+  });
 }
 if(typeof window.buildSnapshot==="function"){
   var origBuildSnapshot=window.buildSnapshot;
