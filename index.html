@@ -795,7 +795,6 @@ tr:hover td{background:var(--bg)}
         Updates automatically when you upload the Power BI export in Admin.
       </div>
     </div>
-    <div id="d-activation-section" style="margin-bottom:1rem"></div>
     <div id="d-tier-upgrade-section" style="margin-bottom:1rem"></div>
     <div class="section-head">Full roster
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
@@ -1076,7 +1075,7 @@ function switchLeadsTab(tab, btn){
     var csEl=document.getElementById("conv-range-start"),ceEl=document.getElementById("conv-range-end");
     if(csEl&&!csEl.value){csEl.value="2026-04-01";ceEl.value=localDateStr(new Date());runConversionRangeSearch();}
   }
-  if(tab==="growth"){renderGrowthScoreboard();renderDaniel();renderActivationPanel();renderTierUpgradePanel();}
+  if(tab==="growth"){renderGrowthScoreboard();renderDaniel();renderTierUpgradePanel();}
 }
 
 function openLeadsView(btn){
@@ -1228,66 +1227,6 @@ function renderReferralLeadsDirect(data){
   renderTable(todayLeads,"ref-today-table-v2","ref-today-count-v2");
   renderTable(priorLeads,"ref-prior-table-v2","ref-prior-day-count-v2");
   renderTable(unconverted,"ref-uncovered-table-v2","ref-uncovered-count-v2");
-}
-
-function renderActivationPanel(){
-  var el=document.getElementById("d-activation-section");
-  if(!el)return;
-  var newAgents=agents.filter(function(a){
-    var nameU=a[0].toUpperCase();
-    // Amanda meets a new agent — that's the actual first real-world
-    // touchpoint, so it's the anchor for "how new is this relationship."
-    var amandaDate = agentMilestones[nameU] && agentMilestones[nameU].first_amanda_visit_date;
-    var anchor = amandaDate || agentFirstCall[a[0]] || null;
-    if(!anchor) return false;
-    var days=Math.floor((TODAY-new Date(anchor+"T12:00:00"))/86400000);
-    if(days>90||a[2]==="Unassigned")return false;
-    var closedPastYear=a[8]||0;
-    if(closedPastYear>0) return false;
-    var vel=VELOCIFY_SEED[a[0].toUpperCase()]||null;
-    if(vel && vel.total>0 && vel.last_lead_date){
-      var leadDays=Math.floor((TODAY-new Date(vel.last_lead_date+"T12:00:00"))/86400000);
-      if(leadDays>90) return false;
-    }
-    return true;
-  });
-  if(!newAgents.length){el.innerHTML="";return;}
-  var html='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem">'
-    +'<div style="background:#1F4E79;padding:10px 16px;">'
-    +'<div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em">New agent activation &mdash; last 90 days</div>'
-    +'<div style="font-size:10px;color:#93c5fd;margin-top:2px">Amanda meets them, then they need to send an opportunity to go active &middot; tap a row to open their contact card</div>'
-    +'</div>';
-  newAgents.slice(0,12).forEach(function(a){
-    var nameU=a[0].toUpperCase();
-    var vel=VELOCIFY_SEED[nameU]||null;
-    var met=!!(agentMilestones[nameU]&&agentMilestones[nameU].first_amanda_visit_date);
-    var hasOpportunity=!!(vel&&vel.total>0);
-    var isActive = met && hasOpportunity;
-    var status, statusColor;
-    if(isActive){ status="&#10003; Active"; statusColor="var(--green)"; }
-    else if(!met){ status="needs Amanda meeting"; statusColor="var(--red)"; }
-    else { status="waiting on first opportunity"; statusColor="#d97706"; }
-    html+='<div class="ct-activation-row" data-agent="'+a[0].replace(/"/g,"&quot;")+'" style="display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:0.5px solid var(--border-light);flex-wrap:wrap;cursor:pointer" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'\'">'
-      +'<span style="font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:110px">'+a[0]+'</span>'
-      +'<span class="lp-tag lp-tag-'+a[2]+'" style="width:40px;text-align:center">'+a[2]+'</span>'
-      +'<span title="Amanda meeting"'
-        +' style="font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:100px;'
-        +(met?'background:#dcfce7;color:#15803d':'background:#f1f5f9;color:#94a3b8')
-        +'">'+(met?'&#10003; Met':'Not met yet')+'</span>'
-      +'<span title="Opportunity / lead received"'
-        +' style="font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:100px;'
-        +(hasOpportunity?'background:#dcfce7;color:#15803d':'background:#f1f5f9;color:#94a3b8')
-        +'">'+(hasOpportunity?'&#10003; Opportunity in':'No opportunity yet')+'</span>'
-      +'<span style="font-size:11px;color:'+statusColor+';font-weight:700;min-width:150px;text-align:right">'+status+'</span>'
-      +'</div>';
-  });
-  html+='</div>';
-  el.innerHTML=html;
-  el.querySelectorAll(".ct-activation-row").forEach(function(row){
-    row.addEventListener("click", function(){
-      openLpContactModal(row.getAttribute("data-agent"));
-    });
-  });
 }
 
 function renderTierUpgradePanel(){
@@ -1858,7 +1797,7 @@ function renderCallCard(a,lp,isBonus){
     var velMtd2=velData2?velData2.mtd:0;
     var velTotal2=velData2?velData2.total:0;
     if(velMtd2>0)talkPoints.push('Follow up on the '+velMtd2+' lead'+(velMtd2>1?'s':'')+' sent this month — thank them and check on the buyer');
-    if(rmAct){var rmDays=Math.floor((TODAY-new Date(rmAct+'T12:00:00'))/86400000);talkPoints.push('Amanda visited '+rmDays+'d ago — reference that meeting and ask how it went');}
+    if(rmAct){var rmDays=Math.floor((TODAY-new Date(rmAct+'T12:00:00'))/86400000);talkPoints.push('The RM visited '+rmDays+'d ago — reference that meeting and ask how it went');}
     if(coMarketingAgents[a[0]])talkPoints.push('Co-marketing active — check if the flyer is working and if they need updated materials');
     if(velTotal2===0&&daysSinceFirst>=90)talkPoints.push('No leads yet — share a recent win or a program they can use (rate buydown, fast close)');
     else if(velMtd2===0&&velTotal2>0)talkPoints.push('Sent leads before but none this month — ask what buyers they are working with right now');
@@ -3738,7 +3677,11 @@ function handleUpload(input){
         var n=(row["Agent"]||"").toString().trim().toUpperCase();
         var lv=(row["Level"]||"").toString().trim();
         if(!n||n==="AGENT"||n==="NAN")return;
-        var gd=function(c){var v=row[c];if(!v)return null;try{var d=new Date(v);return isNaN(d)?null:d.toISOString().split("T")[0];}catch(e){return null;}};
+        // Power BI hands back a raw Excel serial number for these date columns even with
+        // cellDates:true (no explicit date format on the cell) — new Date(rawNumber) misreads
+        // that as milliseconds-since-epoch and silently produces 1970-01-01 for every row.
+        // 25569 is the day offset between Excel's epoch (Dec 30 1899) and the JS epoch.
+        var gd=function(c){var v=row[c];if(v===null||v===undefined||v==="")return null;try{var d;if(v instanceof Date){d=v;}else if(typeof v==="number"&&v>1){d=new Date(Math.round((v-25569)*86400*1000));}else{d=new Date(v);}return(!isNaN(d.getTime())&&d.getFullYear()>1971)?d.toISOString().split("T")[0]:null;}catch(e){return null;}};
         var closedPastYear=parseInt(row["Closed Past Year"])||0;
         var existing=agents.find(function(x){return x[0]===n;});
         var preservedLp=existing?existing[2]:"Unassigned";
@@ -4862,9 +4805,9 @@ function openRmFollowupForm(btn){
   var row=btn.closest("[style*='padding:10px 16px']")||btn.parentNode.parentNode;
   var today=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"});
   var fh='<div style="padding:10px 16px;border-bottom:1px solid #f1f5f9;background:#f8fafc">'
-    +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:8px">Log Amanda follow-up for '+escHtml(agentName)+'</div>'
+    +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:8px">Log RM follow-up for '+escHtml(agentName)+'</div>'
     
-    +'<textarea id="fu-note-'+rid+'" placeholder="What did Amanda do? (e.g. called, met for coffee, sent market update...)" style="width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;min-height:70px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
+    +'<textarea id="fu-note-'+rid+'" placeholder="What did the RM do? (e.g. called, met for coffee, sent market update...)" style="width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;min-height:70px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
     +'<div style="display:flex;gap:6px;margin-top:6px">'
     +'<button data-agent="'+escHtml(agentName)+'" data-lp="'+escHtml(lp)+'" data-rid="'+rid+'" onclick="saveRmFollowup(this)" style="background:#1F4E79;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit">Save &amp; notify LP</button>'
     +'<button onclick="document.getElementById(\'rm-flagged-panel\').style.display=\'none\'" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;color:#64748b;font-family:inherit">Cancel</button>'
