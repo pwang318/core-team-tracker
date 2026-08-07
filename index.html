@@ -696,7 +696,7 @@ tr:hover td{background:var(--bg)}
     </div>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem">
-    <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads-v2">--</div></div>
+    <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads-v2">--</div><div id="ref-mtd-goal-pace" style="font-size:10px;color:var(--text-3);margin-top:2px"></div></div>
     <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts-v2">--</div></div>
     <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf-v2">--</div></div>
     <div class="ref-stat-card urgent"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch-v2">--</div></div>
@@ -1257,7 +1257,20 @@ function renderActivationPanel(){
     var fc=agentFirstCall[a[0]]||null;
     if(!fc)return false;
     var days=Math.floor((TODAY-new Date(fc+"T12:00:00"))/86400000);
-    return days<=90&&a[2]!=="Unassigned";
+    if(days>90||a[2]==="Unassigned")return false;
+    // "First logged call" only means first call the TRACKER recorded —
+    // not necessarily when the actual relationship started. An agent
+    // with any closed loan in the past year, or a Velocify lead history
+    // predating this window, is clearly an established relationship
+    // even if their first tracker-logged call happened recently.
+    var closedPastYear=a[8]||0;
+    if(closedPastYear>0) return false;
+    var vel=VELOCIFY_SEED[a[0].toUpperCase()]||null;
+    if(vel && vel.total>0 && vel.last_lead_date){
+      var leadDays=Math.floor((TODAY-new Date(vel.last_lead_date+"T12:00:00"))/86400000);
+      if(leadDays>90) return false; // has lead history older than the "new" window
+    }
+    return true;
   });
   if(!newAgents.length){el.innerHTML="";return;}
   var html='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem">'
@@ -7072,6 +7085,43 @@ if(typeof window.buildSnapshot==="function"){
     var result=origBuildSnapshot2.apply(this,arguments);
     ctCaptureWeeklySnapshotIfNeeded();
     setTimeout(ctRenderTrendPanel, 400);
+    return result;
+  };
+}
+
+})();
+
+/* ══════════════════════════════════════════════════════════
+   ROUND 7 — monthly lead goal (100/month) with pace projection,
+   shown right next to MTD Leads on the Leads tab.
+   ══════════════════════════════════════════════════════════ */
+(function(){
+
+var CT_MONTHLY_LEAD_GOAL = 100;
+
+function ctRenderLeadGoalPace(){
+  var el=document.getElementById("ref-mtd-goal-pace");
+  var valEl=document.getElementById("ref-mtd-leads-v2");
+  if(!el || !valEl) return;
+  var mtd=parseInt(valEl.textContent, 10);
+  if(isNaN(mtd)) return;
+
+  var now=new Date();
+  var daysInMonth=new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  var dayOfMonth=now.getDate();
+  var projected=Math.round((mtd/dayOfMonth)*daysInMonth);
+  var onTrack = projected >= CT_MONTHLY_LEAD_GOAL;
+  var color = onTrack ? "#3E8E5A" : "#B8842B";
+
+  el.innerHTML = 'Goal: '+CT_MONTHLY_LEAD_GOAL+'/mo · <span style="color:'+color+';font-weight:700">projecting '+projected+'</span>'
+    + (onTrack ? ' ✓ on track' : ' — pace it up');
+}
+
+if(typeof window.renderReferralLeadsDirect==="function"){
+  var origRenderRefLeads2=window.renderReferralLeadsDirect;
+  window.renderReferralLeadsDirect=function(data){
+    var result=origRenderRefLeads2.apply(this,arguments);
+    setTimeout(ctRenderLeadGoalPace, 30);
     return result;
   };
 }
