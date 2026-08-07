@@ -16,23 +16,23 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --navy:#1A1A2E;--navy-soft:#2D3561;
-  --accent:#0E9F8E;--accent-dim:rgba(14,159,142,.08);--accent-glow:rgba(14,159,142,.15);
+  --accent:#3D4E68;--accent-dim:rgba(61,78,104,.08);--accent-glow:rgba(61,78,104,.15);
   --red:#E05858;--red-bg:#FEF2F2;--red-border:#FECACA;--red-light:#FEF7F7;
-  --green:#0E9F8E;--green-bg:#ECFDF5;--green-border:#6EE7B7;--green-var:#0E9F8E;
+  --green:#3E8E5A;--green-bg:#EAF5EE;--green-border:#A8D5B5;--green-var:#3E8E5A;
   --amber:#8C7355;--amber-bg:#FAF7F2;--amber-text:#6B5740;
   --border:#EDF0F4;--border-light:#F4F6F9;
   --text:#18181B;--text-2:#71717A;--text-3:#A1A1AA;
   --bg:#F9FAFB;--surface:#FFFFFF;
-  --lp-gavin:#0E9F8E;--lp-gavin-bg:#F0FAF9;
-  --lp-karen:#2563EB;--lp-karen-bg:#EFF6FF;
-  --lp-osgood:#C2692B;--lp-osgood-bg:#FFF4EC;
-  --lp-jordan:#BE185D;--lp-jordan-bg:#FDF2F8;
-  --lp-said:#7C3AED;--lp-said-bg:#F5F3FF;
+  --lp-gavin:#3D4E68;--lp-gavin-bg:#EEF1F6;
+  --lp-karen:#3D4E68;--lp-karen-bg:#EEF1F6;
+  --lp-osgood:#3D4E68;--lp-osgood-bg:#EEF1F6;
+  --lp-jordan:#3D4E68;--lp-jordan-bg:#EEF1F6;
+  --lp-said:#3D4E68;--lp-said-bg:#EEF1F6;
   --shadow-sm:0 1px 4px rgba(26,26,46,.06),0 1px 2px rgba(26,26,46,.04);
   --shadow-md:0 4px 16px rgba(26,26,46,.08),0 2px 6px rgba(26,26,46,.04);
   --radius-sm:8px;--radius-md:12px;--radius-lg:16px;--font-mono:'Geist','Inter',sans-serif;
-  --navy-mid:#0E9F8E;
-  --brand:#0E9F8E;--surface-2:#F4F6F9;--text-4:#C1C1C9}
+  --navy-mid:#3D4E68;
+  --brand:#3D4E68;--surface-2:#F4F6F9;--text-4:#C1C1C9}
 body{font-family:'Geist','Inter',-apple-system,sans-serif;color:var(--text);font-size:14px;background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;margin:0;padding:0;line-height:1.5}
 .app{max-width:960px;margin:0 auto;padding:1.25rem 1.25rem 4rem}
 
@@ -51,11 +51,11 @@ body{font-family:'Geist','Inter',-apple-system,sans-serif;color:var(--text);font
 .who-label{font-size:11px;color:var(--text-3);margin-right:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
 .who-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:500;color:var(--text-2);font-family:inherit;transition:all .15s}
 .who-btn:hover{background:var(--bg);border-color:#CBD5E1;color:var(--text)}
-.wb-Gavin.active{background:#F0FAF9;border-color:#0E9F8E;color:#0E9F8E;font-weight:600}
-.wb-Karen.active{background:#EFF6FF;border-color:#2563EB;color:#2563EB;font-weight:600}
-.wb-Osgood.active{background:#FFF4EC;border-color:#C2692B;color:#C2692B;font-weight:600}
-.wb-Jordan.active{background:#FDF2F8;border-color:#BE185D;color:#BE185D;font-weight:600}
-.wb-Said.active{background:#F5F3FF;border-color:#7C3AED;color:#7C3AED;font-weight:600}
+.wb-Gavin.active{background:#EEF1F6;border-color:#3D4E68;color:#3D4E68;font-weight:600}
+.wb-Karen.active{background:#EEF1F6;border-color:#3D4E68;color:#3D4E68;font-weight:600}
+.wb-Osgood.active{background:#EEF1F6;border-color:#3D4E68;color:#3D4E68;font-weight:600}
+.wb-Jordan.active{background:#EEF1F6;border-color:#3D4E68;color:#3D4E68;font-weight:600}
+.wb-Said.active{background:#EEF1F6;border-color:#3D4E68;color:#3D4E68;font-weight:600}
 .wb-Daniel{}.wb-Daniel:hover{background:#1e293b;border-color:#1e293b;color:#fff}.wb-Daniel.active{background:#1F4E79;border-color:#3b82f6;color:#fff;font-weight:700;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
 .wb-RM.active{background:#FAF7F2;border-color:#8C7355;color:#8C7355;font-weight:600}
 .wb-Admin.active{background:#FAF7F2;border-color:#8C7355;color:#8C7355;font-weight:600}
@@ -437,6 +437,13 @@ tr:hover td{background:var(--bg)}
   <div style="display:flex;gap:8px;align-items:center">
     <span class="week-pill" id="weekPill"></span>
     <span class="save-ind"><span class="sync-dot" id="syncDot"></span><span id="saveInd">Connecting...</span></span>
+    <button id="ct-notif-bell" style="position:relative;border:1px solid var(--border);background:#fff;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer" title="Recent activity">
+      &#128276;<span id="ct-notif-badge" style="display:none;position:absolute;top:-3px;right:-3px;background:#B54B42;color:#fff;font-size:9px;font-weight:800;width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center"></span>
+    </button>
+    <div id="ct-notif-panel" style="display:none;position:absolute;top:56px;right:16px;width:290px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 30px -8px rgba(0,0,0,.2);padding:12px;z-index:999">
+      <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Recent activity</div>
+      <div id="ct-notif-list" style="font-size:12px;color:var(--text-3)">Loading...</div>
+    </div>
   </div>
 </div>
 <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
@@ -945,7 +952,7 @@ tr:hover td{background:var(--bg)}
 <script>
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
-var LP_COLORS={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
+var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
@@ -998,7 +1005,7 @@ var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
-var LP_COLORS={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
+var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
@@ -1223,86 +1230,64 @@ function renderReferralLeadsDirect(data){
   renderTable(unconverted,"ref-uncovered-table-v2","ref-uncovered-count-v2");
 }
 
-function renderLeadsViewSync(){
-  var ids=["mtd-leads","file-starts","ltf","needs-touch"];
-  ids.forEach(function(id){
-    var s=document.getElementById("ref-"+id);
-    var d=document.getElementById("ref-"+id+"-v2");
-    if(s&&d)d.textContent=s.textContent;
-  });
-  var lu=document.getElementById("ref-last-updated");
-  var lu2=document.getElementById("ref-last-updated-v2");
-  if(lu&&lu2)lu2.textContent=lu.textContent;
-  var tables=["needs-touch-table","today-table","prior-table","uncovered-table"];
-  tables.forEach(function(id){
-    var s=document.getElementById("ref-"+id);
-    var d=document.getElementById("ref-"+id+"-v2");
-    if(s&&d)d.innerHTML=s.innerHTML;
-  });
-  var counts=["needs-touch-count","today-count","prior-day-count","uncovered-count","today-label","prior-label"];
-  counts.forEach(function(id){
-    var s=document.getElementById("ref-"+id);
-    var d=document.getElementById("ref-"+id+"-v2");
-    if(s&&d)d.textContent=s.textContent;
-  });
-  var ntSrc=document.getElementById("ref-needs-touch-section");
-  var ntDst=document.getElementById("ref-needs-touch-section-v2");
-  if(ntSrc&&ntDst)ntDst.style.display=ntSrc.style.display;
-}
-
 function renderActivationPanel(){
   var el=document.getElementById("d-activation-section");
   if(!el)return;
   var newAgents=agents.filter(function(a){
-    var fc=agentFirstCall[a[0]]||null;
-    if(!fc)return false;
-    var days=Math.floor((TODAY-new Date(fc+"T12:00:00"))/86400000);
+    var nameU=a[0].toUpperCase();
+    // Amanda meets a new agent — that's the actual first real-world
+    // touchpoint, so it's the anchor for "how new is this relationship."
+    var amandaDate = agentMilestones[nameU] && agentMilestones[nameU].first_amanda_visit_date;
+    var anchor = amandaDate || agentFirstCall[a[0]] || null;
+    if(!anchor) return false;
+    var days=Math.floor((TODAY-new Date(anchor+"T12:00:00"))/86400000);
     if(days>90||a[2]==="Unassigned")return false;
-    // "First logged call" only means first call the TRACKER recorded —
-    // not necessarily when the actual relationship started. An agent
-    // with any closed loan in the past year, or a Velocify lead history
-    // predating this window, is clearly an established relationship
-    // even if their first tracker-logged call happened recently.
     var closedPastYear=a[8]||0;
     if(closedPastYear>0) return false;
     var vel=VELOCIFY_SEED[a[0].toUpperCase()]||null;
     if(vel && vel.total>0 && vel.last_lead_date){
       var leadDays=Math.floor((TODAY-new Date(vel.last_lead_date+"T12:00:00"))/86400000);
-      if(leadDays>90) return false; // has lead history older than the "new" window
+      if(leadDays>90) return false;
     }
     return true;
   });
   if(!newAgents.length){el.innerHTML="";return;}
   var html='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem">'
-    +'<div style="background:#1F4E79;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="background:#1F4E79;padding:10px 16px;">'
     +'<div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em">New agent activation &mdash; last 90 days</div>'
-    +'<div style="font-size:10px;color:#93c5fd">Called &rarr; Amanda &rarr; Lead &rarr; File</div>'
+    +'<div style="font-size:10px;color:#93c5fd;margin-top:2px">Amanda meets them, then they need to send an opportunity to go active &middot; tap a row to open their contact card</div>'
     +'</div>';
   newAgents.slice(0,12).forEach(function(a){
     var nameU=a[0].toUpperCase();
     var vel=VELOCIFY_SEED[nameU]||null;
-    var step1=!!(agentFirstCall[a[0]]);
-    var step2=!!(agentMilestones[nameU]&&agentMilestones[nameU].first_amanda_visit_date);
-    var step3=!!(vel&&vel.total>0);
-    var step4=!!(vel&&vel.file_starts>0);
-    var steps=[step1,step2,step3,step4];
-    var nextLabels=["needs LP call","needs Amanda visit","no lead yet","no file start yet"];
-    var nextStep=steps.indexOf(false);
-    var status=nextStep===-1?"&#10003; Fully activated":nextLabels[nextStep];
-    var statusColor=nextStep===-1?"var(--green)":nextStep===0?"var(--red)":"#d97706";
-    html+='<div style="display:flex;align-items:center;gap:8px;padding:9px 16px;border-bottom:0.5px solid var(--border-light);flex-wrap:wrap">'
+    var met=!!(agentMilestones[nameU]&&agentMilestones[nameU].first_amanda_visit_date);
+    var hasOpportunity=!!(vel&&vel.total>0);
+    var isActive = met && hasOpportunity;
+    var status, statusColor;
+    if(isActive){ status="&#10003; Active"; statusColor="var(--green)"; }
+    else if(!met){ status="needs Amanda meeting"; statusColor="var(--red)"; }
+    else { status="waiting on first opportunity"; statusColor="#d97706"; }
+    html+='<div class="ct-activation-row" data-agent="'+a[0].replace(/"/g,"&quot;")+'" style="display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:0.5px solid var(--border-light);flex-wrap:wrap;cursor:pointer" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'\'">'
       +'<span style="font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:110px">'+a[0]+'</span>'
-      +'<span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span>'
-      +'<div style="display:flex;gap:4px">';
-    ["Called","Amanda","Lead","File"].forEach(function(lbl,i){
-      html+='<div title="'+lbl+'" style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;'
-        +(steps[i]?'background:#dcfce7;color:#15803d;border:1px solid #86efac':'background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0')
-        +'">'+( steps[i]?'&#10003;':''+(i+1))+'</div>';
-    });
-    html+='</div><span style="font-size:11px;color:'+statusColor+';font-weight:600">'+status+'</span></div>';
+      +'<span class="lp-tag lp-tag-'+a[2]+'" style="width:40px;text-align:center">'+a[2]+'</span>'
+      +'<span title="Amanda meeting"'
+        +' style="font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:100px;'
+        +(met?'background:#dcfce7;color:#15803d':'background:#f1f5f9;color:#94a3b8')
+        +'">'+(met?'&#10003; Met':'Not met yet')+'</span>'
+      +'<span title="Opportunity / lead received"'
+        +' style="font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:100px;'
+        +(hasOpportunity?'background:#dcfce7;color:#15803d':'background:#f1f5f9;color:#94a3b8')
+        +'">'+(hasOpportunity?'&#10003; Opportunity in':'No opportunity yet')+'</span>'
+      +'<span style="font-size:11px;color:'+statusColor+';font-weight:700;min-width:150px;text-align:right">'+status+'</span>'
+      +'</div>';
   });
   html+='</div>';
   el.innerHTML=html;
+  el.querySelectorAll(".ct-activation-row").forEach(function(row){
+    row.addEventListener("click", function(){
+      openLpContactModal(row.getAttribute("data-agent"));
+    });
+  });
 }
 
 function renderTierUpgradePanel(){
@@ -1429,11 +1414,6 @@ function sbFetch(method,path,body){
   var opts={method:method,headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
   if(body)opts.body=JSON.stringify(body);
   return fetch(SB_URL+"/rest/v1/"+path,opts).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});return r.text().then(function(t){return t?JSON.parse(t):null;});});
-}
-
-function fetchWithTimeout(promise,ms){
-  var timeout=new Promise(function(_,rej){setTimeout(function(){rej(new Error("timeout"));},ms);});
-  return Promise.race([promise,timeout]);
 }
 
 function loadCallLogs(){
@@ -2334,12 +2314,6 @@ function renderInlineContact(name,safeId,data){
   }
 }
 
-function toggleCall(btn){
-  var name=btn.getAttribute("data-name");
-  if(calledThisWeek(name)){deleteCallLog(name).then(function(){renderLP(currentUser);});}
-  else{upsertCallLog(name,currentUser,"").then(function(){renderLP(currentUser);});}
-}
-
 function openLpContactModal(name){
   editingLpContact=name;
   document.getElementById("lpContactModalName").textContent=name;
@@ -2382,24 +2356,6 @@ function saveLpContactModal(){
   });
 }
 
-function renderScorecard(which,logs,wkKey,rotFn){
-  var pills="",sc="";
-  document.getElementById(which+"-lbl").textContent=getWeekLabel(wkKey);
-  LPS.forEach(function(lp){
-    var done=Object.values(logs).filter(function(l){return l.lp===lp&&l.week_key===wkKey;}).length;
-    var pct=Math.min(100,Math.round(done/WEEKLY_TARGET*100));
-    var rot=getRotation(lp);
-    var missed=rot.filter(function(a){return !(logs[a[0]]&&logs[a[0]].week_key===wkKey);});
-    var col=pct===100?"#43A047":pct>=80?"#FB8C00":"#E53935";
-    var bg=pct===100?"pill-green":pct>=80?"pill-amber":"pill-red";
-    pills+="<span class=\"pill "+bg+"\">"+lp+" "+pct+"%</span>";
-    var bottomHtml=pct>=100?"<div class=\"won-box\">&#10003; Hit the 15 target!</div>":missed.length?"<div class=\"missed-box\"><b>Not yet called from rotation:</b> "+missed.map(function(a){return a[0];}).join(", ")+"</div>":"";
-    sc+="<div class=\"sc-row\"><div class=\"sc-top\"><div style=\"font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px\"><span style=\"width:9px;height:9px;border-radius:50%;background:"+LP_COLORS[lp]+";display:inline-block\"></span>"+lp+"</div><div style=\"display:flex;align-items:center;gap:10px\"><span class=\"sc-pct\" style=\"color:"+col+"\">"+pct+"%</span><span style=\"font-size:11px;color:#888\">"+done+"/"+WEEKLY_TARGET+"</span></div></div>"+bottomHtml+"</div>";
-  });
-  document.getElementById(which+"-pills").innerHTML=pills;
-  document.getElementById(which+"-content").innerHTML=sc;
-}
-
 function renderLeaderboard(){
   // Count true all-time calls per LP from call_logs_history via agentLastCall keys
   var lpHistoryCounts={};
@@ -2420,30 +2376,6 @@ function renderLeaderboard(){
   document.getElementById("leaderboard").innerHTML=stats.map(function(s,i){
     return'<div class="leaderboard-row"><span style="font-size:18px;width:28px;text-align:center">'+medals[i]+'</span><div style="flex:1"><div style="font-weight:700;font-size:14px;color:'+LP_COLORS[s.lp]+'">'+s.lp+'</div><div style="font-size:11px;color:#888;margin-top:2px">'+s.allCalls+' total calls logged'+(s.streak>0?' &nbsp;🔥 '+s.streak+' week streak':'')+'</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:'+(s.pct===100?"#43A047":s.pct>50?"#FB8C00":"#E53935")+'">'+s.pct+'%</div><div style="font-size:10px;color:#888">'+s.done+'/'+WEEKLY_TARGET+' this week</div></div></div>';
   }).join("");
-}
-
-function renderTeamsMsg(){
-  var lines=["Core Team Weekly Update - "+getWeekLabel(weekKey),""];
-  LPS.forEach(function(lp){
-    var done=getLpCallsThisWeek(lp),pct=getLpPctThisWeek(lp);
-    lines.push((pct>=100?"✅":pct>=80?"🟡":"🔴")+" "+lp+": "+pct+"% ("+done+"/"+WEEKLY_TARGET+" calls done)"+(done>WEEKLY_TARGET?" +"+(done-WEEKLY_TARGET)+" bonus":""));
-  });
-  lines.push("");
-  var allDone=LPS.every(function(lp){return getLpCallsThisWeek(lp)>=WEEKLY_TARGET;});
-  lines.push(allDone?"Everyone hit 100% this week! 🎉":"Outstanding: "+LPS.filter(function(lp){return getLpCallsThisWeek(lp)<WEEKLY_TARGET;}).join(", ")+" — finish strong!");
-  lines.push("");lines.push("Tracker: https://pwang318.github.io/core-team-tracker");
-  document.getElementById("teams-message").textContent=lines.join("\n");
-}
-
-function copyTeamsMsg(){
-  navigator.clipboard.writeText(document.getElementById("teams-message").textContent).then(function(){var c=document.getElementById("copy-confirm");c.style.display="inline";setTimeout(function(){c.style.display="none";},2000);});
-}
-
-function toggleSC(bodyId,chevId){
-  var body=document.getElementById(bodyId),chev=document.getElementById(chevId);
-  var isOpen=body.style.display!=="none";
-  body.style.display=isOpen?"none":"block";
-  chev.style.transform=isOpen?"":"rotate(180deg)";
 }
 
 // ── MANAGEMENT DASHBOARD ADDITIONS ──────────────────────────────────────
@@ -4131,13 +4063,6 @@ function updateReceivedLeadBtn(btn,name,isReceived,buyerName){
     :'<span style="font-size:16px">&#127919;</span><span>Received a lead from this agent?</span>';
 }
 
-function loadSelfReportedReferrals(){
-  return sbFetch("GET","call_logs?outcome=eq.Referred a lead&select=agent_name&limit=2000").then(function(res){
-    selfReportedReferrals={};
-    if(res)res.forEach(function(r){selfReportedReferrals[r.agent_name]=(selfReportedReferrals[r.agent_name]||0)+1;});
-  }).catch(function(){});
-}
-
 var lpHistoryCallCounts={};
 function loadAgentFirstCalls(){
   return Promise.all([
@@ -4207,12 +4132,6 @@ function renderVelocifyLeaderboard(){
 }
 
 // ── Also add last_update column support — check for last_update or updated_at ──
-function getLastUpdate(r){
-  if(r.last_update)return r.last_update;
-  if(r.updated_at)return r.updated_at.split("T")[0];
-  return null;
-}
-
 
 // ── REFERRAL LEADS FUNCTIONS ──
 var referralLeadsCache=null;
@@ -4226,26 +4145,6 @@ function getStatusBadgeClass(status){
   if(s.indexOf("contacted")>=0)return"rs-contacted";
   if(s.indexOf("withdrawn")>=0)return"rs-withdrawn";
   return"rs-other";
-}
-
-function loadReferralLeads(force){
-  if(referralLeadsCache&&!force){renderReferralLeads(referralLeadsCache);return;}
-  var el=document.getElementById("ref-last-updated");
-  if(el)el.textContent="Loading...";
-  var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
-  sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
-    var CORE_LP_KEYWORDS=["Dill","Gavin","De La Riva","Karen","Saleh","Said","McMahon","Osgood","Johnston","Jordan"];
-    var filtered=(res||[]).filter(function(r){
-      var lp=r.lp_user||"";
-      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
-    });
-    referralLeadsCache=filtered;
-    renderReferralLeads(referralLeadsCache);
-    if(el)el.textContent="Last refreshed: "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
-  }).catch(function(){
-    if(el)el.textContent="Could not load — check Zap connection";
-    renderReferralLeads([]);
-  });
 }
 
 var refFilters={status:"",lp:""};
@@ -5464,7 +5363,7 @@ function renderLpAssignList(){
   var el=document.getElementById("lp-assign-list");
   if(!el){console.warn("lp-assign-list not found");return;}
   var LPS=["Gavin","Jordan","Karen","Osgood","Said","Unassigned"];
-  var LP_COLORS={"Gavin":"#0E9F8E","Karen":"#2563EB","Osgood":"#C2692B","Jordan":"#BE185D","Said":"#7C3AED"};
+  var LP_COLORS={"Gavin":"#3D4E68","Karen":"#3D4E68","Osgood":"#3D4E68","Jordan":"#3D4E68","Said":"#3D4E68"};
   var searchEl=document.getElementById("lp-assign-search");
   var showAllEl=document.getElementById("lp-assign-show-all");
   var q=searchEl?searchEl.value.toLowerCase():"";
@@ -5619,10 +5518,6 @@ function ftStatus(tier,days){
   return"ok";
 }
 
-function ftDaysLabel(days,status){
-  if(days===null)return"Never";
-  return days+"d ago";
-}
 
 function renderFaceTime(){
   var listEl=document.getElementById("ft-list");if(!listEl)return;
@@ -5673,7 +5568,7 @@ function renderFaceTime(){
     B:"B-Tier — target every 30 days · 🟡 21d · 🔴 30d · 🚨 45d",
     C:"C-Tier — target every 60 days · 🟡 45d · 🔴 60d · 🚨 90d"
   };
-  var lpColors={Gavin:"#0E9F8E",Karen:"#2563EB",Osgood:"#C2692B",Jordan:"#BE185D",Said:"#7C3AED"};
+  var lpColors={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
 
   // Build rows using DOM-safe approach (no inline onclick with dynamic strings)
   var rows=[];
@@ -5953,7 +5848,7 @@ function loadVelocifyLeadsCsv(input){
 
 function platTag(p){
   if(p==="zillow")return'<span style="background:#EFF6FF;color:#006AFF;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">Zillow</span>';
-  if(p==="both")return'<span style="background:#F5F3FF;color:#7C3AED;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">Both</span>';
+  if(p==="both")return'<span style="background:#EEF1F6;color:#3D4E68;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">Both</span>';
   return'<span style="background:#FFF1F2;color:#D92424;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">Realtor.com</span>';
 }
 
@@ -6203,50 +6098,6 @@ var ZILLOW_SPEND_LATEST={
   "SAM COOPER":855,
   "THE JAMES TEAM":620
 };
-function zillowSpendQuickFillGlobal(){
-  var touchedPartnerIdx=[],toCreate=[],partnerZillowTotal={};
-  Object.keys(ZILLOW_SPEND_LATEST).forEach(function(nameKey){
-    var amt=ZILLOW_SPEND_LATEST[nameKey];
-    var found=false;
-    coMktPartners.forEach(function(p,pi){
-      (p.agent_roster||[]).forEach(function(r){
-        var rn=(r.name||"").trim().toUpperCase();
-        var ra=(r.alias||"").trim().toUpperCase();
-        if(rn===nameKey||ra===nameKey){
-          r.spend=amt;
-          found=true;
-          if(touchedPartnerIdx.indexOf(pi)<0)touchedPartnerIdx.push(pi);
-          if(p.platform==="both")partnerZillowTotal[pi]=(partnerZillowTotal[pi]||0)+amt;
-        }
-      });
-    });
-    if(!found)toCreate.push({key:nameKey,amt:amt});
-  });
-
-  var savePromises=touchedPartnerIdx.map(function(pi){
-    var p=coMktPartners[pi];
-    var payload={agent_roster:p.agent_roster};
-    if(partnerZillowTotal.hasOwnProperty(pi)){
-      p.your_spend_zillow=partnerZillowTotal[pi];
-      payload.your_spend_zillow=partnerZillowTotal[pi];
-    }
-    return sbFetch("PATCH","co_marketing_partners?id=eq."+p.id,payload);
-  });
-  toCreate.forEach(function(item){
-    var prettyName=item.key.split(" ").map(function(w){return w.charAt(0)+w.slice(1).toLowerCase();}).join(" ");
-    savePromises.push(sbFetch("POST","co_marketing_partners",{
-      partner_name:prettyName,platform:"zillow",brokerage:"",since_date:null,
-      total_cost:0,your_spend:item.amt,agent_spend:0,lender_budget:0,your_spend_zillow:0,agent_spend_zillow:0,
-      agent_roster:[{name:prettyName,alias:"",spend:item.amt}]
-    }));
-  });
-
-  Promise.all(savePromises).then(function(){
-    return loadCoMktPartners();
-  }).then(function(){
-    showToast("Zillow spend loaded — "+touchedPartnerIdx.length+" partner(s) updated, "+toCreate.length+" new added","success");
-  }).catch(function(){alert("Some updates failed — check connection and try again");});
-}
 function dmRemoveAgent(idx,agentIdx){
   var p=coMktPartners[idx];
   p.agent_roster.splice(agentIdx,1);
@@ -7122,6 +6973,94 @@ if(typeof window.renderReferralLeadsDirect==="function"){
   window.renderReferralLeadsDirect=function(data){
     var result=origRenderRefLeads2.apply(this,arguments);
     setTimeout(ctRenderLeadGoalPace, 30);
+    return result;
+  };
+}
+
+})();
+
+/* ══════════════════════════════════════════════════════════
+   ROUND 8 — real notification bell, pulling from lp_flags and
+   lead_notes (gesture opportunities). Plus per-agent "Flag for
+   RM" button on individual call cards, using the same lp_flags
+   table the general flag button already writes to.
+   ══════════════════════════════════════════════════════════ */
+(function(){
+
+function ctLoadNotifications(){
+  var badge=document.getElementById("ct-notif-badge");
+  var list=document.getElementById("ct-notif-list");
+  if(!badge||!list) return;
+  Promise.all([
+    sbFetch("GET","lp_flags?resolved=eq.false&select=agent_name,lp,note,created_at&order=created_at.desc&limit=5").catch(function(){return [];}),
+    sbFetch("GET","lead_notes?notify_rm_gesture=eq.true&gesture_sent=eq.false&select=lead_buyer_name,lead_agent_name,lp,created_at&order=created_at.desc&limit=5").catch(function(){return [];})
+  ]).then(function(results){
+    var flags=results[0]||[], gestures=results[1]||[];
+    var total=flags.length+gestures.length;
+    if(total>0){
+      badge.textContent=total>9?"9+":total;
+      badge.style.display="flex";
+    } else {
+      badge.style.display="none";
+    }
+    if(total===0){ list.innerHTML='<div style="padding:8px 0;color:var(--text-3)">Nothing new right now</div>'; return; }
+    var html="";
+    flags.forEach(function(f){
+      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🚩 '+(f.agent_name?escHtml(f.agent_name):"General flag")+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(f.lp)+' — "'+escHtml((f.note||"").substring(0,60))+'"</div></div>';
+    });
+    gestures.forEach(function(g){
+      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🎁 '+escHtml(g.lead_buyer_name||g.lead_agent_name)+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(g.lp)+' — gesture opportunity</div></div>';
+    });
+    list.innerHTML=html;
+  }).catch(function(){ list.innerHTML='<div style="color:var(--text-3)">Could not load</div>'; });
+}
+
+var notifBell=document.getElementById("ct-notif-bell");
+if(notifBell){
+  notifBell.addEventListener("click", function(){
+    var panel=document.getElementById("ct-notif-panel");
+    var isOpen=panel.style.display!=="none";
+    panel.style.display = isOpen ? "none" : "block";
+    if(!isOpen) ctLoadNotifications();
+  });
+}
+setInterval(ctLoadNotifications, 60000);
+setTimeout(ctLoadNotifications, 2000);
+
+/* ── Per-agent "Flag for RM" button on individual call cards ── */
+function ctInjectPerAgentFlagButtons(){
+  document.querySelectorAll(".call-card, .search-agent-row").forEach(function(card){
+    if(card.querySelector(".ct-agent-flag-btn")) return;
+    var checkBtn=card.querySelector(".check-btn[data-name]");
+    if(!checkBtn) return;
+    var name=checkBtn.getAttribute("data-name");
+    var lp=checkBtn.getAttribute("data-lp")||currentUser;
+    var btn=document.createElement("button");
+    btn.className="ct-agent-flag-btn";
+    btn.style.cssText="margin-top:6px;font-size:10.5px;font-weight:700;color:#B8842B;background:none;border:none;cursor:pointer;font-family:inherit;padding:0";
+    btn.textContent="🚩 Flag for RM";
+    btn.onclick=function(e){
+      e.stopPropagation();
+      var note=prompt("What does the RM need to know about "+name+"?");
+      if(note) ctSubmitFlag(name, note, lp);
+    };
+    var infoDiv=card.querySelector(".call-info") || card;
+    infoDiv.appendChild(btn);
+  });
+}
+if(typeof window.renderLP==="function"){
+  var origRenderLP3=window.renderLP;
+  window.renderLP=function(lp){
+    var result=origRenderLP3.apply(this,arguments);
+    setTimeout(ctInjectPerAgentFlagButtons, 100);
+    return result;
+  };
+}
+if(typeof window.renderLpSearch==="function"){
+  var origRenderLpSearch=window.renderLpSearch;
+  window.renderLpSearch=function(){
+    var result=origRenderLpSearch.apply(this,arguments);
+    setTimeout(ctInjectPerAgentFlagButtons, 100);
     return result;
   };
 }
