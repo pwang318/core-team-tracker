@@ -1,4 +1,4 @@
-
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -795,7 +795,7 @@ tr:hover td{background:var(--bg)}
         Updates automatically when you upload the Power BI export in Admin.
       </div>
     </div>
-    <div id="d-tier-upgrade-section" style="margin-bottom:1rem"></div>
+    <div id="d-tier-movement-section" style="margin-bottom:1rem"></div>
     <div class="section-head">Full roster
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
         <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
@@ -1075,7 +1075,7 @@ function switchLeadsTab(tab, btn){
     var csEl=document.getElementById("conv-range-start"),ceEl=document.getElementById("conv-range-end");
     if(csEl&&!csEl.value){csEl.value="2026-04-01";ceEl.value=localDateStr(new Date());runConversionRangeSearch();}
   }
-  if(tab==="growth"){renderGrowthScoreboard();renderDaniel();renderTierUpgradePanel();}
+  if(tab==="growth"){renderGrowthScoreboard();renderDaniel();renderTierMovementPanel();}
 }
 
 function openLeadsView(btn){
@@ -1229,48 +1229,71 @@ function renderReferralLeadsDirect(data){
   renderTable(unconverted,"ref-uncovered-table-v2","ref-uncovered-count-v2");
 }
 
-function renderTierUpgradePanel(){
-  var el=document.getElementById("d-tier-upgrade-section");
+function renderTierMovementPanel(){
+  var el=document.getElementById("d-tier-movement-section");
   if(!el)return;
-  var suggestions=[];
+  // C→B and B→A each get two buckets: "ready now" (already qualifies, closes>=threshold) and
+  // "one away" (exactly one close short). Real thresholds: C=0-1, B=2-3, A=4+ closes.
+  var cToB_ready=[],cToB_close=[],bToA_ready=[],bToA_close=[];
   agents.forEach(function(a){
     if(!isActive(a))return;
-    var vel=VELOCIFY_SEED[a[0].toUpperCase()]||null;
-    var leads=vel?vel.total||0:0;
     var closes=a[8]||0;
-    // C → B: 1+ lead AND 1+ close, currently C, has 2+ leads or 2+ closes
-    if(a[1]==="C"&&leads>=1&&closes>=1){
-      var reason=[];
-      if(leads>=2)reason.push(leads+" leads");
-      if(closes>=2)reason.push(closes+" closes");
-      suggestions.push({name:a[0],lp:a[2],leads:leads,closes:closes,cur:"C",sug:"B",reason:reason.join(" · ")||leads+" lead, "+closes+" close"});
-    }
-    // B → A: 4+ closes
-    else if(a[1]==="B"&&closes>=4){
-      suggestions.push({name:a[0],lp:a[2],leads:leads,closes:closes,cur:"B",sug:"A",reason:closes+" closes with NFM"});
+    var row={name:a[0],lp:a[2],closes:closes};
+    if(a[1]==="C"){
+      if(closes>=2)cToB_ready.push(row);
+      else if(closes===1)cToB_close.push(row);
+    }else if(a[1]==="B"){
+      if(closes>=4)bToA_ready.push(row);
+      else if(closes===3)bToA_close.push(row);
     }
   });
-  suggestions.sort(function(a,b){return (b.closes-a.closes)||( b.leads-a.leads);});
-  if(!suggestions.length){
-    el.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--text-2)">No tier upgrade candidates yet based on current data. Upload latest Power BI export to refresh.</div>';
+  [cToB_ready,cToB_close,bToA_ready,bToA_close].forEach(function(list){list.sort(function(a,b){return b.closes-a.closes;});});
+  var total=cToB_ready.length+cToB_close.length+bToA_ready.length+bToA_close.length;
+  if(!total){
+    el.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--text-2)">No tier movement to show right now, based on current data. Upload the latest Power BI export to refresh.</div>';
     return;
   }
-  var html='<div style="background:var(--surface);border:1px solid #86efac;border-radius:10px;overflow:hidden;margin-bottom:1rem">'
-    +'<div style="background:#15803d;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
-    +'<div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em">&#8679; Tier upgrade candidates ('+suggestions.length+')</div>'
-    +'<div style="font-size:10px;color:#bbf7d0">Based on Power BI closing data</div>'
-    +'</div>';
-  suggestions.slice(0,10).forEach(function(s){
-    var badge=s.sug==="A"
-      ?'<span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px">→ A-tier</span>'
-      :'<span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px">→ B-tier</span>';
-    html+='<div style="display:flex;align-items:center;gap:8px;padding:9px 16px;border-bottom:0.5px solid var(--border-light);flex-wrap:wrap">'
-      +'<span style="font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:100px">'+s.name+'</span>'
-      +'<span class="lp-tag lp-tag-'+s.lp+'">'+s.lp+'</span>'
-      +'<span style="font-size:11px;color:var(--text-2)">'+s.reason+'</span>'
-      +badge
+  var VISIBLE=6,uid=0;
+  var row=function(c,badgeColor,badgeBg,badgeText){
+    return'<div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:0.5px solid var(--border-light);flex-wrap:wrap">'
+      +'<span style="font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:100px">'+c.name+'</span>'
+      +'<span class="lp-tag lp-tag-'+c.lp+'">'+c.lp+'</span>'
+      +'<span style="font-size:11px;color:var(--text-2)">'+c.closes+' close'+(c.closes!==1?'s':'')+' (past year)</span>'
+      +'<span style="background:'+badgeBg+';color:'+badgeColor+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px">'+badgeText+'</span>'
       +'</div>';
-  });
+  };
+  // Renders a subgroup with the first VISIBLE rows shown and the rest behind a "Show all" toggle.
+  var subgroup=function(label,list,badgeColor,badgeBg,badgeText){
+    if(!list.length)return"";
+    uid++;
+    var id="tm-group-"+uid;
+    var visible=list.slice(0,VISIBLE),rest=list.slice(VISIBLE);
+    var html='<div style="padding:6px 16px 2px;font-size:10.5px;font-weight:700;color:'+badgeColor+'">'+label+' ('+list.length+')</div>';
+    visible.forEach(function(c){html+=row(c,badgeColor,badgeBg,badgeText);});
+    if(rest.length){
+      html+='<div id="'+id+'" style="display:none">';
+      rest.forEach(function(c){html+=row(c,badgeColor,badgeBg,badgeText);});
+      html+='</div>';
+      html+='<div style="padding:6px 16px;text-align:center">'
+        +'<button onclick="var d=document.getElementById(\''+id+'\');var open=d.style.display!==\'none\';d.style.display=open?\'none\':\'block\';this.textContent=open?\'Show all '+list.length+' \\u2192\':\'Show fewer\';" style="font-size:10.5px;font-weight:600;color:'+badgeColor+';background:none;border:1px solid '+badgeColor+';border-radius:20px;padding:3px 12px;cursor:pointer;font-family:inherit">Show all '+list.length+' &rarr;</button>'
+        +'</div>';
+    }
+    return html;
+  };
+  var html='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem">'
+    +'<div style="background:#1F4E79;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em">Tier movement ('+total+')</div>'
+    +'<div style="font-size:10px;color:#93c5fd">Based on Power BI closing data</div>'
+    +'</div>';
+  // B → A shown first (green) since it's the higher-value transition, then C → B (blue).
+  html+='<div style="border-bottom:2px solid #dcfce7;background:#f0fdf4;padding:8px 16px 2px;font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.04em">B &rarr; A</div>';
+  html+=subgroup("Ready now (4+ closes)",bToA_ready,"#15803d","#dcfce7","Ready \u2192 A");
+  html+=subgroup("1 close away (3 closes)",bToA_close,"#15803d","#dcfce7","\u2192 A soon");
+  if(!bToA_ready.length&&!bToA_close.length)html+='<div style="padding:8px 16px;font-size:11px;color:var(--text-3)">No one in range right now.</div>';
+  html+='<div style="border-bottom:2px solid #dbeafe;background:#eff6ff;padding:8px 16px 2px;font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.04em;margin-top:6px">C &rarr; B</div>';
+  html+=subgroup("Ready now (2+ closes)",cToB_ready,"#1d4ed8","#dbeafe","Ready \u2192 B");
+  html+=subgroup("1 close away (1 close)",cToB_close,"#1d4ed8","#dbeafe","\u2192 B soon");
+  if(!cToB_ready.length&&!cToB_close.length)html+='<div style="padding:8px 16px;font-size:11px;color:var(--text-3)">No one in range right now.</div>';
   html+='</div>';
   el.innerHTML=html;
 }
