@@ -2533,14 +2533,20 @@ function closeScriptsModal(){document.getElementById("scriptsModal").classList.r
 
 function saveLpContactModal(){
   if(!editingLpContact)return;
-  var payload={agent_name:editingLpContact,phone:document.getElementById("lp-cm-phone").value.trim()||null,email:document.getElementById("lp-cm-email").value.trim()||null,birthday:ctGetBirthdayValue()};
-  sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(editingLpContact)+"&limit=1").then(function(res){
+  var btn=document.querySelector("#lpContactModal .btn-primary");
+  if(btn){if(btn.disabled)return;btn.disabled=true;btn.dataset.origText=btn.dataset.origText||btn.textContent;btn.textContent="Saving...";}
+  var savedName=editingLpContact; // capture now — a fast second open/close shouldn't be able to change what this save targets
+  // agent_name is the real primary key here (confirmed against the live schema — agent_profiles
+  // has no id column), and this app already keys everything off it with an exact eq. match, so
+  // there's no ambiguity risk the way there was in the RM Tracker's case-insensitive lookup.
+  var payload={agent_name:savedName,phone:document.getElementById("lp-cm-phone").value.trim()||null,email:document.getElementById("lp-cm-email").value.trim()||null,birthday:ctGetBirthdayValue()};
+  sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(savedName)+"&limit=1").then(function(res){
     var method=(res&&res.length)?"PATCH":"POST";
-    var path=method==="PATCH"?"agent_profiles?agent_name=eq."+encodeURIComponent(editingLpContact):"agent_profiles";
+    var path=method==="PATCH"?"agent_profiles?agent_name=eq."+encodeURIComponent(savedName):"agent_profiles";
     return sbFetch(method,path,payload);
   }).then(function(){
-    if(!contactCache[editingLpContact])contactCache[editingLpContact]={agent_name:editingLpContact};
-    Object.assign(contactCache[editingLpContact],payload);
+    if(!contactCache[savedName])contactCache[savedName]={agent_name:savedName};
+    Object.assign(contactCache[savedName],payload);
     setSyncStatus("live");
     var st=document.getElementById("lpContactModalStatus");
     if(st){st.style.display="block";st.style.background="#f0fdf4";st.style.color="#15803d";st.textContent="Saved!";}
@@ -2549,6 +2555,8 @@ function saveLpContactModal(){
     var st=document.getElementById("lpContactModalStatus");
     if(st){st.style.display="block";st.style.background="#fff1f2";st.style.color="#be123c";st.textContent="Save failed. Try again.";}
     else console.error("Save failed:",e);
+  }).finally(function(){
+    if(btn){btn.disabled=false;btn.textContent=btn.dataset.origText||"Save";}
   });
 }
 
@@ -4597,6 +4605,24 @@ document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 // Pause auto-refresh while user is typing in any input or textarea
 document.addEventListener("focusin",function(e){if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"){userTyping=true;}});
 document.addEventListener("focusout",function(e){if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"){userTyping=false;}});
+// ── Near-real-time refresh for shared agent_profiles data (Phase 2 architecture pass) ──────
+// There are no Supabase Realtime (push) subscriptions here — turning those on requires a
+// database-side change (adding this table to the `supabase_realtime` publication), which is
+// outside a no-schema/no-database-change pass and was intentionally NOT done. The 30-second
+// poll above already keeps call_logs (LP activity) fresh; contact info (phone/email/tier/
+// birthday from agent_profiles) is cached per-agent the first time it's looked up and, before
+// this, never refreshed again in the same session — so a phone number Amanda updates wouldn't
+// show up here until the page was reloaded. This clears that cache periodically instead, so the
+// next time any agent card is viewed it refetches fresh — typically within a couple of minutes
+// of a change, not instantly, and never while someone's actively typing or has the contact
+// modal open.
+setInterval(function(){
+  if(userTyping||editingLpContact)return;
+  contactCache={};
+},120000);
+document.addEventListener("visibilitychange",function(){
+  if(!document.hidden&&!userTyping&&!editingLpContact)contactCache={};
+});
 loadAgents();
 loadAgentAssignments();
 // Auto-open Snapshot on load
@@ -6755,6 +6781,11 @@ function ctSetBirthdayDropdowns(value){
   if(!mEl||!dEl) return;
   mEl.value=""; dEl.value="";
   if(!value) return;
+  // HOTFIX: MM/DD is now the shared standard (matches the RM Tracker, which validates and
+  // writes MM/DD) — check it first. MM-DD stays supported for reading records this app wrote
+  // before this fix; that path is unchanged.
+  var slash=value.match(/^(\d{1,2})\/(\d{1,2})$/);
+  if(slash){ mEl.value=slash[1].padStart(2,"0"); dEl.value=slash[2].padStart(2,"0"); return; }
   var structured=value.match(/^(\d{2})-(\d{2})$/);
   if(structured){ mEl.value=structured[1]; dEl.value=structured[2]; return; }
   // Legacy free-text value already saved — best-effort parse so it still displays
@@ -6770,7 +6801,10 @@ function ctSetBirthdayDropdowns(value){
 function ctGetBirthdayValue(){
   var m=document.getElementById("lp-cm-birthday-month"), d=document.getElementById("lp-cm-birthday-day");
   if(!m||!d||!m.value||!d.value) return null;
-  return m.value+"-"+d.value; // always stored as MM-DD, regardless of who enters it
+  // HOTFIX: shared column with the RM Tracker, which requires MM/DD — was MM-DD, which the RM
+  // Tracker's save validation rejects, blocking her from saving *any* edit to a contact whose
+  // birthday was last set here. Standardized to MM/DD.
+  return m.value+"/"+d.value;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -7320,8 +7354,18 @@ function pfrPeriodRange(){
 // Mirrors the RM Tracker's Contacts Bulk Import logic exactly — same table, same fields.
 async function lpSyncAgentProfilesFromUpload(rows){
   if(!rows||!rows.length)return;
-  // Build upsert payload — one row per agent, all fields the Portfolio Review needs.
-  // Uses POST with resolution=merge-duplicates so existing rows get updated, new ones inserted.
+  // HOTFIX (shared Power BI logic pass): this used to batch-upsert with every row's tier/email/
+  // phone set unconditionally — including explicit nulls for blank cells, which overwrote good
+  // existing manually-maintained data on every re-import — and wrote Title-Cased names straight
+  // from the ALL-CAPS export, which could create a second row for someone like "McMahon"
+  // (mangled to "Mcmahon") instead of matching their real existing record. This version:
+  //  - looks up existing agents first (case-insensitive) and writes back to their EXACT existing
+  //    agent_name, so a real name's casing is never clobbered by the importer's guess
+  //  - only ever sends fields that have an actual value in this row — a blank Power BI cell can
+  //    no longer overwrite a populated field
+  //  - computes Tier and Active Partner (retained) with the exact same formulas the RM Tracker
+  //    uses (see shared formula notes below), so the two apps can't disagree from the same file
+  //  - imports birthday/address too, closing a gap where this import previously left them alone
   var gd=function(v){
     if(v===null||v===undefined||v==="")return null;
     try{
@@ -7332,46 +7376,101 @@ async function lpSyncAgentProfilesFromUpload(rows){
       return(!isNaN(d.getTime())&&d.getFullYear()>1971)?d.toISOString().split("T")[0]:null;
     }catch(e){return null;}
   };
-  var payload=[];
+  var normalizePhoneShared=function(v){
+    if(!v)return null;
+    var digits=String(v).replace(/[^\d]/g,"");
+    if(digits.length===11&&digits[0]==="1")digits=digits.slice(1);
+    if(digits.length!==10)return String(v).trim()||null; // can't confidently reformat — keep rather than lose it
+    return "("+digits.slice(0,3)+") "+digits.slice(3,6)+"-"+digits.slice(6);
+  };
+  var normalizeBirthdayShared=function(raw){
+    if(!raw)return null;
+    var s=String(raw).trim();
+    if(!s)return null;
+    var slash=s.match(/^(\d{1,2})\/(\d{1,2})$/);
+    if(slash)return slash[1].padStart(2,"0")+"/"+slash[2].padStart(2,"0");
+    var dash=s.match(/^(\d{1,2})-(\d{1,2})$/);
+    if(dash)return dash[1].padStart(2,"0")+"/"+dash[2].padStart(2,"0");
+    var months=["january","february","march","april","may","june","july","august","september","october","november","december"];
+    var parts=s.toLowerCase().split(" ");
+    if(parts.length>=2){
+      var mi=months.findIndex(function(m){return m.indexOf(parts[0])===0;});
+      var day=parseInt(parts[1]);
+      if(mi>=0&&!isNaN(day)&&day>=1&&day<=31)return String(mi+1).padStart(2,"0")+"/"+String(day).padStart(2,"0");
+    }
+    return null; // couldn't confidently parse — don't write something wrong
+  };
+
+  var now=new Date();
+  var ninetyDaysAgo=new Date(now.getTime()-90*86400000);
+
+  var existing=await sbFetch("GET","agent_profiles?select=agent_name&limit=5000").catch(function(){return[];});
+  var existingByKey={};
+  (existing||[]).forEach(function(e){
+    var k=(e.agent_name||"").trim().toLowerCase();
+    if(k&&!existingByKey[k])existingByKey[k]=e.agent_name; // first match wins if pre-existing casing duplicates exist — same known limitation flagged in the audit, not solved here
+  });
+
+  var toUpdate=[],toInsert=[];
   rows.forEach(function(row){
     var rawName=(row["Agent"]||"").toString().trim();
     if(!rawName||rawName.toUpperCase()==="AGENT"||rawName.toUpperCase()==="NAN")return;
     var closes=parseInt(row["Closed Past Year"])||0;
-    var tier=closes>=10?"Channel":closes>=4?"A":closes>=2?"B":"C";
+    var leads=parseInt(row["Total Leads Past Year"])||0;
+    // Shared formula (identical in the RM Tracker): Channel 10+, A 4-9, B 2-3, C requires at
+    // least 1 close OR 1 lead — 0 and 0 gets no tier at all rather than defaulting to C.
+    var tier=closes>=10?"Channel":closes>=4?"A":closes>=2?"B":(closes>=1||leads>=1)?"C":null;
+    var latestLead=gd(row["Latest Lead (In Velocify)"]);
+    var latestClose=gd(row["Latest Close"]);
+    // Active Partner = a qualifying lead OR closing within the last 90 days — not just being
+    // present in this file. Latest File Started / Latest Contract aren't "a lead or a closing"
+    // per the draft playbook's definition, so they're deliberately excluded from this check.
+    var isActive=!!((latestLead&&new Date(latestLead)>=ninetyDaysAgo)||(latestClose&&new Date(latestClose)>=ninetyDaysAgo));
+
     var normalizedName=rawName.split(" ").map(function(w){return w?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():"";}).join(" ");
-    payload.push({
-      agent_name:normalizedName,
-      tier:tier,
-      closes_past_year:closes,
-      total_leads_past_year:parseInt(row["Total Leads Past Year"])||0,
-      latest_lead_date:gd(row["Latest Lead (In Velocify)"]),
-      retained:true,
-      email:row["Email"]?row["Email"].toString().trim()||null:null,
-      phone:row["Phone Number"]?row["Phone Number"].toString().trim()||null:null
-    });
+    var key=rawName.toLowerCase();
+    var canonicalName=existingByKey[key]||normalizedName; // preserve the real stored name/casing when this person is already known
+
+    var payload={agent_name:canonicalName,tier:tier,closes_past_year:closes,total_leads_past_year:leads,retained:isActive};
+    if(latestLead)payload.latest_lead_date=latestLead;
+    var email=row["Email"]?row["Email"].toString().trim():"";
+    if(email)payload.email=email;
+    var phone=normalizePhoneShared(row["Phone Number"]);
+    if(phone)payload.phone=phone;
+    var addr=row["Address"]?row["Address"].toString().trim():"";
+    if(addr)payload.address=addr;
+    var bday=normalizeBirthdayShared(row["Birthday"]);
+    if(bday)payload.birthday=bday;
+    // Power BI's Notes column is intentionally never mapped into personal_notes or any
+    // relationship field here — those are hand-written relationship history, not something a
+    // generic import column should be able to overwrite.
+
+    if(existingByKey[key]){toUpdate.push(payload);}
+    else{toInsert.push(payload);existingByKey[key]=canonicalName;} // guards a name appearing twice in one file
   });
-  if(!payload.length)return;
-  // Batch upsert in groups of 50 using agent_name as the conflict key
-  var synced=0;
-  for(var i=0;i<payload.length;i+=50){
-    var batch=payload.slice(i,i+50);
+  if(!toUpdate.length&&!toInsert.length)return;
+
+  var synced=0,created=0,failed=0;
+  // Existing agents: individual PATCHes by exact stored agent_name. This is what makes the
+  // blank-safe, canonical-name-preserving behavior above actually stick — a single batch upsert
+  // can't selectively omit fields per row or guarantee it targets the right existing casing.
+  for(var i=0;i<toUpdate.length;i++){
+    var p=toUpdate[i];
+    var body=Object.assign({},p);delete body.agent_name;
     try{
-      var r=await fetch(SB_URL+"/rest/v1/agent_profiles",{
-        method:"POST",
-        headers:{
-          "apikey":SB_KEY,
-          "Authorization":"Bearer "+SB_KEY,
-          "Content-Type":"application/json",
-          "Prefer":"resolution=merge-duplicates,return=minimal",
-          "On-Conflict":"agent_name"
-        },
-        body:JSON.stringify(batch)
-      });
-      if(r.ok){synced+=batch.length;}
-      else{var t=await r.text();console.error("Batch "+(i/50+1)+" failed:",t);}
-    }catch(e){console.error("Batch "+(i/50+1)+" error:",e.message);}
+      await sbFetch("PATCH","agent_profiles?agent_name=eq."+encodeURIComponent(p.agent_name),body);
+      synced++;
+    }catch(e){failed++;console.error("Update failed for "+p.agent_name+":",e.message);}
   }
-  console.log("LP agent_profiles upsert: "+synced+" of "+payload.length+" rows written");
+  // New agents: batched insert is safe here — these names are confirmed not to exist yet.
+  for(var j=0;j<toInsert.length;j+=50){
+    var batch=toInsert.slice(j,j+50);
+    try{
+      await sbFetch("POST","agent_profiles",batch);
+      created+=batch.length;
+    }catch(e){failed+=batch.length;console.error("Insert batch failed:",e.message);}
+  }
+  console.log("LP agent_profiles sync: "+synced+" updated, "+created+" created, "+failed+" failed, of "+(toUpdate.length+toInsert.length)+" rows");
 }
 
 // Playbook Sec. 18 — Health Score historical snapshots (LP Tracker version).
