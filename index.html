@@ -4019,8 +4019,13 @@ function handleUpload(input){
         res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged.";
       }
       renderAdmin();
-      // Write health snapshots after every Power BI import — builds the trend history the
-      // Quarterly Review needs. Best-effort: never blocks or surfaces an error to the user.
+      // Sync agent_profiles from same Power BI file — sets tiers, retained status, production
+      // data, and lead dates so Portfolio Review, Health Score, and cadence checks all update
+      // from a single LP Tracker upload without needing the RM Tracker at all.
+      lpSyncAgentProfilesFromUpload(rows).catch(function(e){
+        console.warn("agent_profiles sync failed (non-critical):",e.message);
+      });
+      // Write health snapshots after profiles are updated
       lpWriteHealthSnapshots().catch(function(e){console.warn("Health snapshot write failed (non-critical):",e.message);});
     }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
   };
@@ -7307,6 +7312,81 @@ function pfrPeriodRange(){
   }
   var d2=new Date(now.getFullYear(),now.getMonth(),1);
   return{start:localDateStr(d2),label:"This Month"};
+}
+
+// Syncs agent_profiles from the Power BI upload so Portfolio Review, Health Score, cadence
+// checks, and tier badges all reflect the latest data from a single LP Tracker upload.
+// Mirrors the RM Tracker's Contacts Bulk Import logic exactly — same table, same fields.
+async function lpSyncAgentProfilesFromUpload(rows){
+  if(!rows||!rows.length)return;
+
+  var gd=function(v){
+    if(v===null||v===undefined||v==="")return null;
+    try{
+      var d;
+      if(v instanceof Date){d=v;}
+      else if(typeof v==="number"&&v>1){d=new Date(Math.round((v-25569)*86400*1000));}
+      else{d=new Date(v);}
+      return(!isNaN(d.getTime())&&d.getFullYear()>1971)?d.toISOString().split("T")[0]:null;
+    }catch(e){return null;}
+  };
+
+  // Fetch existing profiles for id-based PATCH (avoids duplicate key errors)
+  var existing=await sbFetch("GET","agent_profiles?select=id,agent_name,tier&limit=5000").catch(function(){return[];});
+  var existingById={};
+  var existingTierByName={};
+  (existing||[]).forEach(function(e){
+    var n=(e.agent_name||"").trim().toLowerCase();
+    if(n&&!existingById[n]){existingById[n]=e.id;existingTierByName[n]=e.tier||null;}
+  });
+
+  var synced=0,created=0;
+  for(var i=0;i<rows.length;i++){
+    var row=rows[i];
+    var rawName=(row["Agent"]||"").toString().trim();
+    if(!rawName||rawName.toUpperCase()==="AGENT"||rawName.toUpperCase()==="NAN")continue;
+
+    var closedPastYear=parseInt(row["Closed Past Year"])||0;
+    // Channel = 10+ closes, overrides Level column — same logic as RM Tracker
+    var tier=closedPastYear>=10?"Channel":
+              closedPastYear>=4?"A":
+              closedPastYear>=2?"B":"C";
+
+    var payload={
+      agent_name:rawName,
+      tier:tier,
+      closes_past_year:closedPastYear,
+      total_leads_past_year:parseInt(row["Total Leads Past Year"])||0,
+      latest_lead_date:gd(row["Latest Lead (In Velocify)"]),
+      retained:true, // being in the Power BI export = active partner
+      email:row["Email"]?row["Email"].toString().trim()||null:null,
+      phone:row["Phone Number"]?row["Phone Number"].toString().trim()||null:null,
+      address:row["Address"]?row["Address"].toString().trim()||null:null
+    };
+
+    var key=rawName.toLowerCase();
+
+    // Log tier migration if tier changed
+    if(tier&&existingTierByName[key]&&tier!==existingTierByName[key]){
+      sbFetch("POST","tier_migrations",{
+        agent_name:rawName,from_tier:existingTierByName[key],to_tier:tier,
+        migration_date:localDateStr(new Date())
+      }).catch(function(){});
+    }
+
+    try{
+      if(existingById[key]){
+        await sbFetch("PATCH","agent_profiles?id=eq."+existingById[key],payload);
+        synced++;
+      }else{
+        await sbFetch("POST","agent_profiles",payload);
+        created++;
+      }
+    }catch(e){
+      console.warn("agent_profiles sync row failed:",rawName,e.message);
+    }
+  }
+  console.log("LP agent_profiles sync: "+synced+" updated, "+created+" created");
 }
 
 // Playbook Sec. 18 — Health Score historical snapshots (LP Tracker version).
