@@ -7376,10 +7376,20 @@ async function lpSyncAgentProfilesFromUpload(rows){
 
     try{
       if(existingById[key]){
-        await sbFetch("PATCH","agent_profiles?id=eq."+existingById[key],payload);
+        // LP tracker's sbFetch uses "return=representation" for PATCH by default which can
+        // cause issues — override with a direct fetch using return=minimal instead
+        await fetch(SB_URL+"/rest/v1/agent_profiles?id=eq."+existingById[key],{
+          method:"PATCH",
+          headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
+          body:JSON.stringify(payload)
+        }).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});});
         synced++;
       }else{
-        await sbFetch("POST","agent_profiles",payload);
+        await fetch(SB_URL+"/rest/v1/agent_profiles",{
+          method:"POST",
+          headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},
+          body:JSON.stringify(payload)
+        }).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});});
         created++;
       }
     }catch(e){
