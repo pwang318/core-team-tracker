@@ -2206,6 +2206,7 @@ function renderCallCard(a,lp,isBonus){
 }
 
 function escHtml(s){if(!s)return"";return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function pfrProperCase(s){if(!s)return"";return s.trim().split(/\s+/).map(function(w){return w?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():"";}).join(" ");}
 
 function selectOutcome(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp"),outc=btn.getAttribute("data-outcome");
@@ -7376,27 +7377,17 @@ async function lpSyncAgentProfilesFromUpload(rows){
 
     try{
       if(existingById[key]){
-        // LP tracker's sbFetch uses "return=representation" for PATCH by default which can
-        // cause issues — override with a direct fetch using return=minimal instead
-        await fetch(SB_URL+"/rest/v1/agent_profiles?id=eq."+existingById[key],{
-          method:"PATCH",
-          headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
-          body:JSON.stringify(payload)
-        }).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});});
+        await sbFetch("PATCH","agent_profiles?id=eq."+existingById[key],payload);
         synced++;
       }else{
-        await fetch(SB_URL+"/rest/v1/agent_profiles",{
-          method:"POST",
-          headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},
-          body:JSON.stringify(payload)
-        }).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});});
+        await sbFetch("POST","agent_profiles",payload);
         created++;
       }
     }catch(e){
-      console.warn("agent_profiles sync row failed:",rawName,e.message);
+      console.error("agent_profiles sync row failed for ["+rawName+"]:",e.message);
     }
   }
-  console.log("LP agent_profiles sync: "+synced+" updated, "+created+" created");
+  console.log("LP agent_profiles sync complete: "+synced+" updated, "+created+" created out of "+rows.length+" rows");
 }
 
 // Playbook Sec. 18 — Health Score historical snapshots (LP Tracker version).
@@ -7490,7 +7481,7 @@ function pfrHealthTile(label,count,color,onclick){
 function pfrListRow(rank,name,detail){
   return '<div style="padding:8px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px">'
     +(rank?'<span style="font-size:11px;font-weight:700;color:var(--text-3);width:16px;flex-shrink:0">'+rank+'</span>':'')
-    +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">'+escHtml(name)+'</div><div style="font-size:11px;color:var(--text-3)">'+detail+'</div></div>'
+    +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">'+escHtml(pfrProperCase(name))+'</div><div style="font-size:11px;color:var(--text-3)">'+detail+'</div></div>'
   +'</div>';
 }
 
@@ -7719,7 +7710,7 @@ async function pfrLoad(){
     html+='<div style="background:var(--surface);border:1px solid #1F4E79;border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Proactive Watch &mdash; reach out before they go Yellow</div>'
       +'<div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Green partners within 7 days of crossing into Yellow if nothing changes.</div>'
-      +(proactiveWatch.length?proactiveWatch.map(function(r,i){return pfrListRow(i+1,r.name,pfrTierLabel(r.tier)+" &middot; "+r.daysUntilYellow+(r.daysUntilYellow===1?" day":" days")+" until Yellow");}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nobody\'s close to slipping right now.</div>')
+      +(proactiveWatch.length?proactiveWatch.map(function(r,i){return pfrListRow(i+1,pfrProperCase(r.name),pfrTierLabel(r.tier)+" &middot; "+r.daysUntilYellow+(r.daysUntilYellow===1?" day":" days")+" until Yellow");}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nobody\'s close to slipping right now.</div>')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
@@ -7730,7 +7721,7 @@ async function pfrLoad(){
         +pfrHealthTile("Red",healthCounts.Red,"#B54B42","pfrOpenDrill(\'health:Red\')")
       +'</div>'
       +(top10AtRisk.length?'<div style="border-top:1px solid var(--border-light);padding-top:8px"><div style="font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;padding:0 4px">Top Red &mdash; ranked by days since last lead</div>'
-        +top10AtRisk.map(function(r,i){return pfrListRow(i+1,r.name,pfrTierLabel(r.tier)+" &middot; "+(r.daysSinceLead===null?"no lead logged":r.daysSinceLead+"d since last lead")+(r.recovery_plan?" &middot; recovery plan on file":" &middot; &#9888; no recovery plan"));}).join("")+'</div>'
+        +top10AtRisk.map(function(r,i){return pfrListRow(i+1,pfrProperCase(r.name),pfrTierLabel(r.tier)+" &middot; "+(r.daysSinceLead===null?"no lead logged":r.daysSinceLead+"d since last lead")+(r.recovery_plan?" &middot; recovery plan on file":" &middot; &#9888; no recovery plan"));}).join("")+'</div>'
         :'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">No Red partners right now.</div>')
     +'</div>';
 
@@ -7743,7 +7734,7 @@ async function pfrLoad(){
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">High-Potential Agents to Watch</div>'
-      +(highPotential.length?highPotential.map(function(a,i){return pfrListRow(i+1,a.agent_name,pfrTierLabel(a.tier));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">None flagged yet.</div>')
+      +(highPotential.length?highPotential.map(function(a,i){return pfrListRow(i+1,pfrProperCase(a.agent_name),pfrTierLabel(a.tier));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">None flagged yet.</div>')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
@@ -7775,7 +7766,7 @@ async function pfrLoad(){
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Top 10 Growth Opportunities</div>'
-      +(top10GrowthOpp.length?top10GrowthOpp.map(function(a,i){return pfrListRow(i+1,a.agent_name,pfrTierLabel(a.tier)+" &middot; "+escHtml(a.next_growth_opportunity));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">No growth opportunities documented yet.</div>')
+      +(top10GrowthOpp.length?top10GrowthOpp.map(function(a,i){return pfrListRow(i+1,pfrProperCase(a.agent_name),pfrTierLabel(a.tier)+" &middot; "+escHtml(a.next_growth_opportunity));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">No growth opportunities documented yet.</div>')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
@@ -7792,7 +7783,7 @@ async function pfrLoad(){
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Required Leadership Escalations</div>'
-      +(escalations.length?escalations.map(function(e){return pfrListRow(null,e.agent_name,escHtml((e.notes||"").substring(0,120)));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nothing escalated this period.</div>')
+      +(escalations.length?escalations.map(function(e){return pfrListRow(null,pfrProperCase(e.agent_name),escHtml((e.notes||"").substring(0,120)));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nothing escalated this period.</div>')
     +'</div>';
 
     
