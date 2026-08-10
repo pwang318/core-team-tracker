@@ -1,4 +1,4 @@
- 
+  
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -448,6 +448,7 @@ tr:hover td{background:var(--bg)}
 </div>
 <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
   <button class="btn" id="scorecardsTopBtn" onclick="openScorecardsView()" style="display:flex;align-items:center;gap:6px;font-size:12px">&#128202; Scorecards</button>
+  <button class="btn" id="scriptsTopBtn" onclick="openScriptsModal()" style="display:flex;align-items:center;gap:6px;font-size:12px;margin-left:8px">&#128172; Scripts</button>
 </div>
 <div class="who-bar">
   <button class="who-btn wb-Snapshot" onclick="openSnapshotView(this)">Snapshot</button>
@@ -459,7 +460,7 @@ tr:hover td{background:var(--bg)}
   <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
   <button class="who-btn wb-RM" onclick="openRmView(this)">Relationship Manager</button>
   <button class="who-btn wb-FaceTime" onclick="selectUser(this,'FaceTime')">Face Time</button>
-  <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button> <button class="who-btn wb-Director" onclick="openDirectorView(this)">Co-Marketing</button>
+  <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button> <button class="who-btn wb-Director" onclick="openDirectorView(this)">Co-Marketing</button> <button class="who-btn wb-Portfolio" onclick="openPortfolioReviewView(this)">Portfolio Review</button>
 </div>
 <div class="contact-modal-overlay" id="lpContactModal">
   <div class="contact-modal-box">
@@ -486,6 +487,209 @@ tr:hover td{background:var(--bg)}
       <button class="btn btn-primary" onclick="saveLpContactModal()">Save</button>
       <button class="btn" onclick="closeLpContactModal()">Cancel</button>
     </div>
+  </div>
+</div>
+
+<div class="contact-modal-overlay" id="scriptsModal">
+  <div class="contact-modal-box" style="max-width:660px;max-height:85vh;overflow-y:auto">
+    <div class="cm-header"><span class="cm-title">Scripts</span><button class="cm-close" onclick="closeScriptsModal()">&times;</button></div>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:18px">Exact call scripts, organized by moment in the transaction. New ones get added here as they come up.</div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">How to Refer Us &mdash; 1st Buyer Interaction</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">The exact script an agent should use the moment they get a buyer &mdash; via text, email, or verbally, same script either way.</div>
+    <div style="font-size:12.5px;color:var(--text-2);font-weight:600;margin-bottom:4px">Send to Client:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;font-style:italic">
+      "[Buyer Name], to ensure that you're 100% safe, secure, and set up for success moving forward with the home search, I'm going to have the Daniel Sa Team at NFM Lending reach out to you directly to get the process started. Everybody on the team does a WONDERFUL job and will provide you with important information that guarantees you're prepared to move quickly with the right home becomes available. They will educate you on every financing option available so you can make an informed decision on what aligns best with your goals. You can expect to hear from them within the next few hours. Please let me know if you have any questions in the meantime. Thank you so much!"
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);font-weight:600;margin-bottom:4px">Send an email to the Daniel Sa Team (<span style="color:#1F4E79">sateam@nfmlending.com</span>) with the borrower's information:</div>
+    <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;color:var(--text-2);line-height:1.6">
+      Subject: Client Name / NEW LEAD &mdash; from [Realtor Name] at [Realty Brokerage]<br><br>
+      Hello Daniel Sa Team,<br><br>
+      At your earliest convenience, please reach out to my wonderful client(s) [Client Name]. They are looking to purchase [insert all relevant details/goals related to the borrowers and their home search].<br><br>
+      &bull; [Borrower #1]<br>&nbsp;&nbsp;&nbsp;&#9675; Phone:<br>&nbsp;&nbsp;&nbsp;&#9675; Email:<br>
+      &bull; [Borrower #2]<br>&nbsp;&nbsp;&nbsp;&#9675; Phone:<br>&nbsp;&nbsp;&nbsp;&#9675; Email:<br><br>
+      Please let me know if you have any follow-up questions/concerns in the meantime. Thank you so much!<br><br>
+      Have a wonderful day,
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Under Contract Call (Listing Agent)</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Call the listing agent as soon as a deal you're the buyer's lender on goes under contract. Set the tone early &mdash; this is your first real touchpoint with them on this file.</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], this is [Your Name] from the Daniel Sa Team at NFM Lending. I'm calling about your listing at [Property Address], which has just gone into contract. I'm the lender representing the buyer. First, I have a couple of questions about the transaction, I want to make sure we have a smooth process. Does that sound good? Congratulations again on the sale."
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px">Questions to cover:</div>
+    <ul style="font-size:12.5px;color:var(--text-2);margin:0 0 8px;padding-left:18px;line-height:1.6">
+      <li>Any special accommodations for your seller, a POA or mail-away closing, we should know about?</li>
+      <li>Will your seller use the sale proceeds to purchase another home?</li>
+      <li>Will this be a simultaneous closing?
+        <ul style="margin:2px 0;padding-left:18px">
+          <li>Would it help to get the final closing package and closing disclosure three full days in advance?</li>
+          <li>Do you know which title company will handle your seller's next purchase?</li>
+        </ul>
+      </li>
+      <li>Do you have a transaction coordinator we should keep updated throughout?</li>
+    </ul>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Our team is available nights and weekends, so I'm going to send you a quick text with my contact info. Please don't hesitate to reach out anytime if you or your seller need anything."
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Close for the meeting before ending the call.</div>
+    <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">After the call, send a follow-up text with your contact info.</div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Under Contract Call (Buyer's Agent)</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Call the buyer's agent once the file goes under contract. This call sets the tone for how you will work together throughout.</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], this is [Your Name] from the Daniel Sa Team at NFM Lending. I'm calling about [Buyer Name]'s contract on [Property Address] &mdash; congratulations to you and your buyers for going into contract! I wanted to reach out personally and introduce myself. I'll be your main point of contact throughout the transaction and our team is here to support you every step of the way."
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px">Questions to cover:</div>
+    <ul style="font-size:12.5px;color:var(--text-2);margin:0 0 8px;padding-left:18px;line-height:1.6">
+      <li>Are there any concerns or anything we should know going in?</li>
+      <li>What's the best way to keep you updated throughout the process &mdash; text, email, calls?</li>
+      <li>Regarding the closing date &mdash; we want to make sure we stick with the contracted date. We do not move up closing dates. Once we are clear to close, if all parties are in agreement we can revisit at that point.</li>
+    </ul>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Our team is available nights and weekends, so I'm going to send you a quick text with my contact info. Please reach out anytime. We are going to take good care of your buyer."
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">If they don't already work with us regularly, close for a meeting before ending the call: <em style="color:#fff;background:#1E2B3A;padding:2px 6px;border-radius:4px;font-style:normal">"I'd love to sit down sometime, even just 15 minutes, to see if it makes sense to work together."</em></div>
+    <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">After the call, send a follow-up text with your contact info.</div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">CTC Call</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Process: call the agent, leave a voicemail if no answer, follow up with a text if still no response.</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Hi [Agent Name], this is [Your Name] with the Daniel Sa Team at NFM Lending. Congrats on getting [Buyer/Property] to clear to close! I wanted to check in personally, was there anything that went really smoothly for you, or anything we could've done better on our end?"
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">If it's the listing agent and they don't already work with us, bridge straight into the meeting ask before ending the call:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      "I'd love to actually sit down and meet sometime, even just 15 minutes, to see if it makes sense to work together."
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Cold Call &mdash; Opening Script</div>
+    <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--text-2)"><strong style="color:var(--text)">Before you dial:</strong> Pull up RETR and look them up. Find a recent sale or listing and mention it in your opener &mdash; "I saw your listing at [address] just closed, congrats!" It makes the call personal and shows you did your homework.</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Goal: introduce yourself, explain how we support agents, and schedule a 20-minute meeting.</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], I wanted to reach out and introduce myself. We love working alongside agents to help buyers better understand their financing options, create listing-specific payment strategies, and explore creative financing options to help ensure you and your clients are winning in this market. I would love to learn more about your business and explore ways we can support you. Would you be open to a quick 20-minute meeting sometime next week?"
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px">When scheduling &mdash; offer two options:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;font-style:italic">
+      "Would Tuesday at 11:00 or Thursday at 2:00 work better for you?"
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Cold Call &mdash; Common Responses</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:16px">
+      <tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">What's the meeting about?</td><td style="padding:8px 0;color:var(--text-2)">"We'd love to learn more about the clients and areas you serve, what you're currently focused on growing, and where additional lending support may be helpful. We can also share some of the financing strategies and listing resources we provide to our agent partners."</td></tr>
+      <tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">Already have a lender</td><td style="padding:8px 0;color:var(--text-2)">"That's completely understandable, and we're not asking you to replace a relationship that's working well. We'd simply love the opportunity to introduce ourselves and become an additional resource when you need a second opinion, have a challenging scenario, or need extra support. Would you still be open to a 20-minute meeting?"</td></tr>
+      <tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">Send me some info</td><td style="padding:8px 0;color:var(--text-2)">"Absolutely. I want to make sure I send something relevant. Would buyer financing options, listing-specific payment strategies, or solutions for more challenging scenarios be most helpful? I'll send that over today. Would it be okay if I follow up with you on [day]?"</td></tr>
+      <tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">I'm busy right now</td><td style="padding:8px 0;color:var(--text-2)">"No problem at all, I completely understand. Would there be a better time for me to call you back, or would it be easier if I sent you a quick text?"</td></tr>
+      <tr><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">Not interested</td><td style="padding:8px 0;color:var(--text-2)">"I completely understand. Thank you for taking my call. I'll send you my contact information in case you ever need an additional lending resource or a second opinion on a scenario."</td></tr>
+    </table>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">No Answer &mdash; Follow-Up Text</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Send immediately after the missed call.</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      "Hey [Name], this is [Your Name] with the Daniel Sa Team at NFM Lending. I just tried to give you a quick call to introduce myself. We love working alongside agents to support their buyers, create listing-specific payment strategies, and explore creative financing options to help you and your clients win in this market. I would love to connect for a quick 20-minute conversation. Do you have any availability next week?"
+    </div>
+
+    <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">
+      <strong style="color:var(--text)">Gifting Campaign Scripts (4-Week Cadence)</strong><br>Always try a call first. If no answer, follow up with a text.
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 1: Break the Ice</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], this is [Your Name] with the Daniel Sa Team at NFM Lending. I wanted to follow up after our meeting. It was great connecting with you and I'm excited to work together. How has your week been going?"
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], this is [Your Name] with the Daniel Sa Team at NFM. Great meeting with you. Looking forward to working together. Here to support you and your buyers."
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 2: Value Touch</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], it's [Your Name] with the Daniel Sa Team at NFM. I've been thinking about your business and wanted to share something I think will be useful for you. [share resource or market update]. Would you have a few minutes this week to connect?"
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], it's [Your Name] with NFM. I have something I think will be useful for you. [resource]. Let's connect this week!"
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 3: Opportunity Call</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], it's [Your Name] with the Daniel Sa Team at NFM. I've really enjoyed getting to know you. Do you have any buyers right now we can help with? We would love to earn your business."
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], it's [Your Name] with NFM. Do you have any buyers we can help with right now? We would love to earn your business."
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 4: Accountability Follow-Up</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], it's [Your Name] with the Daniel Sa Team at NFM. Wanted to connect and see how your business is going. Do you have any buyers or listings we can support? We are committed to being your go-to team and we are here whenever you need us."
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], it's [Your Name] with NFM. Do you have any buyers or listings we can support right now? We are here whenever you need us."
+    </div>
+
+    <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">
+      <strong style="color:var(--text)">Note:</strong> Replace [resource or market update] in Week 2 with something specific to that agent. The more relevant it is to their market or situation, the better it lands.
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">New Agent Meeting &mdash; Commitment &amp; 4-Week Follow-Up</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:10px">The most common failure mode: great meeting, agent signs up for the mailing list, nothing else happens. This framework closes that gap. The commitment ask is the single most important moment &mdash; get it every time, no exceptions.</div>
+
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">The Commitment Ask &mdash; end of every new agent meeting</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      "Do I have your commitment to send me the next two to three leads that come your way?"
+    </div>
+    <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--text-2)">
+      Deliver this while looking them in the eye and shaking their hand. This creates a spoken agreement that is genuinely difficult to break without consciously going back on their word. Ending with a vague "let me know if I can ever help" puts zero pressure on the agent and gives you no leverage to follow up on. <strong style="color:var(--text)">Getting a lead within the first 30 days is critical</strong> &mdash; after that window closes, the agent has usually reverted to their previous lender and reconverting them becomes exponentially harder.
+    </div>
+
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">The 4-Week Follow-Up Structure</div>
+
+    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 0 &mdash; Day of the meeting</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;padding-left:10px">Send the How to Refer template. Add them on social media. No ask yet &mdash; pure value delivery.</div>
+
+    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 1 &mdash; Break the walls down</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">Send a relatable meme or short video &mdash; nothing salesy. Just staying on their radar in a human way.</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;padding-left:10px">No direct ask. Goal is to make them smile and remember you.</div>
+
+    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 2 &mdash; Value touch, still no ask</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">Send something relevant &mdash; market update, sales meeting content, or a financing strategy tip. Nothing that asks for a lead.</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;padding-left:10px">Patience here pays off in week 3. Two touches, no pressure &mdash; this is what separates you from the LO who emailed three times in a row asking for business.</div>
+
+    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 3 &mdash; First lead ask, paired with a unique product</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      "Hey [Agent], I was thinking about you &mdash; do you have any buyers who've been told no elsewhere? We have a 1099 program / bank statement option / portfolio loan that might be worth a look. Also, did anyone come to mind since we met that I could help with?"
+    </div>
+    <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--text-2)">
+      Lead with the unfamiliar product, not a well-known one. Every agent has heard of bank statement and DSCR &mdash; leading with something more unique (1099, portfolio program) signals you have tools others don't and gives them a specific reason to think of a client.
+    </div>
+
+    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 4 &mdash; Accountability call</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      "Hey [Agent], I wanted to circle back &mdash; when we met, you committed to sending me the next couple of leads that came your way. Is there anyone you're working with right now I could help with?"
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px;padding-left:10px">If they push back or go quiet:</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      "Did I do something wrong?"
+    </div>
+    <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--text-2)">
+      This surfaces the real reason almost every time &mdash; fix it, or pivot: "Would you be open to just introducing me to whoever you're currently working with? I'd love the chance to earn a second opinion."
+    </div>
+
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">For Existing Partners &mdash; shifting to earning 100% of their business</div>
+    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      "What's one thing we could do better to make working together easier for you?"
+    </div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:14px;padding-left:10px">Invites specific, actionable feedback and deepens trust simultaneously. The agent who answers this honestly is the one you'll earn 100% of business from.</div>
+
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">Pre-Approval Pipeline Review (monthly or bi-weekly to top agents)</div>
+    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px;padding-left:10px">Send the agent a view of their entire pre-approved pipeline with current status. Creates mutual accountability &mdash; they see their buyers' statuses, it surfaces where leads are being lost, and it makes you look like a partner, not a vendor.</div>
+
+    <button class="btn btn-sm" onclick="closeScriptsModal()" style="margin-top:8px">Close</button>
   </div>
 </div>
 
@@ -882,6 +1086,7 @@ tr:hover td{background:var(--bg)}
     <div>
       <div style="font-size:16px;font-weight:700;color:var(--text-1)">Face Time Tracker</div>
       <div style="font-size:12px;color:var(--text-3);margin-top:2px">Break breads & in-person meetings — last touch by tier</div>
+      <div style="font-size:11.5px;color:var(--text-3);margin-top:4px;background:var(--surface-2);border-radius:6px;padding:5px 10px;display:inline-block">This tracks <strong style="color:var(--text-2)">in-person visits only</strong> — break breads, office visits, agent lunches. Phone calls and texts live in your main LP view.</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <select id="ft-lp-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
@@ -894,6 +1099,7 @@ tr:hover td{background:var(--bg)}
       </select>
       <select id="ft-tier-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
         <option value="all">All tiers</option>
+        <option value="Channel">Channel only</option>
         <option value="A">A-tier only</option>
         <option value="B">B-tier only</option>
         <option value="C">C-tier only</option>
@@ -913,7 +1119,7 @@ tr:hover td{background:var(--bg)}
     </div>
   </div>
   <div class="ft-summary">
-    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-critical" style="color:#991B1B">—</div><div class="ft-stat-label">Critical (21/45/90d+)</div></div>
+    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-critical" style="color:#991B1B">—</div><div class="ft-stat-label">Critical (21/21/45/90d+)</div></div>
     <div class="ft-stat"><div class="ft-stat-num" id="ft-s-overdue" style="color:#DC2626">—</div><div class="ft-stat-label">Overdue</div></div>
     <div class="ft-stat"><div class="ft-stat-num" id="ft-s-warn" style="color:#D97706">—</div><div class="ft-stat-label">Due soon</div></div>
     <div class="ft-stat"><div class="ft-stat-num" id="ft-s-ok" style="color:#0A6B4C">—</div><div class="ft-stat-label">On track</div></div>
@@ -947,6 +1153,31 @@ tr:hover td{background:var(--bg)}
     </div>
   </div>
   <div id="director-cards"></div>
+</div>
+
+<div id="view-portfolio" class="view" style="padding:18px 20px;max-width:1100px;margin:0 auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:10px">
+    <div style="font-size:16px;font-weight:700;color:var(--text)">Monthly Portfolio Review</div>
+    <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
+  </div>
+  <div style="font-size:11.5px;color:var(--text-3);margin-bottom:14px">Where the RM and Team Lead review Active Partner Count, Tier Migration, Active Agent-to-Lead Ratio, and Partner Health together. Pulls live from the same data Amanda's tracker feeds — nothing entered twice. Every number is clickable.</div>
+  <div style="display:flex;gap:6px;margin-bottom:16px">
+    <button class="lpsc-period-btn-light active" id="pfrBtnWeek" onclick="pfrSwitchPeriod('week',this)">This Week</button>
+    <button class="lpsc-period-btn-light" id="pfrBtnMonth" onclick="pfrSwitchPeriod('month',this)">This Month</button>
+  </div>
+  <div id="pfr-body">
+    <div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">Loading...</div>
+  </div>
+</div>
+
+<div id="pfr-drilldown-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)pfrCloseDrilldown()">
+  <div style="background:var(--surface);border-radius:12px;width:100%;max-width:520px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border)">
+    <div style="background:#1F4E79;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div id="pfr-drilldown-title" style="color:#fff;font-size:14px;font-weight:700"></div>
+      <button onclick="pfrCloseDrilldown()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div id="pfr-drilldown-body" style="overflow-y:auto;padding:0"></div>
+  </div>
 </div>
 <script>
 var STORAGE_KEY="ct_agents_v3";
@@ -2296,6 +2527,8 @@ function openLpContactModal(name){
 }
 
 function closeLpContactModal(){document.getElementById("lpContactModal").classList.remove("open");editingLpContact=null;}
+function openScriptsModal(){document.getElementById("scriptsModal").classList.add("open");}
+function closeScriptsModal(){document.getElementById("scriptsModal").classList.remove("open");}
 
 function saveLpContactModal(){
   if(!editingLpContact)return;
@@ -3786,6 +4019,9 @@ function handleUpload(input){
         res.style.color="#43A047";res.textContent="Done — "+updated+" updated, "+added+" new, "+flagged+" flagged.";
       }
       renderAdmin();
+      // Write health snapshots after every Power BI import — builds the trend history the
+      // Quarterly Review needs. Best-effort: never blocks or surfaces an error to the user.
+      lpWriteHealthSnapshots().catch(function(e){console.warn("Health snapshot write failed (non-critical):",e.message);});
     }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
   };
   reader.readAsArrayBuffer(file);input.value="";
@@ -5438,8 +5674,8 @@ function loadLpOverrides(){
 
 // ── FACE TIME ─────────────────────────────────────────────────────────────
 // Thresholds (days): [warn, red, critical]
-var FT_THRESHOLDS={A:[10,14,21],B:[21,30,45],C:[45,60,90]};
-var FT_TARGETS={A:14,B:30,C:60};
+var FT_THRESHOLDS={Channel:[10,14,21],A:[10,14,21],B:[21,30,45],C:[45,60,90]};
+var FT_TARGETS={Channel:14,A:14,B:30,C:60};
 var ftData={};  // agent_name → {lastDate, source, notes}
 
 async function loadFaceTime(){
@@ -5528,8 +5764,9 @@ function renderFaceTime(){
 
   if(!agentList.length){listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px">No agents match these filters</div>';return;}
 
-  var tierColors={A:"#B45309",B:"#1D4ED8",C:"#64748B"};
+  var tierColors={Channel:"#1E3A8A",A:"#B45309",B:"#1D4ED8",C:"#64748B"};
   var tierLabels={
+    Channel:"Channel — target every 14 days · 🟡 10d · 🔴 14d · 🚨 21d",
     A:"A-Tier — target every 14 days · 🟡 10d · 🔴 14d · 🚨 21d",
     B:"B-Tier — target every 30 days · 🟡 21d · 🔴 30d · 🚨 45d",
     C:"C-Tier — target every 60 days · 🟡 45d · 🔴 60d · 🚨 90d"
@@ -5538,7 +5775,7 @@ function renderFaceTime(){
 
   // Build rows using DOM-safe approach (no inline onclick with dynamic strings)
   var rows=[];
-  ["A","B","C"].forEach(function(tier){
+  ["Channel","A","B","C"].forEach(function(tier){
     var tList=agentList.filter(function(a){return a.tier===tier;});
     if(!tList.length)return;
     rows.push({type:"hdr",tier:tier,label:tierLabels[tier],count:tList.length,color:tierColors[tier]});
@@ -5576,7 +5813,7 @@ function renderFaceTime(){
             +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Logged by</label>'
             +'<select id="'+fid+'-by" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"><option>Amanda</option><option>Gavin</option><option>Jordan</option><option>Karen</option><option>Nyny</option><option>Osgood</option><option>Said</option></select></div>'
           +'</div>'
-          +'<textarea id="'+fid+'-notes" placeholder="Notes (optional)..." style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical;min-height:50px;margin-bottom:8px"></textarea>'
+          +'<textarea id="'+fid+'-notes" placeholder="What did you talk about? Any referral opportunities discussed, next steps, what they need from us..." style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical;min-height:72px;margin-bottom:8px;box-sizing:border-box"></textarea>'
           +'<div style="display:flex;gap:7px">'
             +'<button class="ft-save-btn" data-agent="'+a.name.replace(/"/g,"&quot;")+'" data-fid="'+fid+'" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer">Save</button>'
             +'<button class="ft-cancel-btn" data-fid="'+fid+'" style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer">Cancel</button>'
@@ -7030,6 +7267,511 @@ if(typeof window.renderLpSearch==="function"){
     return result;
   };
 }
+
+})();
+
+/* ══════════════════════════════════════════════════════════
+   ROUND 9 — Monthly Portfolio Review. Read-only display of the
+   playbook's review metrics (Active Partner Count, Tier Migration,
+   Active Agent-to-Lead Ratio, Partner Health, Growth Opportunity
+   coverage). Pulls from agent_profiles / tier_migrations /
+   amanda_activities — the same tables Amanda's own tracker writes
+   to — plus velocify_leads directly for a real (not manually-
+   logged) lead count. No new tables, no new input forms: this tab
+   only reads.
+   ══════════════════════════════════════════════════════════ */
+(function(){
+
+var PFR_TIER_TOUCH={Channel:14,A:14,B:30,C:60};
+var PFR_TIER_URGENT={Channel:21,A:21,B:45,C:90};
+var PFR_TARGETS={total:200,A:25,B:35};
+var pfrPeriod="month";
+var pfrDrill={};
+
+function pfrTierLabel(tier){return tier?tier+"-tier":"No tier set";}
+
+function pfrHealthScore(daysSinceLead,daysAny,threshold,urgent,competitorRisk){
+  if(competitorRisk)return"Red";
+  if(daysSinceLead===null||daysSinceLead>=urgent)return"Red";
+  if(daysAny===null||daysAny>=urgent)return"Red";
+  if(daysSinceLead>=threshold)return"Yellow";
+  if(daysAny>=threshold)return"Yellow";
+  return"Green";
+}
+
+function pfrPeriodRange(){
+  var now=new Date();
+  if(pfrPeriod==="week"){
+    var wk=getWeekKey(now);
+    return{start:wk,label:"This Week"};
+  }
+  var d2=new Date(now.getFullYear(),now.getMonth(),1);
+  return{start:localDateStr(d2),label:"This Month"};
+}
+
+// Playbook Sec. 18 — Health Score historical snapshots (LP Tracker version).
+// Called after every Power BI import so Portfolio Review can show quarter-over-quarter trends.
+// Uses the same health-score logic as pfrHealthScore — one definition, consistent everywhere.
+async function lpWriteHealthSnapshots(){
+  var now=new Date();
+  var snapshotDate=localDateStr(now);
+  var PFR_TIER_TOUCH={Channel:14,A:14,B:30,C:60};
+  var PFR_TIER_URGENT={Channel:21,A:21,B:45,C:90};
+
+  var results=await Promise.all([
+    sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,latest_lead_date,competitor_risk_flag&limit=2000").catch(function(){return[];}),
+    sbFetch("GET","amanda_activities?select=agent_name,act_date&order=act_date.desc&limit=3000").catch(function(){return[];}),
+    sbFetch("GET","call_logs?select=agent_name,call_date&order=call_date.desc&limit=2000").catch(function(){return[];}),
+    // Use Velocify for real last-lead-date — same source as Portfolio Review for consistency
+    sbFetch("GET","velocify_leads?select=referral_partner_name,date_added&order=date_added.desc&limit=5000&date_added=gte."+(function(){var d=new Date();d.setFullYear(d.getFullYear()-1);return d.toISOString().slice(0,10);}())).catch(function(){return[];})
+  ]);
+  var allAgents=results[0]||[],allActs=results[1]||[],lpCalls=results[2]||[],allLeads=results[3]||[];
+
+  var lastSeenRM={};
+  allActs.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&!lastSeenRM[n])lastSeenRM[n]=a.act_date;});
+  var lastSeenLP={};
+  lpCalls.forEach(function(c){var n=(c.agent_name||"").trim().toLowerCase();if(n&&!lastSeenLP[n])lastSeenLP[n]=c.call_date;});
+  var lastLeadByAgent={};
+  allLeads.forEach(function(l){var n=(l.referral_partner_name||"").trim().toLowerCase();if(n&&(!lastLeadByAgent[n]||l.date_added>lastLeadByAgent[n]))lastLeadByAgent[n]=l.date_added;});
+
+  var active=allAgents.filter(function(a){return a.retained&&a.do_not_contact!==true;});
+  if(!active.length)return;
+
+  var rows=active.map(function(a){
+    var key=(a.agent_name||"").trim().toLowerCase();
+    var lastRM=lastSeenRM[key],lastLP=lastSeenLP[key];
+    var daysRM=lastRM?Math.round((now-new Date(lastRM+"T12:00:00"))/86400000):null;
+    var daysLP=lastLP?Math.round((now-new Date(lastLP+"T12:00:00"))/86400000):null;
+    var daysAny=(daysRM===null&&daysLP===null)?null:Math.min(daysRM===null?Infinity:daysRM,daysLP===null?Infinity:daysLP);
+    var tier=a.tier||null;
+    var threshold=PFR_TIER_TOUCH[tier]||14;
+    var urgent=PFR_TIER_URGENT[tier]||21;
+    var vDate=lastLeadByAgent[key];
+    var pDate=a.latest_lead_date;
+    var bestLead=vDate&&pDate?(vDate>pDate?vDate:pDate):(vDate||pDate);
+    var daysSinceLead=bestLead?Math.round((now-new Date(bestLead+"T12:00:00"))/86400000):null;
+    var health=pfrHealthScore(daysSinceLead,daysAny,threshold,urgent,!!a.competitor_risk_flag);
+    return{agent_name:a.agent_name,tier:tier||null,health_score:health,snapshot_date:snapshotDate};
+  });
+
+  // Batch in groups of 100
+  for(var i=0;i<rows.length;i+=100){
+    var batch=rows.slice(i,i+100);
+    await sbFetch("POST","health_snapshots?on_conflict=agent_name,snapshot_date",batch).catch(function(e){
+      console.warn("Health snapshot batch failed (non-critical):",e.message);
+    });
+  }
+  console.log("LP health snapshots written for "+rows.length+" agents on "+snapshotDate);
+}
+
+function openPortfolioReviewView(btn){
+  if(typeof rmStopPolling==="function")rmStopPolling();
+  if(typeof lpStopPolling==="function")lpStopPolling();
+  currentUser=null;
+  document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+  document.getElementById("view-portfolio").classList.add("active");
+  pfrLoad();
+}
+window.openPortfolioReviewView=openPortfolioReviewView;
+
+function pfrSwitchPeriod(period,btn){
+  pfrPeriod=period;
+  ["Week","Month","Quarter"].forEach(function(k){
+    var b=document.getElementById("pfrBtn"+k);
+    if(b)b.classList.toggle("active",k.toLowerCase()===period);
+  });
+  pfrLoad();
+}
+window.pfrSwitchPeriod=pfrSwitchPeriod;
+
+function pfrTile(label,count,target,onclick){
+  var t='<div'+(onclick?' onclick="'+onclick+'" style="cursor:pointer;text-align:center;background:var(--surface-2);border-radius:8px;padding:10px 6px"':' style="text-align:center;background:var(--surface-2);border-radius:8px;padding:10px 6px"')+'>'
+    +'<div style="font-size:20px;font-weight:800;color:var(--text)">'+count+(target?'<span style="font-size:11px;font-weight:600;color:var(--text-3)"> / '+target+'</span>':'')+'</div>'
+    +'<div style="font-size:10.5px;color:var(--text-3);margin-top:2px">'+label+'</div></div>';
+  return t;
+}
+function pfrHealthTile(label,count,color,onclick){
+  return '<div'+(onclick?' onclick="'+onclick+'" style="cursor:pointer;text-align:center;background:var(--surface-2);border-radius:8px;padding:10px 6px;border-bottom:3px solid '+color+'"':' style="text-align:center;background:var(--surface-2);border-radius:8px;padding:10px 6px;border-bottom:3px solid '+color+'"')+'>'
+    +'<div style="font-size:20px;font-weight:800;color:'+color+'">'+count+'</div>'
+    +'<div style="font-size:10.5px;color:var(--text-3);margin-top:2px">'+label+'</div></div>';
+}
+function pfrListRow(rank,name,detail){
+  return '<div style="padding:8px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px">'
+    +(rank?'<span style="font-size:11px;font-weight:700;color:var(--text-3);width:16px;flex-shrink:0">'+rank+'</span>':'')
+    +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">'+escHtml(name)+'</div><div style="font-size:11px;color:var(--text-3)">'+detail+'</div></div>'
+  +'</div>';
+}
+
+function pfrStatTile(label,value,onclick){
+  return '<div'+(onclick?' onclick="'+onclick+'" style="cursor:pointer;background:var(--surface-2);border-radius:8px;padding:10px 12px"':' style="background:var(--surface-2);border-radius:8px;padding:10px 12px"')+'>'
+    +'<div style="font-size:10.5px;color:var(--text-3);margin-bottom:4px">'+label+'</div>'
+    +'<div style="font-size:17px;font-weight:800;color:var(--text)">'+value+'</div>'
+  +'</div>';
+}
+function pfrActivityTile(label,count,target,onclick){
+  var pct=target>0?Math.min(100,Math.round((count/target)*100)):0;
+  var color=pct>=100?"#3E8E5A":pct>=60?"#B8842B":"#B54B42";
+  return '<div'+(onclick?' onclick="'+onclick+'" style="cursor:pointer;background:var(--surface-2);border-radius:8px;padding:10px 12px"':' style="background:var(--surface-2);border-radius:8px;padding:10px 12px"')+'>'
+    +'<div style="font-size:10.5px;color:var(--text-3);margin-bottom:4px">'+label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--text)">'+count+'<span style="font-size:11px;font-weight:600;color:var(--text-3)"> / '+target+'</span></div>'
+    +'<div style="height:5px;background:var(--border);border-radius:3px;margin-top:5px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+color+'"></div></div>'
+  +'</div>';
+}
+
+async function pfrLoad(){
+  var body=document.getElementById("pfr-body");
+  if(!body)return;
+  body.innerHTML='<div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">Loading...</div>';
+  try{
+    var range=pfrPeriodRange();
+    var now=new Date();
+    var results=await Promise.all([
+      sbFetch("GET","agent_profiles?select=*&limit=2000"),
+      sbFetch("GET","amanda_activities?select=agent_name,act_date&order=act_date.desc&limit=3000"),
+      sbFetch("GET","call_logs?select=agent_name,call_date&order=call_date.desc&limit=3000"),
+      sbFetch("GET","tier_migrations?select=agent_name,from_tier,to_tier,migration_date&migration_date=gte."+range.start+"&limit=1000").catch(function(){return[];}),
+      sbFetch("GET","velocify_leads?date_added=gte."+range.start+"&select=referral_partner_name&limit=5000").catch(function(){return[];}),
+      sbFetch("GET","amanda_activities?select=agent_name,act_type,act_date,outcome,notes&act_date=gte."+range.start+"&limit=3000").catch(function(){return[];}),
+      sbFetch("GET","break_breads?select=agent_name,date,notes&date=gte."+range.start+"&limit=2000").catch(function(){return[];}),
+      sbFetch("GET","break_breads?select=agent_name,date&order=date.desc&limit=3000").catch(function(){return[];}),
+      // Real last-lead-date per agent from Velocify (trailing 12 months) — more accurate than
+      // latest_lead_date on agent_profiles, which only updates when the Power BI import runs.
+      sbFetch("GET","velocify_leads?select=referral_partner_name,date_added&order=date_added.desc&limit=5000&date_added=gte."+(function(){var d=new Date();d.setFullYear(d.getFullYear()-1);return d.toISOString().slice(0,10);}())).catch(function(){return[];})
+    ]);
+    var allAgents=results[0]||[],allActs=results[1]||[],lpCalls=results[2]||[],migrations=results[3]||[],periodLeads=results[4]||[],periodActs=results[5]||[],periodBreads=results[6]||[],allBreads=results[7]||[],allLeads=results[8]||[];
+
+    // Build real last-lead-date per agent from Velocify — keyed by lowercase name for matching
+    var lastLeadDateByAgent={};
+    allLeads.forEach(function(l){
+      var n=(l.referral_partner_name||"").trim().toLowerCase();
+      if(n&&(!lastLeadDateByAgent[n]||l.date_added>lastLeadDateByAgent[n]))lastLeadDateByAgent[n]=l.date_added;
+    });
+
+    var lastSeenRM={};
+    allActs.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&!lastSeenRM[n])lastSeenRM[n]=a.act_date;});
+    var lastSeenLP={};
+    lpCalls.forEach(function(c){var n=(c.agent_name||"").trim().toLowerCase();if(n&&!lastSeenLP[n])lastSeenLP[n]=c.call_date;});
+    // All-time last "meeting" (Partner Meeting act_type OR a Break Bread) per agent — drives
+    // formal Meeting Cadence Compliance, which is distinct from the touch-cadence check above.
+    var lastMeeting={};
+    var periodPartnerMeetingActs=periodActs.filter(function(a){return a.act_type==="Partner Meeting";});
+    // Meeting dates need their own dedicated fetch — the earlier allActs fetch only selected
+    // act_date (for touch-cadence), not act_type, so it can't tell a Partner Meeting from a
+    // Cold Call. This second fetch is scoped to just that one type.
+    var results2=await sbFetch("GET","amanda_activities?select=agent_name,act_date&act_type=eq.Partner Meeting&order=act_date.desc&limit=2000").catch(function(){return[];});
+    (results2||[]).forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&(!lastMeeting[n]||a.act_date>lastMeeting[n]))lastMeeting[n]=a.act_date;});
+    allBreads.forEach(function(b){var n=(b.agent_name||"").trim().toLowerCase();if(n&&(!lastMeeting[n]||b.date>lastMeeting[n]))lastMeeting[n]=b.date;});
+
+    var active=allAgents.filter(function(a){return a.retained&&a.do_not_contact!==true;});
+    var totalActive=active.length;
+
+    var FORMAL_CADENCE={Channel:30,A:30,B:60,C:90};
+    var rows=active.map(function(a){
+      var name=(a.agent_name||"").trim();
+      var key=name.toLowerCase();
+      var lastRM=lastSeenRM[key],lastLP=lastSeenLP[key];
+      var daysRM=lastRM?Math.round((now-new Date(lastRM+"T12:00:00"))/86400000):null;
+      var daysLP=lastLP?Math.round((now-new Date(lastLP+"T12:00:00"))/86400000):null;
+      var daysAny=(daysRM===null&&daysLP===null)?null:Math.min(daysRM===null?Infinity:daysRM,daysLP===null?Infinity:daysLP);
+      var tier=a.tier||null;
+      var threshold=PFR_TIER_TOUCH[tier]||14;
+      var urgent=PFR_TIER_URGENT[tier]||21;
+      var daysSinceLead=(function(){
+        // Prefer Velocify's real last-lead-date; fall back to agent_profiles.latest_lead_date
+        // (which only updates when the Power BI import runs and may be weeks stale)
+        var vDate=lastLeadDateByAgent[key];
+        var pDate=a.latest_lead_date;
+        var best=vDate&&pDate?(vDate>pDate?vDate:pDate):(vDate||pDate);
+        return best?Math.round((now-new Date(best+"T12:00:00"))/86400000):null;
+      }());
+      var health=pfrHealthScore(daysSinceLead,daysAny,threshold,urgent,!!a.competitor_risk_flag);
+      var daysToYellowTouch=daysAny===null?null:threshold-daysAny;
+      var daysToYellowLead=daysSinceLead===null?null:threshold-daysSinceLead;
+      var candidates=[daysToYellowTouch,daysToYellowLead].filter(function(d){return d!==null;});
+      var daysUntilYellow=candidates.length?Math.min.apply(null,candidates):null;
+      return{name:name,tier:tier,health:health,daysAny:daysAny,daysSinceLead:daysSinceLead,daysUntilYellow:daysUntilYellow,
+        next_growth_opportunity:a.next_growth_opportunity||null,satisfaction:a.satisfaction_rating||null,
+        high_potential:!!a.high_potential_flag,recovery_plan:a.recovery_plan||null,agent:a};
+    });
+
+    var countByTier={Channel:0,A:0,B:0,C:0,None:0};
+    active.forEach(function(a){var t=a.tier&&countByTier.hasOwnProperty(a.tier)?a.tier:"None";countByTier[t]++;});
+
+    var leadsThisPeriod=periodLeads.length;
+    var ratio=totalActive>0?(leadsThisPeriod/totalActive):0;
+    var ratioLabel=ratio>=1.30?"Elite":ratio>=1.15?"On Target":ratio>=0.90?"Acceptable":"Below Minimum";
+    var ratioColor=ratio>=1.15?"#3E8E5A":ratio>=0.90?"#B8842B":"#B54B42";
+
+    var migCtoB=migrations.filter(function(m){return m.from_tier==="C"&&m.to_tier==="B";}).length;
+    var migBtoA=migrations.filter(function(m){return m.from_tier==="B"&&m.to_tier==="A";}).length;
+    var migAtoChannel=migrations.filter(function(m){return m.from_tier==="A"&&m.to_tier==="Channel";}).length;
+    var migOther=migrations.length-migCtoB-migBtoA-migAtoChannel;
+
+    var healthCounts={Green:0,Yellow:0,Red:0};
+    rows.forEach(function(r){healthCounts[r.health]++;});
+    var top10AtRisk=rows.filter(function(r){return r.health==="Red";}).sort(function(a,b){
+      return(b.daysSinceLead===null?9999:b.daysSinceLead)-(a.daysSinceLead===null?9999:a.daysSinceLead);
+    }).slice(0,10);
+    var PROACTIVE_WINDOW=7;
+    var proactiveWatch=rows.filter(function(r){return r.health==="Green"&&r.daysUntilYellow!==null&&r.daysUntilYellow<=PROACTIVE_WINDOW;})
+      .sort(function(a,b){return a.daysUntilYellow-b.daysUntilYellow;});
+
+    var missingGrowthOpp=active.filter(function(a){return(a.tier==="Channel"||a.tier==="A")&&!a.next_growth_opportunity;});
+    var channelAndACount=active.filter(function(a){return a.tier==="Channel"||a.tier==="A";}).length;
+    var growthOppPct=totalActive>0?Math.round(((totalActive-active.filter(function(a){return!a.next_growth_opportunity;}).length)/totalActive)*100):0;
+    var top10GrowthOpp=active.filter(function(a){return a.next_growth_opportunity;}).sort(function(a,b){
+      var order={Channel:0,A:1,B:2,C:3};
+      return(order[a.tier]!==undefined?order[a.tier]:4)-(order[b.tier]!==undefined?order[b.tier]:4);
+    }).slice(0,10);
+
+    var rated=rows.filter(function(r){return r.satisfaction!==null;});
+    var avgSatisfaction=rated.length?(rated.reduce(function(s,r){return s+r.satisfaction;},0)/rated.length).toFixed(1):null;
+    var lowSatisfaction=rows.filter(function(r){return r.satisfaction!==null&&r.satisfaction<=2;});
+    var highPotential=active.filter(function(a){return a.high_potential_flag;});
+
+    // Meeting Cadence Compliance — formal (Partner Meeting or Break Bread), distinct from touch cadence
+    var meetingCompliant=0;
+    active.forEach(function(a){
+      var key=(a.agent_name||"").trim().toLowerCase();
+      var last=lastMeeting[key];
+      var daysSince=last?Math.round((now-new Date(last+"T12:00:00"))/86400000):null;
+      var cadence=FORMAL_CADENCE[a.tier]||90;
+      if(daysSince!==null&&daysSince<=cadence)meetingCompliant++;
+    });
+    var meetingCompliancePct=totalActive>0?Math.round((meetingCompliant/totalActive)*100):0;
+
+    // Weekly Scorecard extras
+    var newRealtorMeetingActs=periodActs.filter(function(a){return a.act_type==="New Realtor Meeting";});
+    var meetingsScheduled=periodActs.filter(function(a){return(a.act_type==="Cold Calls"||a.act_type==="New Realtor Meeting")&&a.outcome==="Meeting Scheduled";}).length;
+    var followUpComplete=newRealtorMeetingActs.filter(function(a){return!(a.notes||"").indexOf("INTAKE PENDING")>=0;}).length;
+    var followUpPct=newRealtorMeetingActs.length>0?Math.round((followUpComplete/newRealtorMeetingActs.length)*100):0;
+    var metThisPeriod={};
+    newRealtorMeetingActs.forEach(function(a){metThisPeriod[(a.agent_name||"").trim().toLowerCase()]=true;});
+    var convertedToActive=active.filter(function(a){return metThisPeriod[(a.agent_name||"").trim().toLowerCase()];}).length;
+
+    var existingMeetings=periodPartnerMeetingActs.length+periodBreads.length;
+    var tierByName={};
+    active.forEach(function(a){tierByName[(a.agent_name||"").trim().toLowerCase()]=a.tier;});
+    var meetingsByTier={Channel:0,A:0,B:0};
+    periodPartnerMeetingActs.concat(periodBreads).forEach(function(a){
+      var t=tierByName[(a.agent_name||"").trim().toLowerCase()];
+      if(t&&meetingsByTier.hasOwnProperty(t))meetingsByTier[t]++;
+    });
+
+    var newMeetings=newRealtorMeetingActs.length;
+
+    // Themes — Service Recovery / Partner Feedback, split, parsed from [Theme: X] tag
+    var themeCount={Recovery:{},Feedback:{}};
+    periodActs.filter(function(a){return a.act_type==="Service Recovery"||a.act_type==="Partner Feedback";}).forEach(function(a){
+      var m=(a.notes||"").match(/^\[Theme:\s*([^\]]+)\]/);
+      var theme=m?m[1].trim():"Untagged";
+      var bucket=a.act_type==="Service Recovery"?"Recovery":"Feedback";
+      themeCount[bucket][theme]=(themeCount[bucket][theme]||0)+1;
+    });
+
+    var escalations=periodActs.filter(function(a){return a.outcome==="Needs manager attention";});
+
+    var migScore=Math.min(100,(migCtoB+migBtoA+migAtoChannel)*25);
+    var ratioScore=Math.min(100,(ratio/1.15)*100);
+    var countScore=Math.min(100,(totalActive/PFR_TARGETS.total)*100);
+    var weighted=Math.round(migScore*0.5+ratioScore*0.3+countScore*0.2);
+    var dataGaps=[];
+    if(migrations.length===0)dataGaps.push("No tier migrations logged yet this period.");
+    if(leadsThisPeriod===0)dataGaps.push("No Velocify leads recorded yet this period.");
+
+    pfrDrill={rows:rows,missingGrowthOpp:missingGrowthOpp,migrations:migrations,lowSatisfaction:lowSatisfaction,
+      escalations:escalations,newRealtorMeetingActs:newRealtorMeetingActs,meetingActs:periodPartnerMeetingActs.concat(periodBreads),
+      top10AtRisk:top10AtRisk,top10GrowthOpp:top10GrowthOpp,highPotential:highPotential,proactiveWatch:proactiveWatch,
+      convertedActive:active.filter(function(a){return metThisPeriod[(a.agent_name||"").trim().toLowerCase()];}),
+      meetings:periodActs};
+
+    var html="";
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;margin-bottom:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Weighted Scorecard &mdash; '+range.label+'</div>'
+      +'<div style="font-size:36px;font-weight:800;color:#1F4E79">'+weighted+'</div>'
+      +'<div style="font-size:11px;color:var(--text-3);margin-top:4px">50% Tier Migration ('+Math.round(migScore)+') &middot; 30% Agent-to-Lead Ratio ('+Math.round(ratioScore)+') &middot; 20% Active Count ('+Math.round(countScore)+')</div>'
+      +'<div style="font-size:10px;color:var(--text-3);margin-top:6px">Reference number for the conversation, not a bonus calculation.</div>'
+      +(dataGaps.length?'<div style="text-align:left;background:#FBF3E5;border:1px solid #E8DDC8;border-radius:8px;padding:8px 12px;margin-top:12px;font-size:11px;color:#8C7355">&#9888; '+dataGaps.join('<br>&#9888; ')+'</div>':'')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Active Partner Count</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">'
+        +pfrTile("Total",totalActive,PFR_TARGETS.total,"pfrOpenDrill(\'tier:all\')")
+        +pfrTile("Channel",countByTier.Channel,null,"pfrOpenDrill(\'tier:Channel\')")
+        +pfrTile("A",countByTier.A,PFR_TARGETS.A,"pfrOpenDrill(\'tier:A\')")
+        +pfrTile("B",countByTier.B,PFR_TARGETS.B,"pfrOpenDrill(\'tier:B\')")
+        +pfrTile("C",countByTier.C,null,"pfrOpenDrill(\'tier:C\')")
+        +pfrTile("No Tier",countByTier.None,null,"pfrOpenDrill(\'tier:None\')")
+      +'</div>'
+      +(countByTier.None>0?'<div style="margin-top:10px;background:#FBF3E5;border:1px solid #E8DDC8;border-radius:8px;padding:8px 12px;font-size:11px;color:#8C7355">&#9888; '+countByTier.None+' active partner'+(countByTier.None!==1?"s have":" has")+' no tier set &mdash; check the Power BI/Contacts import.</div>':'')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Active Agent-to-Lead Ratio</div>'
+      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+leadsThisPeriod+' Velocify leads this period &divide; '+totalActive+' active partners</div>'
+      +'<div style="font-size:24px;font-weight:800;color:'+ratioColor+'">'+ratio.toFixed(2)+'<span style="font-size:13px;font-weight:600;margin-left:8px">'+ratioLabel+'</span></div>'
+      +'<div style="font-size:10.5px;color:var(--text-3);margin-top:2px">Min 0.90 &middot; Target 1.15+ &middot; Elite 1.30+</div>'
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Tier Migration Progress &mdash; '+range.label+'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'
+        +pfrTile("C &rarr; B",migCtoB,null,"pfrOpenDrill(\'mig:C:B\')")
+        +pfrTile("B &rarr; A",migBtoA,null,"pfrOpenDrill(\'mig:B:A\')")
+        +pfrTile("A &rarr; Channel",migAtoChannel,null,"pfrOpenDrill(\'mig:A:Channel\')")
+        +pfrTile("Other",migOther,null,"pfrOpenDrill(\'mig:other\')")
+      +'</div>'
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid #1F4E79;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Proactive Watch &mdash; reach out before they go Yellow</div>'
+      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Green partners within 7 days of crossing into Yellow if nothing changes.</div>'
+      +(proactiveWatch.length?proactiveWatch.map(function(r,i){return pfrListRow(i+1,r.name,pfrTierLabel(r.tier)+" &middot; "+r.daysUntilYellow+(r.daysUntilYellow===1?" day":" days")+" until Yellow");}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nobody\'s close to slipping right now.</div>')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Partner Health</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">'
+        +pfrHealthTile("Green",healthCounts.Green,"#3E8E5A","pfrOpenDrill(\'health:Green\')")
+        +pfrHealthTile("Yellow",healthCounts.Yellow,"#B8842B","pfrOpenDrill(\'health:Yellow\')")
+        +pfrHealthTile("Red",healthCounts.Red,"#B54B42","pfrOpenDrill(\'health:Red\')")
+      +'</div>'
+      +(top10AtRisk.length?'<div style="border-top:1px solid var(--border-light);padding-top:8px"><div style="font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;padding:0 4px">Top Red &mdash; ranked by days since last lead</div>'
+        +top10AtRisk.map(function(r,i){return pfrListRow(i+1,r.name,pfrTierLabel(r.tier)+" &middot; "+(r.daysSinceLead===null?"no lead logged":r.daysSinceLead+"d since last lead")+(r.recovery_plan?" &middot; recovery plan on file":" &middot; &#9888; no recovery plan"));}).join("")+'</div>'
+        :'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">No Red partners right now.</div>')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Partner Satisfaction / Support Rating</div>'
+      +(avgSatisfaction?'<div style="font-size:24px;font-weight:800;color:'+(avgSatisfaction>=4?"#3E8E5A":avgSatisfaction>=3?"#B8842B":"#B54B42")+'">'+avgSatisfaction+'<span style="font-size:13px;font-weight:600;color:var(--text-3)"> / 5 avg</span></div><div style="font-size:10.5px;color:var(--text-3);margin-top:2px">'+rated.length+' of '+totalActive+' active partners rated</div>'
+        :'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:6px 0">No satisfaction ratings set yet.</div>')
+      +(lowSatisfaction.length?'<div onclick="pfrOpenDrill(\'lowsat\')" style="cursor:pointer;margin-top:10px;background:#FBF3F3;border:1px solid #F0AFAF;border-radius:8px;padding:10px 12px;font-size:12px;color:#B54B42;font-weight:600">&#9888; '+lowSatisfaction.length+' partner'+(lowSatisfaction.length!==1?"s":"")+' rated 1&ndash;2. Click to view &rarr;</div>':'')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">High-Potential Agents to Watch</div>'
+      +(highPotential.length?highPotential.map(function(a,i){return pfrListRow(i+1,a.agent_name,pfrTierLabel(a.tier));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">None flagged yet.</div>')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Growth Opportunity Coverage</div>'
+      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+growthOppPct+'% of active partners have a documented next growth opportunity</div>'
+      +(missingGrowthOpp.length?'<div onclick="pfrOpenDrill(\'escalation\')" style="cursor:pointer;background:#FBF3F3;border:1px solid #F0AFAF;border-radius:8px;padding:10px 12px;font-size:12px;color:#B54B42;font-weight:600">&#9888; '+missingGrowthOpp.length+' Channel/A partner'+(missingGrowthOpp.length!==1?"s":"")+' missing a growth opportunity &mdash; escalation required. Click to view &rarr;</div>'
+        :channelAndACount>0?'<div style="font-size:12px;color:#3E8E5A">&#10003; All Channel/A partners have a growth opportunity documented</div>'
+        :'<div style="font-size:12px;color:var(--text-3)">No Channel/A tier partners on file yet &mdash; nothing to check.</div>')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Meeting Cadence Compliance</div>'
+      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Formal meetings (Partner Meeting or Break Bread) against each tier\'s cadence &mdash; Channel/A monthly, B every-other-month, C quarterly. Distinct from touch cadence above.</div>'
+      +'<div style="font-size:24px;font-weight:800;color:'+(meetingCompliancePct>=80?"#3E8E5A":meetingCompliancePct>=50?"#B8842B":"#B54B42")+'">'+meetingCompliancePct+'%</div>'
+      +'<div style="font-size:10.5px;color:var(--text-3);margin-top:2px">'+meetingCompliant+' of '+totalActive+' active partners current</div>'
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Weekly Scorecard Extras</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+        +pfrStatTile("New Meetings Scheduled",meetingsScheduled,"pfrOpenDrill(\'scheduled\')")
+        +pfrStatTile("New Agents Converted to Active",convertedToActive,"pfrOpenDrill(\'converted\')")
+        +pfrStatTile("New Meeting Follow-up Complete",followUpPct+"%",null)
+        +pfrStatTile("Existing Meetings &mdash; Channel",meetingsByTier.Channel,"pfrOpenDrill(\'meetings:Channel\')")
+        +pfrStatTile("Existing Meetings &mdash; A",meetingsByTier.A,"pfrOpenDrill(\'meetings:A\')")
+        +pfrStatTile("Existing Meetings &mdash; B",meetingsByTier.B,"pfrOpenDrill(\'meetings:B\')")
+      +'</div>'
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Top 10 Growth Opportunities</div>'
+      +(top10GrowthOpp.length?top10GrowthOpp.map(function(a,i){return pfrListRow(i+1,a.agent_name,pfrTierLabel(a.tier)+" &middot; "+escHtml(a.next_growth_opportunity));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">No growth opportunities documented yet.</div>')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Service Recovery Themes</div>'
+      +(Object.keys(themeCount.Recovery).length?'<div style="display:flex;flex-wrap:wrap;gap:8px">'+Object.keys(themeCount.Recovery).sort(function(a,b){return themeCount.Recovery[b]-themeCount.Recovery[a];}).map(function(t){return'<span style="background:var(--surface-2);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--text-2)">'+escHtml(t)+' &middot; '+themeCount.Recovery[t]+'</span>';}).join("")+'</div>'
+        :'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">No Service Recovery logged this period.</div>')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Partner Feedback Themes</div>'
+      +(Object.keys(themeCount.Feedback).length?'<div style="display:flex;flex-wrap:wrap;gap:8px">'+Object.keys(themeCount.Feedback).sort(function(a,b){return themeCount.Feedback[b]-themeCount.Feedback[a];}).map(function(t){return'<span style="background:var(--surface-2);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--text-2)">'+escHtml(t)+' &middot; '+themeCount.Feedback[t]+'</span>';}).join("")+'</div>'
+        :'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">No Partner Feedback logged this period.</div>')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Required Leadership Escalations</div>'
+      +(escalations.length?escalations.map(function(e){return pfrListRow(null,e.agent_name,escHtml((e.notes||"").substring(0,120)));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nothing escalated this period.</div>')
+    +'</div>';
+
+    
+
+    body.innerHTML=html;
+  }catch(e){
+    console.warn("Portfolio review load failed:",e);
+    body.innerHTML='<div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">Could not load &mdash; check connection. ('+e.message+')</div>';
+  }
+}
+window.pfrLoad=pfrLoad;
+
+function pfrOpenDrill(key){
+  var overlay=document.getElementById("pfr-drilldown-overlay");
+  var title=document.getElementById("pfr-drilldown-title");
+  var body=document.getElementById("pfr-drilldown-body");
+  if(!overlay||!title||!body)return;
+  var items=[];
+  if(key==="escalation"){
+    title.textContent="Missing Growth Opportunity — Channel/A";
+    items=(pfrDrill.missingGrowthOpp||[]).map(function(a){return{name:a.agent_name,detail:pfrTierLabel(a.tier)};});
+  }else if(key==="lowsat"){
+    title.textContent="Low Satisfaction / Support Rating";
+    items=(pfrDrill.lowSatisfaction||[]).map(function(r){return{name:r.name,detail:pfrTierLabel(r.tier)+" · rated "+r.satisfaction+"/5"};});
+  }else if(key.indexOf("tier:")===0){
+    var t=key.split(":")[1];
+    title.textContent=t==="all"?"All Active Partners":t==="None"?"No Tier Set":t+"-Tier Active Partners";
+    items=(pfrDrill.rows||[]).filter(function(r){return t==="all"||(t==="None"?!r.tier:r.tier===t);}).map(function(r){return{name:r.name,detail:pfrTierLabel(r.tier)+" · "+r.health+" · "+(r.daysAny===null?"no touch logged":r.daysAny+"d since last touch")};});
+  }else if(key.indexOf("health:")===0){
+    var h=key.split(":")[1];
+    title.textContent=h+" Partners";
+    items=(pfrDrill.rows||[]).filter(function(r){return r.health===h;}).map(function(r){return{name:r.name,detail:pfrTierLabel(r.tier)+" · "+(r.daysSinceLead===null?"no lead logged":r.daysSinceLead+"d since last lead")};});
+  }else if(key.indexOf("mig:")===0){
+    var parts=key.split(":");
+    title.textContent=parts[1]==="other"?"Other Tier Changes":parts[1]+" → "+parts[2]+" Migrations";
+    var migList=parts[1]==="other"
+      ?(pfrDrill.migrations||[]).filter(function(m){return!((m.from_tier==="C"&&m.to_tier==="B")||(m.from_tier==="B"&&m.to_tier==="A")||(m.from_tier==="A"&&m.to_tier==="Channel"));})
+      :(pfrDrill.migrations||[]).filter(function(m){return m.from_tier===parts[1]&&m.to_tier===parts[2];});
+    items=migList.map(function(m){return{name:m.agent_name,detail:(m.from_tier||"?")+" → "+(m.to_tier||"?")+" · "+m.migration_date};});
+  }else if(key==="newmeetings"){
+    title.textContent="New Agent Meetings — this period";
+    items=(pfrDrill.newRealtorMeetingActs||[]).map(function(a){return{name:a.agent_name,detail:a.act_date};});
+  }else if(key==="existingmeetings"){
+    title.textContent="Existing Partner Meetings — this period";
+    items=(pfrDrill.meetingActs||[]).map(function(a){return{name:a.agent_name,detail:a.act_date};});
+  }else if(key==="scheduled"){
+    title.textContent="New Meetings Scheduled — this period";
+    items=(pfrDrill.meetings||[]).filter(function(a){return a.outcome==="Meeting Scheduled";}).map(function(a){return{name:a.agent_name,detail:a.act_date};});
+  }else if(key==="converted"){
+    title.textContent="New Agents Converted to Active";
+    items=(pfrDrill.convertedActive||[]).map(function(a){return{name:a.agent_name,detail:pfrTierLabel(a.tier)};});
+  }else if(key.indexOf("meetings:")===0){
+    var mt=key.split(":")[1];
+    title.textContent=mt+"-Tier Existing Partner Meetings — this period";
+    var namesInTier={};
+    (pfrDrill.rows||[]).filter(function(r){return r.tier===mt;}).forEach(function(r){namesInTier[r.name.toLowerCase()]=true;});
+    items=(pfrDrill.meetingActs||[]).filter(function(a){return namesInTier[(a.agent_name||"").toLowerCase()];}).map(function(a){return{name:a.agent_name,detail:a.act_date};});
+  }
+  body.innerHTML=items.length
+    ?items.map(function(it,i){return pfrListRow(i+1,it.name,it.detail);}).join("")
+    :'<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">Nothing here.</div>';
+  overlay.style.display="flex";
+}
+window.pfrOpenDrill=pfrOpenDrill;
+
+function pfrCloseDrilldown(){
+  document.getElementById("pfr-drilldown-overlay").style.display="none";
+}
+window.pfrCloseDrilldown=pfrCloseDrilldown;
 
 })();
 </script>
