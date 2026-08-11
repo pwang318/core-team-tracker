@@ -1,5 +1,4 @@
- 
-  
+   
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -4169,16 +4168,16 @@ function handleUpload(input){
       // This is the authoritative Portfolio baseline sync. Do not report completion until it
       // finishes, because it writes powerbi_last_seen_at / powerbi_level as well as production,
       // tier and 90-day Active Partner status.
-      await lpSyncAgentProfilesFromUpload(rows);
+      await window.lpSyncAgentProfilesFromUpload(rows);
 
       // Health snapshots must run AFTER the profile sync, not race it.
-      try{await lpWriteHealthSnapshots();}
+      try{await window.lpWriteHealthSnapshots();}
       catch(healthErr){console.warn("Health snapshot write failed (non-critical):",healthErr.message);}
 
       renderAdmin();
       if(coMktPartners.length&&typeof renderDirectorView==="function"&&currentUser==="Director")renderDirectorView();
       // If Portfolio Review is already open, refresh it from the newly stamped profiles now.
-      if(document.getElementById("pfr-body")){try{await pfrLoad();}catch(pfrErr){console.warn("Portfolio refresh failed:",pfrErr.message);}}
+      if(document.getElementById("pfr-body")){try{await window.pfrLoad();}catch(pfrErr){console.warn("Portfolio refresh failed:",pfrErr.message);}}
 
       res.style.color="#43A047";
       res.textContent="Done — "+updated+" agents updated, "+added+" new, "+flagged+" flagged. Portfolio baseline refreshed ✓"+(assignmentSyncOk?"":" (agent assignment sync needs review)");
@@ -7810,6 +7809,7 @@ async function lpSyncAgentProfilesFromUpload(rows){
     });
   }catch(e){console.warn("Import audit log failed (non-critical — table may not exist yet, see SAFE_DATABASE_MIGRATIONS.sql):",e.message);}
 }
+window.lpSyncAgentProfilesFromUpload=lpSyncAgentProfilesFromUpload;
 
 // Playbook Sec. 18 — Health Score historical snapshots (LP Tracker version).
 // Called after every Power BI import so Portfolio Review can show quarter-over-quarter trends.
@@ -7865,6 +7865,7 @@ async function lpWriteHealthSnapshots(){
   }
   console.log("LP health snapshots written for "+rows.length+" agents on "+snapshotDate);
 }
+window.lpWriteHealthSnapshots=lpWriteHealthSnapshots;
 
 function openPortfolioReviewView(btn){
   if(typeof rmStopPolling==="function")rmStopPolling();
