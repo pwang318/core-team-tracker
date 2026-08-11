@@ -1,4 +1,4 @@
-  
+   
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -422,6 +422,11 @@ tr:hover td{background:var(--bg)}
   #d-note-quality-section>div,#d-carryover-section>div{border-radius:8px}
 }
 </style>
+<!-- Realtime pass: loads the Supabase client ONLY for postgres_changes subscriptions below.
+     Everything else in this app still uses the existing sbFetch()/raw-fetch REST calls,
+     unchanged — this is additive, not a rewrite. If this script fails to load (offline, CDN
+     blocked, etc.) the app is unaffected: the existing 30s poll + cache-clear still runs. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
 </head>
 <body>
 <div class="app">
@@ -505,7 +510,7 @@ tr:hover td{background:var(--bg)}
     <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;color:var(--text-2);line-height:1.6">
       Subject: Client Name / NEW LEAD &mdash; from [Realtor Name] at [Realty Brokerage]<br><br>
       Hello Daniel Sa Team,<br><br>
-      At your earliest convenience, please reach out to my wonderful client(s) [Client Name]. They are looking to purchase [insert all relevant details/goals related to the borrowers and their home search].<br><br>
+      Please reach out to my wonderful client(s) [Client Name] as soon as possible. They are looking to purchase [insert all relevant details/goals related to the borrowers and their home search].<br><br>
       &bull; [Borrower #1]<br>&nbsp;&nbsp;&nbsp;&#9675; Phone:<br>&nbsp;&nbsp;&nbsp;&#9675; Email:<br>
       &bull; [Borrower #2]<br>&nbsp;&nbsp;&nbsp;&#9675; Phone:<br>&nbsp;&nbsp;&nbsp;&#9675; Email:<br><br>
       Please let me know if you have any follow-up questions/concerns in the meantime. Thank you so much!<br><br>
@@ -1078,6 +1083,12 @@ tr:hover td{background:var(--bg)}
       </div>
       <div id="lp-assign-list" style="max-height:500px;overflow-y:auto"></div>
     </div>
+    <!-- SYSTEM HEALTH — lightweight, existing data only, no new tables required for this section -->
+    <div class="admin-section" id="system-health-section">
+      <h3>System Health</h3>
+      <p style="font-size:12px;color:#888;margin-bottom:.75rem">Data-quality checks computed from current shared data — not a separate dashboard, just a quick proactive glance.</p>
+      <div id="system-health-list" style="font-size:12px"></div>
+    </div>
   </div>
 </div>
 <!-- FACE TIME VIEW -->
@@ -1232,6 +1243,55 @@ function getLpTotalTargetThisWeek(lp){
 }
 
 var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
+// ── Display-only name formatting (does NOT touch stored agent_name — matching/identity always
+// uses the raw stored value; this only affects what's rendered on screen) ─────────────────────
+// A Power BI import can leave a name ALL CAPS ("MEGAN LYNCH"); a human-entered or manually
+// corrected name is left exactly as typed, since it may carry real, intentional capitalization
+// (McMahon, O'Connor, De La Riva) that a blind title-case would mangle. The rule: only reformat
+// a name that is ENTIRELY uppercase (a strong signal it's raw import data, not something a
+// person typed) — anything already mixed-case is assumed to be a real human-entered/verified
+// name and is left untouched.
+function displayName(raw){
+  if(!raw)return raw;
+  const s=String(raw).trim();
+  if(!s)return s;
+  // Preserve intentional mixed-case human-entered names exactly (McMahon, de la Rosa, etc.).
+  // Normalize only obvious raw-import casing: ALL CAPS or all lowercase.
+  const letters=s.replace(/[^A-Za-z]/g,"");
+  if(letters && letters!==letters.toUpperCase() && letters!==letters.toLowerCase())return s;
+  const suffixes={"jr":"Jr.","jr.":"Jr.","sr":"Sr.","sr.":"Sr.","ii":"II","iii":"III","iv":"IV","v":"V"};
+  const capPart=part=>{
+    if(!part)return part;
+    const lead=(part.match(/^[^A-Za-z0-9]*/)||[""])[0];
+    const trail=(part.match(/[^A-Za-z0-9.]*$/)||[""])[0];
+    let core=part.slice(lead.length,part.length-trail.length).toLowerCase();
+    if(!core)return part;
+    if(suffixes[core])return lead+suffixes[core]+trail;
+    if(core==="&")return part;
+    if(/^[a-z](\.[a-z])+\.?$/i.test(core))return lead+core.toUpperCase()+trail;
+    if(core.includes("-"))return lead+core.split("-").map(capPart).join("-")+trail;
+    if(core.includes("'"))return lead+core.split("'").map(capPart).join("'")+trail;
+    if(core.startsWith("mc")&&core.length>3)core="Mc"+core.charAt(2).toUpperCase()+core.slice(3);
+    else if(core.startsWith("mac")&&core.length>4)core="Mac"+core.charAt(3).toUpperCase()+core.slice(4);
+    else core=core.charAt(0).toUpperCase()+core.slice(1);
+    return lead+core+trail;
+  };
+  return s.split(/\s+/).map(capPart).join(" ");
+}
+// ── Meaningful Contact classification (shared definition — see identical config in the RM
+// Tracker) ───────────────────────────────────────────────────────────────────────────────────
+// CORRECTED DEFAULT (was: blank outcome counted as meaningful — flagged as wrong): a blank/unset
+// outcome is now NOT meaningful UNLESS the activity type itself proves real contact happened (a
+// logged meeting is evidence of contact on its own, independent of a separate outcome field).
+var NOT_MEANINGFUL_RM_OUTCOMES=["left voicemail","no answer"];
+var NOT_MEANINGFUL_LP_OUTCOMES=["left vm"];
+var MEETING_ACT_TYPES=["Partner Meeting","Break Breads","New Agent Meeting"];
+function isMeaningfulOutcome(outcome,list,actType){
+  if(actType&&MEETING_ACT_TYPES.indexOf(actType)>=0)return true;
+  var o=(outcome||"").trim().toLowerCase();
+  if(!o)return false;
+  return list.indexOf(o)<0;
+}
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
 var STORAGE_KEY="ct_agents_v3";
 var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
@@ -1287,6 +1347,18 @@ function getLpTotalTargetThisWeek(lp){
 var weekKey=getWeekKey(TODAY);
 var lastWeekKey=getLastWeekKey(TODAY);
 var agents=[],callLogs={},lastWeekLogs={},currentUser=null,noteTimers={},contactCache={},editingLpContact=null,pendingNote={};
+var ctInactiveRosterNames=new Set();
+// Live Current Relationship Roster exclusion set — shared by co-marketing selection and any
+// other place that still reads from the legacy `agents` array (which itself carries no
+// relationship_status field, so this cross-reference is needed wherever that array is used to
+// decide who's eligible for active work). Best-effort: if this hasn't loaded yet when a screen
+// first renders, nothing is excluded — the same tolerance already used elsewhere for admin views.
+async function loadInactiveRosterNames(){
+  try{
+    var rows=await sbFetch("GET","agent_profiles?select=agent_name&relationship_status=eq.inactive&limit=5000");
+    ctInactiveRosterNames=new Set((rows||[]).map(function(r){return(r.agent_name||"").trim().toLowerCase();}));
+  }catch(e){ctInactiveRosterNames=new Set();}
+}
 var userTyping=false;
 var referralLeadsCache=null;
 
@@ -1733,7 +1805,8 @@ function selectUser(btn,u){
     document.getElementById("view-admin").classList.add("active");
     renderAdmin();
     loadLpOverrides();
-    loadAgentAssignments().then(function(){renderLpAssignList();renderAdmin();});
+    loadAgentAssignments().then(function(){renderLpAssignList();renderAdmin();loadSystemHealth();});
+    loadInactiveRosterNames().then(function(){renderCoMktList();});
   } else if(u==="Welcome"){
     document.getElementById("view-welcome").classList.add("active");
   } else {
@@ -1966,7 +2039,7 @@ function renderCallCard(a,lp,isBonus){
   html+='<div class="call-info">';
 
   // Name row
-  html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+a[0]+'</span>':a[0]);
+  html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+displayName(a[0])+'</span>':displayName(a[0]));
   if(pri&&!called&&!isBonus)html+='<span class="priority-tag">PRIORITY</span>';
   if(isCarryover&&!called&&!isBonus)html+='<span class="carryover-tag">Missed last week</span>';
   
@@ -2206,7 +2279,7 @@ function renderCallCard(a,lp,isBonus){
 }
 
 function escHtml(s){if(!s)return"";return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function pfrProperCase(s){if(!s)return"";return s.trim().split(/\s+/).map(function(w){return w?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():"";}).join(" ");}
+function pfrProperCase(s){return displayName(s||"");}
 
 function selectOutcome(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp"),outc=btn.getAttribute("data-outcome");
@@ -2292,7 +2365,7 @@ function renderLpSearch(){
     h+='<button class="'+chkClass+'" style="width:36px;height:36px;flex-shrink:0;margin-top:2px;'+chkStyle+'" data-name="'+a[0]+'" data-lp="'+currentUser+'" onclick="toggleCallFromCard(this)">'+chkIcon+'</button>';
 
     h+='<div style="flex:1;min-width:0">';
-    h+='<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+a[0]+'</span>':a[0])+'</div>';
+    h+='<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+displayName(a[0])+'</span>':displayName(a[0]))+'</div>';
     h+='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px">';
     h+='<span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
     h+='<span class="lp-tag lp-tag-'+assignedLp+'">'+assignedLp+'</span>';
@@ -2728,7 +2801,7 @@ async function renderRmSummary(){
       var shortNote=note.length>120?note.substring(0,120)+"...":note;
       return'<div style="padding:9px 0;border-bottom:1px solid #fde6cc;display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
         +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:12px;font-weight:700;color:#7c2d12">'+escHtml(r.agent_name||"")+' <span style="font-size:10px;color:#c2853f;font-weight:500">via '+escHtml(r.lp||"LP")+'</span></div>'
+        +'<div style="font-size:12px;font-weight:700;color:#7c2d12">'+escHtml(displayName(r.agent_name||""))+' <span style="font-size:10px;color:#c2853f;font-weight:500">via '+escHtml(r.lp||"LP")+'</span></div>'
         +(shortNote?'<div style="font-size:11px;color:#5C4A35;margin-top:2px;font-style:italic">&ldquo;'+escHtml(shortNote)+'&rdquo;</div>':'')
         +'<div style="font-size:10px;color:#c2853f;margin-top:2px">'+fmt(r.call_date)+(r.outcome?" &middot; "+escHtml(r.outcome):"")+'</div>'
         +'</div>'
@@ -2821,7 +2894,7 @@ function toggleCarryoverList(lp){
     missed.forEach(function(a){
       var calledNow=calledThisWeek(a[0]);
       html+='<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f4e3b8">';
-      html+='<span style="font-weight:600;font-size:13px;flex:1'+(calledNow?';text-decoration:line-through;color:var(--text-3)':'')+'">'+escHtml(a[0])+'</span>';
+      html+='<span style="font-weight:600;font-size:13px;flex:1'+(calledNow?';text-decoration:line-through;color:var(--text-3)':'')+'">'+escHtml(displayName(a[0]))+'</span>';
       html+='<span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
       if(calledNow){
         html+='<span style="font-size:11px;color:var(--green);font-weight:700">\u2713 Called this week</span>';
@@ -2967,7 +3040,7 @@ function renderChurnRisk(){
     var lpName=r.assigned_lp||"?";
     html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid #fee2e2;flex-wrap:wrap">'
       +'<span style="font-size:11px;width:8px;height:8px;border-radius:50%;background:'+(isHigh?"#dc2626":"#d97706")+';display:inline-block;flex-shrink:0"></span>'
-      +'<span style="font-weight:600;font-size:13px;flex:1">'+(ag?ag[0]:r.agent_name_upper)+'</span>'
+      +'<span style="font-weight:600;font-size:13px;flex:1">'+displayName(ag?ag[0]:r.agent_name_upper)+'</span>'
       +'<span class="lp-tag lp-tag-'+lpName+'">'+lpName+'</span>'
       +'<span style="font-size:11px;color:#991b1b">'+r.total_leads+' leads · last: '+fmt(r.last_lead_date)+'</span>'
       +'<span style="font-size:11px;color:var(--text-3)">'+r.days_since_lead+'d no lead · '+r.days_since_call+'d no call</span>'
@@ -3058,7 +3131,8 @@ function runConversionRangeSearch(){
   });
 }
 
-function loadLeadPipeline(){
+async function loadLeadPipeline(){
+  await loadInactiveRosterNames();
   var now=new Date();
   var todayStr=localDateStr(now);
   var ytdStart=now.getFullYear()+'-01-01';
@@ -3136,7 +3210,7 @@ function loadLeadPipeline(){
     // Find agents who sent leads in prior months but 0 MTD (quiet agents)
     // Use agent_lead_summary data already loaded in VELOCIFY_SEED
     Object.keys(lps).forEach(function(lp){
-      var lpAgents=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+      var lpAgents=agents.filter(function(a){return a[2]===lp&&isActive(a)&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());});
       lpAgents.forEach(function(a){
         var vel=VELOCIFY_SEED[a[0].toUpperCase()]||null;
         if(vel&&vel.total>0&&vel.mtd===0){
@@ -3206,7 +3280,7 @@ function renderLeadPipelinePanels(raw){
         +';color:'+(ltf>=20?"#15803d":ltf>=10?"#5C4A35":"#991b1b")+';padding:2px 7px;border-radius:4px">'+ltf+'% lead-to-file</span>':'');
       var quietId='quiet-'+lp;
       var mtdCalled=lpCallCounts[lp]||0;
-      var totalLpAgents=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
+      var totalLpAgents=agents.filter(function(a){return a[2]===lp&&isActive(a)&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());}).length;
       var callPct=totalLpAgents>0?Math.round(mtdCalled/totalLpAgents*100):0;
       s+='<span style="font-size:10px;color:var(--text-3);white-space:nowrap">'+mtdCalled+'/'+totalLpAgents+' called MTD</span>';
       s+=(quietCount>0?'<span style="font-size:10px;color:#991b1b;cursor:pointer;text-decoration:underline" data-qid="'+quietId+'" onclick="toggleQuiet(this.getAttribute(\'data-qid\'))">'+quietCount+' agent'+(quietCount>1?'s':'')+' gone quiet ▾</span>':'<span style="font-size:10px;color:var(--text-3);margin-left:auto">'+r.agents_mtd.size+' agents active</span>');
@@ -3216,7 +3290,7 @@ function renderLeadPipelinePanels(raw){
         r.quiet_agents.slice(0,8).forEach(function(qa){
           var daysSince=qa.lastLead?Math.floor((new Date()-new Date(qa.lastLead+"T12:00:00"))/86400000):null;
           s+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px">';
-          s+='<span style="flex:1;font-weight:500;color:var(--text)">'+escHtml(qa.name)+'</span>';
+          s+='<span style="flex:1;font-weight:500;color:var(--text)">'+escHtml(displayName(qa.name))+'</span>';
           s+='<span style="color:var(--text-2)">'+qa.total+' leads ever</span>';
           s+=(daysSince!==null?'<span style="color:#991b1b;font-weight:600">'+daysSince+'d silent</span>':'');
           s+='</div>';
@@ -3267,7 +3341,7 @@ function renderLeadPipelinePanels(raw){
         r.quiet_agents.slice(0,6).forEach(function(a){
           var daysSince=a.lastLead?Math.floor((new Date()-new Date(a.lastLead+"T12:00:00"))/86400000):null;
           f+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:0.5px solid #fee2e2">';
-          f+='<span style="font-size:12px;font-weight:500;color:var(--text);flex:1">'+escHtml(a.name)+'</span>';
+          f+='<span style="font-size:12px;font-weight:500;color:var(--text);flex:1">'+escHtml(displayName(a.name))+'</span>';
           f+='<span style="font-size:11px;color:var(--text-2)">'+a.total+' lead'+(a.total!==1?'s':'')+' ever</span>';
           f+=(daysSince!==null?'<span style="font-size:11px;color:#991b1b">'+daysSince+'d since last</span>':"");
           f+='</div>';
@@ -3807,7 +3881,7 @@ function renderDaniel(){
     var log=callLogs[a[0]],notePreview=log&&log.note?'<div style="font-size:11px;color:#888;margin-top:2px;font-style:italic">'+log.note+'</div>':"";
     var dsc=ds===null?"color:#E53935":ds>=14?"color:#FB8C00":"color:#43A047";
     return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
-      '<td style="font-weight:600">'+a[0]+(pri?'<span class="priority-tag" style="margin-left:5px">PRIORITY</span>':"")+notePreview+'</td>'+
+      '<td style="font-weight:600">'+displayName(a[0])+(pri?'<span class="priority-tag" style="margin-left:5px">PRIORITY</span>':"")+notePreview+'</td>'+
       '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
       '<td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td>'+
       '<td>'+(act?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
@@ -3839,7 +3913,7 @@ function renderAdmin(){
   renderReassign();renderRemoveList();renderCoMktList();
   var inactive=agents.filter(function(a){return!isActive(a);});
   document.getElementById("inactive-count-label").textContent="- "+inactive.length+" agents";
-  document.getElementById("inactive-list").innerHTML=inactive.length?inactive.map(function(a){return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
+  document.getElementById("inactive-list").innerHTML=inactive.length?inactive.map(function(a){return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
 }
 
 function renderReassign(){
@@ -3856,7 +3930,7 @@ function renderReassign(){
     var curLp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";
     var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said"].map(function(lp){return'<option'+(curLp===lp?" selected":"")+' value="'+lp+'">'+lp+'</option>';}).join("");
     return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
-      '<td style="font-weight:600">'+a[0]+'</td>'+
+      '<td style="font-weight:600">'+displayName(a[0])+'</td>'+
       '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
       '<td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
       '<td><button class="btn btn-sm'+(pri?" btn-danger":" btn-success")+'" data-idx="'+idx+'" onclick="togglePriority(this)">'+(pri?"Remove":"Set Priority")+'</button></td>'+
@@ -3871,7 +3945,7 @@ function renderRemoveList(){
   if(!q){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">Type an agent name to search.</div>';return;}
   var list=agents.filter(function(a){return a[0].toLowerCase().indexOf(q)>=0;}).slice(0,8);
   if(!list.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">No agents found.</div>';return;}
-  el.innerHTML=list.map(function(a){return'<div class="alert-item"><span style="font-weight:600;flex:1">'+a[0]+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
+  el.innerHTML=list.map(function(a){return'<div class="alert-item"><span style="font-weight:600;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
 }
 
 function reassign(sel){var idx=parseInt(sel.getAttribute("data-idx"));agents[idx][2]=sel.value;saveAgents();renderAdmin();}
@@ -3884,9 +3958,25 @@ function addAgent(){
   agents.push([name,lv,lp,null,null,null,null,pri,0]);
   document.getElementById("add-name").value="";saveAgents();renderAdmin();alert(name+" added!");
 }
-function removeAgent(btn){
+async function resolveCanonicalProfileName(name){
+  var raw=(name||"").trim();
+  if(!raw)return null;
+  // Case-insensitive exact lookup. We never guess when multiple case-variants exist because that
+  // would risk changing the wrong canonical relationship.
+  var rows=await sbFetch("GET","agent_profiles?agent_name=ilike."+encodeURIComponent(raw)+"&select=agent_name&limit=2");
+  if(!rows||!rows.length)return null;
+  if(rows.length>1)throw new Error("Multiple agent profiles match "+raw+". Review duplicates before changing roster status.");
+  return rows[0].agent_name;
+}
+
+async function removeAgent(btn){
   var name=btn.getAttribute("data-name");
   if(!confirm("Remove "+name+"?"))return;
+  // Resolve the exact stored profile name BEFORE mutating any local state. The legacy local roster
+  // can contain ALL CAPS while agent_profiles contains human-entered casing; if the lookup is
+  // ambiguous, abort cleanly rather than half-removing the agent locally.
+  var canonicalName=name;
+  try{canonicalName=(await resolveCanonicalProfileName(name))||name;}catch(e){alert(e.message);return;}
   agents=agents.filter(function(a){return a[0]!==name;});
   try{
     var s=localStorage.getItem(STORAGE_KEY);
@@ -3895,10 +3985,39 @@ function removeAgent(btn){
     if(d.rm.indexOf(name)<0)d.rm.push(name);
     localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
   }catch(e){}
-  sbFetch("POST","agent_assignments?on_conflict=agent_name",[{agent_name:name,lp:"__REMOVED__",priority:false,added:false,level:"C"}]).catch(function(){});
+  await sbFetch("POST","agent_assignments?on_conflict=agent_name",[{agent_name:canonicalName,lp:"__REMOVED__",priority:false,added:false,level:"C"}]).catch(function(e){console.warn("Could not persist removal marker:",e.message);});
+  // Removal changes ONLY roster status. DNC and retained/Active Partner remain untouched.
+  await sbFetch("PATCH","agent_profiles?agent_name=eq."+encodeURIComponent(canonicalName),{relationship_status:"inactive"}).catch(function(e){console.warn("Could not propagate removal to shared agent_profiles:",e.message);});
+  ctInactiveRosterNames.add(canonicalName.trim().toLowerCase());
   renderAdmin();
+  renderLpAssignList();
+  renderCoMktList();
 }
-function reactivate(btn){var a=agents.find(function(x){return x[0]===btn.getAttribute("data-name");});if(a)a[3]=localDateStr(TODAY);saveAgents();renderAdmin();}
+async function reactivate(btn){
+  var name=btn.getAttribute("data-name");
+  var canonicalName=name;
+  if(name){
+    try{canonicalName=(await resolveCanonicalProfileName(name))||name;}catch(e){alert(e.message);return;}
+  }
+  var a=agents.find(function(x){return x[0]===name;});
+  if(a)a[3]=localDateStr(TODAY);
+  saveAgents();
+  // relationship_status is the one authoritative signal going forward — only it changes here.
+  // DNC and retained (Active Partner) are separate decisions and are never touched.
+  if(name){
+    await sbFetch("PATCH","agent_profiles?agent_name=eq."+encodeURIComponent(canonicalName),{relationship_status:"active"}).catch(function(e){console.warn("Could not propagate reactivation to shared agent_profiles:",e.message);});
+    // Clear either canonical- or legacy-cased removal markers so the agent can be assigned again.
+    var legacyNames=[canonicalName];if(name!==canonicalName)legacyNames.push(name);
+    for(var li=0;li<legacyNames.length;li++){
+      await sbFetch("PATCH","agent_assignments?agent_name=eq."+encodeURIComponent(legacyNames[li])+"&lp=eq.__REMOVED__",{lp:"Unassigned"}).catch(function(e){console.warn("Could not clear legacy __REMOVED__ marker:",e.message);});
+    }
+    ctInactiveRosterNames.delete(canonicalName.trim().toLowerCase());
+    ctInactiveRosterNames.delete(name.trim().toLowerCase());
+  }
+  renderAdmin();
+  renderLpAssignList();
+  renderCoMktList();
+}
 
 function loadXLSX(){
   if(typeof XLSX!=="undefined"){document.getElementById("fileInput").click();return;}
@@ -4094,11 +4213,12 @@ function renderCoMktList(){
   var q=(document.getElementById("comkt-q")||{value:""}).value.toLowerCase();
   var el=document.getElementById("comkt-list");if(!el)return;
 
-  // Active co-marketing agents (always shown at top)
-  var activeAgents=agents.filter(function(a){return coMarketingAgents[a[0]];});
-  // Search results (non-active matching query)
+  // Active co-marketing agents (always shown at top) — excludes anyone removed from the
+  // Current Relationship Roster, even though `agents` itself has no roster-status field.
+  var activeAgents=agents.filter(function(a){return coMarketingAgents[a[0]]&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());});
+  // Search results (non-active matching query) — same exclusion
   var searchResults=q?agents.filter(function(a){
-    return!coMarketingAgents[a[0]]&&a[0].toLowerCase().indexOf(q)>=0;
+    return!coMarketingAgents[a[0]]&&a[0].toLowerCase().indexOf(q)>=0&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());
   }).slice(0,15):[];
 
   function agentRow(a,active){
@@ -4106,7 +4226,7 @@ function renderCoMktList(){
     var lpClass=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?"lp-tag lp-tag-"+a[2]:"";
     var lpSpan=lpClass?'<span class="'+lpClass+'">'+lp+'</span>':'<span style="color:#aaa;font-size:12px">'+lp+'</span>';
     return'<div class="alert-item" style="'+(active?"background:#E8F5F0;border-color:#6EE7C4;":"")+'">'+
-      '<span style="font-weight:600;flex:1">'+a[0]+'</span>'+
+      '<span style="font-weight:600;flex:1">'+displayName(a[0])+'</span>'+
       '<span class="badge badge-'+(a[1]||"c").toLowerCase()+'" style="margin-right:6px">'+a[1]+'</span>'+
       lpSpan+
       '<button class="btn btn-sm '+(active?"btn-danger":"btn-success")+'" style="margin-left:10px" data-name="'+a[0]+'" data-active="'+(active?"true":"false")+'" onclick="toggleCoMarketing(this)">'+
@@ -4623,6 +4743,34 @@ setInterval(function(){
 document.addEventListener("visibilitychange",function(){
   if(!document.hidden&&!userTyping&&!editingLpContact)contactCache={};
 });
+// ── Realtime subscription (upgrade over polling, added this pass) ──────────────────────────
+// Subscribes to live changes on agent_profiles via Supabase Realtime, so a shared-profile
+// change (e.g. Amanda editing a phone number) clears the local cache as soon as it happens
+// instead of waiting for the interval above. REQUIRES the database owner to have run: ALTER
+// PUBLICATION supabase_realtime ADD TABLE agent_profiles; (see SAFE_DATABASE_MIGRATIONS.sql)
+// — if that hasn't been done, or RLS blocks it, this fails quietly and the interval above keeps
+// working exactly as before. Not verified against the live database from this environment —
+// treat as REQUIRES LIVE MANUAL TEST.
+function initRealtimeSync(){
+  if(typeof window.supabase==="undefined"||!window.supabase.createClient){
+    initRealtimeSync._tries=(initRealtimeSync._tries||0)+1;
+    if(initRealtimeSync._tries<10){setTimeout(initRealtimeSync,500);}
+    else console.warn("Realtime: Supabase SDK didn't load in time — continuing on the interval/cache-clear only.");
+    return;
+  }
+  try{
+    var rtClient=window.supabase.createClient(SB_URL,SB_KEY);
+    rtClient.channel("agent_profiles-changes")
+      .on("postgres_changes",{event:"*",schema:"public",table:"agent_profiles"},function(){
+        if(!userTyping&&!editingLpContact)contactCache={};
+      })
+      .subscribe(function(status){
+        if(status==="SUBSCRIBED")console.log("Realtime: subscribed to agent_profiles.");
+        else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("Realtime: agent_profiles subscription unavailable ("+status+") — table may not be in the supabase_realtime publication yet, or RLS is blocking it. Falling back to the polling/cache-clear only.");
+      });
+  }catch(e){console.warn("Realtime setup failed (non-critical — falling back to polling):",e.message);}
+}
+initRealtimeSync();
 loadAgents();
 loadAgentAssignments();
 // Auto-open Snapshot on load
@@ -5021,7 +5169,7 @@ function rmRenderFeed(){
   var capNote=filt.length>80?'<div style="text-align:center;font-size:11px;color:#aaa;padding:8px 0;border-top:1px solid #f0f2f8">Showing '+showCount+' of '+filt.length+' entries</div>':"";
   el.innerHTML=filt.slice(0,80).map(function(a){
     var h='<div style="padding:9px 0;border-bottom:1px solid #f0f2f8">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:13px">'+escHtml(a.agent_name||"—")+'</span><span style="font-size:11px;color:#999">'+fmt(a.act_date)+'</span></div>';
+    h+='<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:13px">'+escHtml(displayName(a.agent_name||"—"))+'</span><span style="font-size:11px;color:#999">'+fmt(a.act_date)+'</span></div>';
     h+='<div style="font-size:12px;color:#555;margin-top:2px">'+escHtml(a.act_type||"")+(a.outcome?' &middot; '+escHtml(a.outcome):'')+'</div>';
     if(a.notes)h+='<div style="font-size:11px;color:#888;margin-top:3px;font-style:italic">"'+escHtml(String(a.notes).substring(0,80))+'"</div>';
     h+='</div>';
@@ -5152,7 +5300,10 @@ function toggleCoveragePanel(){
   // Recompute who is uncovered
   var week=rmWeekRange();
   Promise.all([
-    fetch(SB_URL+"/rest/v1/agent_profiles?select=agent_name&order=agent_name.asc&limit=500",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+    // HOTFIX: was select=agent_name with no filter — same fix as rmLoadCoverage() above, and
+    // the direct cause of a removed agent (e.g. soft-deleted via do_not_contact:true) still
+    // showing up here as "No visits on record."
+    fetch(SB_URL+"/rest/v1/agent_profiles?select=agent_name,relationship_status&do_not_contact=neq.true&relationship_status=neq.inactive&order=agent_name.asc&limit=500",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
     fetch(SB_URL+"/rest/v1/amanda_activities?select=agent_name,act_date&act_date=lt."+week.start+"&order=act_date.desc&limit=3000",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
     fetch(SB_URL+"/rest/v1/amanda_activities?select=agent_name&act_date=gte."+week.start+"&act_date=lte."+week.end,{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();})
   ]).then(function(results){
@@ -5180,7 +5331,7 @@ function toggleCoveragePanel(){
       var since=a.lastDate?new Date(a.lastDate+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"2-digit"}):"Never visited";
       var daysStr=a.days!==null?a.days+"d since last visit":"No visits on record";
       h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid #FAF7F2">';
-      h+='<div style="flex:1"><div style="font-size:12px;font-weight:600;color:#0f172a">'+escHtml(a.name)+'</div>';
+      h+='<div style="flex:1"><div style="font-size:12px;font-weight:600;color:#0f172a">'+escHtml(displayName(a.name))+'</div>';
       h+='<div style="font-size:11px;color:#5C4A35">'+daysStr+'</div></div>';
       h+='<div style="font-size:11px;color:#94a3b8;text-align:right">Last: '+since+'</div>';
       h+='</div>';
@@ -5211,7 +5362,7 @@ function toggleRmFlaggedPanel(){
       h+='<div style="padding:10px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:10px">';
       h+='<span style="font-size:16px;flex-shrink:0">🚩</span>';
       h+='<div style="flex:1;min-width:0">';
-      h+='<div style="font-size:13px;font-weight:700;color:#0f172a">'+escHtml(r.agent_name)+'</div>';
+      h+='<div style="font-size:13px;font-weight:700;color:#0f172a">'+escHtml(displayName(r.agent_name))+'</div>';
       h+='<div style="font-size:11px;color:#64748b;margin-top:2px">';
       h+='<span style="font-weight:600;color:'+lpColor+'">'+escHtml(r.lp)+'</span>';
       h+=' · '+(r.call_date?new Date(r.call_date+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"—");
@@ -5254,7 +5405,10 @@ async function rmLoadCoverage(){
   try{
     var week=rmWeekRange();
     var[allAgents,priorActs,weekActs]=await Promise.all([
-      fetch(SB_URL+"/rest/v1/agent_profiles?select=agent_name&order=agent_name.asc&limit=500",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+      // HOTFIX: was select=agent_name with no filter, so a removed/DNC'd agent (soft-deleted —
+      // do_not_contact:true, retained:false, row still exists — never a real DELETE, so history
+      // is preserved) still counted toward this stat and the list below it. Excludes those now.
+      fetch(SB_URL+"/rest/v1/agent_profiles?select=agent_name,relationship_status&do_not_contact=neq.true&relationship_status=neq.inactive&order=agent_name.asc&limit=500",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
       fetch(SB_URL+"/rest/v1/amanda_activities?select=agent_name,act_date&act_date=lt."+week.start+"&order=act_date.desc&limit=3000",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
       fetch(SB_URL+"/rest/v1/amanda_activities?select=agent_name&act_date=gte."+week.start+"&act_date=lte."+week.end,{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();})
     ]);
@@ -5593,7 +5747,78 @@ function lpscShowAmandaDaily(wk){
 
 
 // ── LP ASSIGNMENT ────────────────────────────────────────────────────────
-function renderLpAssignList(){
+// Lightweight, on-demand data-quality check — no new tables required for this section itself
+// (powerbi_import_log is used opportunistically if it exists; everything else reads tables both
+// apps already depend on). Never blocks or breaks the admin view if a query fails.
+async function loadSystemHealth(){
+  var el=document.getElementById("system-health-list");
+  if(!el)return;
+  el.innerHTML='<div style="padding:8px 0;color:#aaa">Checking...</div>';
+  try{
+    var results=await Promise.all([
+      sbFetch("GET","agent_profiles?select=agent_name,relationship_status,do_not_contact&limit=5000")
+        .catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,do_not_contact&limit=5000").catch(function(){return[];});}),
+      sbFetch("GET","agent_assignments?select=agent_name,lp&limit=5000").catch(function(){return[];}),
+      sbFetch("GET","powerbi_import_log?select=imported_at,source_app,errors&order=imported_at.desc&limit=1").catch(function(){return null;})
+    ]);
+    var profiles=results[0]||[],assignments=results[1]||[],lastImportRows=results[2];
+
+    var lpByName={};
+    assignments.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n)lpByName[n]=a.lp;});
+
+    var issues=[];
+
+    // Inactive agent still showing a real (non-Unassigned/__REMOVED__) LP assignment
+    var inactiveWithLp=0;
+    profiles.forEach(function(p){
+      var status=p.relationship_status||"active";
+      var lp=lpByName[(p.agent_name||"").trim().toLowerCase()];
+      if(status==="inactive"&&lp&&lp!=="Unassigned"&&lp!=="__REMOVED__")inactiveWithLp++;
+    });
+    if(inactiveWithLp>0)issues.push(inactiveWithLp+" inactive agent"+(inactiveWithLp!==1?"s":"")+" still show an active LP assignment");
+
+    // Active roster agent with no LP
+    var activeNoLp=0;
+    profiles.forEach(function(p){
+      var status=p.relationship_status||"active";
+      var lp=lpByName[(p.agent_name||"").trim().toLowerCase()];
+      if(status!=="inactive"&&(!lp||lp==="Unassigned"))activeNoLp++;
+    });
+    if(activeNoLp>0)issues.push(activeNoLp+" active roster agent"+(activeNoLp!==1?"s":"")+" have no LP assigned");
+
+    // Possible duplicate names — case/spacing collisions only (same detection basis as the RM
+    // Tracker's existing "Clean up duplicate agents" tool; this just surfaces the count here too)
+    var seen={};
+    profiles.forEach(function(p){var n=(p.agent_name||"").trim().toLowerCase();if(n)seen[n]=(seen[n]||0)+1;});
+    var dupeGroups=Object.keys(seen).filter(function(k){return seen[k]>1;}).length;
+    if(dupeGroups>0)issues.push(dupeGroups+" possible duplicate name group"+(dupeGroups!==1?"s":"")+" (case/spacing variants) — see Contacts \u2192 Clean up duplicate agents in the RM Tracker");
+
+    var dncCount=profiles.filter(function(p){return p.do_not_contact===true;}).length;
+
+    var lastImportLine;
+    if(lastImportRows===null){
+      lastImportLine="Import history unavailable (powerbi_import_log table not created yet \u2014 see DEPLOY_NOW_SAFE_MIGRATIONS.sql; the import itself still works fine without it)";
+    }else if(!lastImportRows.length){
+      lastImportLine="No Power BI import recorded yet";
+    }else{
+      var li=lastImportRows[0];
+      var when=new Date(li.imported_at);
+      lastImportLine="Last Power BI import: "+when.toLocaleDateString()+" via "+li.source_app+(li.errors?" \u2014 "+li.errors+" error"+(li.errors!==1?"s":""):"");
+    }
+
+    var html='<div style="color:#888;margin-bottom:8px">'+lastImportLine+'</div>';
+    html+='<div style="color:#888;margin-bottom:8px">DNC agents on file: '+dncCount+'</div>';
+    if(issues.length){
+      html+='<ul style="margin:0;padding-left:18px;color:var(--text-2)">'+issues.map(function(i){return'<li style="margin-bottom:4px">'+i+'</li>';}).join("")+'</ul>';
+    }else{
+      html+='<div style="color:var(--green)">No issues detected.</div>';
+    }
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div style="color:var(--red)">System Health check failed: '+e.message+'</div>';
+  }
+}
+async function renderLpAssignList(){
   var el=document.getElementById("lp-assign-list");
   if(!el){console.warn("lp-assign-list not found");return;}
   var LPS=["Gavin","Jordan","Karen","Osgood","Said","Unassigned"];
@@ -5603,41 +5828,74 @@ function renderLpAssignList(){
   var q=searchEl?searchEl.value.toLowerCase():"";
   var showAll=showAllEl?showAllEl.checked:false;
 
+  el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px">Loading...</div>';
+
+  // REWIRED (was: rendered from SEED, a snapshot frozen into the page's HTML source at build
+  // time — never reflected anything that happened in the live database afterward, which is very
+  // likely why removed/reassigned agents kept resurfacing here no matter what was done live).
+  // Now fetches the current Current Relationship Roster from agent_profiles, joined with actual
+  // current LP assignment from agent_assignments. relationship_status falls back gracefully if
+  // the column doesn't exist yet (DEPLOY_NOW_SAFE_MIGRATIONS.sql not yet run) — treats everyone
+  // as active roster in that case, same as before this migration existed.
+  var profilesPromise=sbFetch("GET","agent_profiles?select=agent_name,tier,relationship_status&limit=5000")
+    .catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier&limit=5000").catch(function(){return[];});});
+  var assignPromise=sbFetch("GET","agent_assignments?select=agent_name,lp&limit=5000").catch(function(){return[];});
+  var results=await Promise.all([profilesPromise,assignPromise]);
+  var profiles=results[0]||[],assignments=results[1]||[];
+
+  var lpByName={};
+  assignments.forEach(function(a){
+    var n=(a.agent_name||"").trim().toLowerCase();
+    if(n)lpByName[n]=a.lp;
+  });
+
   var list=[];
-  for(var i=0;i<SEED.length;i++){
-    var e=SEED[i];
-    var name=e[0]||"";
-    var tier=e[1]||"C";
-    var lp=e[2]||"";
-    if(lp==="null"||lp==="undefined")lp="";
-    if(!showAll&&lp&&lp!=="Unassigned")continue;
+  for(var i=0;i<profiles.length;i++){
+    var p=profiles[i];
+    var name=(p.agent_name||"").trim();
+    if(!name)continue;
+    // Current Relationship Roster only — an agent removed from active management should not
+    // show up here regardless of what Power BI or anything else says about them. Defaults to
+    // active if relationship_status is missing/null (pre-migration or never explicitly set).
+    if((p.relationship_status||"active")==="inactive")continue;
+    var lpRaw=lpByName[name.toLowerCase()];
+    // Defensive: a pre-migration "__REMOVED__" sentinel (the old removal marker, before
+    // relationship_status existed) should never display as if it were a real LP name.
+    if(lpRaw==="__REMOVED__")continue;
+    var lp=(lpRaw&&lpRaw!=="Unassigned")?lpRaw:"";
+    var tier=p.tier||"C";
+    if(!showAll&&lp)continue;
     if(q&&name.toLowerCase().indexOf(q)<0)continue;
     list.push({name:name,tier:tier,lp:lp});
   }
   list.sort(function(a,b){return a.name.localeCompare(b.name);});
 
   if(!list.length){
-    el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px">'+(showAll?"No agents match.":"All agents are assigned! Check \"Show all agents\" to edit.")+'</div>';
+    el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:13px">'+(showAll?"No agents match.":"All active agents are assigned! Check \"Show all agents\" to edit.")+'</div>';
     return;
   }
 
   var rows="";
   _lpAssignNames=list.map(function(x){return x.name;});
+  _lpAssignTiers=list.map(function(x){return x.tier;});
   for(var j=0;j<list.length;j++){
     var ag=list[j];
     var tc=ag.tier==="A"?"#B45309":ag.tier==="B"?"#1D4ED8":"#888";
     var lc=LP_COLORS[ag.lp]||"#aaa";
     var opts="";
+    // Blank LP explicitly selects "Unassigned" — see fix note in setAgentLP/original bug report:
+    // a <select> with no option marked "selected" defaults to showing its first option in the
+    // browser ("Gavin"), which looked like a real assignment even when nothing was ever saved.
+    var effectiveLp=ag.lp||"Unassigned";
     for(var k=0;k<LPS.length;k++){
-      opts+='<option value="'+LPS[k]+'"'+(ag.lp===LPS[k]?" selected":"")+'>'+LPS[k]+'</option>';
+      opts+='<option value="'+LPS[k]+'"'+(effectiveLp===LPS[k]?" selected":"")+'>'+LPS[k]+'</option>';
     }
     var sid="lpsi_"+j;
     rows+='<tr style="border-bottom:1px solid var(--border)">'
-      +'<td style="padding:8px 10px;font-size:13px;font-weight:500">'+ag.name+'</td>'
+      +'<td style="padding:8px 10px;font-size:13px;font-weight:500">'+displayName(ag.name)+'</td>'
       +'<td style="padding:8px 10px"><span style="font-size:11px;font-weight:700;color:'+tc+'">'+ag.tier+'</span></td>'
       +'<td style="padding:8px 10px"><span style="font-size:11px;font-weight:600;color:'+lc+'">'+(ag.lp||"—")+'</span></td>'
       +'<td style="padding:8px 10px;display:flex;align-items:center;gap:8px">'
-      +'<select style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit" '
       +'<select data-idx="'+j+'" onchange="setAgentLPByIdx(this)" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit">'
       +opts+'</select>'
       +'<span id="'+sid+'" style="font-size:11px;color:var(--green);display:none">✓</span>'
@@ -5656,18 +5914,22 @@ function renderLpAssignList(){
 
 
 var _lpAssignNames=[];
+var _lpAssignTiers=[];
 function setAgentLPByIdx(sel){
   var idx=parseInt(sel.getAttribute("data-idx"));
   var name=_lpAssignNames[idx];
   if(!name)return;
-  setAgentLP(name,sel.value);
+  setAgentLP(name,sel.value,null,_lpAssignTiers[idx]);
 }
-function setAgentLP(name,lp,selectEl){
-  // Update SEED in memory immediately
+function setAgentLP(name,lp,selectEl,tierHint){
+  // REWIRED: this used to require a SEED entry to exist at all (SEED.find(...); if(!entry)
+  // return;) — silently doing nothing for any agent not in that frozen snapshot, which after
+  // switching renderLpAssignList() to live data would include most agents added since SEED was
+  // last baked into the page. No longer depends on SEED for the save itself; SEED is updated
+  // afterward only as a harmless, best-effort legacy bootstrap if an entry happens to exist.
   var entry=SEED.find(function(e){return e[0]===name;});
-  if(!entry)return;
   var lpVal=lp==="Unassigned"?"Unassigned":lp||null;
-  entry[2]=lpVal;
+  if(entry)entry[2]=lpVal;
 
   // Show saving indicator
   var savedId="lp-saved-"+name.replace(/[^a-zA-Z0-9]/g,"_");
@@ -5678,8 +5940,8 @@ function setAgentLP(name,lp,selectEl){
   sbFetch("POST","agent_assignments?on_conflict=agent_name",{
     agent_name:name,
     lp:lpVal||"Unassigned",
-    level:entry[1]||"C",
-    priority:entry[7]||false,
+    level:(entry&&entry[1])||tierHint||"C",
+    priority:(entry&&entry[7])||false,
     added:false
   }).then(function(){
     if(savedEl){savedEl.textContent="✓ Saved";savedEl.style.color="var(--green)";
@@ -7037,7 +7299,7 @@ function ctLoadLpFlags(){
     html+='<div style="background:#FBF3E5;border:1px solid #E8DDC8;border-radius:10px;padding:4px 16px">';
     rows.forEach(function(r){
       html+='<div style="padding:10px 0;border-bottom:1px solid #E8DDC8">';
-      html+='<div style="font-size:13px;font-weight:700;color:#0f172a">'+(r.agent_name?escHtml(r.agent_name):"General")+'<span style="font-weight:400;color:#8C7355;font-size:11px"> via '+escHtml(r.lp)+'</span></div>';
+      html+='<div style="font-size:13px;font-weight:700;color:#0f172a">'+(r.agent_name?escHtml(displayName(r.agent_name)):"General")+'<span style="font-weight:400;color:#8C7355;font-size:11px"> via '+escHtml(r.lp)+'</span></div>';
       html+='<div style="font-size:12px;color:#5C4A35;margin-top:2px;font-style:italic">"'+escHtml((r.note||"").substring(0,140))+'"</div>';
       html+='<div style="display:flex;gap:10px;margin-top:4px">';
       html+='<button onclick="ctAssignFlag(\''+r.id+'\')" style="font-size:10.5px;font-weight:700;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit">Assign to me</button>';
@@ -7249,7 +7511,7 @@ function ctLoadNotifications(){
     if(total===0){ list.innerHTML='<div style="padding:8px 0;color:var(--text-3)">Nothing new right now</div>'; return; }
     var html="";
     flags.forEach(function(f){
-      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🚩 '+(f.agent_name?escHtml(f.agent_name):"General flag")+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(f.lp)+' — "'+escHtml((f.note||"").substring(0,60))+'"</div></div>';
+      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🚩 '+(f.agent_name?escHtml(displayName(f.agent_name)):"General flag")+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(f.lp)+' — "'+escHtml((f.note||"").substring(0,60))+'"</div></div>';
     });
     gestures.forEach(function(g){
       html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🎁 '+escHtml(g.lead_buyer_name||g.lead_agent_name)+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(g.lp)+' — gesture opportunity</div></div>';
@@ -7404,12 +7666,14 @@ async function lpSyncAgentProfilesFromUpload(rows){
   var now=new Date();
   var ninetyDaysAgo=new Date(now.getTime()-90*86400000);
 
-  var existing=await sbFetch("GET","agent_profiles?select=agent_name&limit=5000").catch(function(){return[];});
-  var existingByKey={};
+  var existing=await sbFetch("GET","agent_profiles?select=agent_name,tier,retained,email,phone,address,birthday&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,retained&limit=5000").catch(function(){return[];});});
+  var existingByKey={},existingTierByKey={},existingActiveByKey={},existingContactByKey={};
   (existing||[]).forEach(function(e){
     var k=(e.agent_name||"").trim().toLowerCase();
-    if(k&&!existingByKey[k])existingByKey[k]=e.agent_name; // first match wins if pre-existing casing duplicates exist — same known limitation flagged in the audit, not solved here
+    if(k&&!existingByKey[k]){existingByKey[k]=e.agent_name;existingTierByKey[k]=e.tier||null;existingActiveByKey[k]=!!e.retained;existingContactByKey[k]={email:e.email,phone:e.phone,address:e.address,birthday:e.birthday};} // first match wins if pre-existing casing duplicates exist — same known limitation flagged in the audit, not solved here
   });
+
+  var tierChanges=[],activeChanges={becameActive:0,becameInactive:0};
 
   var toUpdate=[],toInsert=[];
   rows.forEach(function(row){
@@ -7433,20 +7697,38 @@ async function lpSyncAgentProfilesFromUpload(rows){
 
     var payload={agent_name:canonicalName,tier:tier,closes_past_year:closes,total_leads_past_year:leads,retained:isActive};
     if(latestLead)payload.latest_lead_date=latestLead;
+    // CORRECTED contact-field precedence: for an EXISTING agent, Power BI may only fill a
+    // contact field when the current shared value is blank. A human-verified phone/email/
+    // address/birthday is never silently overwritten by a different nonblank import value —
+    // that's now treated as a conflict and the existing, human-maintained value wins. For a
+    // brand-new agent there's nothing to conflict with, so Power BI's value is used normally.
+    var existingContact=existingContactByKey[key]||null;
     var email=row["Email"]?row["Email"].toString().trim():"";
-    if(email)payload.email=email;
+    if(email&&(!existingContact||!existingContact.email))payload.email=email;
     var phone=normalizePhoneShared(row["Phone Number"]);
-    if(phone)payload.phone=phone;
+    if(phone&&(!existingContact||!existingContact.phone))payload.phone=phone;
     var addr=row["Address"]?row["Address"].toString().trim():"";
-    if(addr)payload.address=addr;
+    if(addr&&(!existingContact||!existingContact.address))payload.address=addr;
     var bday=normalizeBirthdayShared(row["Birthday"]);
-    if(bday)payload.birthday=bday;
+    if(bday&&(!existingContact||!existingContact.birthday))payload.birthday=bday;
     // Power BI's Notes column is intentionally never mapped into personal_notes or any
     // relationship field here — those are hand-written relationship history, not something a
     // generic import column should be able to overwrite.
 
     if(existingByKey[key]){toUpdate.push(payload);}
     else{toInsert.push(payload);existingByKey[key]=canonicalName;} // guards a name appearing twice in one file
+
+    // Tier history + Active Partner transition tracking — logged for every row with a
+    // detectable change, existing agent or new, so Portfolio Review's tier-migration and
+    // active-status trend reporting stays complete regardless of which app ran the import.
+    var priorTier=existingTierByKey[key];
+    if(priorTier!==undefined&&priorTier!==tier&&(priorTier||tier)){
+      tierChanges.push({agent_name:canonicalName,from_tier:priorTier,to_tier:tier});
+    }
+    var priorActive=existingActiveByKey[key];
+    if(priorActive!==undefined&&priorActive!==isActive){
+      if(isActive)activeChanges.becameActive++;else activeChanges.becameInactive++;
+    }
   });
   if(!toUpdate.length&&!toInsert.length)return;
 
@@ -7471,6 +7753,28 @@ async function lpSyncAgentProfilesFromUpload(rows){
     }catch(e){failed+=batch.length;console.error("Insert batch failed:",e.message);}
   }
   console.log("LP agent_profiles sync: "+synced+" updated, "+created+" created, "+failed+" failed, of "+(toUpdate.length+toInsert.length)+" rows");
+
+  // Tier history — reuses the existing tier_migrations table (already written to by the RM
+  // Tracker's imports; this closes the gap where a Power BI upload run from Core Team never
+  // logged a migration at all). Best-effort: never blocks the import if it fails.
+  for(var t=0;t<tierChanges.length;t++){
+    var tc=tierChanges[t];
+    try{
+      await sbFetch("POST","tier_migrations",{agent_name:tc.agent_name,from_tier:tc.from_tier,to_tier:tc.to_tier,migration_date:localDateStr(now)});
+    }catch(e){console.warn("Tier migration log failed (non-critical):",e.message);}
+  }
+
+  // Import audit log — additive table (see SAFE_DATABASE_MIGRATIONS.sql). Records what this
+  // import actually did so a management view can show import history without guessing from
+  // side effects. Best-effort: a failure here never blocks or rolls back the import itself.
+  try{
+    await sbFetch("POST","powerbi_import_log",{
+      imported_at:new Date().toISOString(),source_app:"core-team-tracker",
+      rows_processed:rows.length,matched:toUpdate.length,created:created,updated:synced,
+      skipped:rows.length-toUpdate.length-toInsert.length,errors:failed,
+      tier_changes:tierChanges.length,became_active:activeChanges.becameActive,became_inactive:activeChanges.becameInactive
+    });
+  }catch(e){console.warn("Import audit log failed (non-critical — table may not exist yet, see SAFE_DATABASE_MIGRATIONS.sql):",e.message);}
 }
 
 // Playbook Sec. 18 — Health Score historical snapshots (LP Tracker version).
@@ -7483,22 +7787,22 @@ async function lpWriteHealthSnapshots(){
   var PFR_TIER_URGENT={Channel:21,A:21,B:45,C:90};
 
   var results=await Promise.all([
-    sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,latest_lead_date,competitor_risk_flag&limit=2000").catch(function(){return[];}),
-    sbFetch("GET","amanda_activities?select=agent_name,act_date&order=act_date.desc&limit=3000").catch(function(){return[];}),
-    sbFetch("GET","call_logs?select=agent_name,call_date&order=call_date.desc&limit=2000").catch(function(){return[];}),
+    sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,relationship_status,latest_lead_date,competitor_risk_flag&limit=2000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,latest_lead_date,competitor_risk_flag&limit=2000").catch(function(){return[];});}),
+    sbFetch("GET","amanda_activities?select=agent_name,act_date,outcome,act_type&order=act_date.desc&limit=3000").catch(function(){return[];}),
+    sbFetch("GET","call_logs?select=agent_name,call_date,outcome&order=call_date.desc&limit=2000").catch(function(){return[];}),
     // Use Velocify for real last-lead-date — same source as Portfolio Review for consistency
     sbFetch("GET","velocify_leads?select=referral_partner_name,date_added&order=date_added.desc&limit=5000&date_added=gte."+(function(){var d=new Date();d.setFullYear(d.getFullYear()-1);return d.toISOString().slice(0,10);}())).catch(function(){return[];})
   ]);
   var allAgents=results[0]||[],allActs=results[1]||[],lpCalls=results[2]||[],allLeads=results[3]||[];
 
   var lastSeenRM={};
-  allActs.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&!lastSeenRM[n])lastSeenRM[n]=a.act_date;});
+  allActs.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&!lastSeenRM[n]&&isMeaningfulOutcome(a.outcome,NOT_MEANINGFUL_RM_OUTCOMES,a.act_type))lastSeenRM[n]=a.act_date;});
   var lastSeenLP={};
-  lpCalls.forEach(function(c){var n=(c.agent_name||"").trim().toLowerCase();if(n&&!lastSeenLP[n])lastSeenLP[n]=c.call_date;});
+  lpCalls.forEach(function(c){var n=(c.agent_name||"").trim().toLowerCase();if(n&&!lastSeenLP[n]&&isMeaningfulOutcome(c.outcome,NOT_MEANINGFUL_LP_OUTCOMES))lastSeenLP[n]=c.call_date;});
   var lastLeadByAgent={};
   allLeads.forEach(function(l){var n=(l.referral_partner_name||"").trim().toLowerCase();if(n&&(!lastLeadByAgent[n]||l.date_added>lastLeadByAgent[n]))lastLeadByAgent[n]=l.date_added;});
 
-  var active=allAgents.filter(function(a){return a.retained&&a.do_not_contact!==true;});
+  var active=allAgents.filter(function(a){return a.retained&&a.do_not_contact!==true&&a.relationship_status!=="inactive";});
   if(!active.length)return;
 
   var rows=active.map(function(a){
@@ -7593,8 +7897,8 @@ async function pfrLoad(){
     var now=new Date();
     var results=await Promise.all([
       sbFetch("GET","agent_profiles?select=*&limit=2000"),
-      sbFetch("GET","amanda_activities?select=agent_name,act_date&order=act_date.desc&limit=3000"),
-      sbFetch("GET","call_logs?select=agent_name,call_date&order=call_date.desc&limit=3000"),
+      sbFetch("GET","amanda_activities?select=agent_name,act_date,outcome,act_type&order=act_date.desc&limit=3000"),
+      sbFetch("GET","call_logs?select=agent_name,call_date,outcome&order=call_date.desc&limit=3000"),
       sbFetch("GET","tier_migrations?select=agent_name,from_tier,to_tier,migration_date&migration_date=gte."+range.start+"&limit=1000").catch(function(){return[];}),
       sbFetch("GET","velocify_leads?date_added=gte."+range.start+"&select=referral_partner_name&limit=5000").catch(function(){return[];}),
       sbFetch("GET","amanda_activities?select=agent_name,act_type,act_date,outcome,notes&act_date=gte."+range.start+"&limit=3000").catch(function(){return[];}),
@@ -7614,9 +7918,11 @@ async function pfrLoad(){
     });
 
     var lastSeenRM={};
-    allActs.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&!lastSeenRM[n])lastSeenRM[n]=a.act_date;});
+    // Last MEANINGFUL contact — same shared classifier as the RM Tracker (see top of file), so
+    // a voicemail or unanswered call doesn't count as a touch in either app's calculation.
+    allActs.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&!lastSeenRM[n]&&isMeaningfulOutcome(a.outcome,NOT_MEANINGFUL_RM_OUTCOMES,a.act_type))lastSeenRM[n]=a.act_date;});
     var lastSeenLP={};
-    lpCalls.forEach(function(c){var n=(c.agent_name||"").trim().toLowerCase();if(n&&!lastSeenLP[n])lastSeenLP[n]=c.call_date;});
+    lpCalls.forEach(function(c){var n=(c.agent_name||"").trim().toLowerCase();if(n&&!lastSeenLP[n]&&isMeaningfulOutcome(c.outcome,NOT_MEANINGFUL_LP_OUTCOMES))lastSeenLP[n]=c.call_date;});
     // All-time last "meeting" (Partner Meeting act_type OR a Break Bread) per agent — drives
     // formal Meeting Cadence Compliance, which is distinct from the touch-cadence check above.
     var lastMeeting={};
@@ -7628,7 +7934,7 @@ async function pfrLoad(){
     (results2||[]).forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&(!lastMeeting[n]||a.act_date>lastMeeting[n]))lastMeeting[n]=a.act_date;});
     allBreads.forEach(function(b){var n=(b.agent_name||"").trim().toLowerCase();if(n&&(!lastMeeting[n]||b.date>lastMeeting[n]))lastMeeting[n]=b.date;});
 
-    var active=allAgents.filter(function(a){return a.retained&&a.do_not_contact!==true;});
+    var active=allAgents.filter(function(a){return a.retained&&a.do_not_contact!==true&&a.relationship_status!=="inactive";});
     var totalActive=active.length;
 
     var FORMAL_CADENCE={Channel:30,A:30,B:60,C:90};
