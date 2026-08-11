@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="version" content="20260721220000">
-  <meta name="build-notes" content="Single-save LP notes, categorized scripts, clickable portfolio drilldowns, Face Time fixes, co-marketing bulk spend editor">
+  <meta name="build-notes" content="Reviewed merge: one-click LP notes, categorized/searchable scripts, clickable portfolio drilldowns; placeholder weighted score disabled">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -502,7 +502,7 @@ tr:hover td{background:var(--bg)}
 
 <div class="contact-modal-overlay" id="scriptsModal">
   <div class="contact-modal-box" style="max-width:660px;max-height:85vh;overflow-y:auto">
-    <div class="cm-header"><span class="cm-title">Scripts</span><button class="cm-close" onclick="closeScriptsModal()">&times;</button></div>
+    <div class="cm-header"><span class="cm-title">Scripts</span><button class="cm-close" onclick="closeScriptsModal()">×</button></div>
     <div style="font-size:12px;color:var(--text-3);margin-bottom:18px">Exact call scripts, organized by moment in the transaction. New ones get added here as they come up.</div>
 
     <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:14px">
@@ -516,243 +516,215 @@ tr:hover td{background:var(--bg)}
 
     <details class="script-cat" data-script-cat="buyer-referral" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
       <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
-        <span>Buyer Referral & Introduction<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">The first buyer handoff and referral language</span></span>
+        <span>Buyer Referral &amp; Introduction<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">The first buyer handoff and referral language</span></span>
         <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">1 script</span>
       </summary>
       <div class="script-cat-body" style="padding:14px 14px 2px">
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">How to Refer Us &mdash; 1st Buyer Interaction</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">The exact script an agent should use the moment they get a buyer &mdash; via text, email, or verbally, same script either way.</div>
-    <div style="font-size:12.5px;color:var(--text-2);font-weight:600;margin-bottom:4px">Send to Client:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">How to Refer Us — 1st Buyer Interaction</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">The exact script an agent should use the moment they get a buyer — via text, email, or verbally, same script either way.</div>
+      <div style="font-size:12.5px;color:var(--text-2);font-weight:600;margin-bottom:4px">Send to Client:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;font-style:italic">
       "[Buyer Name], to ensure that you're 100% safe, secure, and set up for success moving forward with the home search, I'm going to have the Daniel Sa Team at NFM Lending reach out to you directly to get the process started. Everybody on the team does a WONDERFUL job and will provide you with important information that guarantees you're prepared to move quickly with the right home becomes available. They will educate you on every financing option available so you can make an informed decision on what aligns best with your goals. You can expect to hear from them within the next few hours. Please let me know if you have any questions in the meantime. Thank you so much!"
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);font-weight:600;margin-bottom:4px">Send an email to the Daniel Sa Team (<span style="color:#1F4E79">sateam@nfmlending.com</span>) with the borrower's information:</div>
-    <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;color:var(--text-2);line-height:1.6">
-      Subject: Client Name / NEW LEAD &mdash; from [Realtor Name] at [Realty Brokerage]<br><br>
-      Hello Daniel Sa Team,<br><br>
-      Please reach out to my wonderful client(s) [Client Name] as soon as possible. They are looking to purchase [insert all relevant details/goals related to the borrowers and their home search].<br><br>
-      &bull; [Borrower #1]<br>&nbsp;&nbsp;&nbsp;&#9675; Phone:<br>&nbsp;&nbsp;&nbsp;&#9675; Email:<br>
-      &bull; [Borrower #2]<br>&nbsp;&nbsp;&nbsp;&#9675; Phone:<br>&nbsp;&nbsp;&nbsp;&#9675; Email:<br><br>
-      Please let me know if you have any follow-up questions/concerns in the meantime. Thank you so much!<br><br>
+      <div style="font-size:12.5px;color:var(--text-2);font-weight:600;margin-bottom:4px">Send an email to the Daniel Sa Team (<span style="color:#1F4E79">sateam@nfmlending.com</span>) with the borrower's information:</div>
+      <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;color:var(--text-2);line-height:1.6">
+      Subject: Client Name / NEW LEAD — from [Realtor Name] at [Realty Brokerage]<br/><br/>
+      Hello Daniel Sa Team,<br/><br/>
+      Please reach out to my wonderful client(s) [Client Name] as soon as possible. They are looking to purchase [insert all relevant details/goals related to the borrowers and their home search].<br/><br/>
+      • [Borrower #1]<br/>   ○ Phone:<br/>   ○ Email:<br/>
+      • [Borrower #2]<br/>   ○ Phone:<br/>   ○ Email:<br/><br/>
+      Please let me know if you have any follow-up questions/concerns in the meantime. Thank you so much!<br/><br/>
       Have a wonderful day,
     </div>
-
+      </div>
+    </details>
     <details class="script-cat" data-script-cat="transaction" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
       <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
-        <span>Contract & Closing Calls<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Listing agent, buyer agent, and clear-to-close</span></span>
+        <span>Contract &amp; Closing Calls<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Listing agent, buyer agent, and clear-to-close</span></span>
         <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">3 scripts</span>
       </summary>
       <div class="script-cat-body" style="padding:14px 14px 2px">
-      </div>
-    </details>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Under Contract Call (Listing Agent)</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Call the listing agent as soon as a deal you're the buyer's lender on goes under contract. Set the tone early &mdash; this is your first real touchpoint with them on this file.</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Under Contract Call (Listing Agent)</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Call the listing agent as soon as a deal you're the buyer's lender on goes under contract. Set the tone early — this is your first real touchpoint with them on this file.</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], this is [Your Name] from the Daniel Sa Team at NFM Lending. I'm calling about your listing at [Property Address], which has just gone into contract. I'm the lender representing the buyer. First, I have a couple of questions about the transaction, I want to make sure we have a smooth process. Does that sound good? Congratulations again on the sale."
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px">Questions to cover:</div>
-    <ul style="font-size:12.5px;color:var(--text-2);margin:0 0 8px;padding-left:18px;line-height:1.6">
-      <li>Any special accommodations for your seller, a POA or mail-away closing, we should know about?</li>
-      <li>Will your seller use the sale proceeds to purchase another home?</li>
-      <li>Will this be a simultaneous closing?
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px">Questions to cover:</div>
+      <ul style="font-size:12.5px;color:var(--text-2);margin:0 0 8px;padding-left:18px;line-height:1.6">
+<li>Any special accommodations for your seller, a POA or mail-away closing, we should know about?</li>
+<li>Will your seller use the sale proceeds to purchase another home?</li>
+<li>Will this be a simultaneous closing?
         <ul style="margin:2px 0;padding-left:18px">
-          <li>Would it help to get the final closing package and closing disclosure three full days in advance?</li>
-          <li>Do you know which title company will handle your seller's next purchase?</li>
-        </ul>
-      </li>
-      <li>Do you have a transaction coordinator we should keep updated throughout?</li>
-    </ul>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+<li>Would it help to get the final closing package and closing disclosure three full days in advance?</li>
+<li>Do you know which title company will handle your seller's next purchase?</li>
+</ul>
+</li>
+<li>Do you have a transaction coordinator we should keep updated throughout?</li>
+</ul>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
       "Our team is available nights and weekends, so I'm going to send you a quick text with my contact info. Please don't hesitate to reach out anytime if you or your seller need anything."
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Close for the meeting before ending the call.</div>
-    <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">After the call, send a follow-up text with your contact info.</div>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Under Contract Call (Buyer's Agent)</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Call the buyer's agent once the file goes under contract. This call sets the tone for how you will work together throughout.</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
-      "Hey [Agent Name], this is [Your Name] from the Daniel Sa Team at NFM Lending. I'm calling about [Buyer Name]'s contract on [Property Address] &mdash; congratulations to you and your buyers for going into contract! I wanted to reach out personally and introduce myself. I'll be your main point of contact throughout the transaction and our team is here to support you every step of the way."
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Close for the meeting before ending the call.</div>
+      <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">After the call, send a follow-up text with your contact info.</div>
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Under Contract Call (Buyer's Agent)</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Call the buyer's agent once the file goes under contract. This call sets the tone for how you will work together throughout.</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      "Hey [Agent Name], this is [Your Name] from the Daniel Sa Team at NFM Lending. I'm calling about [Buyer Name]'s contract on [Property Address] — congratulations to you and your buyers for going into contract! I wanted to reach out personally and introduce myself. I'll be your main point of contact throughout the transaction and our team is here to support you every step of the way."
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px">Questions to cover:</div>
-    <ul style="font-size:12.5px;color:var(--text-2);margin:0 0 8px;padding-left:18px;line-height:1.6">
-      <li>Are there any concerns or anything we should know going in?</li>
-      <li>What's the best way to keep you updated throughout the process &mdash; text, email, calls?</li>
-      <li>Regarding the closing date &mdash; we want to make sure we stick with the contracted date. We do not move up closing dates. Once we are clear to close, if all parties are in agreement we can revisit at that point.</li>
-    </ul>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px">Questions to cover:</div>
+      <ul style="font-size:12.5px;color:var(--text-2);margin:0 0 8px;padding-left:18px;line-height:1.6">
+<li>Are there any concerns or anything we should know going in?</li>
+<li>What's the best way to keep you updated throughout the process — text, email, calls?</li>
+<li>Regarding the closing date — we want to make sure we stick with the contracted date. We do not move up closing dates. Once we are clear to close, if all parties are in agreement we can revisit at that point.</li>
+</ul>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
       "Our team is available nights and weekends, so I'm going to send you a quick text with my contact info. Please reach out anytime. We are going to take good care of your buyer."
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">If they don't already work with us regularly, close for a meeting before ending the call: <em style="color:#fff;background:#1E2B3A;padding:2px 6px;border-radius:4px;font-style:normal">"I'd love to sit down sometime, even just 15 minutes, to see if it makes sense to work together."</em></div>
-    <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">After the call, send a follow-up text with your contact info.</div>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">CTC Call</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Process: call the agent, leave a voicemail if no answer, follow up with a text if still no response.</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">If they don't already work with us regularly, close for a meeting before ending the call: <em style="color:#fff;background:#1E2B3A;padding:2px 6px;border-radius:4px;font-style:normal">"I'd love to sit down sometime, even just 15 minutes, to see if it makes sense to work together."</em></div>
+      <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">After the call, send a follow-up text with your contact info.</div>
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">CTC Call</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Process: call the agent, leave a voicemail if no answer, follow up with a text if still no response.</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
       "Hi [Agent Name], this is [Your Name] with the Daniel Sa Team at NFM Lending. Congrats on getting [Buyer/Property] to clear to close! I wanted to check in personally, was there anything that went really smoothly for you, or anything we could've done better on our end?"
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">If it's the listing agent and they don't already work with us, bridge straight into the meeting ask before ending the call:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">If it's the listing agent and they don't already work with us, bridge straight into the meeting ask before ending the call:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
       "I'd love to actually sit down and meet sometime, even just 15 minutes, to see if it makes sense to work together."
     </div>
-
+      </div>
+    </details>
     <details class="script-cat" data-script-cat="prospecting" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
       <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
-        <span>Prospecting & Cold Outreach<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Cold call opener, objections, and no-answer follow-up</span></span>
+        <span>Prospecting &amp; Cold Outreach<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Cold call opener, objections, and no-answer follow-up</span></span>
         <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">3 scripts</span>
       </summary>
       <div class="script-cat-body" style="padding:14px 14px 2px">
-      </div>
-    </details>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Cold Call &mdash; Opening Script</div>
-    <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--text-2)"><strong style="color:var(--text)">Before you dial:</strong> Pull up RETR and look them up. Find a recent sale or listing and mention it in your opener &mdash; "I saw your listing at [address] just closed, congrats!" It makes the call personal and shows you did your homework.</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Goal: introduce yourself, explain how we support agents, and schedule a 20-minute meeting.</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Cold Call — Opening Script</div>
+      <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--text-2)"><strong style="color:var(--text)">Before you dial:</strong> Pull up RETR and look them up. Find a recent sale or listing and mention it in your opener — "I saw your listing at [address] just closed, congrats!" It makes the call personal and shows you did your homework.</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Goal: introduce yourself, explain how we support agents, and schedule a 20-minute meeting.</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], I wanted to reach out and introduce myself. We love working alongside agents to help buyers better understand their financing options, create listing-specific payment strategies, and explore creative financing options to help ensure you and your clients are winning in this market. I would love to learn more about your business and explore ways we can support you. Would you be open to a quick 20-minute meeting sometime next week?"
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px">When scheduling &mdash; offer two options:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px">When scheduling — offer two options:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;font-style:italic">
       "Would Tuesday at 11:00 or Thursday at 2:00 work better for you?"
     </div>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Cold Call &mdash; Common Responses</div>
-    <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:16px">
-      <tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">What's the meeting about?</td><td style="padding:8px 0;color:var(--text-2)">"We'd love to learn more about the clients and areas you serve, what you're currently focused on growing, and where additional lending support may be helpful. We can also share some of the financing strategies and listing resources we provide to our agent partners."</td></tr>
-      <tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">Already have a lender</td><td style="padding:8px 0;color:var(--text-2)">"That's completely understandable, and we're not asking you to replace a relationship that's working well. We'd simply love the opportunity to introduce ourselves and become an additional resource when you need a second opinion, have a challenging scenario, or need extra support. Would you still be open to a 20-minute meeting?"</td></tr>
-      <tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">Send me some info</td><td style="padding:8px 0;color:var(--text-2)">"Absolutely. I want to make sure I send something relevant. Would buyer financing options, listing-specific payment strategies, or solutions for more challenging scenarios be most helpful? I'll send that over today. Would it be okay if I follow up with you on [day]?"</td></tr>
-      <tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">I'm busy right now</td><td style="padding:8px 0;color:var(--text-2)">"No problem at all, I completely understand. Would there be a better time for me to call you back, or would it be easier if I sent you a quick text?"</td></tr>
-      <tr><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">Not interested</td><td style="padding:8px 0;color:var(--text-2)">"I completely understand. Thank you for taking my call. I'll send you my contact information in case you ever need an additional lending resource or a second opinion on a scenario."</td></tr>
-    </table>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">No Answer &mdash; Follow-Up Text</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Send immediately after the missed call.</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Cold Call — Common Responses</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:16px">
+<tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">What's the meeting about?</td><td style="padding:8px 0;color:var(--text-2)">"We'd love to learn more about the clients and areas you serve, what you're currently focused on growing, and where additional lending support may be helpful. We can also share some of the financing strategies and listing resources we provide to our agent partners."</td></tr>
+<tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">Already have a lender</td><td style="padding:8px 0;color:var(--text-2)">"That's completely understandable, and we're not asking you to replace a relationship that's working well. We'd simply love the opportunity to introduce ourselves and become an additional resource when you need a second opinion, have a challenging scenario, or need extra support. Would you still be open to a 20-minute meeting?"</td></tr>
+<tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">Send me some info</td><td style="padding:8px 0;color:var(--text-2)">"Absolutely. I want to make sure I send something relevant. Would buyer financing options, listing-specific payment strategies, or solutions for more challenging scenarios be most helpful? I'll send that over today. Would it be okay if I follow up with you on [day]?"</td></tr>
+<tr style="border-bottom:1px solid var(--border-light)"><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">I'm busy right now</td><td style="padding:8px 0;color:var(--text-2)">"No problem at all, I completely understand. Would there be a better time for me to call you back, or would it be easier if I sent you a quick text?"</td></tr>
+<tr><td style="padding:8px 10px 8px 0;font-weight:600;vertical-align:top;white-space:nowrap">Not interested</td><td style="padding:8px 0;color:var(--text-2)">"I completely understand. Thank you for taking my call. I'll send you my contact information in case you ever need an additional lending resource or a second opinion on a scenario."</td></tr>
+</table>
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">No Answer — Follow-Up Text</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Send immediately after the missed call.</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
       "Hey [Name], this is [Your Name] with the Daniel Sa Team at NFM Lending. I just tried to give you a quick call to introduce myself. We love working alongside agents to support their buyers, create listing-specific payment strategies, and explore creative financing options to help you and your clients win in this market. I would love to connect for a quick 20-minute conversation. Do you have any availability next week?"
     </div>
-
+      </div>
+    </details>
     <details class="script-cat" data-script-cat="new-agent" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
       <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
         <span>New Agent Follow-Up<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">4-week gifting cadence, commitment ask, and accountability follow-up</span></span>
         <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">2 playbooks</span>
       </summary>
       <div class="script-cat-body" style="padding:14px 14px 2px">
-      </div>
-    </details>
-
-    <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">
-      <strong style="color:var(--text)">Gifting Campaign Scripts (4-Week Cadence)</strong><br>Always try a call first. If no answer, follow up with a text.
+      <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">
+<strong style="color:var(--text)">Gifting Campaign Scripts (4-Week Cadence)</strong><br/>Always try a call first. If no answer, follow up with a text.
     </div>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 1: Break the Ice</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 1: Break the Ice</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], this is [Your Name] with the Daniel Sa Team at NFM Lending. I wanted to follow up after our meeting. It was great connecting with you and I'm excited to work together. How has your week been going?"
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], this is [Your Name] with the Daniel Sa Team at NFM. Great meeting with you. Looking forward to working together. Here to support you and your buyers."
     </div>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 2: Value Touch</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 2: Value Touch</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], it's [Your Name] with the Daniel Sa Team at NFM. I've been thinking about your business and wanted to share something I think will be useful for you. [share resource or market update]. Would you have a few minutes this week to connect?"
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], it's [Your Name] with NFM. I have something I think will be useful for you. [resource]. Let's connect this week!"
     </div>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 3: Opportunity Call</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 3: Opportunity Call</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], it's [Your Name] with the Daniel Sa Team at NFM. I've really enjoyed getting to know you. Do you have any buyers right now we can help with? We would love to earn your business."
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], it's [Your Name] with NFM. Do you have any buyers we can help with right now? We would love to earn your business."
     </div>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 4: Accountability Follow-Up</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Week 4: Accountability Follow-Up</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Call:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], it's [Your Name] with the Daniel Sa Team at NFM. Wanted to connect and see how your business is going. Do you have any buyers or listings we can support? We are committed to being your go-to team and we are here whenever you need us."
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:6px">Text if no answer:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
       "Hey [Agent Name], it's [Your Name] with NFM. Do you have any buyers or listings we can support right now? We are here whenever you need us."
     </div>
-
-    <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">
-      <strong style="color:var(--text)">Note:</strong> Replace [resource or market update] in Week 2 with something specific to that agent. The more relevant it is to their market or situation, the better it lands.
+      <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">
+<strong style="color:var(--text)">Note:</strong> Replace [resource or market update] in Week 2 with something specific to that agent. The more relevant it is to their market or situation, the better it lands.
     </div>
-
-    <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">New Agent Meeting &mdash; Commitment &amp; 4-Week Follow-Up</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:10px">The most common failure mode: great meeting, agent signs up for the mailing list, nothing else happens. This framework closes that gap. The commitment ask is the single most important moment &mdash; get it every time, no exceptions.</div>
-
-    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">The Commitment Ask &mdash; end of every new agent meeting</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">New Agent Meeting — Commitment &amp; 4-Week Follow-Up</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:10px">The most common failure mode: great meeting, agent signs up for the mailing list, nothing else happens. This framework closes that gap. The commitment ask is the single most important moment — get it every time, no exceptions.</div>
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">The Commitment Ask — end of every new agent meeting</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
       "Do I have your commitment to send me the next two to three leads that come your way?"
     </div>
-    <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--text-2)">
-      Deliver this while looking them in the eye and shaking their hand. This creates a spoken agreement that is genuinely difficult to break without consciously going back on their word. Ending with a vague "let me know if I can ever help" puts zero pressure on the agent and gives you no leverage to follow up on. <strong style="color:var(--text)">Getting a lead within the first 30 days is critical</strong> &mdash; after that window closes, the agent has usually reverted to their previous lender and reconverting them becomes exponentially harder.
+      <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--text-2)">
+      Deliver this while looking them in the eye and shaking their hand. This creates a spoken agreement that is genuinely difficult to break without consciously going back on their word. Ending with a vague "let me know if I can ever help" puts zero pressure on the agent and gives you no leverage to follow up on. <strong style="color:var(--text)">Getting a lead within the first 30 days is critical</strong> — after that window closes, the agent has usually reverted to their previous lender and reconverting them becomes exponentially harder.
     </div>
-
-    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">The 4-Week Follow-Up Structure</div>
-
-    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 0 &mdash; Day of the meeting</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;padding-left:10px">Send the How to Refer template. Add them on social media. No ask yet &mdash; pure value delivery.</div>
-
-    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 1 &mdash; Break the walls down</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">Send a relatable meme or short video &mdash; nothing salesy. Just staying on their radar in a human way.</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;padding-left:10px">No direct ask. Goal is to make them smile and remember you.</div>
-
-    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 2 &mdash; Value touch, still no ask</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">Send something relevant &mdash; market update, sales meeting content, or a financing strategy tip. Nothing that asks for a lead.</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;padding-left:10px">Patience here pays off in week 3. Two touches, no pressure &mdash; this is what separates you from the LO who emailed three times in a row asking for business.</div>
-
-    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 3 &mdash; First lead ask, paired with a unique product</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
-      "Hey [Agent], I was thinking about you &mdash; do you have any buyers who've been told no elsewhere? We have a 1099 program / bank statement option / portfolio loan that might be worth a look. Also, did anyone come to mind since we met that I could help with?"
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">The 4-Week Follow-Up Structure</div>
+      <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 0 — Day of the meeting</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;padding-left:10px">Send the How to Refer template. Add them on social media. No ask yet — pure value delivery.</div>
+      <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 1 — Break the walls down</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">Send a relatable meme or short video — nothing salesy. Just staying on their radar in a human way.</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;padding-left:10px">No direct ask. Goal is to make them smile and remember you.</div>
+      <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 2 — Value touch, still no ask</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">Send something relevant — market update, sales meeting content, or a financing strategy tip. Nothing that asks for a lead.</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;padding-left:10px">Patience here pays off in week 3. Two touches, no pressure — this is what separates you from the LO who emailed three times in a row asking for business.</div>
+      <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 3 — First lead ask, paired with a unique product</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      "Hey [Agent], I was thinking about you — do you have any buyers who've been told no elsewhere? We have a 1099 program / bank statement option / portfolio loan that might be worth a look. Also, did anyone come to mind since we met that I could help with?"
     </div>
-    <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--text-2)">
-      Lead with the unfamiliar product, not a well-known one. Every agent has heard of bank statement and DSCR &mdash; leading with something more unique (1099, portfolio program) signals you have tools others don't and gives them a specific reason to think of a client.
+      <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--text-2)">
+      Lead with the unfamiliar product, not a well-known one. Every agent has heard of bank statement and DSCR — leading with something more unique (1099, portfolio program) signals you have tools others don't and gives them a specific reason to think of a client.
     </div>
-
-    <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 4 &mdash; Accountability call</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
-      "Hey [Agent], I wanted to circle back &mdash; when we met, you committed to sending me the next couple of leads that came your way. Is there anyone you're working with right now I could help with?"
+      <div style="font-size:11.5px;font-weight:700;color:#1F4E79;margin-bottom:3px">Week 4 — Accountability call</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      "Hey [Agent], I wanted to circle back — when we met, you committed to sending me the next couple of leads that came your way. Is there anyone you're working with right now I could help with?"
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px;padding-left:10px">If they push back or go quiet:</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:4px;padding-left:10px">If they push back or go quiet:</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
       "Did I do something wrong?"
     </div>
-    <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--text-2)">
-      This surfaces the real reason almost every time &mdash; fix it, or pivot: "Would you be open to just introducing me to whoever you're currently working with? I'd love the chance to earn a second opinion."
+      <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--text-2)">
+      This surfaces the real reason almost every time — fix it, or pivot: "Would you be open to just introducing me to whoever you're currently working with? I'd love the chance to earn a second opinion."
     </div>
-
+      </div>
+    </details>
     <details class="script-cat" data-script-cat="existing" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
       <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
         <span>Existing Partner Growth<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Retention, feedback, and pipeline review</span></span>
         <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">2 scripts</span>
       </summary>
       <div class="script-cat-body" style="padding:14px 14px 2px">
-      </div>
-    </details>
-
-    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">For Existing Partners &mdash; shifting to earning 100% of their business</div>
-    <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">For Existing Partners — shifting to earning 100% of their business</div>
+      <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
       "What's one thing we could do better to make working together easier for you?"
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:14px;padding-left:10px">Invites specific, actionable feedback and deepens trust simultaneously. The agent who answers this honestly is the one you'll earn 100% of business from.</div>
-
-    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">Pre-Approval Pipeline Review (monthly or bi-weekly to top agents)</div>
-    <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px;padding-left:10px">Send the agent a view of their entire pre-approved pipeline with current status. Creates mutual accountability &mdash; they see their buyers' statuses, it surfaces where leads are being lost, and it makes you look like a partner, not a vendor.</div>
-
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:14px;padding-left:10px">Invites specific, actionable feedback and deepens trust simultaneously. The agent who answers this honestly is the one you'll earn 100% of business from.</div>
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">Pre-Approval Pipeline Review (monthly or bi-weekly to top agents)</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px;padding-left:10px">Send the agent a view of their entire pre-approved pipeline with current status. Creates mutual accountability — they see their buyers' statuses, it surfaces where leads are being lost, and it makes you look like a partner, not a vendor.</div>
       </div>
     </details>
-
     <button class="btn btn-sm" onclick="closeScriptsModal()" style="margin-top:8px">Close</button>
   </div>
 </div>
@@ -8195,7 +8167,7 @@ async function pfrLoad(){
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px">'
       +'<div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Portfolio Scorecard &mdash; '+range.label+'</div>'
       +'<div style="font-size:20px;font-weight:800;color:#1F4E79;margin-bottom:4px">Live components are working</div>'
-      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:12px">The single weighted number is intentionally paused until leadership defines the Tier Migration scoring target. The old 19 was based on an invented 25-points-per-migration formula and should not be used.</div>'
+      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:12px">The single weighted number is intentionally paused until leadership confirms the monthly scoring targets. No placeholder target is allowed to drive a bonus or performance result.</div>'
       +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
         +pfrStatTile("Projected monthly Agent-to-Lead",projectedRatio.toFixed(2)+" · "+ratioLabel,"pfrOpenDrill('ratio')")
         +pfrStatTile("Managed Active Partners",totalActive+" / "+PFR_TARGETS.total,"pfrOpenDrill('tier:all')")
