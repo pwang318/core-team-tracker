@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="version" content="20260721220000">
-  <meta name="build-notes" content="Face Time fixes, co-marketing bulk spend editor, closed_past_year sync, Director renamed to Co-Marketing">
+  <meta name="build-notes" content="Single-save LP notes, categorized scripts, clickable portfolio drilldowns, Face Time fixes, co-marketing bulk spend editor">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -505,6 +505,21 @@ tr:hover td{background:var(--bg)}
     <div class="cm-header"><span class="cm-title">Scripts</span><button class="cm-close" onclick="closeScriptsModal()">&times;</button></div>
     <div style="font-size:12px;color:var(--text-3);margin-bottom:18px">Exact call scripts, organized by moment in the transaction. New ones get added here as they come up.</div>
 
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:14px">
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="scriptSearchInput" type="text" placeholder="Search scripts — e.g. CTC, cold call, under contract..." oninput="filterScripts(this.value)" style="flex:1;min-width:0;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;color:var(--text);background:#fff">
+        <button class="btn btn-sm" onclick="clearScriptSearch()" type="button">Clear</button>
+      </div>
+      <div style="font-size:11.5px;color:var(--text-3);margin-top:7px">Or choose a category below. Each category opens only the scripts you need.</div>
+    </div>
+    <div id="scriptNoResults" style="display:none;background:#FFF3F2;border:1px solid #F1D4CF;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12.5px;color:#9B4A40">No scripts matched that search.</div>
+
+    <details class="script-cat" data-script-cat="buyer-referral" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
+      <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
+        <span>Buyer Referral & Introduction<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">The first buyer handoff and referral language</span></span>
+        <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">1 script</span>
+      </summary>
+      <div class="script-cat-body" style="padding:14px 14px 2px">
     <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">How to Refer Us &mdash; 1st Buyer Interaction</div>
     <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">The exact script an agent should use the moment they get a buyer &mdash; via text, email, or verbally, same script either way.</div>
     <div style="font-size:12.5px;color:var(--text-2);font-weight:600;margin-bottom:4px">Send to Client:</div>
@@ -521,6 +536,15 @@ tr:hover td{background:var(--bg)}
       Please let me know if you have any follow-up questions/concerns in the meantime. Thank you so much!<br><br>
       Have a wonderful day,
     </div>
+
+    <details class="script-cat" data-script-cat="transaction" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
+      <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
+        <span>Contract & Closing Calls<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Listing agent, buyer agent, and clear-to-close</span></span>
+        <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">3 scripts</span>
+      </summary>
+      <div class="script-cat-body" style="padding:14px 14px 2px">
+      </div>
+    </details>
 
     <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Under Contract Call (Listing Agent)</div>
     <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Call the listing agent as soon as a deal you're the buyer's lender on goes under contract. Set the tone early &mdash; this is your first real touchpoint with them on this file.</div>
@@ -572,6 +596,15 @@ tr:hover td{background:var(--bg)}
       "I'd love to actually sit down and meet sometime, even just 15 minutes, to see if it makes sense to work together."
     </div>
 
+    <details class="script-cat" data-script-cat="prospecting" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
+      <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
+        <span>Prospecting & Cold Outreach<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Cold call opener, objections, and no-answer follow-up</span></span>
+        <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">3 scripts</span>
+      </summary>
+      <div class="script-cat-body" style="padding:14px 14px 2px">
+      </div>
+    </details>
+
     <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Cold Call &mdash; Opening Script</div>
     <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--text-2)"><strong style="color:var(--text)">Before you dial:</strong> Pull up RETR and look them up. Find a recent sale or listing and mention it in your opener &mdash; "I saw your listing at [address] just closed, congrats!" It makes the call personal and shows you did your homework.</div>
     <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Goal: introduce yourself, explain how we support agents, and schedule a 20-minute meeting.</div>
@@ -597,6 +630,15 @@ tr:hover td{background:var(--bg)}
     <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12.5px;font-style:italic">
       "Hey [Name], this is [Your Name] with the Daniel Sa Team at NFM Lending. I just tried to give you a quick call to introduce myself. We love working alongside agents to support their buyers, create listing-specific payment strategies, and explore creative financing options to help you and your clients win in this market. I would love to connect for a quick 20-minute conversation. Do you have any availability next week?"
     </div>
+
+    <details class="script-cat" data-script-cat="new-agent" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
+      <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
+        <span>New Agent Follow-Up<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">4-week gifting cadence, commitment ask, and accountability follow-up</span></span>
+        <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">2 playbooks</span>
+      </summary>
+      <div class="script-cat-body" style="padding:14px 14px 2px">
+      </div>
+    </details>
 
     <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text-2);margin-bottom:16px">
       <strong style="color:var(--text)">Gifting Campaign Scripts (4-Week Cadence)</strong><br>Always try a call first. If no answer, follow up with a text.
@@ -690,6 +732,15 @@ tr:hover td{background:var(--bg)}
       This surfaces the real reason almost every time &mdash; fix it, or pivot: "Would you be open to just introducing me to whoever you're currently working with? I'd love the chance to earn a second opinion."
     </div>
 
+    <details class="script-cat" data-script-cat="existing" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
+      <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
+        <span>Existing Partner Growth<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Retention, feedback, and pipeline review</span></span>
+        <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">2 scripts</span>
+      </summary>
+      <div class="script-cat-body" style="padding:14px 14px 2px">
+      </div>
+    </details>
+
     <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">For Existing Partners &mdash; shifting to earning 100% of their business</div>
     <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;font-style:italic">
       "What's one thing we could do better to make working together easier for you?"
@@ -698,6 +749,9 @@ tr:hover td{background:var(--bg)}
 
     <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">Pre-Approval Pipeline Review (monthly or bi-weekly to top agents)</div>
     <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px;padding-left:10px">Send the agent a view of their entire pre-approved pipeline with current status. Creates mutual accountability &mdash; they see their buyers' statuses, it surfaces where leads are being lost, and it makes you look like a partner, not a vendor.</div>
+
+      </div>
+    </details>
 
     <button class="btn btn-sm" onclick="closeScriptsModal()" style="margin-top:8px">Close</button>
   </div>
@@ -2613,8 +2667,34 @@ function openLpContactModal(name){
 }
 
 function closeLpContactModal(){document.getElementById("lpContactModal").classList.remove("open");editingLpContact=null;}
-function openScriptsModal(){document.getElementById("scriptsModal").classList.add("open");}
+function openScriptsModal(){
+  document.getElementById("scriptsModal").classList.add("open");
+  var box=document.querySelector("#scriptsModal .contact-modal-box");
+  if(box) box.scrollTop=0;
+}
 function closeScriptsModal(){document.getElementById("scriptsModal").classList.remove("open");}
+function filterScripts(value){
+  var q=(value||"").trim().toLowerCase();
+  var cats=Array.from(document.querySelectorAll("#scriptsModal .script-cat"));
+  var shown=0;
+  cats.forEach(function(cat){
+    var match=!q || (cat.textContent||"").toLowerCase().indexOf(q)!==-1;
+    cat.style.display=match?"block":"none";
+    if(match){
+      shown++;
+      if(q) cat.open=true;
+    }
+  });
+  var empty=document.getElementById("scriptNoResults");
+  if(empty) empty.style.display=(q && shown===0)?"block":"none";
+}
+function clearScriptSearch(){
+  var input=document.getElementById("scriptSearchInput");
+  if(input) input.value="";
+  filterScripts("");
+  var box=document.querySelector("#scriptsModal .contact-modal-box");
+  if(box) box.scrollTop=0;
+}
 
 function saveLpContactModal(){
   if(!editingLpContact)return;
@@ -6918,8 +6998,9 @@ function ctIsRepetitive(text){
   return (uniqueCount/words.length < 0.5) || (maxRepeat/words.length > 0.4);
 }
 
-var ctConfirmedOnce={}; // name -> true once they've tapped "Save anyway"
-
+/* Single-save note flow: normal quality nudges must never require a second click.
+   We still hard-block obviously repetitive/gamed notes, but duplicate wording or a
+   short Answered/In Person note is allowed to save on the first click. */
 if(typeof window.tryConfirmCall==="function"){
   var origTryConfirm2=window.tryConfirmCall;
   window.tryConfirmCall=function(name,lp){
@@ -6929,47 +7010,19 @@ if(typeof window.tryConfirmCall==="function"){
     var findSaveBtn=function(){
       return document.querySelector('.btn-primary[onclick*="tryConfirmCall"][onclick*="'+name.replace(/'/g,"\\'")+'"]');
     };
-    if(outcome && draft){
-      if(ctIsRepetitive(draft)){
-        var btn0=findSaveBtn();
-        if(btn0){
-          var orig0=btn0.innerHTML;
-          btn0.innerHTML="This note repeats the same word/phrase — add a real line about what happened.";
-          btn0.style.background="#B54B42";
-          btn0.style.fontSize="11px";
-          setTimeout(function(){ if(btn0.innerHTML.indexOf("repeats")>=0){btn0.innerHTML=orig0;btn0.style.background="";btn0.style.fontSize="";} },3500);
-        }
-        return; // hard block — no override path for this one
+    if(outcome && draft && ctIsRepetitive(draft)){
+      var btn0=findSaveBtn();
+      if(btn0){
+        var orig0=btn0.innerHTML;
+        btn0.innerHTML="Add a real note about what happened before saving.";
+        btn0.style.background="#B54B42";
+        btn0.style.fontSize="11px";
+        setTimeout(function(){ if(btn0.innerHTML.indexOf("real note")>=0){btn0.innerHTML=orig0;btn0.style.background="";btn0.style.fontSize="";} },3500);
       }
+      return;
     }
-    if(outcome && draft && !ctConfirmedOnce[name]){
-      var dupMsg=ctFindDuplicate(name,lp,draft);
-      if(dupMsg){
-        var btn=findSaveBtn();
-        if(btn){
-          var orig=btn.innerHTML;
-          btn.innerHTML="⚠ "+dupMsg+" Tap again to save anyway.";
-          btn.style.background="#B54B42";
-          btn.style.fontSize="11px";
-          ctConfirmedOnce[name]=true;
-          setTimeout(function(){ delete ctConfirmedOnce[name]; if(btn.innerHTML.indexOf("Tap again")>=0){btn.innerHTML=orig;btn.style.background="";btn.style.fontSize="";} },6000);
-        }
-        return; // block this tap — require a second, deliberate tap to proceed
-      }
-      if((outcome==="Answered"||outcome==="In Person") && ctLacksAgentResponse(draft) && ctWords(draft).length<25){
-        var btn2=findSaveBtn();
-        if(btn2){
-          var orig2=btn2.innerHTML;
-          btn2.innerHTML="Add what they said back — makes this easier to pick up next time. Tap again to save anyway.";
-          btn2.style.background="#B8842B";
-          btn2.style.fontSize="11px";
-          ctConfirmedOnce[name]=true;
-          setTimeout(function(){ delete ctConfirmedOnce[name]; if(btn2.innerHTML.indexOf("Tap again")>=0){btn2.innerHTML=orig2;btn2.style.background="";btn2.style.fontSize="";} },6000);
-        }
-        return;
-      }
-    }
-    delete ctConfirmedOnce[name];
+    // Soft quality checks remain informational only; they no longer block the first save.
+    // This keeps the LP workflow to one Save click while preserving the data-quality guardrail above.
     return origTryConfirm2.apply(this,arguments);
   };
 }
