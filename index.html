@@ -7613,7 +7613,7 @@ if(typeof window.renderLpSearch==="function"){
 var PFR_TIER_TOUCH={Channel:14,A:14,B:30,C:60};
 var PFR_TIER_URGENT={Channel:21,A:21,B:45,C:90};
 var PFR_TARGETS={total:200,A:25,B:35};
-var pfrPeriod="month";
+var pfrPeriod="week";
 var pfrDrill={};
 
 function pfrTierLabel(tier){return tier?tier+"-tier":"No tier set";}
@@ -7633,10 +7633,12 @@ function pfrPeriodRange(){
   var now=new Date();
   if(pfrPeriod==="week"){
     var wk=getWeekKey(now);
-    return{start:wk,label:"This Week"};
+    var end=new Date(wk+"T12:00:00");end.setDate(end.getDate()+6);
+    return{start:wk,end:localDateStr(end),label:"This Week"};
   }
   var d2=new Date(now.getFullYear(),now.getMonth(),1);
-  return{start:localDateStr(d2),label:"This Month"};
+  var d3=new Date(now.getFullYear(),now.getMonth()+1,0);
+  return{start:localDateStr(d2),end:localDateStr(d3),label:"This Month"};
 }
 
 // Syncs agent_profiles from the Power BI upload so Portfolio Review, Health Score, cadence
@@ -7936,13 +7938,13 @@ async function pfrLoad(){
       sbFetch("GET","agent_profiles?select=*&limit=2000"),
       sbFetch("GET","amanda_activities?select=agent_name,act_date,outcome,act_type&order=act_date.desc&limit=3000"),
       sbFetch("GET","call_logs?select=agent_name,call_date,outcome&order=call_date.desc&limit=3000"),
-      sbFetch("GET","tier_migrations?select=agent_name,from_tier,to_tier,migration_date&migration_date=gte."+range.start+"&limit=1000").catch(function(){return[];}),
-      sbFetch("GET","velocify_leads?date_added=gte."+range.start+"&select=referral_partner_name&limit=5000").catch(function(){return[];}),
+      sbFetch("GET","tier_migrations?select=agent_name,from_tier,to_tier,migration_date&migration_date=gte."+range.start+"&migration_date=lte."+range.end+"&limit=1000").catch(function(){return[];}),
+      sbFetch("GET","velocify_leads?date_added=gte."+range.start+"&date_added=lte."+range.end+"&select=referral_partner_name&limit=5000").catch(function(){return[];}),
       // Playbook Agent-to-Lead Ratio is monthly. Pull current-month Velocify leads, then show
       // MTD actual plus a projected month-end pace so early-month partial data isn't misread.
       sbFetch("GET","velocify_leads?date_added=gte."+(function(){var d=new Date();return new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10);}())+"&select=referral_partner_name,date_added&limit=5000").catch(function(){return[];}),
-      sbFetch("GET","amanda_activities?select=agent_name,act_type,act_date,outcome,notes&act_date=gte."+range.start+"&limit=3000").catch(function(){return[];}),
-      sbFetch("GET","break_breads?select=agent_name,date,notes&date=gte."+range.start+"&limit=2000").catch(function(){return[];}),
+      sbFetch("GET","amanda_activities?select=agent_name,act_type,act_date,outcome,notes&act_date=gte."+range.start+"&act_date=lte."+range.end+"&limit=3000").catch(function(){return[];}),
+      sbFetch("GET","break_breads?select=agent_name,date,notes&date=gte."+range.start+"&date=lte."+range.end+"&limit=2000").catch(function(){return[];}),
       sbFetch("GET","break_breads?select=agent_name,date&order=date.desc&limit=3000").catch(function(){return[];}),
       // Real last-lead-date per agent from Velocify (trailing 12 months) — more accurate than
       // latest_lead_date on agent_profiles, which only updates when the Power BI import runs.
