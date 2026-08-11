@@ -4,8 +4,8 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260721220000">
-  <meta name="build-notes" content="Reviewed merge: one-click LP notes, categorized/searchable scripts, clickable portfolio drilldowns; placeholder weighted score disabled">
+  <meta name="version" content="20260811155500">
+  <meta name="build-notes" content="Reviewed merge + inactive-agent persistence fix: removed agents stay removed across Power BI refreshes and are excluded from Portfolio tier migrations">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1388,11 +1388,26 @@ var ctDisplayNames={};
 // decide who's eligible for active work). Best-effort: if this hasn't loaded yet when a screen
 // first renders, nothing is excluded — the same tolerance already used elsewhere for admin views.
 async function loadInactiveRosterNames(){
+  // A removed agent can be represented by either the current relationship_status=inactive flag
+  // or the legacy agent_assignments lp=__REMOVED__ sentinel. Union both so Power BI uploads
+  // can never accidentally resurrect a removed agent, even if one of the two database fields
+  // is unavailable or was written by an older tracker version.
   try{
-    var rows=await sbFetch("GET","agent_profiles?select=agent_name,display_name,relationship_status&limit=5000");
-    ctInactiveRosterNames=new Set((rows||[]).filter(function(r){return r.relationship_status==="inactive";}).map(function(r){return(r.agent_name||"").trim().toLowerCase();}));
+    var results=await Promise.all([
+      sbFetch("GET","agent_profiles?select=agent_name,display_name,relationship_status&limit=5000")
+        .catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,display_name&limit=5000").catch(function(){return[];});}),
+      sbFetch("GET","agent_assignments?select=agent_name,lp&limit=5000").catch(function(){return[];})
+    ]);
+    var rows=results[0]||[],assignments=results[1]||[];
+    ctInactiveRosterNames=new Set();
+    rows.forEach(function(r){
+      if(r.relationship_status==="inactive"&&r.agent_name)ctInactiveRosterNames.add((r.agent_name||"").trim().toLowerCase());
+    });
+    assignments.forEach(function(r){
+      if(r.lp==="__REMOVED__"&&r.agent_name)ctInactiveRosterNames.add((r.agent_name||"").trim().toLowerCase());
+    });
     ctDisplayNames={};
-    (rows||[]).forEach(function(r){if(r.agent_name&&r.display_name)ctDisplayNames[(r.agent_name||"").trim().toLowerCase()]=r.display_name.trim();});
+    rows.forEach(function(r){if(r.agent_name&&r.display_name)ctDisplayNames[(r.agent_name||"").trim().toLowerCase()]=r.display_name.trim();});
   }catch(e){ctInactiveRosterNames=new Set();}
 }
 var userTyping=false;
@@ -4117,16 +4132,20 @@ function handleUpload(input){
       var wb=XLSX.read(new Uint8Array(e.target.result),{type:"array",cellDates:true});
       var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null});
       var up=[],added=0,updated=0,flagged=0;
+      // Refresh the shared removed/inactive roster BEFORE processing Power BI. Otherwise a row
+      // that still exists in the export can overwrite __REMOVED__ in agent_assignments and make
+      // the agent reappear after refresh. Removed means removed until explicitly reactivated.
+      await loadInactiveRosterNames();
       // Build a name->row map for co-marketing lookup
       var pbMap={};
       rows.forEach(function(row){
         var n=(row["Agent"]||"").toString().trim().toUpperCase();
-        if(n&&n!=="AGENT"&&n!=="NAN")pbMap[n]=row;
+        if(n&&n!=="AGENT"&&n!=="NAN"&&!ctInactiveRosterNames.has(n.toLowerCase()))pbMap[n]=row;
       });
       rows.forEach(function(row){
         var n=(row["Agent"]||"").toString().trim().toUpperCase();
         var lv=(row["Level"]||"").toString().trim();
-        if(!n||n==="AGENT"||n==="NAN")return;
+        if(!n||n==="AGENT"||n==="NAN"||ctInactiveRosterNames.has(n.toLowerCase()))return;
         // Power BI hands back a raw Excel serial number for these date columns even with
         // cellDates:true (no explicit date format on the cell) — new Date(rawNumber) misreads
         // that as milliseconds-since-epoch and silently produces 1970-01-01 for every row.
@@ -7724,11 +7743,11 @@ async function lpSyncAgentProfilesFromUpload(rows){
   // to distinguish the CURRENT Power BI population from old/manual profiles that remain in history.
   var powerBiImportStamp=new Date().toISOString();
 
-  var existing=await sbFetch("GET","agent_profiles?select=agent_name,tier,retained,email,phone,address,birthday&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,retained&limit=5000").catch(function(){return[];});});
-  var existingByKey={},existingTierByKey={},existingActiveByKey={},existingContactByKey={};
+  var existing=await sbFetch("GET","agent_profiles?select=agent_name,tier,retained,email,phone,address,birthday,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,retained,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,retained&limit=5000").catch(function(){return[];});});});
+  var existingByKey={},existingTierByKey={},existingActiveByKey={},existingContactByKey={},existingRelationshipStatusByKey={};
   (existing||[]).forEach(function(e){
     var k=(e.agent_name||"").trim().toLowerCase();
-    if(k&&!existingByKey[k]){existingByKey[k]=e.agent_name;existingTierByKey[k]=e.tier||null;existingActiveByKey[k]=!!e.retained;existingContactByKey[k]={email:e.email,phone:e.phone,address:e.address,birthday:e.birthday};} // first match wins if pre-existing casing duplicates exist — same known limitation flagged in the audit, not solved here
+    if(k&&!existingByKey[k]){existingByKey[k]=e.agent_name;existingTierByKey[k]=e.tier||null;existingActiveByKey[k]=!!e.retained;existingRelationshipStatusByKey[k]=e.relationship_status||"active";existingContactByKey[k]={email:e.email,phone:e.phone,address:e.address,birthday:e.birthday};} // first match wins if pre-existing casing duplicates exist — same known limitation flagged in the audit, not solved here
   });
 
   var tierChanges=[],activeChanges={becameActive:0,becameInactive:0};
@@ -7752,6 +7771,10 @@ async function lpSyncAgentProfilesFromUpload(rows){
     var normalizedName=rawName.split(" ").map(function(w){return w?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():"";}).join(" ");
     var key=rawName.toLowerCase();
     var canonicalName=existingByKey[key]||normalizedName; // preserve the real stored name/casing when this person is already known
+    // A Power BI export is production data, not roster authority. If an agent was explicitly
+    // removed from our relationship roster, leave their profile/history untouched and do not
+    // stamp them back into the current Portfolio population or generate a fake tier migration.
+    if(existingRelationshipStatusByKey[key]==="inactive"||ctInactiveRosterNames.has(key))return;
 
     var payload={agent_name:canonicalName,tier:tier,closes_past_year:closes,total_leads_past_year:leads,retained:isActive,
       powerbi_last_seen_at:powerBiImportStamp,powerbi_level:(row["Level"]||"").toString().trim()||null};
@@ -8014,6 +8037,17 @@ async function pfrLoad(){
     var rmActivePartners=currentPowerBiAgents.filter(function(a){return !!a.retained;});
     var active=rmActivePartners.filter(function(a){return a.do_not_contact!==true&&a.relationship_status!=="inactive";});
     var totalActive=active.length;
+
+    // Tier Migration is a managed-portfolio metric. Exclude removed/inactive/DNC agents and
+    // null-tier transitions (for example C → ?), because "no tier" is not a real migration.
+    // This also hides legacy false migration rows that were already written before this fix.
+    var managedNameSet={};
+    active.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n)managedNameSet[n]=true;});
+    var validMigrationTiers={C:true,B:true,A:true,Channel:true};
+    migrations=migrations.filter(function(m){
+      var n=(m.agent_name||"").trim().toLowerCase();
+      return !!managedNameSet[n]&&!!validMigrationTiers[m.from_tier]&&!!validMigrationTiers[m.to_tier]&&m.from_tier!==m.to_tier;
+    });
 
     var FORMAL_CADENCE={Channel:30,A:30,B:60,C:90};
     var rows=active.map(function(a){
