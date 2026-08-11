@@ -7901,6 +7901,8 @@ function pfrHealthTile(label,count,color,onclick){
     +'<div style="font-size:10.5px;color:var(--text-3);margin-top:2px">'+label+'</div></div>';
 }
 function pfrListRow(rank,name,detail){
+  // Never let a missing optional detail render as the literal word "undefined".
+  detail=(detail===undefined||detail===null||detail==="")?"—":detail;
   return '<div style="padding:8px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px">'
     +(rank?'<span style="font-size:11px;font-weight:700;color:var(--text-3);width:16px;flex-shrink:0">'+rank+'</span>':'')
     +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">'+escHtml(pfrProperCase(name))+'</div><div style="font-size:11px;color:var(--text-3)">'+detail+'</div></div>'
@@ -8112,8 +8114,15 @@ async function pfrLoad(){
     if(!latestPowerBiStamp)dataGaps.push("Current Power BI population is not stamped yet. Re-upload the latest Power BI file once after this deployment to establish a clean baseline.");
     if(leadsMTD===0)dataGaps.push("No Velocify leads found month-to-date.");
 
+    // Normalize Break Bread rows to the same shape as Amanda Partner Meeting activity rows.
+    // break_breads uses `date`; amanda_activities uses `act_date`. Without this normalization,
+    // the drilldown tried to render a.act_date for Break Breads and displayed "undefined".
+    var normalizedExistingMeetingActs=periodPartnerMeetingActs.concat(periodBreads.map(function(b){
+      return {agent_name:b.agent_name,act_date:b.date,notes:b.notes||"",act_type:"Break Bread"};
+    }));
+
     pfrDrill={rows:rows,missingGrowthOpp:missingGrowthOpp,migrations:migrations,lowSatisfaction:lowSatisfaction,
-      escalations:escalations,newRealtorMeetingActs:newRealtorMeetingActs,meetingActs:periodPartnerMeetingActs.concat(periodBreads),
+      escalations:escalations,newRealtorMeetingActs:newRealtorMeetingActs,meetingActs:normalizedExistingMeetingActs,
       top10AtRisk:top10AtRisk,top10GrowthOpp:top10GrowthOpp,highPotential:highPotential,proactiveWatch:proactiveWatch,
       convertedActive:active.filter(function(a){return metThisPeriod[(a.agent_name||"").trim().toLowerCase()];}),
       meetings:periodActs};
@@ -8299,13 +8308,14 @@ function pfrOpenDrill(key){
     items=migList.map(function(m){return{name:m.agent_name,detail:(m.from_tier||"?")+" → "+(m.to_tier||"?")+" · "+m.migration_date};});
   }else if(key==="newmeetings"){
     title.textContent="New Agent Meetings — this period";
-    items=(pfrDrill.newRealtorMeetingActs||[]).map(function(a){return{name:a.agent_name,detail:a.act_date};});
+    items=(pfrDrill.newRealtorMeetingActs||[]).map(function(a){return{name:a.agent_name,detail:fmt(a.act_date)};});
   }else if(key==="existingmeetings"){
     title.textContent="Existing Partner Meetings — this period";
-    items=(pfrDrill.meetingActs||[]).map(function(a){return{name:a.agent_name,detail:a.act_date};});
+    items=(pfrDrill.meetingActs||[]).map(function(a){return{name:a.agent_name,date:a.act_date||a.date,detail:fmt(a.act_date||a.date)+(a.act_type?" · "+a.act_type:"")};})
+      .sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
   }else if(key==="scheduled"){
     title.textContent="New Meetings Scheduled — this period";
-    items=(pfrDrill.meetings||[]).filter(function(a){return a.outcome==="Meeting Scheduled";}).map(function(a){return{name:a.agent_name,detail:a.act_date};});
+    items=(pfrDrill.meetings||[]).filter(function(a){return a.outcome==="Meeting Scheduled";}).map(function(a){return{name:a.agent_name,detail:fmt(a.act_date)};});
   }else if(key==="converted"){
     title.textContent="New Agents Converted to Active";
     items=(pfrDrill.convertedActive||[]).map(function(a){return{name:a.agent_name,detail:pfrTierLabel(a.tier)};});
@@ -8314,7 +8324,8 @@ function pfrOpenDrill(key){
     title.textContent=mt+"-Tier Existing Partner Meetings — this period";
     var namesInTier={};
     (pfrDrill.rows||[]).filter(function(r){return r.tier===mt;}).forEach(function(r){namesInTier[r.name.toLowerCase()]=true;});
-    items=(pfrDrill.meetingActs||[]).filter(function(a){return namesInTier[(a.agent_name||"").toLowerCase()];}).map(function(a){return{name:a.agent_name,detail:a.act_date};});
+    items=(pfrDrill.meetingActs||[]).filter(function(a){return namesInTier[(a.agent_name||"").toLowerCase()];}).map(function(a){return{name:a.agent_name,date:a.act_date||a.date,detail:fmt(a.act_date||a.date)+(a.act_type?" · "+a.act_type:"")};})
+      .sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
   }
   body.innerHTML=items.length
     ?items.map(function(it,i){return pfrListRow(i+1,it.name,it.detail);}).join("")
