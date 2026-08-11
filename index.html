@@ -1,4 +1,4 @@
-   
+    
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8127,7 +8127,16 @@ async function pfrLoad(){
       escalations:escalations,newRealtorMeetingActs:newRealtorMeetingActs,meetingActs:normalizedExistingMeetingActs,
       top10AtRisk:top10AtRisk,top10GrowthOpp:top10GrowthOpp,highPotential:highPotential,proactiveWatch:proactiveWatch,
       convertedActive:active.filter(function(a){return metThisPeriod[(a.agent_name||"").trim().toLowerCase()];}),
-      meetings:periodActs};
+      meetings:periodActs,
+      powerBiActiveRows:currentPowerBiAgents.filter(function(a){return !!a.powerbi_level;}),
+      rmActivePartners:rmActivePartners,
+      managedActivePartners:active,
+      monthLeads:monthLeads,
+      leadsMTD:leadsMTD,
+      projectedMonthLeads:projectedMonthLeads,
+      ratioMTD:ratioMTD,
+      projectedRatio:projectedRatio,
+      totalActive:totalActive};
 
     var html="";
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px">'
@@ -8135,9 +8144,9 @@ async function pfrLoad(){
       +'<div style="font-size:20px;font-weight:800;color:#1F4E79;margin-bottom:4px">Live components are working</div>'
       +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:12px">The single weighted number is intentionally paused until leadership defines the Tier Migration scoring target. The old 19 was based on an invented 25-points-per-migration formula and should not be used.</div>'
       +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
-        +pfrStatTile("Projected monthly Agent-to-Lead",projectedRatio.toFixed(2)+" · "+ratioLabel)
-        +pfrStatTile("Managed Active Partners",totalActive+" / "+PFR_TARGETS.total)
-        +pfrStatTile("Tier migrations — "+range.label,(migCtoB+migBtoA+migAtoChannel+migOther))
+        +pfrStatTile("Projected monthly Agent-to-Lead",projectedRatio.toFixed(2)+" · "+ratioLabel,"pfrOpenDrill('ratio')")
+        +pfrStatTile("Managed Active Partners",totalActive+" / "+PFR_TARGETS.total,"pfrOpenDrill('tier:all')")
+        +pfrStatTile("Tier migrations — "+range.label,(migCtoB+migBtoA+migAtoChannel+migOther),"pfrOpenDrill('mig:all')")
       +'</div>'
       +(dataGaps.length?'<div style="background:#FBF3E5;border:1px solid #E8DDC8;border-radius:8px;padding:8px 12px;margin-top:12px;font-size:11px;color:#8C7355">&#9888; '+dataGaps.join('<br>&#9888; ')+'</div>':'')
     +'</div>';
@@ -8146,9 +8155,9 @@ async function pfrLoad(){
       +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Portfolio Reconciliation</div>'
       +'<div style="font-size:11px;color:var(--text-3);margin-bottom:10px">Three different populations on purpose — this is how the tracker reconciles to Power BI without mixing definitions.</div>'
       +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
-        +pfrStatTile("Power BI Active Agents",powerBiActiveAgents+(latestPowerBiStamp?"":"*") )
-        +pfrStatTile("RM Active Partners · 90d",rmActivePartners.length)
-        +pfrStatTile("Managed Active Partners",totalActive)
+        +pfrStatTile("Power BI Active Agents",powerBiActiveAgents+(latestPowerBiStamp?"":"*"),"pfrOpenDrill('pop:powerbi')")
+        +pfrStatTile("RM Active Partners · 90d",rmActivePartners.length,"pfrOpenDrill('pop:rmactive')")
+        +pfrStatTile("Managed Active Partners",totalActive,"pfrOpenDrill('tier:all')")
       +'</div>'
       +'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">Power BI Active Agents = current imported rows with a Power BI Level. RM Active Partners = latest lead OR close within 90 days. Managed Active Partners = RM Active Partners excluding inactive/removed and DNC.</div>'
     +'</div>';
@@ -8166,8 +8175,8 @@ async function pfrLoad(){
       +(countByTier.None>0?'<div style="margin-top:10px;background:#FBF3E5;border:1px solid #E8DDC8;border-radius:8px;padding:8px 12px;font-size:11px;color:#8C7355">&#9888; '+countByTier.None+' active partner'+(countByTier.None!==1?"s have":" has")+' no tier set &mdash; check the Power BI/Contacts import.</div>':'')
     +'</div>';
 
-    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Active Agent-to-Lead Ratio · Monthly</div>'
+    html+='<div onclick="pfrOpenDrill(\'ratio\')" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Active Agent-to-Lead Ratio · Monthly <span style="font-size:10px;font-weight:600;color:var(--text-3)">· click for source data</span></div>'
       +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+leadsMTD+' Velocify leads MTD &divide; '+totalActive+' managed active partners = <strong>'+ratioMTD.toFixed(2)+'</strong></div>'
       +'<div style="font-size:24px;font-weight:800;color:'+ratioColor+'">'+projectedRatio.toFixed(2)+'<span style="font-size:13px;font-weight:600;margin-left:8px">'+ratioLabel+'</span></div>'
       +'<div style="font-size:10.5px;color:var(--text-3);margin-top:2px">Projected month-end pace: '+projectedMonthLeads+' leads. Min 0.90 &middot; Target 1.15+ &middot; Elite 1.30+</div>'
@@ -8293,6 +8302,28 @@ function pfrOpenDrill(key){
   }else if(key==="lowsat"){
     title.textContent="Low Satisfaction / Support Rating";
     items=(pfrDrill.lowSatisfaction||[]).map(function(r){return{name:r.name,detail:pfrTierLabel(r.tier)+" · rated "+r.satisfaction+"/5"};});
+  }else if(key==="ratio"){
+    title.textContent="Agent-to-Lead Ratio — source data";
+    var mtd=pfrDrill.monthLeads||[];
+    var summary='<div style="padding:12px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:12px;line-height:1.6">'
+      +'<strong>'+((pfrDrill.leadsMTD||0))+' Velocify leads MTD</strong> &divide; <strong>'+((pfrDrill.totalActive||0))+' managed active partners</strong> = <strong>'+((pfrDrill.ratioMTD||0).toFixed(2))+'</strong><br>'
+      +'Projected month-end: <strong>'+((pfrDrill.projectedMonthLeads||0))+' leads</strong> = projected ratio <strong>'+((pfrDrill.projectedRatio||0).toFixed(2))+'</strong>. The projected lead count is a pace calculation, not additional lead records.'
+      +'</div>';
+    items=mtd.map(function(l){return{name:(l.referral_partner_name||"Unassigned / no referral partner"),detail:fmt(l.date_added)};});
+    body.innerHTML=summary+(items.length?items.map(function(it,i){return pfrListRow(i+1,it.name,it.detail);}).join(""):'<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No Velocify leads found month-to-date.</div>');
+    overlay.style.display="flex";
+    return;
+  }else if(key==="pop:powerbi"){
+    title.textContent="Power BI Active Agents — current import";
+    items=(pfrDrill.powerBiActiveRows||[]).map(function(a){return{name:a.agent_name,detail:(a.powerbi_level||"Power BI active")+" · "+pfrTierLabel(a.tier)};});
+  }else if(key==="pop:rmactive"){
+    title.textContent="RM Active Partners — latest lead or close within 90 days";
+    items=(pfrDrill.rmActivePartners||[]).map(function(a){
+      var dates=[];
+      if(a.latest_lead_date)dates.push("lead "+fmt(a.latest_lead_date));
+      if(a.latest_close_date)dates.push("close "+fmt(a.latest_close_date));
+      return{name:a.agent_name,detail:pfrTierLabel(a.tier)+(dates.length?" · "+dates.join(" · "):"")};
+    });
   }else if(key.indexOf("tier:")===0){
     var t=key.split(":")[1];
     title.textContent=t==="all"?"All Active Partners":t==="None"?"No Tier Set":t+"-Tier Active Partners";
@@ -8303,10 +8334,12 @@ function pfrOpenDrill(key){
     items=(pfrDrill.rows||[]).filter(function(r){return r.health===h;}).map(function(r){return{name:r.name,detail:pfrTierLabel(r.tier)+" · "+(r.daysSinceLead===null?"no lead logged":r.daysSinceLead+"d since last lead")};});
   }else if(key.indexOf("mig:")===0){
     var parts=key.split(":");
-    title.textContent=parts[1]==="other"?"Other Tier Changes":parts[1]+" → "+parts[2]+" Migrations";
-    var migList=parts[1]==="other"
-      ?(pfrDrill.migrations||[]).filter(function(m){return!((m.from_tier==="C"&&m.to_tier==="B")||(m.from_tier==="B"&&m.to_tier==="A")||(m.from_tier==="A"&&m.to_tier==="Channel"));})
-      :(pfrDrill.migrations||[]).filter(function(m){return m.from_tier===parts[1]&&m.to_tier===parts[2];});
+    title.textContent=parts[1]==="all"?"All Tier Migrations — this period":parts[1]==="other"?"Other Tier Changes":parts[1]+" → "+parts[2]+" Migrations";
+    var migList=parts[1]==="all"
+      ?(pfrDrill.migrations||[])
+      :parts[1]==="other"
+        ?(pfrDrill.migrations||[]).filter(function(m){return!((m.from_tier==="C"&&m.to_tier==="B")||(m.from_tier==="B"&&m.to_tier==="A")||(m.from_tier==="A"&&m.to_tier==="Channel"));})
+        :(pfrDrill.migrations||[]).filter(function(m){return m.from_tier===parts[1]&&m.to_tier===parts[2];});
     items=migList.map(function(m){return{name:m.agent_name,detail:(m.from_tier||"?")+" → "+(m.to_tier||"?")+" · "+m.migration_date};});
   }else if(key==="newmeetings"){
     title.textContent="New Agent Meetings — this period";
