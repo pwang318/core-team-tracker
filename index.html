@@ -1,4 +1,4 @@
-   
+  
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -471,6 +471,11 @@ tr:hover td{background:var(--bg)}
   <div class="contact-modal-box">
     <div class="cm-header"><span class="cm-title">Edit contact info</span><button class="cm-close" onclick="closeLpContactModal()">×</button></div>
     <div style="font-size:12px;color:#888;margin-bottom:14px" id="lpContactModalName"></div>
+    <div class="cm-field">
+      <label>Correct display name</label>
+      <input type="text" id="lp-cm-display-name" placeholder="e.g. Jordan Holibaugh">
+      <div style="font-size:10.5px;color:#888;margin-top:4px">Safe spelling/capitalization correction shown in both trackers. It does not rename the underlying agent record.</div>
+    </div>
     <div id="lpContactModalStatus" style="display:none;font-size:12px;font-weight:600;padding:8px 12px;border-radius:6px;margin-bottom:10px"></div>
     <div class="cm-field"><label>Phone</label><input type="text" id="lp-cm-phone" placeholder="Phone number"></div>
     <div class="cm-field"><label>Email</label><input type="email" id="lp-cm-email" placeholder="Email address"></div>
@@ -1254,6 +1259,8 @@ var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
 function displayName(raw){
   if(!raw)return raw;
   const s=String(raw).trim();
+  const corrected=(typeof ctDisplayNames!=="undefined"&&ctDisplayNames[(s||"").toLowerCase()])||null;
+  if(corrected)return corrected;
   if(!s)return s;
   // Preserve intentional mixed-case human-entered names exactly (McMahon, de la Rosa, etc.).
   // Normalize only obvious raw-import casing: ALL CAPS or all lowercase.
@@ -1348,6 +1355,7 @@ var weekKey=getWeekKey(TODAY);
 var lastWeekKey=getLastWeekKey(TODAY);
 var agents=[],callLogs={},lastWeekLogs={},currentUser=null,noteTimers={},contactCache={},editingLpContact=null,pendingNote={};
 var ctInactiveRosterNames=new Set();
+var ctDisplayNames={};
 // Live Current Relationship Roster exclusion set — shared by co-marketing selection and any
 // other place that still reads from the legacy `agents` array (which itself carries no
 // relationship_status field, so this cross-reference is needed wherever that array is used to
@@ -1355,8 +1363,10 @@ var ctInactiveRosterNames=new Set();
 // first renders, nothing is excluded — the same tolerance already used elsewhere for admin views.
 async function loadInactiveRosterNames(){
   try{
-    var rows=await sbFetch("GET","agent_profiles?select=agent_name&relationship_status=eq.inactive&limit=5000");
-    ctInactiveRosterNames=new Set((rows||[]).map(function(r){return(r.agent_name||"").trim().toLowerCase();}));
+    var rows=await sbFetch("GET","agent_profiles?select=agent_name,display_name,relationship_status&limit=5000");
+    ctInactiveRosterNames=new Set((rows||[]).filter(function(r){return r.relationship_status==="inactive";}).map(function(r){return(r.agent_name||"").trim().toLowerCase();}));
+    ctDisplayNames={};
+    (rows||[]).forEach(function(r){if(r.agent_name&&r.display_name)ctDisplayNames[(r.agent_name||"").trim().toLowerCase()]=r.display_name.trim();});
   }catch(e){ctInactiveRosterNames=new Set();}
 }
 var userTyping=false;
@@ -2583,8 +2593,9 @@ function renderInlineContact(name,safeId,data){
 
 function openLpContactModal(name){
   editingLpContact=name;
-  document.getElementById("lpContactModalName").textContent=name;
+  document.getElementById("lpContactModalName").textContent=displayName(name);
   var cp=contactCache[name]||{};
+  document.getElementById("lp-cm-display-name").value=cp.display_name||ctDisplayNames[(name||"").trim().toLowerCase()]||"";
   document.getElementById("lp-cm-phone").value=cp.phone||"";
   document.getElementById("lp-cm-email").value=cp.email||"";
   ctSetBirthdayDropdowns(cp.birthday||"");
@@ -2592,6 +2603,7 @@ function openLpContactModal(name){
     sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(name)+"&limit=1").then(function(res){
       var data=(res&&res.length)?res[0]:{agent_name:name};
       contactCache[name]=data;
+      document.getElementById("lp-cm-display-name").value=data.display_name||"";
       document.getElementById("lp-cm-phone").value=data.phone||"";
       document.getElementById("lp-cm-email").value=data.email||"";
       ctSetBirthdayDropdowns(data.birthday||"");
@@ -2612,7 +2624,7 @@ function saveLpContactModal(){
   // agent_name is the real primary key here (confirmed against the live schema — agent_profiles
   // has no id column), and this app already keys everything off it with an exact eq. match, so
   // there's no ambiguity risk the way there was in the RM Tracker's case-insensitive lookup.
-  var payload={agent_name:savedName,phone:document.getElementById("lp-cm-phone").value.trim()||null,email:document.getElementById("lp-cm-email").value.trim()||null,birthday:ctGetBirthdayValue()};
+  var payload={agent_name:savedName,display_name:document.getElementById("lp-cm-display-name").value.trim()||null,phone:document.getElementById("lp-cm-phone").value.trim()||null,email:document.getElementById("lp-cm-email").value.trim()||null,birthday:ctGetBirthdayValue()};
   sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(savedName)+"&limit=1").then(function(res){
     var method=(res&&res.length)?"PATCH":"POST";
     var path=method==="PATCH"?"agent_profiles?agent_name=eq."+encodeURIComponent(savedName):"agent_profiles";
@@ -2620,6 +2632,8 @@ function saveLpContactModal(){
   }).then(function(){
     if(!contactCache[savedName])contactCache[savedName]={agent_name:savedName};
     Object.assign(contactCache[savedName],payload);
+    if(payload.display_name)ctDisplayNames[(savedName||"").trim().toLowerCase()]=payload.display_name;
+    else delete ctDisplayNames[(savedName||"").trim().toLowerCase()];
     setSyncStatus("live");
     var st=document.getElementById("lpContactModalStatus");
     if(st){st.style.display="block";st.style.background="#f0fdf4";st.style.color="#15803d";st.textContent="Saved!";}
