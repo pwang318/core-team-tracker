@@ -1,4 +1,4 @@
-    
+   
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -4857,16 +4857,40 @@ function initRealtimeSync(){
   }
   try{
     var rtClient=window.supabase.createClient(SB_URL,SB_KEY);
-    rtClient.channel("agent_profiles-changes")
+    rtClient.channel("shared-tracker-changes")
       .on("postgres_changes",{event:"*",schema:"public",table:"agent_profiles"},function(){
         if(!userTyping&&!editingLpContact)contactCache={};
       })
+      .on("postgres_changes",{event:"*",schema:"public",table:"lp_flags"},function(){
+        if(typeof ctLoadLpFlags==="function")ctLoadLpFlags();
+        if(currentUser==="Snapshot"&&typeof loadAmandaSnapshot==="function")loadAmandaSnapshot();
+      })
+      .on("postgres_changes",{event:"*",schema:"public",table:"amanda_activities"},function(){
+        if(typeof loadRmActivity==="function")loadRmActivity().then(function(){
+          if(currentUser==="Snapshot"&&typeof buildSnapshot==="function")buildSnapshot();
+          if(currentUser==="Daniel"&&typeof renderDaniel==="function")renderDaniel();
+        }).catch(function(){});
+      })
+      .on("postgres_changes",{event:"*",schema:"public",table:"call_logs"},function(){
+        if(typeof loadCallLogs==="function")loadCallLogs().then(function(){
+          if(currentUser==="Snapshot"&&typeof buildSnapshot==="function")buildSnapshot();
+          if(currentUser==="Daniel"&&typeof renderDaniel==="function")renderDaniel();
+        }).catch(function(){});
+      })
       .subscribe(function(status){
-        if(status==="SUBSCRIBED")console.log("Realtime: subscribed to agent_profiles.");
-        else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("Realtime: agent_profiles subscription unavailable ("+status+") — table may not be in the supabase_realtime publication yet, or RLS is blocking it. Falling back to the polling/cache-clear only.");
+        if(status==="SUBSCRIBED")console.log("Realtime: subscribed to shared tracker tables.");
+        else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("Realtime: shared tracker subscription unavailable ("+status+") — polling fallback remains active.");
       });
   }catch(e){console.warn("Realtime setup failed (non-critical — falling back to polling):",e.message);}
 }
+// Fallback sync: if Realtime is not enabled for one of the shared tables, refresh
+// cross-tracker data every 30 seconds while the page is visible.
+setInterval(function(){
+  if(document.hidden||userTyping||editingLpContact)return;
+  contactCache={};
+  if(typeof ctLoadLpFlags==="function")ctLoadLpFlags();
+  if(typeof loadRmActivity==="function")loadRmActivity().catch(function(){});
+},30000);
 initRealtimeSync();
 loadAgents();
 loadAgentAssignments();
