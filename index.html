@@ -1,4 +1,4 @@
-   
+    
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6101,7 +6101,8 @@ async function loadFaceTime(){
     var r=await Promise.all([
       sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=2000"),
       sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=2000").catch(function(){return[];}),
-      loadCoMarketing()
+      loadCoMarketing(),
+      loadInactiveRosterNames()
     ]);
     // Build map: agent → latest date from either source.
     // Keys are normalized to uppercase because the roster (SEED) stores names in ALL CAPS,
@@ -6144,9 +6145,22 @@ function renderFaceTime(){
   var comktF=(document.getElementById("ft-comkt-filter")||{value:"all"}).value;
   var now=new Date();
 
-  var agentList=agents.map(function(e){
-    var name=e[0],tier=e[1]||"C",lp=(e[2]&&e[2]!=="null")?e[2]:"Unassigned";
-    var ft=ftData[name];
+  // FaceTime is an LP-owned cadence view. Only active agents with a real LP assignment belong here.
+  // Exclude blank/null/Unassigned/__REMOVED__ assignments and anyone marked inactive/removed
+  // in the shared roster so removed names cannot leak back in from the seeded/Power BI population.
+  var validLpNames={Gavin:true,Karen:true,Osgood:true,Jordan:true,Said:true};
+  var faceTimeAgents=agents.filter(function(e){
+    var name=(e[0]||"").trim();
+    var lp=(e[2]||"").trim();
+    if(!name||!validLpNames[lp])return false;
+    if(ctInactiveRosterNames&&ctInactiveRosterNames.has(name.toLowerCase()))return false;
+    if(typeof isActive==="function"&&!isActive(e))return false;
+    return true;
+  });
+
+  var agentList=faceTimeAgents.map(function(e){
+    var name=e[0],tier=e[1]||"C",lp=e[2];
+    var ft=ftData[(name||"").trim().toUpperCase()];
     var days=null;
     if(ft&&ft.lastDate){days=Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000);}
     var status=ftStatus(tier,days);
@@ -6167,8 +6181,9 @@ function renderFaceTime(){
     return(b.days===null?9999:b.days)-(a.days===null?9999:a.days);
   });
 
-  var full=agents.map(function(e){
-    var ft=ftData[e[0]];var days=null;
+  // Summary cards must use the exact same eligible population as the FaceTime list.
+  var full=faceTimeAgents.map(function(e){
+    var ft=ftData[(e[0]||"").trim().toUpperCase()];var days=null;
     if(ft&&ft.lastDate){days=Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000);}
     return ftStatus(e[1]||"C",days);
   });
