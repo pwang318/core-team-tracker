@@ -1,5 +1,4 @@
- 
-   
+    
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -422,6 +421,40 @@ tr:hover td{background:var(--bg)}
   /* Note quality / carryover panels in Daniel */
   #d-note-quality-section>div,#d-carryover-section>div{border-radius:8px}
 }
+
+/* ══════════════════════════════════════════════════════════
+   READABILITY PASS — higher contrast + larger leadership text
+   Keeps Core Team styling but reduces eye strain on dense views.
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --text-2:#4B5563;
+  --text-3:#667085;
+  --text-4:#8992A3;
+  --border:#DDE2EA;
+  --border-light:#E9EDF3;
+}
+body{font-size:14.75px;line-height:1.58}
+.app{max-width:1040px}
+.section-head{font-size:11.5px;color:#536071;font-weight:750}
+.brand-sub,.save-ind,.week-pill{font-size:11.5px}
+.who-btn{font-size:12.5px;padding:6px 14px}
+.call-meta,.d-meta,.lp-hero-sub{font-size:12.5px;color:#4F5B6B}
+.sc-title{font-size:14px}.sc-row{padding:11px 0}.sc-pct{font-size:21px}
+th{font-size:11px;color:#566174}td{font-size:13.5px}
+.cm-field label,.form-group label{font-size:11px;color:#596579}
+input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
+/* Most eye-strain reports came from Daniel/scorecard/RM summary views. Inline font sizes
+   are overridden here only inside those leadership views so working LP cards stay compact. */
+#view-daniel [style*="font-size:8px"],#view-rm [style*="font-size:8px"]{font-size:10.5px!important}
+#view-daniel [style*="font-size:9px"],#view-rm [style*="font-size:9px"]{font-size:10.75px!important}
+#view-daniel [style*="font-size:10px"],#view-rm [style*="font-size:10px"]{font-size:11.25px!important}
+#view-daniel [style*="font-size:10.5px"],#view-rm [style*="font-size:10.5px"]{font-size:11.5px!important}
+#view-daniel [style*="font-size:11px"],#view-rm [style*="font-size:11px"]{font-size:11.75px!important}
+#view-daniel [style*="color:var(--text-3)"],#view-rm [style*="color:var(--text-3)"]{color:#5B6677!important}
+#view-daniel [style*="color:#94a3b8"],#view-rm [style*="color:#94a3b8"]{color:#667085!important}
+#view-daniel [style*="color:#888"],#view-rm [style*="color:#888"]{color:#5F6978!important}
+#view-rm #rm-goals-body{padding:18px!important}
+
 </style>
 <!-- Realtime pass: loads the Supabase client ONLY for postgres_changes subscriptions below.
      Everything else in this app still uses the existing sbFetch()/raw-fetch REST calls,
@@ -464,6 +497,7 @@ tr:hover td{background:var(--bg)}
   <button class="who-btn wb-Osgood" onclick="selectUser(this,'Osgood')">Osgood</button>
   <button class="who-btn wb-Jordan" onclick="selectUser(this,'Jordan')">Jordan</button>
   <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
+  <button class="who-btn wb-RM" onclick="openRmView(this)">Relationship Manager</button>
   <button class="who-btn wb-FaceTime" onclick="selectUser(this,'FaceTime')">Face Time</button>
   <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button> <button class="who-btn wb-Director" onclick="openDirectorView(this)">Co-Marketing</button> <button class="who-btn wb-Portfolio" onclick="openPortfolioReviewView(this)">Portfolio Review</button>
 </div>
@@ -774,68 +808,61 @@ tr:hover td{background:var(--bg)}
   </div>
 </div>
 
-<!-- LEGACY RM EXECUTION VIEW — intentionally not linked from LP navigation. RM follow-up is owned in the RM Tracker. -->
+<!-- RELATIONSHIP MANAGER / RM TEAM LEADERSHIP VIEW — read-only summary.
+     LPs create flags in this tracker; Amanda/Nyny execute the follow-up in the RM Tracker. -->
 <div id="view-rm" class="view">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-    <div class="lp-hero-name" style="color:var(--text);font-size:18px">Relationship Manager</div>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div class="lp-hero-name" style="color:var(--text);font-size:19px">Relationship Manager</div>
+      <div style="font-size:11.5px;color:var(--text-3);margin-top:3px">Leadership summary for Daniel · Amanda + Nyny stats live here; RM execution and flag responses are completed in the RM Tracker.</div>
+    </div>
     <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
   </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
     <div style="display:flex;align-items:center;gap:10px">
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999">Amanda Dearth</div>
-    <div id="rm-last-refreshed" style="font-size:10px;color:#bbb;font-weight:500"></div>
-  </div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#64748b">RM Team</div>
+      <div id="rm-last-refreshed" style="font-size:10.5px;color:#94a3b8;font-weight:500"></div>
+    </div>
     <div style="display:flex;gap:6px">
-      <button class="lpsc-period-btn-light active" onclick="rmSwitchPeriod('today',this)">Today</button>
+      <button class="lpsc-period-btn-light" onclick="rmSwitchPeriod('today',this)">Today</button>
       <button class="lpsc-period-btn-light" onclick="rmSwitchPeriod('week',this)">This week</button>
-      <button class="lpsc-period-btn-light" onclick="rmSwitchPeriod('mtd',this)">MTD</button>
+      <button class="lpsc-period-btn-light active" onclick="rmSwitchPeriod('mtd',this)">MTD</button>
     </div>
   </div>
 
-  <div id="rm-goals-body" style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:16px">
-    <div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading...</div>
+  <div id="rm-goals-body" style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:14px">
+    <div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading RM stats...</div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px">
     <div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px">Flagged by LPs</div>
-      <div id="rm-flagged-count" style="font-size:22px;font-weight:700;color:#1F4E79;cursor:pointer" onclick="toggleRmFlaggedPanel()">—</div>
-      <div style="font-size:10px;color:#94a3b8;margin-top:2px;cursor:pointer" onclick="toggleRmFlaggedPanel()">tap to see agents</div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:4px">Open LP flags</div>
+      <div id="rm-open-flags-count" style="font-size:24px;font-weight:800;color:#B54B42">—</div>
+      <div style="font-size:10.5px;color:#64748b;margin-top:2px">Awaiting RM response/handling</div>
     </div>
     <div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px">Agents needing RM visit</div>
-      <div id="rm-coverage-pct" style="font-size:22px;font-weight:700;color:#1F4E79;cursor:pointer" onclick="toggleCoveragePanel()">—</div>
-      <div style="font-size:10px;color:#94a3b8;margin-top:2px;cursor:pointer" onclick="toggleCoveragePanel()">% covered this week · tap to see list</div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:4px">RM activity</div>
+      <div id="rm-period-activity-count" style="font-size:24px;font-weight:800;color:#1F4E79">—</div>
+      <div id="rm-period-activity-label" style="font-size:10.5px;color:#64748b;margin-top:2px">Current period</div>
     </div>
   </div>
 
-  <div id="rm-flagged-panel" style="display:none;background:#fff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:12px;overflow:hidden">
-    <div style="background:#eff6ff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:12px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.04em">🚩 Flagged for RM follow-up</div>
-      <button onclick="toggleRmFlaggedPanel()" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:16px">×</button>
+  <div style="background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden">
+    <div style="padding:11px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:12px;font-weight:800;color:var(--text)">Recent RM activity</div>
+        <div style="font-size:10.5px;color:#64748b;margin-top:2px">Read-only here. Use the RM Tracker for logging, coaching, and LP-flag follow-up.</div>
+      </div>
+      <select id="rm-feed-owner" onchange="rmRenderFeed()" style="padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;color:#333;background:#fff">
+        <option value="">Amanda + Nyny</option>
+        <option value="Amanda">Amanda</option>
+        <option value="Nyny">Nyny</option>
+      </select>
     </div>
-    <div id="rm-flagged-list" style="padding:0"><div style="padding:12px 16px;font-size:12px;color:#94a3b8">Loading...</div></div>
-  </div>
-  <div id="rm-coverage-panel" style="display:none;background:#fff;border:1px solid #E8DDD0;border-radius:10px;margin-bottom:12px;overflow:hidden">
-    <div style="background:#FAF7F2;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:12px;font-weight:700;color:#5C4A35;text-transform:uppercase;letter-spacing:.04em">⚠ Agents gone quiet — not yet visited this week</div>
-      <button onclick="toggleCoveragePanel()" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:16px">×</button>
+    <div id="rm-feed-list" style="padding:6px 14px;max-height:430px;overflow-y:auto">
+      <div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading...</div>
     </div>
-    <div id="rm-coverage-list" style="padding:0"><div style="padding:12px 16px;font-size:12px;color:#94a3b8">Loading...</div></div>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px">
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999">Activity feed</div>
-    <select id="rm-feed-type" onchange="rmRenderFeed()" style="padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;color:#333;background:#fff;min-width:170px">
-      <option value="">All activity types</option>
-      <option>Cold Calls</option><option>New Realtor Meeting</option><option>Break Breads</option>
-      <option>New Agent Follow-up</option><option>Active Agent Talk-to</option><option>Reconnect Outreach</option>
-      <option>CTC Call</option><option>Market Update</option><option>Realtor Buddy Referral Ask</option>
-      <option>Birthday Outreach</option><option>Holiday Outreach</option>
-      <option>Agent Appreciation</option><option>Co-hosted Event</option>
-    </select>
-  </div>
-  <div id="rm-feed-list" style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px;max-height:420px;overflow-y:auto">
-    <div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading...</div>
   </div>
 </div>
 
@@ -1294,17 +1321,14 @@ var SB_URL="https://uclucbdkjqyqdvifyptx.supabase.co";
 // a name that is ENTIRELY uppercase (a strong signal it's raw import data, not something a
 // person typed) — anything already mixed-case is assumed to be a real human-entered/verified
 // name and is left untouched.
-function displayName(raw){
+function displayNameWithoutOverride(raw){
   if(!raw)return raw;
   const s=String(raw).trim();
-  const corrected=(typeof ctDisplayNames!=="undefined"&&ctDisplayNames[(s||"").toLowerCase()])||null;
-  if(corrected)return corrected;
   if(!s)return s;
-  // Preserve intentional mixed-case human-entered names exactly (McMahon, de la Rosa, etc.).
-  // Normalize only obvious raw-import casing: ALL CAPS or all lowercase.
   const letters=s.replace(/[^A-Za-z]/g,"");
   if(letters && letters!==letters.toUpperCase() && letters!==letters.toLowerCase())return s;
   const suffixes={"jr":"Jr.","jr.":"Jr.","sr":"Sr.","sr.":"Sr.","ii":"II","iii":"III","iv":"IV","v":"V"};
+  const lowerParticles=new Set(["de","del","de la","da","di","du","van","von"]);
   const capPart=part=>{
     if(!part)return part;
     const lead=(part.match(/^[^A-Za-z0-9]*/)||[""])[0];
@@ -1322,6 +1346,13 @@ function displayName(raw){
     return lead+core+trail;
   };
   return s.split(/\s+/).map(capPart).join(" ");
+}
+function displayName(raw){
+  if(!raw)return raw;
+  const s=String(raw).trim();
+  const corrected=(typeof ctDisplayNames!=="undefined"&&ctDisplayNames[(s||"").toLowerCase()])||null;
+  if(corrected)return displayNameWithoutOverride(corrected);
+  return displayNameWithoutOverride(s);
 }
 // ── Meaningful Contact classification (shared definition — see identical config in the RM
 // Tracker) ───────────────────────────────────────────────────────────────────────────────────
@@ -2887,9 +2918,10 @@ async function renderRmSummary(){
   try{
     var now=new Date(),todayStr=localDateStr(now);
     var week=rmWeekRange?rmWeekRange():{start:todayStr,end:todayStr};
-    var res=await fetch(SB_URL+"/rest/v1/amanda_activities?act_date=gte."+week.start+"&act_date=lte."+week.end+"&select=act_type,act_date,agent_name",
+    var res=await fetch(SB_URL+"/rest/v1/amanda_activities?act_date=gte."+week.start+"&act_date=lte."+week.end+"&select=act_type,act_date,agent_name,notes",
       {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
     var acts=await res.json();
+    if(Array.isArray(acts))acts=acts.filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Amanda";});
     if(!Array.isArray(acts)){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load Amanda data.</div>';return;}
 
     var flagRes=await fetch(SB_URL+"/rest/v1/call_logs?flag_rm=eq.true&select=id,agent_name,lp,call_date,note,outcome&order=call_date.desc",{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
@@ -2899,13 +2931,15 @@ async function renderRmSummary(){
 
     var goals=[
       {type:"Cold Calls",label:"Cold calls",weekly:125},
-      {type:"New Realtor Meeting",label:"New meetings",weekly:5},
-      {type:"Break Breads",label:"Break breads",weekly:5},
+      {type:"New Realtor Meeting",label:"New meetings",weekly:3},
+      {type:"__existing__",label:"Existing partner meetings",weekly:5},
       {type:"__talkto__",label:"Talk-to's",weekly:100},
-      {type:"Realtor Buddy Referral Ask",label:"Buddy intros",weekly:3}
+      {type:"Buddy Intro Received",label:"Buddy intros received",weekly:3}
     ];
     var cards=goals.map(function(g){
-      var count=g.type==="__talkto__"?amCntTalkTo(acts):acts.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="__talkto__"?amCntTalkTo(acts)
+        :g.type==="__existing__"?acts.filter(function(a){return ctIsExistingRmMeeting(a.act_type);}).length
+        :acts.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.weekly,1);
       var color=pct>=1?"#15803d":pct>=0.6?"#b8922a":"#9ca3af";
       return'<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:12px;border:1px solid var(--border)">'
@@ -3595,8 +3629,10 @@ function loadAmandaSnapshot(){
   var monthStart=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
   var todayStr=localDateStr(now);
   var week=rmWeekRange();
-  return sbFetch("GET","amanda_activities?act_date=gte."+monthStart+"&select=agent_name,act_type,act_date&limit=2000").then(function(rows){
+  return sbFetch("GET","amanda_activities?act_date=gte."+monthStart+"&select=agent_name,act_type,act_date,notes,outcome&limit=2000").then(function(rows){
     if(!rows||!Array.isArray(rows))return;
+    // Snapshot Amanda metrics must not count Nyny activities stored in the same RM activity table.
+    rows=rows.filter(function(r){return ctRmOwnerFromNotes(r.notes)==="Amanda";});
     window.rmFeedCache=window.rmFeedCache||{};
     window.rmFeedCache.mtd=rows;
     window.rmFeedCache.week=rows.filter(function(r){return r.act_date>=week.start&&r.act_date<=week.end;});
@@ -3892,7 +3928,7 @@ function buildSnapshot(){
   h+='</div>';
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
   h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:#3D4E68"></div></div></div>';
-  [{type:"New Realtor Meeting",daily:1,weekly:5,label:"Mtgs"},{type:"Cold Calls",daily:25,weekly:125,label:"Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Breads"},{type:"__talkto__",daily:20,weekly:100,label:"Talk-to\'s"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy"}].forEach(function(m){
+  [{type:"New Realtor Meeting",daily:1,weekly:5,label:"Mtgs"},{type:"Cold Calls",daily:25,weekly:125,label:"Cold Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Breads"},{type:"__talkto__",daily:20,weekly:100,label:"Talk-to\'s"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy"}].forEach(function(m){
     var td=m.type==="__talkto__"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
     var tw=m.type==="__talkto__"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
     var dc=td>=m.daily?'#3E8E5A':'var(--text-3)';
@@ -5116,11 +5152,11 @@ const LPSC_METRICS_MAP={
 ["Gavin","Osgood","Karen","Said","Jordan"].forEach(function(n){LPSC_METRICS_MAP[n]=LPSC_METRICS_MAP._lp2;});
 
 const LPSC_AMANDA_GOALS=[
-  {key:"New Realtor Meeting",label:"New realtor meeting",goal:5,monthlyGoal:20},
-  {key:"Cold Calls",label:"Cold calls",goal:125,monthlyGoal:400},
-  {key:"Break Breads",label:"Break breads",goal:5,monthlyGoal:20},
+  {key:"New Realtor Meeting",label:"New partner meetings",goal:3,monthlyGoal:12},
+  {key:"__existingmeeting__",label:"Existing partner meetings",goal:5,monthlyGoal:18},
+  {key:"Cold Calls",label:"Cold calls",goal:125,monthlyGoal:500},
   {key:"Talk-to's",label:"Talk-to's",goal:100,monthlyGoal:400},
-  {key:"Realtor Buddy Referral Ask",label:"Buddy asks",goal:3,monthlyGoal:12}
+  {key:"Buddy Intro Received",label:"Buddy intros received",goal:3,monthlyGoal:12}
 ];
 
 
@@ -5755,10 +5791,11 @@ async function lpscLoadAmanda(){
 
   try{
     var res=await fetch(
-      SB_URL+"/rest/v1/amanda_activities?act_date=gte."+fromEl.value+"&act_date=lte."+toEl.value+"&select=act_type,act_date",
+      SB_URL+"/rest/v1/amanda_activities?act_date=gte."+fromEl.value+"&act_date=lte."+toEl.value+"&select=act_type,act_date,notes",
       {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}
     );
     var acts=await res.json();
+    if(Array.isArray(acts))acts=acts.filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Amanda";});
 
     if(!res.ok || !Array.isArray(acts)){
       wrap.innerHTML='<div style="text-align:center;padding:40px;color:#888">Could not load Amanda\'s data (request error).</div>';
@@ -5786,12 +5823,15 @@ async function lpscLoadAmanda(){
     // Every other goal is a literal, single act_type and reads straight from byWeek.
     function amGoalCount(g,weekActsArr,weekCounts){
       if(g.key==="Talk-to's")return amCntTalkTo(weekActsArr||[]);
+      if(g.key==="__existingmeeting__")return (weekActsArr||[]).filter(function(a){return ctIsExistingRmMeeting(a.act_type);}).length;
       return(weekCounts&&weekCounts[g.key])||0;
     }
 
     summaryEl.innerHTML="";
     LPSC_AMANDA_GOALS.forEach(function(g){
-      var grandTotal=g.key==="Talk-to's"?amCntTalkTo(acts):acts.filter(function(a){return a.act_type===g.key;}).length;
+      var grandTotal=g.key==="Talk-to's"?amCntTalkTo(acts)
+        :g.key==="__existingmeeting__"?acts.filter(function(a){return ctIsExistingRmMeeting(a.act_type);}).length
+        :acts.filter(function(a){return a.act_type===g.key;}).length;
       var avgPerWeek=Math.round(grandTotal/Math.max(1,weekKeys.length));
       var pct=Math.min(avgPerWeek/g.goal,1);
       var color=pct>=1?"#2a7a3b":pct>=0.6?"#b8922a":"#9ca3af";
@@ -5907,13 +5947,17 @@ function lpscShowAmandaDaily(wk){
 
   var tbody="<tbody>";
   LPSC_AMANDA_GOALS.forEach(function(g){
-    var total=g.key==="Talk-to's"?amCntTalkTo(weekActs):weekActs.filter(function(a){return a.act_type===g.key;}).length;
+    var total=g.key==="Talk-to's"?amCntTalkTo(weekActs)
+      :g.key==="__existingmeeting__"?weekActs.filter(function(a){return ctIsExistingRmMeeting(a.act_type);}).length
+      :weekActs.filter(function(a){return a.act_type===g.key;}).length;
     var pct=Math.min(total/g.goal,1);
     var color=pct>=1?"#2a7a3b":pct>=0.6?"#b8922a":"#9ca3af";
     tbody+='<tr><td style="padding:9px 12px;font-size:12px;font-weight:500;border-bottom:1px solid #f0f2f8">'+g.label+'</td>';
     LPSC_DAYS.forEach(function(day){
       var dayActs=byDay[day]||[];
-      var v=g.key==="Talk-to's"?amCntTalkTo(dayActs):dayActs.filter(function(a){return a.act_type===g.key;}).length;
+      var v=g.key==="Talk-to's"?amCntTalkTo(dayActs)
+        :g.key==="__existingmeeting__"?dayActs.filter(function(a){return ctIsExistingRmMeeting(a.act_type);}).length
+        :dayActs.filter(function(a){return a.act_type===g.key;}).length;
       tbody+='<td style="padding:9px 10px;text-align:center;font-size:13px;font-weight:500;border-bottom:1px solid #f0f2f8">'+(v||"")+'</td>';
     });
     tbody+='<td style="padding:9px 10px;text-align:center;font-size:13px;font-weight:700;color:'+color+';border-bottom:1px solid #f0f2f8">'+total+' <span style="font-size:10px;color:#aaa">/'+g.goal+'</span></td></tr>';
@@ -7650,7 +7694,7 @@ function ctLoadNotifications(){
   var list=document.getElementById("ct-notif-list");
   if(!badge||!list) return;
   Promise.all([
-    sbFetch("GET","lp_flags?resolved=eq.false&select=agent_name,lp,note,created_at&order=created_at.desc&limit=5").catch(function(){return [];}),
+    sbFetch("GET","lp_flags?resolved=eq.false&select=*&order=created_at.desc&limit=5").catch(function(){return [];}),
     sbFetch("GET","lead_notes?notify_rm_gesture=eq.true&gesture_sent=eq.false&select=lead_buyer_name,lead_agent_name,lp,created_at&order=created_at.desc&limit=5").catch(function(){return [];})
   ]).then(function(results){
     var flags=results[0]||[], gestures=results[1]||[];
@@ -7664,7 +7708,9 @@ function ctLoadNotifications(){
     if(total===0){ list.innerHTML='<div style="padding:8px 0;color:var(--text-3)">Nothing new right now</div>'; return; }
     var html="";
     flags.forEach(function(f){
-      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🚩 '+(f.agent_name?escHtml(displayName(f.agent_name)):"General flag")+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(f.lp)+' — "'+escHtml((f.note||"").substring(0,60))+'"</div></div>';
+      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🚩 '+(f.agent_name?escHtml(displayName(f.agent_name)):"General flag")+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(f.lp)+' — "'+escHtml((f.note||"").substring(0,60))+'"</div>'
+        +(f.rm_note?'<div style="margin-top:5px;padding:5px 7px;background:#ecfdf5;border-radius:6px;color:#166534;font-size:11px"><strong>RM reply'+(f.rm_note_by?' · '+escHtml(f.rm_note_by):'')+':</strong> '+escHtml(String(f.rm_note).substring(0,120))+'</div>':'')
+        +'</div>';
     });
     gestures.forEach(function(g){
       html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🎁 '+escHtml(g.lead_buyer_name||g.lead_agent_name)+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(g.lp)+' — gesture opportunity</div></div>';
@@ -8517,6 +8563,203 @@ function pfrCloseDrilldown(){
 window.pfrCloseDrilldown=pfrCloseDrilldown;
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RM TEAM LEADERSHIP SUMMARY + SHARED OWNER DECODER
+   Restores the Relationship Manager tab as a read-only leadership view.
+   Amanda/Nyny still perform the actual RM work in the RM Tracker.
+   ═══════════════════════════════════════════════════════════════════════ */
+function ctRmOwnerFromNotes(notes){
+  try{
+    var n=String(notes||""),start="\u2063\u2063\u2063",end="\u2064\u2064\u2064";
+    var a=n.lastIndexOf(start); if(a<0)return "Amanda";
+    var b=n.indexOf(end,a+start.length); if(b<0)return "Amanda";
+    var encoded=n.slice(a+start.length,b);
+    var bits=encoded.replace(/\u200B/g,"0").replace(/\u200C/g,"1"),out="";
+    for(var i=0;i+7<bits.length;i+=8)out+=String.fromCharCode(parseInt(bits.slice(i,i+8),2));
+    var obj=JSON.parse(decodeURIComponent(escape(atob(out))));
+    return obj.owner||"Amanda";
+  }catch(e){return "Amanda";}
+}
+function ctIsExistingRmMeeting(type){
+  return ["Partner Meeting","Break Breads","Strategic Partner Meeting","Channel Meeting","Retention Meeting"].indexOf(String(type||"").trim())>=0;
+}
+function ctIsDirectorLeadership(type){
+  return ["Amanda Coaching / Development","RM Scorecard Review","RM Portfolio Review","RM Process Improvement","Tracker / System Development","RM Training","RM Leadership Escalation Support"].indexOf(String(type||"").trim())>=0;
+}
+function ctRmTalkCount(rows){return amCntTalkTo(rows||[]);}
+function ctRmCount(rows,type){
+  if(type==="__talkto__")return ctRmTalkCount(rows);
+  if(type==="__existing__")return (rows||[]).filter(function(a){return ctIsExistingRmMeeting(a.act_type);}).length;
+  if(type==="__partner_total__")return (rows||[]).filter(function(a){return a.act_type==="New Realtor Meeting"||ctIsExistingRmMeeting(a.act_type);}).length;
+  if(type==="__leadership__")return (rows||[]).filter(function(a){return ctIsDirectorLeadership(a.act_type);}).length;
+  return (rows||[]).filter(function(a){return a.act_type===type;}).length;
+}
+
+var rmLeadershipCache={all:[],todayStr:"",week:null,monthStart:"",openFlags:0};
+rmCurrentPeriod="mtd";
+
+function rmPeriodRows(){
+  var rows=rmLeadershipCache.all||[];
+  if(rmCurrentPeriod==="today")return rows.filter(function(a){return a.act_date===rmLeadershipCache.todayStr;});
+  if(rmCurrentPeriod==="week")return rows.filter(function(a){return a.act_date>=rmLeadershipCache.week.start&&a.act_date<=rmLeadershipCache.week.end;});
+  return rows;
+}
+function rmMetricTarget(kind,owner){
+  if(rmCurrentPeriod==="today"){
+    if(owner==="Amanda"&&kind==="cold")return 25;
+    if(owner==="Amanda"&&kind==="talk")return 20;
+    return null;
+  }
+  if(rmCurrentPeriod==="week"){
+    var wk={
+      teamNew:5,
+      Amanda:{newM:3,existing:5,total:8,cold:125,talk:100,buddy:3},
+      Nyny:{newM:2,existing:3,total:5}
+    };
+    return owner==="Team"?wk.teamNew:(wk[owner]?wk[owner][kind]:null);
+  }
+  var mo={
+    teamNew:20,
+    Amanda:{newM:12,existing:18,total:30,cold:500,talk:400,buddy:12},
+    Nyny:{newM:8,existing:12,total:20}
+  };
+  return owner==="Team"?mo.teamNew:(mo[owner]?mo[owner][kind]:null);
+}
+function rmLeadershipTile(label,value,target,sub){
+  var pct=target?Math.min(value/target,1):0;
+  var color=target?(pct>=1?"#15803d":pct>=.65?"#9A6A18":"#1F4E79"):"#1F4E79";
+  return '<div style="background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:11px 12px;min-width:0">'
+    +'<div style="font-size:10.5px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.035em;line-height:1.25">'+label+'</div>'
+    +'<div style="font-size:22px;font-weight:800;color:'+color+';margin-top:4px">'+value+(target?' <span style="font-size:11px;font-weight:600;color:#94a3b8">/ '+target+'</span>':'')+'</div>'
+    +(target?'<div style="height:4px;background:#e2e8f0;border-radius:3px;margin-top:6px;overflow:hidden"><div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+'"></div></div>':'')
+    +(sub?'<div style="font-size:10px;color:#64748b;margin-top:5px;line-height:1.3">'+sub+'</div>':'')
+    +'</div>';
+}
+
+function rmRenderGoals(){
+  var body=document.getElementById("rm-goals-body");
+  if(!body)return;
+  var rows=rmPeriodRows();
+  var am=rows.filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Amanda";});
+  var ny=rows.filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Nyny";});
+  var aNew=ctRmCount(am,"New Realtor Meeting"),aExisting=ctRmCount(am,"__existing__"),aTotal=ctRmCount(am,"__partner_total__");
+  var nNew=ctRmCount(ny,"New Realtor Meeting"),nExisting=ctRmCount(ny,"__existing__"),nTotal=ctRmCount(ny,"__partner_total__");
+  var teamNew=aNew+nNew;
+
+  body.innerHTML=
+    '<div style="background:#F4F1FB;border:1px solid #D8D0EC;border-radius:10px;padding:12px 14px;margin-bottom:14px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+        +'<div><div style="font-size:11px;font-weight:800;color:#4E3D8A;text-transform:uppercase;letter-spacing:.05em">RM Team · New partner meetings</div>'
+        +'<div style="font-size:10.5px;color:#64748b;margin-top:2px">Shared team outcome · working allocation Amanda 12 / Nyny 8 monthly</div></div>'
+        +'<div style="font-size:25px;font-weight:800;color:#4E3D8A">'+teamNew+(rmMetricTarget("newM","Team")?' <span style="font-size:12px;color:#64748b">/ '+rmMetricTarget("newM","Team")+'</span>':'')+'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="font-size:12px;font-weight:800;color:#1f2937;margin-bottom:7px">Amanda Dearth · Relationship Manager</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px;margin-bottom:16px">'
+      +rmLeadershipTile("New meetings",aNew,rmMetricTarget("newM","Amanda"),"New partner acquisition")
+      +rmLeadershipTile("Existing meetings",aExisting,rmMetricTarget("existing","Amanda"),"Partner / Break Bread / strategic")
+      +rmLeadershipTile("Total partner meetings",aTotal,rmMetricTarget("total","Amanda"),"30+ monthly working goal")
+      +rmLeadershipTile("Cold calls",ctRmCount(am,"Cold Calls"),rmMetricTarget("cold","Amanda"),"Primary outbound")
+      +rmLeadershipTile("Talk-to's",ctRmCount(am,"__talkto__"),rmMetricTarget("talk","Amanda"),"Meaningful relationship touches")
+      +rmLeadershipTile("Buddy intros received",ctRmCount(am,"Buddy Intro Received"),rmMetricTarget("buddy","Amanda"),"Referral growth")
+    +'</div>'
+    +'<div style="font-size:12px;font-weight:800;color:#1f2937;margin-bottom:7px">Nyny · Director / RM Team Lead</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px">'
+      +rmLeadershipTile("New meetings",nNew,rmMetricTarget("newM","Nyny"),"Strategic / warm / Channel")
+      +rmLeadershipTile("Existing / strategic",nExisting,rmMetricTarget("existing","Nyny"),"Current, A/B, Channel, retention")
+      +rmLeadershipTile("Total partner meetings",nTotal,rmMetricTarget("total","Nyny"),"20–25 monthly working range")
+      +rmLeadershipTile("Director leadership",ctRmCount(ny,"__leadership__"),null,"Coaching, portfolio, scorecard, process/system work")
+    +'</div>';
+}
+
+function rmRenderFeed(){
+  var el=document.getElementById("rm-feed-list");
+  if(!el)return;
+  var data=rmPeriodRows().slice();
+  var ownerEl=document.getElementById("rm-feed-owner");
+  var owner=ownerEl?ownerEl.value:"";
+  if(owner)data=data.filter(function(a){return ctRmOwnerFromNotes(a.notes)===owner;});
+  data.sort(function(a,b){return String(b.act_date||"").localeCompare(String(a.act_date||""));});
+  if(!data.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">No RM activity found for this period.</div>';return;}
+  el.innerHTML=data.slice(0,80).map(function(a){
+    var own=ctRmOwnerFromNotes(a.notes);
+    var note=String(a.notes||"").replace(/\u2063\u2063\u2063[\s\S]*?\u2064\u2064\u2064/g,"").trim();
+    return '<div style="padding:9px 0;border-bottom:1px solid #edf0f4">'
+      +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><div><span style="font-size:12.5px;font-weight:800;color:#1f2937">'+escHtml(displayName(a.agent_name||"—"))+'</span>'
+      +'<span style="font-size:10px;font-weight:700;color:'+(own==="Nyny"?"#6B4FA3":"#1F4E79")+';margin-left:7px">'+own+'</span></div>'
+      +'<span style="font-size:10.5px;color:#64748b">'+fmt(a.act_date)+'</span></div>'
+      +'<div style="font-size:11.5px;color:#475569;margin-top:2px">'+escHtml(a.act_type||"")+(a.outcome?' · '+escHtml(a.outcome):'')+'</div>'
+      +(note?'<div style="font-size:10.5px;color:#64748b;margin-top:3px;font-style:italic">'+escHtml(note.substring(0,120))+'</div>':'')
+      +'</div>';
+  }).join("");
+}
+async function rmLoadAll(){
+  var body=document.getElementById("rm-goals-body");
+  try{
+    var now=new Date(),todayStr=localDateStr(now),week=rmWeekRange();
+    var monthStart=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
+    var results=await Promise.all([
+      sbFetch("GET","amanda_activities?act_date=gte."+monthStart+"&select=agent_name,act_type,act_date,notes,outcome&order=act_date.desc&limit=4000").catch(function(){return[];}),
+      sbFetch("GET","call_logs?flag_rm=eq.true&select=id&limit=500").catch(function(){return[];}),
+      sbFetch("GET","lp_flags?resolved=eq.false&select=id&limit=500").catch(function(){return[];})
+    ]);
+    rmLeadershipCache={all:Array.isArray(results[0])?results[0]:[],todayStr:todayStr,week:week,monthStart:monthStart,openFlags:(results[1]||[]).length+(results[2]||[]).length};
+    rmRenderGoals();
+    rmRenderFeed();
+    var rows=rmPeriodRows();
+    var fc=document.getElementById("rm-open-flags-count");if(fc)fc.textContent=rmLeadershipCache.openFlags;
+    var ac=document.getElementById("rm-period-activity-count");if(ac)ac.textContent=rows.length;
+    var al=document.getElementById("rm-period-activity-label");if(al)al.textContent=rmCurrentPeriod==="today"?"Today":rmCurrentPeriod==="week"?"This week":"Month to date";
+    var lr=document.getElementById("rm-last-refreshed");if(lr)lr.textContent="Updated "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+  }catch(e){
+    console.warn("RM leadership view failed",e);
+    if(body)body.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Could not load RM stats.</div>';
+  }
+}
+function rmSwitchPeriod(period,btn){
+  document.querySelectorAll("#view-rm .lpsc-period-btn-light").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  rmCurrentPeriod=period;
+  rmRenderGoals();rmRenderFeed();
+  var rows=rmPeriodRows(),ac=document.getElementById("rm-period-activity-count"),al=document.getElementById("rm-period-activity-label");
+  if(ac)ac.textContent=rows.length;
+  if(al)al.textContent=period==="today"?"Today":period==="week"?"This week":"Month to date";
+}
+function openRmView(btn){
+  if(typeof lpStopPolling==="function")lpStopPolling();
+  if(typeof rmStopPolling==="function")rmStopPolling();
+  currentUser="RM";
+  document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+  var view=document.getElementById("view-rm");if(view)view.classList.add("active");
+  rmCurrentPeriod="mtd";
+  document.querySelectorAll("#view-rm .lpsc-period-btn-light").forEach(function(b){b.classList.toggle("active",(b.textContent||"").trim()==="MTD");});
+  rmLoadAll();
+  rmStartPolling();
+}
+function rmStartPolling(){
+  if(rmPollInterval)clearInterval(rmPollInterval);
+  rmPollInterval=setInterval(function(){if(currentUser==="RM"&&!userTyping)rmLoadAll();},30000);
+}
+function rmStopPolling(){if(rmPollInterval){clearInterval(rmPollInterval);rmPollInterval=null;}}
+
+// The old LP-side RM execution injectors are intentionally disabled.
+// This tracker shows leadership stats; flags are worked and replied to in the RM Tracker.
+function ctInjectRmPanels(){return;}
+
+// Make push updates refresh the restored RM leadership tab too.
+if(typeof refreshLpSharedData==="function"){
+  var _refreshLpSharedDataRmAware=refreshLpSharedData;
+  refreshLpSharedData=function(source){
+    _refreshLpSharedDataRmAware(source);
+    if(currentUser==="RM"&&["amanda_activities","lp_flags","call_logs"].indexOf(source)>=0){
+      setTimeout(function(){if(currentUser==="RM")rmLoadAll();},260);
+    }
+  };
+}
+
 </script>
 </div>
 </body>
