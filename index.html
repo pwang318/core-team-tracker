@@ -794,6 +794,12 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
     <div id="priority-banner" class="priority-banner" style="display:none">&#9888; You have priority agents that need to be called ASAP!</div>
     <div id="inactive-banner" class="inactive-banner" style="display:none">&#9888; <span id="inactive-banner-txt"></span></div>
     <div id="bday-banner" class="bday-banner" style="display:none">&#127874; <span id="bday-banner-txt"></span></div>
+    <div id="lp-facetime-focus" style="display:none;background:#fff;border:1px solid #D8D1EE;border-left:4px solid #6B5AA6;border-radius:9px;padding:11px 13px;margin-bottom:12px"></div>
+    <div id="lp-rm-responses" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #4E3D8A;border-radius:9px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:12.5px;font-weight:800;color:#332B52">Recent RM Responses</div>
+      <div style="font-size:11.5px;color:#5F5874;margin-top:2px">Replies from Amanda/Nyny stay here even after the flag is marked handled.</div>
+      <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#5F5874">Loading...</div>
+    </div>
     <div class="search-panel">
       <div class="search-panel-title">&#128269; Search &amp; Log Any Agent</div>
       <p style="font-size:12px;color:#888;margin-bottom:.6rem">Search the full roster to log a call, add notes, or update contact info — regardless of assignment.</p>
@@ -1154,52 +1160,54 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
   </div>
 </div>
 <!-- FACE TIME VIEW -->
-<div id="view-facetime" class="view" style="padding:18px 20px;max-width:960px;margin:0 auto">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+<div id="view-facetime" class="view" style="padding:18px 20px;max-width:1040px;margin:0 auto">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:10px">
     <div>
-      <div style="font-size:16px;font-weight:700;color:var(--text-1)">Face Time Tracker</div>
-      <div style="font-size:12px;color:var(--text-3);margin-top:2px">Break breads & in-person meetings — last touch by tier</div>
-      <div style="font-size:11.5px;color:var(--text-3);margin-top:4px;background:var(--surface-2);border-radius:6px;padding:5px 10px;display:inline-block">This tracks <strong style="color:var(--text-2)">in-person visits only</strong> — break breads, office visits, agent lunches. Phone calls and texts live in your main LP view.</div>
+      <div style="font-size:18px;font-weight:800;color:var(--text-1)">Face Time Coverage</div>
+      <div style="font-size:13px;color:var(--text-2);margin-top:3px">In-person relationship coverage — break breads, office visits and agent lunches.</div>
+      <div style="font-size:12px;color:var(--text-2);margin-top:6px;background:#F4F1FA;border:1px solid #DDD6EE;border-radius:7px;padding:7px 10px;display:inline-block"><strong>Keep it simple:</strong> work the weekly focus below. Nyny can manage/log visits centrally, and Break Breads logged in the RM Tracker sync here automatically.</div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <select id="ft-lp-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
-        <option value="all">All LPs</option>
-        <option value="Gavin">Gavin</option>
-        <option value="Karen">Karen</option>
-        <option value="Osgood">Osgood</option>
-        <option value="Jordan">Jordan</option>
-        <option value="Said">Said</option>
-      </select>
-      <select id="ft-tier-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
-        <option value="all">All tiers</option>
-        <option value="Channel">Channel only</option>
-        <option value="A">A-tier only</option>
-        <option value="B">B-tier only</option>
-        <option value="C">C-tier only</option>
-      </select>
-      <select id="ft-status-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
-        <option value="all">All statuses</option>
-        <option value="critical">Critical only</option>
-        <option value="overdue">Overdue + Critical</option>
-        <option value="warn">Needs attention</option>
-      </select>
-      <select id="ft-comkt-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
-        <option value="all">Co-marketing: all</option>
-        <option value="yes">Co-marketing only</option>
-        <option value="no">Not co-marketing</option>
-      </select>
-      <button onclick="loadFaceTime()" style="background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500">↺ Refresh</button>
-    </div>
+    <button onclick="loadFaceTime()" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:700">↺ Refresh</button>
   </div>
+
   <div class="ft-summary">
-    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-critical" style="color:#991B1B">—</div><div class="ft-stat-label">Critical (21/21/45/90d+)</div></div>
-    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-overdue" style="color:#DC2626">—</div><div class="ft-stat-label">Overdue</div></div>
-    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-warn" style="color:#D97706">—</div><div class="ft-stat-label">Due soon</div></div>
+    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-mtd" style="color:#1F4E79">—</div><div class="ft-stat-label">Visits logged MTD</div></div>
+    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-focus" style="color:#7C3F00">—</div><div class="ft-stat-label">Weekly focus</div></div>
+    <div class="ft-stat"><div class="ft-stat-num" id="ft-s-dueweek" style="color:#B45309">—</div><div class="ft-stat-label">Due next 7 days</div></div>
     <div class="ft-stat"><div class="ft-stat-num" id="ft-s-ok" style="color:#0A6B4C">—</div><div class="ft-stat-label">On track</div></div>
   </div>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
-    <div id="ft-list"><div style="text-align:center;color:var(--text-4);padding:30px;font-size:13px">Loading...</div></div>
+
+  <div style="background:#fff;border:1.5px solid #CFC7E8;border-radius:12px;padding:16px 18px;margin-bottom:14px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:var(--text-1)">This week’s Face Time focus</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:2px">Top 3 relationships per LP. Channel/A first, then B/C. This is the working list — not the entire backlog.</div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#665A86;background:#F4F1FA;border-radius:999px;padding:5px 9px">Nyny can log for anyone</div>
+    </div>
+    <div id="ft-priority"><div style="text-align:center;color:var(--text-3);padding:20px;font-size:13px">Loading priorities...</div></div>
   </div>
+
+  <details id="ft-full-details" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <summary style="cursor:pointer;padding:13px 16px;font-size:13px;font-weight:800;color:var(--text-1);background:#F8F9FB">View full Face Time coverage &amp; filters</summary>
+    <div style="padding:14px 16px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <select id="ft-lp-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
+        <option value="all">All LPs</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option>
+      </select>
+      <select id="ft-tier-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
+        <option value="all">All tiers</option><option value="Channel">Channel only</option><option value="A">A-tier only</option><option value="B">B-tier only</option><option value="C">C-tier only</option>
+      </select>
+      <select id="ft-status-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
+        <option value="all">All statuses</option><option value="critical">Critical only</option><option value="overdue">Overdue + Critical</option><option value="warn">Needs attention</option>
+      </select>
+      <select id="ft-comkt-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
+        <option value="all">Co-marketing: all</option><option value="yes">Co-marketing only</option><option value="no">Not co-marketing</option>
+      </select>
+    </div>
+    <div style="padding:14px 16px 16px">
+      <div id="ft-list"><div style="text-align:center;color:var(--text-4);padding:30px;font-size:13px">Loading...</div></div>
+    </div>
+  </details>
 </div>
 
 
@@ -1904,7 +1912,7 @@ function selectUser(btn,u){
   } else {
     document.getElementById("view-lp").classList.add("active");
     renderLP(u);
-    loadCallLogs().then(function(){renderLP(u);});
+    Promise.all([loadCallLogs().catch(function(){}),loadFaceTime().catch(function(){})]).then(function(){renderLP(u);});
     lpStartPolling(u);
   }
 }
@@ -2020,6 +2028,8 @@ function renderLP(lp){
     if(bdayAgents.length){bdayEl.style.display="flex";document.getElementById("bday-banner-txt").textContent="Birthday this week: "+bdayAgents.map(function(b){return b.name+" ("+b.birthday+")";}).join(", ")+" — reach out!";}
     else bdayEl.style.display="none";
   }
+  if(typeof renderLpFaceTimeFocus==="function")renderLpFaceTimeFocus(lp);
+  if(typeof ctLoadRecentRmResponses==="function")ctLoadRecentRmResponses(lp);
   document.getElementById("lp-search-input").value="";
   document.getElementById("lp-search-results").innerHTML="";
   var el=document.getElementById("lp-call-list"),html="";
@@ -4939,7 +4949,8 @@ function refreshLpSharedData(source){
           loadCallLogs().catch(function(){}),
           loadRmActivity().catch(function(){}),
           loadRmFollowups().catch(function(){}),
-          loadAmandaSnapshot().catch(function(){})
+          loadAmandaSnapshot().catch(function(){}),
+          loadFaceTime().catch(function(){})
         ]);
       }
 
@@ -6190,7 +6201,8 @@ function loadLpOverrides(){
 // Thresholds (days): [warn, red, critical]
 var FT_THRESHOLDS={Channel:[10,14,21],A:[10,14,21],B:[21,30,45],C:[45,60,90]};
 var FT_TARGETS={Channel:14,A:14,B:30,C:60};
-var ftData={};  // agent_name → {lastDate, source, notes}
+var ftData={};  // normalized agent name → {lastDate, source, notes}
+var ftVisitRows=[]; // all visit records used for month-to-date counts
 
 async function loadFaceTime(){
   var listEl=document.getElementById("ft-list");
@@ -6207,14 +6219,18 @@ async function loadFaceTime(){
     // while agent_name as logged by Amanda/LPs is typically Title Case — without normalizing,
     // every lookup below misses and every agent shows "Never" even when visits are logged.
     ftData={};
+    ftVisitRows=[];
     (r[0]||[]).forEach(function(a){
       var n=(a.agent_name||"").trim().toUpperCase();if(!n)return;
+      var owner=(typeof ctRmOwnerFromNotes==="function"?ctRmOwnerFromNotes(a.notes):"Amanda")||"Amanda";
+      ftVisitRows.push({agent_name:a.agent_name,date:a.act_date,source:owner,notes:a.notes||""});
       if(!ftData[n]||a.act_date>ftData[n].lastDate){
-        ftData[n]={lastDate:a.act_date,source:"Amanda",notes:a.notes||""};
+        ftData[n]={lastDate:a.act_date,source:owner,notes:a.notes||""};
       }
     });
     (r[1]||[]).forEach(function(b){
       var n=(b.agent_name||"").trim().toUpperCase();if(!n)return;
+      ftVisitRows.push({agent_name:b.agent_name,date:b.date,source:b.logged_by||"LP",notes:b.notes||""});
       if(!ftData[n]||b.date>ftData[n].lastDate){
         ftData[n]={lastDate:b.date,source:b.logged_by||"LP",notes:b.notes||""};
       }
@@ -6235,6 +6251,173 @@ function ftStatus(tier,days){
 }
 
 
+function ftAgentRows(){
+  var now=new Date();
+  return agents.filter(function(e){return typeof isActive!=="function"||isActive(e);}).map(function(e){
+    var name=e[0],tier=e[1]||"C",lp=(e[2]&&e[2]!=="null")?e[2]:"Unassigned";
+    var ft=ftData[(name||"").trim().toUpperCase()];
+    var days=null;
+    if(ft&&ft.lastDate)days=Math.max(0,Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000));
+    var target=FT_TARGETS[tier]||FT_TARGETS.C;
+    return {name:name,tier:tier,lp:lp,days:days,status:ftStatus(tier,days),target:target,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name]};
+  });
+}
+function ftPriorityForLp(lp,count){
+  var tierRank={Channel:0,A:1,B:2,C:3};
+  var statusRank={critical:0,red:1,warn:2,ok:3};
+  var rows=ftAgentRows().filter(function(a){return a.lp===lp;});
+  var needs=rows.filter(function(a){return a.status!=="ok";});
+  var ok=rows.filter(function(a){return a.status==="ok";});
+  function sorter(a,b){
+    var tr=(tierRank[a.tier]||0)-(tierRank[b.tier]||0);if(tr!==0)return tr;
+    var sr=(statusRank[a.status]||0)-(statusRank[b.status]||0);if(sr!==0)return sr;
+    return (b.days===null?9999:b.days)-(a.days===null?9999:a.days);
+  }
+  needs.sort(sorter);ok.sort(sorter);
+  return needs.concat(ok).slice(0,count||3);
+}
+function ftOpenAgentLog(name,lp){
+  var d=document.getElementById("ft-full-details");if(d)d.open=true;
+  var lpEl=document.getElementById("ft-lp-filter"),tierEl=document.getElementById("ft-tier-filter"),statusEl=document.getElementById("ft-status-filter");
+  if(lpEl)lpEl.value=lp||"all";if(tierEl)tierEl.value="all";if(statusEl)statusEl.value="all";
+  renderFaceTime();
+  setTimeout(function(){
+    var target=null;
+    document.querySelectorAll("#ft-list .ft-save-btn").forEach(function(btn){if(btn.dataset.agent===name)target=btn;});
+    if(!target)return;
+    var fid=target.dataset.fid;var form=document.getElementById(fid);
+    if(form&&!form.classList.contains("show"))ftToggleLog(fid);
+    if(form)form.scrollIntoView({behavior:"smooth",block:"center"});
+  },40);
+}
+function renderFtPriority(){
+  var el=document.getElementById("ft-priority");if(!el)return;
+  var lps=["Gavin","Karen","Osgood","Jordan","Said"],html="",focusTotal=0;
+  lps.forEach(function(lp){
+    var list=ftPriorityForLp(lp,3);focusTotal+=list.length;
+    html+='<div style="border-top:1px solid #ECE8F5;padding:10px 0 8px">'
+      +'<div style="font-size:12px;font-weight:800;color:#3D3562;margin-bottom:6px">'+lp+'</div>';
+    if(!list.length){html+='<div style="font-size:12px;color:var(--text-3)">No active assigned partners.</div>';}
+    list.forEach(function(a){
+      var last=a.lastDate?(a.days+"d since last visit"):'No visit recorded';
+      var due=a.days===null?'Needs first recorded visit':(a.days>=a.target?'Overdue by '+(a.days-a.target)+'d':'Due in '+(a.target-a.days)+'d');
+      var dueColor=(a.days===null||a.days>=a.target)?'#A32D2D':'#5C4A35';
+      html+='<div style="display:grid;grid-template-columns:minmax(180px,1fr) 62px minmax(125px,.8fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid #F2F0F7">'
+        +'<div><span style="font-size:12.5px;font-weight:700;color:var(--text-1)">'+displayName(a.name)+'</span> <span class="badge badge-'+String(a.tier).toLowerCase()+'" style="font-size:9px">'+a.tier+'</span></div>'
+        +'<div style="font-size:11px;color:var(--text-3)">'+last+'</div>'
+        +'<div style="font-size:11px;font-weight:700;color:'+dueColor+'">'+due+'</div>'
+        +'<button type="button" class="ft-priority-log" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(lp)+'" style="border:1px solid #CFC7E8;background:#F4F1FA;color:#4E3D8A;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:700;cursor:pointer">Log visit</button>'
+        +'</div>';
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+  el.querySelectorAll(".ft-priority-log").forEach(function(btn){btn.addEventListener("click",function(){ftOpenAgentLog(this.dataset.agent,this.dataset.lp);});});
+  var f=document.getElementById("ft-s-focus");if(f)f.textContent=focusTotal;
+}
+
+/* ── Persistent LP-side RM response history ───────────────────────────────
+   The bell remains an OPEN-items queue. This panel intentionally includes
+   both open and handled flags so an LP can always see what Amanda/Nyny sent
+   back after the actionable notification disappears. */
+async function ctLoadRecentRmResponses(lp){
+  var host=document.getElementById("lp-rm-responses-list");
+  if(!host)return;
+  host.innerHTML='<div style="padding:5px 0;color:#756E89">Loading responses...</div>';
+  try{
+    var safeLp=encodeURIComponent(lp||"");
+    // Pull replies AND handled flags separately, then merge them.
+    // This intentionally preserves handled flags where an older tracker failed to save the RM note.
+    var results=await Promise.all([
+      sbFetch("GET","lp_flags?lp=eq."+safeLp+"&rm_note=not.is.null&select=id,agent_name,lp,note,rm_note,rm_note_at,rm_note_by,resolved,resolved_at,created_at&order=rm_note_at.desc&limit=30").catch(function(){return[];}),
+      sbFetch("GET","lp_flags?lp=eq."+safeLp+"&resolved=eq.true&select=id,agent_name,lp,note,rm_note,rm_note_at,rm_note_by,resolved,resolved_at,created_at&order=resolved_at.desc&limit=30").catch(function(){return[];}),
+      sbFetch("GET","call_logs?lp=eq."+safeLp+"&rm_note=not.is.null&select=id,agent_name,lp,note,rm_note,rm_note_at,flag_rm,call_date,outcome&order=rm_note_at.desc&limit=30").catch(function(){return[];})
+    ]);
+    var directMap={};
+    function addDirect(r){
+      if(!r||r.id===undefined||r.id===null)return;
+      var key=String(r.id);
+      var existing=directMap[key]||{};
+      directMap[key]={
+        source:"direct",id:r.id,agent_name:r.agent_name||existing.agent_name||"",flag_note:r.note||existing.flag_note||"",
+        rm_note:r.rm_note||existing.rm_note||"",rm_note_at:r.rm_note_at||existing.rm_note_at||r.resolved_at||existing.handled_at||r.created_at||existing.created_at||"",
+        rm_note_by:r.rm_note_by||existing.rm_note_by||"RM",handled:r.resolved===true||existing.handled===true,
+        handled_at:r.resolved_at||existing.handled_at||null,created_at:r.created_at||existing.created_at||""
+      };
+    }
+    (Array.isArray(results[0])?results[0]:[]).forEach(addDirect);
+    (Array.isArray(results[1])?results[1]:[]).forEach(addDirect);
+    var direct=Object.keys(directMap).map(function(k){return directMap[k];});
+    var legacy=(Array.isArray(results[2])?results[2]:[]).map(function(r){
+      return{
+        source:"call",id:r.id,agent_name:r.agent_name||"",flag_note:r.note||"",rm_note:r.rm_note||"",
+        rm_note_at:r.rm_note_at||r.call_date||"",rm_note_by:"RM",
+        handled:r.flag_rm!==true,handled_at:null,created_at:r.call_date||"",outcome:r.outcome||""
+      };
+    });
+    var rows=direct.concat(legacy).filter(function(r){
+      return String(r.rm_note||"").trim() || r.handled===true;
+    });
+    rows.sort(function(a,b){
+      var ad=a.rm_note_at||a.handled_at||a.created_at||"";
+      var bd=b.rm_note_at||b.handled_at||b.created_at||"";
+      return String(bd).localeCompare(String(ad));
+    });
+    rows=rows.slice(0,15);
+    if(!rows.length){
+      host.innerHTML='<div style="padding:6px 0;color:#756E89">No RM responses yet. When Amanda or Nyny replies to one of your flags, it will stay here for reference.</div>';
+      return;
+    }
+    var html='<div style="max-height:280px;overflow-y:auto;padding-right:3px">';
+    rows.forEach(function(r,i){
+      var agent=r.agent_name?displayName(r.agent_name):"General flag";
+      var when=r.rm_note_at?fmt(String(r.rm_note_at).slice(0,10)):"";
+      var by=r.rm_note_by||"RM";
+      var flagText=String(r.flag_note||"").trim();
+      var response=String(r.rm_note||"").trim();
+      var missingResponse=r.handled&&!response;
+      var status=missingResponse?"Handled · no response saved":(r.handled?"Handled":"Reply sent · still open");
+      var statusColor=missingResponse?"#6B5E3E":(r.handled?"#15803d":"#B7791F");
+      var statusBg=missingResponse?"#F8F3E7":(r.handled?"#ECFDF3":"#FFF8E8");
+      html+='<div style="padding:10px 0;'+(i?'border-top:1px solid #EEEAF6;':'')+'">'
+        +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">'
+          +'<div style="font-size:13px;font-weight:800;color:#28213F">'+escHtml(agent)+'</div>'
+          +'<div style="font-size:10.5px;font-weight:800;color:'+statusColor+';background:'+statusBg+';border-radius:999px;padding:3px 8px">'+status+'</div>'
+        +'</div>'
+        +(flagText?'<div style="font-size:11.5px;color:#665E78;margin-top:5px;line-height:1.45"><span style="font-weight:700">Your flag:</span> '+escHtml(flagText)+'</div>':'')
+        +(missingResponse
+          ?'<div style="margin-top:6px;background:#FAF7EF;border:1px solid #E7DCC3;border-radius:7px;padding:8px 10px">'
+            +'<div style="font-size:10.5px;font-weight:800;color:#6B5E3E;margin-bottom:3px">Handled'+(when?" · "+escHtml(when):"")+'</div>'
+            +'<div style="font-size:12px;color:#5F5874;line-height:1.5">No RM response was recorded before this flag was handled. This can happen with flags cleared in an older tracker version.</div>'
+          +'</div>'
+          :'<div style="margin-top:6px;background:#F3F8F3;border:1px solid #CFE5D2;border-radius:7px;padding:8px 10px">'
+            +'<div style="font-size:10.5px;font-weight:800;color:#4E3D8A;margin-bottom:3px">RM response'+(by?" · "+escHtml(by):"")+(when?" · "+escHtml(when):"")+'</div>'
+            +'<div style="font-size:12.5px;color:#243124;line-height:1.5">'+escHtml(response)+'</div>'
+          +'</div>')
+      +'</div>';
+    });
+    html+='</div><div style="font-size:10.5px;color:#756E89;margin-top:7px">Showing the 15 most recent RM flag outcomes for '+escHtml(lp)+'. Handled flags remain here even when no RM response was recorded. Open items still appear in the bell until handled.</div>';
+    host.innerHTML=html;
+  }catch(e){
+    console.error("RM response history failed",e);
+    host.innerHTML='<div style="padding:6px 0;color:#A32D2D">Could not load RM responses. Refresh or try again in a moment.</div>';
+  }
+}
+window.ctLoadRecentRmResponses=ctLoadRecentRmResponses;
+
+function renderLpFaceTimeFocus(lp){
+  var el=document.getElementById("lp-facetime-focus");if(!el)return;
+  if(!Object.keys(ftData||{}).length){el.style.display="none";return;}
+  var list=ftPriorityForLp(lp,3);if(!list.length){el.style.display="none";return;}
+  el.style.display="block";
+  var html='<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px"><div><div style="font-size:12.5px;font-weight:800;color:#3D3562">Face Time — your next 3</div><div style="font-size:11px;color:var(--text-2);margin-top:1px">You do not need to work the full Face Time tab. Start here.</div></div><button type="button" onclick="selectUser(document.querySelector(\'.wb-FaceTime\'),\'FaceTime\')" style="border:0;background:transparent;color:#4E3D8A;font-size:11px;font-weight:800;cursor:pointer">Open Face Time →</button></div>';
+  list.forEach(function(a){
+    var due=a.days===null?'No visit recorded':(a.days>=a.target?'Overdue '+(a.days-a.target)+'d':'Due in '+(a.target-a.days)+'d');
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid #EEEAF6"><div style="font-size:12px;font-weight:700;color:var(--text-1)">'+displayName(a.name)+' <span style="font-size:9px;color:#746A8D">'+a.tier+'</span></div><div style="font-size:11px;color:'+(a.days===null||a.days>=a.target?'#A32D2D':'#5C4A35')+';font-weight:700">'+due+'</div></div>';
+  });
+  el.innerHTML=html;
+}
+
 function renderFaceTime(){
   var listEl=document.getElementById("ft-list");if(!listEl)return;
   var lpF=(document.getElementById("ft-lp-filter")||{value:"all"}).value;
@@ -6243,14 +6426,7 @@ function renderFaceTime(){
   var comktF=(document.getElementById("ft-comkt-filter")||{value:"all"}).value;
   var now=new Date();
 
-  var agentList=agents.map(function(e){
-    var name=e[0],tier=e[1]||"C",lp=(e[2]&&e[2]!=="null")?e[2]:"Unassigned";
-    var ft=ftData[name];
-    var days=null;
-    if(ft&&ft.lastDate){days=Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000);}
-    var status=ftStatus(tier,days);
-    return{name:name,tier:tier,lp:lp,days:days,status:status,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name]};
-  });
+  var agentList=ftAgentRows();
 
   if(lpF!=="all")agentList=agentList.filter(function(a){return a.lp===lpF;});
   if(tierF!=="all")agentList=agentList.filter(function(a){return a.tier===tierF;});
@@ -6266,15 +6442,16 @@ function renderFaceTime(){
     return(b.days===null?9999:b.days)-(a.days===null?9999:a.days);
   });
 
-  var full=agents.map(function(e){
-    var ft=ftData[e[0]];var days=null;
-    if(ft&&ft.lastDate){days=Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000);}
-    return ftStatus(e[1]||"C",days);
-  });
-  document.getElementById("ft-s-critical").textContent=full.filter(function(s){return s==="critical";}).length;
-  document.getElementById("ft-s-overdue").textContent=full.filter(function(s){return s==="red";}).length;
-  document.getElementById("ft-s-warn").textContent=full.filter(function(s){return s==="warn";}).length;
-  document.getElementById("ft-s-ok").textContent=full.filter(function(s){return s==="ok";}).length;
+  var fullRows=ftAgentRows();
+  var monthStart=new Date(now.getFullYear(),now.getMonth(),1);var monthStartStr=monthStart.getFullYear()+"-"+String(monthStart.getMonth()+1).padStart(2,"0")+"-01";
+  var mtdKeys={};(ftVisitRows||[]).forEach(function(v){if(v.date&&v.date>=monthStartStr)mtdKeys[String(v.agent_name||"").trim().toUpperCase()+"|"+v.date]=true;});
+  var mtd=Object.keys(mtdKeys).length;
+  var dueWeek=fullRows.filter(function(a){if(a.days===null)return false;var left=a.target-a.days;return left>=0&&left<=7;}).length;
+  var okCount=fullRows.filter(function(a){return a.status==="ok";}).length;
+  var mtdEl=document.getElementById("ft-s-mtd");if(mtdEl)mtdEl.textContent=mtd;
+  var dueEl=document.getElementById("ft-s-dueweek");if(dueEl)dueEl.textContent=dueWeek;
+  var okEl=document.getElementById("ft-s-ok");if(okEl)okEl.textContent=okCount;
+  renderFtPriority();
 
   if(!agentList.length){listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px">No agents match these filters</div>';return;}
 
@@ -6295,7 +6472,7 @@ function renderFaceTime(){
     rows.push({type:"hdr",tier:tier,label:tierLabels[tier],count:tList.length,color:tierColors[tier]});
     tList.forEach(function(a,i){
       var target=FT_TARGETS[tier];
-      var nextLabel=a.days===null?"Never logged":a.days<target?"Next in "+(target-a.days)+"d":"Overdue by "+(a.days-target)+"d";
+      var nextLabel=a.days===null?"No visit recorded":a.days<target?"Next in "+(target-a.days)+"d":"Overdue by "+(a.days-target)+"d";
       var overdue=a.days===null||a.days>=target;
       rows.push({type:"agent",a:a,target:target,nextLabel:nextLabel,overdue:overdue,lc:lpColors[a.lp]||"#888",formId:"ftf"+tier+i});
     });
@@ -6313,8 +6490,8 @@ function renderFaceTime(){
       html2+='<div class="ft-row"'+rowStyle+'>'
         +'<div class="ft-name">'+a.name+'</div>'
         +'<span style="font-size:11px;font-weight:600;color:'+r.lc+';min-width:50px">'+a.lp+'</span>'
-        +'<span class="ft-days '+a.status+'">'+(a.days===null?"Never":a.days+"d ago")+'</span>'
-        +'<span class="ft-meta">'+(a.lastDate?fmtDate(a.lastDate)+(a.source?" via "+a.source:""):"No record")+'</span>'
+        +'<span class="ft-days '+a.status+'">'+(a.days===null?"No record":a.days+"d ago")+'</span>'
+        +'<span class="ft-meta">'+(a.lastDate?fmtDate(a.lastDate)+(a.source?" via "+a.source:""):"No visit recorded")+'</span>'
         +'<span class="ft-meta" style="color:'+(r.overdue?"#DC2626":"#0A6B4C")+'">'+r.nextLabel+'</span>'
         +'<span class="ft-comkt-toggle">'+coBadge+'</span>'
         +'<button class="ft-log-btn btn-ft-log" data-fid="'+fid+'" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Log visit</button>'
@@ -6325,7 +6502,7 @@ function renderFaceTime(){
             +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Date</label>'
             +'<input type="date" id="'+fid+'-date" value="'+today2()+'" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"></div>'
             +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Logged by</label>'
-            +'<select id="'+fid+'-by" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"><option>Amanda</option><option>Gavin</option><option>Jordan</option><option>Karen</option><option>Nyny</option><option>Osgood</option><option>Said</option></select></div>'
+            +'<select id="'+fid+'-by" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"><option>Nyny</option><option>Amanda</option><option>Gavin</option><option>Jordan</option><option>Karen</option><option>Osgood</option><option>Said</option></select></div>'
           +'</div>'
           +'<textarea id="'+fid+'-notes" placeholder="What did you talk about? Any referral opportunities discussed, next steps, what they need from us..." style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical;min-height:72px;margin-bottom:8px;box-sizing:border-box"></textarea>'
           +'<div style="display:flex;gap:7px">'
