@@ -469,7 +469,7 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
     <div style="display:flex;align-items:center;gap:12px">
       <div>
         <div class="brand-logo">CORE TEAM</div>
-        <div class="brand-sub">NFM Lending Ohio <span style="font-size:9px;color:#94a3b8">· v13 clean QA</span></div>
+        <div class="brand-sub">NFM Lending Ohio <span style="font-size:9px;color:#94a3b8">· v13.1 Face Time QA</span></div>
       </div>
     </div>
   </div>
@@ -6326,27 +6326,47 @@ async function loadFaceTime(){
       sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
       loadCoMarketing(),
       sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,do_not_contact,relationship_status&limit=5000").catch(function(){return[];});}),
-      sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000").catch(function(){return[];})
+      sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000").catch(function(){
+        // Older deployments may not have the RM column yet. LP ownership is still usable,
+        // so retry without RM instead of silently treating every partner as Unassigned.
+        return sbFetch("GET","agent_assignments?select=agent_name,lp&limit=5000").catch(function(){return null;});
+      })
     ]);
     ftData={};ftVisitRows=[];
     (r[0]||[]).forEach(function(a){
-      var n=(a.agent_name||"").trim().toUpperCase();if(!n)return;
+      var n=assignmentKey(a.agent_name);if(!n)return;
       var owner=(typeof ctRmOwnerFromNotes==="function"?ctRmOwnerFromNotes(a.notes):"Amanda")||"Amanda";
       ftVisitRows.push({agent_name:a.agent_name,date:a.act_date,source:owner,notes:a.notes||""});
       if(!ftData[n]||a.act_date>ftData[n].lastDate)ftData[n]={lastDate:a.act_date,source:owner,notes:a.notes||""};
     });
     (r[1]||[]).forEach(function(b){
-      var n=(b.agent_name||"").trim().toUpperCase();if(!n)return;
+      var n=assignmentKey(b.agent_name);if(!n)return;
       ftVisitRows.push({agent_name:b.agent_name,date:b.date,source:b.logged_by||"LP",notes:b.notes||""});
       if(!ftData[n]||b.date>ftData[n].lastDate)ftData[n]={lastDate:b.date,source:b.logged_by||"LP",notes:b.notes||""};
     });
     var ownerMap={};
-    ctCollapseAssignmentRows(r[4]||[]).forEach(function(a){var k=assignmentKey(a.agent_name);if(k)ownerMap[k]={lp:(a.lp&&a.lp!=="__REMOVED__")?a.lp:"Unassigned",rm:a.rm||"Unassigned",removed:a.lp==="__REMOVED__"};});
+    ctCollapseAssignmentRows(r[4]||[]).forEach(function(a){
+      var k=assignmentKey(a.agent_name);if(!k)return;
+      ownerMap[k]={
+        lp:(a.lp&&a.lp!=="__REMOVED__")?a.lp:"Unassigned",
+        rm:a.rm||(typeof getRmOwner==="function"?getRmOwner(a.agent_name):"")||"Unassigned",
+        removed:a.lp==="__REMOVED__"
+      };
+    });
+    // If the assignment request was unavailable, fall back to the already-loaded shared roster
+    // rather than showing every active relationship as Unassigned.
+    if(!Object.keys(ownerMap).length && Array.isArray(agents)){
+      agents.forEach(function(a){
+        var k=assignmentKey(a&&a[0]);if(!k)return;
+        var lp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";
+        ownerMap[k]={lp:lp,rm:(typeof getRmOwner==="function"?getRmOwner(a[0]):"")||"Unassigned",removed:lp==="__REMOVED__"};
+      });
+    }
     ftRosterRows=ctDedupeProfileRows(r[3]||[]).filter(function(p){
-      var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
+      var k=assignmentKey(p.agent_name),o=ownerMap[k]||{};
       return !!k && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && p.retained!==false && !o.removed;
     }).map(function(p){
-      var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
+      var k=assignmentKey(p.agent_name),o=ownerMap[k]||{};
       return {name:p.agent_name,tier:p.tier||"C",lp:o.lp||"Unassigned",rm:o.rm||"Unassigned"};
     });
     renderFaceTime();
@@ -6368,7 +6388,7 @@ function ftAgentRows(){
   var roster=(ftRosterRows&&ftRosterRows.length)?ftRosterRows:agents.filter(function(e){return typeof isActive!=="function"||isActive(e);}).map(function(e){return{name:e[0],tier:e[1]||"C",lp:(e[2]&&e[2]!=="null")?e[2]:"Unassigned",rm:(agentRmOwners&&agentRmOwners[assignmentKey(e[0])])||"Unassigned"};});
   return roster.map(function(e){
     var name=e.name,tier=e.tier||"C",lp=e.lp||"Unassigned";
-    var ft=ftData[(name||"").trim().toUpperCase()],days=null;
+    var ft=ftData[assignmentKey(name)],days=null;
     if(ft&&ft.lastDate)days=Math.max(0,Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000));
     var target=FT_TARGETS[tier]||FT_TARGETS.C;
     return {name:name,tier:tier,lp:lp,rm:e.rm||"Unassigned",days:days,status:ftStatus(tier,days),target:target,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name]};
@@ -6619,7 +6639,12 @@ function renderFaceTime(){
 
   var fullRows=ftAgentRows();
   var monthStart=new Date(now.getFullYear(),now.getMonth(),1);var monthStartStr=monthStart.getFullYear()+"-"+String(monthStart.getMonth()+1).padStart(2,"0")+"-01";
-  var mtdKeys={};(ftVisitRows||[]).forEach(function(v){if(v.date&&v.date>=monthStartStr)mtdKeys[String(v.agent_name||"").trim().toUpperCase()+"|"+v.date]=true;});
+  var todayStr=localDateStr(now);
+  var mtdKeys={};(ftVisitRows||[]).forEach(function(v){
+    if(v.date&&v.date>=monthStartStr&&v.date<=todayStr){
+      var k=assignmentKey(v.agent_name);if(k)mtdKeys[k+"|"+v.date]=true;
+    }
+  });
   var mtd=Object.keys(mtdKeys).length;
   var dueWeek=fullRows.filter(function(a){if(a.days===null)return false;var left=a.target-a.days;return left>=0&&left<=7;}).length;
   var okCount=fullRows.filter(function(a){return a.status==="ok";}).length;
