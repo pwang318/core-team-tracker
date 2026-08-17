@@ -469,7 +469,7 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
     <div style="display:flex;align-items:center;gap:12px">
       <div>
         <div class="brand-logo">CORE TEAM</div>
-        <div class="brand-sub">NFM Lending Ohio <span style="font-size:9px;color:#94a3b8">· v13.1 Face Time QA</span></div>
+        <div class="brand-sub">NFM Lending Ohio <span style="font-size:9px;color:#94a3b8">· v13.2 Portfolio Health QA</span></div>
       </div>
     </div>
   </div>
@@ -8186,6 +8186,25 @@ function pfrHealthScore(daysSinceLead,daysAny,threshold,urgent,competitorRisk){
   if(daysAny>=threshold)return"Yellow";
   return"Green";
 }
+function pfrHealthReason(daysSinceLead,daysAny,threshold,urgent,competitorRisk,health){
+  if(competitorRisk)return"Competitor risk flagged";
+  if(daysSinceLead===null)return"No lead history found";
+  if(daysSinceLead>=60)return"Last lead "+daysSinceLead+"d ago · Red at 60d";
+  if(daysAny===null)return"No meaningful RM/LP touch recorded";
+  if(daysAny>=urgent)return"Meaningful touch "+daysAny+"d ago · Red at "+urgent+"d";
+  if(daysSinceLead>=30)return"Last lead "+daysSinceLead+"d ago · Yellow at 30d";
+  if(daysAny>=threshold)return"Meaningful touch "+daysAny+"d ago · Yellow at "+threshold+"d";
+  if(health==="Green")return"Healthy · lead "+daysSinceLead+"d ago · meaningful touch "+daysAny+"d ago";
+  return"Health trigger unavailable";
+}
+function pfrRedRiskScore(r){
+  if(r.competitorRisk)return 100000;
+  if(r.daysSinceLead===null)return 90000;
+  if(r.daysAny===null)return 85000;
+  var leadOver=Math.max(0,(r.daysSinceLead||0)-60);
+  var touchOver=Math.max(0,(r.daysAny||0)-(r.urgent||0));
+  return 1000+Math.max(leadOver,touchOver);
+}
 
 function pfrPeriodRange(){
   var now=new Date();
@@ -8582,12 +8601,20 @@ async function pfrLoad(){
         var best=vDate&&pDate?(vDate>pDate?vDate:pDate):(vDate||pDate);
         return best?Math.round((now-new Date(best+"T12:00:00"))/86400000):null;
       }());
-      var health=pfrHealthScore(daysSinceLead,daysAny,threshold,urgent,!!a.competitor_risk_flag);
+      var competitorRisk=!!a.competitor_risk_flag;
+      var health=pfrHealthScore(daysSinceLead,daysAny,threshold,urgent,competitorRisk);
+      var healthReason=pfrHealthReason(daysSinceLead,daysAny,threshold,urgent,competitorRisk,health);
       var daysToYellowTouch=daysAny===null?null:threshold-daysAny;
       var daysToYellowLead=daysSinceLead===null?null:30-daysSinceLead;
       var candidates=[daysToYellowTouch,daysToYellowLead].filter(function(d){return d!==null;});
       var daysUntilYellow=candidates.length?Math.min.apply(null,candidates):null;
-      return{name:name,tier:tier,health:health,daysAny:daysAny,daysSinceLead:daysSinceLead,daysUntilYellow:daysUntilYellow,
+      var yellowTrigger=null;
+      if(health==="Green"&&daysUntilYellow!==null){
+        if(daysToYellowLead!==null&&daysToYellowLead===daysUntilYellow)yellowTrigger="Lead will hit 30 days";
+        else if(daysToYellowTouch!==null&&daysToYellowTouch===daysUntilYellow)yellowTrigger="Meaningful touch reaches "+threshold+" days";
+      }
+      return{name:name,tier:tier,health:health,healthReason:healthReason,daysAny:daysAny,daysSinceLead:daysSinceLead,daysUntilYellow:daysUntilYellow,
+        yellowTrigger:yellowTrigger,threshold:threshold,urgent:urgent,competitorRisk:competitorRisk,
         next_growth_opportunity:a.next_growth_opportunity||null,satisfaction:a.satisfaction_rating||null,
         high_potential:!!a.high_potential_flag,recovery_plan:a.recovery_plan||null,agent:a};
     });
@@ -8613,7 +8640,8 @@ async function pfrLoad(){
     var healthCounts={Green:0,Yellow:0,Red:0};
     rows.forEach(function(r){healthCounts[r.health]++;});
     var top10AtRisk=rows.filter(function(r){return r.health==="Red";}).sort(function(a,b){
-      return(b.daysSinceLead===null?9999:b.daysSinceLead)-(a.daysSinceLead===null?9999:a.daysSinceLead);
+      var risk=pfrRedRiskScore(b)-pfrRedRiskScore(a);if(risk!==0)return risk;
+      return (a.name||"").localeCompare(b.name||"");
     }).slice(0,10);
     var PROACTIVE_WINDOW=7;
     var proactiveWatch=rows.filter(function(r){return r.health==="Green"&&r.daysUntilYellow!==null&&r.daysUntilYellow<=PROACTIVE_WINDOW;})
@@ -8767,8 +8795,8 @@ async function pfrLoad(){
 
     html+='<div style="background:var(--surface);border:1px solid #1F4E79;border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Proactive Watch &mdash; reach out before they go Yellow</div>'
-      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Green partners within 7 days of crossing into Yellow if nothing changes.</div>'
-      +(proactiveWatch.length?proactiveWatch.map(function(r,i){return pfrListRow(i+1,pfrProperCase(r.name),pfrTierLabel(r.tier)+" &middot; "+r.daysUntilYellow+(r.daysUntilYellow===1?" day":" days")+" until Yellow");}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nobody\'s close to slipping right now.</div>')
+      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Green partners within 7 days of crossing into Yellow. Each row now shows the trigger so you know what action actually matters.</div>'
+      +(proactiveWatch.length?proactiveWatch.map(function(r,i){return pfrListRow(i+1,pfrProperCase(r.name),pfrTierLabel(r.tier)+" &middot; Yellow in "+r.daysUntilYellow+(r.daysUntilYellow===1?" day":" days")+" &middot; <strong>"+escHtml(r.yellowTrigger||"Health threshold approaching")+"</strong>");}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nobody\'s close to slipping right now.</div>')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
@@ -8778,8 +8806,8 @@ async function pfrLoad(){
         +pfrHealthTile("Yellow",healthCounts.Yellow,"#B8842B","pfrOpenDrill(\'health:Yellow\')")
         +pfrHealthTile("Red",healthCounts.Red,"#B54B42","pfrOpenDrill(\'health:Red\')")
       +'</div>'
-      +(top10AtRisk.length?'<div style="border-top:1px solid var(--border-light);padding-top:8px"><div style="font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;padding:0 4px">Top Red &mdash; ranked by days since last lead</div>'
-        +top10AtRisk.map(function(r,i){return pfrListRow(i+1,pfrProperCase(r.name),pfrTierLabel(r.tier)+" &middot; "+(r.daysSinceLead===null?"no lead logged":r.daysSinceLead+"d since last lead")+(r.recovery_plan?" &middot; recovery plan on file":" &middot; &#9888; no recovery plan"));}).join("")+'</div>'
+      +(top10AtRisk.length?'<div style="border-top:1px solid var(--border-light);padding-top:8px"><div style="font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;padding:0 4px">Top Red &mdash; most urgent health triggers</div>'
+        +top10AtRisk.map(function(r,i){return pfrListRow(i+1,pfrProperCase(r.name),pfrTierLabel(r.tier)+" &middot; <strong>"+escHtml(r.healthReason)+"</strong>"+(r.recovery_plan?" &middot; recovery plan on file":" &middot; &#9888; no recovery plan"));}).join("")+'</div>'
         :'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">No Red partners right now.</div>')
     +'</div>';
 
@@ -8903,8 +8931,10 @@ function pfrOpenDrill(key){
     items=(pfrDrill.rows||[]).filter(function(r){return t==="all"||(t==="None"?!r.tier:r.tier===t);}).map(function(r){return{name:r.name,detail:pfrTierLabel(r.tier)+" · "+r.health+" · "+(r.daysAny===null?"no touch logged":r.daysAny+"d since last touch")};});
   }else if(key.indexOf("health:")===0){
     var h=key.split(":")[1];
-    title.textContent=h+" Partners";
-    items=(pfrDrill.rows||[]).filter(function(r){return r.health===h;}).map(function(r){return{name:r.name,detail:pfrTierLabel(r.tier)+" · "+(r.daysSinceLead===null?"no lead logged":r.daysSinceLead+"d since last lead")};});
+    title.textContent=h+" Partners — exact health trigger";
+    items=(pfrDrill.rows||[]).filter(function(r){return r.health===h;}).map(function(r){
+      return{name:r.name,detail:pfrTierLabel(r.tier)+" · "+r.healthReason};
+    });
   }else if(key.indexOf("mig:")===0){
     var parts=key.split(":");
     title.textContent=parts[1]==="all"?"All Tier Migrations — this period":parts[1]==="other"?"Other Tier Changes":parts[1]+" → "+parts[2]+" Migrations";
