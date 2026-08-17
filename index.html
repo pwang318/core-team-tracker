@@ -9,7 +9,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Core Team Intelligence Platform</title>
+<title>Core Team Intelligence Platform — LP v12 Ownership QA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -795,10 +795,20 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
     <div id="inactive-banner" class="inactive-banner" style="display:none">&#9888; <span id="inactive-banner-txt"></span></div>
     <div id="bday-banner" class="bday-banner" style="display:none">&#127874; <span id="bday-banner-txt"></span></div>
     <div id="lp-facetime-focus" style="display:none;background:#fff;border:1px solid #D8D1EE;border-left:4px solid #6B5AA6;border-radius:9px;padding:11px 13px;margin-bottom:12px"></div>
+    <div id="lp-rm-flags-for-you" style="display:none;background:#fff;border:1px solid #E7C66B;border-left:4px solid #B8842B;border-radius:9px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:12.5px;font-weight:800;color:#6F4E00">RM Flags for You</div>
+      <div style="font-size:11.5px;color:#6C6252;margin-top:2px">Items Amanda or Nyny sent to you for follow-up. Reply here, then mark handled when complete.</div>
+      <div id="lp-rm-flags-for-you-list" style="margin-top:8px;font-size:12px;color:#5F5874"></div>
+    </div>
     <div id="lp-rm-responses" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #4E3D8A;border-radius:9px;padding:12px 14px;margin-bottom:12px">
       <div style="font-size:12.5px;font-weight:800;color:#332B52">Recent RM Responses</div>
       <div style="font-size:11.5px;color:#5F5874;margin-top:2px">Replies from Amanda/Nyny stay here even after the flag is marked handled.</div>
       <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#5F5874">Loading...</div>
+    </div>
+    <div id="lp-rm-relationship-notes" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #6B5AA6;border-radius:9px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:12.5px;font-weight:800;color:#332B52">Recent RM Relationship Notes</div>
+      <div style="font-size:11.5px;color:#5F5874;margin-top:2px">What Amanda or Nyny documented after speaking with agents assigned to you. This is shared relationship context — no need to ask the RM what was discussed.</div>
+      <div id="lp-rm-relationship-notes-list" style="margin-top:8px;font-size:12px;color:#5F5874">Loading...</div>
     </div>
     <div class="search-panel">
       <div class="search-panel-title">&#128269; Search &amp; Log Any Agent</div>
@@ -1076,12 +1086,13 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
     <div class="section-head">Full roster
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
         <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
+        <select id="d-rm" onchange="renderDaniel()"><option value="">All RM Owners</option><option>Amanda</option><option>Nyny</option><option value="Unassigned">Unassigned</option></select>
         <select id="d-lvl" onchange="renderDaniel()"><option value="">All levels</option><option>A</option><option>B</option><option>C</option></select>
         <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
         <input type="text" id="d-q" placeholder="Search..." oninput="renderDaniel()" style="width:120px">
       </div>
     </div>
-    <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>LP</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>RM Owner</th><th>LP Owner</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
   </div>
 
 </div>
@@ -1108,9 +1119,10 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
     <h3>Reassign agents</h3>
     <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
       <input type="text" id="reassign-q" placeholder="Search agent..." oninput="renderReassign()" style="flex:1;min-width:140px">
+      <select id="reassign-filter-rm" onchange="renderReassign()"><option value="">All RM Owners</option><option>Amanda</option><option>Nyny</option><option value="Unassigned">Unassigned</option></select>
       <select id="reassign-filter-lp" onchange="renderReassign()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
     </div>
-    <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign to</th><th></th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
+    <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>RM Owner</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign LP</th><th></th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
   </div>
   <div class="admin-section">
     <h3>Inactive agents <span id="inactive-count-label" style="font-weight:400;color:#888;font-size:12px"></span></h3>
@@ -1267,6 +1279,7 @@ var RMS=["Amanda","Nyny"];
 var agentRmOwners={};
 function assignmentKey(name){return (name||"").trim().toLowerCase().replace(/\s+/g," ");}
 function getRmOwner(name){return agentRmOwners[assignmentKey(name)]||"";}
+function rmOwnerBadge(name){var o=getRmOwner(name)||"Unassigned";return '<span class="rm-owner-tag" style="font-size:10.5px;font-weight:700;color:#4E3D8A;background:#F1EEFA;border:1px solid #DED8EF;border-radius:999px;padding:2px 7px;white-space:nowrap">RM: '+escHtml(o)+'</span>';}
 var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
@@ -2029,7 +2042,9 @@ function renderLP(lp){
     else bdayEl.style.display="none";
   }
   if(typeof renderLpFaceTimeFocus==="function")renderLpFaceTimeFocus(lp);
+  if(typeof ctLoadRmFlagsForLp==="function")ctLoadRmFlagsForLp(lp);
   if(typeof ctLoadRecentRmResponses==="function")ctLoadRecentRmResponses(lp);
+  if(typeof ctLoadRecentRmRelationshipNotes==="function")ctLoadRecentRmRelationshipNotes(lp);
   document.getElementById("lp-search-input").value="";
   document.getElementById("lp-search-results").innerHTML="";
   var el=document.getElementById("lp-call-list"),html="";
@@ -2247,8 +2262,8 @@ function renderCallCard(a,lp,isBonus){
 
   // Contact bar
   html+='<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:8px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">';
-  html+='<span style="font-size:12px;color:var(--text-2)" id="ci-phone-'+safeId+'">📞 <span style="color:var(--text-3)">Loading...</span></span>';
-  html+='<span style="font-size:12px;color:var(--text-2)" id="ci-email-'+safeId+'">✉️ <span style="color:var(--text-3)">Loading...</span></span>';
+  html+='<span style="font-size:12px;color:var(--text-2)" data-contact-phone="'+safeId+'">📞 <span style="color:var(--text-3)">Loading...</span></span>';
+  html+='<span style="font-size:12px;color:var(--text-2)" data-contact-email="'+safeId+'">✉️ <span style="color:var(--text-3)">Loading...</span></span>';
   html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+"\'"+ ')" style="margin-left:auto;font-size:11px">Edit contact</button>';
   html+='</div>';
 
@@ -2480,8 +2495,8 @@ function renderLpSearch(){
 
     // Contact info row
     h+='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px">';
-    h+='<span id="ci-phone-'+safeId+'" style="font-size:12px;color:var(--text-2)">&#128222; <span style="color:var(--text-3)">Loading...</span></span>';
-    h+='<span id="ci-email-'+safeId+'" style="font-size:12px;color:var(--text-2)">&#9993; <span style="color:var(--text-3)">Loading...</span></span>';
+    h+='<span data-contact-phone="'+safeId+'" style="font-size:12px;color:var(--text-2)">&#128222; <span style="color:var(--text-3)">Loading...</span></span>';
+    h+='<span data-contact-email="'+safeId+'" style="font-size:12px;color:var(--text-2)">&#9993; <span style="color:var(--text-3)">Loading...</span></span>';
     h+='</div>';
     h+='</div>';
 
@@ -2655,7 +2670,8 @@ function copyContact(btn){
 }
 
 function renderInlineContact(name,safeId,data){
-  var p=document.getElementById("ci-phone-"+safeId),e=document.getElementById("ci-email-"+safeId);
+  var ps=document.querySelectorAll('[data-contact-phone="'+safeId+'"]'),es=document.querySelectorAll('[data-contact-email="'+safeId+'"]');
+  var p=ps.length?ps[0]:null,e=es.length?es[0]:null;
   var isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   if(p){
     if(data.phone){
@@ -2683,6 +2699,8 @@ function renderInlineContact(name,safeId,data){
       e.innerHTML='✉️ <span style="color:#ccc">No email</span>';
     }
   }
+  if(p)ps.forEach(function(x){if(x!==p)x.innerHTML=p.innerHTML;});
+  if(e)es.forEach(function(x){if(x!==e)x.innerHTML=e.innerHTML;});
 }
 
 function openLpContactModal(name){
@@ -2779,6 +2797,12 @@ function saveLpContactModal(){
     if(payload.display_name)ctDisplayNames[(savedName||"").trim().toLowerCase()]=payload.display_name;
     else delete ctDisplayNames[(savedName||"").trim().toLowerCase()];
     setSyncStatus("live");
+    // Refresh the view immediately so RM/LP ownership changes are visible without a page reload.
+    try{
+      if(currentUser&&LPS.indexOf(currentUser)>=0)renderLP(currentUser);
+      if(document.getElementById("view-scorecards")&&document.getElementById("view-scorecards").classList.contains("active"))renderDaniel();
+      if(document.getElementById("view-admin")&&document.getElementById("view-admin").classList.contains("active"))renderAdmin();
+    }catch(refreshErr){console.warn("Ownership refresh failed:",refreshErr);}
     var st=document.getElementById("lpContactModalStatus");
     if(st){st.style.display="block";st.style.background=ownershipSaveOk?"#f0fdf4":"#fff7ed";st.style.color=ownershipSaveOk?"#15803d":"#9a3412";st.textContent=ownershipSaveOk?"Contact + ownership saved!":"Contact saved, but RM ownership needs the one-time Supabase ownership setup.";}
     setTimeout(function(){closeLpContactModal();if(st)st.style.display="none";},ownershipSaveOk?900:2600);
@@ -4007,7 +4031,7 @@ function renderDaniel(){
     if(allBdays.length){
       bdayEl.innerHTML=allBdays.map(function(b){
         var ag=agents.find(function(a){return a[0]===b.name;});var lp=ag?ag[2]:"";
-        return'<div class="alert-item"><span class="adot" style="background:#E91E63"></span><span style="font-weight:600;flex:1">'+b.name+'</span><span style="font-size:12px;color:#888">'+b.birthday+'</span><span class="lp-tag lp-tag-'+lp+'">'+lp+'</span><span style="font-size:11px;color:#880E4F">Reach out this week!</span></div>';
+        return'<div class="alert-item"><span class="adot" style="background:#E91E63"></span><span style="font-weight:600;flex:1">'+b.name+'</span><span style="font-size:12px;color:#888">'+b.birthday+'</span><span>'+rmOwnerBadge(b.name)+'</span><span class="lp-tag lp-tag-'+lp+'">'+lp+'</span><span style="font-size:11px;color:#880E4F">Reach out this week!</span></div>';
       }).join("");
     } else {
       bdayEl.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px 0">🎂 No birthdays this week. Tap Edit on any agent card to add one.</div>';
@@ -4015,6 +4039,7 @@ function renderDaniel(){
   }
   renderLeaderboard();
   var flp=document.getElementById("d-lp").value,flv=document.getElementById("d-lvl").value;
+  var frm=document.getElementById("d-rm")?document.getElementById("d-rm").value:"";
   var fst=document.getElementById("d-status").value,q=document.getElementById("d-q").value.toLowerCase();
   var gh="";
   LPS.forEach(function(lp){
@@ -4034,6 +4059,7 @@ function renderDaniel(){
   if(gridEl)gridEl.innerHTML=gh;
   var list=agents.filter(function(a){return a[2]&&a[2]!=="Unassigned";});
   if(flp)list=list.filter(function(a){return a[2]===flp;});
+  if(frm)list=list.filter(function(a){var o=getRmOwner(a[0])||"Unassigned";return o===frm;});
   if(flv)list=list.filter(function(a){return a[1]===flv;});
   if(fst==="active")list=list.filter(isActive);
   if(fst==="inactive")list=list.filter(function(a){return!isActive(a);});
@@ -4046,6 +4072,7 @@ function renderDaniel(){
     return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
       '<td style="font-weight:600">'+displayName(a[0])+(pri?'<span class="priority-tag" style="margin-left:5px">PRIORITY</span>':"")+notePreview+'</td>'+
       '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
+      '<td>'+rmOwnerBadge(a[0])+'</td>'+
       '<td><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span></td>'+
       '<td>'+(act?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
       '<td><button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+'\''+')" style="font-size:11px">View/Edit</button></td>'+
@@ -4076,14 +4103,16 @@ function renderAdmin(){
   renderReassign();renderRemoveList();renderCoMktList();
   var inactive=agents.filter(function(a){return!isActive(a);});
   document.getElementById("inactive-count-label").textContent="- "+inactive.length+" agents";
-  document.getElementById("inactive-list").innerHTML=inactive.length?inactive.map(function(a){return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
+  document.getElementById("inactive-list").innerHTML=inactive.length?inactive.map(function(a){return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>'+rmOwnerBadge(a[0])+'<span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
 }
 
 function renderReassign(){
   var q=document.getElementById("reassign-q").value.toLowerCase();
   var flp=document.getElementById("reassign-filter-lp").value;
+  var frm=document.getElementById("reassign-filter-rm")?document.getElementById("reassign-filter-rm").value:"";
   var list=agents.filter(function(a){
     if(q&&a[0].toLowerCase().indexOf(q)<0)return false;
+    if(frm&&((getRmOwner(a[0])||"Unassigned")!==frm))return false;
     if(!flp)return true;
     var agLp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";
     return agLp===flp;
@@ -4095,6 +4124,7 @@ function renderReassign(){
     return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
       '<td style="font-weight:600">'+displayName(a[0])+'</td>'+
       '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
+      '<td>'+rmOwnerBadge(a[0])+'</td>'+
       '<td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
       '<td><button class="btn btn-sm'+(pri?" btn-danger":" btn-success")+'" data-idx="'+idx+'" onclick="togglePriority(this)">'+(pri?"Remove":"Set Priority")+'</button></td>'+
       '<td><span class="lp-tag lp-tag-'+curLp+'">'+curLp+'</span></td>'+
@@ -4108,7 +4138,7 @@ function renderRemoveList(){
   if(!q){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">Type an agent name to search.</div>';return;}
   var list=agents.filter(function(a){return a[0].toLowerCase().indexOf(q)>=0;}).slice(0,8);
   if(!list.length){el.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">No agents found.</div>';return;}
-  el.innerHTML=list.map(function(a){return'<div class="alert-item"><span style="font-weight:600;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span><span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
+  el.innerHTML=list.map(function(a){return'<div class="alert-item"><span style="font-weight:600;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>'+rmOwnerBadge(a[0])+'<span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)">Remove</button></div>';}).join("");
 }
 
 function reassign(sel){var idx=parseInt(sel.getAttribute("data-idx"));agents[idx][2]=sel.value;saveAgents();renderAdmin();}
@@ -4967,7 +4997,7 @@ function refreshLpSharedData(source){
       }
 
       // LP notification bell should immediately reflect a resolved/new RM flag.
-      if((source==="lp_flags"||source==="call_logs")&&typeof ctLoadNotifications==="function")ctLoadNotifications();
+      if((source==="lp_flags"||source==="rm_lp_flags"||source==="call_logs")&&typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
     }catch(e){console.warn("Cross-tracker realtime refresh failed:",e);}
   },180);
 }
@@ -4982,7 +5012,7 @@ function initRealtimeSync(){
   try{
     var rtClient=window.supabase.createClient(SB_URL,SB_KEY);
     var ch=rtClient.channel("core-team-shared-changes");
-    ["agent_profiles","agent_assignments","lp_flags","call_logs","amanda_activities","rm_followups","break_breads","tier_migrations","health_snapshots"].forEach(function(table){
+    ["agent_profiles","agent_assignments","lp_flags","rm_lp_flags","call_logs","amanda_activities","rm_followups","break_breads","tier_migrations","health_snapshots"].forEach(function(table){
       ch=ch.on("postgres_changes",{event:"*",schema:"public",table:table},function(){refreshLpSharedData(table);});
     });
     ch.subscribe(function(status){
@@ -6203,42 +6233,44 @@ var FT_THRESHOLDS={Channel:[10,14,21],A:[10,14,21],B:[21,30,45],C:[45,60,90]};
 var FT_TARGETS={Channel:14,A:14,B:30,C:60};
 var ftData={};  // normalized agent name → {lastDate, source, notes}
 var ftVisitRows=[]; // all visit records used for month-to-date counts
+var ftRosterRows=[]; // shared active partner population from agent_profiles + agent_assignments
 
 async function loadFaceTime(){
   var listEl=document.getElementById("ft-list");
   if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px;font-size:13px">Loading...</div>';
   try{
-    // Load from both sources in parallel, plus co-marketing flags so the tab can show/filter on them
+    // Shared source-of-truth with the RM Break Bread list: same active partner population,
+    // same assignments, same two visit sources, same cadence thresholds.
     var r=await Promise.all([
-      sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=2000"),
-      sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=2000").catch(function(){return[];}),
-      loadCoMarketing()
+      sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=4000"),
+      sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
+      loadCoMarketing(),
+      sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,do_not_contact,relationship_status&limit=5000").catch(function(){return[];});}),
+      sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000").catch(function(){return[];})
     ]);
-    // Build map: agent → latest date from either source.
-    // Keys are normalized to uppercase because the roster (SEED) stores names in ALL CAPS,
-    // while agent_name as logged by Amanda/LPs is typically Title Case — without normalizing,
-    // every lookup below misses and every agent shows "Never" even when visits are logged.
-    ftData={};
-    ftVisitRows=[];
+    ftData={};ftVisitRows=[];
     (r[0]||[]).forEach(function(a){
       var n=(a.agent_name||"").trim().toUpperCase();if(!n)return;
       var owner=(typeof ctRmOwnerFromNotes==="function"?ctRmOwnerFromNotes(a.notes):"Amanda")||"Amanda";
       ftVisitRows.push({agent_name:a.agent_name,date:a.act_date,source:owner,notes:a.notes||""});
-      if(!ftData[n]||a.act_date>ftData[n].lastDate){
-        ftData[n]={lastDate:a.act_date,source:owner,notes:a.notes||""};
-      }
+      if(!ftData[n]||a.act_date>ftData[n].lastDate)ftData[n]={lastDate:a.act_date,source:owner,notes:a.notes||""};
     });
     (r[1]||[]).forEach(function(b){
       var n=(b.agent_name||"").trim().toUpperCase();if(!n)return;
       ftVisitRows.push({agent_name:b.agent_name,date:b.date,source:b.logged_by||"LP",notes:b.notes||""});
-      if(!ftData[n]||b.date>ftData[n].lastDate){
-        ftData[n]={lastDate:b.date,source:b.logged_by||"LP",notes:b.notes||""};
-      }
+      if(!ftData[n]||b.date>ftData[n].lastDate)ftData[n]={lastDate:b.date,source:b.logged_by||"LP",notes:b.notes||""};
+    });
+    var ownerMap={};
+    (r[4]||[]).forEach(function(a){var k=(a.agent_name||"").trim().toUpperCase();if(k)ownerMap[k]={lp:(a.lp&&a.lp!=="__REMOVED__")?a.lp:"Unassigned",rm:a.rm||"Unassigned",removed:a.lp==="__REMOVED__"};});
+    ftRosterRows=(r[3]||[]).filter(function(p){
+      var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
+      return !!k && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && p.retained!==false && !o.removed;
+    }).map(function(p){
+      var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
+      return {name:p.agent_name,tier:p.tier||"C",lp:o.lp||"Unassigned",rm:o.rm||"Unassigned"};
     });
     renderFaceTime();
-  }catch(e){
-    if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--red);padding:30px;font-size:13px">Error loading — '+e.message+'</div>';
-  }
+  }catch(e){if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--red);padding:30px;font-size:13px">Error loading — '+e.message+'</div>';}
 }
 
 function ftStatus(tier,days){
@@ -6253,15 +6285,16 @@ function ftStatus(tier,days){
 
 function ftAgentRows(){
   var now=new Date();
-  return agents.filter(function(e){return typeof isActive!=="function"||isActive(e);}).map(function(e){
-    var name=e[0],tier=e[1]||"C",lp=(e[2]&&e[2]!=="null")?e[2]:"Unassigned";
-    var ft=ftData[(name||"").trim().toUpperCase()];
-    var days=null;
+  var roster=(ftRosterRows&&ftRosterRows.length)?ftRosterRows:agents.filter(function(e){return typeof isActive!=="function"||isActive(e);}).map(function(e){return{name:e[0],tier:e[1]||"C",lp:(e[2]&&e[2]!=="null")?e[2]:"Unassigned",rm:(agentRmOwners&&agentRmOwners[assignmentKey(e[0])])||"Unassigned"};});
+  return roster.map(function(e){
+    var name=e.name,tier=e.tier||"C",lp=e.lp||"Unassigned";
+    var ft=ftData[(name||"").trim().toUpperCase()],days=null;
     if(ft&&ft.lastDate)days=Math.max(0,Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000));
     var target=FT_TARGETS[tier]||FT_TARGETS.C;
-    return {name:name,tier:tier,lp:lp,days:days,status:ftStatus(tier,days),target:target,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name]};
+    return {name:name,tier:tier,lp:lp,rm:e.rm||"Unassigned",days:days,status:ftStatus(tier,days),target:target,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name]};
   });
 }
+
 function ftPriorityForLp(lp,count){
   var tierRank={Channel:0,A:1,B:2,C:3};
   var statusRank={critical:0,red:1,warn:2,ok:3};
@@ -6404,6 +6437,68 @@ async function ctLoadRecentRmResponses(lp){
   }
 }
 window.ctLoadRecentRmResponses=ctLoadRecentRmResponses;
+
+
+async function ctLoadRecentRmRelationshipNotes(lp){
+  var host=document.getElementById("lp-rm-relationship-notes-list");if(!host)return;
+  host.innerHTML='<div style="padding:5px 0;color:#756E89">Loading RM notes...</div>';
+  try{
+    var safeLp=encodeURIComponent(lp||""),cut=new Date();cut.setDate(cut.getDate()-45);var cutStr=localDateStr(cut);
+    var results=await Promise.all([
+      sbFetch("GET","agent_assignments?lp=eq."+safeLp+"&select=agent_name&limit=1000").catch(function(){return[];}),
+      sbFetch("GET","amanda_activities?act_date=gte."+cutStr+"&select=agent_name,act_type,act_date,notes,outcome,follow_up_date&order=act_date.desc&limit=1500").catch(function(){return[];})
+    ]);
+    var assigned={};(results[0]||[]).forEach(function(r){assigned[String(r.agent_name||"").trim().toUpperCase()]=true;});
+    var rows=(results[1]||[]).filter(function(a){
+      var k=String(a.agent_name||"").trim().toUpperCase();
+      if(!assigned[k]||!String(ctStripRmMeta(a.notes)||"").trim())return false;
+      return !ctIsDirectorLeadership(a.act_type);
+    }).slice(0,15);
+    if(!rows.length){host.innerHTML='<div style="padding:6px 0;color:#756E89">No recent RM conversation notes for your assigned agents.</div>';return;}
+    host.innerHTML='<div style="max-height:300px;overflow-y:auto;padding-right:3px">'+rows.map(function(a,i){
+      var owner=ctRmOwnerFromNotes(a.notes),note=ctStripRmMeta(a.notes),date=a.act_date?fmt(a.act_date):"";
+      return'<div style="padding:9px 0;'+(i?'border-top:1px solid #EEEAF6;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="font-size:12.5px;font-weight:800;color:#28213F">'+escHtml(displayName(a.agent_name||"Agent"))+'</div><div style="font-size:10.5px;color:#756E89">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div></div><div style="font-size:12px;color:#514A61;line-height:1.5;margin-top:4px">'+escHtml(note)+'</div>'+(a.outcome?'<div style="font-size:10.5px;color:#756E89;margin-top:3px">Outcome: '+escHtml(a.outcome)+(a.follow_up_date?' · Follow-up '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')+'</div>';
+    }).join("")+'</div><div style="font-size:10.5px;color:#756E89;margin-top:7px">Showing recent relationship notes from the RM tracker for agents assigned to '+escHtml(lp)+'.</div>';
+  }catch(e){console.error("RM relationship notes failed",e);host.innerHTML='<div style="padding:6px 0;color:#A32D2D">Could not load RM notes.</div>';}
+}
+window.ctLoadRecentRmRelationshipNotes=ctLoadRecentRmRelationshipNotes;
+
+async function ctLoadRmFlagsForLp(lp){
+  var panel=document.getElementById("lp-rm-flags-for-you"),host=document.getElementById("lp-rm-flags-for-you-list");if(!panel||!host)return;
+  try{
+    var rows=await sbFetch("GET","rm_lp_flags?lp=eq."+encodeURIComponent(lp||"")+"&select=*&order=created_at.desc&limit=30").catch(function(){return[];});
+    rows=Array.isArray(rows)?rows:[];
+    if(!rows.length){panel.style.display="none";host.innerHTML="";return;}
+    panel.style.display="block";
+    var open=rows.filter(function(r){return r.resolved!==true;}),handled=rows.filter(function(r){return r.resolved===true;}).slice(0,6);
+    var html="";
+    if(open.length){
+      html+='<div style="font-size:10.5px;font-weight:800;color:#8A5A00;text-transform:uppercase;letter-spacing:.04em;margin:4px 0">Needs your attention · '+open.length+'</div>';
+      html+=open.map(function(r,i){
+        var rid=String(r.id),reply=String(r.lp_note||""),date=String(r.created_at||"").slice(0,10);
+        return'<div style="padding:9px 0;'+(i?'border-top:1px solid #F0E4C2;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong style="font-size:12.5px;color:#352D1D">'+escHtml(displayName(r.agent_name||"General"))+'</strong><div style="font-size:10.5px;color:#7B6E52;margin-top:2px">From '+escHtml(r.created_by||"RM")+(date?' · '+escHtml(fmt(date)):'')+'</div></div><span style="font-size:10px;font-weight:800;color:#8A5A00;background:#FFF3C7;border-radius:999px;padding:3px 7px">OPEN</span></div><div style="font-size:12px;color:#514A3A;line-height:1.5;margin-top:5px"><strong>RM note:</strong> '+escHtml(r.note||"")+'</div><textarea id="rm-lp-reply-'+rid+'" rows="2" placeholder="Reply back to RM..." style="width:100%;box-sizing:border-box;margin-top:7px;border:1px solid #DDCFA8;border-radius:7px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical">'+escHtml(reply)+'</textarea><div style="display:flex;gap:7px;justify-content:flex-end;margin-top:6px"><button type="button" onclick="ctReplyToRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:1px solid #D7B85E;background:#FFF8E8;color:#745000;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Send reply</button><button type="button" onclick="ctHandleRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:0;background:#4E3D8A;color:#fff;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Mark handled</button></div></div>';
+      }).join("");
+    }else html+='<div style="font-size:11.5px;color:#6C6252;padding:4px 0">No open RM flags for you right now.</div>';
+    if(handled.length){
+      html+='<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;font-weight:800;color:#6C6252">Recently handled ('+handled.length+')</summary><div style="margin-top:5px">'+handled.map(function(r){var dt=String(r.resolved_at||r.created_at||"").slice(0,10);return'<div style="padding:7px 0;border-top:1px solid #F0EADF"><div style="font-size:11.5px;font-weight:700;color:#514A3A">'+escHtml(displayName(r.agent_name||"General"))+' <span style="font-size:10px;color:#15803d">✓ Handled</span></div><div style="font-size:11px;color:#6C6252;margin-top:2px"><strong>RM:</strong> '+escHtml(r.note||"")+'</div>'+(r.lp_note?'<div style="font-size:11px;color:#315B40;margin-top:2px"><strong>Your reply:</strong> '+escHtml(r.lp_note)+'</div>':'')+(dt?'<div style="font-size:9.5px;color:#8A806C;margin-top:2px">'+escHtml(fmt(dt))+'</div>':'')+'</div>';}).join("")+'</div></details>';
+    }
+    host.innerHTML=html;
+  }catch(e){console.error("RM→LP flags failed",e);panel.style.display="none";}
+}
+window.ctLoadRmFlagsForLp=ctLoadRmFlagsForLp;
+async function ctReplyToRmFlag(id,lp){
+  var ta=document.getElementById("rm-lp-reply-"+id),note=(ta?ta.value:"").trim();if(!note){ctShowToast("Add a reply first");return;}
+  try{await sbFetch("PATCH","rm_lp_flags?id=eq."+encodeURIComponent(id),{lp_note:note,lp_note_at:new Date().toISOString(),lp_note_by:lp});ctShowToast("Reply sent to RM ✓");ctLoadRmFlagsForLp(lp);if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();}catch(e){ctShowToast("Reply failed — check RM↔LP handoff setup");}
+}
+window.ctReplyToRmFlag=ctReplyToRmFlag;
+async function ctHandleRmFlag(id,lp){
+  try{
+    var rows=await sbFetch("GET","rm_lp_flags?id=eq."+encodeURIComponent(id)+"&select=lp_note&limit=1").catch(function(){return[];});
+    if(!rows||!rows[0]||!String(rows[0].lp_note||"").trim()){ctShowToast("Send a quick reply to RM before marking handled");return;}
+    await sbFetch("PATCH","rm_lp_flags?id=eq."+encodeURIComponent(id),{resolved:true,resolved_at:new Date().toISOString()});ctShowToast("Marked handled ✓");ctLoadRmFlagsForLp(lp);if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
+  }catch(e){ctShowToast("Could not mark handled");}
+}
+window.ctHandleRmFlag=ctHandleRmFlag;
 
 function renderLpFaceTimeFocus(lp){
   var el=document.getElementById("lp-facetime-focus");if(!el)return;
@@ -7866,12 +7961,15 @@ function ctLoadNotifications(){
   var badge=document.getElementById("ct-notif-badge");
   var list=document.getElementById("ct-notif-list");
   if(!badge||!list) return;
+  var isLp=["Gavin","Karen","Osgood","Jordan","Said"].indexOf(currentUser)>=0;
+  var rmToLpPath="rm_lp_flags?resolved=eq.false"+(isLp?"&lp=eq."+encodeURIComponent(currentUser):"")+"&select=*&order=created_at.desc&limit=5";
   Promise.all([
     sbFetch("GET","lp_flags?resolved=eq.false&select=*&order=created_at.desc&limit=5").catch(function(){return [];}),
-    sbFetch("GET","lead_notes?notify_rm_gesture=eq.true&gesture_sent=eq.false&select=lead_buyer_name,lead_agent_name,lp,created_at&order=created_at.desc&limit=5").catch(function(){return [];})
+    sbFetch("GET","lead_notes?notify_rm_gesture=eq.true&gesture_sent=eq.false&select=lead_buyer_name,lead_agent_name,lp,created_at&order=created_at.desc&limit=5").catch(function(){return [];}),
+    sbFetch("GET",rmToLpPath).catch(function(){return [];})
   ]).then(function(results){
-    var flags=results[0]||[], gestures=results[1]||[];
-    var total=flags.length+gestures.length;
+    var flags=results[0]||[], gestures=results[1]||[], rmFlags=results[2]||[];
+    var total=flags.length+gestures.length+rmFlags.length;
     if(total>0){
       badge.textContent=total>9?"9+":total;
       badge.style.display="flex";
@@ -7885,12 +7983,16 @@ function ctLoadNotifications(){
         +(f.rm_note?'<div style="margin-top:5px;padding:5px 7px;background:#ecfdf5;border-radius:6px;color:#166534;font-size:11px"><strong>RM reply'+(f.rm_note_by?' · '+escHtml(f.rm_note_by):'')+':</strong> '+escHtml(String(f.rm_note).substring(0,120))+'</div>':'')
         +'</div>';
     });
+    rmFlags.forEach(function(f){
+      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light);background:#FFFDF7"><div style="font-weight:700;color:#6F4E00">📥 RM → '+escHtml(f.lp||"LP")+' · '+escHtml(f.agent_name?displayName(f.agent_name):"General")+'</div><div style="color:#6C6252;font-size:11px">from '+escHtml(f.created_by||"RM")+' — "'+escHtml(String(f.note||"").substring(0,80))+'"</div></div>';
+    });
     gestures.forEach(function(g){
       html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🎁 '+escHtml(g.lead_buyer_name||g.lead_agent_name)+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(g.lp)+' — gesture opportunity</div></div>';
     });
     list.innerHTML=html;
   }).catch(function(){ list.innerHTML='<div style="color:var(--text-3)">Could not load</div>'; });
 }
+window.ctLoadNotifications=ctLoadNotifications;
 
 var notifBell=document.getElementById("ct-notif-bell");
 if(notifBell){
@@ -8754,6 +8856,15 @@ function ctRmOwnerFromNotes(notes){
     return obj.owner||"Amanda";
   }catch(e){return "Amanda";}
 }
+function ctStripRmMeta(notes){
+  try{
+    var n=String(notes||""),start="\u2063\u2063\u2063",end="\u2064\u2064\u2064";
+    var a=n.lastIndexOf(start);if(a<0)return n.trim();
+    var b=n.indexOf(end,a+start.length);if(b<0)return n.trim();
+    return (n.slice(0,a)+n.slice(b+end.length)).trim();
+  }catch(e){return String(notes||"").trim();}
+}
+
 function ctIsExistingRmMeeting(type){
   return ["Partner Meeting","Break Breads","Strategic Partner Meeting","Channel Meeting","Retention Meeting"].indexOf(String(type||"").trim())>=0;
 }
