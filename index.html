@@ -469,7 +469,7 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
     <div style="display:flex;align-items:center;gap:12px">
       <div>
         <div class="brand-logo">CORE TEAM</div>
-        <div class="brand-sub">NFM Lending Ohio</div>
+        <div class="brand-sub">NFM Lending Ohio <span style="font-size:9px;color:#94a3b8">· v13 clean QA</span></div>
       </div>
     </div>
   </div>
@@ -1280,6 +1280,82 @@ var agentRmOwners={};
 function assignmentKey(name){return (name||"").trim().toLowerCase().replace(/\s+/g," ");}
 function getRmOwner(name){return agentRmOwners[assignmentKey(name)]||"";}
 function rmOwnerBadge(name){var o=getRmOwner(name)||"Unassigned";return '<span class="rm-owner-tag" style="font-size:10.5px;font-weight:700;color:#4E3D8A;background:#F1EEFA;border:1px solid #DED8EF;border-radius:999px;padding:2px 7px;white-space:nowrap">RM: '+escHtml(o)+'</span>';}
+function lpOwnerBadge(name){
+  var a=(typeof agents!=="undefined"&&agents)?agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);}):null;
+  var o=(a&&a[2]&&a[2]!=="__REMOVED__")?a[2]:"Unassigned";
+  return '<span class="lp-owner-tag lp-tag lp-tag-'+escHtml(o)+'" style="font-size:10.5px;font-weight:700;white-space:nowrap">LP: '+escHtml(o)+'</span>';
+}
+function findAgentByName(name){
+  var k=assignmentKey(name);
+  return agents.find(function(a){return assignmentKey(a[0])===k;})||null;
+}
+function findSeedByName(name){
+  var k=assignmentKey(name);
+  return (typeof SEED!=="undefined"?SEED:[]).find(function(a){return assignmentKey(a[0])===k;})||null;
+}
+function ctMergeAgentRows(base,incoming){
+  if(!base)return incoming?incoming.slice():base;
+  if(!incoming)return base;
+  // Preserve the first/canonical display key, but merge the most useful data from a duplicate row.
+  if((!base[1]||base[1]==="C")&&incoming[1]&&incoming[1]!=="C")base[1]=incoming[1];
+  var baseLp=base[2],inLp=incoming[2];
+  if((!baseLp||baseLp==="Unassigned")&&inLp&&inLp!=="Unassigned"&&inLp!=="__REMOVED__")base[2]=inLp;
+  for(var i=3;i<=6;i++){
+    if(incoming[i]&&(!base[i]||String(incoming[i])>String(base[i])))base[i]=incoming[i];
+  }
+  if(incoming[7]===true)base[7]=true;
+  base[8]=Math.max(parseInt(base[8])||0,parseInt(incoming[8])||0);
+  return base;
+}
+function ctDedupeAgentRows(rows){
+  var byKey={},out=[];
+  (rows||[]).forEach(function(r){
+    if(!r||!r[0])return;
+    var k=assignmentKey(r[0]);
+    if(!k)return;
+    if(!byKey[k]){byKey[k]=r;out.push(r);}
+    else ctMergeAgentRows(byKey[k],r);
+  });
+  return out;
+}
+function ctDedupeProfileRows(rows){
+  var byKey={},out=[];
+  var tierRank={"":0,"C":1,"B":2,"A":3,"Channel":4};
+  (rows||[]).forEach(function(r){
+    if(!r||!r.agent_name)return;
+    var k=assignmentKey(r.agent_name);if(!k)return;
+    if(!byKey[k]){byKey[k]=Object.assign({},r);out.push(byKey[k]);return;}
+    var g=byKey[k];
+    // If any duplicate record says the relationship is inactive/DNC, keep the safer state.
+    if(r.relationship_status==="inactive")g.relationship_status="inactive";
+    if(r.do_not_contact===true)g.do_not_contact=true;
+    if(r.retained===true)g.retained=true;
+    if((tierRank[r.tier||""]||0)>(tierRank[g.tier||""]||0))g.tier=r.tier;
+    Object.keys(r).forEach(function(field){
+      if(field==="agent_name"||field==="relationship_status"||field==="do_not_contact"||field==="retained"||field==="tier")return;
+      if((g[field]===null||g[field]===undefined||g[field]==="")&&r[field]!==null&&r[field]!==undefined&&r[field]!=="")g[field]=r[field];
+    });
+  });
+  return out;
+}
+function ctCollapseAssignmentRows(rows){
+  var grouped={},order=[];
+  var levelRank={"":0,"C":1,"B":2,"A":3,"Channel":4};
+  (rows||[]).forEach(function(r){
+    if(!r||!r.agent_name)return;
+    var k=assignmentKey(r.agent_name);if(!k)return;
+    if(!grouped[k]){grouped[k]=Object.assign({},r);order.push(k);return;}
+    var g=grouped[k];
+    if(r.lp==="__REMOVED__")g.lp="__REMOVED__";
+    else if(g.lp!=="__REMOVED__"&&(!g.lp||g.lp==="Unassigned")&&r.lp)g.lp=r.lp;
+    if(!g.rm&&r.rm)g.rm=r.rm;
+    if(r.priority===true)g.priority=true;
+    if((levelRank[r.level||""]||0)>(levelRank[g.level||""]||0))g.level=r.level;
+    if(r.closed_past_year!==undefined&&r.closed_past_year!==null)g.closed_past_year=Math.max(parseInt(g.closed_past_year)||0,parseInt(r.closed_past_year)||0);
+    g.added=!!(g.added||r.added);
+  });
+  return order.map(function(k){return grouped[k];});
+}
 var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
@@ -1386,57 +1462,7 @@ function isMeaningfulOutcome(outcome,list,actType){
   return list.indexOf(o)<0;
 }
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
-var STORAGE_KEY="ct_agents_v3";
-var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
-var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
-var WEEKLY_TARGET=15;
-var TODAY=new Date();TODAY.setHours(0,0,0,0);
-var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
-
-function localDateStr(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
-function getWeekKey(d){
-  var day=d.getDay(); // 0=Sun,1=Mon,...,6=Sat
-  var diff=day===0?-6:1-day; // days to subtract to get to Monday
-  var mon=new Date(d.getFullYear(),d.getMonth(),d.getDate()+diff);
-  return localDateStr(mon);
-}
-function getLastWeekKey(d){var dt=new Date(d);dt.setDate(dt.getDate()-7);return getWeekKey(dt);}
-function getWeekLabel(k){var mon=new Date(k+'T12:00:00'),sun=new Date(mon);sun.setDate(mon.getDate()+6);var o={month:'short',day:'numeric'};return 'Week of '+mon.toLocaleDateString('en-US',o)+' - '+sun.toLocaleDateString('en-US',o);}
-function fmt(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
-function fmtShort(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'numeric',day:'numeric'});}
-function mostRecent(a){return[a[3],a[4],a[5],a[6]].filter(Boolean).sort().reverse()[0]||null;}
-function mostRecentWithType(a){
-  var pairs=[
-    {date:a[3],label:"Lead in Velocify",icon:"🎯"},
-    {date:a[4],label:"File started",icon:"📄"},
-    {date:a[5],label:"Contract",icon:"✍️"},
-    {date:a[6],label:"Close",icon:"🏆"}
-  ].filter(function(p){return!!p.date;}).sort(function(x,y){return y.date.localeCompare(x.date);});
-  return pairs.length?pairs[0]:null;
-}
-function isActive(a){var d=mostRecent(a);return d?new Date(d+'T12:00:00')>=CUTOFF:false;}
-function calledThisWeek(name){return !!(callLogs[name]&&callLogs[name].week_key===weekKey);}
-function lpDays(name){var log=callLogs[name];if(!log||!log.call_date)return null;var dt=new Date(log.call_date+'T12:00:00');dt.setHours(0,0,0,0);return Math.floor((TODAY-dt)/86400000);}
-function isPriority(a){return a[7]===true;}
-function isMonday(){return TODAY.getDay()===1;}
-
-function getLpCallsThisWeek(lp){return Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey;}).length;}
-function getLpCallsLastWeek(lp){return Object.values(lastWeekLogs).filter(function(l){return l.lp===lp&&l.week_key===lastWeekKey;}).length;}
-function getLpPctThisWeek(lp){return Math.min(100,Math.round(getLpCallsThisWeek(lp)/WEEKLY_TARGET*100));}
-function getLpPctLastWeek(lp){return Math.min(100,Math.round(getLpCallsLastWeek(lp)/WEEKLY_TARGET*100));}
-
-// ─── INCOMPLETE CALLS CARRYOVER SYSTEM ───
-function getLpIncompleteFromLastWeek(lp){
-  var lastWeekCalls=getLpCallsLastWeek(lp);
-  return Math.max(0,WEEKLY_TARGET-lastWeekCalls);
-}
-function getLpTotalTargetThisWeek(lp){
-  var raw=WEEKLY_TARGET+getLpIncompleteFromLastWeek(lp);
-  // Cap at the LP's active agent count - can't call more unique agents than exist
-  var activeCount=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
-  return Math.min(raw,Math.max(WEEKLY_TARGET,activeCount));
-}
-
+// Duplicate core helper declarations removed in v13; using the single canonical definitions above.
 var weekKey=getWeekKey(TODAY);
 var lastWeekKey=getLastWeekKey(TODAY);
 var agents=[],callLogs={},lastWeekLogs={},currentUser=null,noteTimers={},contactCache={},editingLpContact=null,pendingNote={};
@@ -1846,53 +1872,87 @@ function setSyncStatus(s){
 }
 
 function loadAgents(){
-  agents=SEED.map(function(r){return r.slice();});
+  agents=ctDedupeAgentRows(SEED.map(function(r){return r.slice();}));
   try{
-    var s=localStorage.getItem(STORAGE_KEY);
-    if(s){
-      var d=JSON.parse(s);
-      if(d.ov)d.ov.forEach(function(o){var a=agents.find(function(x){return x[0]===o.n;});if(a){a[2]=o.lp;if(o.pr!==undefined)a[7]=o.pr;}else if(o.added){agents.push([o.n,o.lv,o.lp,null,null,null,null,o.pr||false,0]);}});
+    var raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      var d=JSON.parse(raw);
+      if(d.ov)d.ov.forEach(function(o){
+        if(!o||!o.n)return;
+        var a=findAgentByName(o.n);
+        if(a){
+          if(o.lp!==undefined&&o.lp!==null)a[2]=o.lp||"Unassigned";
+          if(o.pr!==undefined)a[7]=!!o.pr;
+          if(o.lv&&(!a[1]||a[1]==="C"))a[1]=o.lv;
+        }else if(o.added){
+          agents.push([o.n,o.lv||"C",o.lp||"Unassigned",null,null,null,null,!!o.pr,0]);
+        }
+      });
+      agents=ctDedupeAgentRows(agents);
       // Intentionally NOT applying d.rm — removals are now tracked exclusively in
-      // Supabase (lp='__REMOVED__') to prevent localStorage drift from hiding agents
+      // Supabase (lp='__REMOVED__') to prevent localStorage drift from hiding agents.
       if(d.rm&&d.rm.length){d.rm=[];localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
     }
-  }catch(e){}
+  }catch(e){console.warn("Local agent overrides could not be loaded:",e);}
 }
 
 function saveAgents(){
-  var ov=agents.filter(function(a){var s=SEED.find(function(x){return x[0]===a[0];});return!s||s[2]!==a[2]||s[7]!==a[7];}).map(function(a){return{n:a[0],lp:a[2],lv:a[1],pr:a[7],added:!SEED.find(function(s){return s[0]===a[0];})};});
+  agents=ctDedupeAgentRows(agents);
+  var ov=agents.filter(function(a){
+    var seed=findSeedByName(a[0]);
+    return !seed||seed[2]!==a[2]||seed[7]!==a[7]||seed[1]!==a[1];
+  }).map(function(a){
+    var seed=findSeedByName(a[0]);
+    return{n:a[0],lp:a[2]||"Unassigned",lv:a[1]||"C",pr:!!a[7],added:!seed};
+  });
+  // Safety: one override per normalized agent name.
+  var ovByKey={};
+  ov.forEach(function(o){ovByKey[assignmentKey(o.n)]=o;});
+  ov=Object.keys(ovByKey).map(function(k){return ovByKey[k];});
   try{
-    var s=localStorage.getItem(STORAGE_KEY);
-    var d=s?JSON.parse(s):{};
+    var raw=localStorage.getItem(STORAGE_KEY);
+    var d=raw?JSON.parse(raw):{};
     d.ov=ov;
     localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
-  }catch(e){}
-  // Save to Supabase async — don't block or error on failure
+  }catch(e){console.warn("Local agent overrides could not be saved:",e);}
+  // Save to Supabase async — don't block or error on failure.
   try{
-    var rows=ov.map(function(o){return{agent_name:o.n,lp:o.lp,priority:o.pr||false,added:o.added||false,level:o.lv||"C"};});
-    if(rows.length)sbFetch("POST","agent_assignments?on_conflict=agent_name",rows).catch(function(){});
-  }catch(e){}
+    var rows=ov.map(function(o){return{agent_name:o.n,lp:o.lp,priority:o.pr,added:o.added,level:o.lv};});
+    if(rows.length)sbFetch("POST","agent_assignments?on_conflict=agent_name",rows).catch(function(e){console.warn("Agent assignment sync failed:",e);});
+  }catch(e){console.warn("Agent assignment sync setup failed:",e);}
 }
 
 function loadAgentAssignments(){
-  return sbFetch("GET","agent_assignments?select=*&limit=1000").then(function(res){
+  return sbFetch("GET","agent_assignments?select=*&limit=5000").then(function(res){
     agentRmOwners={};
-    if(!res||!res.length)return;
-    res.forEach(function(r){
-      if(r&&r.agent_name)agentRmOwners[assignmentKey(r.agent_name)]=r.rm||"";
+    if(!res||!res.length){agents=ctDedupeAgentRows(agents);return;}
+
+    // Collapse case/spacing variants before they ever reach the UI. A removal marker wins;
+    // otherwise merge useful ownership fields without creating a second agent card.
+    ctCollapseAssignmentRows(res).forEach(function(r){
+      var k=assignmentKey(r.agent_name);
+      agentRmOwners[k]=RMS.indexOf(r.rm)>=0?r.rm:"";
       try{
         if(r.lp==="__REMOVED__"){
-          agents=agents.filter(function(a){return a[0]!==r.agent_name;});
-        } else {
-          var a=agents.find(function(x){return x[0]===r.agent_name;});
-          if(a){a[2]=r.lp;a[7]=r.priority||false;if(r.level)a[1]=r.level;if(r.closed_past_year!==undefined&&r.closed_past_year!==null)a[8]=r.closed_past_year;}
-          var s=SEED.find(function(x){return x[0]===r.agent_name;});
-          if(s){s[2]=r.lp;if(r.level)s[1]=r.level;}
-          else if(r.added){agents.push([r.agent_name,r.level||"C",r.lp,null,null,null,null,r.priority||false,r.closed_past_year||0]);}
+          agents=agents.filter(function(a){return assignmentKey(a[0])!==k;});
+          return;
         }
-      }catch(e){}
+        var a=findAgentByName(r.agent_name);
+        var lp=(LPS.indexOf(r.lp)>=0)?r.lp:"Unassigned";
+        if(a){
+          a[2]=lp;
+          a[7]=!!r.priority;
+          if(r.level)a[1]=r.level;
+          if(r.closed_past_year!==undefined&&r.closed_past_year!==null)a[8]=parseInt(r.closed_past_year)||0;
+        }else if(r.added){
+          agents.push([r.agent_name,r.level||"C",lp,null,null,null,null,!!r.priority,parseInt(r.closed_past_year)||0]);
+        }
+        var seed=findSeedByName(r.agent_name);
+        if(seed){seed[2]=lp;if(r.level)seed[1]=r.level;}
+      }catch(e){console.warn("Could not apply assignment for "+r.agent_name+":",e);}
     });
-  }).catch(function(){});
+    agents=ctDedupeAgentRows(agents);
+  }).catch(function(e){console.warn("Agent assignments could not be loaded:",e);agents=ctDedupeAgentRows(agents);});
 }
 
 var lpPollInterval=null;
@@ -2037,7 +2097,7 @@ function renderLP(lp){
   else ib.style.display="none";
   var bdayEl=document.getElementById("bday-banner");
   if(bdayEl){
-    var bdayAgents=getBirthdayAgentsThisWeek().filter(function(b){var ag=agents.find(function(a){return a[0]===b.name;});return ag&&ag[2]===lp;});
+    var bdayAgents=getBirthdayAgentsThisWeek().filter(function(b){var ag=findAgentByName(b.name);return ag&&ag[2]===lp;});
     if(bdayAgents.length){bdayEl.style.display="flex";document.getElementById("bday-banner-txt").textContent="Birthday this week: "+bdayAgents.map(function(b){return b.name+" ("+b.birthday+")";}).join(", ")+" — reach out!";}
     else bdayEl.style.display="none";
   }
@@ -2058,7 +2118,7 @@ function renderLP(lp){
     var calledNames=calledAgents.map(function(a){return a[0];});
     allCalledThisWeek.forEach(function(l){
       if(calledNames.indexOf(l.agent_name)<0){
-        var a=agents.find(function(x){return x[0]===l.agent_name;})||[l.agent_name,"C",lp,null,null,null,null,false,0];
+        var a=findAgentByName(l.agent_name)||[l.agent_name,"C",lp,null,null,null,null,false,0];
         calledAgents.push(a);calledNames.push(l.agent_name);
       }
     });
@@ -2162,9 +2222,11 @@ function renderCallCard(a,lp,isBonus){
   
   html+='</div>';
 
-  // Meta row — badge, LP days, last activity
+  // Meta row — tier + explicit ownership + timing/activity
   html+='<div class="call-meta"><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
-  if(assignedLp&&assignedLp!==lp)html+='<span class="lp-tag lp-tag-'+assignedLp+'" style="font-size:10px">'+assignedLp+"'s agent</span>";
+  html+=rmOwnerBadge(a[0]);
+  html+='<span class="lp-tag lp-tag-'+escHtml(assignedLp||"Unassigned")+'" style="font-size:10.5px;font-weight:700">LP: '+escHtml(assignedLp||"Unassigned")+'</span>';
+  if(assignedLp&&assignedLp!==lp)html+='<span style="font-size:10px;color:var(--text-3);font-weight:600">Currently viewing '+escHtml(lp)+'</span>';
   var dsCls=(!calledThisWeek(a[0])&&overdueDays>=0&&ds!==null&&ds!==0)?'color:var(--red);font-weight:600':(ds===null?'color:var(--red)':'color:var(--text-2)');
   html+='<span style="'+dsCls+'">'+dsText+'</span>';
   if(dueLabel)html+='<span style="font-size:11px;color:var(--text-3)">'+dueLabel+'</span>';
@@ -2823,7 +2885,7 @@ function renderLeaderboard(){
   // Use a separate approach: sum from the history data we loaded
   var stats=LPS.map(function(lp){
     var histCount=Object.keys(agentLastCall).filter(function(name){
-      var a=agents.find(function(x){return x[0]===name;});
+      var a=findAgentByName(name);
       return a&&a[2]===lp;
     }).length; // fallback: agents with any history assigned to this LP
     // Better: use lpHistoryCallCounts if populated
@@ -4030,7 +4092,7 @@ function renderDaniel(){
     var allBdays=getBirthdayAgentsThisWeek();
     if(allBdays.length){
       bdayEl.innerHTML=allBdays.map(function(b){
-        var ag=agents.find(function(a){return a[0]===b.name;});var lp=ag?ag[2]:"";
+        var ag=findAgentByName(b.name);var lp=ag?ag[2]:"";
         return'<div class="alert-item"><span class="adot" style="background:#E91E63"></span><span style="font-weight:600;flex:1">'+b.name+'</span><span style="font-size:12px;color:#888">'+b.birthday+'</span><span>'+rmOwnerBadge(b.name)+'</span><span class="lp-tag lp-tag-'+lp+'">'+lp+'</span><span style="font-size:11px;color:#880E4F">Reach out this week!</span></div>';
       }).join("");
     } else {
@@ -4147,7 +4209,7 @@ function addAgent(){
   var name=document.getElementById("add-name").value.trim().toUpperCase();
   var lv=document.getElementById("add-level").value,lp=document.getElementById("add-lp").value,pri=document.getElementById("add-priority").value==="true";
   if(!name){alert("Enter a name.");return;}
-  if(agents.find(function(a){return a[0]===name;})){alert("Already exists.");return;}
+  if(findAgentByName(name)){alert("Already exists — agent names are matched regardless of capitalization or extra spaces.");return;}
   agents.push([name,lv,lp,null,null,null,null,pri,0]);
   document.getElementById("add-name").value="";saveAgents();renderAdmin();alert(name+" added!");
 }
@@ -4170,7 +4232,7 @@ async function removeAgent(btn){
   // ambiguous, abort cleanly rather than half-removing the agent locally.
   var canonicalName=name;
   try{canonicalName=(await resolveCanonicalProfileName(name))||name;}catch(e){alert(e.message);return;}
-  agents=agents.filter(function(a){return a[0]!==name;});
+  agents=agents.filter(function(a){return assignmentKey(a[0])!==assignmentKey(name);});
   try{
     var s=localStorage.getItem(STORAGE_KEY);
     var d=s?JSON.parse(s):{};
@@ -4192,7 +4254,7 @@ async function reactivate(btn){
   if(name){
     try{canonicalName=(await resolveCanonicalProfileName(name))||name;}catch(e){alert(e.message);return;}
   }
-  var a=agents.find(function(x){return x[0]===name;});
+  var a=findAgentByName(name);
   if(a)a[3]=localDateStr(TODAY);
   saveAgents();
   // relationship_status is the one authoritative signal going forward — only it changes here.
@@ -4264,7 +4326,7 @@ function handleUpload(input){
         // 25569 is the day offset between Excel's epoch (Dec 30 1899) and the JS epoch.
         var gd=function(c){var v=row[c];if(v===null||v===undefined||v==="")return null;try{var d;if(v instanceof Date){d=v;}else if(typeof v==="number"&&v>1){d=new Date(Math.round((v-25569)*86400*1000));}else{d=new Date(v);}return(!isNaN(d.getTime())&&d.getFullYear()>1971)?d.toISOString().split("T")[0]:null;}catch(e){return null;}};
         var closedPastYear=parseInt(row["Closed Past Year"])||0;
-        var existing=agents.find(function(x){return x[0]===n;});
+        var existing=findAgentByName(n);
         var preservedLp=existing?existing[2]:"Unassigned";
         var preservedPriority=existing?existing[7]:false;
         var u=[n,lv||"C",preservedLp,gd("Latest Lead (In Velocify)"),gd("Latest File Started"),gd("Latest Contract"),gd("Latest Close"),preservedPriority,closedPastYear];
@@ -4676,7 +4738,7 @@ function renderVelocifyLeaderboard(){
   if(!sorted.length){el.innerHTML='<div style="text-align:center;padding:1.5rem;color:#aaa;font-size:13px">No Velocify data yet &#8212; Zap will populate this automatically</div>';return;}
   var medals=["&#127947;","&#127948;","&#127949;","4.","5.","6.","7.","8.","9.","10."];
   el.innerHTML=sorted.map(function(e,i){
-    var ag=agents.find(function(a){return a[0]===e[0];});
+    var ag=findAgentByName(e[0]);
     var lp=ag?ag[2]:"",lvl=ag?ag[1]:"C";
     return'<div class="vel-row"><span class="vel-medal">'+medals[i]+'</span><div style="flex:1"><div style="font-weight:700;font-size:13px">'+e[0]+' <span class="badge badge-'+lvl.toLowerCase()+'">'+lvl+'</span></div><div style="font-size:11px;color:#aaa;margin-top:2px">'+(lp?'&#8594; '+lp:'')+'</div></div><div class="vel-cols"><div class="vel-col"><div class="vel-col-num'+(e[1].wtd===0?' zero':'')+'">'+( e[1].wtd||'&#8212;')+'</div><div class="vel-col-lbl">WTD</div></div><div class="vel-col"><div class="vel-col-num'+(e[1].mtd===0?' zero':'')+'">'+( e[1].mtd||'&#8212;')+'</div><div class="vel-col-lbl">MTD</div></div><div class="vel-col"><div class="vel-col-num">'+e[1].total+'</div><div class="vel-col-lbl">Total</div></div></div></div>';
   }).join("");
@@ -6016,16 +6078,22 @@ async function loadSystemHealth(){
   if(!el)return;
   el.innerHTML='<div style="padding:8px 0;color:#aaa">Checking...</div>';
   try{
+    var assignmentRmSupported=true;
+    var assignmentsPromise=sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000").catch(function(){
+      assignmentRmSupported=false;
+      return sbFetch("GET","agent_assignments?select=agent_name,lp&limit=5000").catch(function(){return[];});
+    });
     var results=await Promise.all([
       sbFetch("GET","agent_profiles?select=agent_name,relationship_status,do_not_contact&limit=5000")
         .catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,do_not_contact&limit=5000").catch(function(){return[];});}),
-      sbFetch("GET","agent_assignments?select=agent_name,lp&limit=5000").catch(function(){return[];}),
+      assignmentsPromise,
       sbFetch("GET","powerbi_import_log?select=imported_at,source_app,errors&order=imported_at.desc&limit=1").catch(function(){return null;})
     ]);
     var profiles=results[0]||[],assignments=results[1]||[],lastImportRows=results[2];
+    var collapsedAssignments=ctCollapseAssignmentRows(assignments);
 
-    var lpByName={};
-    assignments.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n)lpByName[n]=a.lp;});
+    var lpByName={},rmByName={};
+    collapsedAssignments.forEach(function(a){var n=assignmentKey(a.agent_name);if(n){lpByName[n]=a.lp;rmByName[n]=a.rm||"";}});
 
     var issues=[];
 
@@ -6046,6 +6114,24 @@ async function loadSystemHealth(){
       if(status!=="inactive"&&(!lp||lp==="Unassigned"))activeNoLp++;
     });
     if(activeNoLp>0)issues.push(activeNoLp+" active roster agent"+(activeNoLp!==1?"s":"")+" have no LP assigned");
+
+    // RM ownership completeness — visible here so ownership does not silently disappear.
+    if(!assignmentRmSupported){
+      issues.push("RM ownership storage is not available yet — run the one-time Supabase ownership setup");
+    }else{
+      var activeNoRm=0;
+      profiles.forEach(function(p){
+        var status=p.relationship_status||"active",k=assignmentKey(p.agent_name);
+        var lp=lpByName[k];
+        if(status!=="inactive"&&lp!=="__REMOVED__"&&!rmByName[k])activeNoRm++;
+      });
+      if(activeNoRm>0)issues.push(activeNoRm+" active roster agent"+(activeNoRm!==1?"s":"")+" have no RM owner assigned");
+    }
+
+    var assignSeen={};
+    assignments.forEach(function(a){var n=assignmentKey(a.agent_name);if(n)assignSeen[n]=(assignSeen[n]||0)+1;});
+    var assignmentDupeGroups=Object.keys(assignSeen).filter(function(k){return assignSeen[k]>1;}).length;
+    if(assignmentDupeGroups>0)issues.push(assignmentDupeGroups+" duplicate assignment name group"+(assignmentDupeGroups!==1?"s":"")+" detected — the tracker will collapse them in the UI, but the database should be cleaned");
 
     // Possible duplicate names — case/spacing collisions only (same detection basis as the RM
     // Tracker's existing "Clean up duplicate agents" tool; this just surfaces the count here too)
@@ -6102,11 +6188,11 @@ async function renderLpAssignList(){
     .catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier&limit=5000").catch(function(){return[];});});
   var assignPromise=sbFetch("GET","agent_assignments?select=agent_name,lp&limit=5000").catch(function(){return[];});
   var results=await Promise.all([profilesPromise,assignPromise]);
-  var profiles=results[0]||[],assignments=results[1]||[];
+  var profiles=ctDedupeProfileRows(results[0]||[]),assignments=ctCollapseAssignmentRows(results[1]||[]);
 
   var lpByName={};
   assignments.forEach(function(a){
-    var n=(a.agent_name||"").trim().toLowerCase();
+    var n=assignmentKey(a.agent_name);
     if(n)lpByName[n]=a.lp;
   });
 
@@ -6119,7 +6205,7 @@ async function renderLpAssignList(){
     // show up here regardless of what Power BI or anything else says about them. Defaults to
     // active if relationship_status is missing/null (pre-migration or never explicitly set).
     if((p.relationship_status||"active")==="inactive")continue;
-    var lpRaw=lpByName[name.toLowerCase()];
+    var lpRaw=lpByName[assignmentKey(name)];
     // Defensive: a pre-migration "__REMOVED__" sentinel (the old removal marker, before
     // relationship_status existed) should never display as if it were a real LP name.
     if(lpRaw==="__REMOVED__")continue;
@@ -6183,41 +6269,35 @@ function setAgentLPByIdx(sel){
   setAgentLP(name,sel.value,null,_lpAssignTiers[idx]);
 }
 function setAgentLP(name,lp,selectEl,tierHint){
-  // REWIRED: this used to require a SEED entry to exist at all (SEED.find(...); if(!entry)
-  // return;) — silently doing nothing for any agent not in that frozen snapshot, which after
-  // switching renderLpAssignList() to live data would include most agents added since SEED was
-  // last baked into the page. No longer depends on SEED for the save itself; SEED is updated
-  // afterward only as a harmless, best-effort legacy bootstrap if an entry happens to exist.
-  var entry=SEED.find(function(e){return e[0]===name;});
-  var lpVal=lp==="Unassigned"?"Unassigned":lp||null;
+  var entry=findSeedByName(name);
+  var lpVal=lp==="Unassigned"?"Unassigned":lp||"Unassigned";
   if(entry)entry[2]=lpVal;
+  var local=findAgentByName(name);if(local)local[2]=lpVal;
 
-  // Show saving indicator
   var savedId="lp-saved-"+name.replace(/[^a-zA-Z0-9]/g,"_");
   var savedEl=document.getElementById(savedId);
   if(savedEl){savedEl.textContent="Saving...";savedEl.style.color="var(--text-3)";savedEl.style.display="inline";}
 
-  // Persist to Supabase agent_assignments
-  sbFetch("POST","agent_assignments?on_conflict=agent_name",{
-    agent_name:name,
-    lp:lpVal||"Unassigned",
-    level:(entry&&entry[1])||tierHint||"C",
-    priority:(entry&&entry[7])||false,
-    added:false
+  // Reuse the existing assignment's exact stored agent_name when a capitalization/spacing
+  // variant already exists. This prevents creating a second assignment row for the same person.
+  sbFetch("GET","agent_assignments?agent_name=ilike."+encodeURIComponent(name)+"&select=*&limit=10").catch(function(){return[];}).then(function(rows){
+    var existing=ctCollapseAssignmentRows(rows||[]).find(function(r){return assignmentKey(r.agent_name)===assignmentKey(name);})||{};
+    var payload={
+      agent_name:existing.agent_name||name,
+      lp:lpVal,
+      level:(entry&&entry[1])||existing.level||tierHint||"C",
+      priority:(entry&&!!entry[7])||!!existing.priority,
+      added:!!existing.added
+    };
+    if(existing.rm!==undefined)payload.rm=existing.rm||null;
+    if(existing.closed_past_year!==undefined)payload.closed_past_year=existing.closed_past_year;
+    return sbFetch("POST","agent_assignments?on_conflict=agent_name",payload);
   }).then(function(){
-    if(savedEl){savedEl.textContent="✓ Saved";savedEl.style.color="var(--green)";
-      setTimeout(function(){if(savedEl)savedEl.style.display="none";},2000);}
-    renderLpAssignList();
+    if(savedEl){savedEl.textContent="✓ Saved";savedEl.style.color="var(--green)";setTimeout(function(){if(savedEl)savedEl.style.display="none";},2000);}
+    loadAgentAssignments().then(function(){renderLpAssignList();renderAdmin();});
   }).catch(function(e){
-    // Try PATCH if POST fails (row exists)
-    sbFetch("PATCH","agent_assignments?agent_name=eq."+encodeURIComponent(name),{lp:lpVal||"Unassigned"})
-      .then(function(){
-        if(savedEl){savedEl.textContent="✓ Saved";savedEl.style.color="var(--green)";
-          setTimeout(function(){if(savedEl)savedEl.style.display="none";},2000);}
-        renderLpAssignList();
-      }).catch(function(){
-        if(savedEl){savedEl.textContent="✗ Error";savedEl.style.color="var(--red)";}
-      });
+    console.warn("LP assignment save failed:",e);
+    if(savedEl){savedEl.textContent="✗ Error";savedEl.style.color="var(--red)";}
   });
 }
 
@@ -6261,8 +6341,8 @@ async function loadFaceTime(){
       if(!ftData[n]||b.date>ftData[n].lastDate)ftData[n]={lastDate:b.date,source:b.logged_by||"LP",notes:b.notes||""};
     });
     var ownerMap={};
-    (r[4]||[]).forEach(function(a){var k=(a.agent_name||"").trim().toUpperCase();if(k)ownerMap[k]={lp:(a.lp&&a.lp!=="__REMOVED__")?a.lp:"Unassigned",rm:a.rm||"Unassigned",removed:a.lp==="__REMOVED__"};});
-    ftRosterRows=(r[3]||[]).filter(function(p){
+    ctCollapseAssignmentRows(r[4]||[]).forEach(function(a){var k=assignmentKey(a.agent_name);if(k)ownerMap[k]={lp:(a.lp&&a.lp!=="__REMOVED__")?a.lp:"Unassigned",rm:a.rm||"Unassigned",removed:a.lp==="__REMOVED__"};});
+    ftRosterRows=ctDedupeProfileRows(r[3]||[]).filter(function(p){
       var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
       return !!k && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && p.retained!==false && !o.removed;
     }).map(function(p){
@@ -7443,13 +7523,12 @@ function ctJumpToAgentAndLog(name, lp){
 function ctInjectOverdueQueue(){
   var host=document.getElementById("d-snapshot-body");
   if(!host || typeof agents==="undefined" || !agents.length) return;
-  var old=document.getElementById("ct-overdue-queue");
-  if(old) old.remove();
+  host.querySelectorAll("#ct-overdue-queue").forEach(function(el){el.remove();});
 
   var overdue=agents.filter(function(a){
     return isActive(a) && a[2] && a[2]!=="Unassigned" && !calledThisWeek(a[0]);
   }).map(function(a){
-    return {name:a[0], lp:a[2], tier:a[1], days:daysOverdue(a), priority:isPriority(a)};
+    return {name:a[0], lp:a[2], rm:getRmOwner(a[0])||"Unassigned", tier:a[1], days:daysOverdue(a), priority:isPriority(a)};
   }).filter(function(x){return x.days>=0 || x.priority;})
     .sort(function(x,y){ if(x.priority!==y.priority) return y.priority-x.priority; return y.days-x.days; })
     .slice(0,8);
@@ -7462,7 +7541,8 @@ function ctInjectOverdueQueue(){
   var rows=overdue.map(function(o){
     return '<div class="ct-overdue-row" data-name="'+o.name.replace(/"/g,"&quot;")+'" data-lp="'+o.lp+'" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0F1EE;cursor:pointer" onmouseover="this.style.background=\'#FAFAF9\'" onmouseout="this.style.background=\'\'">'
       +'<span style="font-size:13px;font-weight:700;flex:1">'+o.name+'</span>'
-      +'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;background:#EEF1F6;color:#3D4E68">'+o.lp+'</span>'
+      +'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;background:#EEF1F6;color:#3D4E68">LP: '+escHtml(o.lp)+'</span>'
+      +'<span style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:100px;background:#F1EEFA;color:#4E3D8A">RM: '+escHtml(o.rm)+'</span>'
       +(o.priority?'<span style="font-size:10.5px;font-weight:700;color:#B54B42">PRIORITY</span>':'')
       +'<span style="font-size:11.5px;color:'+(o.days>=0?'#B54B42':'#6B7280')+';font-weight:600;min-width:70px;text-align:right">'+(o.days>=0?o.days+"d overdue":"—")+'</span>'
       +'<span style="font-size:11px;font-weight:700;color:#3D4E68;padding:5px 10px;border-radius:7px;background:#EEF1F6">Log call →</span>'
@@ -7862,13 +7942,15 @@ function ctCaptureWeeklySnapshotIfNeeded(){
   }).catch(function(e){ console.warn("weekly snapshot capture skipped:",e); });
 }
 
+var ctTrendRenderToken=0;
 function ctRenderTrendPanel(){
   var host=document.getElementById("d-snapshot-body");
   if(!host) return;
-  var old=document.getElementById("ct-trend-panel");
-  if(old) old.remove();
+  var token=++ctTrendRenderToken;
+  host.querySelectorAll("#ct-trend-panel").forEach(function(el){el.remove();});
 
   sbFetch("GET","weekly_metrics_snapshot?select=*&order=week_key.desc&limit=13").then(function(rows){
+    if(token!==ctTrendRenderToken) return; // a newer render request superseded this one
     if(!rows || rows.length<2) return; // need at least 2 weeks of real history to show a trend
     var current=ctComputeWeeklyMetrics();
     var prior=rows[0]; // most recent captured week (last week, since this week captures on first visit)
@@ -7896,6 +7978,9 @@ function ctRenderTrendPanel(){
     }).join('');
     box.innerHTML='<div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#6B7280;margin-bottom:10px">Trend vs. last captured week <span style="font-weight:600;text-transform:none;color:#94a3b8">· '+rows.length+' week'+(rows.length!==1?'s':'')+' of history</span></div>'
       +'<div style="display:flex;gap:16px;flex-wrap:wrap">'+cellsHtml+'</div>';
+    // Re-check immediately before insertion: overlapping async responses cannot create twins.
+    if(token!==ctTrendRenderToken)return;
+    host.querySelectorAll("#ct-trend-panel").forEach(function(el){el.remove();});
     host.insertBefore(box, host.firstChild);
   }).catch(function(e){ console.warn("trend panel load failed:",e); });
 }
@@ -8919,7 +9004,7 @@ function rmLeadershipTile(label,value,target,sub){
     +'</div>';
 }
 
-function rmRenderGoals(){
+rmRenderGoals=function(){
   var body=document.getElementById("rm-goals-body");
   if(!body)return;
   var rows=rmPeriodRows();
@@ -8941,7 +9026,7 @@ function rmRenderGoals(){
     +'</div>';
 }
 
-function rmRenderFeed(){
+rmRenderFeed=function(){
   var el=document.getElementById("rm-feed-list");
   if(!el)return;
   var data=rmPeriodRows().filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Amanda";}).slice();
@@ -8959,7 +9044,7 @@ function rmRenderFeed(){
   }).join("");
 }
 
-async function rmLoadAll(){
+rmLoadAll=async function(){
   var body=document.getElementById("rm-goals-body");
   try{
     var now=new Date(),todayStr=localDateStr(now),week=rmWeekRange();
@@ -8982,7 +9067,7 @@ async function rmLoadAll(){
     if(body)body.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Could not load RM stats.</div>';
   }
 }
-function rmSwitchPeriod(period,btn){
+rmSwitchPeriod=function(period,btn){
   document.querySelectorAll("#view-rm .lpsc-period-btn-light").forEach(function(b){b.classList.remove("active");});
   if(btn)btn.classList.add("active");
   rmCurrentPeriod=period;
@@ -8991,7 +9076,7 @@ function rmSwitchPeriod(period,btn){
   if(ac)ac.textContent=rows.filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Amanda";}).length;
   if(al)al.textContent=period==="today"?"Today":period==="week"?"This week":"Month to date";
 }
-function openRmView(btn){
+openRmView=function(btn){
   if(typeof lpStopPolling==="function")lpStopPolling();
   if(typeof rmStopPolling==="function")rmStopPolling();
   currentUser="RM";
@@ -9004,15 +9089,15 @@ function openRmView(btn){
   rmLoadAll();
   rmStartPolling();
 }
-function rmStartPolling(){
+rmStartPolling=function(){
   if(rmPollInterval)clearInterval(rmPollInterval);
   rmPollInterval=setInterval(function(){if(currentUser==="RM"&&!userTyping)rmLoadAll();},30000);
 }
-function rmStopPolling(){if(rmPollInterval){clearInterval(rmPollInterval);rmPollInterval=null;}}
+rmStopPolling=function(){if(rmPollInterval){clearInterval(rmPollInterval);rmPollInterval=null;}}
 
 // The old LP-side RM execution injectors are intentionally disabled.
 // This tracker shows leadership stats; flags are worked and replied to in the RM Tracker.
-function ctInjectRmPanels(){return;}
+ctInjectRmPanels=function(){return;}
 
 // Make push updates refresh the restored RM leadership tab too.
 if(typeof refreshLpSharedData==="function"){
