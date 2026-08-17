@@ -469,7 +469,7 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
     <div style="display:flex;align-items:center;gap:12px">
       <div>
         <div class="brand-logo">CORE TEAM</div>
-        <div class="brand-sub">NFM Lending Ohio <span style="font-size:9px;color:#94a3b8">· v13.2 Portfolio Health QA</span></div>
+        <div class="brand-sub">NFM Lending Ohio <span style="font-size:9px;color:#94a3b8">· v13.3 RM Alignment QA</span></div>
       </div>
     </div>
   </div>
@@ -830,7 +830,7 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
   <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
     <div>
       <div class="lp-hero-name" style="color:var(--text);font-size:19px">Relationship Manager</div>
-      <div style="font-size:11.5px;color:var(--text-3);margin-top:3px">Leadership summary for Daniel · Amanda’s Relationship Manager stats only. RM execution and flag responses are completed in the RM Tracker.</div>
+      <div style="font-size:11.5px;color:var(--text-3);margin-top:3px">Leadership summary for Daniel · Amanda’s Relationship Manager stats only. Amanda’s execution scorecard is 12 new + 18 existing / 30 total monthly; the separate RM Team acquisition goal is 20 new partner meetings across Amanda + Nyny. RM execution and flag responses are completed in the RM Tracker.</div>
     </div>
     <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
   </div>
@@ -1278,7 +1278,31 @@ var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
 var RMS=["Amanda","Nyny"];
 var agentRmOwners={};
 function assignmentKey(name){return (name||"").trim().toLowerCase().replace(/\s+/g," ");}
-function getRmOwner(name){return agentRmOwners[assignmentKey(name)]||"";}
+var CT_RM_STRATEGIC_NAMES={"lyndsay myers":true,"micah myers":true,"morgan stone":true,"ian temple":true,"brian pol":true};
+var ctRmRoutingProfiles={};
+function ctStrategicRmOwner(name,profile){
+  var k=assignmentKey(name);if(CT_RM_STRATEGIC_NAMES[k])return "Nyny";
+  var org=String(profile&&profile.brokerage||"").trim().toLowerCase();
+  if(org.indexOf("rockford")>=0||org.indexOf("sam cooper")>=0||org.indexOf("thrive")>=0)return "Nyny";
+  var email=String(profile&&profile.email||"").trim().toLowerCase();
+  if(email.indexOf("rockfordhomes")>=0)return "Nyny";
+  return "";
+}
+function ctCacheRmRoutingProfile(p){
+  if(!p||!p.agent_name)return;
+  ctRmRoutingProfiles[assignmentKey(p.agent_name)]={brokerage:p.brokerage||"",email:p.email||""};
+}
+function loadRmRoutingProfiles(){
+  return sbFetch("GET","agent_profiles?select=agent_name,brokerage,email&limit=5000").then(function(rows){
+    ctRmRoutingProfiles={};(rows||[]).forEach(ctCacheRmRoutingProfile);return rows||[];
+  }).catch(function(){return[];});
+}
+function getRmOwner(name){
+  var k=assignmentKey(name);
+  // Current RM Tracker strategic person + organization routing overrides stale assignment rows.
+  var strategic=ctStrategicRmOwner(name,ctRmRoutingProfiles[k]||null);if(strategic)return strategic;
+  return agentRmOwners[k]||"";
+}
 function rmOwnerBadge(name){var o=getRmOwner(name)||"Unassigned";return '<span class="rm-owner-tag" style="font-size:10.5px;font-weight:700;color:#4E3D8A;background:#F1EEFA;border:1px solid #DED8EF;border-radius:999px;padding:2px 7px;white-space:nowrap">RM: '+escHtml(o)+'</span>';}
 function lpOwnerBadge(name){
   var a=(typeof agents!=="undefined"&&agents)?agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);}):null;
@@ -1931,7 +1955,7 @@ function loadAgentAssignments(){
     // otherwise merge useful ownership fields without creating a second agent card.
     ctCollapseAssignmentRows(res).forEach(function(r){
       var k=assignmentKey(r.agent_name);
-      agentRmOwners[k]=RMS.indexOf(r.rm)>=0?r.rm:"";
+      agentRmOwners[k]=ctStrategicRmOwner(r.agent_name,null)||(RMS.indexOf(r.rm)>=0?r.rm:"");
       try{
         if(r.lp==="__REMOVED__"){
           agents=agents.filter(function(a){return assignmentKey(a[0])!==k;});
@@ -2779,12 +2803,14 @@ function openLpContactModal(name){
   if(lpSel)lpSel.value=(ag&&ag[2])||"Unassigned";
   sbFetch("GET","agent_assignments?agent_name=ilike."+encodeURIComponent(name)+"&select=*&limit=5").then(function(rows){
     var ar=(rows||[]).find(function(r){return assignmentKey(r.agent_name)===assignmentKey(name);})||(rows||[])[0];
-    if(ar){agentRmOwners[assignmentKey(ar.agent_name)]=ar.rm||"";if(rmSel)rmSel.value=ar.rm||"";if(lpSel)lpSel.value=(ar.lp&&ar.lp!=="__REMOVED__")?ar.lp:"Unassigned";}
+    if(ar){agentRmOwners[assignmentKey(ar.agent_name)]=ctStrategicRmOwner(ar.agent_name,ctRmRoutingProfiles[assignmentKey(ar.agent_name)]||null)||ar.rm||"";if(rmSel)rmSel.value=getRmOwner(name)||"";if(lpSel)lpSel.value=(ar.lp&&ar.lp!=="__REMOVED__")?ar.lp:"Unassigned";}
   }).catch(function(){});
   if(!contactCache[name]){
     sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(name)+"&limit=1").then(function(res){
       var data=(res&&res.length)?res[0]:{agent_name:name};
       contactCache[name]=data;
+      ctCacheRmRoutingProfile(data);
+      if(rmSel)rmSel.value=getRmOwner(name)||"";
       document.getElementById("lp-cm-display-name").value=data.display_name||"";
       document.getElementById("lp-cm-phone").value=data.phone||"";
       document.getElementById("lp-cm-email").value=data.email||"";
@@ -2839,7 +2865,10 @@ function saveLpContactModal(){
     var path=method==="PATCH"?"agent_profiles?agent_name=eq."+encodeURIComponent(savedName):"agent_profiles";
     return sbFetch(method,path,payload);
   }).then(function(){
+    var routingKey=assignmentKey(savedName),routingProfile=ctRmRoutingProfiles[routingKey]||{};
+    routingProfile.email=payload.email||routingProfile.email||"";ctRmRoutingProfiles[routingKey]=routingProfile;
     var rmVal=document.getElementById("lp-cm-rm-owner")?document.getElementById("lp-cm-rm-owner").value:"";
+    var strategicRm=ctStrategicRmOwner(savedName,routingProfile);if(strategicRm)rmVal=strategicRm;
     var lpVal=document.getElementById("lp-cm-lp-owner")?document.getElementById("lp-cm-lp-owner").value:"Unassigned";
     return sbFetch("GET","agent_assignments?agent_name=ilike."+encodeURIComponent(savedName)+"&select=*&limit=5").catch(function(){return[];}).then(function(rows){
       var ar=(rows||[]).find(function(r){return assignmentKey(r.agent_name)===assignmentKey(savedName);})||(rows||[])[0]||{};
@@ -3754,8 +3783,13 @@ function amCnt(src,type){
   return (src||[]).filter(function(a){return (a.act_type||"").trim()===type;}).length;
 }
 function amCntTalkTo(src){
-  var TALKTO_TYPES=["Agent Talk-to","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Market Update","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Closed Deal Thank You","Recruiting Conversation"];
+  // Keep this list identical to the current RM Tracker TALKTO_TYPES definition.
+  var TALKTO_TYPES=["Agent Talk-to","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Under Contract Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Market Update","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Closed Deal Thank You"];
   return (src||[]).filter(function(a){return TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length;
+}
+function amCntExistingRmMeetings(src){
+  var EXISTING=["Partner Meeting","Break Breads","Strategic Partner Meeting","Channel Meeting","Retention Meeting"];
+  return (src||[]).filter(function(a){return EXISTING.indexOf(String(a.act_type||"").trim())>=0;}).length;
 }
 
 
@@ -3979,28 +4013,24 @@ function buildSnapshot(){
   var amWeekActs=amActs.filter(function(a){return a.act_date>=amWeekObj.start&&a.act_date<=amWeekObj.end;});
   var amMonthActs=amActs.filter(function(a){return a.act_date>=amMonthStart2;});
   var amYearActs=amActs.filter(function(a){return a.act_date>=amYearStart;});
-  var amTotalToday = amCnt(amTodayActs,"New Realtor Meeting")+amCnt(amTodayActs,"Cold Calls")+amCnt(amTodayActs,"Break Breads")+amCntTalkTo(amTodayActs)+amCnt(amTodayActs,"Realtor Buddy Referral Ask");
-  var amTotalMTD = amCnt(amMonthActs,"New Realtor Meeting")+amCnt(amMonthActs,"Cold Calls")+amCnt(amMonthActs,"Break Breads")+amCntTalkTo(amMonthActs)+amCnt(amMonthActs,"Realtor Buddy Referral Ask");
+  // Amanda execution categories mirror the CURRENT RM Tracker scorecard exactly.
+  var amTotalToday = amCnt(amTodayActs,"New Realtor Meeting")+amCntExistingRmMeetings(amTodayActs)+amCnt(amTodayActs,"Cold Calls")+amCntTalkTo(amTodayActs)+amCnt(amTodayActs,"Buddy Intro Received");
+  var amTotalMTD = amCnt(amMonthActs,"New Realtor Meeting")+amCntExistingRmMeetings(amMonthActs)+amCnt(amMonthActs,"Cold Calls")+amCntTalkTo(amMonthActs)+amCnt(amMonthActs,"Buddy Intro Received");
   var amTotalYTD=amYearActs.length;
   var amMeetings=amCnt(amMonthActs,"New Realtor Meeting");
+  var amExistingMeetings=amCntExistingRmMeetings(amMonthActs);
   var amColdCalls=amCnt(amMonthActs,"Cold Calls");
-  var amBreakBreads=amCnt(amMonthActs,"Break Breads");
-  var TALKTO_TYPES=["Agent Talk-to","New Agent Follow-up","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Market Update","Market Update Call","Closed Deal Thank You","Birthday Outreach","Holiday Outreach","Agent Appreciation","Co-Marketing Discussion","Sent Referral","Sent Market Report","Recruiting Conversation"];
   var amTalkTos=amCntTalkTo(amMonthActs);
-  var amBuddyAsks=amCnt(amMonthActs,"Realtor Buddy Referral Ask");
-  // amTotalWTD must be the SUM of the 5 tracked goal categories for the week —
-  // not a raw count of every logged activity row. Activity types outside
-  // those 5 categories (e.g. "Co-hosted Event") were previously inflating
-  // this number well past what Amanda's own tool shows, since her tool only
-  // ever sums these same 5 categories.
+  var amBuddyIntros=amCnt(amMonthActs,"Buddy Intro Received");
+  // Five current scorecard categories: 3 new + 5 existing + 125 cold + 100 talk-to + 3 buddy intros weekly.
   var amTotalWTD = amCnt(amWeekActs,"New Realtor Meeting")
+    + amCntExistingRmMeetings(amWeekActs)
     + amCnt(amWeekActs,"Cold Calls")
-    + amCnt(amWeekActs,"Break Breads")
     + amCntTalkTo(amWeekActs)
-    + amCnt(amWeekActs,"Realtor Buddy Referral Ask");
-  var amWeeklyGoal=238; // 125 cold calls + 100 talk-tos + 5 meetings + 5 break breads + 3 buddy asks
-  var amDailyTotalGoal=48; // 25 cold calls + 20 talk-tos + 1 meeting + 1 break bread + 1 buddy ask
-  var amTotalGoal=852;
+    + amCnt(amWeekActs,"Buddy Intro Received");
+  var amWeeklyGoal=236;
+  var amDailyTotalGoal=48;
+  var amTotalGoal=942;
   var amPaceT=Math.round(amWeeklyGoal*paceFraction);
   var amPctOfGoal=amWeeklyGoal>0?Math.min(Math.round(amTotalWTD/amWeeklyGoal*100),100):0;
   // Amanda status badge
@@ -4020,9 +4050,9 @@ function buildSnapshot(){
   h+='</div>';
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
   h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+amPctOfGoal+'%;background:#3D4E68"></div></div></div>';
-  [{type:"New Realtor Meeting",daily:1,weekly:5,label:"Mtgs"},{type:"Cold Calls",daily:25,weekly:125,label:"Cold Calls"},{type:"Break Breads",daily:1,weekly:5,label:"Breads"},{type:"__talkto__",daily:20,weekly:100,label:"Talk-to\'s"},{type:"Realtor Buddy Referral Ask",daily:1,weekly:3,label:"Buddy"}].forEach(function(m){
-    var td=m.type==="__talkto__"?amCntTalkTo(amTodayActs):amCnt(amTodayActs,m.type);
-    var tw=m.type==="__talkto__"?amCntTalkTo(amWeekActs):amCnt(amWeekActs,m.type);
+  [{type:"New Realtor Meeting",daily:1,weekly:3,label:"New Mtgs"},{type:"__existing__",daily:1,weekly:5,label:"Existing"},{type:"Cold Calls",daily:25,weekly:125,label:"Cold Calls"},{type:"__talkto__",daily:20,weekly:100,label:"Talk-to's"},{type:"Buddy Intro Received",daily:1,weekly:3,label:"Buddy In"}].forEach(function(m){
+    var td=m.type==="__talkto__"?amCntTalkTo(amTodayActs):m.type==="__existing__"?amCntExistingRmMeetings(amTodayActs):amCnt(amTodayActs,m.type);
+    var tw=m.type==="__talkto__"?amCntTalkTo(amWeekActs):m.type==="__existing__"?amCntExistingRmMeetings(amWeekActs):amCnt(amWeekActs,m.type);
     var dc=td>=m.daily?'#3E8E5A':'var(--text-3)';
     var wc=tw>=m.weekly?'#3E8E5A':tw>0?'#B8842B':'var(--text-3)';
     h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:'+dc+';font-family:\'Geist\',\'Inter\',sans-serif">'+td+'<span style="font-size:9px;color:var(--text-3)">/'+m.daily+'</span></div><div style="font-size:10px;font-weight:500;color:'+wc+';font-family:\'Geist\',\'Inter\',sans-serif">'+tw+'<span style="font-size:8px;color:var(--text-3)">/'+m.weekly+'</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">'+m.label+'</div></div>';
@@ -4397,7 +4427,12 @@ function handleUpload(input){
       // Previously the UI said "Done" before agent_profiles had been stamped with the new
       // Power BI import timestamp. Portfolio Review could therefore still show 0* immediately
       // after a successful upload even though the slower profile sync was still running.
-      var agentRows=up.map(function(u){return{agent_name:u[0],level:u[1]||"C",lp:u[2]||"Unassigned",priority:u[7]||false,added:false,closed_past_year:u[8]||0};});
+      var agentRows=up.map(function(u){
+        var row={agent_name:u[0],level:u[1]||"C",lp:u[2]||"Unassigned",priority:u[7]||false,added:false,closed_past_year:u[8]||0};
+        // RM ownership is shared with the current RM Tracker. Never let an LP Power BI refresh erase it.
+        var knownRm=getRmOwner(u[0]);if(knownRm)row.rm=knownRm;
+        return row;
+      });
       res.style.color="";
       res.textContent="Syncing current Power BI population to Portfolio Review...";
       var assignmentSyncOk=true;
@@ -5031,7 +5066,7 @@ function refreshLpSharedData(source){
   clearTimeout(_sharedRealtimeTimer);
   _sharedRealtimeTimer=setTimeout(async function(){
     try{
-      if(source==="agent_profiles")contactCache={};
+      if(source==="agent_profiles"){contactCache={};await loadRmRoutingProfiles().catch(function(){});}
       if(source==="agent_assignments")await loadAgentAssignments().catch(function(){});
 
       // Shared activity/flag data. Reload these together so a flag can disappear and the RM touch
@@ -5087,7 +5122,7 @@ function initRealtimeSync(){
 }
 initRealtimeSync();
 loadAgents();
-loadAgentAssignments();
+loadRmRoutingProfiles().then(function(){return loadAgentAssignments();}).catch(function(){return loadAgentAssignments();});
 // Auto-open Snapshot on load
 (function(){
   var snapBtn=document.querySelector(".wb-Snapshot");
@@ -5415,11 +5450,12 @@ async function lpscSaveEdit(){
 
 // ── RELATIONSHIP MANAGER TAB (Amanda) ────────────────────────────────────
 const RM_GOALS=[
-  {label:"New realtor meeting",type:"New Realtor Meeting",daily:1,weekly:5,monthly:20},
-  {label:"Cold calls",type:"Cold Calls",daily:25,weekly:125,monthly:400},
-  {label:"Break breads",type:"Break Breads",daily:1,weekly:5,monthly:20},
-  {label:"Talk-to's",type:"Talk-to's",daily:20,weekly:100,monthly:400},
-  {label:"Buddy asks",type:"Realtor Buddy Referral Ask",daily:1,weekly:3,monthly:12}
+  // Current RM Tracker Amanda scorecard. Team acquisition is separately 20 new/month across Amanda + Nyny.
+  {label:"New partner meetings",type:"New Realtor Meeting",weekly:3,monthly:12},
+  {label:"Existing partner meetings",type:"__existingmeeting__",weekly:5,monthly:18},
+  {label:"Cold calls",type:"Cold Calls",weekly:125,monthly:500},
+  {label:"Talk-to's",type:"Talk-to's",weekly:100,monthly:400},
+  {label:"Buddy intros received",type:"Buddy Intro Received",weekly:3,monthly:12}
 ];
 var rmCurrentPeriod="today";
 
@@ -5521,7 +5557,7 @@ function rmRenderGoals(){
   if(period==="today"){
     var todaysActs=acts.filter(function(a){return a.act_date===todayStr;});
     RM_GOALS.forEach(function(g){
-      var count=g.type==="Talk-to's"?amCntTalkTo(todaysActs):todaysActs.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="Talk-to's"?amCntTalkTo(todaysActs):g.type==="__existingmeeting__"?amCntExistingRmMeetings(todaysActs):todaysActs.filter(function(a){return a.act_type===g.type;}).length;
       var dailyTarget=Math.ceil(g.weekly/5);
       var hit=count>=dailyTarget;
       html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f8">'
@@ -5532,7 +5568,7 @@ function rmRenderGoals(){
   }else if(period==="week"){
     var weekActs=acts.filter(function(a){return a.act_date>=week.start&&a.act_date<=week.end;});
     RM_GOALS.forEach(function(g){
-      var count=g.type==="Talk-to's"?amCntTalkTo(weekActs):weekActs.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="Talk-to's"?amCntTalkTo(weekActs):g.type==="__existingmeeting__"?amCntExistingRmMeetings(weekActs):weekActs.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.weekly,1);
       var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
       html+='<div style="margin-bottom:12px">'
@@ -5541,7 +5577,7 @@ function rmRenderGoals(){
     });
   }else{
     RM_GOALS.forEach(function(g){
-      var count=g.type==="Talk-to's"?amCntTalkTo(acts):acts.filter(function(a){return a.act_type===g.type;}).length;
+      var count=g.type==="Talk-to's"?amCntTalkTo(acts):g.type==="__existingmeeting__"?amCntExistingRmMeetings(acts):acts.filter(function(a){return a.act_type===g.type;}).length;
       var pct=Math.min(count/g.monthly,1);
       var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
       html+='<div style="margin-bottom:12px">'
@@ -6325,7 +6361,7 @@ async function loadFaceTime(){
       sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=4000"),
       sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
       loadCoMarketing(),
-      sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,do_not_contact,relationship_status&limit=5000").catch(function(){return[];});}),
+      sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,relationship_status,brokerage,email&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,relationship_status,email&limit=5000").catch(function(){return[];});}),
       sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000").catch(function(){
         // Older deployments may not have the RM column yet. LP ownership is still usable,
         // so retry without RM instead of silently treating every partner as Unassigned.
@@ -6367,7 +6403,8 @@ async function loadFaceTime(){
       return !!k && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && p.retained!==false && !o.removed;
     }).map(function(p){
       var k=assignmentKey(p.agent_name),o=ownerMap[k]||{};
-      return {name:p.agent_name,tier:p.tier||"C",lp:o.lp||"Unassigned",rm:o.rm||"Unassigned"};
+      ctCacheRmRoutingProfile(p);
+      return {name:p.agent_name,tier:p.tier||"C",lp:o.lp||"Unassigned",rm:ctStrategicRmOwner(p.agent_name,p)||o.rm||"Unassigned"};
     });
     renderFaceTime();
   }catch(e){if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--red);padding:30px;font-size:13px">Error loading — '+e.message+'</div>';}
@@ -8674,9 +8711,29 @@ async function pfrLoad(){
     });
     var meetingCompliancePct=meetingCadenceEligible.length>0?Math.round((meetingCompliant/meetingCadenceEligible.length)*100):0;
 
-    // Weekly Scorecard extras
+    // Weekly Scorecard extras — use the same new-vs-existing meeting semantics as the RM Tracker.
+    // A held New Realtor Meeting is NOT a scheduling event. Current retained relationships are not "new".
+    // If someone is retained today because they converted, preserve a booking that occurred BEFORE
+    // their first held New Realtor Meeting so the acquisition funnel does not disappear retroactively.
     var newRealtorMeetingActs=periodActs.filter(function(a){return a.act_type==="New Realtor Meeting";});
-    var meetingsScheduled=periodActs.filter(function(a){return(a.act_type==="Cold Calls"||a.act_type==="New Realtor Meeting")&&a.outcome==="Meeting Scheduled";}).length;
+    var firstNewHeldByName={};
+    (allActs||[]).filter(function(a){return a.act_type==="New Realtor Meeting";}).forEach(function(a){
+      var k=(a.agent_name||"").trim().toLowerCase();if(!k||!a.act_date)return;
+      if(!firstNewHeldByName[k]||a.act_date<firstNewHeldByName[k])firstNewHeldByName[k]=a.act_date;
+    });
+    var knownRetainedNames={};
+    (allAgents||[]).forEach(function(a){var k=(a.agent_name||"").trim().toLowerCase();if(k&&a.retained===true)knownRetainedNames[k]=true;});
+    function isVerifiedNewMeetingScheduled(a){
+      if(!a||a.outcome!=="Meeting Scheduled")return false;
+      var type=String(a.act_type||"").trim();
+      if(type==="New Realtor Meeting"||ctIsExistingRmMeeting(type))return false;
+      var k=(a.agent_name||"").trim().toLowerCase();if(!k)return false;
+      if(!knownRetainedNames[k])return true;
+      var firstHeld=firstNewHeldByName[k];
+      return !!(firstHeld&&a.act_date&&a.act_date<firstHeld);
+    }
+    var newMeetingScheduledActs=periodActs.filter(isVerifiedNewMeetingScheduled);
+    var meetingsScheduled=newMeetingScheduledActs.length;
     var followUpComplete=newRealtorMeetingActs.filter(function(a){return (a.notes||"").indexOf("INTAKE PENDING")<0;}).length;
     var followUpPct=newRealtorMeetingActs.length>0?Math.round((followUpComplete/newRealtorMeetingActs.length)*100):0;
     var metThisPeriod={};
@@ -8728,6 +8785,7 @@ async function pfrLoad(){
       escalations:escalations,newRealtorMeetingActs:newRealtorMeetingActs,meetingActs:normalizedExistingMeetingActs,
       top10AtRisk:top10AtRisk,top10GrowthOpp:top10GrowthOpp,highPotential:highPotential,proactiveWatch:proactiveWatch,
       convertedActive:active.filter(function(a){return metThisPeriod[(a.agent_name||"").trim().toLowerCase()];}),
+      newMeetingScheduledActs:newMeetingScheduledActs,
       meetings:periodActs,
       powerBiActiveRows:currentPowerBiAgents.filter(function(a){return !!a.powerbi_level;}),
       rmActivePartners:rmActivePartners,
@@ -8841,7 +8899,7 @@ async function pfrLoad(){
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Weekly Scorecard Extras</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
-        +pfrStatTile("New Meetings Scheduled",meetingsScheduled,"pfrOpenDrill(\'scheduled\')")
+        +pfrStatTile("New Partner Meetings Scheduled",meetingsScheduled,"pfrOpenDrill(\'scheduled\')")
         +pfrStatTile("New Agents Converted to Active",convertedToActive,"pfrOpenDrill(\'converted\')")
         +pfrStatTile("New Meeting Follow-up Complete",followUpPct+"%",null)
         +pfrStatTile("Existing Meetings &mdash; Channel",meetingsByTier.Channel,"pfrOpenDrill(\'meetings:Channel\')")
@@ -8952,8 +9010,8 @@ function pfrOpenDrill(key){
     items=(pfrDrill.meetingActs||[]).map(function(a){return{name:a.agent_name,date:a.act_date||a.date,detail:fmt(a.act_date||a.date)+(a.act_type?" · "+a.act_type:"")};})
       .sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
   }else if(key==="scheduled"){
-    title.textContent="New Meetings Scheduled — this period";
-    items=(pfrDrill.meetings||[]).filter(function(a){return a.outcome==="Meeting Scheduled";}).map(function(a){return{name:a.agent_name,detail:fmt(a.act_date)};});
+    title.textContent="New Partner Meetings Scheduled — this period";
+    items=(pfrDrill.newMeetingScheduledActs||[]).map(function(a){return{name:a.agent_name,detail:fmt(a.act_date)+" · "+(a.act_type||"Outreach")};});
   }else if(key==="converted"){
     title.textContent="New Agents Converted to Active";
     items=(pfrDrill.convertedActive||[]).map(function(a){return{name:a.agent_name,detail:pfrTierLabel(a.tier)};});
