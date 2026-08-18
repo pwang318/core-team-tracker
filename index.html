@@ -1,4 +1,4 @@
-     
+    
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -624,7 +624,7 @@ td{line-height:1.4!important}
 
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v24.0</div>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v25.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -1332,7 +1332,7 @@ td{line-height:1.4!important}
       <select id="reassign-filter-rm" onchange="renderReassign()"><option value="">All RM Owners</option><option>Amanda</option><option>Nyny</option><option value="Unassigned">Unassigned</option></select>
       <select id="reassign-filter-lp" onchange="renderReassign()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
     </div>
-    <div class="tbl-wrap" style="max-height:280px"><table><thead><tr><th>Agent</th><th>Lvl</th><th>RM Owner</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign LP</th><th></th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
+    <div class="tbl-wrap" style="max-height:none;overflow:visible"><div id="reassign-count-label" style="padding:0 0 8px;font-size:11px;color:var(--text-3)"></div><table><thead><tr><th>Agent</th><th>Lvl</th><th>RM Owner</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign LP</th><th></th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
   </div>
   <div class="admin-section">
     <h3>Inactive agents <span id="inactive-count-label" style="font-weight:400;color:#888;font-size:12px"></span></h3>
@@ -2173,11 +2173,15 @@ function loadAgentAssignments(){
         if(r.lp==="__REMOVED__"){
           agents=agents.filter(function(a){return a[0]!==r.agent_name;});
         } else {
-          var a=agents.find(function(x){return x[0]===r.agent_name;});
-          if(a){a[2]=r.lp;a[7]=r.priority||false;if(r.level)a[1]=r.level;if(r.closed_past_year!==undefined&&r.closed_past_year!==null)a[8]=r.closed_past_year;}
-          var s=SEED.find(function(x){return x[0]===r.agent_name;});
-          if(s){s[2]=r.lp;if(r.level)s[1]=r.level;}
-          else if(r.added){agents.push([r.agent_name,r.level||"C",r.lp,null,null,null,null,r.priority||false,r.closed_past_year||0]);}
+          var key=assignmentKey(r.agent_name);
+          var a=agents.find(function(x){return assignmentKey(x[0])===key;});
+          if(a){a[2]=r.lp||"Unassigned";a[7]=r.priority||false;if(r.level)a[1]=r.level;if(r.closed_past_year!==undefined&&r.closed_past_year!==null)a[8]=r.closed_past_year;}
+          var seedRow=SEED.find(function(x){return assignmentKey(x[0])===key;});
+          if(seedRow){seedRow[2]=r.lp||"Unassigned";if(r.level)seedRow[1]=r.level;}
+          // Every live assignment belongs in the working roster, even if the row was not created
+          // by this page (added=false). This prevents newer/current LP relationships from being
+          // invisible simply because they were never baked into the old SEED snapshot.
+          if(!a){agents.push([r.agent_name,r.level||"C",r.lp||"Unassigned",null,null,null,null,r.priority||false,r.closed_past_year||0]);}
         }
       }catch(e){}
     });
@@ -4489,9 +4493,9 @@ function renderDaniel(){
 
 function renderAdmin(){
   renderReassign();renderRemoveList();renderCoMktList();
-  var inactive=agents.filter(function(a){return!isActive(a);});
+  var inactive=agents.filter(function(a){return ctRosterEligible(a)&&!isActive(a);});
   document.getElementById("inactive-count-label").textContent="- "+inactive.length+" agents";
-  document.getElementById("inactive-list").innerHTML=inactive.length?inactive.map(function(a){return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>'+rmOwnerBadge(a[0])+'<span class="lp-tag lp-tag-'+a[2]+'">'+a[2]+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
+  document.getElementById("inactive-list").innerHTML=inactive.length?inactive.map(function(a){var lp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>'+rmOwnerBadge(a[0])+'<span class="lp-tag lp-tag-'+lp+'">'+lp+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
 }
 
 function renderReassign(){
@@ -4511,6 +4515,8 @@ function renderReassign(){
     profiles.forEach(function(p){var k=assignmentKey(p.agent_name);if(!k||names[k])return;names[k]=true;var ar=amap[k]||{};if(ar.lp==="__REMOVED__"||p.relationship_status==="inactive")return;list.push({name:p.agent_name,tier:p.tier||ar.level||"C",lp:(ar.lp&&ar.lp!=="__REMOVED__")?ar.lp:"Unassigned",rm:ar.rm||"Unassigned",priority:!!ar.priority,status:(function(){var a=agents.find(function(x){return assignmentKey(x[0])===k;});return a&&!isActive(a)?"inactive":"active";})()});});
     assignments.forEach(function(ar){var k=assignmentKey(ar.agent_name);if(!k||names[k]||ar.lp==="__REMOVED__")return;names[k]=true;list.push({name:ar.agent_name,tier:ar.level||"C",lp:ar.lp||"Unassigned",rm:ar.rm||"Unassigned",priority:!!ar.priority,status:(function(){var a=agents.find(function(x){return assignmentKey(x[0])===k;});return a&&!isActive(a)?"inactive":"active";})()});});
     list=list.filter(function(r){if(q&&r.name.toLowerCase().indexOf(q)<0)return false;if(flp&&r.lp!==flp)return false;if(frm&&r.rm!==frm)return false;return true;}).sort(function(a,b){return a.name.localeCompare(b.name);});
+    var countEl=document.getElementById("reassign-count-label");
+    if(countEl)countEl.textContent=(flp?list.length+" relationship"+(list.length!==1?"s":"")+" assigned to "+flp:list.length+" relationship"+(list.length!==1?"s":"")+" shown")+(frm?" · RM: "+frm:"");
     if(!list.length){tbody.innerHTML='<tr><td colspan="8" style="padding:18px;text-align:center;color:var(--text-3)">No agents match these filters.</td></tr>';return;}
     tbody.innerHTML=list.map(function(r){
       var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said"].map(function(lp){return '<option'+(r.lp===lp?' selected':'')+'>'+lp+'</option>';}).join('');
