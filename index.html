@@ -2002,6 +2002,29 @@ function sbFetch(method,path,body){
   }).finally(function(){clearTimeout(timer);});
 }
 
+// v22: schema-safe writes to the shared agent_profiles table.
+// If an optional UI field is not present in the live Supabase schema, remove only
+// that unsupported field and retry instead of failing the entire contact update.
+function lpMissingAgentProfileColumn(err){
+  var msg=String((err&&err.message)||"");
+  var m=msg.match(/Could not find the [\'\"]([^\'\"]+)[\'\"] column of [\'\"]agent_profiles[\'\"]/i)
+      ||msg.match(/column [\'\"]?([^\'\"\s]+)[\'\"]? does not exist/i);
+  return m&&m[1]?m[1]:null;
+}
+function lpProfileWrite(method,path,payload){
+  var body=Object.assign({},payload||{});
+  function attempt(remaining){
+    return sbFetch(method,path,body).catch(function(err){
+      var col=lpMissingAgentProfileColumn(err);
+      if(!col || !(col in body) || col==="agent_name" || remaining<=0)throw err;
+      delete body[col];
+      console.warn("agent_profiles schema does not include optional field '"+col+"'; save retried without it.");
+      return attempt(remaining-1);
+    });
+  }
+  return attempt(10);
+}
+
 function loadCallLogs(){
   setSyncStatus("saving");
   return Promise.all([
@@ -3077,7 +3100,7 @@ function saveLpContactModal(){
   sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(savedName)+"&limit=1").then(function(res){
     var method=(res&&res.length)?"PATCH":"POST";
     var path=method==="PATCH"?"agent_profiles?agent_name=eq."+encodeURIComponent(savedName):"agent_profiles";
-    return sbFetch(method,path,payload);
+    return lpProfileWrite(method,path,payload);
   }).then(function(){
     var rmVal=document.getElementById("lp-cm-rm-owner")?document.getElementById("lp-cm-rm-owner").value:"";
     var lpVal=document.getElementById("lp-cm-lp-owner")?document.getElementById("lp-cm-lp-owner").value:"Unassigned";
