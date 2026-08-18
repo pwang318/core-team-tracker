@@ -1,11 +1,11 @@
-    
+     
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260818-v17">
-  <meta name="build-notes" content="v21 LP outreach workflow: priority/overdue carryover + VM/text enforcement + text-reply connection + direct no-response RM handoff; open RM handoffs pause routine LP rotation">
+  <meta name="version" content="20260818-v24">
+  <meta name="build-notes" content="v24 live-roster audit: complete LP assignment lists, removed-agent suppression across Snapshot/rotation, clickable inactive drilldown, legacy SEED leak protection">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -624,6 +624,7 @@ td{line-height:1.4!important}
 
 </head>
 <body>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v24.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -1644,6 +1645,9 @@ var lastWeekKey=getLastWeekKey(TODAY);
 var agents=[],callLogs={},lastWeekLogs={},lpOpenRmFlags={},currentUser=null,noteTimers={},contactCache={},editingLpContact=null,pendingNote={};
 var ctInactiveRosterNames=new Set();
 var ctDisplayNames={};
+function ctRosterRemoved(name){return ctInactiveRosterNames.has(String(name||"").trim().toLowerCase());}
+function ctRosterEligible(a){return !!a && !ctRosterRemoved(a[0]);}
+
 // Live Current Relationship Roster exclusion set — shared by co-marketing selection and any
 // other place that still reads from the legacy `agents` array (which itself carries no
 // relationship_status field, so this cross-reference is needed wherever that array is used to
@@ -1952,7 +1956,7 @@ function daysOverdue(a){
 }
 
 function getRotation(lp){
-  var active=agents.filter(function(a){return a[2]===lp&&isActive(a)&&!lpOpenRmFlags[assignmentKey(a[0])];});
+  var active=agents.filter(function(a){return a[2]===lp&&ctRosterEligible(a)&&isActive(a)&&!lpOpenRmFlags[assignmentKey(a[0])];});
   if(!active.length)return[];
   var priority=active.filter(isPriority);
   var normal=active.filter(function(a){return!isPriority(a);});
@@ -1977,7 +1981,7 @@ function getRotation(lp){
 }
 
 function getLastWeekRotation(lp){
-  var active=agents.filter(function(a){return a[2]===lp&&isActive(a);});
+  var active=agents.filter(function(a){return a[2]===lp&&ctRosterEligible(a)&&isActive(a);});
   if(!active.length)return[];
   var priority=active.filter(isPriority);
   var normal=active.filter(function(a){return!isPriority(a);});
@@ -2333,7 +2337,7 @@ function renderLP(lp){
     var n=ta.getAttribute("data-name");
     if(n&&pendingNote[n]&&ta.value)pendingNote[n].draft=ta.value;
   });
-  var all=agents.filter(function(a){return a[2]===lp;});
+  var all=agents.filter(function(a){return a[2]===lp&&ctRosterEligible(a);});
   var ac=all.filter(isActive).length,ic=all.filter(function(a){return!isActive(a);}).length;
   var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
   document.getElementById("lp-hero-name").textContent=lp+"'s calls this week";
@@ -2383,8 +2387,8 @@ function renderLP(lp){
   var rot=getRotation(lp);
   document.getElementById("priority-banner").style.display=rot.some(function(a){return isPriority(a)&&!calledThisWeek(a[0]);})?"flex":"none";
   var ib=document.getElementById("inactive-banner");
-  if(ic>0){ib.style.display="flex";document.getElementById("inactive-banner-txt").textContent=ic+" agents inactive (90+ days) — removed from rotation.";}
-  else ib.style.display="none";
+  if(ic>0){ib.style.display="flex";ib.style.cursor="pointer";ib.title="Click to see inactive agents";ib.onclick=function(){showLpInactiveAgents(lp);};document.getElementById("inactive-banner-txt").textContent=ic+" agents inactive (90+ days) — removed from rotation. Click to view.";}
+  else {ib.style.display="none";ib.onclick=null;}
   var bdayEl=document.getElementById("bday-banner");
   if(bdayEl){
     var bdayAgents=getBirthdayAgentsThisWeek().filter(function(b){var ag=agents.find(function(a){return a[0]===b.name;});return ag&&ag[2]===lp;});
@@ -3432,7 +3436,7 @@ function getLpMissedLastWeek(lp){
   var need=getLpIncompleteFromLastWeek(lp);
   if(need<=0)return[];
   var candidates=agents.filter(function(a){
-    if(a[2]!==lp||!isActive(a)||lpOpenRmFlags[assignmentKey(a[0])])return false;
+    if(a[2]!==lp||!ctRosterEligible(a)||!isActive(a)||lpOpenRmFlags[assignmentKey(a[0])])return false;
     var log=lastWeekLogs[a[0]];
     return !(log&&log.week_key===lastWeekKey&&lpWorkflowCompleteLog(log));
   });
@@ -4047,6 +4051,16 @@ function loadAmandaSnapshot(){
   }).catch(function(){});
 }
 
+function showLpInactiveAgents(lp){
+  var list=(agents||[]).filter(function(a){return a[2]===lp&&ctRosterEligible(a)&&!isActive(a);}).sort(function(a,b){return a[0].localeCompare(b[0]);});
+  var ov=document.getElementById("lead-drilldown-overlay"),title=document.getElementById("drilldown-title"),body=document.getElementById("drilldown-body");
+  if(!ov||!title||!body)return;
+  title.textContent=lp+" — inactive relationships (90+ days)";
+  if(!list.length){body.innerHTML='<div style="padding:18px;color:var(--text-3)">No inactive agents for '+lp+'.</div>';}
+  else{body.innerHTML='<div style="padding:12px 16px;font-size:11px;color:var(--text-3);border-bottom:1px solid var(--border)">These relationships are still assigned to '+lp+' but are out of the weekly call rotation because there has been no activity for 90+ days. Explicitly removed relationships are not shown here.</div>'+list.map(function(a){var mr=mostRecent(a);return '<div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border-light)"><span style="font-weight:700;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+String(a[1]||"C").toLowerCase()+'">'+(a[1]||"C")+'</span><span style="font-size:11px;color:var(--text-3)">'+(mr?'Last activity: '+fmt(mr):'No activity on file')+'</span></div>';}).join('');}
+  ov.style.display="flex";
+}
+
 function openSnapshotView(btn){
   if(typeof rmStopPolling==="function")rmStopPolling();
   if(typeof lpStopPolling==="function")lpStopPolling();
@@ -4055,8 +4069,10 @@ function openSnapshotView(btn){
   if(btn)btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   document.getElementById("view-snapshot").classList.add("active");
-  buildSnapshot();
-  loadCallLogs().then(buildSnapshot);
+  Promise.resolve(typeof loadInactiveRosterNames==="function"?loadInactiveRosterNames():null).then(function(){
+    buildSnapshot();
+    return loadCallLogs();
+  }).then(buildSnapshot).catch(function(){buildSnapshot();});
   if(typeof loadAmandaSnapshot==="function")loadAmandaSnapshot();
 }
 
@@ -4091,7 +4107,7 @@ function buildSnapshot(){
   var callsLogged={};
   LPS.forEach(function(lp){callsLogged[lp]=0;});
   agents.forEach(function(a){
-    if(callLogs[a[0]]&&isActive(a)&&a[2]&&callsLogged[a[2]]!==undefined)callsLogged[a[2]]++;
+    if(ctRosterEligible(a)&&callLogs[a[0]]&&isActive(a)&&a[2]&&callsLogged[a[2]]!==undefined)callsLogged[a[2]]++;
   });
   var totalCallsWTD=Object.values(callsLogged).reduce(function(s,n){return s+n;},0);
 
@@ -4479,31 +4495,31 @@ function renderAdmin(){
 }
 
 function renderReassign(){
-  var q=document.getElementById("reassign-q").value.toLowerCase();
-  var flp=document.getElementById("reassign-filter-lp").value;
-  var frm=document.getElementById("reassign-filter-rm")?document.getElementById("reassign-filter-rm").value:"";
-  var list=agents.filter(function(a){
-    if(q&&a[0].toLowerCase().indexOf(q)<0)return false;
-    if(frm&&((getRmOwner(a[0])||"Unassigned")!==frm))return false;
-    if(!flp)return true;
-    var agLp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";
-    return agLp===flp;
-  });
-  document.getElementById("admin-tbody").innerHTML=list.map(function(a){
-    var idx=agents.indexOf(a),pri=isPriority(a);
-    var curLp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";
-    var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said"].map(function(lp){return'<option'+(curLp===lp?" selected":"")+' value="'+lp+'">'+lp+'</option>';}).join("");
-    return'<tr'+(pri?' style="background:#FFFAFA"':'')+'>'+
-      '<td style="font-weight:600">'+displayName(a[0])+'</td>'+
-      '<td><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span></td>'+
-      '<td>'+rmOwnerBadge(a[0])+'</td>'+
-      '<td>'+(isActive(a)?'<span style="color:#43A047;font-size:12px">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td>'+
-      '<td><button class="btn btn-sm'+(pri?" btn-danger":" btn-success")+'" data-idx="'+idx+'" onclick="togglePriority(this)">'+(pri?"Remove":"Set Priority")+'</button></td>'+
-      '<td><span class="lp-tag lp-tag-'+curLp+'">'+curLp+'</span></td>'+
-      '<td><select data-idx="'+idx+'" onchange="reassign(this)" style="font-size:12px">'+opts+'</select></td>'+
-      '<td><button class="btn btn-sm btn-danger" data-name="'+a[0]+'" onclick="removeAgent(this)" style="font-size:11px;padding:2px 8px">Remove</button></td></tr>';
-  }).join("");
+  var tbody=document.getElementById("admin-tbody");
+  if(!tbody)return;
+  var q=(document.getElementById("reassign-q")?.value||"").toLowerCase();
+  var flp=document.getElementById("reassign-filter-lp")?.value||"";
+  var frm=document.getElementById("reassign-filter-rm")?.value||"";
+  tbody.innerHTML='<tr><td colspan="8" style="padding:18px;text-align:center;color:var(--text-3)">Loading live assignments...</td></tr>';
+  Promise.all([
+    sbFetch("GET","agent_profiles?select=agent_name,tier,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier&limit=5000").catch(function(){return[];});}),
+    sbFetch("GET","agent_assignments?select=agent_name,lp,rm,priority,level&limit=5000").catch(function(){return[];})
+  ]).then(function(results){
+    var profiles=results[0]||[],assignments=results[1]||[], amap={};
+    assignments.forEach(function(r){var k=assignmentKey(r.agent_name);if(k)amap[k]=r;});
+    var names={},list=[];
+    profiles.forEach(function(p){var k=assignmentKey(p.agent_name);if(!k||names[k])return;names[k]=true;var ar=amap[k]||{};if(ar.lp==="__REMOVED__"||p.relationship_status==="inactive")return;list.push({name:p.agent_name,tier:p.tier||ar.level||"C",lp:(ar.lp&&ar.lp!=="__REMOVED__")?ar.lp:"Unassigned",rm:ar.rm||"Unassigned",priority:!!ar.priority,status:(function(){var a=agents.find(function(x){return assignmentKey(x[0])===k;});return a&&!isActive(a)?"inactive":"active";})()});});
+    assignments.forEach(function(ar){var k=assignmentKey(ar.agent_name);if(!k||names[k]||ar.lp==="__REMOVED__")return;names[k]=true;list.push({name:ar.agent_name,tier:ar.level||"C",lp:ar.lp||"Unassigned",rm:ar.rm||"Unassigned",priority:!!ar.priority,status:(function(){var a=agents.find(function(x){return assignmentKey(x[0])===k;});return a&&!isActive(a)?"inactive":"active";})()});});
+    list=list.filter(function(r){if(q&&r.name.toLowerCase().indexOf(q)<0)return false;if(flp&&r.lp!==flp)return false;if(frm&&r.rm!==frm)return false;return true;}).sort(function(a,b){return a.name.localeCompare(b.name);});
+    if(!list.length){tbody.innerHTML='<tr><td colspan="8" style="padding:18px;text-align:center;color:var(--text-3)">No agents match these filters.</td></tr>';return;}
+    tbody.innerHTML=list.map(function(r){
+      var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said"].map(function(lp){return '<option'+(r.lp===lp?' selected':'')+'>'+lp+'</option>';}).join('');
+      return '<tr><td style="font-weight:650">'+displayName(r.name)+'</td><td><span class="badge badge-'+String(r.tier).toLowerCase()+'">'+r.tier+'</span></td><td>'+rmOwnerBadge(r.name,r.rm)+'</td><td>'+(r.status==="active"?'<span style="color:#43A047">Active</span>':'<span class="badge badge-inactive">INACTIVE</span>')+'</td><td><button class="btn btn-sm '+(r.priority?'btn-success':'')+'" data-priority-name="'+r.name.replace(/"/g,'&quot;')+'" onclick="toggleLivePriority(this)">'+(r.priority?'Priority':'Set Priority')+'</button></td><td><span class="lp-tag lp-tag-'+r.lp+'">'+r.lp+'</span></td><td><select data-reassign-name="'+r.name.replace(/"/g,'&quot;')+'" onchange="reassignLiveAgent(this)">'+opts+'</select></td><td><button class="btn btn-sm btn-danger" data-name="'+r.name.replace(/"/g,'&quot;')+'" onclick="removeAgent(this)">Remove</button></td></tr>';
+    }).join('');
+  }).catch(function(e){tbody.innerHTML='<tr><td colspan="8" style="padding:18px;color:var(--red)">Could not load live assignments: '+e.message+'</td></tr>';});
 }
+function reassignLiveAgent(sel){var name=sel.getAttribute("data-reassign-name"),lp=sel.value||"Unassigned";if(!name)return;setSyncStatus("saving");sbFetch("POST","agent_assignments?on_conflict=agent_name",{agent_name:name,lp:lp,added:false}).then(function(){var a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});if(a)a[2]=lp;setSyncStatus("live");renderReassign();}).catch(function(){sbFetch("PATCH","agent_assignments?agent_name=eq."+encodeURIComponent(name),{lp:lp}).then(function(){var a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});if(a)a[2]=lp;setSyncStatus("live");renderReassign();}).catch(function(){setSyncStatus("error");alert("Could not save LP assignment. Please retry.");});});}
+function toggleLivePriority(btn){var name=btn.getAttribute("data-priority-name");if(!name)return;var next=btn.textContent.trim()!=="Priority";sbFetch("PATCH","agent_assignments?agent_name=eq."+encodeURIComponent(name),{priority:next}).then(function(){var a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});if(a)a[7]=next;renderReassign();}).catch(function(){alert("Could not update priority. Please retry.");});}
 
 function renderRemoveList(){
   var q=document.getElementById("remove-q").value.toLowerCase(),el=document.getElementById("remove-list");
@@ -7866,7 +7882,7 @@ function ctInjectOverdueQueue(){
   // A voicemail or one-way follow-up text still needs a real conversation, so it stays visible.
   // Answered / In Person clears the row for the week.
   var overdue=agents.filter(function(a){
-    return isActive(a) && a[2] && a[2]!=="Unassigned";
+    return ctRosterEligible(a) && isActive(a) && a[2] && a[2]!=="Unassigned";
   }).map(function(a){
     var log=callLogs[a[0]]||null;
     var thisWeek=!!(log&&log.week_key===weekKey);
