@@ -1,16 +1,15 @@
- 
-   
+    
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260811155500">
-  <meta name="build-notes" content="Reviewed merge + inactive-agent persistence fix: removed agents stay removed across Power BI refreshes and are excluded from Portfolio tier migrations">
+  <meta name="version" content="20260818-v17">
+  <meta name="build-notes" content="v17 visual makeover layered on functionality-QA + load-recovery build; portfolio, LP workflows, shared RM data, Power BI/Velocify, flags, scorecards and admin logic preserved">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Core Team Intelligence Platform — LP v12 Ownership QA</title>
+<title>Core Team Tracker · Daniel Sa Team</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -456,6 +455,13 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
 #view-daniel [style*="color:#888"],#view-rm [style*="color:#888"]{color:#5F6978!important}
 #view-rm #rm-goals-body{padding:18px!important}
 
+
+/* v18 ownership visibility */
+@media(max-width:760px){
+  #view-ownership > div:nth-of-type(3) > div{grid-template-columns:1fr!important}
+  .ct-overdue-row{flex-wrap:wrap}
+  .ct-overdue-row > span:first-child{min-width:100%}
+}
 </style>
 <!-- Realtime pass: loads the Supabase client ONLY for postgres_changes subscriptions below.
      Everything else in this app still uses the existing sbFetch()/raw-fetch REST calls,
@@ -558,6 +564,64 @@ table tbody tr:hover{background:#FAF8FD!important}
   .top-actions .btn{font-size:11px!important}
 }
 </style>
+
+<style id="v17-makeover">
+/* ─────────────────────────────────────────────────────────────
+   v17 MAKEOVER — presentation only. No workflow/data functions overridden.
+   Built on the functionality-QA + load-recovery version.
+   ───────────────────────────────────────────────────────────── */
+:root{--v17-ink:#29223B;--v17-muted:#766F86;--v17-purple:#57428F;--v17-soft:#F7F5FB;--v17-card:#FFFFFF;--v17-border:#E6E1EF}
+body{background:radial-gradient(circle at 75% -10%,rgba(112,89,170,.08),transparent 34%),linear-gradient(180deg,#FAF9FD 0%,#F5F3F9 100%)!important;color:var(--v17-ink)}
+.app{padding-left:264px!important;padding-right:34px!important;padding-bottom:72px!important}
+.app-header{margin-left:-264px!important;padding-left:282px!important;padding-right:34px!important;min-height:70px!important;background:linear-gradient(118deg,#2E205D 0%,#4D3987 50%,#6D58AA 100%)!important}
+.app-header .brand-logo{font-size:14.5px!important;letter-spacing:.11em!important}
+.app-header .brand-sub{font-size:10.5px!important}
+.who-bar{left:16px!important;top:86px!important;width:224px!important;padding:14px 11px 16px!important;border-radius:16px!important;border-color:#E3DDEE!important;box-shadow:0 14px 36px rgba(43,31,79,.11)!important}
+.v14-nav-label{font-size:8.5px!important;letter-spacing:.13em!important;color:#978EAA!important;padding-left:11px!important}
+.who-btn{padding:9.5px 11px!important;border-radius:10px!important;font-size:11.75px!important;color:#514A61!important}
+.who-btn.active{background:linear-gradient(135deg,#F0ECFA,#E7E0F7)!important;color:#422F7E!important;box-shadow:inset 3px 0 0 #745EB2,0 2px 8px rgba(74,54,127,.06)!important}
+.wb-Portfolio{border:1px solid #EEE8F8!important;background:#FAF8FD!important}
+.view{max-width:1260px!important}
+.top-actions{max-width:1260px!important;margin-left:auto!important;margin-right:auto!important;margin-bottom:12px!important}
+.top-actions .btn{background:rgba(255,255,255,.92)!important;border-color:#DFD8EB!important;box-shadow:0 3px 10px rgba(58,43,95,.06)!important}
+.section-head{font-size:10.5px!important;color:#756D84!important;letter-spacing:.11em!important;margin-top:1.35rem!important}
+.d-card,.scorecard,.admin-section,.search-panel,.ref-section,.call-card,.leaderboard-row,.lp-hero,.ft-stat{border-color:var(--v17-border)!important;box-shadow:0 5px 18px rgba(54,41,89,.055)!important}
+.d-card,.scorecard,.admin-section,.search-panel,.ref-section{border-radius:14px!important}
+#view-snapshot:before,#view-portfolio-review:before{font-size:9.5px!important;letter-spacing:.145em!important;color:#7565A0!important;margin:4px 0 10px!important}
+#view-snapshot .section-head{color:#625975!important}
+#view-snapshot .d-card,#view-snapshot .scorecard{background:rgba(255,255,255,.96)!important}
+/* Make the daily command-center blocks breathe without changing their content. */
+#view-snapshot [style*="padding:20px"],#view-snapshot [style*="padding:18px"]{border-radius:14px}
+#view-snapshot .alert-item{padding:10px 13px!important;border-radius:10px!important}
+/* Portfolio is an executive review surface: slightly stronger card hierarchy. */
+#view-portfolio-review .d-card,#view-portfolio-review .scorecard,#view-portfolio-review [style*="background:var(--surface)"]{border-color:#E1DAEC!important}
+#view-portfolio-review .section-head{color:#5E517A!important}
+/* Consistent buttons and form controls. */
+.btn,.btn-sm,.who-btn,input,select,textarea{font-family:'Geist','Inter',sans-serif!important}
+.btn-primary{background:linear-gradient(135deg,#5A4493,#735DB1)!important}
+.btn:not(.btn-primary):not(.btn-danger):not(.btn-success){color:#4D3E73!important}
+input,select,textarea{background:#fff!important}
+/* Safer readable density for data-heavy views. */
+th{font-size:9.5px!important;letter-spacing:.075em!important;color:#746D82!important}
+td{line-height:1.4!important}
+.tbl-wrap{box-shadow:0 3px 14px rgba(54,41,89,.035)!important}
+/* Connection status looks intentional and remains clickable for retry. */
+#lpSyncStatusBtn{border-radius:20px!important;padding:5px 8px!important;background:rgba(255,255,255,.10)!important;color:rgba(255,255,255,.9)!important}
+#lpSyncStatusBtn:hover{background:rgba(255,255,255,.17)!important}
+/* Mobile keeps the proven horizontal navigation behavior. */
+@media(max-width:900px){
+  .app{padding:0 14px 48px!important}
+  .app-header{margin:0 -14px 14px!important;padding:12px 14px!important}
+  .who-bar{left:auto!important;top:auto!important;width:auto!important}
+  .view,.top-actions{max-width:none!important}
+}
+@media(max-width:560px){
+  .app-header{min-height:62px!important}
+  #lpSyncStatusBtn{padding:4px 6px!important}
+  .section-head{margin-top:1rem!important}
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -572,7 +636,7 @@ table tbody tr:hover{background:#FAF8FD!important}
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <span class="week-pill" id="weekPill"></span>
-    <span class="save-ind"><span class="sync-dot" id="syncDot"></span><span id="saveInd">Connecting...</span></span>
+    <button type="button" class="save-ind" id="lpSyncStatusBtn" onclick="lpRetryConnection()" title="Click to retry connection" style="border:0;background:transparent;cursor:pointer;font-family:inherit;padding:0"><span class="sync-dot" id="syncDot"></span><span id="saveInd">Connecting...</span></button>
     <button id="ct-notif-bell" style="position:relative;border:1px solid var(--border);background:#fff;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer" title="Recent activity">
       &#128276;<span id="ct-notif-badge" style="display:none;position:absolute;top:-3px;right:-3px;background:#B54B42;color:#fff;font-size:9px;font-weight:800;width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center"></span>
     </button>
@@ -590,6 +654,7 @@ table tbody tr:hover{background:#FAF8FD!important}
   <div class="v14-nav-label">TEAM VIEW</div>
   <button class="who-btn wb-Snapshot" onclick="openSnapshotView(this)" title="Team snapshot and today’s priorities">Snapshot</button>
   <button class="who-btn wb-Portfolio" onclick="openPortfolioReviewView(this)" title="Partner health, portfolio trends and relationship coverage">Portfolio Review</button>
+  <button class="who-btn wb-Ownership" onclick="openOwnershipView(this)" title="See and edit RM + LP ownership for every relationship">Ownership</button>
   <button class="who-btn wb-Leads" onclick="openLeadsView(this)" title="Realtor and builder lead activity">Realtor / Builder Leads</button>
   <div class="v14-nav-label">LOAN PARTNERS</div>
   <button class="who-btn wb-Gavin" onclick="selectUser(this,'Gavin')">Gavin</button>
@@ -605,7 +670,7 @@ table tbody tr:hover{background:#FAF8FD!important}
 </div>
 <div class="contact-modal-overlay" id="lpContactModal">
   <div class="contact-modal-box">
-    <div class="cm-header"><span class="cm-title">Edit contact info</span><button class="cm-close" onclick="closeLpContactModal()">×</button></div>
+    <div class="cm-header"><span class="cm-title">Edit contact + ownership</span><button class="cm-close" onclick="closeLpContactModal()">×</button></div>
     <div style="font-size:12px;color:#888;margin-bottom:14px" id="lpContactModalName"></div>
     <div class="cm-field">
       <label>Correct display name</label>
@@ -1076,6 +1141,26 @@ table tbody tr:hover{background:#FAF8FD!important}
   <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div></div>
 </div>
 
+<!-- OWNERSHIP VIEW -->
+<div id="view-ownership" class="view">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+    <div>
+      <div class="section-head" style="margin:0 0 4px">Partner Ownership</div>
+      <div style="font-size:12px;color:var(--text-3);line-height:1.5">One shared ownership view for the Core Team + RM trackers. Edit the RM owner or LP owner here and the change saves to the shared agent assignment record.</div>
+    </div>
+    <button class="btn" type="button" onclick="refreshOwnershipView()">&#8635; Refresh</button>
+  </div>
+  <div id="ownership-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-bottom:12px"></div>
+  <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:minmax(220px,2fr) minmax(140px,1fr) minmax(140px,1fr);gap:8px">
+      <input id="ownership-search" type="text" placeholder="Search agent..." oninput="renderOwnershipRows()" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px">
+      <select id="ownership-rm-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All RM owners</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option><option value="__UNASSIGNED__">RM unassigned</option></select>
+      <select id="ownership-lp-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All LP owners</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Unassigned">LP unassigned</option></select>
+    </div>
+  </div>
+  <div id="ownership-body" style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><div style="padding:30px;text-align:center;color:var(--text-3)">Loading ownership...</div></div>
+</div>
+
 <!-- REALTOR BUILDER LEADS VIEW -->
 <div id="view-leads" class="view">
   <div class="d-tab-bar" style="margin-bottom:.75rem">
@@ -1495,49 +1580,28 @@ var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
 
-function localDateStr(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
-function getWeekKey(d){
-  var day=d.getDay(); // 0=Sun,1=Mon,...,6=Sat
-  var diff=day===0?-6:1-day; // days to subtract to get to Monday
-  var mon=new Date(d.getFullYear(),d.getMonth(),d.getDate()+diff);
-  return localDateStr(mon);
-}
-function getLastWeekKey(d){var dt=new Date(d);dt.setDate(dt.getDate()-7);return getWeekKey(dt);}
-function getWeekLabel(k){var mon=new Date(k+'T12:00:00'),sun=new Date(mon);sun.setDate(mon.getDate()+6);var o={month:'short',day:'numeric'};return 'Week of '+mon.toLocaleDateString('en-US',o)+' - '+sun.toLocaleDateString('en-US',o);}
-function fmt(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
-function fmtShort(d){if(!d)return'--';return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'numeric',day:'numeric'});}
-function mostRecent(a){return[a[3],a[4],a[5],a[6]].filter(Boolean).sort().reverse()[0]||null;}
-function mostRecentWithType(a){
-  var pairs=[
-    {date:a[3],label:"Lead in Velocify",icon:"🎯"},
-    {date:a[4],label:"File started",icon:"📄"},
-    {date:a[5],label:"Contract",icon:"✍️"},
-    {date:a[6],label:"Close",icon:"🏆"}
-  ].filter(function(p){return!!p.date;}).sort(function(x,y){return y.date.localeCompare(x.date);});
-  return pairs.length?pairs[0]:null;
-}
-function isActive(a){var d=mostRecent(a);return d?new Date(d+'T12:00:00')>=CUTOFF:false;}
-function calledThisWeek(name){return !!(callLogs[name]&&callLogs[name].week_key===weekKey);}
-function lpDays(name){var log=callLogs[name];if(!log||!log.call_date)return null;var dt=new Date(log.call_date+'T12:00:00');dt.setHours(0,0,0,0);return Math.floor((TODAY-dt)/86400000);}
-function isPriority(a){return a[7]===true;}
-function isMonday(){return TODAY.getDay()===1;}
 
-function getLpCallsThisWeek(lp){return Object.values(callLogs).filter(function(l){return l.lp===lp&&l.week_key===weekKey;}).length;}
-function getLpCallsLastWeek(lp){return Object.values(lastWeekLogs).filter(function(l){return l.lp===lp&&l.week_key===lastWeekKey;}).length;}
-function getLpPctThisWeek(lp){return Math.min(100,Math.round(getLpCallsThisWeek(lp)/WEEKLY_TARGET*100));}
-function getLpPctLastWeek(lp){return Math.min(100,Math.round(getLpCallsLastWeek(lp)/WEEKLY_TARGET*100));}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ─── INCOMPLETE CALLS CARRYOVER SYSTEM ───
-function getLpIncompleteFromLastWeek(lp){
-  var lastWeekCalls=getLpCallsLastWeek(lp);
-  return Math.max(0,WEEKLY_TARGET-lastWeekCalls);
-}
-function getLpTotalTargetThisWeek(lp){
-  var raw=WEEKLY_TARGET+getLpIncompleteFromLastWeek(lp);
-  // Cap at the LP's active agent count - can't call more unique agents than exist
-  var activeCount=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
-  return Math.min(raw,Math.max(WEEKLY_TARGET,activeCount));
-}
+
+
 
 var weekKey=getWeekKey(TODAY);
 var lastWeekKey=getLastWeekKey(TODAY);
@@ -1889,9 +1953,14 @@ function getLastWeekRotation(lp){
 }
 
 function sbFetch(method,path,body){
-  var opts={method:method,headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
+  var controller=new AbortController();
+  var timer=setTimeout(function(){controller.abort();},12000);
+  var opts={method:method,signal:controller.signal,headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
   if(body)opts.body=JSON.stringify(body);
-  return fetch(SB_URL+"/rest/v1/"+path,opts).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t);});return r.text().then(function(t){return t?JSON.parse(t):null;});});
+  return fetch(SB_URL+"/rest/v1/"+path,opts).then(function(r){
+    if(!r.ok)return r.text().then(function(t){throw new Error(t||("HTTP "+r.status));});
+    return r.text().then(function(t){return t?JSON.parse(t):null;});
+  }).finally(function(){clearTimeout(timer);});
 }
 
 function loadCallLogs(){
@@ -1942,10 +2011,18 @@ function deleteCallLog(name){
 
 function setSyncStatus(s){
   var dot=document.getElementById("syncDot"),ind=document.getElementById("saveInd");
+  if(!dot||!ind)return;
   if(s==="live"){dot.className="sync-dot live";ind.textContent="Live";}
   else if(s==="saving"){dot.className="sync-dot saving";ind.textContent="Syncing...";}
-  else{dot.className="sync-dot error";ind.textContent="Offline";}
+  else{dot.className="sync-dot error";ind.textContent="Connection issue";}
 }
+function lpRetryConnection(){
+  setSyncStatus("saving");
+  return loadCallLogs().then(function(){
+    if(typeof buildSnapshot==="function")buildSnapshot();
+  }).catch(function(){setSyncStatus("error");});
+}
+
 
 function loadAgents(){
   agents=SEED.map(function(r){return r.slice();});
@@ -2063,6 +2140,71 @@ function openScorecardsView(){
     lpscLoad();
   }
 }
+
+
+/* ── v18: first-class shared RM + LP ownership workspace ── */
+function ctOwnEscAttr(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function openOwnershipView(btn){
+  rmStopPolling();lpStopPolling();
+  currentUser="Ownership";
+  document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+  var view=document.getElementById("view-ownership");if(view)view.classList.add("active");
+  var body=document.getElementById("ownership-body");if(body)body.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">Loading ownership...</div>';
+  Promise.resolve(loadAgentAssignments()).then(function(){renderOwnershipSummary();renderOwnershipRows();}).catch(function(){renderOwnershipRows();});
+}
+function refreshOwnershipView(){
+  var body=document.getElementById("ownership-body");if(body)body.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">Refreshing...</div>';
+  return loadAgentAssignments().then(function(){renderOwnershipSummary();renderOwnershipRows();setSyncStatus("live");}).catch(function(){setSyncStatus("error");renderOwnershipRows();});
+}
+function renderOwnershipSummary(){
+  var host=document.getElementById("ownership-summary");if(!host)return;
+  var rows=(agents||[]).filter(function(a){return isActive(a);});
+  var counts={total:rows.length,Amanda:0,Nyny:0,rmU:0,lpU:0};
+  rows.forEach(function(a){var rm=getRmOwner(a[0]);if(rm==="Amanda")counts.Amanda++;else if(rm==="Nyny")counts.Nyny++;else counts.rmU++;if(!a[2]||a[2]==="Unassigned")counts.lpU++;});
+  function card(label,val){return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--text-3)">'+label+'</div><div style="font-size:20px;font-weight:800;color:var(--text);margin-top:3px">'+val+'</div></div>';}
+  host.innerHTML=card("Active relationships",counts.total)+card("RM · Amanda",counts.Amanda)+card("RM · Nyny",counts.Nyny)+card("RM unassigned",counts.rmU)+card("LP unassigned",counts.lpU);
+}
+function renderOwnershipRows(){
+  var host=document.getElementById("ownership-body");if(!host)return;
+  var q=((document.getElementById("ownership-search")||{}).value||"").trim().toLowerCase();
+  var rf=((document.getElementById("ownership-rm-filter")||{}).value||"");
+  var lf=((document.getElementById("ownership-lp-filter")||{}).value||"");
+  var rows=(agents||[]).filter(function(a){return isActive(a);}).filter(function(a){
+    var rm=getRmOwner(a[0])||"",lp=a[2]||"Unassigned",dn=displayName(a[0]);
+    if(q && (dn+" "+a[0]+" "+rm+" "+lp).toLowerCase().indexOf(q)===-1)return false;
+    if(rf==="__UNASSIGNED__" && rm)return false;if(rf && rf!=="__UNASSIGNED__" && rm!==rf)return false;
+    if(lf && lp!==lf)return false;return true;
+  }).sort(function(a,b){return displayName(a[0]).localeCompare(displayName(b[0]));});
+  if(!rows.length){host.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">No relationships match those filters.</div>';return;}
+  var rmOptions='<option value="">Unassigned</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option>';
+  var lpOptions='<option value="Unassigned">Unassigned</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option>';
+  var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:700px"><thead><tr style="background:var(--surface-2);text-align:left"><th style="padding:10px 12px;font-size:10px;text-transform:uppercase;color:var(--text-3)">Agent</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">Tier</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">RM Owner</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">LP Owner</th><th style="padding:10px 12px"></th></tr></thead><tbody>';
+  rows.forEach(function(a){
+    var name=a[0],rm=getRmOwner(name)||"",lp=a[2]||"Unassigned",key=assignmentKey(name);
+    html+='<tr data-agent="'+ctOwnEscAttr(name)+'" style="border-top:1px solid var(--border)"><td style="padding:10px 12px"><div style="font-size:12.5px;font-weight:750;color:var(--text)">'+escHtml(displayName(name))+'</div></td><td style="padding:10px 8px"><span style="font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#f4f1fb;color:#5b4498">'+escHtml(a[1]||"C")+'</span></td><td style="padding:8px"><select data-owner-role="rm" style="width:100%;min-width:120px;padding:7px 8px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px">'+rmOptions+'</select></td><td style="padding:8px"><select data-owner-role="lp" style="width:100%;min-width:120px;padding:7px 8px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px">'+lpOptions+'</select></td><td style="padding:8px 12px;text-align:right;white-space:nowrap"><button class="btn btn-sm ownership-save-btn" type="button" onclick="saveOwnershipRow(this)">Save</button><button class="btn btn-sm" type="button" onclick="openLpContactModal(this.closest(\'tr\').getAttribute(\'data-agent\'))" style="margin-left:5px">Contact</button><span class="ownership-row-status" style="display:inline-block;min-width:42px;margin-left:6px;font-size:10.5px;color:var(--text-3)"></span></td></tr>';
+  });
+  host.innerHTML=html+'</tbody></table></div>';
+  host.querySelectorAll('tr[data-agent]').forEach(function(tr){var name=tr.getAttribute('data-agent'),a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});var rm=getRmOwner(name)||"",lp=(a&&a[2])||"Unassigned";var rs=tr.querySelector('select[data-owner-role="rm"]'),ls=tr.querySelector('select[data-owner-role="lp"]');if(rs)rs.value=rm;if(ls)ls.value=lp;});
+}
+function saveOwnershipRow(btn){
+  var tr=btn&&btn.closest?btn.closest('tr[data-agent]'):null;if(!tr)return;
+  var name=tr.getAttribute('data-agent'),rmSel=tr.querySelector('select[data-owner-role="rm"]'),lpSel=tr.querySelector('select[data-owner-role="lp"]'),status=tr.querySelector('.ownership-row-status');
+  var rmVal=rmSel?rmSel.value:"",lpVal=lpSel?lpSel.value:"Unassigned";
+  btn.disabled=true;btn.textContent="Saving...";if(status){status.textContent="";status.style.color="var(--text-3)";}setSyncStatus("saving");
+  sbFetch("GET","agent_assignments?agent_name=ilike."+encodeURIComponent(name)+"&select=*&limit=5").catch(function(){return[];}).then(function(rows){
+    var ar=(rows||[]).find(function(r){return assignmentKey(r.agent_name)===assignmentKey(name);})||(rows||[])[0]||{};
+    var ag=(agents||[]).find(function(a){return assignmentKey(a[0])===assignmentKey(name);});
+    var payload={agent_name:ar.agent_name||name,lp:lpVal||"Unassigned",rm:rmVal||null,priority:ar.priority!==undefined?!!ar.priority:!!(ag&&ag[7]),added:ar.added!==undefined?!!ar.added:false,level:ar.level||(ag&&ag[1])||"C"};
+    if(ar.closed_past_year!==undefined)payload.closed_past_year=ar.closed_past_year;else if(ag&&ag[8]!==undefined)payload.closed_past_year=ag[8];
+    return sbFetch("POST","agent_assignments?on_conflict=agent_name",payload);
+  }).then(function(){
+    agentRmOwners[assignmentKey(name)]=rmVal||"";var ag=(agents||[]).find(function(a){return assignmentKey(a[0])===assignmentKey(name);});if(ag)ag[2]=lpVal||"Unassigned";
+    setSyncStatus("live");btn.textContent="Saved";if(status){status.textContent="✓";status.style.color="#15803d";}renderOwnershipSummary();setTimeout(function(){btn.textContent="Save";btn.disabled=false;if(status)status.textContent="";},1200);
+  }).catch(function(err){console.error("Ownership save failed",err);setSyncStatus("error");btn.disabled=false;btn.textContent="Retry";if(status){status.textContent="Failed";status.style.color="#b42318";}});
+}
+function ctOpenOwnershipEdit(ev,name){if(ev){ev.preventDefault();ev.stopPropagation();}openLpContactModal(name);}
 
 function calcStreak(lp){
   var streak=0,dt=new Date(TODAY);dt.setDate(dt.getDate()-7);
@@ -3451,11 +3593,7 @@ async function loadLeadPipeline(){
     var lpMap={"Dill":"Gavin","Gavin":"Gavin","De La Riva":"Karen","Karen":"Karen",
                "McMahon":"Osgood","Osgood":"Osgood","Johnston":"Jordan","Jordan":"Jordan",
                "Saleh":"Said","Said":"Said"};
-    function getLp(lp_user){
-      if(!lp_user)return null;
-      for(var k in lpMap){if(lp_user.toLowerCase().indexOf(k.toLowerCase())>=0)return lpMap[k];}
-      return null;
-    }
+    
 
     var today=new Date();today.setHours(0,0,0,0);
     var todayS=localDateStr(today);
@@ -7566,7 +7704,7 @@ function ctInjectOverdueQueue(){
   var overdue=agents.filter(function(a){
     return isActive(a) && a[2] && a[2]!=="Unassigned" && !calledThisWeek(a[0]);
   }).map(function(a){
-    return {name:a[0], lp:a[2], tier:a[1], days:daysOverdue(a), priority:isPriority(a)};
+    return {name:a[0], lp:a[2], rm:getRmOwner(a[0])||"Unassigned", tier:a[1], days:daysOverdue(a), priority:isPriority(a)};
   }).filter(function(x){return x.days>=0 || x.priority;})
     .sort(function(x,y){ if(x.priority!==y.priority) return y.priority-x.priority; return y.days-x.days; })
     .slice(0,8);
@@ -7579,14 +7717,19 @@ function ctInjectOverdueQueue(){
   var rows=overdue.map(function(o){
     return '<div class="ct-overdue-row" data-name="'+o.name.replace(/"/g,"&quot;")+'" data-lp="'+o.lp+'" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0F1EE;cursor:pointer" onmouseover="this.style.background=\'#FAFAF9\'" onmouseout="this.style.background=\'\'">'
       +'<span style="font-size:13px;font-weight:700;flex:1">'+o.name+'</span>'
-      +'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;background:#EEF1F6;color:#3D4E68">'+o.lp+'</span>'
+      +'<span style="font-size:10.5px;font-weight:750;padding:3px 7px;border-radius:100px;background:#F1ECFA;color:#5B4498" title="Relationship Manager owner">RM · '+o.rm+'</span>'
+      +'<span style="font-size:10.5px;font-weight:750;padding:3px 7px;border-radius:100px;background:#EEF1F6;color:#3D4E68" title="Loan Partner owner">LP · '+o.lp+'</span>'
       +(o.priority?'<span style="font-size:10.5px;font-weight:700;color:#B54B42">PRIORITY</span>':'')
       +'<span style="font-size:11.5px;color:'+(o.days>=0?'#B54B42':'#6B7280')+';font-weight:600;min-width:70px;text-align:right">'+(o.days>=0?o.days+"d overdue":"—")+'</span>'
+      +'<button type="button" class="ct-owner-edit-btn" data-owner-agent="'+ctOwnEscAttr(o.name)+'" style="border:1px solid #DDD7EC;background:#fff;color:#5B4498;border-radius:7px;padding:5px 8px;font:inherit;font-size:10.5px;font-weight:700;cursor:pointer">Edit owners</button>'
       +'<span style="font-size:11px;font-weight:700;color:#3D4E68;padding:5px 10px;border-radius:7px;background:#EEF1F6">Log call →</span>'
       +'</div>';
   }).join("");
   box.innerHTML='<div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#6B7280;margin-bottom:8px">Team-wide — who needs a call next <span style="font-weight:600;text-transform:none;color:#94a3b8">· click a row to log it</span></div>'+rows;
   host.insertBefore(box, host.firstChild);
+  box.querySelectorAll(".ct-owner-edit-btn").forEach(function(btn){
+    btn.addEventListener("click",function(ev){ctOpenOwnershipEdit(ev,btn.getAttribute("data-owner-agent"));});
+  });
   box.querySelectorAll(".ct-overdue-row").forEach(function(row){
     row.addEventListener("click", function(){
       ctJumpToAgentAndLog(row.getAttribute("data-name"), row.getAttribute("data-lp"));
@@ -9142,6 +9285,15 @@ if(typeof refreshLpSharedData==="function"){
   };
 }
 
+
+// v17 — makeover layer + v16 load recovery; all operational logic preserved.
+function runLpUiIntegrityCheck(){const requiredViews=["snapshot","portfolio","ownership","leads","lp","rm","director","facetime","admin"];const missingViews=requiredViews.filter(n=>!document.getElementById("view-"+n));const requiredFns=["openSnapshotView","openPortfolioReviewView","openOwnershipView","openLeadsView","selectUser","openRmView","openDirectorView","loadAgents","loadCallLogs","buildSnapshot"];const missingFns=requiredFns.filter(n=>typeof window[n]!=="function");if(missingViews.length||missingFns.length)console.error("LP Tracker UI integrity issue",{missingViews,missingFns});else console.log("LP Tracker UI integrity check passed");}
+setTimeout(runLpUiIntegrityCheck,0);
+// Startup watchdog: do not let GitHub Pages sit forever on Connecting/Syncing if a request stalls.
+setTimeout(function(){
+  var ind=document.getElementById("saveInd");
+  if(ind&&(/Connecting|Syncing/.test(ind.textContent||"")))setSyncStatus("error");
+},13000);
 </script>
 </div>
 </body>
