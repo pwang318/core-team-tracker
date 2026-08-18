@@ -4,8 +4,8 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260818-v26">
-  <meta name="build-notes" content="v28 LP culture + function audit: attributed real-person quotes, curated dad jokes, no short-cycle recycling, RM nurture retained">
+  <meta name="version" content="20260818-v29">
+  <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -624,7 +624,7 @@ td{line-height:1.4!important}
 
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v28.0</div>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v29.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -1520,6 +1520,36 @@ function mostRecentWithType(a){
     {date:a[6],label:"Close",icon:"🏆"}
   ].filter(function(p){return!!p.date;}).sort(function(x,y){return y.date.localeCompare(x.date);});
   return pairs.length?pairs[0]:null;
+}
+// v29: shared cross-system name key. Velocify may omit punctuation/middle initials
+// (e.g. "SHAYNE BOYD") while the relationship roster contains "Shayne D. Boyd".
+function ctAgentNameKey(name){
+  var parts=String(name||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim().split(" ").filter(Boolean);
+  return parts.filter(function(part,idx){return !(part.length===1&&idx>0&&idx<parts.length-1);}).join(" ");
+}
+var VELOCIFY_MATCH={};
+function rebuildVelocifyMatch(){
+  VELOCIFY_MATCH={};
+  Object.keys(VELOCIFY_SEED||{}).forEach(function(raw){
+    var d=VELOCIFY_SEED[raw]||{};
+    var keys=[String(raw||"").trim().toUpperCase(),ctAgentNameKey(raw)].filter(Boolean);
+    keys.forEach(function(k){
+      var prev=VELOCIFY_MATCH[k];
+      if(!prev||String(d.last_lead_date||"")>String(prev.last_lead_date||""))VELOCIFY_MATCH[k]=d;
+    });
+  });
+}
+function getVelocifyForAgent(name){
+  var raw=String(name||"").trim();
+  return (VELOCIFY_SEED&&VELOCIFY_SEED[raw])||(VELOCIFY_SEED&&VELOCIFY_SEED[raw.toUpperCase()])||VELOCIFY_MATCH[ctAgentNameKey(raw)]||null;
+}
+function syncLiveVelocifyDatesIntoAgents(){
+  rebuildVelocifyMatch();
+  (agents||[]).forEach(function(a){
+    var vel=getVelocifyForAgent(a[0]);
+    var live=vel&&vel.last_lead_date?String(vel.last_lead_date).slice(0,10):null;
+    if(live&&(!a[3]||live>a[3]))a[3]=live;
+  });
 }
 function isActive(a){var d=mostRecent(a);return d?new Date(d+'T12:00:00')>=CUTOFF:false;}
 function lpOutcomeKey(outcome){return String(outcome||"").trim().toLowerCase();}
@@ -2481,7 +2511,7 @@ function renderCallCard(a,lp,isBonus){
   var isPending=!!(pendingNote&&pendingNote[a[0]]);
   var log=callLogs[a[0]],note=log?log.note:"",outcome=log?log.outcome||"":"";
   var safeId=a[0].replace(/\s+/g,'_');
-  var velData=VELOCIFY_SEED[a[0]]||null;
+  var velData=getVelocifyForAgent(a[0]);
   var velTotal=velData?velData.total:0,velMtd=velData?velData.mtd:0;
   var lastNote=prevNotes[a[0]]||null;
   var rmAct=rmActivity[a[0]]||rmActivity[(a[0]||"").toUpperCase()]||null;
@@ -2606,7 +2636,7 @@ function renderCallCard(a,lp,isBonus){
   // Talking points
   if(!called&&!isBonus){
     var talkPoints=[];
-    var velData2=VELOCIFY_SEED[a[0]]||null;
+    var velData2=getVelocifyForAgent(a[0]);
     var velMtd2=velData2?velData2.mtd:0;
     var velTotal2=velData2?velData2.total:0;
     if(velMtd2>0)talkPoints.push('Follow up on the '+velMtd2+' lead'+(velMtd2>1?'s':'')+' sent this month — thank them and check on the buyer');
@@ -2687,7 +2717,7 @@ function renderCallCard(a,lp,isBonus){
     }
 
     // Speed-to-lead signal — if agent sent a lead recently, show how fast team responded
-  var velStl=VELOCIFY_SEED[a[0].toUpperCase()]||null;
+  var velStl=getVelocifyForAgent(a[0]);
   if(velStl&&velStl.last_lead_date&&velStl.total>0){
     var daysSinceLead2=Math.floor((TODAY-new Date(velStl.last_lead_date+"T12:00:00"))/86400000);
     var lastTeamCall=agentLastCall[a[0]]||null;
@@ -2711,7 +2741,7 @@ function renderCallCard(a,lp,isBonus){
   }
 
   // "Never sent a lead" opportunity highlight
-  var velCheck2=VELOCIFY_SEED[a[0].toUpperCase()]||null;
+  var velCheck2=getVelocifyForAgent(a[0]);
   var totalLeadsEver=velCheck2?velCheck2.total||0:0;
   var totalCallsOnAgent=agentFirstCall[a[0]]?1:0;
   // Use call history count if available
@@ -2726,7 +2756,7 @@ function renderCallCard(a,lp,isBonus){
   // Co-marketing ROI flag — active co-marketing + 0 leads in 90+ days
   var coMktActive=coMarketingAgents[a[0]]||false;
   if(coMktActive){
-    var velCheck=VELOCIFY_SEED[a[0].toUpperCase()]||null;
+    var velCheck=getVelocifyForAgent(a[0]);
     var lastLeadDays=velCheck&&velCheck.last_lead_date
       ?Math.floor((TODAY-new Date(velCheck.last_lead_date+"T12:00:00"))/86400000):999;
     var noLeadMtd=!velCheck||velCheck.mtd===0;
@@ -3788,7 +3818,7 @@ async function loadLeadPipeline(){
     Object.keys(lps).forEach(function(lp){
       var lpAgents=agents.filter(function(a){return a[2]===lp&&isActive(a)&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());});
       lpAgents.forEach(function(a){
-        var vel=VELOCIFY_SEED[a[0].toUpperCase()]||null;
+        var vel=getVelocifyForAgent(a[0]);
         if(vel&&vel.total>0&&vel.mtd===0){
           lps[lp].quiet_agents.push({name:a[0],total:vel.total,lastLead:vel.last_lead_date});
         }
@@ -5067,8 +5097,10 @@ function loadVelocifyLeads(){
           fresh[name].total++;
           if(d>=ms)fresh[name].mtd++;
           if(d>=ws)fresh[name].wtd++;
+          var iso=String(r.date_added||"").slice(0,10);
+          if(iso&&(!fresh[name].last_lead_date||iso>fresh[name].last_lead_date))fresh[name].last_lead_date=iso;
         });
-        if(Object.keys(fresh).length>0)VELOCIFY_SEED=fresh;
+        if(Object.keys(fresh).length>0){VELOCIFY_SEED=fresh;syncLiveVelocifyDatesIntoAgents();}
       });
     }
     var fresh={};
@@ -5088,7 +5120,7 @@ function loadVelocifyLeads(){
         assigned_lp:r.assigned_lp||null
       };
     });
-    if(Object.keys(fresh).length>0)VELOCIFY_SEED=fresh;
+    if(Object.keys(fresh).length>0){VELOCIFY_SEED=fresh;syncLiveVelocifyDatesIntoAgents();}
   }).catch(function(){});
 }
 
@@ -8923,21 +8955,22 @@ async function lpWriteHealthSnapshots(){
   var lastSeenLP={};
   lpCalls.forEach(function(c){var n=(c.agent_name||"").trim().toLowerCase();if(n&&!lastSeenLP[n]&&isMeaningfulOutcome(c.outcome,NOT_MEANINGFUL_LP_OUTCOMES))lastSeenLP[n]=c.call_date;});
   var lastLeadByAgent={};
-  allLeads.forEach(function(l){var n=(l.referral_partner_name||"").trim().toLowerCase();if(n&&(!lastLeadByAgent[n]||l.date_added>lastLeadByAgent[n]))lastLeadByAgent[n]=l.date_added;});
+  allLeads.forEach(function(l){var raw=(l.referral_partner_name||"").trim();var keys=[raw.toLowerCase(),ctAgentNameKey(raw)].filter(Boolean);keys.forEach(function(n){if(!lastLeadByAgent[n]||l.date_added>lastLeadByAgent[n])lastLeadByAgent[n]=l.date_added;});});
 
   var active=allAgents.filter(function(a){return a.retained&&a.do_not_contact!==true&&a.relationship_status!=="inactive";});
   if(!active.length)return;
 
   var rows=active.map(function(a){
     var key=(a.agent_name||"").trim().toLowerCase();
-    var lastRM=lastSeenRM[key],lastLP=lastSeenLP[key];
+    var matchKey=ctAgentNameKey(a.agent_name);
+    var lastRM=lastSeenRM[key]||lastSeenRM[matchKey],lastLP=lastSeenLP[key]||lastSeenLP[matchKey];
     var daysRM=lastRM?Math.round((now-new Date(lastRM+"T12:00:00"))/86400000):null;
     var daysLP=lastLP?Math.round((now-new Date(lastLP+"T12:00:00"))/86400000):null;
     var daysAny=(daysRM===null&&daysLP===null)?null:Math.min(daysRM===null?Infinity:daysRM,daysLP===null?Infinity:daysLP);
     var tier=a.tier||null;
     var threshold=PFR_TIER_TOUCH[tier]||14;
     var urgent=PFR_TIER_URGENT[tier]||21;
-    var vDate=lastLeadByAgent[key];
+    var vDate=lastLeadByAgent[key]||lastLeadByAgent[matchKey];
     var pDate=a.latest_lead_date;
     var bestLead=vDate&&pDate?(vDate>pDate?vDate:pDate):(vDate||pDate);
     var daysSinceLead=bestLead?Math.round((now-new Date(bestLead+"T12:00:00"))/86400000):null;
@@ -9042,8 +9075,9 @@ async function pfrLoad(){
     // Build real last-lead-date per agent from Velocify — keyed by lowercase name for matching
     var lastLeadDateByAgent={};
     allLeads.forEach(function(l){
-      var n=(l.referral_partner_name||"").trim().toLowerCase();
-      if(n&&(!lastLeadDateByAgent[n]||l.date_added>lastLeadDateByAgent[n]))lastLeadDateByAgent[n]=l.date_added;
+      var raw=(l.referral_partner_name||"").trim();
+      var keys=[raw.toLowerCase(),ctAgentNameKey(raw)].filter(Boolean);
+      keys.forEach(function(n){if(!lastLeadDateByAgent[n]||l.date_added>lastLeadDateByAgent[n])lastLeadDateByAgent[n]=l.date_added;});
     });
 
     var lastSeenRM={};
@@ -9094,7 +9128,8 @@ async function pfrLoad(){
     var rows=active.map(function(a){
       var name=(a.agent_name||"").trim();
       var key=name.toLowerCase();
-      var lastRM=lastSeenRM[key],lastLP=lastSeenLP[key];
+      var matchKey=ctAgentNameKey(name);
+      var lastRM=lastSeenRM[key]||lastSeenRM[matchKey],lastLP=lastSeenLP[key]||lastSeenLP[matchKey];
       var daysRM=lastRM?Math.round((now-new Date(lastRM+"T12:00:00"))/86400000):null;
       var daysLP=lastLP?Math.round((now-new Date(lastLP+"T12:00:00"))/86400000):null;
       var daysAny=(daysRM===null&&daysLP===null)?null:Math.min(daysRM===null?Infinity:daysRM,daysLP===null?Infinity:daysLP);
@@ -9104,7 +9139,7 @@ async function pfrLoad(){
       var daysSinceLead=(function(){
         // Prefer Velocify's real last-lead-date; fall back to agent_profiles.latest_lead_date
         // (which only updates when the Power BI import runs and may be weeks stale)
-        var vDate=lastLeadDateByAgent[key];
+        var vDate=lastLeadDateByAgent[key]||lastLeadDateByAgent[matchKey];
         var pDate=a.latest_lead_date;
         var best=vDate&&pDate?(vDate>pDate?vDate:pDate):(vDate||pDate);
         return best?Math.round((now-new Date(best+"T12:00:00"))/86400000):null;
