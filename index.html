@@ -1,4 +1,4 @@
-    
+     
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -624,7 +624,7 @@ td{line-height:1.4!important}
 
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v26.0</div>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v27.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -1339,6 +1339,11 @@ td{line-height:1.4!important}
     <p style="font-size:12px;color:#888;margin-bottom:.75rem">Agents with no activity in 90+ days — fallen off the active rotation. Reactivate if they're working leads again.</p>
     <div id="inactive-list" style="max-height:320px;overflow-y:auto"></div>
   </div>
+  <div class="admin-section" id="lp-nurture-admin-section">
+    <h3>RM Nurture <span id="lp-nurture-count-label" style="font-weight:400;color:#888;font-size:12px"></span></h3>
+    <p style="font-size:12px;color:#888;margin-bottom:.75rem">These relationships are intentionally kept in the tracker but paused from LP recurring outreach. The RM owns the next light-touch check-in.</p>
+    <div id="lp-nurture-admin-list" style="max-height:280px;overflow-y:auto"><div style="font-size:12px;color:#aaa">Loading...</div></div>
+  </div>
   <div class="admin-section">
     <h3>Add agent manually</h3>
     <div class="form-row">
@@ -1644,9 +1649,14 @@ var weekKey=getWeekKey(TODAY);
 var lastWeekKey=getLastWeekKey(TODAY);
 var agents=[],callLogs={},lastWeekLogs={},lpOpenRmFlags={},currentUser=null,noteTimers={},contactCache={},editingLpContact=null,pendingNote={};
 var ctInactiveRosterNames=new Set();
+var ctNurtureRosterNames=new Set();
+var ctNurtureRosterMeta={};
 var ctDisplayNames={};
 function ctRosterRemoved(name){return ctInactiveRosterNames.has(String(name||"").trim().toLowerCase());}
-function ctRosterEligible(a){return !!a && !ctRosterRemoved(a[0]);}
+function ctRosterNurture(name){return ctNurtureRosterNames.has(String(name||"").trim().toLowerCase());}
+// LP action eligibility is intentionally narrower than relationship visibility: RM Nurture agents
+// stay in ownership/history/admin, but leave recurring LP call, connection, overdue and Face Time queues.
+function ctRosterEligible(a){return !!a && !ctRosterRemoved(a[0]) && !ctRosterNurture(a[0]);}
 
 // Live Current Relationship Roster exclusion set — shared by co-marketing selection and any
 // other place that still reads from the legacy `agents` array (which itself carries no
@@ -1660,21 +1670,23 @@ async function loadInactiveRosterNames(){
   // is unavailable or was written by an older tracker version.
   try{
     var results=await Promise.all([
-      sbFetch("GET","agent_profiles?select=agent_name,display_name,relationship_status&limit=5000")
-        .catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,display_name&limit=5000").catch(function(){return[];});}),
+      sbFetch("GET","agent_profiles?select=agent_name,display_name,relationship_status,lp_outreach_status,nurture_reason,next_rm_followup&limit=5000")
+        .catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,display_name,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,display_name&limit=5000").catch(function(){return[];});});}),
       sbFetch("GET","agent_assignments?select=agent_name,lp&limit=5000").catch(function(){return[];})
     ]);
     var rows=results[0]||[],assignments=results[1]||[];
-    ctInactiveRosterNames=new Set();
+    ctInactiveRosterNames=new Set();ctNurtureRosterNames=new Set();ctNurtureRosterMeta={};
     rows.forEach(function(r){
-      if(r.relationship_status==="inactive"&&r.agent_name)ctInactiveRosterNames.add((r.agent_name||"").trim().toLowerCase());
+      var k=(r.agent_name||"").trim().toLowerCase();
+      if(r.relationship_status==="inactive"&&r.agent_name)ctInactiveRosterNames.add(k);
+      if(r.lp_outreach_status==="nurture"&&r.relationship_status!=="inactive"&&r.agent_name){ctNurtureRosterNames.add(k);ctNurtureRosterMeta[k]={reason:r.nurture_reason||"",next:r.next_rm_followup||""};}
     });
     assignments.forEach(function(r){
       if(r.lp==="__REMOVED__"&&r.agent_name)ctInactiveRosterNames.add((r.agent_name||"").trim().toLowerCase());
     });
     ctDisplayNames={};
     rows.forEach(function(r){if(r.agent_name&&r.display_name)ctDisplayNames[(r.agent_name||"").trim().toLowerCase()]=r.display_name.trim();});
-  }catch(e){ctInactiveRosterNames=new Set();}
+  }catch(e){ctInactiveRosterNames=new Set();ctNurtureRosterNames=new Set();ctNurtureRosterMeta={};}
 }
 var userTyping=false;
 var referralLeadsCache=null;
@@ -2191,7 +2203,7 @@ function loadAgentAssignments(){
 var lpPollInterval=null;
 function lpStartPolling(lp){
   if(lpPollInterval)clearInterval(lpPollInterval);
-  lpPollInterval=setInterval(function(){if(userTyping)return;loadCallLogs().then(function(){if(currentUser===lp&&Object.keys(pendingNote).length===0)renderLP(lp);});},30000);
+  lpPollInterval=setInterval(function(){if(userTyping)return;Promise.all([loadCallLogs(),loadInactiveRosterNames()]).then(function(){if(currentUser===lp&&Object.keys(pendingNote).length===0)renderLP(lp);});},30000);
 }
 function lpStopPolling(){
   if(lpPollInterval){clearInterval(lpPollInterval);lpPollInterval=null;}
@@ -2211,14 +2223,13 @@ function selectUser(btn,u){
     document.getElementById("view-admin").classList.add("active");
     renderAdmin();
     loadLpOverrides();
-    loadAgentAssignments().then(function(){renderLpAssignList();renderAdmin();loadSystemHealth();});
-    loadInactiveRosterNames().then(function(){renderCoMktList();});
+    Promise.all([loadAgentAssignments(),loadInactiveRosterNames()]).then(function(){renderLpAssignList();renderAdmin();loadSystemHealth();renderCoMktList();});
   } else if(u==="Welcome"){
     document.getElementById("view-welcome").classList.add("active");
   } else {
     document.getElementById("view-lp").classList.add("active");
     renderLP(u);
-    Promise.all([loadCallLogs().catch(function(){}),loadFaceTime().catch(function(){})]).then(function(){renderLP(u);});
+    Promise.all([loadCallLogs().catch(function(){}),loadFaceTime().catch(function(){}),loadInactiveRosterNames().catch(function(){})]).then(function(){renderLP(u);});
     lpStartPolling(u);
   }
 }
@@ -4580,8 +4591,16 @@ function renderDaniel(){
   }).join("");
 }
 
+function renderRmNurtureAdmin(){
+  var el=document.getElementById("lp-nurture-admin-list"),count=document.getElementById("lp-nurture-count-label");if(!el)return;
+  var rows=[];ctNurtureRosterNames.forEach(function(k){var a=(agents||[]).find(function(x){return assignmentKey(x[0])===k;});var m=ctNurtureRosterMeta[k]||{};rows.push({name:a?a[0]:k,lp:a&&a[2]&&a[2]!=="null"?a[2]:"Unassigned",reason:m.reason||"RM-directed light-touch relationship",next:m.next||""});});
+  rows.sort(function(a,b){return (a.next||"9999").localeCompare(b.next||"9999")||a.name.localeCompare(b.name);});
+  if(count)count.textContent="- "+rows.length+" relationship"+(rows.length!==1?"s":"");
+  el.innerHTML=rows.length?rows.map(function(r){return '<div class="alert-item"><span style="font-weight:650;flex:1">'+displayName(r.name)+'</span><span class="lp-tag lp-tag-'+r.lp+'">'+r.lp+'</span><span style="background:#FFF2D6;color:#8A5A00;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">RM NURTURE</span><span style="font-size:11px;color:#666">'+r.reason+(r.next?' · RM check-in '+r.next:'')+'</span></div>';}).join(""):'<div style="font-size:12px;color:#aaa">No RM Nurture relationships.</div>';
+}
+
 function renderAdmin(){
-  renderReassign();renderRemoveList();renderCoMktList();
+  renderReassign();renderRemoveList();renderCoMktList();renderRmNurtureAdmin();
   var inactive=agents.filter(function(a){return ctRosterEligible(a)&&!isActive(a);});
   document.getElementById("inactive-count-label").textContent="- "+inactive.length+" agents";
   document.getElementById("inactive-list").innerHTML=inactive.length?inactive.map(function(a){var lp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"Unassigned";return'<div class="alert-item"><span class="adot adot-amber"></span><span style="font-weight:600;flex:1">'+displayName(a[0])+'</span><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>'+rmOwnerBadge(a[0])+'<span class="lp-tag lp-tag-'+lp+'">'+lp+'</span><span style="font-size:11px;color:#888">'+(mostRecent(a)?"Last: "+fmt(mostRecent(a)):"No activity")+'</span><button class="btn btn-sm btn-success" data-name="'+a[0]+'" onclick="reactivate(this)">Reactivate</button></div>';}).join(""):'<div style="font-size:13px;color:#888">No inactive agents!</div>';
@@ -4595,13 +4614,13 @@ function renderReassign(){
   var frm=document.getElementById("reassign-filter-rm")?.value||"";
   tbody.innerHTML='<tr><td colspan="8" style="padding:18px;text-align:center;color:var(--text-3)">Loading live assignments...</td></tr>';
   Promise.all([
-    sbFetch("GET","agent_profiles?select=agent_name,tier,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier&limit=5000").catch(function(){return[];});}),
+    sbFetch("GET","agent_profiles?select=agent_name,tier,relationship_status,lp_outreach_status,nurture_reason,next_rm_followup&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier&limit=5000").catch(function(){return[];});});}),
     sbFetch("GET","agent_assignments?select=agent_name,lp,rm,priority,level&limit=5000").catch(function(){return[];})
   ]).then(function(results){
     var profiles=results[0]||[],assignments=results[1]||[], amap={};
     assignments.forEach(function(r){var k=assignmentKey(r.agent_name);if(k)amap[k]=r;});
     var names={},list=[];
-    profiles.forEach(function(p){var k=assignmentKey(p.agent_name);if(!k||names[k])return;names[k]=true;var ar=amap[k]||{};if(ar.lp==="__REMOVED__"||p.relationship_status==="inactive")return;list.push({name:p.agent_name,tier:p.tier||ar.level||"C",lp:(ar.lp&&ar.lp!=="__REMOVED__")?ar.lp:"Unassigned",rm:ar.rm||"Unassigned",priority:!!ar.priority,status:(function(){var a=agents.find(function(x){return assignmentKey(x[0])===k;});return a&&!isActive(a)?"inactive":"active";})()});});
+    profiles.forEach(function(p){var k=assignmentKey(p.agent_name);if(!k||names[k])return;names[k]=true;var ar=amap[k]||{};if(ar.lp==="__REMOVED__"||p.relationship_status==="inactive")return;list.push({name:p.agent_name,tier:p.tier||ar.level||"C",lp:(ar.lp&&ar.lp!=="__REMOVED__")?ar.lp:"Unassigned",rm:ar.rm||"Unassigned",priority:!!ar.priority,status:p.lp_outreach_status==="nurture"?"nurture":((function(){var a=agents.find(function(x){return assignmentKey(x[0])===k;});return a&&!isActive(a)?"inactive":"active";})()),nurture_reason:p.nurture_reason||"",next_rm_followup:p.next_rm_followup||""});});
     assignments.forEach(function(ar){var k=assignmentKey(ar.agent_name);if(!k||names[k]||ar.lp==="__REMOVED__")return;names[k]=true;list.push({name:ar.agent_name,tier:ar.level||"C",lp:ar.lp||"Unassigned",rm:ar.rm||"Unassigned",priority:!!ar.priority,status:(function(){var a=agents.find(function(x){return assignmentKey(x[0])===k;});return a&&!isActive(a)?"inactive":"active";})()});});
     list=list.filter(function(r){if(q&&r.name.toLowerCase().indexOf(q)<0)return false;if(flp&&r.lp!==flp)return false;if(frm&&r.rm!==frm)return false;return true;}).sort(function(a,b){return a.name.localeCompare(b.name);});
     var countEl=document.getElementById("reassign-count-label");
@@ -4609,7 +4628,7 @@ function renderReassign(){
     if(!list.length){tbody.innerHTML='<tr><td colspan="8" style="padding:18px;text-align:center;color:var(--text-3)">No agents match these filters.</td></tr>';return;}
     tbody.innerHTML=list.map(function(r){
       var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said"].map(function(lp){return '<option'+(r.lp===lp?' selected':'')+'>'+lp+'</option>';}).join('');
-      return '<tr><td style="font-weight:650">'+displayName(r.name)+'</td><td><span class="badge badge-'+String(r.tier).toLowerCase()+'">'+r.tier+'</span></td><td>'+rmOwnerBadge(r.name,r.rm)+'</td><td>'+(r.status==="active"?'<span style="color:#43A047">Active</span>':'<span class="badge badge-inactive">INACTIVE</span>')+'</td><td><button class="btn btn-sm '+(r.priority?'btn-success':'')+'" data-priority-name="'+r.name.replace(/"/g,'&quot;')+'" onclick="toggleLivePriority(this)">'+(r.priority?'Priority':'Set Priority')+'</button></td><td><span class="lp-tag lp-tag-'+r.lp+'">'+r.lp+'</span></td><td><select data-reassign-name="'+r.name.replace(/"/g,'&quot;')+'" onchange="reassignLiveAgent(this)">'+opts+'</select></td><td><button class="btn btn-sm btn-danger" data-name="'+r.name.replace(/"/g,'&quot;')+'" onclick="removeAgent(this)">Remove</button></td></tr>';
+      return '<tr><td style="font-weight:650">'+displayName(r.name)+'</td><td><span class="badge badge-'+String(r.tier).toLowerCase()+'">'+r.tier+'</span></td><td>'+rmOwnerBadge(r.name,r.rm)+'</td><td>'+(r.status==="nurture"?'<span style="background:#FFF2D6;color:#8A5A00;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700" title="'+(r.nurture_reason||'RM-directed light-touch relationship')+(r.next_rm_followup?' · Next RM check-in '+r.next_rm_followup:'')+'">RM NURTURE</span>':r.status==="active"?'<span style="color:#43A047">Active</span>':'<span class="badge badge-inactive">INACTIVE</span>')+'</td><td><button class="btn btn-sm '+(r.priority?'btn-success':'')+'" data-priority-name="'+r.name.replace(/"/g,'&quot;')+'" onclick="toggleLivePriority(this)">'+(r.priority?'Priority':'Set Priority')+'</button></td><td><span class="lp-tag lp-tag-'+r.lp+'">'+r.lp+'</span></td><td><select data-reassign-name="'+r.name.replace(/"/g,'&quot;')+'" onchange="reassignLiveAgent(this)">'+opts+'</select></td><td><button class="btn btn-sm btn-danger" data-name="'+r.name.replace(/"/g,'&quot;')+'" onclick="removeAgent(this)">Remove</button></td></tr>';
     }).join('');
   }).catch(function(e){tbody.innerHTML='<tr><td colspan="8" style="padding:18px;color:var(--red)">Could not load live assignments: '+e.message+'</td></tr>';});
 }
