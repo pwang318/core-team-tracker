@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="version" content="20260818-v26">
-  <meta name="build-notes" content="v26 LP full-function audit: clearer live-connection status, live roster/assignment hardening, no-short-cycle daily quote + dad joke, removed-agent suppression retained">
+  <meta name="build-notes" content="v28 LP culture + function audit: attributed real-person quotes, curated dad jokes, no short-cycle recycling, RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -624,7 +624,7 @@ td{line-height:1.4!important}
 
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v27.0</div>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v28.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -4170,107 +4170,170 @@ function buildSnapshot(){
     return t;
   }
 
-  // Daily culture moment: deterministic, long-cycle, no short-bank recycling.
-  // Uses the absolute local calendar day to generate a unique quote + dad joke combination.
-  // The mixed-radix banks below do not repeat the exact daily pairing for thousands of days.
+  // Daily culture moment: real attributed quotes + curated dad jokes.
+  // Each bank is long enough to avoid short-cycle repetition; the date picks one stable item per day.
   var dailyEpoch=Math.floor(new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime()/86400000);
-  var QUOTE_OPENERS=[
-    "You do not need a perfect day to make a powerful move.",
-    "Strong teams are built in ordinary moments.",
-    "Confidence grows after the action, not before it.",
-    "Your voice belongs in the room.",
-    "Small wins are still wins.",
-    "You can be kind and still be a force.",
-    "Momentum loves a first move.",
-    "The work gets lighter when the purpose stays clear.",
-    "Your next good conversation can change the whole week.",
-    "You are allowed to take up space and do great work.",
-    "Progress does not need permission.",
-    "A calm mind can still make bold moves.",
-    "Consistency is a quiet superpower.",
-    "You already know more than you did yesterday.",
-    "Being prepared is powerful; being willing is even better.",
-    "A strong day starts with one useful thing.",
-    "Do the next right thing and let momentum handle the rest.",
-    "You do not have to be fearless to be effective.",
-    "Good relationships are built one genuine moment at a time.",
-    "Today is another chance to make the work matter."
+  var QUOTE_BANK=[
+    {q:"Nothing will work unless you do.",a:"Maya Angelou"},
+    {q:"Alone we can do so little; together we can do so much.",a:"Helen Keller"},
+    {q:"Luck has nothing to do with it.",a:"Serena Williams"},
+    {q:"Real change, enduring change, happens one step at a time.",a:"Ruth Bader Ginsburg"},
+    {q:"Nothing in life is to be feared; it is only to be understood.",a:"Marie Curie"},
+    {q:"The most difficult thing is the decision to act, the rest is merely tenacity.",a:"Amelia Earhart"},
+    {q:"If you don't like the road you're walking, start paving another one.",a:"Dolly Parton"},
+    {q:"No one can make you feel inferior without your consent.",a:"Eleanor Roosevelt"},
+    {q:"The future belongs to those who believe in the beauty of their dreams.",a:"Eleanor Roosevelt"},
+    {q:"Do what you feel in your heart to be right — for you'll be criticized anyway.",a:"Eleanor Roosevelt"},
+    {q:"You must do the thing you think you cannot do.",a:"Eleanor Roosevelt"},
+    {q:"The only way to do great work is to love what you do.",a:"Steve Jobs"},
+    {q:"Stay hungry. Stay foolish.",a:"Steve Jobs"},
+    {q:"The way to get started is to quit talking and begin doing.",a:"Walt Disney"},
+    {q:"It's kind of fun to do the impossible.",a:"Walt Disney"},
+    {q:"Whether you think you can, or you think you can't — you're right.",a:"Henry Ford"},
+    {q:"Failure is simply the opportunity to begin again, this time more intelligently.",a:"Henry Ford"},
+    {q:"Genius is one percent inspiration and ninety-nine percent perspiration.",a:"Thomas Edison"},
+    {q:"I have not failed. I've just found 10,000 ways that won't work.",a:"Thomas Edison"},
+    {q:"Believe you can and you're halfway there.",a:"Theodore Roosevelt"},
+    {q:"Do what you can, with what you have, where you are.",a:"Theodore Roosevelt"},
+    {q:"It always seems impossible until it's done.",a:"Nelson Mandela"},
+    {q:"I never lose. I either win or learn.",a:"Nelson Mandela"},
+    {q:"Success is not final, failure is not fatal: it is the courage to continue that counts.",a:"Winston Churchill"},
+    {q:"If you're going through hell, keep going.",a:"Winston Churchill"},
+    {q:"The secret of getting ahead is getting started.",a:"Mark Twain"},
+    {q:"Courage is resistance to fear, mastery of fear — not absence of fear.",a:"Mark Twain"},
+    {q:"What you do speaks so loudly that I cannot hear what you say.",a:"Ralph Waldo Emerson"},
+    {q:"Nothing great was ever achieved without enthusiasm.",a:"Ralph Waldo Emerson"},
+    {q:"Act as if what you do makes a difference. It does.",a:"William James"},
+    {q:"The art of being wise is the art of knowing what to overlook.",a:"William James"},
+    {q:"Well done is better than well said.",a:"Benjamin Franklin"},
+    {q:"Energy and persistence conquer all things.",a:"Benjamin Franklin"},
+    {q:"You miss 100% of the shots you don't take.",a:"Wayne Gretzky"},
+    {q:"The harder the battle, the sweeter the victory.",a:"Les Brown"},
+    {q:"You are never too old to set another goal or to dream a new dream.",a:"C. S. Lewis"},
+    {q:"Start where you are. Use what you have. Do what you can.",a:"Arthur Ashe"},
+    {q:"Success is a journey, not a destination. The doing is often more important than the outcome.",a:"Arthur Ashe"},
+    {q:"Champions keep playing until they get it right.",a:"Billie Jean King"},
+    {q:"Pressure is a privilege.",a:"Billie Jean King"},
+    {q:"I've failed over and over and over again in my life. And that is why I succeed.",a:"Michael Jordan"},
+    {q:"Some people want it to happen, some wish it would happen, others make it happen.",a:"Michael Jordan"},
+    {q:"Don't count the days, make the days count.",a:"Muhammad Ali"},
+    {q:"He who is not courageous enough to take risks will accomplish nothing in life.",a:"Muhammad Ali"},
+    {q:"The most courageous act is still to think for yourself. Aloud.",a:"Coco Chanel"},
+    {q:"Success is most often achieved by those who don't know that failure is inevitable.",a:"Coco Chanel"},
+    {q:"The question isn't who is going to let me; it's who is going to stop me.",a:"Ayn Rand"},
+    {q:"Done is better than perfect.",a:"Sheryl Sandberg"},
+    {q:"If you're offered a seat on a rocket ship, don't ask what seat! Just get on.",a:"Sheryl Sandberg"},
+    {q:"Don't be intimidated by what you don't know.",a:"Sara Blakely"},
+    {q:"It's important to be willing to make mistakes. The worst thing that can happen is you become memorable.",a:"Sara Blakely"},
+    {q:"I attribute my success to this: I never gave or took any excuse.",a:"Florence Nightingale"},
+    {q:"I am not afraid of storms, for I am learning how to sail my ship.",a:"Louisa May Alcott"},
+    {q:"You cannot swim for new horizons until you have courage to lose sight of the shore.",a:"William Faulkner"},
+    {q:"Great things are done by a series of small things brought together.",a:"Vincent van Gogh"},
+    {q:"What would life be if we had no courage to attempt anything?",a:"Vincent van Gogh"},
+    {q:"The most effective way to do it, is to do it.",a:"Amelia Earhart"},
+    {q:"You may encounter many defeats, but you must not be defeated.",a:"Maya Angelou"},
+    {q:"If you don't risk anything, you risk even more.",a:"Erica Jong"},
+    {q:"The best way out is always through.",a:"Robert Frost"},
+    {q:"You can't use up creativity. The more you use, the more you have.",a:"Maya Angelou"},
+    {q:"Optimism is the faith that leads to achievement.",a:"Helen Keller"},
+    {q:"Keep your face to the sunshine and you cannot see a shadow.",a:"Helen Keller"},
+    {q:"The only limit to our realization of tomorrow will be our doubts of today.",a:"Franklin D. Roosevelt"},
+    {q:"Happiness depends upon ourselves.",a:"Aristotle"},
+    {q:"We are what we repeatedly do.",a:"Will Durant"},
+    {q:"The beginning is the most important part of the work.",a:"Plato"},
+    {q:"It is never too late to be what you might have been.",a:"George Eliot"},
+    {q:"With the new day comes new strength and new thoughts.",a:"Eleanor Roosevelt"},
+    {q:"Be so good they can't ignore you.",a:"Steve Martin"},
+    {q:"The successful warrior is the average man, with laser-like focus.",a:"Bruce Lee"},
+    {q:"Knowing is not enough, we must apply. Willing is not enough, we must do.",a:"Bruce Lee"},
+    {q:"Success usually comes to those who are too busy to be looking for it.",a:"Henry David Thoreau"}
   ];
-  var QUOTE_CORES=[
-    "Make the call that moves something forward.",
-    "Ask the question instead of guessing.",
-    "Protect your energy and spend it where it matters.",
-    "Be clear, be useful, and follow through.",
-    "Choose progress over busywork.",
-    "Let preparation turn into action.",
-    "Trust the work you have already put in.",
-    "Make one relationship stronger today.",
-    "Do not shrink a good idea just because it is new.",
-    "Keep your standards high and your next step simple.",
-    "Move with purpose, not panic.",
-    "Give the important thing your best attention first.",
-    "Turn the awkward first step into momentum.",
-    "Leave people clearer, calmer, or better than you found them.",
-    "Stay curious enough to learn and confident enough to act.",
-    "Do the work that actually moves the needle.",
-    "Be the person who follows through.",
-    "Use what you know, then improve as you go.",
-    "A thoughtful follow-up can be more powerful than a perfect pitch.",
-    "Keep showing up with value."
+  var DAD_JOKES=[
+    "I only know 25 letters of the alphabet. I don't know y.",
+    "Why don't skeletons fight each other? They don't have the guts.",
+    "I used to hate facial hair, but then it grew on me.",
+    "What do you call fake spaghetti? An impasta.",
+    "Why did the scarecrow win an award? He was outstanding in his field.",
+    "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+    "What do you call cheese that isn't yours? Nacho cheese.",
+    "Why couldn't the bicycle stand up by itself? It was two tired.",
+    "I'm reading a book about anti-gravity. It's impossible to put down.",
+    "What do you call a factory that makes okay products? A satisfactory.",
+    "Did you hear about the restaurant on the moon? Great food, no atmosphere.",
+    "Why did the math book look sad? It had too many problems.",
+    "What do you call a bear with no teeth? A gummy bear.",
+    "Why did the golfer bring two pairs of pants? In case he got a hole in one.",
+    "I used to be addicted to the hokey pokey, but I turned myself around.",
+    "Why did the computer go to the doctor? It had a virus.",
+    "What do you call a sleeping bull? A bulldozer.",
+    "Why don't eggs tell jokes? They'd crack each other up.",
+    "What do you call a fish wearing a bowtie? Sofishticated.",
+    "Why did the coffee file a police report? It got mugged.",
+    "How does a penguin build its house? Igloos it together.",
+    "What did one wall say to the other wall? I'll meet you at the corner.",
+    "Why don't scientists trust atoms? Because they make up everything.",
+    "What do you call an elephant that doesn't matter? An irrelephant.",
+    "Why was six afraid of seven? Because seven eight nine.",
+    "How do you organize a space party? You planet.",
+    "What did the ocean say to the beach? Nothing, it just waved.",
+    "Why did the tomato blush? Because it saw the salad dressing.",
+    "What kind of shoes do ninjas wear? Sneakers.",
+    "Why can't your nose be 12 inches long? Because then it would be a foot.",
+    "What do you call a pile of cats? A meowtain.",
+    "Why did the cookie go to the hospital? Because it felt crummy.",
+    "Why are elevator jokes so good? They work on many levels.",
+    "What did the janitor say when he jumped out of the closet? Supplies!",
+    "What do you call a boomerang that won't come back? A stick.",
+    "Why did the stadium get hot after the game? All the fans left.",
+    "What did the grape do when it got stepped on? Nothing, it just let out a little wine.",
+    "Why did the man fall down the well? Because he couldn't see that well.",
+    "What do you call a can opener that doesn't work? A can't opener.",
+    "What did the zero say to the eight? Nice belt.",
+    "Why was the broom late? It over-swept.",
+    "What do you call a belt made of watches? A waist of time.",
+    "Why did the picture go to jail? Because it was framed.",
+    "What kind of music do balloons hate? Pop.",
+    "What do you call a cow with no legs? Ground beef.",
+    "Why did the banana go to the doctor? It wasn't peeling well.",
+    "What do you call two monkeys sharing an Amazon account? Prime mates.",
+    "Why did the employee get fired from the calendar factory? They took a couple of days off.",
+    "Why did the spreadsheet break up with the calculator? Too many unresolved issues.",
+    "My printer and I are in a complicated relationship. It's always giving me mixed signals and paper jams.",
+    "Why did the loan officer bring a ladder? To get to the next tier.",
+    "Why was the mortgage file so calm? It had excellent closing conditions.",
+    "Why did the Realtor carry a pencil? To draw up a good deal.",
+    "Why did the lead cross the pipeline? To get to the closing side.",
+    "I asked my CRM for emotional support. It created a follow-up task.",
+    "My calendar said I have commitment issues. I told it we'd circle back.",
+    "Why was the email confident? It had a strong subject line.",
+    "Why did the office chair get promoted? It always supported the team.",
+    "Why did the keyboard get invited to every meeting? It had all the right keys.",
+    "I told my to-do list we needed space. It added 'give to-do list space' as a task.",
+    "Why did the whiteboard feel important? Everyone kept drawing conclusions on it.",
+    "Why did the stapler get Employee of the Month? It always held things together.",
+    "Why was the phone so good at networking? It had a lot of contacts.",
+    "Why did the meeting end early? Everyone was on the same page. Miracles happen.",
+    "Why did the file go to therapy? Too many attachments.",
+    "What does a nosy pepper do? It gets jalapeño business.",
+    "What do you call a magic dog? A labracadabrador.",
+    "Why don't oysters donate to charity? Because they're shellfish.",
+    "Why did the invisible man turn down the job offer? He couldn't see himself doing it.",
+    "What do you call a dinosaur with an extensive vocabulary? A thesaurus.",
+    "Why did the orange stop halfway up the hill? It ran out of juice.",
+    "What did one plate say to the other plate? Dinner's on me.",
+    "Why are frogs so happy? They eat whatever bugs them.",
+    "What do you call a cow during an earthquake? A milkshake.",
+    "Why did the mushroom get invited to the party? Because he was a fungi.",
+    "Why did the belt get arrested? It held up a pair of pants.",
+    "Why do bees have sticky hair? Because they use honeycombs.",
+    "What do you call a bee that can't make up its mind? A maybe.",
+    "Why did the barber win the race? He knew a shortcut.",
+    "What kind of tree fits in your hand? A palm tree."
   ];
-  var QUOTE_CLOSERS=[
-    "You have got this.","Keep going.","That counts.","Make it happen.","Own the day.",
-    "One move at a time.","Stay steady.","Go be useful.","That is how momentum starts.","Keep the standard high.",
-    "You are more capable than the task is complicated.","Do the thing.","Forward is forward.","Make today useful.","Be proud of the follow-through.",
-    "Strong work, simple steps.","Build the win.","Keep your head up and your notes updated.","Make future-you proud.","Now go crush something responsibly."
-  ];
-  function mixedDaily(arrA,arrB,arrC,offset){
-    var n=Math.abs(dailyEpoch+offset);
-    var a=arrA[n%arrA.length]; n=Math.floor(n/arrA.length);
-    var b=arrB[n%arrB.length]; n=Math.floor(n/arrB.length);
-    var c=arrC[n%arrC.length];
-    return[a,b,c];
-  }
-  var qParts=mixedDaily(QUOTE_OPENERS,QUOTE_CORES,QUOTE_CLOSERS,17);
-  var QUOTE=qParts.join(" ");
-
-  var JOKE_SUBJECTS=[
-    "calendar","calculator","coffee mug","stapler","spreadsheet","printer","keyboard","mortgage file","phone","desk",
-    "meeting","email","paperclip","folder","rate sheet","whiteboard","laptop","notepad","highlighter","office chair"
-  ];
-  var JOKE_SCENARIOS=[
-    ["bring a ladder to work","it wanted to move up a level"],
-    ["sit by the window","it needed a better outlook"],
-    ["carry a pencil everywhere","it liked to draw conclusions"],
-    ["wear sneakers","it was always running the numbers"],
-    ["bring a ruler","it was determined to measure up"],
-    ["pack an extra lunch","it already had too much on its plate"],
-    ["skip the elevator","it preferred taking things one step at a time"],
-    ["ask for a map","it did not want to lose its direction"],
-    ["show up early","it heard timing was everything"],
-    ["bring sunglasses","its future was looking bright"],
-    ["take notes","it did not want the point to get away"],
-    ["carry an umbrella","it was preparing for a brainstorm"],
-    ["join the team huddle","it wanted to stay in the loop"],
-    ["bring a flashlight","it wanted to shed some light on the situation"],
-    ["take a deep breath","it was dealing with too much pressure"],
-    ["ask for a raise","it thought its value was outstanding"],
-    ["bring a bookmark","it wanted to stay on the same page"],
-    ["clean its desk","it needed to get its priorities straight"],
-    ["bring tape","it was trying to hold everything together"],
-    ["call IT","it had too many unresolved issues" ]
-  ];
-  var JOKE_TAGS=[
-    "I will see myself out.","Peak dad-joke performance.","No refunds on that joke.","Please remain employed after reading this.","That one was painfully free.",
-    "You are welcome. Probably.","HR has not reviewed this joke.","Corn level: elite.","I regret nothing.","That joke just earned a tiny promotion.",
-    "Yes, it gets worse tomorrow.","Professional? Debatable. Funny? Also debatable.","Put that one in the pipeline.","Do not all laugh at once.","I am here all week. Literally.",
-    "Dad energy achieved.","File under: unnecessary but delightful.","That was a closing-cost-free joke.","Please tip your imaginary waiter.","Okay, back to work before this gets worse."
-  ];
-  var jokeN=Math.abs(dailyEpoch+503);
-  var jokeSubject=JOKE_SUBJECTS[jokeN%JOKE_SUBJECTS.length]; jokeN=Math.floor(jokeN/JOKE_SUBJECTS.length);
-  var jokeScenario=JOKE_SCENARIOS[jokeN%JOKE_SCENARIOS.length]; jokeN=Math.floor(jokeN/JOKE_SCENARIOS.length);
-  var jokeTag=JOKE_TAGS[jokeN%JOKE_TAGS.length];
-  var DAD_JOKE="Why did the "+jokeSubject+" "+jokeScenario[0]+"? Because "+jokeScenario[1]+". "+jokeTag;
+  var quoteItem=QUOTE_BANK[Math.abs(dailyEpoch)%QUOTE_BANK.length];
+  var QUOTE='“'+quoteItem.q+'”';
+  var QUOTE_AUTHOR='— '+quoteItem.a;
+  var DAD_JOKE=DAD_JOKES[Math.abs(dailyEpoch+19)%DAD_JOKES.length];
   var headlines=[];
   var allHit=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
   if(allHit)headlines.push("🔥 Full team hit their call targets this week!");
@@ -4295,7 +4358,7 @@ function buildSnapshot(){
   h+='<div style="background:#EEF1F6;border-radius:8px;padding:7px 12px;font-size:14px;font-weight:600;color:#3D4E68">'+headline+'</div>';
   h+='</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
-    +'<div style="background:#F7F5FB;border:1px solid #E7E1F0;border-radius:9px;padding:9px 11px"><div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#725EB4;margin-bottom:3px">Quote of the day</div><div style="font-size:11.5px;color:var(--text-2);font-weight:600;line-height:1.45">'+QUOTE+'</div></div>'
+    +'<div style="background:#F7F5FB;border:1px solid #E7E1F0;border-radius:9px;padding:9px 11px"><div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#725EB4;margin-bottom:3px">Quote of the day</div><div style="font-size:11.5px;color:var(--text-2);font-weight:600;line-height:1.45">'+QUOTE+'</div><div style="font-size:10px;color:#725EB4;font-weight:700;margin-top:4px">'+QUOTE_AUTHOR+'</div></div>'
     +'<div style="background:#FAF7F2;border:1px solid #E9DFD3;border-radius:9px;padding:9px 11px"><div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8C7355;margin-bottom:3px">Dad joke of the day</div><div style="font-size:11.5px;color:var(--text-2);line-height:1.45">'+DAD_JOKE+'</div></div>'
     +'</div>';
   h+='<div style="display:flex;gap:22px;flex-wrap:wrap">';
