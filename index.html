@@ -4,8 +4,8 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260818-v24">
-  <meta name="build-notes" content="v24 live-roster audit: complete LP assignment lists, removed-agent suppression across Snapshot/rotation, clickable inactive drilldown, legacy SEED leak protection">
+  <meta name="version" content="20260818-v26">
+  <meta name="build-notes" content="v26 LP full-function audit: clearer live-connection status, live roster/assignment hardening, no-short-cycle daily quote + dad joke, removed-agent suppression retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -624,7 +624,7 @@ td{line-height:1.4!important}
 
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v25.0</div>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v26.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -2164,7 +2164,7 @@ function saveAgents(){
 }
 
 function loadAgentAssignments(){
-  return sbFetch("GET","agent_assignments?select=*&limit=1000").then(function(res){
+  return sbFetch("GET","agent_assignments?select=*&limit=5000").then(function(res){
     agentRmOwners={};
     if(!res||!res.length)return;
     res.forEach(function(r){
@@ -4159,21 +4159,107 @@ function buildSnapshot(){
     return t;
   }
 
-  // Motivating headlines + rotating quotes
-  var QUOTES=[
-    "The best mortgage is the one you close. Make the call.",
-    "Every realtor call is a future closing.",
-    "Pick up the phone. Your competition already did.",
-    "Relationships are built one conversation at a time.",
-    "Consistency beats intensity. Show up every day.",
-    "A call today is a commission next month.",
-    "Your next biggest referral partner hasn't heard from you yet.",
-    "The market rewards the persistent.",
-    "One more call can change everything.",
-    "Champions make calls when they don't feel like it."
+  // Daily culture moment: deterministic, long-cycle, no short-bank recycling.
+  // Uses the absolute local calendar day to generate a unique quote + dad joke combination.
+  // The mixed-radix banks below do not repeat the exact daily pairing for thousands of days.
+  var dailyEpoch=Math.floor(new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime()/86400000);
+  var QUOTE_OPENERS=[
+    "You do not need a perfect day to make a powerful move.",
+    "Strong teams are built in ordinary moments.",
+    "Confidence grows after the action, not before it.",
+    "Your voice belongs in the room.",
+    "Small wins are still wins.",
+    "You can be kind and still be a force.",
+    "Momentum loves a first move.",
+    "The work gets lighter when the purpose stays clear.",
+    "Your next good conversation can change the whole week.",
+    "You are allowed to take up space and do great work.",
+    "Progress does not need permission.",
+    "A calm mind can still make bold moves.",
+    "Consistency is a quiet superpower.",
+    "You already know more than you did yesterday.",
+    "Being prepared is powerful; being willing is even better.",
+    "A strong day starts with one useful thing.",
+    "Do the next right thing and let momentum handle the rest.",
+    "You do not have to be fearless to be effective.",
+    "Good relationships are built one genuine moment at a time.",
+    "Today is another chance to make the work matter."
   ];
-  var QUOTE=QUOTES[now.getDay()%QUOTES.length+(now.getDate()%3)>QUOTES.length?0:now.getDay()%QUOTES.length+(now.getDate()%3)];
-  QUOTE=QUOTES[(now.getDate()+now.getDay())%QUOTES.length];
+  var QUOTE_CORES=[
+    "Make the call that moves something forward.",
+    "Ask the question instead of guessing.",
+    "Protect your energy and spend it where it matters.",
+    "Be clear, be useful, and follow through.",
+    "Choose progress over busywork.",
+    "Let preparation turn into action.",
+    "Trust the work you have already put in.",
+    "Make one relationship stronger today.",
+    "Do not shrink a good idea just because it is new.",
+    "Keep your standards high and your next step simple.",
+    "Move with purpose, not panic.",
+    "Give the important thing your best attention first.",
+    "Turn the awkward first step into momentum.",
+    "Leave people clearer, calmer, or better than you found them.",
+    "Stay curious enough to learn and confident enough to act.",
+    "Do the work that actually moves the needle.",
+    "Be the person who follows through.",
+    "Use what you know, then improve as you go.",
+    "A thoughtful follow-up can be more powerful than a perfect pitch.",
+    "Keep showing up with value."
+  ];
+  var QUOTE_CLOSERS=[
+    "You have got this.","Keep going.","That counts.","Make it happen.","Own the day.",
+    "One move at a time.","Stay steady.","Go be useful.","That is how momentum starts.","Keep the standard high.",
+    "You are more capable than the task is complicated.","Do the thing.","Forward is forward.","Make today useful.","Be proud of the follow-through.",
+    "Strong work, simple steps.","Build the win.","Keep your head up and your notes updated.","Make future-you proud.","Now go crush something responsibly."
+  ];
+  function mixedDaily(arrA,arrB,arrC,offset){
+    var n=Math.abs(dailyEpoch+offset);
+    var a=arrA[n%arrA.length]; n=Math.floor(n/arrA.length);
+    var b=arrB[n%arrB.length]; n=Math.floor(n/arrB.length);
+    var c=arrC[n%arrC.length];
+    return[a,b,c];
+  }
+  var qParts=mixedDaily(QUOTE_OPENERS,QUOTE_CORES,QUOTE_CLOSERS,17);
+  var QUOTE=qParts.join(" ");
+
+  var JOKE_SUBJECTS=[
+    "calendar","calculator","coffee mug","stapler","spreadsheet","printer","keyboard","mortgage file","phone","desk",
+    "meeting","email","paperclip","folder","rate sheet","whiteboard","laptop","notepad","highlighter","office chair"
+  ];
+  var JOKE_SCENARIOS=[
+    ["bring a ladder to work","it wanted to move up a level"],
+    ["sit by the window","it needed a better outlook"],
+    ["carry a pencil everywhere","it liked to draw conclusions"],
+    ["wear sneakers","it was always running the numbers"],
+    ["bring a ruler","it was determined to measure up"],
+    ["pack an extra lunch","it already had too much on its plate"],
+    ["skip the elevator","it preferred taking things one step at a time"],
+    ["ask for a map","it did not want to lose its direction"],
+    ["show up early","it heard timing was everything"],
+    ["bring sunglasses","its future was looking bright"],
+    ["take notes","it did not want the point to get away"],
+    ["carry an umbrella","it was preparing for a brainstorm"],
+    ["join the team huddle","it wanted to stay in the loop"],
+    ["bring a flashlight","it wanted to shed some light on the situation"],
+    ["take a deep breath","it was dealing with too much pressure"],
+    ["ask for a raise","it thought its value was outstanding"],
+    ["bring a bookmark","it wanted to stay on the same page"],
+    ["clean its desk","it needed to get its priorities straight"],
+    ["bring tape","it was trying to hold everything together"],
+    ["call IT","it had too many unresolved issues" ]
+  ];
+  var JOKE_TAGS=[
+    "I will see myself out.","Peak dad-joke performance.","No refunds on that joke.","Please remain employed after reading this.","That one was painfully free.",
+    "You are welcome. Probably.","HR has not reviewed this joke.","Corn level: elite.","I regret nothing.","That joke just earned a tiny promotion.",
+    "Yes, it gets worse tomorrow.","Professional? Debatable. Funny? Also debatable.","Put that one in the pipeline.","Do not all laugh at once.","I am here all week. Literally.",
+    "Dad energy achieved.","File under: unnecessary but delightful.","That was a closing-cost-free joke.","Please tip your imaginary waiter.","Okay, back to work before this gets worse."
+  ];
+  var jokeN=Math.abs(dailyEpoch+503);
+  var jokeSubject=JOKE_SUBJECTS[jokeN%JOKE_SUBJECTS.length]; jokeN=Math.floor(jokeN/JOKE_SUBJECTS.length);
+  var jokeScenario=JOKE_SCENARIOS[jokeN%JOKE_SCENARIOS.length]; jokeN=Math.floor(jokeN/JOKE_SCENARIOS.length);
+  var jokeTag=JOKE_TAGS[jokeN%JOKE_TAGS.length];
+  var DAD_JOKE="Why did the "+jokeSubject+" "+jokeScenario[0]+"? Because "+jokeScenario[1]+". "+jokeTag;
   var headlines=[];
   var allHit=LPS.every(function(lp){return callsLogged[lp]>=WEEKLY_TARGET;});
   if(allHit)headlines.push("🔥 Full team hit their call targets this week!");
@@ -4197,7 +4283,10 @@ function buildSnapshot(){
   h+='<div style="color:var(--text);font-size:16px;font-weight:700">'+todayFmt+'</div></div>';
   h+='<div style="background:#EEF1F6;border-radius:8px;padding:7px 12px;font-size:14px;font-weight:600;color:#3D4E68">'+headline+'</div>';
   h+='</div>';
-  h+='<div style="font-size:11px;color:var(--text-3);font-style:italic;margin-bottom:10px">“'+QUOTE+'”</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+    +'<div style="background:#F7F5FB;border:1px solid #E7E1F0;border-radius:9px;padding:9px 11px"><div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#725EB4;margin-bottom:3px">Quote of the day</div><div style="font-size:11.5px;color:var(--text-2);font-weight:600;line-height:1.45">'+QUOTE+'</div></div>'
+    +'<div style="background:#FAF7F2;border:1px solid #E9DFD3;border-radius:9px;padding:9px 11px"><div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8C7355;margin-bottom:3px">Dad joke of the day</div><div style="font-size:11.5px;color:var(--text-2);line-height:1.45">'+DAD_JOKE+'</div></div>'
+    +'</div>';
   h+='<div style="display:flex;gap:22px;flex-wrap:wrap">';
   [{v:totalCallsWTD+" / "+(LPS.length*WEEKLY_TARGET),l:"Team outreach WTD",c:"#3D4E68"},
    {v:leadsToday,l:"Leads today",c:"#3E8E5A"},
@@ -7918,8 +8007,8 @@ function ctInjectOverdueQueue(){
       +'<span style="font-size:10.5px;font-weight:750;padding:3px 7px;border-radius:100px;background:#F1ECFA;color:#5B4498" title="Relationship Manager owner">RM · '+o.rm+'</span>'
       +'<span style="font-size:10.5px;font-weight:750;padding:3px 7px;border-radius:100px;background:#EEF1F6;color:#3D4E68" title="Loan Partner owner">LP · '+o.lp+'</span>'
       +(o.priority?'<span style="font-size:10.5px;font-weight:700;color:#B54B42">PRIORITY</span>':'')
-      +(o.retry?'<span style="font-size:10.5px;font-weight:750;color:#9A6700;background:#FFF7D6;border-radius:100px;padding:3px 7px">'+(o.outcome==="left vm"?"VM only · TEXT REQUIRED":(o.outcome==="sent follow-up text"?"Text only · CALL REQUIRED":((o.outcome==="vm + text"||o.outcome==="voicemail + text")?(o.rmFlagged?"VM + text · sent to RM":"VM + text · awaiting reply"):"Attempt only · retry")))+'</span>':'')
-      +'<span style="font-size:11.5px;color:'+(o.days>=0?'#B54B42':'#6B7280')+';font-weight:600;min-width:70px;text-align:right">'+(!o.retry&&o.days>=0?o.days+"d overdue":(o.retry?"needs connection":"—"))+'</span>'
+      +(o.retry?'<span style="font-size:10.5px;font-weight:750;color:#9A6700;background:#FFF7D6;border-radius:100px;padding:3px 7px">'+(o.outcome==="left vm"?"VM only · TEXT REQUIRED":(o.outcome==="sent follow-up text"?"Text only · CALL REQUIRED":((o.outcome==="vm + text"||o.outcome==="voicemail + text")?(o.rmFlagged?"Outreach complete · sent to RM":"Outreach complete · no reply yet"):"Attempt only · retry")))+'</span>':'')
+      +'<span style="font-size:11.5px;color:'+(o.days>=0?'#B54B42':'#6B7280')+';font-weight:600;min-width:70px;text-align:right">'+(!o.retry&&o.days>=0?o.days+"d overdue":(o.retry?(o.rmFlagged?"RM review needed":"No live connection yet"):"—"))+'</span>'
       +'<button type="button" class="ct-owner-edit-btn" data-owner-agent="'+ctOwnEscAttr(o.name)+'" style="border:1px solid #DDD7EC;background:#fff;color:#5B4498;border-radius:7px;padding:5px 8px;font:inherit;font-size:10.5px;font-weight:700;cursor:pointer">Edit owners</button>'
       +((o.outcome==="vm + text"||o.outcome==="voicemail + text")&&!o.rmFlagged?'<button type="button" class="ct-no-reply-rm-btn" data-noreply-agent="'+ctOwnEscAttr(o.name)+'" data-noreply-lp="'+ctOwnEscAttr(o.lp)+'" style="border:none;background:#5B4498;color:#fff;border-radius:7px;padding:5px 8px;font:inherit;font-size:10.5px;font-weight:800;cursor:pointer">No reply? Tell RM</button>':'')
       +(o.rmFlagged?'<span style="font-size:11px;font-weight:800;color:#276749;padding:5px 10px;border-radius:7px;background:#F0FDF4">RM reviewing</span>':'<span style="font-size:11px;font-weight:700;color:#3D4E68;padding:5px 10px;border-radius:7px;background:#EEF1F6">Log call →</span>')
