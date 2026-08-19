@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260819-v35">
+  <meta name="version" content="20260819-v40-nfm-brand">
   <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -500,14 +500,14 @@ input[type=text],select,input[type=email],textarea{font-size:13.5px!important}
    v14 VISUAL REDESIGN — presentation/navigation only
    ───────────────────────────────────────────────────────────── */
 :root{
-  --v14-purple:#4E3D8A;--v14-purple2:#725EB4;--v14-soft:#F6F4FB;--v14-line:#E5E0F1;
+  --v14-purple:#071B37;--v14-purple2:#007FA4;--v14-soft:#F4FAFC;--v14-line:#DCEAF0;
 }
 html{scroll-behavior:smooth}
 body{background:linear-gradient(180deg,#F8F7FC 0,#F4F2F8 100%);min-height:100vh}
 .app{max-width:none!important;margin:0!important;padding:0 30px 60px 248px!important}
 .app-header{
   margin:0 -30px 20px -248px!important;padding:14px 30px 14px 266px!important;min-height:66px;
-  border-bottom:0!important;background:linear-gradient(125deg,#30205F 0%,#4E3D8A 52%,#6A55A8 100%)!important;
+  border-bottom:0!important;background:linear-gradient(125deg,#071B37 0%,#071B37 52%,#162948 100%)!important;
   box-shadow:0 6px 22px rgba(45,31,87,.16)!important;top:0!important;color:#fff;
 }
 .app-header .brand-logo{color:#fff!important;font-size:14px!important;letter-spacing:.09em}
@@ -523,56 +523,56 @@ body{background:linear-gradient(180deg,#F8F7FC 0,#F4F2F8 100%);min-height:100vh}
   margin:0!important;padding:12px 10px 14px!important;background:rgba(255,255,255,.96)!important;
   border:1px solid #E3DFF0!important;border-radius:14px!important;box-shadow:0 10px 32px rgba(42,31,78,.10)!important;
 }
-.v14-nav-label{font-size:9px;font-weight:800;letter-spacing:.105em;text-transform:uppercase;color:#9A91B1;padding:10px 10px 4px;margin-top:2px}
+.v14-nav-label{font-size:9px;font-weight:800;letter-spacing:.105em;text-transform:uppercase;color:#718493;padding:10px 10px 4px;margin-top:2px}
 .v14-nav-label:first-child{padding-top:3px}
 .who-btn{
   width:100%!important;text-align:left!important;border:0!important;border-radius:9px!important;background:transparent!important;
   color:#504960!important;padding:9px 10px!important;font-size:11.5px!important;font-weight:600!important;line-height:1.2;
   transition:background .14s,color .14s,transform .14s!important;
 }
-.who-btn:hover{background:#F2EFF9!important;color:#37266E!important;transform:translateX(1px)}
-.who-btn.active{background:linear-gradient(135deg,#EEEAF8,#E5DFF5)!important;color:#412F7E!important;font-weight:800!important;box-shadow:inset 3px 0 0 #6D57AE!important}
-.wb-Portfolio{margin-top:2px!important;background:#F6F3FB!important;color:#4E3D8A!important}
-.wb-Portfolio:after{content:'  •';color:#7D67B6}
+.who-btn:hover{background:#EEF8FB!important;color:#071B37!important;transform:translateX(1px)}
+.who-btn.active{background:linear-gradient(135deg,#E9F8FC,#DCF3F9)!important;color:#071B37!important;font-weight:800!important;box-shadow:inset 3px 0 0 #00C0F0!important}
+.wb-Portfolio{margin-top:2px!important;background:#F1FAFC!important;color:#071B37!important}
+.wb-Portfolio:after{content:'  •';color:#00A8D4}
 
 /* Top utility buttons */
 .top-actions{display:flex!important;justify-content:flex-end!important;gap:8px!important;margin:0 0 14px!important}
-.top-actions .btn{border-radius:9px!important;padding:8px 12px!important;background:#fff!important;border:1px solid #DDD7EA!important;box-shadow:0 2px 7px rgba(43,32,77,.05);color:#4E3D8A!important;font-weight:700!important}
-.top-actions .btn:hover{background:#F4F1FA!important;border-color:#C9BFDF!important}
+.top-actions .btn{border-radius:9px!important;padding:8px 12px!important;background:#fff!important;border:1px solid #D8E4EA!important;box-shadow:0 2px 7px rgba(43,32,77,.05);color:#071B37!important;font-weight:700!important}
+.top-actions .btn:hover{background:#EFF9FC!important;border-color:#9FD7E5!important}
 
 /* Main workspace */
 .view{max-width:1180px!important;margin:0 auto!important}
 .d-card,.scorecard,.call-card,.lead-card,.admin-section,.ft-summary,.ref-section,.search-panel,.lp-hero,.missed-box,.won-box{
-  border-color:#E3DFEC!important;border-radius:13px!important;box-shadow:0 4px 16px rgba(44,34,78,.055)!important;background:#fff!important;
+  border-color:#DCE7EC!important;border-radius:13px!important;box-shadow:0 4px 16px rgba(44,34,78,.055)!important;background:#fff!important;
 }
 .d-card,.scorecard,.admin-section,.ref-section,.search-panel{padding-top:16px!important;padding-bottom:16px!important}
-.section-head,.sc-header{border-bottom-color:#EEEAF4!important}
-.d-tab-bar{background:#F1EEF7!important;border:1px solid #E2DDEC!important;border-radius:11px!important;padding:4px!important;gap:3px!important}
+.section-head,.sc-header{border-bottom-color:#E7EFF3!important}
+.d-tab-bar{background:#EEF5F8!important;border:1px solid #D8E5EB!important;border-radius:11px!important;padding:4px!important;gap:3px!important}
 .d-tab{border-radius:8px!important;border:0!important;padding:7px 11px!important}
-.d-tab.active{background:#fff!important;color:#4E3D8A!important;box-shadow:0 2px 7px rgba(50,38,88,.09)!important;font-weight:750!important}
+.d-tab.active{background:#fff!important;color:#071B37!important;box-shadow:0 2px 7px rgba(50,38,88,.09)!important;font-weight:750!important}
 .btn{border-radius:8px!important;transition:transform .12s,box-shadow .12s,background .12s!important}
 .btn:hover,.btn-sm:hover{transform:translateY(-1px)}
-.btn-primary{background:linear-gradient(135deg,#5D4798,#745DB2)!important;border-color:#5D4798!important;box-shadow:0 3px 9px rgba(78,61,138,.15)!important}
+.btn-primary{background:linear-gradient(135deg,#071B37,#162948)!important;border-color:#071B37!important;box-shadow:0 3px 9px rgba(78,61,138,.15)!important}
 .btn-sm{border-radius:7px!important}
-input,select,textarea{border-radius:8px!important;border-color:#DDD8E8!important}
-input:focus,select:focus,textarea:focus{outline:none!important;border-color:#8B76C2!important;box-shadow:0 0 0 3px rgba(110,87,174,.11)!important}
+input,select,textarea{border-radius:8px!important;border-color:#D7E3E9!important}
+input:focus,select:focus,textarea:focus{outline:none!important;border-color:#00A8D4!important;box-shadow:0 0 0 3px rgba(110,87,174,.11)!important}
 
 /* Make snapshot feel like the command center */
-#view-snapshot .d-card:first-of-type,#view-snapshot .scorecard:first-of-type{border-top:3px solid #6E59A8!important}
+#view-snapshot .d-card:first-of-type,#view-snapshot .scorecard:first-of-type{border-top:3px solid #00A8D4!important}
 #view-snapshot{position:relative}
-#view-snapshot:before{content:'CORE TEAM TODAY';display:block;font-size:10px;font-weight:850;letter-spacing:.12em;color:#796A9E;margin:2px 0 8px}
-#view-portfolio-review:before{content:'PORTFOLIO CONTROL CENTER';display:block;font-size:10px;font-weight:850;letter-spacing:.12em;color:#796A9E;margin:2px 0 8px}
+#view-snapshot:before{content:'CORE TEAM TODAY';display:block;font-size:10px;font-weight:850;letter-spacing:.12em;color:#35657C;margin:2px 0 8px}
+#view-portfolio-review:before{content:'PORTFOLIO CONTROL CENTER';display:block;font-size:10px;font-weight:850;letter-spacing:.12em;color:#35657C;margin:2px 0 8px}
 
 /* Tables / rows */
-.tbl-wrap,.ref-leads-table-wrap{border-radius:11px!important;border:1px solid #E4DFEC!important;overflow:hidden!important;background:#fff}
-table thead th{background:#F5F2FA!important;color:#655B76!important}
-table tbody tr:hover{background:#FAF8FD!important}
+.tbl-wrap,.ref-leads-table-wrap{border-radius:11px!important;border:1px solid #DCE7EC!important;overflow:hidden!important;background:#fff}
+table thead th{background:#F1F6F8!important;color:#4F6472!important}
+table tbody tr:hover{background:#F6FBFC!important}
 .leaderboard-row,.ft-row,.vel-row,.search-agent-row{border-radius:8px!important}
 
 /* Modals */
 .contact-modal-overlay{backdrop-filter:blur(3px);background:rgba(31,22,55,.42)!important}
-.contact-modal-box{border-radius:15px!important;border:1px solid #E0DAEA!important;box-shadow:0 24px 70px rgba(28,18,51,.28)!important}
-.cm-header{padding-bottom:10px!important;border-bottom:1px solid #EEEAF4!important;margin-bottom:13px!important}
+.contact-modal-box{border-radius:15px!important;border:1px solid #DCE7EC!important;box-shadow:0 24px 70px rgba(28,18,51,.28)!important}
+.cm-header{padding-bottom:10px!important;border-bottom:1px solid #E7EFF3!important;margin-bottom:13px!important}
 
 /* Responsive: return to a horizontal nav */
 @media(max-width:900px){
@@ -581,7 +581,7 @@ table tbody tr:hover{background:#FAF8FD!important}
   .who-bar{position:static!important;width:auto!important;height:auto!important;overflow-x:auto!important;overflow-y:hidden!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:5px!important;margin-bottom:12px!important;padding:7px!important;border-radius:10px!important;white-space:nowrap}
   .v14-nav-label{display:none!important}
   .who-btn{width:auto!important;flex:0 0 auto!important;text-align:center!important;padding:7px 10px!important}
-  .who-btn.active{box-shadow:inset 0 -3px 0 #6D57AE!important}
+  .who-btn.active{box-shadow:inset 0 -3px 0 #00C0F0!important}
   .top-actions{justify-content:flex-start!important;overflow-x:auto}
 }
 @media(max-width:560px){
@@ -595,39 +595,39 @@ table tbody tr:hover{background:#FAF8FD!important}
    v17 MAKEOVER — presentation only. No workflow/data functions overridden.
    Built on the functionality-QA + load-recovery version.
    ───────────────────────────────────────────────────────────── */
-:root{--v17-ink:#29223B;--v17-muted:#766F86;--v17-purple:#57428F;--v17-soft:#F7F5FB;--v17-card:#FFFFFF;--v17-border:#E6E1EF}
-body{background:radial-gradient(circle at 75% -10%,rgba(112,89,170,.08),transparent 34%),linear-gradient(180deg,#FAF9FD 0%,#F5F3F9 100%)!important;color:var(--v17-ink)}
+:root{--v17-ink:#071B37;--v17-muted:#637381;--v17-purple:#071B37;--v17-soft:#F3F9FB;--v17-card:#FFFFFF;--v17-border:#DCE7EC}
+body{background:radial-gradient(circle at 75% -10%,rgba(112,89,170,.08),transparent 34%),linear-gradient(180deg,#F8FBFC 0%,#F3F7F9 100%)!important;color:var(--v17-ink)}
 .app{padding-left:264px!important;padding-right:34px!important;padding-bottom:72px!important}
-.app-header{margin-left:-264px!important;padding-left:282px!important;padding-right:34px!important;min-height:70px!important;background:linear-gradient(118deg,#2E205D 0%,#4D3987 50%,#6D58AA 100%)!important}
+.app-header{margin-left:-264px!important;padding-left:282px!important;padding-right:34px!important;min-height:70px!important;background:linear-gradient(118deg,#071B37 0%,#0B2442 50%,#162948 100%)!important}
 .app-header .brand-logo{font-size:14.5px!important;letter-spacing:.11em!important}
 .app-header .brand-sub{font-size:10.5px!important}
-.who-bar{left:16px!important;top:86px!important;width:224px!important;padding:14px 11px 16px!important;border-radius:16px!important;border-color:#E3DDEE!important;box-shadow:0 14px 36px rgba(43,31,79,.11)!important}
-.v14-nav-label{font-size:8.5px!important;letter-spacing:.13em!important;color:#978EAA!important;padding-left:11px!important}
-.who-btn{padding:9.5px 11px!important;border-radius:10px!important;font-size:11.75px!important;color:#514A61!important}
-.who-btn.active{background:linear-gradient(135deg,#F0ECFA,#E7E0F7)!important;color:#422F7E!important;box-shadow:inset 3px 0 0 #745EB2,0 2px 8px rgba(74,54,127,.06)!important}
-.wb-Portfolio{border:1px solid #EEE8F8!important;background:#FAF8FD!important}
+.who-bar{left:16px!important;top:86px!important;width:224px!important;padding:14px 11px 16px!important;border-radius:16px!important;border-color:#DCE7EC!important;box-shadow:0 14px 36px rgba(43,31,79,.11)!important}
+.v14-nav-label{font-size:8.5px!important;letter-spacing:.13em!important;color:#718493!important;padding-left:11px!important}
+.who-btn{padding:9.5px 11px!important;border-radius:10px!important;font-size:11.75px!important;color:#405565!important}
+.who-btn.active{background:linear-gradient(135deg,#E9F8FC,#DCF3F9)!important;color:#071B37!important;box-shadow:inset 3px 0 0 #00A8D4,0 2px 8px rgba(74,54,127,.06)!important}
+.wb-Portfolio{border:1px solid #D7EDF4!important;background:#F6FBFC!important}
 .view{max-width:1260px!important}
 .top-actions{max-width:1260px!important;margin-left:auto!important;margin-right:auto!important;margin-bottom:12px!important}
-.top-actions .btn{background:rgba(255,255,255,.92)!important;border-color:#DFD8EB!important;box-shadow:0 3px 10px rgba(58,43,95,.06)!important}
-.section-head{font-size:10.5px!important;color:#756D84!important;letter-spacing:.11em!important;margin-top:1.35rem!important}
+.top-actions .btn{background:rgba(255,255,255,.92)!important;border-color:#D8E4EA!important;box-shadow:0 3px 10px rgba(58,43,95,.06)!important}
+.section-head{font-size:10.5px!important;color:#637381!important;letter-spacing:.11em!important;margin-top:1.35rem!important}
 .d-card,.scorecard,.admin-section,.search-panel,.ref-section,.call-card,.leaderboard-row,.lp-hero,.ft-stat{border-color:var(--v17-border)!important;box-shadow:0 5px 18px rgba(54,41,89,.055)!important}
 .d-card,.scorecard,.admin-section,.search-panel,.ref-section{border-radius:14px!important}
-#view-snapshot:before,#view-portfolio-review:before{font-size:9.5px!important;letter-spacing:.145em!important;color:#7565A0!important;margin:4px 0 10px!important}
-#view-snapshot .section-head{color:#625975!important}
+#view-snapshot:before,#view-portfolio-review:before{font-size:9.5px!important;letter-spacing:.145em!important;color:#35657C!important;margin:4px 0 10px!important}
+#view-snapshot .section-head{color:#526575!important}
 #view-snapshot .d-card,#view-snapshot .scorecard{background:rgba(255,255,255,.96)!important}
 /* Make the daily command-center blocks breathe without changing their content. */
 #view-snapshot [style*="padding:20px"],#view-snapshot [style*="padding:18px"]{border-radius:14px}
 #view-snapshot .alert-item{padding:10px 13px!important;border-radius:10px!important}
 /* Portfolio is an executive review surface: slightly stronger card hierarchy. */
-#view-portfolio-review .d-card,#view-portfolio-review .scorecard,#view-portfolio-review [style*="background:var(--surface)"]{border-color:#E1DAEC!important}
-#view-portfolio-review .section-head{color:#5E517A!important}
+#view-portfolio-review .d-card,#view-portfolio-review .scorecard,#view-portfolio-review [style*="background:var(--surface)"]{border-color:#DCE7EC!important}
+#view-portfolio-review .section-head{color:#405565!important}
 /* Consistent buttons and form controls. */
 .btn,.btn-sm,.who-btn,input,select,textarea{font-family:'Geist','Inter',sans-serif!important}
-.btn-primary{background:linear-gradient(135deg,#5A4493,#735DB1)!important}
-.btn:not(.btn-primary):not(.btn-danger):not(.btn-success){color:#4D3E73!important}
+.btn-primary{background:linear-gradient(135deg,#071B37,#162948)!important}
+.btn:not(.btn-primary):not(.btn-danger):not(.btn-success){color:#071B37!important}
 input,select,textarea{background:#fff!important}
 /* Safer readable density for data-heavy views. */
-th{font-size:9.5px!important;letter-spacing:.075em!important;color:#746D82!important}
+th{font-size:9.5px!important;letter-spacing:.075em!important;color:#637381!important}
 td{line-height:1.4!important}
 .tbl-wrap{box-shadow:0 3px 14px rgba(54,41,89,.035)!important}
 /* Connection status looks intentional and remains clickable for retry. */
@@ -645,6 +645,108 @@ td{line-height:1.4!important}
   #lpSyncStatusBtn{padding:4px 6px!important}
   .section-head{margin-top:1rem!important}
 }
+</style>
+
+
+<style id="v40-nfm-brand">
+/* v40 NFM Lending visual system — branding only. No workflow/data logic changes.
+   Palette sampled from the supplied NFM Lending training deck:
+   Navy #071B37 · Deep Blue #162948 · Cyan #00C0F0. */
+:root{
+  --navy:#071B37!important;
+  --navy-soft:#162948!important;
+  --navy-mid:#162948!important;
+  --accent:#071B37!important;
+  --accent-dim:rgba(0,192,240,.10)!important;
+  --accent-glow:rgba(0,192,240,.18)!important;
+  --brand:#071B37!important;
+  --v14-purple:#071B37!important;
+  --v14-purple2:#00A8D4!important;
+  --v14-soft:#F4FAFC!important;
+  --v14-line:#DCEAF0!important;
+  --v17-ink:#071B37!important;
+  --v17-muted:#637381!important;
+  --v17-purple:#071B37!important;
+  --v17-soft:#F5FAFC!important;
+  --v17-card:#FFFFFF!important;
+  --v17-border:#DCE7EC!important;
+  --border:#DDE6EB!important;
+  --border-light:#EDF3F6!important;
+  --text:#071B37!important;
+  --text-2:#526575!important;
+  --text-3:#7D8D99!important;
+  --text-4:#A7B5BE!important;
+  --bg:#F5F8FA!important;
+  --surface-2:#F1F6F8!important;
+  --lp-gavin:#071B37!important;--lp-gavin-bg:#EAF7FB!important;
+  --lp-karen:#071B37!important;--lp-karen-bg:#EAF7FB!important;
+  --lp-osgood:#071B37!important;--lp-osgood-bg:#EAF7FB!important;
+  --lp-jordan:#071B37!important;--lp-jordan-bg:#EAF7FB!important;
+  --lp-said:#071B37!important;--lp-said-bg:#EAF7FB!important;
+  --shadow-sm:0 1px 4px rgba(7,27,55,.06),0 1px 2px rgba(7,27,55,.04)!important;
+  --shadow-md:0 6px 20px rgba(7,27,55,.10),0 2px 6px rgba(7,27,55,.05)!important;
+}
+body{
+  background:radial-gradient(circle at 80% -15%,rgba(0,192,240,.075),transparent 32%),linear-gradient(180deg,#F8FBFC 0%,#F3F7F9 100%)!important;
+  color:#071B37!important;
+}
+.app-header{
+  background:linear-gradient(112deg,#071B37 0%,#0B2442 58%,#162948 100%)!important;
+  border-bottom:3px solid #00C0F0!important;
+  box-shadow:0 6px 22px rgba(7,27,55,.18)!important;
+}
+.app-header .brand-logo{color:#fff!important;letter-spacing:.11em!important}
+.app-header .brand-logo:after{content:'';display:inline-block;width:7px;height:7px;margin-left:8px;border-radius:50%;background:#00C0F0;vertical-align:2px}
+.app-header .brand-sub{color:rgba(255,255,255,.72)!important}
+.app-header .week-pill{background:rgba(255,255,255,.10)!important;border-color:rgba(255,255,255,.26)!important;color:#fff!important}
+.app-header .save-ind,#lpSyncStatusBtn{color:rgba(255,255,255,.86)!important}
+.app-header #ct-notif-bell{background:rgba(255,255,255,.10)!important;border-color:rgba(255,255,255,.24)!important;color:#fff!important}
+.who-bar{background:rgba(255,255,255,.97)!important;border-color:#DCE7EC!important;box-shadow:0 12px 34px rgba(7,27,55,.09)!important}
+.v14-nav-label{color:#718493!important}
+.v14-nav-label[style*="#071B37"]{color:#071B37!important}
+.who-btn{color:#405565!important}
+.who-btn:hover{background:#EEF8FB!important;color:#071B37!important}
+.who-btn.active{
+  background:linear-gradient(135deg,#E9F8FC,#DCF3F9)!important;
+  color:#071B37!important;
+  box-shadow:inset 3px 0 0 #00C0F0,0 2px 8px rgba(7,27,55,.05)!important;
+}
+.wb-Portfolio{background:#F1FAFC!important;color:#071B37!important;border-color:#D7EDF4!important}
+.wb-Portfolio:after{color:#00A8D4!important}
+.top-actions .btn{background:#fff!important;border-color:#D8E4EA!important;color:#071B37!important;box-shadow:0 2px 8px rgba(7,27,55,.05)!important}
+.top-actions .btn:hover{background:#EFF9FC!important;border-color:#9FD7E5!important}
+.btn-primary{background:linear-gradient(135deg,#071B37,#162948)!important;border-color:#071B37!important;box-shadow:0 3px 10px rgba(7,27,55,.16)!important;color:#fff!important}
+.btn-primary:hover{background:linear-gradient(135deg,#0B2442,#1B3558)!important;border-color:#00C0F0!important}
+.btn:not(.btn-primary):not(.btn-danger):not(.btn-success){color:#071B37!important}
+input,select,textarea{border-color:#D7E3E9!important;color:#071B37!important}
+input:focus,select:focus,textarea:focus{border-color:#00A8D4!important;box-shadow:0 0 0 3px rgba(0,192,240,.13)!important}
+.d-card,.scorecard,.call-card,.lead-card,.admin-section,.ft-summary,.ref-section,.search-panel,.lp-hero,.missed-box,.won-box,.ft-stat{
+  border-color:#DCE7EC!important;box-shadow:0 5px 18px rgba(7,27,55,.045)!important;
+}
+.lp-hero{background:linear-gradient(135deg,#071B37 0%,#162948 100%)!important;border-color:#071B37!important}
+.prog-fill{background:#00C0F0!important}
+#view-snapshot .d-card:first-of-type,#view-snapshot .scorecard:first-of-type{border-top-color:#00C0F0!important}
+#view-snapshot:before,#view-portfolio-review:before{color:#35657C!important}
+.d-tab-bar{background:#EEF5F8!important;border-color:#D8E5EB!important}
+.d-tab.active{background:#fff!important;color:#071B37!important;box-shadow:0 2px 7px rgba(7,27,55,.08)!important}
+.tbl-wrap,.ref-leads-table-wrap{border-color:#DCE7EC!important}
+table thead th{background:#F1F6F8!important;color:#4F6472!important}
+table tbody tr:hover{background:#F6FBFC!important}
+.contact-modal-overlay{background:rgba(7,27,55,.42)!important}
+.contact-modal-box{border-color:#DCE7EC!important;box-shadow:0 24px 70px rgba(7,27,55,.24)!important}
+.cm-header{border-bottom-color:#E7EFF3!important}
+/* RM/shared-context surfaces: replace the old purple accent with NFM cyan/navy. */
+#lp-facetime-focus,#lp-rm-responses,#lp-rm-relationship-notes{border-color:#D7E8EF!important;border-left-color:#00A8D4!important}
+#lp-rm-responses [style*="#071B37"],#lp-rm-relationship-notes [style*="#071B37"]{color:#071B37!important}
+#ownership-selected-count{color:#071B37!important}
+.rm-owner-tag{color:#071B37!important;background:#EAF7FB!important;border-color:#CDEAF2!important}
+/* Inline legacy purple values still used by generated rows. */
+[style*="color:#071B37"],[style*="color: #071B37"]{color:#071B37!important}
+[style*="color:#007FA4"],[style*="color: #007FA4"]{color:#007FA4!important}
+[style*="background:#EFF9FC"],[style*="background: #EFF9FC"],[style*="background:#EAF7FB"]{background:#EAF7FB!important}
+[style*="border:1px solid #CDEAF2"],[style*="border:1px solid #CDEAF2"]{border-color:#CDEAF2!important}
+[style*="border-top:1px solid #E7EFF3"]{border-top-color:#E7EFF3!important}
+@media(max-width:900px){.who-btn.active{box-shadow:inset 0 -3px 0 #00C0F0!important}}
 </style>
 
 </head>
@@ -677,7 +779,7 @@ td{line-height:1.4!important}
   <button class="btn" id="scriptsTopBtn" onclick="openScriptsModal()" style="display:flex;align-items:center;gap:6px;font-size:12px;margin-left:8px">&#128172; Scripts + Training</button>
 </div>
 <div class="who-bar" aria-label="Core Team Tracker navigation">
-  <div class="v14-nav-label" style="color:#4E3D8A;font-weight:900">LOAN PARTNERS · START HERE</div>
+  <div class="v14-nav-label" style="color:#071B37;font-weight:900">LOAN PARTNERS · START HERE</div>
   <button class="who-btn wb-Gavin" onclick="selectUser(this,'Gavin')">Gavin</button>
   <button class="who-btn wb-Karen" onclick="selectUser(this,'Karen')">Karen</button>
   <button class="who-btn wb-Osgood" onclick="selectUser(this,'Osgood')">Osgood</button>
@@ -723,7 +825,7 @@ td{line-height:1.4!important}
       </div>
     </div>
     <div style="background:#f7f4fc;border:1px solid #ded8ef;border-radius:8px;padding:10px 11px;margin:10px 0 12px">
-      <div style="font-size:10.5px;font-weight:700;color:#4E3D8A;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px">Partner Ownership</div>
+      <div style="font-size:10.5px;font-weight:700;color:#071B37;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px">Partner Ownership</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="cm-field" style="margin:0"><label>RM Owner</label><select id="lp-cm-rm-owner" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text)"><option value="">Unassigned</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option></select></div>
         <div class="cm-field" style="margin:0"><label>LP Owner</label><select id="lp-cm-lp-owner" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text)"><option value="Unassigned">Unassigned</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option></select></div>
@@ -1042,24 +1144,24 @@ td{line-height:1.4!important}
     <div id="lp-rm-flags-for-you" style="display:none;background:#fff;border:1px solid #E7C66B;border-left:4px solid #B8842B;border-radius:9px;padding:12px 14px;margin-bottom:12px">
       <div style="font-size:12.5px;font-weight:800;color:#6F4E00">RM Flags for You</div>
       <div style="font-size:11.5px;color:#6C6252;margin-top:2px">Items Amanda or Nyny sent to you for follow-up. Reply here, then mark handled when complete.</div>
-      <div id="lp-rm-flags-for-you-list" style="margin-top:8px;font-size:12px;color:#5F5874"></div>
+      <div id="lp-rm-flags-for-you-list" style="margin-top:8px;font-size:12px;color:#526575"></div>
     </div>
-    <div id="lp-rm-responses" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #4E3D8A;border-radius:9px;padding:12px 14px;margin-bottom:12px">
+    <div id="lp-rm-responses" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #071B37;border-radius:9px;padding:12px 14px;margin-bottom:12px">
       <details>
         <summary style="cursor:pointer;list-style:none">
-          <div style="font-size:12.5px;font-weight:800;color:#332B52">Recent RM Responses</div>
-          <div style="font-size:11.5px;color:#5F5874;margin-top:2px">Replies from Amanda/Nyny stay here even after the flag is marked handled. Click to expand.</div>
+          <div style="font-size:12.5px;font-weight:800;color:#071B37">Recent RM Responses</div>
+          <div style="font-size:11.5px;color:#526575;margin-top:2px">Replies from Amanda/Nyny stay here even after the flag is marked handled. Click to expand.</div>
         </summary>
-        <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#5F5874">Loading...</div>
+        <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#526575">Loading...</div>
       </details>
     </div>
     <div id="lp-rm-relationship-notes" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #6B5AA6;border-radius:9px;padding:12px 14px;margin-bottom:12px">
       <details>
         <summary style="cursor:pointer;list-style:none">
-          <div style="font-size:12.5px;font-weight:800;color:#332B52">Recent RM Relationship Notes</div>
-          <div style="font-size:11.5px;color:#5F5874;margin-top:2px">Shared RM context for your agents. Click to expand.</div>
+          <div style="font-size:12.5px;font-weight:800;color:#071B37">Recent RM Relationship Notes</div>
+          <div style="font-size:11.5px;color:#526575;margin-top:2px">Shared RM context for your agents. Click to expand.</div>
         </summary>
-        <div id="lp-rm-relationship-notes-list" style="margin-top:8px;font-size:12px;color:#5F5874">Loading...</div>
+        <div id="lp-rm-relationship-notes-list" style="margin-top:8px;font-size:12px;color:#526575">Loading...</div>
       </details>
     </div>
     <div class="search-panel">
@@ -1245,7 +1347,7 @@ td{line-height:1.4!important}
       <select id="ownership-lp-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All LP owners</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Unassigned">LP unassigned</option></select>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)">
-      <div id="ownership-selected-count" style="font-size:11.5px;font-weight:800;color:#4E3D8A;min-width:72px">0 selected</div>
+      <div id="ownership-selected-count" style="font-size:11.5px;font-weight:800;color:#071B37;min-width:72px">0 selected</div>
       <select id="ownership-bulk-rm" style="padding:7px 9px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px"><option value="__NO_CHANGE__">RM: no change</option><option value="Amanda">RM: Amanda</option><option value="Nyny">RM: Nyny</option><option value="__UNASSIGNED__">RM: Unassigned</option></select>
       <select id="ownership-bulk-lp" style="padding:7px 9px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px"><option value="__NO_CHANGE__">LP: no change</option><option value="Gavin">LP: Gavin</option><option value="Karen">LP: Karen</option><option value="Osgood">LP: Osgood</option><option value="Jordan">LP: Jordan</option><option value="Said">LP: Said</option><option value="Unassigned">LP: Unassigned</option></select>
       <button id="ownership-bulk-apply" class="btn btn-primary btn-sm" type="button" onclick="bulkApplyOwnership()" disabled>Apply to selected</button>
@@ -1464,7 +1566,7 @@ td{line-height:1.4!important}
     <div>
       <div style="font-size:18px;font-weight:800;color:var(--text-1)">Face Time Coverage</div>
       <div style="font-size:13px;color:var(--text-2);margin-top:3px">In-person relationship coverage — one shared RM + LP priority queue for break breads, office visits and agent lunches.</div>
-      <div style="font-size:12px;color:var(--text-2);margin-top:6px;background:#F4F1FA;border:1px solid #DDD6EE;border-radius:7px;padding:7px 10px;display:inline-block"><strong>Keep it simple:</strong> work the weekly focus below. Nyny can manage/log visits centrally, and Break Breads logged in the RM Tracker sync here automatically.</div>
+      <div style="font-size:12px;color:var(--text-2);margin-top:6px;background:#EFF9FC;border:1px solid #D8E4EA;border-radius:7px;padding:7px 10px;display:inline-block"><strong>Keep it simple:</strong> work the weekly focus below. Nyny can manage/log visits centrally, and Break Breads logged in the RM Tracker sync here automatically.</div>
     </div>
     <button onclick="loadFaceTime()" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:700">↺ Refresh</button>
   </div>
@@ -1477,13 +1579,13 @@ td{line-height:1.4!important}
     <div class="ft-stat"><div class="ft-stat-num" id="ft-s-ok" style="color:#0A6B4C">—</div><div class="ft-stat-label">On track</div></div>
   </div>
 
-  <div style="background:#fff;border:1.5px solid #CFC7E8;border-radius:12px;padding:16px 18px;margin-bottom:14px">
+  <div style="background:#fff;border:1.5px solid #CDEAF2;border-radius:12px;padding:16px 18px;margin-bottom:14px">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
       <div>
         <div style="font-size:14px;font-weight:800;color:var(--text-1)">This week’s Face Time focus</div>
         <div style="font-size:12px;color:var(--text-2);margin-top:2px">Top 3 per LP from the same urgency score Amanda sees: cadence + tier + relationship risk + business/growth signals. Same data, same order, one shared queue.</div>
       </div>
-      <div style="font-size:11px;font-weight:700;color:#665A86;background:#F4F1FA;border-radius:999px;padding:5px 9px">Nyny can log for anyone</div>
+      <div style="font-size:11px;font-weight:700;color:#35657C;background:#EFF9FC;border-radius:999px;padding:5px 9px">Nyny can log for anyone</div>
     </div>
     <div id="ft-priority"><div style="text-align:center;color:var(--text-3);padding:20px;font-size:13px">Loading priorities...</div></div>
   </div>
@@ -1567,7 +1669,7 @@ var RMS=["Amanda","Nyny"];
 var agentRmOwners={};
 function assignmentKey(name){return (name||"").trim().toLowerCase().replace(/\s+/g," ");}
 function getRmOwner(name){return agentRmOwners[assignmentKey(name)]||"";}
-function rmOwnerBadge(name){var o=getRmOwner(name)||"Unassigned";return '<span class="rm-owner-tag" style="font-size:10.5px;font-weight:700;color:#4E3D8A;background:#F1EEFA;border:1px solid #DED8EF;border-radius:999px;padding:2px 7px;white-space:nowrap">RM: '+escHtml(o)+'</span>';}
+function rmOwnerBadge(name){var o=getRmOwner(name)||"Unassigned";return '<span class="rm-owner-tag" style="font-size:10.5px;font-weight:700;color:#071B37;background:#EAF7FB;border:1px solid #CDEAF2;border-radius:999px;padding:2px 7px;white-space:nowrap">RM: '+escHtml(o)+'</span>';}
 var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
@@ -2730,9 +2832,9 @@ function renderCallCard(a,lp,isBonus){
   var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"")+(isPending?" pending":"");
   var html='<div class="'+cardClass+'">';
   var chkY='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-  var chkPending='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6E59A8" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  var chkPending='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A8D4" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
   var chkN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
-  html+='<button class="check-btn'+(called?' checked':'')+'" data-name="'+name+'" data-lp="'+lp+'" onclick="toggleCallFromCard(this)"'+(isPending?' style="border-color:#8B76C2;background:#F5F2FA"':'')+'>'+(called?chkY:(isPending?chkPending:chkN))+'</button>';
+  html+='<button class="check-btn'+(called?' checked':'')+'" data-name="'+name+'" data-lp="'+lp+'" onclick="toggleCallFromCard(this)"'+(isPending?' style="border-color:#00A8D4;background:#F1F6F8"':'')+'>'+(called?chkY:(isPending?chkPending:chkN))+'</button>';
   html+='<div class="call-info">';
 
   html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+displayName(name)+'</span>':displayName(name));
@@ -2891,7 +2993,7 @@ function renderLpSearch(){
     h+='<span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
     h+='<span class="lp-tag lp-tag-'+assignedLp+'">LP: '+assignedLp+'</span>';
     var rmOwner=getRmOwner(a[0])||"Unassigned";
-    h+='<span style="font-size:10.5px;font-weight:600;color:#4E3D8A;background:#F1EEFA;border:1px solid #DED8EF;border-radius:999px;padding:2px 7px">RM: '+escHtml(rmOwner)+'</span>';
+    h+='<span style="font-size:10.5px;font-weight:600;color:#071B37;background:#EAF7FB;border:1px solid #CDEAF2;border-radius:999px;padding:2px 7px">RM: '+escHtml(rmOwner)+'</span>';
     h+='<span style="font-size:11px;color:'+(ds===null||overdueDays>=0?'var(--red)':'var(--text-2)')+'">'+dsText+'</span>';
     if(!isActive(a))h+='<span class="badge badge-inactive">Inactive</span>';
     h+='</div>';
@@ -4375,7 +4477,7 @@ function buildSnapshot(){
   h+='<div style="background:#EEF1F6;border-radius:8px;padding:7px 12px;font-size:14px;font-weight:600;color:#3D4E68">'+headline+'</div>';
   h+='</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
-    +'<div style="background:#F7F5FB;border:1px solid #E7E1F0;border-radius:9px;padding:9px 11px"><div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#725EB4;margin-bottom:3px">Quote of the day</div><div style="font-size:11.5px;color:var(--text-2);font-weight:600;line-height:1.45">'+QUOTE+'</div><div style="font-size:10px;color:#725EB4;font-weight:700;margin-top:4px">'+QUOTE_AUTHOR+'</div></div>'
+    +'<div style="background:#F3F9FB;border:1px solid #DCE7EC;border-radius:9px;padding:9px 11px"><div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#007FA4;margin-bottom:3px">Quote of the day</div><div style="font-size:11.5px;color:var(--text-2);font-weight:600;line-height:1.45">'+QUOTE+'</div><div style="font-size:10px;color:#007FA4;font-weight:700;margin-top:4px">'+QUOTE_AUTHOR+'</div></div>'
     +'<div style="background:#FAF7F2;border:1px solid #E9DFD3;border-radius:9px;padding:9px 11px"><div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8C7355;margin-bottom:3px">Dad joke of the day</div><div style="font-size:11.5px;color:var(--text-2);line-height:1.45">'+DAD_JOKE+'</div></div>'
     +'</div>';
   h+='<div style="display:flex;gap:22px;flex-wrap:wrap">';
@@ -6987,7 +7089,7 @@ function renderFtPriority(){
   lps.forEach(function(lp){
     var list=ftPriorityForLp(lp,3);focusTotal+=list.length;
     html+='<div style="border-top:1px solid #ECE8F5;padding:10px 0 8px">'
-      +'<div style="font-size:12px;font-weight:800;color:#3D3562;margin-bottom:6px">'+lp+'</div>';
+      +'<div style="font-size:12px;font-weight:800;color:#071B37;margin-bottom:6px">'+lp+'</div>';
     if(!list.length){html+='<div style="font-size:12px;color:var(--text-3)">No active assigned partners.</div>';}
     list.forEach(function(a){
       var last=a.lastDate?(a.days+"d since last visit"):'No visit recorded';
@@ -6997,7 +7099,7 @@ function renderFtPriority(){
         +'<div><span style="font-size:12.5px;font-weight:700;color:var(--text-1)">'+displayName(a.name)+'</span> <span class="badge badge-'+String(a.tier).toLowerCase()+'" style="font-size:9px">'+a.tier+'</span></div>'
         +'<div style="font-size:11px;color:var(--text-3)">'+last+'</div>'
         +'<div style="font-size:11px;font-weight:700;color:'+dueColor+'">'+due+'</div>'
-        +'<span style="display:flex;gap:5px;justify-content:flex-end"><button type="button" class="ft-priority-book" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(lp)+'" data-id="'+escHtml(String(a.scheduled&&a.scheduled.id||""))+'" style="border:1px solid #BFD1C2;background:#F4F8F4;color:#365342;border-radius:6px;padding:5px 8px;font-size:10px;font-weight:700;cursor:pointer">'+(a.scheduled?'Open':'Book')+'</button><button type="button" class="ft-priority-log" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(lp)+'" style="border:1px solid #CFC7E8;background:#F4F1FA;color:#4E3D8A;border-radius:6px;padding:5px 8px;font-size:10px;font-weight:700;cursor:pointer">Log visit</button></span>'
+        +'<span style="display:flex;gap:5px;justify-content:flex-end"><button type="button" class="ft-priority-book" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(lp)+'" data-id="'+escHtml(String(a.scheduled&&a.scheduled.id||""))+'" style="border:1px solid #BFD1C2;background:#F4F8F4;color:#365342;border-radius:6px;padding:5px 8px;font-size:10px;font-weight:700;cursor:pointer">'+(a.scheduled?'Open':'Book')+'</button><button type="button" class="ft-priority-log" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(lp)+'" style="border:1px solid #CDEAF2;background:#EFF9FC;color:#071B37;border-radius:6px;padding:5px 8px;font-size:10px;font-weight:700;cursor:pointer">Log visit</button></span>'
         +'</div>';
     });
     html+='</div>';
@@ -7015,7 +7117,7 @@ function renderFtPriority(){
 async function ctLoadRecentRmResponses(lp){
   var host=document.getElementById("lp-rm-responses-list");
   if(!host)return;
-  host.innerHTML='<div style="padding:5px 0;color:#756E89">Loading responses...</div>';
+  host.innerHTML='<div style="padding:5px 0;color:#6B7E8A">Loading responses...</div>';
   try{
     var safeLp=encodeURIComponent(lp||"");
     // Pull replies AND handled flags separately, then merge them.
@@ -7057,7 +7159,7 @@ async function ctLoadRecentRmResponses(lp){
     });
     rows=rows.slice(0,15);
     if(!rows.length){
-      host.innerHTML='<div style="padding:6px 0;color:#756E89">No RM responses yet. When Amanda or Nyny replies to one of your flags, it will stay here for reference.</div>';
+      host.innerHTML='<div style="padding:6px 0;color:#6B7E8A">No RM responses yet. When Amanda or Nyny replies to one of your flags, it will stay here for reference.</div>';
       return;
     }
     var html='<div style="max-height:280px;overflow-y:auto;padding-right:3px">';
@@ -7071,24 +7173,24 @@ async function ctLoadRecentRmResponses(lp){
       var status=missingResponse?"Handled · no response saved":(r.handled?"Handled":"Reply sent · still open");
       var statusColor=missingResponse?"#6B5E3E":(r.handled?"#15803d":"#B7791F");
       var statusBg=missingResponse?"#F8F3E7":(r.handled?"#ECFDF3":"#FFF8E8");
-      html+='<div style="padding:10px 0;'+(i?'border-top:1px solid #EEEAF6;':'')+'">'
+      html+='<div style="padding:10px 0;'+(i?'border-top:1px solid #E7EFF3;':'')+'">'
         +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">'
-          +'<div style="font-size:13px;font-weight:800;color:#28213F">'+escHtml(agent)+'</div>'
+          +'<div style="font-size:13px;font-weight:800;color:#071B37">'+escHtml(agent)+'</div>'
           +'<div style="font-size:10.5px;font-weight:800;color:'+statusColor+';background:'+statusBg+';border-radius:999px;padding:3px 8px">'+status+'</div>'
         +'</div>'
-        +(flagText?'<div style="font-size:11.5px;color:#665E78;margin-top:5px;line-height:1.45"><span style="font-weight:700">Your flag:</span> '+escHtml(flagText)+'</div>':'')
+        +(flagText?'<div style="font-size:11.5px;color:#526575;margin-top:5px;line-height:1.45"><span style="font-weight:700">Your flag:</span> '+escHtml(flagText)+'</div>':'')
         +(missingResponse
           ?'<div style="margin-top:6px;background:#FAF7EF;border:1px solid #E7DCC3;border-radius:7px;padding:8px 10px">'
             +'<div style="font-size:10.5px;font-weight:800;color:#6B5E3E;margin-bottom:3px">Handled'+(when?" · "+escHtml(when):"")+'</div>'
-            +'<div style="font-size:12px;color:#5F5874;line-height:1.5">No RM response was recorded before this flag was handled. This can happen with flags cleared in an older tracker version.</div>'
+            +'<div style="font-size:12px;color:#526575;line-height:1.5">No RM response was recorded before this flag was handled. This can happen with flags cleared in an older tracker version.</div>'
           +'</div>'
           :'<div style="margin-top:6px;background:#F3F8F3;border:1px solid #CFE5D2;border-radius:7px;padding:8px 10px">'
-            +'<div style="font-size:10.5px;font-weight:800;color:#4E3D8A;margin-bottom:3px">RM response'+(by?" · "+escHtml(by):"")+(when?" · "+escHtml(when):"")+'</div>'
+            +'<div style="font-size:10.5px;font-weight:800;color:#071B37;margin-bottom:3px">RM response'+(by?" · "+escHtml(by):"")+(when?" · "+escHtml(when):"")+'</div>'
             +'<div style="font-size:12.5px;color:#243124;line-height:1.5">'+escHtml(response)+'</div>'
           +'</div>')
       +'</div>';
     });
-    html+='</div><div style="font-size:10.5px;color:#756E89;margin-top:7px">Showing the 15 most recent RM flag outcomes for '+escHtml(lp)+'. Handled flags remain here even when no RM response was recorded. Open items still appear in the bell until handled.</div>';
+    html+='</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">Showing the 15 most recent RM flag outcomes for '+escHtml(lp)+'. Handled flags remain here even when no RM response was recorded. Open items still appear in the bell until handled.</div>';
     host.innerHTML=html;
   }catch(e){
     console.error("RM response history failed",e);
@@ -7100,7 +7202,7 @@ window.ctLoadRecentRmResponses=ctLoadRecentRmResponses;
 
 async function ctLoadRecentRmRelationshipNotes(lp){
   var host=document.getElementById("lp-rm-relationship-notes-list");if(!host)return;
-  host.innerHTML='<div style="padding:5px 0;color:#756E89">Loading RM notes...</div>';
+  host.innerHTML='<div style="padding:5px 0;color:#6B7E8A">Loading RM notes...</div>';
   try{
     var safeLp=encodeURIComponent(lp||""),cut=new Date();cut.setDate(cut.getDate()-45);var cutStr=localDateStr(cut);
     var results=await Promise.all([
@@ -7114,11 +7216,11 @@ async function ctLoadRecentRmRelationshipNotes(lp){
       if(typeof lpIsInternalRmActivity==="function"&&lpIsInternalRmActivity(a))return false;
       return !ctIsDirectorLeadership(a.act_type);
     }).slice(0,15);
-    if(!rows.length){host.innerHTML='<div style="padding:6px 0;color:#756E89">No recent RM notes for your assigned agents.</div>';return;}
+    if(!rows.length){host.innerHTML='<div style="padding:6px 0;color:#6B7E8A">No recent RM notes for your assigned agents.</div>';return;}
     host.innerHTML='<div style="max-height:300px;overflow-y:auto;padding-right:3px">'+rows.map(function(a,i){
       var owner=ctRmOwnerFromNotes(a.notes),note=ctStripRmMeta(a.notes),date=a.act_date?fmt(a.act_date):"";
-      return'<div style="padding:9px 0;'+(i?'border-top:1px solid #EEEAF6;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="font-size:12.5px;font-weight:800;color:#28213F">'+escHtml(displayName(a.agent_name||"Agent"))+'</div><div style="font-size:10.5px;color:#756E89">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div></div><div style="font-size:12px;color:#514A61;line-height:1.5;margin-top:4px">'+escHtml(note)+'</div>'+(a.outcome?'<div style="font-size:10.5px;color:#756E89;margin-top:3px">Outcome: '+escHtml(a.outcome)+(a.follow_up_date?' · Follow-up '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')+'</div>';
-    }).join("")+'</div><div style="font-size:10.5px;color:#756E89;margin-top:7px">Showing recent relationship notes from the RM tracker for agents assigned to '+escHtml(lp)+'.</div>';
+      return'<div style="padding:9px 0;'+(i?'border-top:1px solid #E7EFF3;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="font-size:12.5px;font-weight:800;color:#071B37">'+escHtml(displayName(a.agent_name||"Agent"))+'</div><div style="font-size:10.5px;color:#6B7E8A">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div></div><div style="font-size:12px;color:#405565;line-height:1.5;margin-top:4px">'+escHtml(note)+'</div>'+(a.outcome?'<div style="font-size:10.5px;color:#6B7E8A;margin-top:3px">Outcome: '+escHtml(a.outcome)+(a.follow_up_date?' · Follow-up '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')+'</div>';
+    }).join("")+'</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">Showing recent relationship notes from the RM tracker for agents assigned to '+escHtml(lp)+'.</div>';
   }catch(e){console.error("RM relationship notes failed",e);host.innerHTML='<div style="padding:6px 0;color:#A32D2D">Could not load RM notes.</div>';}
 }
 window.ctLoadRecentRmRelationshipNotes=ctLoadRecentRmRelationshipNotes;
@@ -7136,7 +7238,7 @@ async function ctLoadRmFlagsForLp(lp){
       html+='<div style="font-size:10.5px;font-weight:800;color:#8A5A00;text-transform:uppercase;letter-spacing:.04em;margin:4px 0">Needs your attention · '+open.length+'</div>';
       html+=open.map(function(r,i){
         var rid=String(r.id),reply=String(r.lp_note||""),date=String(r.created_at||"").slice(0,10);
-        return'<div style="padding:9px 0;'+(i?'border-top:1px solid #F0E4C2;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong style="font-size:12.5px;color:#352D1D">'+escHtml(displayName(r.agent_name||"General"))+'</strong><div style="font-size:10.5px;color:#7B6E52;margin-top:2px">From '+escHtml(r.created_by||"RM")+(date?' · '+escHtml(fmt(date)):'')+'</div></div><span style="font-size:10px;font-weight:800;color:#8A5A00;background:#FFF3C7;border-radius:999px;padding:3px 7px">OPEN</span></div><div style="font-size:12px;color:#514A3A;line-height:1.5;margin-top:5px"><strong>RM note:</strong> '+escHtml(r.note||"")+'</div><textarea id="rm-lp-reply-'+rid+'" rows="2" placeholder="Reply back to RM..." style="width:100%;box-sizing:border-box;margin-top:7px;border:1px solid #DDCFA8;border-radius:7px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical">'+escHtml(reply)+'</textarea><div style="display:flex;gap:7px;justify-content:flex-end;margin-top:6px"><button type="button" onclick="ctReplyToRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:1px solid #D7B85E;background:#FFF8E8;color:#745000;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Send reply</button><button type="button" onclick="ctHandleRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:0;background:#4E3D8A;color:#fff;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Mark handled</button></div></div>';
+        return'<div style="padding:9px 0;'+(i?'border-top:1px solid #F0E4C2;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong style="font-size:12.5px;color:#352D1D">'+escHtml(displayName(r.agent_name||"General"))+'</strong><div style="font-size:10.5px;color:#7B6E52;margin-top:2px">From '+escHtml(r.created_by||"RM")+(date?' · '+escHtml(fmt(date)):'')+'</div></div><span style="font-size:10px;font-weight:800;color:#8A5A00;background:#FFF3C7;border-radius:999px;padding:3px 7px">OPEN</span></div><div style="font-size:12px;color:#514A3A;line-height:1.5;margin-top:5px"><strong>RM note:</strong> '+escHtml(r.note||"")+'</div><textarea id="rm-lp-reply-'+rid+'" rows="2" placeholder="Reply back to RM..." style="width:100%;box-sizing:border-box;margin-top:7px;border:1px solid #DDCFA8;border-radius:7px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical">'+escHtml(reply)+'</textarea><div style="display:flex;gap:7px;justify-content:flex-end;margin-top:6px"><button type="button" onclick="ctReplyToRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:1px solid #D7B85E;background:#FFF8E8;color:#745000;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Send reply</button><button type="button" onclick="ctHandleRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:0;background:#071B37;color:#fff;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Mark handled</button></div></div>';
       }).join("");
     }else html+='<div style="font-size:11.5px;color:#6C6252;padding:4px 0">No open RM flags for you right now.</div>';
     if(handled.length){
@@ -7165,10 +7267,10 @@ function renderLpFaceTimeFocus(lp){
   if(!Object.keys(ftData||{}).length){el.style.display="none";return;}
   var list=ftPriorityForLp(lp,3);if(!list.length){el.style.display="none";return;}
   el.style.display="block";
-  var html='<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px"><div><div style="font-size:12.5px;font-weight:800;color:#3D3562">Face Time — your next 3</div><div style="font-size:11px;color:var(--text-2);margin-top:1px">You do not need to work the full Face Time tab. Start here.</div></div><button type="button" onclick="selectUser(document.querySelector(\'.wb-FaceTime\'),\'FaceTime\')" style="border:0;background:transparent;color:#4E3D8A;font-size:11px;font-weight:800;cursor:pointer">Open Face Time →</button></div>';
+  var html='<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px"><div><div style="font-size:12.5px;font-weight:800;color:#071B37">Face Time — your next 3</div><div style="font-size:11px;color:var(--text-2);margin-top:1px">You do not need to work the full Face Time tab. Start here.</div></div><button type="button" onclick="selectUser(document.querySelector(\'.wb-FaceTime\'),\'FaceTime\')" style="border:0;background:transparent;color:#071B37;font-size:11px;font-weight:800;cursor:pointer">Open Face Time →</button></div>';
   list.forEach(function(a){
     var due=a.days===null?'No visit recorded':(a.days>=a.target?'Overdue '+(a.days-a.target)+'d':'Due in '+(a.target-a.days)+'d');
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid #EEEAF6"><div style="font-size:12px;font-weight:700;color:var(--text-1)">'+displayName(a.name)+' <span style="font-size:9px;color:#746A8D">'+a.tier+'</span></div><div style="font-size:11px;color:'+(a.days===null||a.days>=a.target?'#A32D2D':'#5C4A35')+';font-weight:700">'+due+'</div></div>';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid #E7EFF3"><div style="font-size:12px;font-weight:700;color:var(--text-1)">'+displayName(a.name)+' <span style="font-size:9px;color:#6B7E8A">'+a.tier+'</span></div><div style="font-size:11px;color:'+(a.days===null||a.days>=a.target?'#A32D2D':'#5C4A35')+';font-weight:700">'+due+'</div></div>';
   });
   el.innerHTML=html;
 }
