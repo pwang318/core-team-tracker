@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260819-v31">
+  <meta name="version" content="20260819-v35">
   <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -312,8 +312,8 @@ tr:hover td{background:var(--bg)}
 .ref-refresh-btn{font-size:11px;color:var(--text-2);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:600}
 .ref-refresh-btn:hover{background:var(--bg)}
 .touch-badge{display:inline-flex;align-items:center;gap:4px;background:var(--red-light);border:1px solid var(--red-border);color:var(--red);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px}
-.rm-flag-btn{display:flex;align-items:center;gap:8px;width:100%;padding:11px 14px;border-radius:8px;border:2px solid #f59e0b;background:#FAF7F2;color:#5C4A35;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
-.rm-flag-btn:hover{background:#FAF7F2}
+.rm-flag-btn{display:inline-flex;align-items:center;gap:6px;width:auto;padding:7px 10px;border-radius:8px;border:1px solid #D8D1E6;background:#F8F6FC;color:#574C6D;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.rm-flag-btn:hover{background:#F1EDF8}
 .rm-flag-btn.is-flagged{border-color:#dc2626;background:#fef2f2;color:#991b1b}
 .rm-flag-btn.is-flagged:hover{background:#fee2e2}
 .rm-flag-icon{font-size:16px;flex-shrink:0}
@@ -339,6 +339,31 @@ tr:hover td{background:var(--bg)}
   .lpsc-print-name{display:block!important;font-size:18px;font-weight:700;color:#000;margin-bottom:10px}
   #lpsc-summary{grid-template-columns:repeat(3,1fr)!important}
   .scorecard,#lpsc-table-wrap,#lpsc-charts>div{break-inside:avoid;page-break-inside:avoid}
+}
+
+
+/* v36 — simplified LP daily card: data stays available, but the work screen only shows what helps the next action */
+.ct-focus-line{margin-top:7px;padding:8px 10px;border-radius:8px;background:#F5F8FC;border:1px solid #DCE5F0;font-size:11.5px;color:#34445B;line-height:1.4}
+.ct-focus-line strong{color:#1F4E79}
+.ct-business-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.ct-business-chip{font-size:10.5px;font-weight:700;color:#586477;background:#F6F7F9;border:1px solid #E1E5EA;border-radius:999px;padding:3px 7px}
+.ct-business-chip.hot{color:#315B40;background:#EDF7F0;border-color:#CFE3D5}
+.ct-contact-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:7px;padding:6px 9px;background:#FBFBFD;border-radius:7px;border:1px solid #ECE9F2}
+.ct-context-details{margin-top:7px;border-top:1px solid #EFEAF4;padding-top:6px}
+.ct-context-details summary{cursor:pointer;color:#746B82;font-size:10.5px;font-weight:700;list-style:none}
+.ct-context-details summary::-webkit-details-marker{display:none}
+.ct-context-body{margin-top:6px;padding:8px 10px;border-radius:8px;background:#FAF9FC;font-size:11px;color:#5E566B;line-height:1.5}
+.ct-log-box{margin-top:9px;border-top:1px solid #ECE8F1;padding-top:9px}
+.ct-log-title{font-size:10.5px;font-weight:800;color:#5E556D;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.ct-inline-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:7px}
+.received-lead-btn{display:inline-flex;align-items:center;gap:5px;width:auto!important;margin:0!important;padding:7px 10px!important;border:1px solid #D8D1E6!important;border-radius:8px!important;background:#F8F6FC!important;color:#574C6D!important;font-size:11.5px!important;font-weight:700!important;cursor:pointer}
+.received-lead-btn.is-received{background:#EDF7F0!important;border-color:#CFE3D5!important;color:#315B40!important}
+.ct-done-summary{margin-top:7px;padding:7px 9px;border-radius:7px;background:#F1F8F5;border:1px solid #D4E7DC;font-size:11.5px;color:#3C5C49;line-height:1.4}
+.ct-simple-note{height:54px!important;min-height:54px!important}
+@media(max-width:600px){
+  .ct-contact-bar{gap:8px}
+  .ct-log-box .outcome-row{grid-template-columns:1fr 1fr!important}
+  .ct-context-body{font-size:11.5px}
 }
 
 /* ══════════════════════════════════════════════════════
@@ -624,7 +649,7 @@ td{line-height:1.4!important}
 
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v32.0</div>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v35.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -760,6 +785,8 @@ td{line-height:1.4!important}
         <div style="font-size:11px;font-weight:800;color:#1F4E79;text-transform:uppercase;letter-spacing:.55px;margin-bottom:4px">Listing Agent Conversion Playbook</div>
         <div style="font-size:15px;font-weight:750;color:var(--text);margin-bottom:6px">Turn every eligible transaction into a retained Realtor meeting opportunity</div>
         <div style="font-size:12.5px;color:var(--text-2);line-height:1.55;margin-bottom:8px">This is demonstrative selling, not a cold pitch. You already have a transaction, a reason to call, and multiple chances to show the listing agent how the team operates.</div>
+        <div style="background:#fff;border:1px solid #D7E2EF;border-radius:8px;padding:9px 10px;margin-bottom:9px;font-size:11.5px;color:var(--text-2);line-height:1.5"><strong style="color:#1F4E79">Scoreboard:</strong> retained Realtor meetings per closed purchase transaction. A training example showed 74 retained meetings from 357 purchase closings — the opportunity was not more transactions, it was executing the conversion moments already available.</div>
+        <details style="margin-bottom:10px"><summary style="cursor:pointer;font-size:11.5px;font-weight:750;color:#5A5570">Why listing-agent conversions get missed ▾</summary><div style="font-size:11.5px;color:var(--text-2);line-height:1.55;margin-top:6px;padding-left:8px"><div>• Never ask, or ask after the transaction when urgency is gone.</div><div>• Execute well but never intentionally connect performance to a meeting.</div><div>• Use generic follow-up instead of a defined script and cadence.</div><div>• Earn the meeting with a commitment close, then fail to call and collect it at CTC.</div><div style="margin-top:5px"><strong>Best posture:</strong> neither pushy nor passive. Ask early, deliver what matters, and collect the meeting before funding.</div></div></details>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:7px;margin-bottom:8px">
           <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px"><strong style="font-size:11px;color:#1F4E79">CHECK</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Run the active-agent search first. If they already work with an NFM LO, protect that relationship.</div></div>
           <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px"><strong style="font-size:11px;color:#1F4E79">ASK EARLY</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Use the intro call to learn what matters and secure the conditional 15-minute meeting.</div></div>
@@ -945,6 +972,7 @@ td{line-height:1.4!important}
       <div style="font-size:12.5px;color:var(--text-2);margin-bottom:14px;padding-left:10px">Invites specific, actionable feedback and deepens trust simultaneously. The agent who answers this honestly is the one you'll earn 100% of business from.</div>
       <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Pre-Approval Pipeline Playbook</div>
       <div style="font-size:12.5px;color:var(--text-2);line-height:1.55;margin-bottom:9px">Protect the buyers already earned before defaulting to “more leads.” Generic check-ins create a silent pipeline leak; every touch should create an opportunity around a property, payment, showing, or changed timeline.</div>
+      <div style="background:#F4F7FB;border:1px solid #D7E2EF;border-radius:8px;padding:9px 11px;margin-bottom:10px;font-size:11.5px;color:var(--text-2);line-height:1.5"><strong style="color:#1F4E79">Why the pipeline review matters:</strong> in one training test, sending Realtors their recent pre-approved-buyer lists generated 12 referred leads and 10 new applications over a weekend. Treat the existing pipeline as a growth channel, not just a service task.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:7px;margin-bottom:10px">
         <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11.5px;color:#1F4E79">Week 1</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Call about questions on strategy/programs and identify anything that changed.</div></div>
         <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11.5px;color:#1F4E79">Weeks 2–3</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Text around showings/properties; offer a concrete payment scenario.</div></div>
@@ -957,6 +985,30 @@ td{line-height:1.4!important}
       <ol style="font-size:12.5px;color:var(--text-2);line-height:1.65;margin:0 0 10px;padding-left:20px"><li>Are they actively looking?</li><li>Do they have showings this week?</li><li>Have they gone stalled?</li><li>What is preventing movement?</li><li>What is the next action and who owns it?</li></ol>
       <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text-2);margin-bottom:8px"><strong>Buyer switched agents?</strong> Send the new agent the updated pre-approval with highlights, call immediately to introduce yourself and offer help, then create a three-way text with the buyer and new agent. Treat it as a warm new-agent conversion opportunity.</div>
       <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text-2);margin-bottom:8px"><strong>Encompass:</strong> the Pre-Approved Buyer box needs to be checked so the pipeline can be pulled by Realtor and the correct Total Expert journey can run.</div>
+      </div>
+    </details>
+
+    <details class="script-cat" data-script-cat="meeting-training" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
+      <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
+        <span>Initial Realtor Meeting Framework<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Control the meeting, understand the agent, prove value, and earn the next 2–3 buyers</span></span>
+        <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">training</span>
+      </summary>
+      <div class="script-cat-body" style="padding:14px 14px 4px">
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.55;margin-bottom:10px"><strong>Goal:</strong> establish control, learn what matters to the Realtor, and demonstrate value so the team becomes the obvious lending choice. The activation target is a first lead within 90 days.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px;margin-bottom:12px">
+          <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11px;color:#1F4E79">1 · OPEN WITH CONTROL</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Use a strong 30-second intro, a quick honor statement, and a clear outline for the conversation.</div></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11px;color:#1F4E79">2 · LEARN FIRST</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Do not jump to rates or products. Learn their priorities, pain points, current lender setup, and business goals.</div></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11px;color:#1F4E79">3 · PROVE VALUE</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Connect our service to what they said matters: speed, communication, access, execution, and business-growth support.</div></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11px;color:#1F4E79">4 · CLOSE FOR ACTION</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Ask for the next 2–3 buyers and leave with a defined follow-up plan, not a vague “keep in touch.”</div></div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Needs analysis</div>
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px">Use FORGE-style rapport questions around family, occupation, recreation and goals, then transition into their business. Listen, take notes, and tailor the rest of the meeting to what they tell you.</div>
+        <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Proof + collateral</div>
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px">Use the Standards of Service plus approved collateral such as 10 Ways to Win, 5-Year Rate Drop Watch, and Multiple Offer Win. Reinforce immediate lead response, strong access, proactive communication, and the team’s fast-close capability.</div>
+        <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Affiliated-lender objection</div>
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px">Research the agent before the meeting. If they use an affiliated lender, position the team as specialized expertise and a strong second option rather than attacking the existing relationship. Use proof and case studies, not pressure.</div>
+        <div style="background:#1E2B3A;color:#fff;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12.5px;font-style:italic">“I’d love the opportunity to earn the next two or three buyers that come your way so you can experience how we communicate and execute. Can I earn that chance?”</div>
+        <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text-2);margin-bottom:8px"><strong>First-lead conversion:</strong> once the first referred buyer has a great experience, ask the buyer to text the Realtor with positive feedback. That third-party proof strengthens the relationship faster than another sales pitch.</div>
       </div>
     </details>
     <button class="btn btn-sm" onclick="closeScriptsModal()" style="margin-top:8px">Close</button>
@@ -993,14 +1045,22 @@ td{line-height:1.4!important}
       <div id="lp-rm-flags-for-you-list" style="margin-top:8px;font-size:12px;color:#5F5874"></div>
     </div>
     <div id="lp-rm-responses" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #4E3D8A;border-radius:9px;padding:12px 14px;margin-bottom:12px">
-      <div style="font-size:12.5px;font-weight:800;color:#332B52">Recent RM Responses</div>
-      <div style="font-size:11.5px;color:#5F5874;margin-top:2px">Replies from Amanda/Nyny stay here even after the flag is marked handled.</div>
-      <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#5F5874">Loading...</div>
+      <details>
+        <summary style="cursor:pointer;list-style:none">
+          <div style="font-size:12.5px;font-weight:800;color:#332B52">Recent RM Responses</div>
+          <div style="font-size:11.5px;color:#5F5874;margin-top:2px">Replies from Amanda/Nyny stay here even after the flag is marked handled. Click to expand.</div>
+        </summary>
+        <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#5F5874">Loading...</div>
+      </details>
     </div>
     <div id="lp-rm-relationship-notes" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #6B5AA6;border-radius:9px;padding:12px 14px;margin-bottom:12px">
-      <div style="font-size:12.5px;font-weight:800;color:#332B52">Recent RM Relationship Notes</div>
-      <div style="font-size:11.5px;color:#5F5874;margin-top:2px">What Amanda or Nyny documented after speaking with agents assigned to you. This is shared relationship context — no need to ask the RM what was discussed.</div>
-      <div id="lp-rm-relationship-notes-list" style="margin-top:8px;font-size:12px;color:#5F5874">Loading...</div>
+      <details>
+        <summary style="cursor:pointer;list-style:none">
+          <div style="font-size:12.5px;font-weight:800;color:#332B52">Recent RM Relationship Notes</div>
+          <div style="font-size:11.5px;color:#5F5874;margin-top:2px">Shared RM context for your agents. Click to expand.</div>
+        </summary>
+        <div id="lp-rm-relationship-notes-list" style="margin-top:8px;font-size:12px;color:#5F5874">Loading...</div>
+      </details>
     </div>
     <div class="search-panel">
       <div class="search-panel-title">&#128269; Search &amp; Log Any Agent</div>
@@ -1381,12 +1441,12 @@ td{line-height:1.4!important}
       </div>
       <div id="lp-assign-list" style="max-height:500px;overflow-y:auto"></div>
     </div>
-    <!-- SYSTEM HEALTH — lightweight, existing data only, no new tables required for this section -->
-    <div class="admin-section" id="system-health-section">
-      <h3>System Health</h3>
-      <p style="font-size:12px;color:#888;margin-bottom:.75rem">Data-quality checks computed from current shared data — not a separate dashboard, just a quick proactive glance.</p>
+    <!-- DATA CHECKS — intentionally collapsed so normal Admin work stays calm and uncluttered -->
+    <details class="admin-section" id="system-health-section">
+      <summary style="cursor:pointer;font-size:12.5px;font-weight:750;color:var(--text);list-style:none">Data checks <span style="font-size:10.5px;font-weight:500;color:var(--text-3)">· open only when troubleshooting</span></summary>
+      <p style="font-size:11.5px;color:#888;margin:.65rem 0">Background data-quality checks. These do not change portfolio numbers by themselves.</p>
       <div id="system-health-list" style="font-size:12px"></div>
-    </div>
+    </details>
   </div>
 </div>
 <!-- FACE TIME VIEW -->
@@ -1394,12 +1454,13 @@ td{line-height:1.4!important}
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:10px">
     <div>
       <div style="font-size:18px;font-weight:800;color:var(--text-1)">Face Time Coverage</div>
-      <div style="font-size:13px;color:var(--text-2);margin-top:3px">In-person relationship coverage — break breads, office visits and agent lunches.</div>
+      <div style="font-size:13px;color:var(--text-2);margin-top:3px">In-person relationship coverage — one shared RM + LP priority queue for break breads, office visits and agent lunches.</div>
       <div style="font-size:12px;color:var(--text-2);margin-top:6px;background:#F4F1FA;border:1px solid #DDD6EE;border-radius:7px;padding:7px 10px;display:inline-block"><strong>Keep it simple:</strong> work the weekly focus below. Nyny can manage/log visits centrally, and Break Breads logged in the RM Tracker sync here automatically.</div>
     </div>
     <button onclick="loadFaceTime()" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:700">↺ Refresh</button>
   </div>
 
+  <div id="ft-scheduled-shared" style="margin-bottom:12px"></div>
   <div class="ft-summary">
     <div class="ft-stat"><div class="ft-stat-num" id="ft-s-mtd" style="color:#1F4E79">—</div><div class="ft-stat-label">Visits logged MTD</div></div>
     <div class="ft-stat"><div class="ft-stat-num" id="ft-s-focus" style="color:#7C3F00">—</div><div class="ft-stat-label">Weekly focus</div></div>
@@ -1411,7 +1472,7 @@ td{line-height:1.4!important}
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
       <div>
         <div style="font-size:14px;font-weight:800;color:var(--text-1)">This week’s Face Time focus</div>
-        <div style="font-size:12px;color:var(--text-2);margin-top:2px">Top 3 relationships per LP. Channel/A first, then B/C. This is the working list — not the entire backlog.</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:2px">Top 3 per LP from the same urgency score Amanda sees: cadence + tier + relationship risk + business/growth signals. Same data, same order, one shared queue.</div>
       </div>
       <div style="font-size:11px;font-weight:700;color:#665A86;background:#F4F1FA;border-radius:999px;padding:5px 9px">Nyny can log for anyone</div>
     </div>
@@ -1554,7 +1615,7 @@ function syncLiveVelocifyDatesIntoAgents(){
     if(live&&(!a[3]||live>a[3]))a[3]=live;
   });
 }
-function isActive(a){var d=mostRecent(a);return d?new Date(d+'T12:00:00')>=CUTOFF:false;}
+function isActive(a){var d=[a[3],a[6]].filter(Boolean).sort().reverse()[0]||null;return d?new Date(d+'T12:00:00')>=CUTOFF:false;}
 function lpOutcomeKey(outcome){return String(outcome||"").trim().toLowerCase();}
 function lpHasLiveConnectionLog(log){
   if(!log)return false;
@@ -2506,303 +2567,121 @@ function renderLP(lp){
   },0);
 }
 
-function countWords(s){return s.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;}
+
+function ctGetPbAgentSnapshot(name){
+  var snap=window.CT_POWERBI_SNAPSHOT||null;
+  if(!snap){try{snap=JSON.parse(localStorage.getItem("ct_powerbi_snapshot_v1")||"null");}catch(e){snap=null;}}
+  if(!snap||!snap.by_agent)return null;
+  var raw=(name||"").trim().toLowerCase();
+  if(snap.by_agent[raw])return snap.by_agent[raw];
+  var wanted=typeof ctAgentNameKey==="function"?ctAgentNameKey(name):raw.replace(/\s+/g," ");
+  var keys=Object.keys(snap.by_agent);
+  for(var i=0;i<keys.length;i++){
+    var row=snap.by_agent[keys[i]]||{};
+    var k=typeof ctAgentNameKey==="function"?ctAgentNameKey(row.name||keys[i]):String(row.name||keys[i]).trim().toLowerCase().replace(/\s+/g," ");
+    if(k===wanted)return row;
+  }
+  return null;
+}
 
 function renderCallCard(a,lp,isBonus){
-  var called=calledThisWeek(a[0]),ds=effectiveDays(a),act=mostRecent(a),pri=isPriority(a);
-  var isCarryover=(typeof lastWeekLogs!=="undefined")&&getLpMissedLastWeek(a[2]).some(function(x){return x[0]===a[0];});
-  var isPending=!!(pendingNote&&pendingNote[a[0]]);
-  var log=callLogs[a[0]],note=log?log.note:"",outcome=log?log.outcome||"":"";
-  var safeId=a[0].replace(/\s+/g,'_');
-  var velData=getVelocifyForAgent(a[0]);
-  var velTotal=velData?velData.total:0,velMtd=velData?velData.mtd:0;
-  var lastNote=prevNotes[a[0]]||null;
-  var rmAct=rmActivity[a[0]]||rmActivity[(a[0]||"").toUpperCase()]||null;
-  var selfRefs=selfReportedReferrals[a[0]]||0;
-  var firstCall=agentFirstCall[a[0]]||null;
-  var daysSinceFirst=firstCall?Math.floor((TODAY-new Date(firstCall+"T12:00:00"))/86400000):0;
-  var noReferralFlag=daysSinceFirst>=90&&velTotal===0&&selfRefs===0&&!isBonus;
+  var name=a[0],called=calledThisWeek(name),ds=effectiveDays(a),act=mostRecent(a),pri=isPriority(a);
+  var isCarryover=(typeof lastWeekLogs!=="undefined")&&getLpMissedLastWeek(a[2]).some(function(x){return x[0]===name;});
+  var isPending=!!(pendingNote&&pendingNote[name]);
+  var log=callLogs[name],note=log?log.note:"",outcome=log?log.outcome||"":"";
+  var safeId=name.replace(/\s+/g,'_');
+  var velData=getVelocifyForAgent(name)||{};
+  var velTotal=Number(velData.total||0),velMtd=Number(velData.mtd||0),velLastDate=velData.last_lead_date||null;
+  var lastNote=prevNotes[name]||null;
+  var rmAct=rmActivity[name]||rmActivity[(name||"").toUpperCase()]||null;
+  var firstCall=agentFirstCall[name]||null;
   var assignedLp=a[2]&&a[2]!=="Unassigned"?a[2]:null;
-  var overdueDays=daysOverdue(a);
-  var tw=tierWindow(a);
-  var dsText="";
-  var dueLabel="";
-  if(ds===null){
-    dsText="Never contacted";
-    dueLabel="never called";
-  } else if(ds===0){
-    dsText="Contacted today";
-  } else if(!calledThisWeek(a[0])&&!isBonus){
-    if(overdueDays>=0){
-      dsText=overdueDays+"d overdue";
-      dueLabel=a[1]+"-tier — call every "+tw+"d";
-    } else {
-      dsText="Due in "+Math.abs(overdueDays)+"d";
-      dueLabel=a[1]+"-tier — call every "+tw+"d";
-    }
-  } else {
-    dsText=ds+"d since last touch";
-  }
+  var overdueDays=daysOverdue(a),tw=tierWindow(a);
+  var pbInfo=ctGetPbAgentSnapshot(name)||{};
+  var preq=Number(pbInfo.active_prequals||0),pipe=Number(pbInfo.active_pipeline||0);
+
+  var dsText="",dueLabel="";
+  if(ds===null){dsText="Never contacted";dueLabel="Call due";}
+  else if(ds===0){dsText="Contacted today";}
+  else if(!calledThisWeek(name)&&!isBonus){
+    if(overdueDays>=0){dsText=overdueDays+"d overdue";dueLabel="Every "+tw+"d";}
+    else{dsText="Due in "+Math.abs(overdueDays)+"d";dueLabel="Every "+tw+"d";}
+  }else{dsText=ds+"d since touch";}
+
+  var focus="";
+  if(velMtd>0)focus="Thank them for "+velMtd+" lead"+(velMtd===1?"":"s")+" this month and ask what the buyer needs next.";
+  else if(preq>0||pipe>0)focus="Ask about the active pipeline — "+preq+" prequal"+(preq===1?"":"s")+" and "+pipe+" in process.";
+  else if(velTotal>0)focus="They have sent business before but none this month — ask what buyers are active right now.";
+  else if(a[1]==="A"||a[1]==="Channel")focus="Protect the relationship — ask about pipeline, listings, and where the team can make things easier.";
+  else if(a[1]==="B")focus="Growth call — ask what would make them more comfortable sending the next buyer.";
+  else focus="Relationship call — ask what they are working on and offer one useful financing strategy.";
+
   var cardClass="call-card"+(pri&&!isBonus?" priority":"")+(called?" done":"")+(isBonus?" bonus":"")+(isPending?" pending":"");
-
   var html='<div class="'+cardClass+'">';
-
-  // Check button — circle on left
   var chkY='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-  var chkPending='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  var chkPending='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6E59A8" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
   var chkN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"></path></svg>';
-  var chk=called?chkY:(isPending?chkPending:chkN);
-  var btnStyle=isPending?"border-color:#d97706;background:#FAF7F2":"";
-  html+='<button class="check-btn'+(called?" checked":"")+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="toggleCallFromCard(this)" style="'+btnStyle+'">'+chk+'</button>';
-
+  html+='<button class="check-btn'+(called?' checked':'')+'" data-name="'+name+'" data-lp="'+lp+'" onclick="toggleCallFromCard(this)"'+(isPending?' style="border-color:#8B76C2;background:#F5F2FA"':'')+'>'+(called?chkY:(isPending?chkPending:chkN))+'</button>';
   html+='<div class="call-info">';
 
-  // Name row
-  html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+displayName(a[0])+'</span>':displayName(a[0]));
+  html+='<div class="call-name">'+(called?'<span style="text-decoration:line-through;color:var(--text-3)">'+displayName(name)+'</span>':displayName(name));
   if(pri&&!called&&!isBonus)html+='<span class="priority-tag">PRIORITY</span>';
   if(isCarryover&&!called&&!isBonus)html+='<span class="carryover-tag">Missed last week</span>';
-  
   html+='</div>';
 
-  // Meta row — badge, LP days, last activity
-  html+='<div class="call-meta"><span class="badge badge-'+a[1].toLowerCase()+'">'+a[1]+'</span>';
+  html+='<div class="call-meta"><span class="badge badge-'+String(a[1]||'C').toLowerCase()+'">'+(a[1]||'C')+'</span>';
   if(assignedLp&&assignedLp!==lp)html+='<span class="lp-tag lp-tag-'+assignedLp+'" style="font-size:10px">'+assignedLp+"'s agent</span>";
-  var dsCls=(!calledThisWeek(a[0])&&overdueDays>=0&&ds!==null&&ds!==0)?'color:var(--red);font-weight:600':(ds===null?'color:var(--red)':'color:var(--text-2)');
+  var dsCls=(!called&&overdueDays>=0&&ds!==null&&ds!==0)?'color:var(--red);font-weight:650':(ds===null?'color:var(--red)':'color:var(--text-2)');
   html+='<span style="'+dsCls+'">'+dsText+'</span>';
-  if(dueLabel)html+='<span style="font-size:11px;color:var(--text-3)">'+dueLabel+'</span>';
-  if(act)html+='<span style="color:var(--text-3)">Last activity: '+fmt(act)+'</span>';
+  if(dueLabel)html+='<span style="font-size:10.5px;color:var(--text-3)">'+dueLabel+'</span>';
+  if(act)html+='<span style="color:var(--text-3)">Last activity '+fmt(act)+'</span>';
   html+='</div>';
 
-  // Live lead panel — rich data from agent_lead_summary view
-  var velFileStarts=velData?velData.file_starts||0:0;
-  var velMtdFileStarts=velData?velData.mtd_file_starts||0:0;
-  var velLastBuyer=velData?velData.last_buyer_name||null:null;
-  var velLastStatus=velData?velData.last_status||null:null;
-  var velLastNote=velData?velData.last_action_note||null:null;
-  var velLastDate=velData?velData.last_lead_date||null:null;
-  if(velTotal>0){
-    var leadBg=velMtd>0?"#eff6ff":"var(--bg)";
-    var leadBorder=velMtd>0?"#bfdbfe":"var(--border)";
-    var leadColor=velMtd>0?"#1d4ed8":"var(--text-3)";
-    html+='<div style="margin-top:6px;background:'+leadBg+';border:1px solid '+leadBorder+';border-radius:6px;padding:7px 10px">';
-    html+='<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">';
-    html+='<span style="font-size:12px;font-weight:700;color:'+leadColor+'">🎯 '+velMtd+' lead'+(velMtd!==1?'s':'')+' MTD</span>';
-    if(velMtdFileStarts>0)html+='<span style="font-size:11px;color:var(--green);font-weight:600">✓ '+velMtdFileStarts+' file'+(velMtdFileStarts!==1?'s':'')+' started</span>';
-    html+='<span style="font-size:11px;color:var(--text-3)">'+velTotal+' total · '+velFileStarts+' files ever</span>';
-    html+='</div>';
-    if(velLastBuyer||velLastDate){
-      var daysSinceLead=velLastDate?Math.floor((TODAY-new Date(velLastDate+"T12:00:00"))/86400000):null;
-      var leadDateColor=daysSinceLead!==null&&daysSinceLead>=30?"var(--red)":"var(--text-2)";
-      var daysAgoStr=daysSinceLead!==null?' <b style="color:'+leadDateColor+'">'+daysSinceLead+'d ago</b>':"";
-      html+='<div style="margin-top:4px;font-size:11px">Last lead: <span style="color:'+leadDateColor+'">'+(velLastDate?fmt(velLastDate):"--")+'</span>'+daysAgoStr+(velLastBuyer?' · <b>'+escHtml(velLastBuyer)+'</b>':'')+(velLastStatus?' · <span style="font-style:italic">'+escHtml(velLastStatus)+'</span>':'')+'</div>';
-    }
-    if(velLastNote&&velLastNote.trim()&&velLastNote.toLowerCase()!=='empty'){
-      html+='<div style="margin-top:3px;font-size:11px;color:var(--text-3);font-style:italic">"'+escHtml(velLastNote.length>80?velLastNote.substring(0,80)+'...':velLastNote)+'"</div>';
-    }
-    html+='</div>';
-  } else if(noReferralFlag){
-    html+='<div style="margin-top:5px"><span style="display:inline-flex;align-items:center;gap:5px;background:var(--red-light);border:1px solid var(--red-border);border-radius:4px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--red)">0 leads · 90+ days</span></div>';
-  }
+  if(!called)html+='<div class="ct-focus-line"><strong>Focus:</strong> '+escHtml(focus)+'</div>';
 
-  // Phase 3: churn risk badge — suppressed if agent has active pipeline note
-  var nameUpper=a[0].toUpperCase();
-  var churnRisk=churnRiskData[nameUpper]?churnRiskData[nameUpper].churn_risk:null;
+  var chips=[];
+  if(velMtd>0)chips.push('<span class="ct-business-chip hot">'+velMtd+' lead'+(velMtd===1?'':'s')+' MTD</span>');
+  else if(velTotal>0)chips.push('<span class="ct-business-chip">'+velTotal+' lead'+(velTotal===1?'':'s')+' total</span>');
+  if(preq>0)chips.push('<span class="ct-business-chip hot">'+preq+' active prequal'+(preq===1?'':'s')+'</span>');
+  if(pipe>0)chips.push('<span class="ct-business-chip hot">'+pipe+' in pipeline</span>');
+  if(chips.length)html+='<div class="ct-business-chips">'+chips.join('')+'</div>';
 
-  // Suppress churn risk if recent note mentions active pipeline
-  if(churnRisk){
-    var recentNote=prevNotes[a[0]]?prevNotes[a[0]].note||"":"";
-    var activeKeywords=["preapproval","pre-approval","buyer","contract","offer","working on",
-      "pipeline","closing","active","appointment","showing","listing","client","meeting","scheduled"];
-    var noteLower=recentNote.toLowerCase();
-    var hasActiveNote=activeKeywords.some(function(kw){return noteLower.indexOf(kw)>=0;});
-    // Also suppress if called this week or within their tier window recently
-    var daysSinceLastCall=agentLastCall[a[0]]?Math.floor((TODAY-new Date(agentLastCall[a[0]]+"T12:00:00"))/86400000):999;
-    var tierW=tierWindow(a);
-    var calledRecently=daysSinceLastCall<=tierW;
-    if(hasActiveNote||calledRecently)churnRisk=null;
-  }
-
-  // Extra tags row (RM activity, co-marketing, tenure)
-  var tagsHtml="";
-  if(churnRisk==="HIGH")tagsHtml+='<span style="display:inline-flex;align-items:center;gap:4px;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#991b1b">&#128308; At risk</span>';
-  else if(churnRisk==="MEDIUM")tagsHtml+='<span style="display:inline-flex;align-items:center;gap:4px;background:#FAF7F2;border:1px solid #E8DDD0;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:#5C4A35">&#9888; Fading — follow up</span>';
-  if(rmAct)tagsHtml+='<span class="rm-tag">RM visited: '+fmt(rmAct)+'</span>';
-  if(coMarketingAgents[a[0]])tagsHtml+='<span class="co-mkt-tag">Co-marketing active</span>';
-  var tenureDays=firstCall?Math.floor((TODAY-new Date(firstCall+"T12:00:00"))/86400000):0;
-  var tenureStr=tenureDays>=365?Math.floor(tenureDays/365)+"yr "+(Math.floor((tenureDays%365)/30))+"mo":tenureDays>=30?Math.floor(tenureDays/30)+"mo":tenureDays>0?tenureDays+"d":"New";
-  if(firstCall)tagsHtml+='<span class="tenure-tag">&#128336; '+tenureStr+' relationship</span>';
-  if(tagsHtml)html+='<div class="tags-row" style="margin-top:6px">'+tagsHtml+'</div>';
-
-  // Last week note preview
-  if(lastNote&&lastNote.note)html+='<div class="last-note-preview"><span class="last-note-label">Last team note · '+fmt(lastNote.call_date)+(lastNote.lp?' · <span class="lp-tag lp-tag-'+lastNote.lp+'">'+lastNote.lp+'</span>':'')+'</span>'+escHtml(lastNote.note)+'</div>';
-
-  // Talking points
-  if(!called&&!isBonus){
-    var talkPoints=[];
-    var velData2=getVelocifyForAgent(a[0]);
-    var velMtd2=velData2?velData2.mtd:0;
-    var velTotal2=velData2?velData2.total:0;
-    if(velMtd2>0)talkPoints.push('Follow up on the '+velMtd2+' lead'+(velMtd2>1?'s':'')+' sent this month — thank them and check on the buyer');
-    if(rmAct){var rmDays=Math.floor((TODAY-new Date(rmAct+'T12:00:00'))/86400000);talkPoints.push('The RM visited '+rmDays+'d ago — reference that meeting and ask how it went');}
-    if(coMarketingAgents[a[0]])talkPoints.push('Co-marketing active — check if the flyer is working and if they need updated materials');
-    if(velTotal2===0&&daysSinceFirst>=90)talkPoints.push('No leads yet — share a recent win or a program they can use (rate buydown, fast close)');
-    else if(velMtd2===0&&velTotal2>0)talkPoints.push('Sent leads before but none this month — ask what buyers they are working with right now');
-    if(a[1]==="A")talkPoints.push('A-tier — protect this relationship, ask about their pipeline and upcoming listings');
-    else if(a[1]==="B")talkPoints.push('B-tier — ask what would make them more comfortable referring buyers to NFM');
-    else if(a[1]==="C"&&velTotal2===0)talkPoints.push('Building the relationship — ask about their business and share one thing NFM does differently');
-    var bdayCheck=getBirthdayAgentsThisWeek();
-    if(bdayCheck.some(function(b){return b.name===a[0];}))talkPoints.unshift('Birthday this week — lead with that, keep it personal');
-    if(talkPoints.length){
-      html+='<div style="margin-top:8px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:8px 12px">';
-      html+='<div style="font-size:10px;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">What to talk about</div>';
-      talkPoints.slice(0,2).forEach(function(tp){
-        html+='<div style="font-size:11px;color:#0c4a6e;margin-bottom:3px">&#8226; '+tp+'</div>';
-      });
-      html+='</div>';
-    }
-  }
-
-  // Contact bar
-  html+='<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:8px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">';
+  html+='<div class="ct-contact-bar">';
   html+='<span style="font-size:12px;color:var(--text-2)" data-contact-phone="'+safeId+'">📞 <span style="color:var(--text-3)">Loading...</span></span>';
   html+='<span style="font-size:12px;color:var(--text-2)" data-contact-email="'+safeId+'">✉️ <span style="color:var(--text-3)">Loading...</span></span>';
-  html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+a[0].replace(/'/g,"\\'")+"\'"+ ')" style="margin-left:auto;font-size:11px">Edit contact</button>';
+  html+='<button class="btn btn-sm" onclick="openLpContactModal(\''+name.replace(/'/g,"\\'")+'\')" style="margin-left:auto;font-size:10.5px;padding:4px 8px">Edit</button>';
   html+='</div>';
 
-  // Pending or called state — outcome buttons FIRST, then note
-  if(isPending||called){
-    // Outcome buttons always visible when card is open
-    var outcomes=["✅ Answered","📞 Left VM","💬 Text only","💬 Text reply","🤝 In Person"];
-    var oKeys=["Answered","Left VM","Sent Follow-up Text","Text Conversation","In Person"];
-    var oCls=["sel-answered","sel-voicemail","sel-text","sel-text","sel-noanswer"];
-    var pendingOutcome=pendingNote[a[0]]?pendingNote[a[0]].outcome||"":"";
-    var displayOutcome=called?outcome:pendingOutcome;
-    html+='<div style="margin-top:10px"><span class="outcome-label">What happened? (required)</span><div class="outcome-row">';
-    for(var oi=0;oi<outcomes.length;oi++){
-      html+='<button class="outcome-btn'+(displayOutcome===oKeys[oi]?' '+oCls[oi]:'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" data-outcome="'+oKeys[oi]+'" onclick="'+(called?'selectOutcome(this)':"selectPendingOutcome(this)")+'">'+outcomes[oi]+'</button>';
-    }
-    html+='</div></div>';
+  var context=[];
+  if(velLastDate)context.push('<strong>Last lead:</strong> '+fmt(velLastDate));
+  if(lastNote&&lastNote.note)context.push('<strong>Last team note:</strong> '+escHtml(lastNote.note));
+  if(rmAct)context.push('<strong>RM touch:</strong> '+fmt(rmAct));
+  if(firstCall){var tenure=Math.max(0,Math.floor((TODAY-new Date(firstCall+'T12:00:00'))/86400000));context.push('<strong>Relationship:</strong> '+(tenure>=365?Math.floor(tenure/365)+'y':tenure>=30?Math.floor(tenure/30)+'mo':tenure+'d'));}
+  if(coMarketingAgents[name])context.push('<strong>Co-marketing:</strong> active');
+  if(context.length)html+='<details class="ct-context-details"><summary>More context ▾</summary><div class="ct-context-body">'+context.map(function(x){return '<div>'+x+'</div>';}).join('')+'</div></details>';
 
-    // Note field with word count
-    var wordCount=countWords(note);
-    var wordsLeft=Math.max(0,10-countWords(isPending?(pendingNote[a[0]]?pendingNote[a[0]].draft||"":""):note));
-    var noteReady=!isPending&&wordCount>=10;
-    var noteBorder=isPending?(pendingNote[a[0]]&&countWords(pendingNote[a[0]].draft||"")>=10?"var(--green)":"var(--red)"):"var(--border)";
-    var noteHintText=isPending?'<span style="font-size:11px;font-weight:600;color:var(--red)">Required: add at least 10 words before saving.</span>':'<span style="font-size:11px;color:var(--text-3)">'+wordCount+' words</span>';
-    html+='<div style="margin-top:8px">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="outcome-label">Call notes</span>'+noteHintText+'</div>';
-    html+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+lp+'" placeholder="Did they mention a new buyer? Listing coming? Next step? (10 words min)" oninput="queueNote(this)" style="border-color:'+noteBorder+';height:60px">'+escHtml(isPending?(pendingNote[a[0]]?pendingNote[a[0]].draft||"":""):note)+'</textarea>';
+  if(called){
+    html+='<div class="ct-done-summary"><strong>Logged:</strong> '+escHtml(outcome||'Completed')+(note?' · '+escHtml(note):'')+'</div>';
+  }
+
+  if(isPending){
+    var pending=pendingNote[name]||{};
+    var displayOutcome=pending.outcome||'';
+    var curFlag=pending.flagRm||false;
+    var outcomes=["Answered","VM + Text","In Person"];
+    var labels=["Talked","VM + text","In person"];
+    var cls=["sel-answered","sel-voicemail","sel-noanswer"];
+    html+='<div class="ct-log-box"><div class="ct-log-title">Log outreach</div><div class="outcome-row">';
+    for(var oi=0;oi<outcomes.length;oi++)html+='<button class="outcome-btn'+(displayOutcome===outcomes[oi]?' '+cls[oi]:'')+'" data-name="'+name+'" data-lp="'+lp+'" data-outcome="'+outcomes[oi]+'" onclick="selectPendingOutcome(this)">'+labels[oi]+'</button>';
     html+='</div>';
-
-    // No-answer workflow status: VM + text counts as weekly outreach, not as a live relationship connection.
-    var curFlag=callLogs[a[0]]?(callLogs[a[0]].flag_rm||false):(pendingNote[a[0]]?(pendingNote[a[0]].flagRm||false):false);
-    var outcomeKey=lpOutcomeKey(outcome);
-    var noReplyRmSent=!!lpOpenRmFlags[assignmentKey(a[0])];
-    if(outcomeKey==="vm + text"||outcomeKey==="voicemail + text"){
-      html+='<div style="margin-top:9px;background:#FFF7D6;border:1px solid #E7C66B;border-radius:8px;padding:9px 11px">'
-        +'<div style="font-size:11.5px;font-weight:800;color:#7A5B00">VM + follow-up text sent · awaiting reply</div>'
-        +'<div style="font-size:11px;color:#6C6252;margin-top:2px">This counts as completed weekly outreach, but not as a live connection. If they reply by text, mark Text reply / Conversation.</div>'
-        +(noReplyRmSent?'<div style="margin-top:7px;font-size:11.5px;font-weight:800;color:#276749">✓ No-response handoff sent to RM team</div>'
-          :'<button type="button" onclick="ctEscalateNoReply(\''+a[0].replace(/'/g,"\\'")+'\',\''+lp+'\')" style="width:100%;margin-top:7px;padding:8px;border-radius:7px;background:#5B4498;color:#fff;border:none;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer">No reply? Tell RM team →</button>')
-        +'</div>';
-    }
-
-    // RM flag toggle — lets LP signal Amanda needs to follow up on this agent
-    var amandaFU=rmFollowupsData[a[0].toUpperCase()]||null;
-    if(amandaFU){
-      var fuDate=amandaFU.followup_date?new Date(amandaFU.followup_date+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"recently";
-      html+='<div style="margin-top:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--radius-sm);padding:8px 12px">';
-      html+='<div style="font-size:11px;font-weight:700;color:#276749;margin-bottom:'+(amandaFU.amanda_note?4:0)+'px">&#10003; RM follow-up complete &middot; '+fuDate+(amandaFU.activity_type?' &middot; '+escHtml(amandaFU.activity_type):'')+'</div>';
-      if(amandaFU.amanda_note)html+='<div style="font-size:11px;color:#475569;font-style:italic">&quot;'+escHtml(amandaFU.amanda_note.substring(0,120))+'&quot;</div>';
-      html+='</div>';
-    } else if(!(outcomeKey==="vm + text"||outcomeKey==="voicemail + text")) {
-      html+='<div style="margin-top:10px"><button type="button" class="rm-flag-btn'+(curFlag?' is-flagged':'')+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="'+(called?'toggleRmFlag(this)':'togglePendingRmFlag(this)')+'"><span class="rm-flag-icon">'+(curFlag?'🚩':'🏳️')+'</span><span>'+(curFlag?'Flagged for RM follow-up':'Flag for RM follow-up')+'</span></button></div>';
-    }
-
-    // Speed-to-lead signal — if agent sent a lead recently, show how fast team responded
-  var velStl=getVelocifyForAgent(a[0]);
-  if(velStl&&velStl.last_lead_date&&velStl.total>0){
-    var daysSinceLead2=Math.floor((TODAY-new Date(velStl.last_lead_date+"T12:00:00"))/86400000);
-    var lastTeamCall=agentLastCall[a[0]]||null;
-    var lastCallDate=lastTeamCall?new Date(lastTeamCall+"T12:00:00"):null;
-    var lastLeadDate=new Date(velStl.last_lead_date+"T12:00:00");
-    if(daysSinceLead2<=14){
-      // Recent lead — show response status
-      var calledAfterLead=lastCallDate&&lastCallDate>=lastLeadDate;
-      if(calledAfterLead){
-        var hoursToContact=Math.floor((lastCallDate-lastLeadDate)/3600000);
-        var contactLabel=hoursToContact<1?"within the hour":hoursToContact<24?(hoursToContact+"h later"):(Math.floor(hoursToContact/24)+"d later");
-        html+='<div style="display:flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#276749;margin-top:4px">'
-          +'<span>⚡</span><span>Lead received '+daysSinceLead2+'d ago — team contacted '+contactLabel+'</span>'
-          +'</div>';
-      } else {
-        html+='<div style="display:flex;align-items:center;gap:6px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#5C4A35;margin-top:4px">'
-          +'<span>⚠</span><span>Lead received '+daysSinceLead2+'d ago — no call logged after lead. Follow up now!</span>'
-          +'</div>';
-      }
-    }
-  }
-
-  // "Never sent a lead" opportunity highlight
-  var velCheck2=getVelocifyForAgent(a[0]);
-  var totalLeadsEver=velCheck2?velCheck2.total||0:0;
-  var totalCallsOnAgent=agentFirstCall[a[0]]?1:0;
-  // Use call history count if available
-  var callHistCount=lpHistoryCallCounts[a[0]]||0;
-  if(totalLeadsEver===0&&(callHistCount>=3||totalCallsOnAgent>=1)&&isActive(a)){
-    var callWord=callHistCount>=3?callHistCount+" calls":"first call";
-    html+='<div style="display:flex;align-items:center;gap:6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#1e40af;margin-top:4px">'
-      +'<span>🎯</span><span>'+callWord+' logged — 0 leads yet. Keep going, could be your next producer.</span>'
-      +'</div>';
-  }
-
-  // Co-marketing ROI flag — active co-marketing + 0 leads in 90+ days
-  var coMktActive=coMarketingAgents[a[0]]||false;
-  if(coMktActive){
-    var velCheck=getVelocifyForAgent(a[0]);
-    var lastLeadDays=velCheck&&velCheck.last_lead_date
-      ?Math.floor((TODAY-new Date(velCheck.last_lead_date+"T12:00:00"))/86400000):999;
-    var noLeadMtd=!velCheck||velCheck.mtd===0;
-    if(noLeadMtd&&lastLeadDays>=90){
-      html+='<div style="display:flex;align-items:center;gap:6px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#5C4A35;margin-top:4px">'
-        +'<span>📋</span><span>Co-marketing active — no lead in '+lastLeadDays+'d. Is it working?</span>'
-        +'</div>';
-    }
-  }
-
-  // Birthday check — show upcoming birthday on card
-  var contactInfo=contactCache[a[0]]||null;
-  if(contactInfo&&contactInfo.birthday){
-    try{
-      var bday=new Date(contactInfo.birthday);
-      var now=new Date();
-      var thisYearBday=new Date(now.getFullYear(),bday.getMonth(),bday.getDate());
-      var nextBday=thisYearBday<now?new Date(now.getFullYear()+1,bday.getMonth(),bday.getDate()):thisYearBday;
-      var daysUntil=Math.floor((nextBday-now)/86400000);
-      if(daysUntil<=7){
-        html+='<div style="display:flex;align-items:center;gap:6px;background:#FAF7F2;border:1px solid #E8DDD0;border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;font-weight:600;color:#4A3728;margin-top:4px">'
-          +'<span>🎂</span>'
-          +(daysUntil===0?'<span>Birthday TODAY! Great reason to call</span>'
-            :daysUntil===1?'<span>Birthday TOMORROW!</span>'
-            :'<span>Birthday in '+daysUntil+' days — '+bday.toLocaleDateString("en-US",{month:"short",day:"numeric"})+'</span>')
-          +'</div>';
-      }
-    }catch(e){}
-  }
-
-  // Received Lead button — visible on all open cards
-    var rlKey=a[0].toUpperCase();
-    var rlData=receivedLeadsData[rlKey]||receivedLeadsData[ctAgentNameKey(a[0]).toUpperCase()]||null;
-    var rlClass="received-lead-btn"+(rlData?" is-received":"");
-    var rlLabel=rlData
-      ?'<span style="font-size:16px">&#127919;</span><span>Lead received'+(rlData.buyer_name?" &#8212; "+escHtml(rlData.buyer_name):"")+" &#10003;</span>"
-      :'<span style="font-size:16px">&#127919;</span><span>Received a lead from this agent?</span>';
-    html+='<button class="'+rlClass+'" data-name="'+a[0]+'" data-lp="'+lp+'" onclick="logReceivedLead(this.getAttribute(\'data-name\'),this.getAttribute(\'data-lp\'),this)">'+rlLabel+'</button>';
-
-    // Save button shown only when pending
-    if(isPending){
-      html+='<button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%;padding:9px" onclick="tryConfirmCall(\''+a[0].replace(/'/g,"\\'")+"\'"+ ',\''+lp+'\')">Save & mark called ✓</button>';
-    }
+    html+='<textarea class="note-field ct-simple-note" data-name="'+name+'" data-lp="'+lp+'" placeholder="Quick note: buyer, listing, response, or next step" oninput="queueNote(this)">'+escHtml(pending.draft||'')+'</textarea>';
+    var rlKey=name.toUpperCase(),rlData=receivedLeadsData[rlKey]||receivedLeadsData[ctAgentNameKey(name).toUpperCase()]||null;
+    html+='<div class="ct-inline-actions">';
+    html+='<button type="button" class="rm-flag-btn'+(curFlag?' is-flagged':'')+'" data-name="'+name+'" data-lp="'+lp+'" onclick="togglePendingRmFlag(this)"><span class="rm-flag-icon">'+(curFlag?'🚩':'🏳️')+'</span><span>'+(curFlag?'RM flagged':'Needs RM')+'</span></button>';
+    html+='<button class="received-lead-btn'+(rlData?' is-received':'')+'" data-name="'+name+'" data-lp="'+lp+'" onclick="logReceivedLead(this.getAttribute(\'data-name\'),this.getAttribute(\'data-lp\'),this)"><span>🎯</span><span>'+(rlData?'Lead received ✓':'Lead received?')+'</span></button>';
+    html+='</div>';
+    html+='<button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%;padding:9px" onclick="tryConfirmCall(\''+name.replace(/'/g,"\\'")+'\',\''+lp+'\')">Save outreach ✓</button>';
+    html+='</div>';
   }
 
   html+='</div></div>';
@@ -2816,7 +2695,7 @@ function selectOutcome(btn){
   var name=btn.getAttribute("data-name"),lp=btn.getAttribute("data-lp"),outc=btn.getAttribute("data-outcome");
   var log=callLogs[name];var cur=log?log.outcome||"":"";var newOutc=cur===outc?"":outc;
   if(callLogs[name])callLogs[name].outcome=newOutc;
-  var clsMap2={"Answered":"sel-answered","Left VM":"sel-voicemail","Sent Follow-up Text":"sel-text","Text Conversation":"sel-text","In Person":"sel-noanswer"};
+  var clsMap2={"Answered":"sel-answered","Left VM":"sel-voicemail","VM + Text":"sel-voicemail","Sent Follow-up Text":"sel-text","Text Conversation":"sel-text","In Person":"sel-noanswer"};
   var card2=btn.closest(".call-card");
   if(card2)card2.querySelectorAll(".outcome-btn").forEach(function(ob){ob.className="outcome-btn"+(ob.getAttribute("data-outcome")===newOutc&&newOutc?" "+(clsMap2[newOutc]||""):"");});
   upsertCallLogWithOutcome(name,lp,callLogs[name]?callLogs[name].note||"":"",newOutc).catch(function(){});
@@ -2921,10 +2800,10 @@ function renderLpSearch(){
     if(isPending){
       var curOutcome=pending.outcome||"";
       var curDraft=pending.draft||"";
-      var words=countWords(curDraft);
-      var outcomes=["Answered","Left VM","Sent Follow-up Text","Text Conversation","In Person"];
-      var oLabels=["Answered","Left VM","Text only","Text reply","In Person"];
-      var oCls=["sel-answered","sel-voicemail","sel-text","sel-text","sel-noanswer"];
+      var hasDraft=!!curDraft.trim();
+      var outcomes=["Answered","VM + Text","In Person"];
+      var oLabels=["Talked","VM + text","In person"];
+      var oCls=["sel-answered","sel-voicemail","sel-noanswer"];
       h+='<div style="margin-top:10px;border-top:1px solid var(--border-light);padding-top:10px">';
       h+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">What happened?</div>';
       h+='<div class="outcome-row">';
@@ -2933,18 +2812,18 @@ function renderLpSearch(){
       }
       h+='</div>';
       h+='<div style="margin-top:8px">';
-      h+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Call notes <span style="font-weight:400;color:'+(words>=10?'var(--green)':'var(--red)')+'">'+words+' / 10 words min</span></div>';
-      h+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+currentUser+'" placeholder="What happened? Buyers, listings, next step? (10 words min)" oninput="queueNote(this)" style="border-color:'+(words>=10?'var(--green)':'var(--red)')+'">'+escHtml(curDraft)+'</textarea>';
+      h+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Quick note</div>';
+      h+='<textarea class="note-field" data-name="'+a[0]+'" data-lp="'+currentUser+'" placeholder="What happened? Buyer, listing, response, or next step?" oninput="queueNote(this)" style="border-color:'+(hasDraft?'var(--green)':'var(--border)')+'">'+escHtml(curDraft)+'</textarea>';
       h+='</div>';
       h+='<button class="btn btn-primary btn-sm" data-name="'+a[0]+'" data-lp="'+currentUser+'" onclick="tryConfirmCall(this.getAttribute(\'data-name\'),this.getAttribute(\'data-lp\'))" style="margin-top:8px;width:100%;padding:9px">Save &amp; mark called &#10003;</button>';
       h+='</div>';
     }
 
-    // Call history
-    h+='<div style="margin-top:10px;border-top:1px solid var(--border-light);padding-top:8px">';
-    h+='<div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Call History</div>';
-    h+='<div id="'+histId+'"><div style="font-size:11px;color:var(--text-3)">Loading...</div></div>';
-    h+='</div>';
+    // Call history stays available, but collapsed so Search does not turn into a wall of data.
+    h+='<details style="margin-top:8px;border-top:1px solid var(--border-light);padding-top:7px">';
+    h+='<summary style="cursor:pointer;font-size:10.5px;font-weight:700;color:var(--text-3);list-style:none">Call history ▾</summary>';
+    h+='<div id="'+histId+'" style="margin-top:6px"><div style="font-size:11px;color:var(--text-3)">Loading...</div></div>';
+    h+='</details>';
     h+='</div>';
   });
   el.innerHTML=h;
@@ -3005,7 +2884,7 @@ function selectPendingOutcome(btn){
   if(!pendingNote[name])pendingNote[name]={draft:"",outcome:""};
   var newOutc=pendingNote[name].outcome===outc?"":outc;
   pendingNote[name].outcome=newOutc;
-  var clsMap={"Answered":"sel-answered","Left VM":"sel-voicemail","Sent Follow-up Text":"sel-text","Text Conversation":"sel-text","In Person":"sel-noanswer"};
+  var clsMap={"Answered":"sel-answered","Left VM":"sel-voicemail","VM + Text":"sel-voicemail","Sent Follow-up Text":"sel-text","Text Conversation":"sel-text","In Person":"sel-noanswer"};
   var card=btn.closest(".call-card")||btn.parentNode;
   while(card&&!card.querySelector&&card.parentNode)card=card.parentNode;
   if(card&&card.querySelectorAll)card.querySelectorAll(".outcome-btn").forEach(function(ob){ob.className="outcome-btn"+(ob.getAttribute("data-outcome")===newOutc&&newOutc?" "+(clsMap[newOutc]||""):"");});
@@ -3016,7 +2895,6 @@ function tryConfirmCall(name,lp){
   var draft=pending.draft||"";
   var outcome=pending.outcome||"";
   var flagRm=pending.flagRm||false;
-  var words=countWords(draft);
   if(!outcome){
     // Show inline error on the save button
     var saveBtn=document.querySelector('.btn-primary[onclick*="tryConfirmCall"][onclick*="'+name.replace(/'/g,"\\'")+'"]');
@@ -3028,9 +2906,9 @@ function tryConfirmCall(name,lp){
     if(vmBtn){var oldVm=vmBtn.innerHTML;vmBtn.innerHTML="⚠ Send the follow-up text too";vmBtn.style.background="#B8842B";setTimeout(function(){vmBtn.innerHTML=oldVm;vmBtn.style.background="";},2800);}
     return;
   }
-  if(words<10){
-    var saveBtn2=document.querySelector('.btn-primary[onclick*="tryConfirmCall"][onclick*="'+name.replace(/'/g,"\\'")+'"]');
-    if(saveBtn2){var ob2=saveBtn2.innerHTML;saveBtn2.innerHTML="⚠ Need "+Math.max(0,10-words)+" more words";saveBtn2.style.background="#dc2626";setTimeout(function(){saveBtn2.innerHTML=ob2;saveBtn2.style.background="";},2500);}
+  if(!draft.trim()){
+    var saveBtn2=document.querySelector('.btn-primary[onclick*="tryConfirmCall"][onclick*="'+name.replace(/'/g,"\'")+'"]');
+    if(saveBtn2){var ob2=saveBtn2.innerHTML;saveBtn2.innerHTML="⚠ Add a quick note first";saveBtn2.style.background="#dc2626";setTimeout(function(){saveBtn2.innerHTML=ob2;saveBtn2.style.background="";},2200);}
     return;
   }
   delete pendingNote[name];
@@ -3045,19 +2923,17 @@ function tryConfirmCall(name,lp){
 
 function queueNote(ta){
   var name=ta.getAttribute("data-name"),lp=ta.getAttribute("data-lp")||currentUser,val=ta.value;
-  var words=countWords(val);
+  var hasText=!!val.trim();
   if(pendingNote[name]){
-    if(!pendingNote[name])pendingNote[name]={draft:"",outcome:""};
     pendingNote[name].draft=val;
-    ta.style.borderColor=words>=10?"var(--green)":"var(--red)";
-    // Update word count hint inline without full re-render
+    ta.style.borderColor=hasText?"var(--green)":"var(--border)";
     var card=ta.closest(".call-card");
     if(card){
       var hint=card.querySelector(".note-word-hint");
-      if(hint)hint.textContent=words+" / 10 words";
+      if(hint)hint.textContent=hasText?"Note ready":"Add a quick useful note";
     }
   } else {
-    ta.style.borderColor=words>=10?"var(--green)":"var(--border)";
+    ta.style.borderColor=hasText?"var(--green)":"var(--border)";
     if(noteTimers[name])clearTimeout(noteTimers[name]);
     noteTimers[name]=setTimeout(function(){
       var _sy=window.scrollY;
@@ -3560,12 +3436,11 @@ function renderNoteQuality(){
   var el=document.getElementById("d-note-quality-section");
   if(!el)return;
 
-  // Detect low-quality notes: unique word count < 6 OR any word repeated 4+ times
+  // No word-count policing. Only flag obvious copy/paste gaming or removal signals.
   function isLowQuality(note){
     if(!note||!note.trim())return false;
     // Strip punctuation and split
     var words=note.trim().toLowerCase().split(/\s+/).map(function(w){return w.replace(/[.,!?;:\-"'()]+/g,"");}).filter(function(w){return w.length>0;});
-    if(words.length<4)return true; // genuinely too short
     // Exclude common stop words before checking quality
     var stopWords={"the":1,"to":1,"a":1,"an":1,"and":1,"or":1,"but":1,"in":1,"on":1,"at":1,
       "for":1,"of":1,"with":1,"that":1,"this":1,"is":1,"are":1,"was":1,"were":1,"be":1,
@@ -3575,8 +3450,6 @@ function renderNoteQuality(){
       "by":1,"from":1,"about":1,"if":1,"me":1,"my":1,"us":1,"our":1,"how":1,"who":1,"what":1,
       "just":1,"also":1,"then":1,"than":1,"when":1,"very":1,"more":1,"some":1};
     var meaningful=words.filter(function(w){return !stopWords[w]&&w.length>1;});
-    var uniqueMeaningful=new Set(meaningful).size;
-    if(uniqueMeaningful<4)return true; // not enough substance
     // Check repetition of meaningful words only
     var freq={};
     meaningful.forEach(function(w){freq[w]=(freq[w]||0)+1;});
@@ -3605,7 +3478,7 @@ function renderNoteQuality(){
   var html='<div style="background:var(--surface);border:1px solid #E8DDD0;border-radius:10px;overflow:hidden;margin-bottom:1rem">'
     +'<div style="background:#FAF7F2;border-bottom:1px solid #E8DDD0;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
     +'<div style="font-size:12px;font-weight:700;color:#5C4A35;text-transform:uppercase;letter-spacing:.04em">⚠️ Note Quality Flags — '+flags.length+' this week</div>'
-    +'<div style="font-size:10px;color:#b45309;font-weight:500">Low-effort, repetitive, or removal-flagged</div>'
+    +'<div style="font-size:10px;color:#b45309;font-weight:500">Repetitive/gamed wording or removal-flagged</div>'
     +'</div>';
 
   flags.forEach(function(f){
@@ -4856,6 +4729,21 @@ function handleUpload(input){
     try{
       var wb=XLSX.read(new Uint8Array(e.target.result),{type:"array",cellDates:true});
       var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null});
+      // Raw Power BI snapshot: keeps Level distribution + Active Prequal/Pipeline totals visible
+      // without cluttering the working LP screens. This is also a fallback if optional shared DB
+      // columns are not available yet.
+      var validPbRows=rows.filter(function(row){var n=(row["Agent"]||"").toString().trim();return n&&n.toUpperCase()!=="AGENT"&&n.toUpperCase()!=="NAN";});
+      var pbSnapshot={imported_at:new Date().toISOString(),raw_rows:validPbRows.length,levels:{A:0,B:0,C:0,Blank:0,Other:0},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,by_agent:{}};
+      validPbRows.forEach(function(row){
+        var rawName=(row["Agent"]||"").toString().trim();
+        var lv=(row["Level"]||"").toString().trim();
+        if(lv==="A"||lv==="B"||lv==="C")pbSnapshot.levels[lv]++;else if(!lv)pbSnapshot.levels.Blank++;else pbSnapshot.levels.Other++;
+        var preq=parseInt(row["Active Prequals"])||0,pipe=parseInt(row["Active In Pipeline"])||0;
+        pbSnapshot.active_prequals_total+=preq;pbSnapshot.active_pipeline_total+=pipe;
+        if(preq>0)pbSnapshot.active_prequals_agents++;if(pipe>0)pbSnapshot.active_pipeline_agents++;
+        pbSnapshot.by_agent[rawName.toLowerCase()]={name:rawName,level:lv||null,active_prequals:preq,active_pipeline:pipe};
+      });
+      try{localStorage.setItem("ct_powerbi_snapshot_v1",JSON.stringify(pbSnapshot));window.CT_POWERBI_SNAPSHOT=pbSnapshot;}catch(snapshotErr){window.CT_POWERBI_SNAPSHOT=pbSnapshot;}
       var up=[],added=0,updated=0,flagged=0;
       // Refresh the shared removed/inactive roster BEFORE processing Power BI. Otherwise a row
       // that still exists in the export can overwrite __REMOVED__ in agent_assignments and make
@@ -4976,7 +4864,7 @@ function handleUpload(input){
       if(document.getElementById("pfr-body")){try{await window.pfrLoad();}catch(pfrErr){console.warn("Portfolio refresh failed:",pfrErr.message);}}
 
       res.style.color="#43A047";
-      res.textContent="Done — "+updated+" agents updated, "+added+" new, "+flagged+" flagged. Portfolio baseline refreshed ✓"+(assignmentSyncOk?"":" (agent assignment sync needs review)");
+      res.textContent="Done — "+pbSnapshot.raw_rows+" Power BI rows imported · Active Prequals: "+pbSnapshot.active_prequals_total+" across "+pbSnapshot.active_prequals_agents+" agents · Active Pipeline: "+pbSnapshot.active_pipeline_total+" across "+pbSnapshot.active_pipeline_agents+" agents. "+updated+" roster agents updated, "+added+" new. Portfolio refreshed ✓"+(assignmentSyncOk?"":" (agent assignment sync needs review)");
     }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
   };
   reader.readAsArrayBuffer(file);input.value="";
@@ -5288,7 +5176,7 @@ function toggleRmFlag(btn){
   var iconEl=btn.querySelector(".rm-flag-icon");
   var txtEl=btn.querySelector("span:last-child");
   if(iconEl)iconEl.textContent=newFlag?"🚩":"🏳️";
-  if(txtEl)txtEl.textContent=newFlag?"Flagged for RM follow-up":"Flag for RM follow-up";
+  if(txtEl)txtEl.textContent=newFlag?"RM flagged":"Needs RM";
   upsertCallLogWithOutcome(name,lp,log?log.note||"":"",log?log.outcome||"":"",newFlag).catch(function(){});
 }
 
@@ -5299,7 +5187,7 @@ function togglePendingRmFlag(btn){
   pendingNote[name].flagRm=flagged;
   btn.className="rm-flag-btn"+(flagged?" is-flagged":"");
   btn.querySelector(".rm-flag-icon").textContent=flagged?"\uD83D\uDEA9":"\uD83C\uDFF3\uFE0F";
-  btn.querySelector("span:last-child").textContent=flagged?"Flagged for RM follow-up":"Flag for RM follow-up";
+  btn.querySelector("span:last-child").textContent=flagged?"RM flagged":"Needs RM";
 }
 
 function renderVelocifyLeaderboard(){
@@ -5485,9 +5373,9 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
 
   function noteInfo(r){
     var note=r.last_action_note||"";
-    var words=note.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
-    if(!note)return{cls:"missing",text:"No note logged",flag:"MISSING"};
-    if(words<=3)return{cls:"lazy",text:escHtml(note),flag:"NEEDS DETAIL"};
+    if(!note.trim())return{cls:"missing",text:"No note logged",flag:"MISSING"};
+    // No minimum word count. Only flag obviously repetitive/filler notes.
+    if(typeof ctIsRepetitive==="function"&&ctIsRepetitive(note))return{cls:"lazy",text:escHtml(note),flag:"NEEDS DETAIL"};
     return{cls:"good",text:escHtml(note.length>70?note.substring(0,70)+"...":note),flag:""};
   }
   function dayInfo(r){
@@ -6875,6 +6763,22 @@ function loadLpOverrides(){
 // Thresholds (days): [warn, red, critical]
 var FT_THRESHOLDS={Channel:[10,14,21],A:[10,14,21],B:[21,30,45],C:[45,60,90]};
 var FT_TARGETS={Channel:14,A:14,B:30,C:60};
+function sharedFaceTimePriorityScore(r){
+  if(r.scheduled)return -100000;
+  var severity={critical:4200,red:2700,warn:1300,ok:0},tier={Channel:1100,A:1000,B:560,C:180};
+  var score=(severity[r.status]||0)+(tier[r.tier]||0);
+  if(r.competitor_risk_flag)score+=1500;if(r.high_potential_flag)score+=650;if(String(r.next_growth_opportunity||'').trim())score+=550;
+  if(r.daysLead!==null){if(r.daysLead<=14)score+=750;else if(r.daysLead<=30)score+=520;else if(r.daysLead<=60)score+=300;}
+  score+=Math.min(550,Number(r.closes_past_year||0)*100+Number(r.total_leads_past_year||0)*45);
+  if(r.days===null)score+=700;else score+=Math.min(650,Math.max(0,r.days-(r.target||60))*18);
+  return score;
+}
+function sharedFaceTimeWhy(r){
+  var why=[];if(r.status==='critical')why.push(r.days===null?'no visit on file':'critically overdue');else if(r.status==='red')why.push('overdue');else if(r.status==='warn')why.push('coming due');
+  if(r.tier==='Channel'||r.tier==='A')why.push(r.tier+' relationship');else if(r.tier==='B')why.push('B relationship');
+  if(r.competitor_risk_flag)why.push('retention risk');if(r.high_potential_flag)why.push('high potential');if(String(r.next_growth_opportunity||'').trim())why.push('active opportunity');if(r.daysLead!==null&&r.daysLead<=60)why.push('recent business');
+  return why.slice(0,3).join(' · ')||'relationship cadence';
+}
 var ftData={};  // normalized agent name → {lastDate, source, notes}
 var ftVisitRows=[]; // all visit records used for month-to-date counts
 var ftRosterRows=[]; // shared active partner population from agent_profiles + agent_assignments
@@ -6889,10 +6793,13 @@ async function loadFaceTime(){
       sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=4000"),
       sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
       loadCoMarketing(),
-      sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,do_not_contact,relationship_status&limit=5000").catch(function(){return[];});}),
-      sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000").catch(function(){return[];})
+      sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,do_not_contact,relationship_status&limit=5000").catch(function(){return[];});}),
+      sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000").catch(function(){return[];}),
+      sbFetch("GET","face_time_events?select=*&status=eq.scheduled&event_date=gte."+today2()+"&order=event_date.asc,event_time.asc&limit=1000").catch(function(){return[];})
     ]);
-    ftData={};ftVisitRows=[];
+    ftData={};ftVisitRows=[];window.FT_SCHEDULED_EVENTS=Array.isArray(r[5])?r[5]:[];
+    var sh=document.getElementById("ft-scheduled-shared");if(sh){var upcoming=window.FT_SCHEDULED_EVENTS.slice().sort(function(a,b){return String(a.event_date||"").localeCompare(String(b.event_date||""))||String(a.event_time||"").localeCompare(String(b.event_time||""));}).slice(0,10);sh.innerHTML=upcoming.length?'<div style="background:#F2F6F2;border:1px solid #D0DED3;border-radius:10px;padding:10px 12px"><div style="font-size:11px;font-weight:800;color:#3E5C49;text-transform:uppercase;letter-spacing:.35px;margin-bottom:5px">Upcoming shared Face Time</div>'+upcoming.map(function(ev){return '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:5px 0;border-top:1px solid #E1EAE3"><div><strong style="font-size:12px;color:var(--text-1)">'+escHtml(displayName(ev.agent_name||""))+'</strong><div style="font-size:10.5px;color:var(--text-3)">'+escHtml(ev.event_date||"")+(ev.event_time?' · '+escHtml(String(ev.event_time).slice(0,5)):'')+' · LP: '+escHtml(ev.lp||"TBD")+' · RM: '+escHtml(ev.rm||"Amanda")+'</div></div><button class="ft-shared-open" data-id="'+escHtml(String(ev.id||""))+'" data-agent="'+escHtml(ev.agent_name||"")+'" data-lp="'+escHtml(ev.lp||"")+'" style="border:1px solid #BCD0C0;background:#fff;color:#365342;border-radius:6px;padding:5px 8px;font-size:10px;font-weight:700;cursor:pointer">Open</button></div>';}).join('')+'</div>':'';setTimeout(function(){sh.querySelectorAll(".ft-shared-open").forEach(function(b){b.addEventListener("click",function(){v33OpenSharedFaceTime(this.dataset.agent,this.dataset.lp,this.dataset.id);});});},0);}
+
     (r[0]||[]).forEach(function(a){
       var n=(a.agent_name||"").trim().toUpperCase();if(!n)return;
       var owner=(typeof ctRmOwnerFromNotes==="function"?ctRmOwnerFromNotes(a.notes):"Amanda")||"Amanda";
@@ -6908,10 +6815,12 @@ async function loadFaceTime(){
     (r[4]||[]).forEach(function(a){var k=(a.agent_name||"").trim().toUpperCase();if(k)ownerMap[k]={lp:(a.lp&&a.lp!=="__REMOVED__")?a.lp:"Unassigned",rm:a.rm||"Unassigned",removed:a.lp==="__REMOVED__"};});
     ftRosterRows=(r[3]||[]).filter(function(p){
       var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
-      return !!k && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && p.retained!==false && !o.removed;
+      return !!k && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && p.retained!==false && !o.removed
+        && String(p.relationship_type||"realtor")!=="strategic_partner"
+        && String(p.lp_outreach_status||"active")!=="nurture";
     }).map(function(p){
       var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
-      return {name:p.agent_name,tier:p.tier||"C",lp:o.lp||"Unassigned",rm:o.rm||"Unassigned"};
+      return {name:p.agent_name,tier:p.tier||"C",lp:o.lp||"Unassigned",rm:o.rm||"Unassigned",competitor_risk_flag:!!p.competitor_risk_flag,high_potential_flag:!!p.high_potential_flag,next_growth_opportunity:p.next_growth_opportunity||"",latest_lead_date:p.latest_lead_date||null,closes_past_year:p.closes_past_year||0,total_leads_past_year:p.total_leads_past_year||0};
     });
     renderFaceTime();
   }catch(e){if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--red);padding:30px;font-size:13px">Error loading — '+e.message+'</div>';}
@@ -6935,23 +6844,17 @@ function ftAgentRows(){
     var ft=ftData[(name||"").trim().toUpperCase()],days=null;
     if(ft&&ft.lastDate)days=Math.max(0,Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000));
     var target=FT_TARGETS[tier]||FT_TARGETS.C;
-    return {name:name,tier:tier,lp:lp,rm:e.rm||"Unassigned",days:days,status:ftStatus(tier,days),target:target,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name]};
+    var sched=(window.FT_SCHEDULED_EVENTS||[]).filter(function(x){return String(x.agent_name||"").trim().toUpperCase()===String(name||"").trim().toUpperCase()&&x.status==="scheduled";}).sort(function(a,b){return String(a.event_date||"").localeCompare(String(b.event_date||""));})[0]||null;
+    var leadDate=e.latest_lead_date?String(e.latest_lead_date).slice(0,10):null,daysLead=leadDate?Math.max(0,Math.floor((now-new Date(leadDate+"T12:00:00"))/86400000)):null;
+    var row={name:name,tier:tier,lp:lp,rm:e.rm||"Unassigned",days:days,status:ftStatus(tier,days),target:target,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name],scheduled:sched,competitor_risk_flag:!!e.competitor_risk_flag,high_potential_flag:!!e.high_potential_flag,next_growth_opportunity:e.next_growth_opportunity||"",daysLead:daysLead,closes_past_year:e.closes_past_year||0,total_leads_past_year:e.total_leads_past_year||0};
+    row.priorityScore=sharedFaceTimePriorityScore(row);row.priorityWhy=sharedFaceTimeWhy(row);return row;
   });
 }
 
 function ftPriorityForLp(lp,count){
-  var tierRank={Channel:0,A:1,B:2,C:3};
-  var statusRank={critical:0,red:1,warn:2,ok:3};
   var rows=ftAgentRows().filter(function(a){return a.lp===lp;});
-  var needs=rows.filter(function(a){return a.status!=="ok";});
-  var ok=rows.filter(function(a){return a.status==="ok";});
-  function sorter(a,b){
-    var tr=(tierRank[a.tier]||0)-(tierRank[b.tier]||0);if(tr!==0)return tr;
-    var sr=(statusRank[a.status]||0)-(statusRank[b.status]||0);if(sr!==0)return sr;
-    return (b.days===null?9999:b.days)-(a.days===null?9999:a.days);
-  }
-  needs.sort(sorter);ok.sort(sorter);
-  return needs.concat(ok).slice(0,count||3);
+  rows.sort(function(a,b){if(!!a.scheduled!==!!b.scheduled)return a.scheduled?1:-1;return (b.priorityScore-a.priorityScore)||String(a.name).localeCompare(String(b.name));});
+  return rows.slice(0,count||3);
 }
 function ftOpenAgentLog(name,lp){
   var d=document.getElementById("ft-full-details");if(d)d.open=true;
@@ -6977,19 +6880,20 @@ function renderFtPriority(){
     if(!list.length){html+='<div style="font-size:12px;color:var(--text-3)">No active assigned partners.</div>';}
     list.forEach(function(a){
       var last=a.lastDate?(a.days+"d since last visit"):'No visit recorded';
-      var due=a.days===null?'Needs first recorded visit':(a.days>=a.target?'Overdue by '+(a.days-a.target)+'d':'Due in '+(a.target-a.days)+'d');
-      var dueColor=(a.days===null||a.days>=a.target)?'#A32D2D':'#5C4A35';
+      var due=a.scheduled?('Booked '+a.scheduled.event_date+(a.scheduled.event_time?' · '+String(a.scheduled.event_time).slice(0,5):'')):(a.days===null?'Needs first recorded visit':(a.days>=a.target?'Overdue by '+(a.days-a.target)+'d':'Due in '+(a.target-a.days)+'d'));
+      var dueColor=a.scheduled?'#365342':((a.days===null||a.days>=a.target)?'#A32D2D':'#5C4A35');
       html+='<div style="display:grid;grid-template-columns:minmax(180px,1fr) 62px minmax(125px,.8fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid #F2F0F7">'
         +'<div><span style="font-size:12.5px;font-weight:700;color:var(--text-1)">'+displayName(a.name)+'</span> <span class="badge badge-'+String(a.tier).toLowerCase()+'" style="font-size:9px">'+a.tier+'</span></div>'
         +'<div style="font-size:11px;color:var(--text-3)">'+last+'</div>'
         +'<div style="font-size:11px;font-weight:700;color:'+dueColor+'">'+due+'</div>'
-        +'<button type="button" class="ft-priority-log" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(lp)+'" style="border:1px solid #CFC7E8;background:#F4F1FA;color:#4E3D8A;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:700;cursor:pointer">Log visit</button>'
+        +'<span style="display:flex;gap:5px;justify-content:flex-end"><button type="button" class="ft-priority-book" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(lp)+'" data-id="'+escHtml(String(a.scheduled&&a.scheduled.id||""))+'" style="border:1px solid #BFD1C2;background:#F4F8F4;color:#365342;border-radius:6px;padding:5px 8px;font-size:10px;font-weight:700;cursor:pointer">'+(a.scheduled?'Open':'Book')+'</button><button type="button" class="ft-priority-log" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(lp)+'" style="border:1px solid #CFC7E8;background:#F4F1FA;color:#4E3D8A;border-radius:6px;padding:5px 8px;font-size:10px;font-weight:700;cursor:pointer">Log visit</button></span>'
         +'</div>';
     });
     html+='</div>';
   });
   el.innerHTML=html;
   el.querySelectorAll(".ft-priority-log").forEach(function(btn){btn.addEventListener("click",function(){ftOpenAgentLog(this.dataset.agent,this.dataset.lp);});});
+  el.querySelectorAll(".ft-priority-book").forEach(function(btn){btn.addEventListener("click",function(){v33OpenSharedFaceTime(this.dataset.agent,this.dataset.lp,this.dataset.id||"");});});
   var f=document.getElementById("ft-s-focus");if(f)f.textContent=focusTotal;
 }
 
@@ -7096,9 +7000,10 @@ async function ctLoadRecentRmRelationshipNotes(lp){
     var rows=(results[1]||[]).filter(function(a){
       var k=String(a.agent_name||"").trim().toUpperCase();
       if(!assigned[k]||!String(ctStripRmMeta(a.notes)||"").trim())return false;
+      if(typeof lpIsInternalRmActivity==="function"&&lpIsInternalRmActivity(a))return false;
       return !ctIsDirectorLeadership(a.act_type);
     }).slice(0,15);
-    if(!rows.length){host.innerHTML='<div style="padding:6px 0;color:#756E89">No recent RM conversation notes for your assigned agents.</div>';return;}
+    if(!rows.length){host.innerHTML='<div style="padding:6px 0;color:#756E89">No recent RM notes for your assigned agents.</div>';return;}
     host.innerHTML='<div style="max-height:300px;overflow-y:auto;padding-right:3px">'+rows.map(function(a,i){
       var owner=ctRmOwnerFromNotes(a.notes),note=ctStripRmMeta(a.notes),date=a.act_date?fmt(a.act_date):"";
       return'<div style="padding:9px 0;'+(i?'border-top:1px solid #EEEAF6;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="font-size:12.5px;font-weight:800;color:#28213F">'+escHtml(displayName(a.agent_name||"Agent"))+'</div><div style="font-size:10.5px;color:#756E89">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div></div><div style="font-size:12px;color:#514A61;line-height:1.5;margin-top:4px">'+escHtml(note)+'</div>'+(a.outcome?'<div style="font-size:10.5px;color:#756E89;margin-top:3px">Outcome: '+escHtml(a.outcome)+(a.follow_up_date?' · Follow-up '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')+'</div>';
@@ -7175,11 +7080,7 @@ function renderFaceTime(){
   if(comktF==="yes")agentList=agentList.filter(function(a){return a.coMkt;});
   else if(comktF==="no")agentList=agentList.filter(function(a){return !a.coMkt;});
 
-  var order={critical:0,red:1,warn:2,ok:3};
-  agentList.sort(function(a,b){
-    var od=order[a.status]-order[b.status];if(od!==0)return od;
-    return(b.days===null?9999:b.days)-(a.days===null?9999:a.days);
-  });
+  agentList.sort(function(a,b){if(!!a.scheduled!==!!b.scheduled)return a.scheduled?1:-1;return (b.priorityScore-a.priorityScore)||String(a.name).localeCompare(String(b.name));});
 
   var fullRows=ftAgentRows();
   var monthStart=new Date(now.getFullYear(),now.getMonth(),1);var monthStartStr=monthStart.getFullYear()+"-"+String(monthStart.getMonth()+1).padStart(2,"0")+"-01";
@@ -7231,9 +7132,9 @@ function renderFaceTime(){
         +'<span style="font-size:11px;font-weight:600;color:'+r.lc+';min-width:50px">'+a.lp+'</span>'
         +'<span class="ft-days '+a.status+'">'+(a.days===null?"No record":a.days+"d ago")+'</span>'
         +'<span class="ft-meta">'+(a.lastDate?fmtDate(a.lastDate)+(a.source?" via "+a.source:""):"No visit recorded")+'</span>'
-        +'<span class="ft-meta" style="color:'+(r.overdue?"#DC2626":"#0A6B4C")+'">'+r.nextLabel+'</span>'
+        +'<span class="ft-meta" style="color:'+(a.scheduled?"#365342":(r.overdue?"#DC2626":"#0A6B4C"))+'">'+(a.scheduled?('Booked '+a.scheduled.event_date+(a.scheduled.event_time?' · '+String(a.scheduled.event_time).slice(0,5):'')):r.nextLabel)+'</span>'
         +'<span class="ft-comkt-toggle">'+coBadge+'</span>'
-        +'<button class="ft-log-btn btn-ft-log" data-fid="'+fid+'" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Log visit</button>'
+        +'<span style="display:flex;gap:5px"><button class="ft-book-btn" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(a.lp)+'" data-id="'+escHtml(String(a.scheduled&&a.scheduled.id||""))+'" style="background:#F4F8F4;color:#365342;border:1px solid #BFD1C2;border-radius:6px;padding:4px 9px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap">'+(a.scheduled?'Open':'Book')+'</button><button class="ft-log-btn btn-ft-log" data-fid="'+fid+'" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 9px;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap">Log visit</button></span>'
         +'</div>'
         +'<div class="ft-log-form" id="'+fid+'">'
           +'<div style="font-size:11px;font-weight:600;color:var(--brand);margin-bottom:8px">Log break bread — '+a.name+'</div>'
@@ -7257,6 +7158,7 @@ function renderFaceTime(){
   listEl.querySelectorAll(".ft-log-btn,.ft-cancel-btn").forEach(function(btn){
     btn.addEventListener("click",function(){ftToggleLog(this.dataset.fid);});
   });
+  listEl.querySelectorAll(".ft-book-btn").forEach(function(btn){btn.addEventListener("click",function(){v33OpenSharedFaceTime(this.dataset.agent,this.dataset.lp,this.dataset.id||"");});});
   listEl.querySelectorAll(".ft-save-btn").forEach(function(btn){
     btn.addEventListener("click",function(){ftSaveLog(this.dataset.agent,this.dataset.fid);});
   });
@@ -7302,6 +7204,7 @@ async function ftSaveLog(agentName,formId){
   if(btn){btn.disabled=true;btn.textContent="Saving...";}
   try{
     await sbFetch("POST","break_breads",{agent_name:agentName,date:date,logged_by:by,notes:notes});
+    try{var mk=(window.FT_SCHEDULED_EVENTS||[]).filter(function(e){return String(e.agent_name||"").trim().toUpperCase()===String(agentName||"").trim().toUpperCase()&&e.status==="scheduled";}).sort(function(a,b){return String(a.event_date||"").localeCompare(String(b.event_date||""));})[0];if(mk)await sbFetch("PATCH","face_time_events?id=eq."+encodeURIComponent(mk.id),{status:"completed",completed_by:by,notes:notes||mk.notes||null,updated_at:new Date().toISOString()});}catch(syncErr){console.warn("Shared Face Time completion sync failed",syncErr);}
     // Update ftData in memory
     if(!ftData[agentName]||date>ftData[agentName].lastDate){
       ftData[agentName]={lastDate:date,source:by,notes:notes||""};
@@ -7846,43 +7749,10 @@ if(typeof window.tryConfirmCall==="function"){
 }
 
 /* ── 3. QUICK-SAVE for VM / Text outcomes — skip the note requirement ── */
-// These outcomes don't need the 10-word detail bar. Adds a small "Quick save"
+// No-answer outreach uses a guided VM + follow-up-text flow. Adds a small "Quick save"
 // button next to the existing Save button once VM or Text is selected —
 // it calls your existing upsertCallLogWithOutcome directly, unmodified.
-function ctInjectQuickSave(card,name,lp,outcome){
-  if(!card) return;
-  var saveBtn=card.querySelector('.btn-primary[onclick*="tryConfirmCall"]');
-  if(!saveBtn) return;
-  var existing=card.querySelector(".ct-quick-save");
-  if(existing) existing.remove();
-  if(outcome!=="Left VM") return;
-
-  var first=(String(name||"").trim().split(/\s+/)[0]||"there");
-  var textMsg="Hi "+first+", just tried you. Wanted to check in and see how things are going on your end. Anything active or coming up that we can help with?";
-  var wrap=document.createElement("div");
-  wrap.className="ct-quick-save";
-  wrap.style.cssText="margin-top:8px;padding:10px;border-radius:9px;background:#FFF7D6;border:1px solid #E7C66B";
-  wrap.innerHTML='<div style="font-size:11px;font-weight:800;color:#7A5B00;margin-bottom:5px">NO ANSWER = 2 STEPS REQUIRED</div>'
-    +'<div style="font-size:11.5px;color:#665E4A;margin-bottom:8px">1. Leave the voicemail. 2. Send a follow-up text. A VM by itself does not complete the weekly outreach.</div>'
-    +'<button type="button" class="ct-copy-vm-text" style="width:100%;padding:7px 8px;margin-bottom:6px;border-radius:7px;background:#fff;border:1px solid #D8C98D;color:#66531E;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer">Copy follow-up text</button>'
-    +'<button type="button" class="ct-confirm-vm-text" style="width:100%;padding:8px;border-radius:7px;background:#5B4498;border:none;color:#fff;font:inherit;font-size:12px;font-weight:800;cursor:pointer">I sent the text — complete outreach ✓</button>';
-  wrap.querySelector(".ct-copy-vm-text").onclick=function(){
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(textMsg).then(function(){ctShowToast("Follow-up text copied ✓");}).catch(function(){prompt("Copy this follow-up text:",textMsg);});}
-    else{prompt("Copy this follow-up text:",textMsg);}
-  };
-  wrap.querySelector(".ct-confirm-vm-text").onclick=function(){
-    var canned="Left voicemail and sent a follow-up text after no answer. Awaiting agent response.";
-    delete pendingNote[name];
-    ctClearDraft(name);
-    upsertCallLogWithOutcome(name,lp,canned,"VM + Text",false).then(function(){
-      ctShowToast("VM + text logged — watch for reply");
-      if(document.getElementById("lp-search-results") && document.getElementById("lp-search-results").innerHTML.length>10){renderLpSearch();}
-      else{renderLP(currentUser);}
-      if(typeof buildSnapshot==="function")buildSnapshot();
-    });
-  };
-  saveBtn.insertAdjacentElement("afterend",wrap);
-}
+function ctInjectQuickSave(card,name,lp,outcome){ return; }
 
 document.addEventListener("click",function(e){
   var btn=e.target.closest(".outcome-btn");
@@ -8044,8 +7914,8 @@ function ctLacksAgentResponse(text){
   var low=(text||"").toLowerCase();
   return !CT_RESPONSE_WORDS.some(function(w){return low.indexOf(w)>=0;});
 }
-// Catches "what what what what" style gaming — a real note has some word
-// variety; one word/phrase stretched out to clear the length bar doesn't.
+// Catches "what what what what" style gaming. There is no word-count minimum,
+// but obvious repeated filler still is not accepted as a useful note.
 // This is a hard block, no override, since there's no legitimate reason
 // a genuine note repeats itself like that.
 function ctIsRepetitive(text){
@@ -8057,9 +7927,8 @@ function ctIsRepetitive(text){
   return (uniqueCount/words.length < 0.5) || (maxRepeat/words.length > 0.4);
 }
 
-/* Single-save note flow: normal quality nudges must never require a second click.
-   We still hard-block obviously repetitive/gamed notes, but duplicate wording or a
-   short Answered/In Person note is allowed to save on the first click. */
+/* Single-save note flow: no word-count minimum.
+   We only hard-block blank notes, the required VM+text workflow, or obviously repetitive/gamed text. */
 if(typeof window.tryConfirmCall==="function"){
   var origTryConfirm2=window.tryConfirmCall;
   window.tryConfirmCall=function(name,lp){
@@ -8114,75 +7983,14 @@ function ctJumpToAgentAndLog(name, lp){
   },200);
 }
 function ctInjectOverdueQueue(){
-  var host=document.getElementById("d-snapshot-body");
-  if(!host || typeof agents==="undefined" || !agents.length) return;
+  // v37: Team-wide live-connection priority radar intentionally removed from the LP Tracker.
+  // Each LP should work only from their own focused weekly list. Cross-team prioritization
+  // belongs in the RM/Management workflow so the LP Snapshot stays simple and actionable.
   var old=document.getElementById("ct-overdue-queue");
   if(old) old.remove();
-
-  // Snapshot is a LIVE-CONNECTION queue, not merely an attempt queue.
-  // A voicemail or one-way follow-up text still needs a real conversation, so it stays visible.
-  // Answered / In Person clears the row for the week.
-  var overdue=agents.filter(function(a){
-    return ctRosterEligible(a) && isActive(a) && a[2] && a[2]!=="Unassigned";
-  }).map(function(a){
-    var log=callLogs[a[0]]||null;
-    var thisWeek=!!(log&&log.week_key===weekKey);
-    var outcome=thisWeek?String(log.outcome||"").trim().toLowerCase():"";
-    var connected=thisWeek&&lpHasLiveConnectionLog(log);
-    var retry=thisWeek&&!connected;
-    var workflowDone=thisWeek&&lpWorkflowCompleteLog(log);
-    var rmFlagged=!!lpOpenRmFlags[assignmentKey(a[0])];
-    return {name:a[0], lp:a[2], rm:getRmOwner(a[0])||"Unassigned", tier:a[1], days:daysOverdue(a), priority:isPriority(a), retry:retry, outcome:outcome, workflowDone:workflowDone, rmFlagged:rmFlagged};
-  }).filter(function(x){
-    if(x.retry) return true;
-    return x.days>=0 || x.priority;
-  }).sort(function(x,y){
-    if(x.priority!==y.priority) return y.priority-x.priority;
-    if(x.retry!==y.retry) return y.retry-x.retry;
-    return y.days-x.days;
-  }).slice(0,8);
-
-  if(!overdue.length) return;
-
-  var box=document.createElement("div");
-  box.id="ct-overdue-queue";
-  box.style.cssText="background:#fff;border:1px solid #E4E6EA;border-radius:12px;padding:14px 18px;margin-bottom:18px;";
-  var rows=overdue.map(function(o){
-    return '<div class="ct-overdue-row" data-name="'+o.name.replace(/"/g,"&quot;")+'" data-lp="'+o.lp+'" data-rmflagged="'+(o.rmFlagged?"1":"0")+'" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0F1EE;cursor:'+(o.rmFlagged?'default':'pointer')+'" onmouseover="this.style.background=\'#FAFAF9\'" onmouseout="this.style.background=\'\'">'
-      +'<span style="font-size:13px;font-weight:700;flex:1">'+o.name+'</span>'
-      +'<span style="font-size:10.5px;font-weight:750;padding:3px 7px;border-radius:100px;background:#F1ECFA;color:#5B4498" title="Relationship Manager owner">RM · '+o.rm+'</span>'
-      +'<span style="font-size:10.5px;font-weight:750;padding:3px 7px;border-radius:100px;background:#EEF1F6;color:#3D4E68" title="Loan Partner owner">LP · '+o.lp+'</span>'
-      +(o.priority?'<span style="font-size:10.5px;font-weight:700;color:#B54B42">PRIORITY</span>':'')
-      +(o.retry?'<span style="font-size:10.5px;font-weight:750;color:#9A6700;background:#FFF7D6;border-radius:100px;padding:3px 7px">'+(o.outcome==="left vm"?"VM only · TEXT REQUIRED":(o.outcome==="sent follow-up text"?"Text only · CALL REQUIRED":((o.outcome==="vm + text"||o.outcome==="voicemail + text")?(o.rmFlagged?"Outreach complete · sent to RM":"Outreach complete · no reply yet"):"Attempt only · retry")))+'</span>':'')
-      +'<span style="font-size:11.5px;color:'+(o.days>=0?'#B54B42':'#6B7280')+';font-weight:600;min-width:70px;text-align:right">'+(!o.retry&&o.days>=0?o.days+"d overdue":(o.retry?(o.rmFlagged?"RM review needed":"No live connection yet"):"—"))+'</span>'
-      +'<button type="button" class="ct-owner-edit-btn" data-owner-agent="'+ctOwnEscAttr(o.name)+'" style="border:1px solid #DDD7EC;background:#fff;color:#5B4498;border-radius:7px;padding:5px 8px;font:inherit;font-size:10.5px;font-weight:700;cursor:pointer">Edit owners</button>'
-      +((o.outcome==="vm + text"||o.outcome==="voicemail + text")&&!o.rmFlagged?'<button type="button" class="ct-no-reply-rm-btn" data-noreply-agent="'+ctOwnEscAttr(o.name)+'" data-noreply-lp="'+ctOwnEscAttr(o.lp)+'" style="border:none;background:#5B4498;color:#fff;border-radius:7px;padding:5px 8px;font:inherit;font-size:10.5px;font-weight:800;cursor:pointer">No reply? Tell RM</button>':'')
-      +(o.rmFlagged?'<span style="font-size:11px;font-weight:800;color:#276749;padding:5px 10px;border-radius:7px;background:#F0FDF4">RM reviewing</span>':'<span style="font-size:11px;font-weight:700;color:#3D4E68;padding:5px 10px;border-radius:7px;background:#EEF1F6">Log call →</span>')
-      +'</div>';
-  }).join("");
-  box.innerHTML='<div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#6B7280;margin-bottom:5px">Top 8 team-wide live-connection priorities <span style="font-weight:600;text-transform:none;color:#94a3b8">· click a row to log it</span></div><div style="font-size:11px;color:#7C8493;margin-bottom:8px"><b>This is the urgent team-wide radar, not each LP’s full weekly call block.</b> Open the LP’s name in the left menu for their full weekly list. A voicemail alone is incomplete: LP must also send the follow-up text. VM + text completes weekly outreach but is not a live connection. If the agent replies by text, mark Text reply / Conversation. If they stay silent, use “No reply? Tell RM” so the RM team can decide the next move.</div>'+rows;
-  host.insertBefore(box, host.firstChild);
-  box.querySelectorAll(".ct-owner-edit-btn").forEach(function(btn){
-    btn.addEventListener("click",function(ev){ctOpenOwnershipEdit(ev,btn.getAttribute("data-owner-agent"));});
-  });
-  box.querySelectorAll(".ct-no-reply-rm-btn").forEach(function(btn){
-    btn.addEventListener("click",function(ev){ev.stopPropagation();ctEscalateNoReply(btn.getAttribute("data-noreply-agent"),btn.getAttribute("data-noreply-lp"));});
-  });
-  box.querySelectorAll(".ct-overdue-row").forEach(function(row){
-    row.addEventListener("click", function(){
-      if(row.getAttribute("data-rmflagged")==="1")return;
-      ctJumpToAgentAndLog(row.getAttribute("data-name"), row.getAttribute("data-lp"));
-    });
-  });
 }
-if(typeof window.buildSnapshot==="function"){
-  var origBuildSnapshot=window.buildSnapshot;
-  window.buildSnapshot=function(){
-    var result=origBuildSnapshot.apply(this,arguments);
-    setTimeout(ctInjectOverdueQueue, 30);
-    return result;
-  };
-}
+
+// v37: no team-wide live-connection priority injection on LP Snapshot.
 
 })();
 
@@ -8874,13 +8682,14 @@ async function lpSyncAgentProfilesFromUpload(rows){
     var normalizedName=rawName.split(" ").map(function(w){return w?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():"";}).join(" ");
     var key=rawName.toLowerCase();
     var canonicalName=existingByKey[key]||normalizedName; // preserve the real stored name/casing when this person is already known
-    // A Power BI export is production data, not roster authority. If an agent was explicitly
-    // removed from our relationship roster, leave their profile/history untouched and do not
-    // stamp them back into the current Portfolio population or generate a fake tier migration.
-    if(existingRelationshipStatusByKey[key]==="inactive"||ctInactiveRosterNames.has(key))return;
+    // A Power BI export is production data, not roster authority. Removed/inactive relationships
+    // still get their latest production snapshot stamped for reconciliation, but this function NEVER
+    // changes relationship_status or LP/RM ownership, so an import cannot resurrect them.
+    var rosterInactive=existingRelationshipStatusByKey[key]==="inactive"||ctInactiveRosterNames.has(key);
 
     var payload={agent_name:canonicalName,tier:tier,closes_past_year:closes,total_leads_past_year:leads,retained:isActive,
       powerbi_last_seen_at:powerBiImportStamp,powerbi_level:(row["Level"]||"").toString().trim()||null};
+    if(rosterInactive)payload.relationship_status="inactive"; // normalize legacy __REMOVED__ markers without reactivating anyone
     if(latestLead)payload.latest_lead_date=latestLead;
     if(latestClose)payload.latest_close_date=latestClose;
     // CORRECTED contact-field precedence: for an EXISTING agent, Power BI may only fill a
@@ -8908,11 +8717,11 @@ async function lpSyncAgentProfilesFromUpload(rows){
     // detectable change, existing agent or new, so Portfolio Review's tier-migration and
     // active-status trend reporting stays complete regardless of which app ran the import.
     var priorTier=existingTierByKey[key];
-    if(priorTier!==undefined&&priorTier!==tier&&(priorTier||tier)){
+    if(!rosterInactive&&priorTier!==undefined&&priorTier!==tier&&(priorTier||tier)){
       tierChanges.push({agent_name:canonicalName,from_tier:priorTier,to_tier:tier});
     }
     var priorActive=existingActiveByKey[key];
-    if(priorActive!==undefined&&priorActive!==isActive){
+    if(!rosterInactive&&priorActive!==undefined&&priorActive!==isActive){
       if(isActive)activeChanges.becameActive++;else activeChanges.becameInactive++;
     }
   });
@@ -9100,9 +8909,10 @@ async function pfrLoad(){
       sbFetch("GET","break_breads?select=agent_name,date&order=date.desc&limit=3000").catch(function(){return[];}),
       // Real last-lead-date per agent from Velocify (trailing 12 months) — more accurate than
       // latest_lead_date on agent_profiles, which only updates when the Power BI import runs.
-      sbFetch("GET","velocify_leads?select=referral_partner_name,date_added&order=date_added.desc&limit=5000&date_added=gte."+(function(){var d=new Date();d.setFullYear(d.getFullYear()-1);return d.toISOString().slice(0,10);}())).catch(function(){return[];})
+      sbFetch("GET","velocify_leads?select=referral_partner_name,date_added&order=date_added.desc&limit=5000&date_added=gte."+(function(){var d=new Date();d.setFullYear(d.getFullYear()-1);return d.toISOString().slice(0,10);}())).catch(function(){return[];}),
+      sbFetch("GET","powerbi_import_log?select=imported_at,rows_processed,matched,created,updated,skipped,errors&order=imported_at.desc&limit=1").catch(function(){return[];})
     ]);
-    var allAgents=results[0]||[],allActs=results[1]||[],lpCalls=results[2]||[],migrations=results[3]||[],periodLeads=results[4]||[],monthLeads=results[5]||[],periodActs=results[6]||[],periodBreads=results[7]||[],allBreads=results[8]||[],allLeads=results[9]||[];
+    var allAgents=results[0]||[],allActs=results[1]||[],lpCalls=results[2]||[],migrations=results[3]||[],periodLeads=results[4]||[],monthLeads=results[5]||[],periodActs=results[6]||[],periodBreads=results[7]||[],allBreads=results[8]||[],allLeads=results[9]||[],lastImportLog=(results[10]&&results[10][0])||null;
 
     // Build real last-lead-date per agent from Velocify — keyed by lowercase name for matching
     var lastLeadDateByAgent={};
@@ -9141,9 +8951,24 @@ async function pfrLoad(){
     }):allAgents.slice();
     var powerBiActiveAgents=currentPowerBiAgents.filter(function(a){return !!a.powerbi_level;}).length;
     var currentPowerBiPopulation=currentPowerBiAgents.length;
+    var currentRosterRelationships=currentPowerBiAgents.filter(function(a){return a.relationship_status!=="inactive";});
+    var inactiveRemovedCount=currentPowerBiAgents.filter(function(a){return a.relationship_status==="inactive";}).length;
     var rmActivePartners=currentPowerBiAgents.filter(function(a){return !!a.retained;});
+    var dncActiveCount=rmActivePartners.filter(function(a){return a.do_not_contact===true&&a.relationship_status!=="inactive";}).length;
+    var inactiveActiveCount=rmActivePartners.filter(function(a){return a.relationship_status==="inactive";}).length;
     var active=rmActivePartners.filter(function(a){return a.do_not_contact!==true&&a.relationship_status!=="inactive";});
     var totalActive=active.length;
+    var powerBiLevelCounts={A:0,B:0,C:0,Blank:0,Other:0};
+    currentPowerBiAgents.forEach(function(a){var lv=String(a.powerbi_level||"").trim();if(lv==="A"||lv==="B"||lv==="C")powerBiLevelCounts[lv]++;else if(!lv)powerBiLevelCounts.Blank++;else powerBiLevelCounts.Other++;});
+    var pbSnapshot=window.CT_POWERBI_SNAPSHOT||null;
+    if(!pbSnapshot){try{pbSnapshot=JSON.parse(localStorage.getItem("ct_powerbi_snapshot_v1")||"null");}catch(e){pbSnapshot=null;}}
+    // Never show a stale browser snapshot if another device/import has refreshed the shared data since.
+    if(pbSnapshot&&lastImportLog&&lastImportLog.imported_at&&pbSnapshot.imported_at){
+      if(new Date(lastImportLog.imported_at).getTime()-new Date(pbSnapshot.imported_at).getTime()>300000)pbSnapshot=null;
+    }
+    var uploadedRows=(pbSnapshot&&pbSnapshot.raw_rows)||((lastImportLog&&lastImportLog.rows_processed)||currentPowerBiPopulation);
+    var displayPbLevels=(pbSnapshot&&pbSnapshot.levels)||powerBiLevelCounts;
+    var pbPipeline={prequalsTotal:(pbSnapshot&&pbSnapshot.active_prequals_total)||0,prequalsAgents:(pbSnapshot&&pbSnapshot.active_prequals_agents)||0,pipelineTotal:(pbSnapshot&&pbSnapshot.active_pipeline_total)||0,pipelineAgents:(pbSnapshot&&pbSnapshot.active_pipeline_agents)||0};
 
     // Tier Migration is a managed-portfolio metric. Exclude removed/inactive/DNC agents and
     // null-tier transitions (for example C → ?), because "no tier" is not a real migration.
@@ -9303,7 +9128,10 @@ async function pfrLoad(){
       projectedMonthLeads:projectedMonthLeads,
       ratioMTD:ratioMTD,
       projectedRatio:projectedRatio,
-      totalActive:totalActive};
+      totalActive:totalActive,
+      pbSnapshot:pbSnapshot,
+      powerBiLevelCounts:displayPbLevels,
+      uploadedRows:uploadedRows};
 
     var html="";
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px">'
@@ -9319,18 +9147,30 @@ async function pfrLoad(){
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Portfolio Reconciliation</div>'
-      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:10px">Three different populations on purpose — this is how the tracker reconciles to Power BI without mixing definitions.</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
-        +pfrStatTile("Current Power BI Population",currentPowerBiPopulation+(latestPowerBiStamp?"":"*"),"pfrOpenDrill('pop:powerbi')")
-        +pfrStatTile("RM Active Partners · 90d",rmActivePartners.length,"pfrOpenDrill('pop:rmactive')")
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Power BI → Managed Portfolio Reconciliation</div>'
+      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:10px">Start with the raw upload, then show exactly what is excluded before the managed portfolio count.</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'
+        +pfrStatTile("Power BI uploaded rows",uploadedRows,"pfrOpenDrill('pop:powerbi')")
+        +pfrStatTile("Current roster relationships",currentRosterRelationships.length,null)
+        +pfrStatTile("90-day active · lead/close",rmActivePartners.length,"pfrOpenDrill('pop:rmactive')")
         +pfrStatTile("Managed Active Partners",totalActive,"pfrOpenDrill('tier:all')")
       +'</div>'
-      +'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">Current Power BI Population = every relationship row stamped by the latest Power BI import ('+powerBiActiveAgents+' have a nonblank Power BI Level). RM Active Partners = latest lead OR close within 90 days. Managed Active Partners = RM Active Partners excluding inactive/removed and DNC.</div>'
+      +'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">Excluded from managed: '+inactiveRemovedCount+' inactive/removed relationship'+(inactiveRemovedCount===1?'':'s')+' in the latest stamped Power BI population and '+dncActiveCount+' active DNC relationship'+(dncActiveCount===1?'':'s')+'. Active Partner = latest lead OR close within 90 days. File-start/contract dates remain visible activity details but do not change Active Partner status.</div>'
+      +((uploadedRows>currentPowerBiPopulation)?'<div style="margin-top:8px;background:#FBF3E5;border:1px solid #E8DDC8;border-radius:8px;padding:7px 10px;font-size:10.5px;color:#8C7355">Re-upload the Power BI file once in Admin after this tracker update so every raw Power BI row — including removed relationships — receives the new audit stamp. This does not reactivate anyone.</div>':'')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">Managed Active Partner Count</div>'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:3px">Pipeline Signals from Power BI</div>'
+      +'<div style="font-size:10.5px;color:var(--text-3);margin-bottom:10px">Useful production context without adding another tier scoreboard.</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'
+        +pfrStatTile("Active Prequals",pbPipeline.prequalsTotal+(pbPipeline.prequalsAgents?' · '+pbPipeline.prequalsAgents+' agents':''),pbSnapshot?"pfrOpenDrill('pb:prequals')":null)
+        +pfrStatTile("Active In Pipeline",pbPipeline.pipelineTotal+(pbPipeline.pipelineAgents?' · '+pbPipeline.pipelineAgents+' agents':''),pbSnapshot?"pfrOpenDrill('pb:pipeline')":null)
+      +'</div>'
+      +(!pbSnapshot?'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">These populate after the next Admin Power BI upload.</div>':'')
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Managed Relationship Tier</div><div style="font-size:10.5px;color:var(--text-3);margin-bottom:10px">Calculated from trailing-12-month closes/leads. This is intentionally separate from Power BI Level.</div>'
       +'<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">'
         +pfrTile("Total",totalActive,PFR_TARGETS.total,"pfrOpenDrill(\'tier:all\')")
         +pfrTile("Channel",countByTier.Channel,null,"pfrOpenDrill(\'tier:Channel\')")
@@ -9480,9 +9320,21 @@ function pfrOpenDrill(key){
     body.innerHTML=summary+(items.length?items.map(function(it,i){return pfrListRow(i+1,it.name,it.detail);}).join(""):'<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No Velocify leads found month-to-date.</div>');
     overlay.style.display="flex";
     return;
+  }else if(key==="pb:levels"){
+    title.textContent="Power BI Level Distribution — raw upload";
+    var lv=(pfrDrill.powerBiLevelCounts||{});
+    items=[{name:"A",detail:String(lv.A||0)+" agents"},{name:"B",detail:String(lv.B||0)+" agents"},{name:"C",detail:String(lv.C||0)+" agents"},{name:"No Level",detail:String(lv.Blank||0)+" agents"}];
+  }else if(key==="pb:prequals"||key==="pb:pipeline"){
+    var snap=pfrDrill.pbSnapshot||null;
+    var isPre=key==="pb:prequals";
+    title.textContent=isPre?"Active Prequals — Power BI snapshot":"Active In Pipeline — Power BI snapshot";
+    var vals=[];
+    if(snap&&snap.by_agent){Object.keys(snap.by_agent).forEach(function(k){var r=snap.by_agent[k]||{};var n=isPre?Number(r.active_prequals||0):Number(r.active_pipeline||0);if(n>0)vals.push({name:r.name||k,detail:n+(isPre?" active prequal":" active pipeline")+(n===1?"":"s")+(r.level?" · Power BI "+r.level:"")});});}
+    vals.sort(function(a,b){var an=parseInt(a.detail)||0,bn=parseInt(b.detail)||0;return bn-an||String(a.name).localeCompare(String(b.name));});
+    items=vals;
   }else if(key==="pop:powerbi"){
     title.textContent="Current Power BI Population — latest import";
-    items=(pfrDrill.powerBiActiveRows||[]).map(function(a){return{name:a.agent_name,detail:(a.powerbi_level||"Power BI active")+" · "+pfrTierLabel(a.tier)};});
+    items=(pfrDrill.powerBiActiveRows||[]).map(function(a){return{name:a.agent_name,detail:(a.powerbi_level?"Power BI "+a.powerbi_level:"No Power BI level")+" · Managed tier "+pfrTierLabel(a.tier)};});
   }else if(key==="pop:rmactive"){
     title.textContent="RM Active Partners — latest lead or close within 90 days";
     items=(pfrDrill.rmActivePartners||[]).map(function(a){
@@ -9740,5 +9592,20 @@ setTimeout(function(){
 },13000);
 </script>
 </div>
+
+<style>
+#v33SharedFaceTimeModal{display:none;position:fixed;inset:0;background:rgba(29,31,39,.36);z-index:12050;align-items:center;justify-content:center;padding:18px}
+#v33SharedFaceTimeModal .v33-card{width:min(500px,96vw);max-height:88vh;overflow:auto;background:#fff;border:1px solid #D8DFD9;border-radius:15px;box-shadow:0 20px 60px rgba(25,32,28,.22);padding:17px;font-family:Arial,Helvetica,sans-serif}
+#v33SharedFaceTimeModal label{font-size:10px;font-weight:800;text-transform:uppercase;color:#69766E;display:block;margin:10px 0 4px}
+#v33SharedFaceTimeModal input,#v33SharedFaceTimeModal select,#v33SharedFaceTimeModal textarea{width:100%;box-sizing:border-box;border:1px solid #CBD6CD;border-radius:8px;padding:8px 9px;font:12px Arial,Helvetica,sans-serif}
+</style>
+<div id="v33SharedFaceTimeModal"><div class="v33-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div style="font-size:17px;font-weight:850;color:#26352D">Book Face Time</div><div id="v33FtAgentLabel" style="font-size:12px;color:#68756D;margin-top:2px"></div></div><button onclick="v33CloseSharedFaceTime()" style="border:0;background:#F1F4F1;width:32px;height:32px;border-radius:8px;cursor:pointer">×</button></div><input type="hidden" id="v33FtId"><input type="hidden" id="v33FtAgent"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>Date</label><input id="v33FtDate" type="date"></div><div><label>Time</label><input id="v33FtTime" type="time"></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>LP attending</label><select id="v33FtLp"><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="">TBD</option></select></div><div><label>RM partner</label><select id="v33FtRm"><option>Amanda</option><option>Nyny</option><option>Amanda + Nyny</option></select></div></div><label>Purpose / notes</label><textarea id="v33FtNotes" rows="3" placeholder="Why are we meeting? Anything Amanda/RM should know?"></textarea><div style="background:#F2F6F2;border:1px solid #D7E2D9;border-radius:8px;padding:8px 9px;margin-top:9px;font-size:11px;color:#536258">One shared booking. It appears in the LP Face Time view and Amanda’s RM Face Time view.</div><div style="display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap;margin-top:13px"><button id="v33FtCancelBooking" onclick="v33CancelSharedFaceTime()" style="display:none;border:1px solid #E1CBC4;background:#FFF8F6;color:#8A4A3E;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer">Cancel booking</button><button onclick="v33CloseSharedFaceTime()" style="border:1px solid #D4DDD6;background:#fff;color:#59655E;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer">Close</button><button onclick="v33SaveSharedFaceTime()" style="border:0;background:#557565;color:#fff;border-radius:8px;padding:7px 11px;font-weight:750;cursor:pointer">Save booking</button></div></div></div>
+<script>
+async function v33OpenSharedFaceTime(name,lp,id){var m=document.getElementById('v33SharedFaceTimeModal');if(!m)return;document.getElementById('v33FtId').value=id||'';document.getElementById('v33FtAgent').value=name||'';document.getElementById('v33FtAgentLabel').textContent=displayName(name||'')+' · shared with RM Tracker';document.getElementById('v33FtDate').value=today2();document.getElementById('v33FtTime').value='';document.getElementById('v33FtLp').value=lp||'';document.getElementById('v33FtRm').value='Amanda';document.getElementById('v33FtNotes').value='';document.getElementById('v33FtCancelBooking').style.display=id?'inline-block':'none';if(id){try{var rows=await sbFetch('GET','face_time_events?id=eq.'+encodeURIComponent(id)+'&select=*&limit=1');if(rows&&rows[0]){var e=rows[0];document.getElementById('v33FtDate').value=e.event_date||today2();document.getElementById('v33FtTime').value=String(e.event_time||'').slice(0,5);document.getElementById('v33FtLp').value=e.lp||lp||'';document.getElementById('v33FtRm').value=e.rm||'Amanda';document.getElementById('v33FtNotes').value=e.notes||'';}}catch(e){console.warn(e);}}m.style.display='flex';}
+function v33CloseSharedFaceTime(){var m=document.getElementById('v33SharedFaceTimeModal');if(m)m.style.display='none';}
+async function v33SaveSharedFaceTime(){var id=document.getElementById('v33FtId').value,name=document.getElementById('v33FtAgent').value,date=document.getElementById('v33FtDate').value,time=document.getElementById('v33FtTime').value||null,lp=document.getElementById('v33FtLp').value||null,rm=document.getElementById('v33FtRm').value||'Amanda',notes=document.getElementById('v33FtNotes').value.trim()||null;if(!name||!date){showToast('Choose an agent and date.','error');return;}var body={agent_name:name,event_date:date,event_time:time,lp:lp,rm:rm,status:'scheduled',notes:notes,created_by:lp||'LP Tracker',updated_at:new Date().toISOString()};try{if(id)await sbFetch('PATCH','face_time_events?id=eq.'+encodeURIComponent(id),body);else await sbFetch('POST','face_time_events',body);v33CloseSharedFaceTime();showToast('Face Time booked · Amanda can see it too ✓','success');await loadFaceTime();}catch(e){showToast('Could not save. Run the shared Face Time SQL if needed.','error');}}
+async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId').value;if(!id)return;try{await sbFetch('PATCH','face_time_events?id=eq.'+encodeURIComponent(id),{status:'cancelled',updated_at:new Date().toISOString()});v33CloseSharedFaceTime();showToast('Booking cancelled.','success');await loadFaceTime();}catch(e){showToast('Could not cancel booking.','error');}}
+</script>
+<!-- v36 SIMPLE LP + TRAINING · 2026-08-19 -->
 </body>
 </html>
