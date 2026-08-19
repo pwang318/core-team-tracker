@@ -1232,16 +1232,25 @@ td{line-height:1.4!important}
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
     <div>
       <div class="section-head" style="margin:0 0 4px">Partner Ownership</div>
-      <div style="font-size:12px;color:var(--text-3);line-height:1.5">One shared ownership view for the Core Team + RM trackers. Edit the RM owner or LP owner here and the change saves to the shared agent assignment record.</div>
+      <div style="font-size:12px;color:var(--text-3);line-height:1.5">One shared ownership view for the Core Team + RM trackers. Select one or many relationships, then update the RM owner, LP owner, or both.</div>
     </div>
     <button class="btn" type="button" onclick="refreshOwnershipView()">&#8635; Refresh</button>
   </div>
   <div id="ownership-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-bottom:12px"></div>
+  <div id="ownership-hidden-note" style="display:none;background:#fff8e8;border:1px solid #ead49a;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:11.5px;color:#6f5618"></div>
   <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px">
     <div style="display:grid;grid-template-columns:minmax(220px,2fr) minmax(140px,1fr) minmax(140px,1fr);gap:8px">
       <input id="ownership-search" type="text" placeholder="Search agent..." oninput="renderOwnershipRows()" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px">
       <select id="ownership-rm-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All RM owners</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option><option value="__UNASSIGNED__">RM unassigned</option></select>
       <select id="ownership-lp-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All LP owners</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Unassigned">LP unassigned</option></select>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)">
+      <div id="ownership-selected-count" style="font-size:11.5px;font-weight:800;color:#4E3D8A;min-width:72px">0 selected</div>
+      <select id="ownership-bulk-rm" style="padding:7px 9px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px"><option value="__NO_CHANGE__">RM: no change</option><option value="Amanda">RM: Amanda</option><option value="Nyny">RM: Nyny</option><option value="__UNASSIGNED__">RM: Unassigned</option></select>
+      <select id="ownership-bulk-lp" style="padding:7px 9px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px"><option value="__NO_CHANGE__">LP: no change</option><option value="Gavin">LP: Gavin</option><option value="Karen">LP: Karen</option><option value="Osgood">LP: Osgood</option><option value="Jordan">LP: Jordan</option><option value="Said">LP: Said</option><option value="Unassigned">LP: Unassigned</option></select>
+      <button id="ownership-bulk-apply" class="btn btn-primary btn-sm" type="button" onclick="bulkApplyOwnership()" disabled>Apply to selected</button>
+      <button class="btn btn-sm" type="button" onclick="clearOwnershipSelection()">Clear selection</button>
+      <span id="ownership-bulk-status" style="font-size:10.5px;color:var(--text-3)"></span>
     </div>
   </div>
   <div id="ownership-body" style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><div style="padding:30px;text-align:center;color:var(--text-3)">Loading ownership...</div></div>
@@ -1772,8 +1781,11 @@ async function loadInactiveRosterNames(){
     ctInactiveRosterNames=new Set();ctNurtureRosterNames=new Set();ctNurtureRosterMeta={};
     rows.forEach(function(r){
       var k=(r.agent_name||"").trim().toLowerCase();
-      if(r.relationship_status==="inactive"&&r.agent_name)ctInactiveRosterNames.add(k);
-      if(r.lp_outreach_status==="nurture"&&r.relationship_status!=="inactive"&&r.agent_name){ctNurtureRosterNames.add(k);ctNurtureRosterMeta[k]={reason:r.nurture_reason||"",next:r.next_rm_followup||""};}
+      var shown=String(r.display_name||"").trim().toLowerCase();
+      // Legacy cleanup versions sometimes used __Hidden__ as a display-name sentinel.
+      // Treat those rows as excluded everywhere until the one-click cleanup below retires them permanently.
+      if((r.relationship_status==="inactive"||shown==="__hidden__"||k==="__hidden__")&&r.agent_name)ctInactiveRosterNames.add(k);
+      if(r.lp_outreach_status==="nurture"&&r.relationship_status!=="inactive"&&shown!=="__hidden__"&&r.agent_name){ctNurtureRosterNames.add(k);ctNurtureRosterMeta[k]={reason:r.nurture_reason||"",next:r.next_rm_followup||""};}
     });
     assignments.forEach(function(r){
       if(r.lp==="__REMOVED__"&&r.agent_name)ctInactiveRosterNames.add((r.agent_name||"").trim().toLowerCase());
@@ -2361,8 +2373,22 @@ function openScorecardsView(){
 }
 
 
-/* ── v18: first-class shared RM + LP ownership workspace ── */
+/* ── v39: shared RM + LP ownership workspace with bulk reassignment ── */
+var ownershipSelected=new Set();
+var ownershipVisibleKeys=[];
 function ctOwnEscAttr(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function ctOwnershipIsHidden(a){
+  if(!a)return false;
+  var raw=String(a[0]||"").trim().toLowerCase();
+  var shown=String(displayName(a[0])||"").trim().toLowerCase();
+  return raw==="__hidden__"||shown==="__hidden__";
+}
+function ctOwnershipBaseRows(){
+  return (agents||[]).filter(function(a){return isActive(a)&&!ctRosterRemoved(a[0])&&!ctOwnershipIsHidden(a);});
+}
+function ctOwnershipHiddenRows(){
+  return (agents||[]).filter(function(a){return isActive(a)&&ctOwnershipIsHidden(a);});
+}
 function openOwnershipView(btn){
   rmStopPolling();lpStopPolling();
   currentUser="Ownership";
@@ -2371,41 +2397,73 @@ function openOwnershipView(btn){
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   var view=document.getElementById("view-ownership");if(view)view.classList.add("active");
   var body=document.getElementById("ownership-body");if(body)body.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">Loading ownership...</div>';
-  Promise.resolve(loadAgentAssignments()).then(function(){renderOwnershipSummary();renderOwnershipRows();}).catch(function(){renderOwnershipRows();});
+  Promise.all([loadAgentAssignments(),loadInactiveRosterNames()]).then(function(){renderOwnershipSummary();renderOwnershipRows();}).catch(function(){renderOwnershipRows();});
 }
 function refreshOwnershipView(){
   var body=document.getElementById("ownership-body");if(body)body.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">Refreshing...</div>';
-  return loadAgentAssignments().then(function(){renderOwnershipSummary();renderOwnershipRows();setSyncStatus("live");}).catch(function(){setSyncStatus("error");renderOwnershipRows();});
+  return Promise.all([loadAgentAssignments(),loadInactiveRosterNames()]).then(function(){renderOwnershipSummary();renderOwnershipRows();setSyncStatus("live");}).catch(function(){setSyncStatus("error");renderOwnershipRows();});
 }
 function renderOwnershipSummary(){
   var host=document.getElementById("ownership-summary");if(!host)return;
-  var rows=(agents||[]).filter(function(a){return isActive(a);});
+  var rows=ctOwnershipBaseRows();
   var counts={total:rows.length,Amanda:0,Nyny:0,rmU:0,lpU:0};
   rows.forEach(function(a){var rm=getRmOwner(a[0]);if(rm==="Amanda")counts.Amanda++;else if(rm==="Nyny")counts.Nyny++;else counts.rmU++;if(!a[2]||a[2]==="Unassigned")counts.lpU++;});
   function card(label,val){return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--text-3)">'+label+'</div><div style="font-size:20px;font-weight:800;color:var(--text);margin-top:3px">'+val+'</div></div>';}
   host.innerHTML=card("Active relationships",counts.total)+card("RM · Amanda",counts.Amanda)+card("RM · Nyny",counts.Nyny)+card("RM unassigned",counts.rmU)+card("LP unassigned",counts.lpU);
+  var note=document.getElementById("ownership-hidden-note"),hidden=ctOwnershipHiddenRows();
+  if(note){
+    if(hidden.length){
+      note.style.display="block";
+      note.innerHTML='<strong>'+hidden.length+' old hidden placeholder'+(hidden.length===1?'':'s')+' excluded.</strong> These are legacy cleanup records, not real agent names. <button class="btn btn-sm" type="button" onclick="cleanupHiddenOwnershipPlaceholders()" style="margin-left:7px;padding:4px 8px">Remove them permanently</button>';
+    }else{note.style.display="none";note.innerHTML="";}
+  }
+}
+function renderOwnershipBulkStatus(){
+  var count=ownershipSelected.size,el=document.getElementById("ownership-selected-count"),btn=document.getElementById("ownership-bulk-apply");
+  if(el)el.textContent=count+" selected";
+  if(btn)btn.disabled=count===0;
+  var all=document.getElementById("ownership-select-all");
+  if(all){var visibleSelected=ownershipVisibleKeys.filter(function(k){return ownershipSelected.has(k);}).length;all.checked=ownershipVisibleKeys.length>0&&visibleSelected===ownershipVisibleKeys.length;all.indeterminate=visibleSelected>0&&visibleSelected<ownershipVisibleKeys.length;}
+}
+function toggleOwnershipRow(cb){
+  var key=cb&&cb.getAttribute("data-own-key");if(!key)return;
+  if(cb.checked)ownershipSelected.add(key);else ownershipSelected.delete(key);
+  renderOwnershipBulkStatus();
+}
+function toggleOwnershipSelectAll(cb){
+  ownershipVisibleKeys.forEach(function(k){if(cb.checked)ownershipSelected.add(k);else ownershipSelected.delete(k);});
+  document.querySelectorAll('#ownership-body input[data-own-key]').forEach(function(x){x.checked=cb.checked;});
+  renderOwnershipBulkStatus();
+}
+function clearOwnershipSelection(){
+  ownershipSelected.clear();
+  document.querySelectorAll('#ownership-body input[data-own-key]').forEach(function(x){x.checked=false;});
+  renderOwnershipBulkStatus();
+  var st=document.getElementById("ownership-bulk-status");if(st)st.textContent="";
 }
 function renderOwnershipRows(){
   var host=document.getElementById("ownership-body");if(!host)return;
   var q=((document.getElementById("ownership-search")||{}).value||"").trim().toLowerCase();
   var rf=((document.getElementById("ownership-rm-filter")||{}).value||"");
   var lf=((document.getElementById("ownership-lp-filter")||{}).value||"");
-  var rows=(agents||[]).filter(function(a){return isActive(a);}).filter(function(a){
+  var rows=ctOwnershipBaseRows().filter(function(a){
     var rm=getRmOwner(a[0])||"",lp=a[2]||"Unassigned",dn=displayName(a[0]);
     if(q && (dn+" "+a[0]+" "+rm+" "+lp).toLowerCase().indexOf(q)===-1)return false;
     if(rf==="__UNASSIGNED__" && rm)return false;if(rf && rf!=="__UNASSIGNED__" && rm!==rf)return false;
     if(lf && lp!==lf)return false;return true;
   }).sort(function(a,b){return displayName(a[0]).localeCompare(displayName(b[0]));});
-  if(!rows.length){host.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">No relationships match those filters.</div>';return;}
+  ownershipVisibleKeys=rows.map(function(a){return assignmentKey(a[0]);});
+  if(!rows.length){host.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">No relationships match those filters.</div>';renderOwnershipBulkStatus();return;}
   var rmOptions='<option value="">Unassigned</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option>';
   var lpOptions='<option value="Unassigned">Unassigned</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option>';
-  var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:700px"><thead><tr style="background:var(--surface-2);text-align:left"><th style="padding:10px 12px;font-size:10px;text-transform:uppercase;color:var(--text-3)">Agent</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">Tier</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">RM Owner</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">LP Owner</th><th style="padding:10px 12px"></th></tr></thead><tbody>';
+  var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:760px"><thead><tr style="background:var(--surface-2);text-align:left"><th style="padding:10px 8px;width:32px;text-align:center"><input id="ownership-select-all" type="checkbox" onchange="toggleOwnershipSelectAll(this)" title="Select all visible"></th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">Agent</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">Tier</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">RM Owner</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">LP Owner</th><th style="padding:10px 12px"></th></tr></thead><tbody>';
   rows.forEach(function(a){
-    var name=a[0],rm=getRmOwner(name)||"",lp=a[2]||"Unassigned",key=assignmentKey(name);
-    html+='<tr data-agent="'+ctOwnEscAttr(name)+'" style="border-top:1px solid var(--border)"><td style="padding:10px 12px"><div style="font-size:12.5px;font-weight:750;color:var(--text)">'+escHtml(displayName(name))+'</div></td><td style="padding:10px 8px"><span style="font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#f4f1fb;color:#5b4498">'+escHtml(a[1]||"C")+'</span></td><td style="padding:8px"><select data-owner-role="rm" style="width:100%;min-width:120px;padding:7px 8px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px">'+rmOptions+'</select></td><td style="padding:8px"><select data-owner-role="lp" style="width:100%;min-width:120px;padding:7px 8px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px">'+lpOptions+'</select></td><td style="padding:8px 12px;text-align:right;white-space:nowrap"><button class="btn btn-sm ownership-save-btn" type="button" onclick="saveOwnershipRow(this)">Save</button><button class="btn btn-sm" type="button" onclick="openLpContactModal(this.closest(\'tr\').getAttribute(\'data-agent\'))" style="margin-left:5px">Contact</button><span class="ownership-row-status" style="display:inline-block;min-width:42px;margin-left:6px;font-size:10.5px;color:var(--text-3)"></span></td></tr>';
+    var name=a[0],rm=getRmOwner(name)||"",lp=a[2]||"Unassigned",key=assignmentKey(name),checked=ownershipSelected.has(key)?' checked':'';
+    html+='<tr data-agent="'+ctOwnEscAttr(name)+'" style="border-top:1px solid var(--border)"><td style="padding:10px 8px;text-align:center"><input type="checkbox" data-own-key="'+ctOwnEscAttr(key)+'" onchange="toggleOwnershipRow(this)"'+checked+'></td><td style="padding:10px 8px"><div style="font-size:12.5px;font-weight:750;color:var(--text)">'+escHtml(displayName(name))+'</div></td><td style="padding:10px 8px"><span style="font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#f4f1fb;color:#5b4498">'+escHtml(a[1]||"C")+'</span></td><td style="padding:8px"><select data-owner-role="rm" style="width:100%;min-width:120px;padding:7px 8px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px">'+rmOptions+'</select></td><td style="padding:8px"><select data-owner-role="lp" style="width:100%;min-width:120px;padding:7px 8px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px">'+lpOptions+'</select></td><td style="padding:8px 12px;text-align:right;white-space:nowrap"><button class="btn btn-sm ownership-save-btn" type="button" onclick="saveOwnershipRow(this)">Save</button><button class="btn btn-sm" type="button" onclick="openLpContactModal(this.closest(\'tr\').getAttribute(\'data-agent\'))" style="margin-left:5px">Contact</button><span class="ownership-row-status" style="display:inline-block;min-width:42px;margin-left:6px;font-size:10.5px;color:var(--text-3)"></span></td></tr>';
   });
   host.innerHTML=html+'</tbody></table></div>';
   host.querySelectorAll('tr[data-agent]').forEach(function(tr){var name=tr.getAttribute('data-agent'),a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});var rm=getRmOwner(name)||"",lp=(a&&a[2])||"Unassigned";var rs=tr.querySelector('select[data-owner-role="rm"]'),ls=tr.querySelector('select[data-owner-role="lp"]');if(rs)rs.value=rm;if(ls)ls.value=lp;});
+  renderOwnershipBulkStatus();
 }
 function saveOwnershipRow(btn){
   var tr=btn&&btn.closest?btn.closest('tr[data-agent]'):null;if(!tr)return;
@@ -2422,6 +2480,59 @@ function saveOwnershipRow(btn){
     agentRmOwners[assignmentKey(name)]=rmVal||"";var ag=(agents||[]).find(function(a){return assignmentKey(a[0])===assignmentKey(name);});if(ag)ag[2]=lpVal||"Unassigned";
     setSyncStatus("live");btn.textContent="Saved";if(status){status.textContent="✓";status.style.color="#15803d";}renderOwnershipSummary();setTimeout(function(){btn.textContent="Save";btn.disabled=false;if(status)status.textContent="";},1200);
   }).catch(function(err){console.error("Ownership save failed",err);setSyncStatus("error");btn.disabled=false;btn.textContent="Retry";if(status){status.textContent="Failed";status.style.color="#b42318";}});
+}
+async function bulkApplyOwnership(){
+  var rmChoice=(document.getElementById("ownership-bulk-rm")||{}).value||"__NO_CHANGE__";
+  var lpChoice=(document.getElementById("ownership-bulk-lp")||{}).value||"__NO_CHANGE__";
+  var st=document.getElementById("ownership-bulk-status"),btn=document.getElementById("ownership-bulk-apply");
+  if(!ownershipSelected.size)return;
+  if(rmChoice==="__NO_CHANGE__"&&lpChoice==="__NO_CHANGE__"){if(st){st.textContent="Choose an RM or LP change first.";st.style.color="#9a3412";}return;}
+  var selected=ctOwnershipBaseRows().filter(function(a){return ownershipSelected.has(assignmentKey(a[0]));});
+  if(!selected.length){clearOwnershipSelection();return;}
+  if(btn){btn.disabled=true;btn.textContent="Saving "+selected.length+"...";}if(st){st.textContent="";st.style.color="var(--text-3)";}setSyncStatus("saving");
+  try{
+    var existing=await sbFetch("GET","agent_assignments?select=*&limit=5000").catch(function(){return[];});
+    var amap={};(existing||[]).forEach(function(r){if(r.agent_name)amap[assignmentKey(r.agent_name)]=r;});
+    var payloads=selected.map(function(ag){
+      var name=ag[0],k=assignmentKey(name),ar=amap[k]||{};
+      var newRm=rmChoice==="__NO_CHANGE__"?(getRmOwner(name)||null):(rmChoice==="__UNASSIGNED__"?null:rmChoice);
+      var newLp=lpChoice==="__NO_CHANGE__"?(ag[2]||"Unassigned"):lpChoice;
+      var p={agent_name:ar.agent_name||name,lp:newLp||"Unassigned",rm:newRm,priority:ar.priority!==undefined?!!ar.priority:!!ag[7],added:ar.added!==undefined?!!ar.added:false,level:ar.level||ag[1]||"C"};
+      if(ar.closed_past_year!==undefined)p.closed_past_year=ar.closed_past_year;else if(ag[8]!==undefined)p.closed_past_year=ag[8];
+      return p;
+    });
+    await sbFetch("POST","agent_assignments?on_conflict=agent_name",payloads);
+    payloads.forEach(function(p){var k=assignmentKey(p.agent_name);agentRmOwners[k]=p.rm||"";var ag=(agents||[]).find(function(a){return assignmentKey(a[0])===k;});if(ag)ag[2]=p.lp||"Unassigned";});
+    var changed=payloads.length;ownershipSelected.clear();
+    if(st){st.textContent=changed+" relationship"+(changed===1?"":"s")+" updated ✓";st.style.color="#15803d";}
+    setSyncStatus("live");renderOwnershipSummary();renderOwnershipRows();
+    if(btn){btn.textContent="Apply to selected";btn.disabled=true;}
+  }catch(err){console.error("Bulk ownership update failed",err);setSyncStatus("error");if(st){st.textContent="Bulk update failed — nothing was intentionally cleared.";st.style.color="#b42318";}if(btn){btn.disabled=false;btn.textContent="Retry bulk update";}}
+}
+async function cleanupHiddenOwnershipPlaceholders(){
+  var note=document.getElementById("ownership-hidden-note");
+  try{
+    var profiles=await sbFetch("GET","agent_profiles?select=agent_name,display_name,relationship_status&limit=5000").catch(function(){return[];});
+    var hidden=(profiles||[]).filter(function(r){return String(r.display_name||"").trim().toLowerCase()==="__hidden__"||String(r.agent_name||"").trim().toLowerCase()==="__hidden__";});
+    if(!hidden.length){if(note){note.textContent="No hidden placeholders remain.";}return;}
+    if(!window.confirm("Remove "+hidden.length+" hidden placeholder record"+(hidden.length===1?"":"s")+" from the active relationship roster? Historical activity and production will be preserved."))return;
+    if(note)note.innerHTML="Cleaning up hidden placeholders...";
+    var assigns=await sbFetch("GET","agent_assignments?select=*&limit=5000").catch(function(){return[];});
+    var amap={};(assigns||[]).forEach(function(r){if(r.agent_name)amap[assignmentKey(r.agent_name)]=r;});
+    for(var i=0;i<hidden.length;i++){
+      var name=hidden[i].agent_name;if(!name)continue;
+      await sbFetch("PATCH","agent_profiles?agent_name=eq."+encodeURIComponent(name),{relationship_status:"inactive",display_name:null}).catch(function(e){console.warn("Hidden profile cleanup failed",e);});
+      var ar=amap[assignmentKey(name)];
+      if(ar){await sbFetch("PATCH","agent_assignments?agent_name=eq."+encodeURIComponent(ar.agent_name),{lp:"__REMOVED__",priority:false}).catch(function(e){console.warn("Hidden assignment cleanup failed",e);});}
+      else{await sbFetch("POST","agent_assignments?on_conflict=agent_name",{agent_name:name,lp:"__REMOVED__",rm:null,priority:false,added:false,level:"C"}).catch(function(e){console.warn("Hidden assignment create failed",e);});}
+      if(typeof clearAgentFromRmWorkflows==="function")await clearAgentFromRmWorkflows(name).catch(function(){});
+      ctInactiveRosterNames.add(String(name).trim().toLowerCase());
+      delete ctDisplayNames[String(name).trim().toLowerCase()];
+      agents=agents.filter(function(a){return assignmentKey(a[0])!==assignmentKey(name);});
+    }
+    await refreshOwnershipView();
+    if(note){note.style.display="block";note.textContent=hidden.length+" hidden placeholder"+(hidden.length===1?"":"s")+" removed ✓";setTimeout(function(){renderOwnershipSummary();},1800);}
+  }catch(err){console.error("Hidden placeholder cleanup failed",err);if(note){note.style.display="block";note.textContent="Could not clean hidden placeholders. Refresh and try again.";}}
 }
 function ctOpenOwnershipEdit(ev,name){if(ev){ev.preventDefault();ev.stopPropagation();}openLpContactModal(name);}
 
