@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260818-v30">
+  <meta name="version" content="20260819-v31">
   <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -624,7 +624,7 @@ td{line-height:1.4!important}
 
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v30.0</div>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v32.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -652,21 +652,23 @@ td{line-height:1.4!important}
   <button class="btn" id="scriptsTopBtn" onclick="openScriptsModal()" style="display:flex;align-items:center;gap:6px;font-size:12px;margin-left:8px">&#128172; Scripts + Training</button>
 </div>
 <div class="who-bar" aria-label="Core Team Tracker navigation">
-  <div class="v14-nav-label">TEAM VIEW</div>
-  <button class="who-btn wb-Snapshot" onclick="openSnapshotView(this)" title="Team snapshot and today’s priorities">Snapshot</button>
-  <button class="who-btn wb-Portfolio" onclick="openPortfolioReviewView(this)" title="Partner health, portfolio trends and relationship coverage">Portfolio Review</button>
-  <button class="who-btn wb-Ownership" onclick="openOwnershipView(this)" title="See and edit RM + LP ownership for every relationship">Ownership</button>
-  <button class="who-btn wb-Leads" onclick="openLeadsView(this)" title="Realtor and builder lead activity">Realtor / Builder Leads</button>
-  <div class="v14-nav-label">LOAN PARTNERS</div>
+  <div class="v14-nav-label" style="color:#4E3D8A;font-weight:900">LOAN PARTNERS · START HERE</div>
   <button class="who-btn wb-Gavin" onclick="selectUser(this,'Gavin')">Gavin</button>
   <button class="who-btn wb-Karen" onclick="selectUser(this,'Karen')">Karen</button>
   <button class="who-btn wb-Osgood" onclick="selectUser(this,'Osgood')">Osgood</button>
   <button class="who-btn wb-Jordan" onclick="selectUser(this,'Jordan')">Jordan</button>
   <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
-  <div class="v14-nav-label">RELATIONSHIPS + OPS</div>
+  <div class="v14-nav-label">TEAM ACCOUNTABILITY</div>
+  <button class="who-btn wb-Snapshot" onclick="openSnapshotView(this)" title="Team accountability, pace and today’s priorities">Snapshot</button>
+  <div class="v14-nav-label">RELATIONSHIPS</div>
+  <button class="who-btn wb-Portfolio" onclick="openPortfolioReviewView(this)" title="Partner health, portfolio trends and relationship coverage">Portfolio Review</button>
+  <button class="who-btn wb-Ownership" onclick="openOwnershipView(this)" title="See and edit RM + LP ownership for every relationship">Ownership</button>
   <button class="who-btn wb-RM" onclick="openRmView(this)">Relationship Manager</button>
   <button class="who-btn wb-FaceTime" onclick="selectUser(this,'FaceTime')">Face Time</button>
   <button class="who-btn wb-Director" onclick="openDirectorView(this)">Co-Marketing</button>
+  <div class="v14-nav-label">PIPELINE</div>
+  <button class="who-btn wb-Leads" onclick="openLeadsView(this)" title="Realtor and builder lead activity">Realtor / Builder Leads</button>
+  <div class="v14-nav-label">TOOLS / ADMIN</div>
   <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button>
 </div>
 <div class="contact-modal-overlay" id="lpContactModal">
@@ -1159,8 +1161,9 @@ td{line-height:1.4!important}
 <!-- DANIEL VIEW -->
 <!-- DANIEL VIEW -->
 <div id="view-snapshot" class="view">
-  <div class="section-head">Snapshot <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'Geist','Inter',sans-serif;font-size:10px"></span></div>
-  <div style="font-size:11px;color:var(--text-3);margin:-6px 0 10px">Calls, Talk's, Leads, 1003's, Pre-apps, and Contracts below are all <b>week-to-date</b> (Monday through now) — not just today. Only the "Leads Today / WTD / MTD" totals up top reset daily.</div>
+  <div class="section-head">Team Accountability <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'Geist','Inter',sans-serif;font-size:10px"></span></div>
+  <div style="font-size:11px;color:var(--text-3);margin:-6px 0 7px"><b>Loan Partners:</b> choose your name at the top of the sidebar for your work list. <b>Leadership:</b> this page is the team accountability view.</div>
+  <div style="font-size:11px;color:var(--text-3);margin:0 0 10px">Calls, Talk's, Leads, 1003's, Pre-apps, and Contracts below are all <b>week-to-date</b> (Monday through now) — not just today. Only the "Leads Today / WTD / MTD" totals up top reset daily.</div>
   <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div></div>
 </div>
 
@@ -6029,6 +6032,7 @@ async function rmLoadFeed(){
       el.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Could not load activity feed.</div>';
       return;
     }
+    rows=rows.filter(function(r){return !lpIsInternalRmActivity(r);});
     rmFeedCache.mtd=rows;
     rmFeedCache.week=rows.filter(function(r){return r.act_date>=week.start&&r.act_date<=week.end;});
     rmFeedCache.today=rows.filter(function(r){return r.act_date===todayStr;});
@@ -6039,13 +6043,23 @@ async function rmLoadFeed(){
   }
 }
 
+function lpIsInternalRmActivity(a){
+  var notes=String((a&&a.notes)||"");
+  var type=String((a&&a.act_type)||"").toLowerCase();
+  // Internal transaction triggers are machine-created must-do records.
+  // They stay in Supabase for workflow logic but should never appear as human RM activity.
+  if(notes.indexOf("[TXN_TRIGGER]")>=0)return true;
+  if(type==="new contract"||type==="clear to close")return notes.indexOf("[TXN_")>=0;
+  return false;
+}
+
 function rmRenderFeed(){
   // Rebuild snapshot if it's active
   if(typeof buildSnapshot==="function"&&document.getElementById("view-snapshot")&&document.getElementById("view-snapshot").classList.contains("active"))buildSnapshot();
   var el=document.getElementById("rm-feed-list");
   if(!el)return;
   var typeF=document.getElementById("rm-feed-type")?document.getElementById("rm-feed-type").value:"";
-  var data=rmFeedCache[rmCurrentPeriod]||[];
+  var data=(rmFeedCache[rmCurrentPeriod]||[]).filter(function(a){return !lpIsInternalRmActivity(a);});
   var filt=typeF?data.filter(function(a){return a.act_type===typeF;}):data;
   if(!filt.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">No activity found.</div>';return;}
   var showCount=Math.min(filt.length,80);
