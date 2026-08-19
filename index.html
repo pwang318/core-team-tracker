@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260819-v40-nfm-brand">
+  <meta name="version" content="20260819-v42-management-truth">
   <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -749,9 +749,13 @@ table tbody tr:hover{background:#F6FBFC!important}
 @media(max-width:900px){.who-btn.active{box-shadow:inset 0 -3px 0 #00C0F0!important}}
 </style>
 
+
+<style id="v42-management-truth">
+@media(max-width:900px){#ownership-sort{min-width:0}#view-portfolio-review [style*="grid-template-columns:repeat(5,1fr)"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+</style>
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v35.0</div>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(0,192,240,.12);color:#071B37;pointer-events:none">Build v42.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -1113,6 +1117,34 @@ table tbody tr:hover{background:#F6FBFC!important}
         <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text-2);margin-bottom:8px"><strong>First-lead conversion:</strong> once the first referred buyer has a great experience, ask the buyer to text the Realtor with positive feedback. That third-party proof strengthens the relationship faster than another sales pitch.</div>
       </div>
     </details>
+
+    <details class="script-cat" data-script-cat="buyer-strategy" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden">
+      <summary style="cursor:pointer;list-style:none;padding:12px 14px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text)">
+        <span>How to Compete: Buyer Strategy<span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-3);margin-top:2px">Offer strength, appraisal strategy, fast closings, contingencies, and seller-friendly terms</span></span>
+        <span style="font-size:11px;color:#1F4E79;background:#EAF2FA;border-radius:999px;padding:3px 8px;white-space:nowrap">training</span>
+      </summary>
+      <div class="script-cat-body" style="padding:14px 14px 4px">
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.55;margin-bottom:10px"><strong>Core idea:</strong> help the buyer and Realtor build a stronger offer without defaulting to price alone. The lending partner should be active in the offer process with scenarios, guidance, and direct follow-up when appropriate.</div>
+        <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:11.5px;color:var(--text-2);line-height:1.55;margin-bottom:10px"><strong style="color:#071B37">Top offer levers:</strong> appraisal gap / appraisal waiver · over asking / escalation clause · fast closing / reputable local lender · non-contingent pre-approval when eligible · extended possession / rent-back.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px;margin-bottom:12px">
+          <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11px;color:#1F4E79">APPRAISAL GAP / WAIVER</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">An appraisal gap is a buyer commitment to cover a short appraisal by a defined amount. An appraisal waiver is property-specific and eligibility must be verified before the offer is submitted.</div></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11px;color:#1F4E79">ESCALATION / OVER ASKING</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Prepare clients for the payment impact before they write aggressively. Scenario work helps the Realtor have the difficult conversation before offer time.</div></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11px;color:#1F4E79">FAST CLOSING</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Speed is a team effort: get the fully executed contract immediately, disclosures signed quickly, and the appraisal ordered promptly so the file can move without avoidable delay.</div></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:9px"><strong style="font-size:11px;color:#1F4E79">CONTINGENCY SOLUTIONS</strong><div style="font-size:11.5px;color:var(--text-2);margin-top:3px">Explore recasting, bridge financing, eligible retirement assets, gifts, or primary-residence rental conversion when a home-sale contingency is creating friction.</div></div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Appraisal strategy</div>
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px">An appraisal gap creates a minimum seller guarantee if value comes in short. A waiver can make the offer cleaner when the property and borrower qualify. Always run the specific property and current guidelines before presenting a waiver as available.</div>
+        <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Fast-close execution</div>
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px">The lender's reputation matters in a multiple-offer environment. Set expectations at contract acceptance: executed contract the day it is ratified, disclosures within 24 hours when possible, and appraisal ordering within 24 hours when required.</div>
+        <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Recast vs. bridge financing</div>
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px"><strong>Recast:</strong> can preserve flexibility and lower the payment after additional principal is applied, but the buyer must have another way to fund the purchase initially. <strong>Bridge:</strong> can unlock equity from the current home for the next purchase, but adds cost and temporary financing. Match the strategy to the client's assets, timing, and qualification.</div>
+        <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Seller-friendly structure</div>
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px">Extended possession or a rent-back can solve a seller timing problem and make an offer more attractive without only increasing price. Confirm current occupancy and program limits before advising on the structure.</div>
+        <div style="font-size:12px;font-weight:700;color:#1F4E79;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Future refinance value</div>
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px">When a current refinance-credit or rate-drop program is available, use it to help clients understand that today's rate does not have to be the forever rate. Verify current eligibility, dates, credits, and program terms before quoting.</div>
+        <div style="background:#F0F7FA;border:1px solid #B9DFEB;border-radius:8px;padding:9px 12px;font-size:11.5px;color:var(--text-2);margin-bottom:10px"><strong style="color:#071B37">Use current guidelines.</strong> Product eligibility, waiver rules, fast-close programs, refinance incentives, occupancy limits, and pricing can change. Use this as strategy training and verify current terms before quoting them to a client or Realtor.</div>
+      </div>
+    </details>
     <button class="btn btn-sm" onclick="closeScriptsModal()" style="margin-top:8px">Close</button>
   </div>
 </div>
@@ -1140,13 +1172,13 @@ table tbody tr:hover{background:#F6FBFC!important}
     <div id="priority-banner" class="priority-banner" style="display:none">&#9888; You have priority agents that need to be called ASAP!</div>
     <div id="inactive-banner" class="inactive-banner" style="display:none">&#9888; <span id="inactive-banner-txt"></span></div>
     <div id="bday-banner" class="bday-banner" style="display:none">&#127874; <span id="bday-banner-txt"></span></div>
-    <div id="lp-facetime-focus" style="display:none;background:#fff;border:1px solid #D8D1EE;border-left:4px solid #6B5AA6;border-radius:9px;padding:11px 13px;margin-bottom:12px"></div>
+    <div id="lp-facetime-focus" style="display:none;background:#fff;border:1px solid #D7E0EA;border-left:4px solid #00C0F0;border-radius:9px;padding:11px 13px;margin-bottom:12px"></div>
     <div id="lp-rm-flags-for-you" style="display:none;background:#fff;border:1px solid #E7C66B;border-left:4px solid #B8842B;border-radius:9px;padding:12px 14px;margin-bottom:12px">
       <div style="font-size:12.5px;font-weight:800;color:#6F4E00">RM Flags for You</div>
       <div style="font-size:11.5px;color:#6C6252;margin-top:2px">Items Amanda or Nyny sent to you for follow-up. Reply here, then mark handled when complete.</div>
       <div id="lp-rm-flags-for-you-list" style="margin-top:8px;font-size:12px;color:#526575"></div>
     </div>
-    <div id="lp-rm-responses" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #071B37;border-radius:9px;padding:12px 14px;margin-bottom:12px">
+    <div id="lp-rm-responses" style="background:#fff;border:1px solid #D7E0EA;border-left:4px solid #071B37;border-radius:9px;padding:12px 14px;margin-bottom:12px">
       <details>
         <summary style="cursor:pointer;list-style:none">
           <div style="font-size:12.5px;font-weight:800;color:#071B37">Recent RM Responses</div>
@@ -1155,7 +1187,7 @@ table tbody tr:hover{background:#F6FBFC!important}
         <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#526575">Loading...</div>
       </details>
     </div>
-    <div id="lp-rm-relationship-notes" style="background:#fff;border:1px solid #D8D1EE;border-left:4px solid #6B5AA6;border-radius:9px;padding:12px 14px;margin-bottom:12px">
+    <div id="lp-rm-relationship-notes" style="background:#fff;border:1px solid #D7E0EA;border-left:4px solid #00C0F0;border-radius:9px;padding:12px 14px;margin-bottom:12px">
       <details>
         <summary style="cursor:pointer;list-style:none">
           <div style="font-size:12.5px;font-weight:800;color:#071B37">Recent RM Relationship Notes</div>
@@ -1341,10 +1373,11 @@ table tbody tr:hover{background:#F6FBFC!important}
   <div id="ownership-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-bottom:12px"></div>
   <div id="ownership-hidden-note" style="display:none;background:#fff8e8;border:1px solid #ead49a;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:11.5px;color:#6f5618"></div>
   <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px">
-    <div style="display:grid;grid-template-columns:minmax(220px,2fr) minmax(140px,1fr) minmax(140px,1fr);gap:8px">
+    <div style="display:grid;grid-template-columns:minmax(220px,2fr) minmax(140px,1fr) minmax(140px,1fr) minmax(145px,.9fr);gap:8px">
       <input id="ownership-search" type="text" placeholder="Search agent..." oninput="renderOwnershipRows()" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px">
       <select id="ownership-rm-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All RM owners</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option><option value="__UNASSIGNED__">RM unassigned</option></select>
       <select id="ownership-lp-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All LP owners</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Unassigned">LP unassigned</option></select>
+      <select id="ownership-sort" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="unassigned">Sort: unassigned first</option><option value="name">Sort: name A–Z</option><option value="rm">Sort: RM owner</option><option value="lp">Sort: LP owner</option></select>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)">
       <div id="ownership-selected-count" style="font-size:11.5px;font-weight:800;color:#071B37;min-width:72px">0 selected</div>
@@ -2548,12 +2581,24 @@ function renderOwnershipRows(){
   var q=((document.getElementById("ownership-search")||{}).value||"").trim().toLowerCase();
   var rf=((document.getElementById("ownership-rm-filter")||{}).value||"");
   var lf=((document.getElementById("ownership-lp-filter")||{}).value||"");
+  var sortMode=((document.getElementById("ownership-sort")||{}).value||"unassigned");
   var rows=ctOwnershipBaseRows().filter(function(a){
     var rm=getRmOwner(a[0])||"",lp=a[2]||"Unassigned",dn=displayName(a[0]);
     if(q && (dn+" "+a[0]+" "+rm+" "+lp).toLowerCase().indexOf(q)===-1)return false;
     if(rf==="__UNASSIGNED__" && rm)return false;if(rf && rf!=="__UNASSIGNED__" && rm!==rf)return false;
     if(lf && lp!==lf)return false;return true;
-  }).sort(function(a,b){return displayName(a[0]).localeCompare(displayName(b[0]));});
+  }).sort(function(a,b){
+    var arm=getRmOwner(a[0])||"",brm=getRmOwner(b[0])||"",alp=a[2]||"Unassigned",blp=b[2]||"Unassigned";
+    if(sortMode==="unassigned"){
+      var as=(arm?0:2)+(alp==="Unassigned"?1:0),bs=(brm?0:2)+(blp==="Unassigned"?1:0);
+      if(as!==bs)return bs-as;
+    }else if(sortMode==="rm"){
+      var arv=arm||"ZZZ Unassigned",brv=brm||"ZZZ Unassigned";if(arv!==brv)return arv.localeCompare(brv);
+    }else if(sortMode==="lp"){
+      var alv=alp==="Unassigned"?"ZZZ Unassigned":alp,blv=blp==="Unassigned"?"ZZZ Unassigned":blp;if(alv!==blv)return alv.localeCompare(blv);
+    }
+    return displayName(a[0]).localeCompare(displayName(b[0]));
+  });
   ownershipVisibleKeys=rows.map(function(a){return assignmentKey(a[0]);});
   if(!rows.length){host.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">No relationships match those filters.</div>';renderOwnershipBulkStatus();return;}
   var rmOptions='<option value="">Unassigned</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option>';
@@ -2781,9 +2826,18 @@ function renderLP(lp){
 }
 
 
-function ctGetPbAgentSnapshot(name){
+function ctGetCurrentPowerBiSnapshot(){
   var snap=window.CT_POWERBI_SNAPSHOT||null;
   if(!snap){try{snap=JSON.parse(localStorage.getItem("ct_powerbi_snapshot_v1")||"null");}catch(e){snap=null;}}
+  if(!snap&&typeof CT_DEFAULT_POWERBI_SNAPSHOT!=="undefined")snap=CT_DEFAULT_POWERBI_SNAPSHOT;
+  return snap||null;
+}
+function ctPowerBiActiveCount(snapshot){
+  var s=snapshot||ctGetCurrentPowerBiSnapshot()||{},l=s.levels||{};
+  return Number(l.A||0)+Number(l.B||0)+Number(l.C||0);
+}
+function ctGetPbAgentSnapshot(name){
+  var snap=ctGetCurrentPowerBiSnapshot();
   if(!snap||!snap.by_agent)return null;
   var raw=(name||"").trim().toLowerCase();
   if(snap.by_agent[raw])return snap.by_agent[raw];
@@ -3394,12 +3448,13 @@ function renderAlerts(){
 function renderGrowthScoreboard(){
   var el=document.getElementById("d-growth-scoreboard");
   if(!el)return;
-  var activeAgents=agents.filter(isActive);
-  var total=activeAgents.length;
-  var aTier=activeAgents.filter(function(a){return a[1]==="A";}).length;
-  var bTier=activeAgents.filter(function(a){return a[1]==="B";}).length;
-  var cTier=activeAgents.filter(function(a){return a[1]==="C";}).length;
-  var GOAL_TOTAL=200,GOAL_A=30,GOAL_B=35;
+  var managedAgents=agents.filter(isActive);
+  var pbSnap=ctGetCurrentPowerBiSnapshot();
+  var pbLevels=(pbSnap&&pbSnap.levels)||{};
+  var total=ctPowerBiActiveCount(pbSnap)||managedAgents.length;
+  var aTier=Number(pbLevels.A||0),bTier=Number(pbLevels.B||0),cTier=Number(pbLevels.C||0);
+  if(!ctPowerBiActiveCount(pbSnap)){aTier=managedAgents.filter(function(a){return a[1]==="A";}).length;bTier=managedAgents.filter(function(a){return a[1]==="B";}).length;cTier=managedAgents.filter(function(a){return a[1]==="C";}).length;}
+  var GOAL_TOTAL=200,GOAL_A=25,GOAL_B=35;
 
   function bar(val,goal,color){
     var pct=Math.min(val/goal,1);
@@ -3426,27 +3481,28 @@ function renderGrowthScoreboard(){
 
   el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">'
     +'<div style="background:#f8fafc;border-radius:8px;padding:14px;border:1px solid var(--border)">'
-      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Active agents</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Power BI Active Agents</div>'
       +'<div style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-.02em">'+total+'</div>'
       +bar(total,GOAL_TOTAL,"#1F4E79")
     +'</div>'
     +'<div style="background:#f0fdf4;border-radius:8px;padding:14px;border:1px solid #bbf7d0">'
-      +'<div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">A-tier agents</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Power BI A</div>'
       +'<div style="font-size:28px;font-weight:800;color:#15803d;letter-spacing:-.02em">'+aTier+'</div>'
       +bar(aTier,GOAL_A,"#15803d")
     +'</div>'
     +'<div style="background:#eff6ff;border-radius:8px;padding:14px;border:1px solid #bfdbfe">'
-      +'<div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">B-tier agents</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Power BI B</div>'
       +'<div style="font-size:28px;font-weight:800;color:#1d4ed8;letter-spacing:-.02em">'+bTier+'</div>'
       +bar(bTier,GOAL_B,"#1d4ed8")
     +'</div>'
     +'<div style="background:#f8fafc;border-radius:8px;padding:14px;border:1px solid var(--border)">'
-      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">C-tier agents</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Power BI C</div>'
       +'<div style="font-size:28px;font-weight:800;color:#64748b;letter-spacing:-.02em">'+cTier+'</div>'
       +'<div style="font-size:10px;color:#94a3b8;margin-top:8px">Development pool</div>'
     +'</div>'
   +'</div>'
-  +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:8px">By LP</div>'
+  +'<div style="font-size:10.5px;color:var(--text-3);margin:-6px 0 12px">Power BI Active Agents = A + B + C from the latest upload. Rows below are the managed tracker roster by LP, so they will not equal the Power BI total.</div>'
+  +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:8px">Managed roster by LP</div>'
   +lpRows;
 }
 
@@ -4946,15 +5002,15 @@ function handleUpload(input){
       // without cluttering the working LP screens. This is also a fallback if optional shared DB
       // columns are not available yet.
       var validPbRows=rows.filter(function(row){var n=(row["Agent"]||"").toString().trim();return n&&n.toUpperCase()!=="AGENT"&&n.toUpperCase()!=="NAN";});
-      var pbSnapshot={imported_at:new Date().toISOString(),raw_rows:validPbRows.length,levels:{A:0,B:0,C:0,Blank:0,Other:0},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,by_agent:{}};
+      var pbSnapshot={imported_at:new Date().toISOString(),raw_rows:validPbRows.length,levels:{A:0,B:0,C:0,Blank:0,Other:0},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,closed_12mo_total:0,closed_12mo_agents:0,by_agent:{}};
       validPbRows.forEach(function(row){
         var rawName=(row["Agent"]||"").toString().trim();
         var lv=(row["Level"]||"").toString().trim();
         if(lv==="A"||lv==="B"||lv==="C")pbSnapshot.levels[lv]++;else if(!lv)pbSnapshot.levels.Blank++;else pbSnapshot.levels.Other++;
-        var preq=parseInt(row["Active Prequals"])||0,pipe=parseInt(row["Active In Pipeline"])||0;
-        pbSnapshot.active_prequals_total+=preq;pbSnapshot.active_pipeline_total+=pipe;
-        if(preq>0)pbSnapshot.active_prequals_agents++;if(pipe>0)pbSnapshot.active_pipeline_agents++;
-        pbSnapshot.by_agent[rawName.toLowerCase()]={name:rawName,level:lv||null,active_prequals:preq,active_pipeline:pipe};
+        var preq=parseInt(row["Active Prequals"])||0,pipe=parseInt(row["Active In Pipeline"])||0,closed12=parseInt(row["Closed Past Year"])||0;
+        pbSnapshot.active_prequals_total+=preq;pbSnapshot.active_pipeline_total+=pipe;pbSnapshot.closed_12mo_total+=closed12;
+        if(preq>0)pbSnapshot.active_prequals_agents++;if(pipe>0)pbSnapshot.active_pipeline_agents++;if(closed12>0)pbSnapshot.closed_12mo_agents++;
+        pbSnapshot.by_agent[rawName.toLowerCase()]={name:rawName,level:lv||null,active_prequals:preq,active_pipeline:pipe,closed_12mo:closed12};
       });
       try{localStorage.setItem("ct_powerbi_snapshot_v1",JSON.stringify(pbSnapshot));window.CT_POWERBI_SNAPSHOT=pbSnapshot;}catch(snapshotErr){window.CT_POWERBI_SNAPSHOT=pbSnapshot;}
       var up=[],added=0,updated=0,flagged=0;
@@ -5077,7 +5133,8 @@ function handleUpload(input){
       if(document.getElementById("pfr-body")){try{await window.pfrLoad();}catch(pfrErr){console.warn("Portfolio refresh failed:",pfrErr.message);}}
 
       res.style.color="#43A047";
-      res.textContent="Done — "+pbSnapshot.raw_rows+" Power BI rows imported · Active Prequals: "+pbSnapshot.active_prequals_total+" across "+pbSnapshot.active_prequals_agents+" agents · Active Pipeline: "+pbSnapshot.active_pipeline_total+" across "+pbSnapshot.active_pipeline_agents+" agents. "+updated+" roster agents updated, "+added+" new. Portfolio refreshed ✓"+(assignmentSyncOk?"":" (agent assignment sync needs review)");
+      var pbActiveImported=Number(pbSnapshot.levels.A||0)+Number(pbSnapshot.levels.B||0)+Number(pbSnapshot.levels.C||0);
+      res.textContent="Done — "+pbActiveImported+" Power BI Active Agents ("+pbSnapshot.levels.A+" A · "+pbSnapshot.levels.B+" B · "+pbSnapshot.levels.C+" C) from "+pbSnapshot.raw_rows+" uploaded rows · Active Prequals: "+pbSnapshot.active_prequals_total+" across "+pbSnapshot.active_prequals_agents+" agents · Active Pipeline: "+pbSnapshot.active_pipeline_total+" across "+pbSnapshot.active_pipeline_agents+" agents · 12mo closings: "+pbSnapshot.closed_12mo_total+". "+updated+" roster agents updated, "+added+" new. Portfolio refreshed ✓"+(assignmentSyncOk?"":" (agent assignment sync needs review)");
     }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
   };
   reader.readAsArrayBuffer(file);input.value="";
@@ -7668,7 +7725,7 @@ function renderDirectorView(){
     var rawReq=(parseFloat(p.your_spend)||0)/250;
     var pct=rawReq>0?Math.min(999,Math.round(lc.total/rawReq*100)):0;
     var ctaOk=pb_cta_num===null||pb_cta_num<=0.50;
-    var statusLabel=pct>=80&&ctaOk?"✅ Working":pct>=80&&!ctaOk?"⚠ Watch (CTA above goal)":pct>=50?"⚠ Watch":"🚨 Concern";
+    var statusLabel=pct>=80&&ctaOk?"On-track opp pace":pct>=80&&!ctaOk?"Opp pace met · CTA watch":pct>=50?"Watch opp pace":"Low opp pace";
     var goalColor=pct>=80&&ctaOk?"#2E7D6A":pct>=50||pct>=80?"#B87333":"#8B3A3A";
     var goalBg=pct>=80&&ctaOk?"#34D399":pct>=50||pct>=80?"#FBBF24":"#F87171";
     var costPerLead=lc.total>0&&p.your_spend?("$"+(p.your_spend/lc.total).toFixed(0)):"—";
@@ -7685,7 +7742,7 @@ function renderDirectorView(){
     var pb_cta_color=pb_cta_num===null?"var(--text-3)":pb_cta_num<=0.50?"#2E7D6A":pb_cta_num<=1.0?"#B87333":"#E53935";
     var pb_cta_label=pb_cta_num!==null?(pb_cta_num<=0.50?"✅ On target":pb_cta_num<=1.0?"⚠ Watch":"🚨 Above goal"):(pb_notSynced?"—":"No closes yet");
 
-    summaryRows.push({id:idx,name:p.partner_name,platform:p.platform,yourSpend:combinedYourSpend,req:req,rawReq:rawReq,leads:lc.total,pct:pct,color:goalColor,status:statusLabel,cta:pb_cta,ctaColor:pb_cta_color});
+    summaryRows.push({id:idx,name:p.partner_name,platform:p.platform,yourSpend:combinedYourSpend,req:req,rawReq:rawReq,leads:lc.total,closed:lc.closed,pbLeads:pb_leads,pbClosed:pb_closed,pct:pct,color:goalColor,status:statusLabel,cta:pb_cta,ctaColor:pb_cta_color});
 
     html+='<div id="dmwrap-'+idx+'" style="background:var(--surface);border:1px solid var(--border);border-left:4px solid '+goalBg+';border-radius:10px;overflow:hidden">';
     html+='<div style="padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="dmToggleCard('+idx+')">';
@@ -7775,6 +7832,7 @@ function renderDirectorView(){
 
   var totalYourSpend=summaryRows.reduce(function(s,r){return s+r.yourSpend;},0);
   var totalLeads=summaryRows.reduce(function(s,r){return s+r.leads;},0);
+  var totalClosed12=summaryRows.reduce(function(s,r){return s+Number(r.pbClosed||0);},0);
   var totalReq=summaryRows.reduce(function(s,r){return s+r.req;},0);
   var totalRawReq=summaryRows.reduce(function(s,r){return s+r.rawReq;},0);
   var overallPct=totalRawReq>0?Math.round(totalLeads/totalRawReq*100):0;
@@ -7783,18 +7841,19 @@ function renderDirectorView(){
   var watchCount=summaryRows.filter(function(r){return r.pct>=50&&r.pct<80;}).length;
 
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px">';
-  html+='<div style="font-size:13px;font-weight:700;margin-bottom:4px">Is co-marketing working?</div>';
-  html+='<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">'+overallPct+'% of expected opportunities delivered across '+summaryRows.length+' partners'+(concernCount||watchCount?" — "+concernCount+" need attention, "+watchCount+" to watch":" — all on track")+'</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
+  html+='<div style="font-size:13px;font-weight:700;margin-bottom:4px">Platform Performance</div>';
+  html+='<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">Opportunity pace shows whether the platform is generating enough lead opportunities for the spend. Closings are shown separately because hitting the opportunity target does not automatically mean the platform is producing funded business.</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total spend</div><div style="font-size:18px;font-weight:800">$'+totalYourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'</div></div>';
-  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total YTD leads</div><div style="font-size:18px;font-weight:800">'+totalLeads+'</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">YTD opportunities</div><div style="font-size:18px;font-weight:800">'+totalLeads+'</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">12mo closings</div><div style="font-size:18px;font-weight:800">'+totalClosed12+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Opps required</div><div style="font-size:18px;font-weight:800">'+totalReq+'</div></div>';
-  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Team goal %</div><div style="font-size:18px;font-weight:800;color:'+overallColor+'">'+overallPct+'%</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Opportunity pace</div><div style="font-size:18px;font-weight:800;color:'+overallColor+'">'+overallPct+'%</div></div>';
   html+='</div>';
 
   html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
   html+='<thead><tr>';
-  ["Partner","Platform","Total spend","Req.","YTD leads","Cost to Acquire","Status"].forEach(function(h){
+  ["Partner","Platform","Total spend","Req.","YTD opps","12mo closes","Cost to Acquire","Opp pace"].forEach(function(h){
     html+='<th style="background:var(--bg);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border)">'+h+'</th>';
   });
   html+='</tr></thead><tbody>';
@@ -7805,6 +7864,7 @@ function renderDirectorView(){
     html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--font-mono)">$'+r.yourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'</td>';
     html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--font-mono)">'+r.req+'</td>';
     html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--font-mono);color:'+r.color+'">'+r.leads+'</td>';
+    html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-weight:800">'+Number(r.pbClosed||0)+'</td>';
     html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);font-weight:700;color:'+(r.ctaColor||"var(--text-3)")+'">'+( r.cta||"—")+'</td>';
     html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);color:'+r.color+';font-weight:600">'+r.status+'</td>';
     html+='</tr>';
@@ -8977,7 +9037,7 @@ async function lpSyncAgentProfilesFromUpload(rows){
   // side effects. Best-effort: a failure here never blocks or rolls back the import itself.
   try{
     await sbFetch("POST","powerbi_import_log",{
-      imported_at:new Date().toISOString(),source_app:"core-team-tracker",
+      imported_at:new Date().toISOString(),source_app:ctPowerBiSummarySourceApp(window.CT_POWERBI_SNAPSHOT||null),
       rows_processed:rows.length,matched:toUpdate.length,created:created,updated:synced,
       skipped:rows.length-toUpdate.length-toInsert.length,errors:failed,
       tier_changes:tierChanges.length,became_active:activeChanges.becameActive,became_inactive:activeChanges.becameInactive
@@ -9101,6 +9161,24 @@ function pfrActivityTile(label,count,target,onclick){
   +'</div>';
 }
 
+
+// v41 — shared/raw Power BI reconciliation. The current approved upload is baked in as a safe
+// fallback so Portfolio Review never mistakes the normalized roster count for raw uploaded rows.
+// Future Admin uploads replace this in-browser and also write a compact shared summary into the
+// existing powerbi_import_log.source_app field so other browsers can see the same totals.
+var CT_DEFAULT_POWERBI_SNAPSHOT={"imported_at":"2026-08-19T19:39:00.000Z","raw_rows":151,"levels":{"A":13,"B":18,"C":117,"Blank":3,"Other":0},"active_prequals_total":405,"active_prequals_agents":91,"active_pipeline_total":42,"active_pipeline_agents":23,"closed_12mo_total":149,"closed_12mo_agents":64,"by_agent":{"leslie hernandez":{"name":"LESLIE HERNANDEZ","level":"B","active_prequals":3,"active_pipeline":0},"matt piper":{"name":"MATT PIPER","level":"B","active_prequals":0,"active_pipeline":0},"sahar shalash":{"name":"SAHAR SHALASH","level":"A","active_prequals":18,"active_pipeline":0},"todd stone":{"name":"TODD STONE","level":"A","active_prequals":13,"active_pipeline":1},"brian zinn":{"name":"BRIAN ZINN","level":"C","active_prequals":3,"active_pipeline":1},"bryce cargill":{"name":"BRYCE CARGILL","level":"C","active_prequals":1,"active_pipeline":0},"lexis grandy":{"name":"LEXIS GRANDY","level":"C","active_prequals":0,"active_pipeline":0},"tamara charlton":{"name":"TAMARA CHARLTON","level":"C","active_prequals":4,"active_pipeline":0},"alexis reed":{"name":"ALEXIS REED","level":"C","active_prequals":7,"active_pipeline":0},"ayleen diaz":{"name":"AYLEEN DIAZ","level":"C","active_prequals":0,"active_pipeline":0},"khadija farah":{"name":"KHADIJA FARAH","level":"B","active_prequals":4,"active_pipeline":0},"paige ludwig":{"name":"PAIGE LUDWIG","level":"C","active_prequals":6,"active_pipeline":0},"bailey strathie":{"name":"BAILEY STRATHIE","level":"C","active_prequals":1,"active_pipeline":1},"bob mccarthy":{"name":"BOB MCCARTHY","level":"C","active_prequals":0,"active_pipeline":1},"claudia chueco":{"name":"CLAUDIA CHUECO","level":"C","active_prequals":0,"active_pipeline":0},"rami tamimi":{"name":"RAMI TAMIMI","level":"C","active_prequals":4,"active_pipeline":1},"suni rivas":{"name":"SUNI RIVAS","level":"C","active_prequals":1,"active_pipeline":0},"angelique sotondji":{"name":"ANGELIQUE SOTONDJI","level":"C","active_prequals":0,"active_pipeline":0},"chris owens":{"name":"CHRIS OWENS","level":"C","active_prequals":0,"active_pipeline":0},"tiara villatoro":{"name":"TIARA VILLATORO","level":"A","active_prequals":5,"active_pipeline":0},"christina coughlin":{"name":"CHRISTINA COUGHLIN","level":"C","active_prequals":1,"active_pipeline":0},"kevin speert":{"name":"KEVIN SPEERT","level":"A","active_prequals":3,"active_pipeline":0},"megan lynch":{"name":"MEGAN LYNCH","level":"A","active_prequals":14,"active_pipeline":1},"mk yussuf":{"name":"MK YUSSUF","level":"C","active_prequals":0,"active_pipeline":0},"maria susana huntwork":{"name":"MARIA SUSANA HUNTWORK","level":"C","active_prequals":0,"active_pipeline":0},"brandon thompson":{"name":"BRANDON THOMPSON","level":"A","active_prequals":14,"active_pipeline":0},"ingrid correia":{"name":"INGRID CORREIA","level":"C","active_prequals":4,"active_pipeline":0},"chris reed":{"name":"CHRIS REED","level":"A","active_prequals":33,"active_pipeline":0},"kishma james":{"name":"KISHMA JAMES","level":"C","active_prequals":7,"active_pipeline":0},"john brunner":{"name":"JOHN BRUNNER","level":"B","active_prequals":9,"active_pipeline":0},"marychris willams":{"name":"MARYCHRIS WILLAMS","level":"C","active_prequals":0,"active_pipeline":0},"colin kochansky":{"name":"COLIN KOCHANSKY","level":"C","active_prequals":1,"active_pipeline":0},"jasmin arcos":{"name":"JASMIN ARCOS","level":"C","active_prequals":1,"active_pipeline":0},"kecia frye":{"name":"KECIA FRYE","level":"C","active_prequals":0,"active_pipeline":0},"mariana cortes":{"name":"MARIANA CORTES","level":"C","active_prequals":0,"active_pipeline":0},"jasmine mckenzie":{"name":"JASMINE MCKENZIE","level":"C","active_prequals":0,"active_pipeline":0},"kristina murphy":{"name":"KRISTINA MURPHY","level":"C","active_prequals":3,"active_pipeline":0},"racquel ludaway":{"name":"RACQUEL LUDAWAY","level":"A","active_prequals":17,"active_pipeline":0},"shayne boyd":{"name":"SHAYNE BOYD","level":"C","active_prequals":1,"active_pipeline":0},"lizbel contreras":{"name":"LIZBEL CONTRERAS","level":"C","active_prequals":3,"active_pipeline":0},"megan dodderer":{"name":"MEGAN DODDERER","level":"C","active_prequals":0,"active_pipeline":0},"oscar martinez":{"name":"OSCAR MARTINEZ","level":"A","active_prequals":24,"active_pipeline":0},"haifa brunney":{"name":"HAIFA BRUNNEY","level":"B","active_prequals":5,"active_pipeline":1},"tammy fast":{"name":"TAMMY FAST","level":"C","active_prequals":0,"active_pipeline":0},"wilber flores":{"name":"WILBER FLORES","level":"C","active_prequals":1,"active_pipeline":0},"maria comas":{"name":"MARIA COMAS","level":"C","active_prequals":3,"active_pipeline":0},"natalie estrella":{"name":"NATALIE ESTRELLA","level":"C","active_prequals":8,"active_pipeline":2},"jessica tower":{"name":"JESSICA TOWER","level":"C","active_prequals":0,"active_pipeline":0},"annie moreno":{"name":"ANNIE MORENO","level":"B","active_prequals":7,"active_pipeline":0},"luis gil":{"name":"LUIS GIL","level":"C","active_prequals":9,"active_pipeline":0},"tony amos":{"name":"TONY AMOS","level":"C","active_prequals":2,"active_pipeline":0},"deanne rhynehardt":{"name":"DEANNE RHYNEHARDT","level":"C","active_prequals":9,"active_pipeline":3},"jeff messmer":{"name":"JEFF MESSMER","level":"C","active_prequals":2,"active_pipeline":0},"rosalia pablo":{"name":"ROSALIA PABLO","level":"C","active_prequals":2,"active_pipeline":0},"conner kochansky":{"name":"CONNER KOCHANSKY","level":"A","active_prequals":3,"active_pipeline":0},"pilar bennett":{"name":"PILAR BENNETT","level":"C","active_prequals":4,"active_pipeline":0},"ava laird":{"name":"AVA LAIRD","level":"C","active_prequals":0,"active_pipeline":0},"georgena xammar":{"name":"GEORGENA XAMMAR","level":"C","active_prequals":1,"active_pipeline":1},"nick zatezalo":{"name":"NICK ZATEZALO","level":"C","active_prequals":2,"active_pipeline":0},"christian chalkias":{"name":"CHRISTIAN CHALKIAS","level":"C","active_prequals":1,"active_pipeline":0},"kathy hayes":{"name":"KATHY HAYES","level":"C","active_prequals":14,"active_pipeline":0},"elizabeth howard":{"name":"ELIZABETH HOWARD","level":"C","active_prequals":4,"active_pipeline":0},"amanda howard":{"name":"AMANDA HOWARD","level":"C","active_prequals":3,"active_pipeline":0},"katherine de la rosa":{"name":"KATHERINE DE LA ROSA","level":"B","active_prequals":2,"active_pipeline":0},"morgan stone":{"name":"MORGAN STONE","level":"C","active_prequals":0,"active_pipeline":0},"juane madaris":{"name":"JUANE MADARIS","level":"C","active_prequals":0,"active_pipeline":0},"shirrell burnside":{"name":"SHIRRELL BURNSIDE","level":"C","active_prequals":1,"active_pipeline":0},"jasmin montoya":{"name":"JASMIN MONTOYA","level":"C","active_prequals":2,"active_pipeline":0},"ross digiorgio":{"name":"ROSS DIGIORGIO","level":"C","active_prequals":2,"active_pipeline":1},"jonnathan agudelo":{"name":"JONNATHAN AGUDELO","level":"C","active_prequals":2,"active_pipeline":0},"dustin goldman":{"name":"DUSTIN GOLDMAN","level":"A","active_prequals":13,"active_pipeline":0},"matt braddy":{"name":"MATT BRADDY","level":"C","active_prequals":0,"active_pipeline":0},"gamal harding":{"name":"GAMAL HARDING","level":"C","active_prequals":0,"active_pipeline":0},"john lubinsky":{"name":"JOHN LUBINSKY","level":"C","active_prequals":3,"active_pipeline":0},"amy agresta":{"name":"AMY AGRESTA","level":"C","active_prequals":3,"active_pipeline":0},"sarah schumaker":{"name":"SARAH SCHUMAKER","level":"C","active_prequals":0,"active_pipeline":0},"nathan white":{"name":"NATHAN WHITE","level":"C","active_prequals":1,"active_pipeline":0},"heather emmert":{"name":"HEATHER EMMERT","level":"C","active_prequals":1,"active_pipeline":0},"timothy oliver":{"name":"TIMOTHY OLIVER","level":"C","active_prequals":1,"active_pipeline":0},"brandon mcclendon":{"name":"BRANDON MCCLENDON","level":"C","active_prequals":1,"active_pipeline":0},"tatiana grigorita":{"name":"TATIANA GRIGORITA","level":"C","active_prequals":0,"active_pipeline":0},"tom newman":{"name":"TOM NEWMAN","level":"C","active_prequals":3,"active_pipeline":0},"donald payne jr":{"name":"DONALD PAYNE JR","level":"C","active_prequals":0,"active_pipeline":0},"yvetta harrison":{"name":"YVETTA HARRISON","level":"C","active_prequals":0,"active_pipeline":0},"anthony amos":{"name":"ANTHONY AMOS","level":"C","active_prequals":5,"active_pipeline":0},"hypatia espinal":{"name":"HYPATIA ESPINAL","level":"C","active_prequals":2,"active_pipeline":0},"jaiden ballah":{"name":"JAIDEN BALLAH","level":"C","active_prequals":0,"active_pipeline":0},"celine williams":{"name":"CELINE WILLIAMS","level":"C","active_prequals":0,"active_pipeline":0},"carole mcmahon":{"name":"CAROLE MCMAHON","level":"C","active_prequals":6,"active_pipeline":0},"slavi jordanov":{"name":"SLAVI JORDANOV","level":"C","active_prequals":0,"active_pipeline":0},"sarah hernandez":{"name":"SARAH HERNANDEZ","level":"C","active_prequals":3,"active_pipeline":0},"courtney hamilton":{"name":"COURTNEY HAMILTON","level":"C","active_prequals":4,"active_pipeline":0},"justin biery":{"name":"JUSTIN BIERY","level":"C","active_prequals":0,"active_pipeline":0},"izxel martinez":{"name":"IZXEL MARTINEZ","level":"C","active_prequals":0,"active_pipeline":0},"benjamin gaytan":{"name":"BENJAMIN GAYTAN","level":"C","active_prequals":0,"active_pipeline":0},"brad gilliam":{"name":"BRAD GILLIAM","level":null,"active_prequals":1,"active_pipeline":0},"letika white":{"name":"LETIKA WHITE","level":"C","active_prequals":2,"active_pipeline":0},"sahel alam":{"name":"SAHEL ALAM","level":"C","active_prequals":1,"active_pipeline":0},"coda gahris":{"name":"CODA GAHRIS","level":null,"active_prequals":0,"active_pipeline":0},"patrick arquette":{"name":"PATRICK ARQUETTE","level":"C","active_prequals":0,"active_pipeline":0},"mary mcmichael":{"name":"MARY MCMICHAEL","level":"B","active_prequals":3,"active_pipeline":0},"matthew montalvo":{"name":"MATTHEW MONTALVO","level":"A","active_prequals":1,"active_pipeline":0},"mark vennitti":{"name":"MARK VENNITTI","level":"C","active_prequals":6,"active_pipeline":0},"heather henry-minor":{"name":"HEATHER HENRY-MINOR","level":"B","active_prequals":1,"active_pipeline":0},"elizabeth ellinger":{"name":"ELIZABETH ELLINGER","level":"B","active_prequals":1,"active_pipeline":0},"marychris williams":{"name":"MARYCHRIS WILLIAMS","level":"C","active_prequals":2,"active_pipeline":0},"patrick klein":{"name":"PATRICK KLEIN","level":null,"active_prequals":0,"active_pipeline":0},"martin hopkins":{"name":"MARTIN HOPKINS","level":"B","active_prequals":1,"active_pipeline":0},"addie gilkey":{"name":"ADDIE GILKEY","level":"C","active_prequals":0,"active_pipeline":0},"kandis hall":{"name":"KANDIS HALL","level":"B","active_prequals":10,"active_pipeline":1},"nancy price":{"name":"NANCY PRICE","level":"C","active_prequals":7,"active_pipeline":0},"angie bronowski":{"name":"ANGIE BRONOWSKI","level":"B","active_prequals":0,"active_pipeline":1},"deron bender":{"name":"DERON BENDER","level":"B","active_prequals":6,"active_pipeline":3},"michelle erickson":{"name":"MICHELLE ERICKSON","level":"A","active_prequals":1,"active_pipeline":2},"connor kochansky":{"name":"CONNOR KOCHANSKY","level":"C","active_prequals":1,"active_pipeline":0},"georgena starr":{"name":"GEORGENA STARR","level":"C","active_prequals":0,"active_pipeline":1},"tina hoffman":{"name":"TINA HOFFMAN","level":"C","active_prequals":8,"active_pipeline":4},"beth hazard":{"name":"BETH HAZARD","level":"C","active_prequals":0,"active_pipeline":0},"brian":{"name":"BRIAN","level":"C","active_prequals":0,"active_pipeline":0},"claudia chueca":{"name":"CLAUDIA CHUECA","level":"C","active_prequals":1,"active_pipeline":0},"colin burnheimer - thrive":{"name":"COLIN BURNHEIMER - THRIVE","level":"C","active_prequals":1,"active_pipeline":0},"deron benden":{"name":"DERON BENDEN","level":"C","active_prequals":0,"active_pipeline":1},"donald payne":{"name":"DONALD PAYNE","level":"C","active_prequals":0,"active_pipeline":0},"erika (rockford)":{"name":"ERIKA (ROCKFORD)","level":"C","active_prequals":0,"active_pipeline":1},"erika wehner":{"name":"ERIKA WEHNER","level":"B","active_prequals":2,"active_pipeline":2},"i'm a realtor partner.":{"name":"I'M A REALTOR PARTNER.","level":"C","active_prequals":0,"active_pipeline":0},"ingrid correa":{"name":"INGRID CORREA","level":"C","active_prequals":1,"active_pipeline":0},"jacob english":{"name":"JACOB ENGLISH","level":"C","active_prequals":0,"active_pipeline":0},"jen crim":{"name":"JEN CRIM","level":"C","active_prequals":0,"active_pipeline":0},"jesse mccrerry":{"name":"JESSE MCCRERRY","level":"C","active_prequals":0,"active_pipeline":0},"jordan hollibaugh":{"name":"JORDAN HOLLIBAUGH","level":"B","active_prequals":1,"active_pipeline":5},"katherie de la rosa":{"name":"KATHERIE DE LA ROSA","level":"C","active_prequals":0,"active_pipeline":0},"katie summers":{"name":"KATIE SUMMERS","level":"B","active_prequals":2,"active_pipeline":6},"khadija":{"name":"KHADIJA","level":"C","active_prequals":0,"active_pipeline":0},"kinsie huskins":{"name":"KINSIE HUSKINS","level":"C","active_prequals":0,"active_pipeline":0},"kunlavee":{"name":"KUNLAVEE","level":"C","active_prequals":1,"active_pipeline":0},"lisa simmons":{"name":"LISA SIMMONS","level":"C","active_prequals":0,"active_pipeline":0},"makayla & conner kochansky":{"name":"MAKAYLA & CONNER KOCHANSKY","level":"C","active_prequals":0,"active_pipeline":0},"mathea arudda":{"name":"MATHEA ARUDDA","level":"C","active_prequals":0,"active_pipeline":1},"michele frederick":{"name":"MICHELE FREDERICK","level":"C","active_prequals":0,"active_pipeline":0},"michelle holtz":{"name":"MICHELLE HOLTZ","level":"C","active_prequals":1,"active_pipeline":0},"paula palleschi":{"name":"PAULA PALLESCHI","level":"C","active_prequals":0,"active_pipeline":0},"realtor":{"name":"REALTOR","level":"C","active_prequals":0,"active_pipeline":0},"rockford":{"name":"ROCKFORD","level":"C","active_prequals":0,"active_pipeline":0},"rockford homes":{"name":"ROCKFORD HOMES","level":"C","active_prequals":1,"active_pipeline":0},"sara bush":{"name":"SARA BUSH","level":"C","active_prequals":0,"active_pipeline":0},"self":{"name":"SELF","level":"C","active_prequals":1,"active_pipeline":0},"slavisha jordanov":{"name":"SLAVISHA JORDANOV","level":"C","active_prequals":1,"active_pipeline":0},"tina hoffman (rockford)":{"name":"TINA HOFFMAN (ROCKFORD)","level":"C","active_prequals":0,"active_pipeline":0},"traci williams-jones":{"name":"TRACI WILLIAMS-JONES","level":"C","active_prequals":0,"active_pipeline":0},"tracy berard":{"name":"TRACY BERARD","level":"B","active_prequals":0,"active_pipeline":0}}};
+function ctParsePowerBiSummaryFromSourceApp(sourceApp,importedAt){
+  var s=String(sourceApp||"");
+  if(s.indexOf("core-team-tracker")!==0)return null;
+  var out={imported_at:importedAt||null,raw_rows:0,levels:{A:0,B:0,C:0,Blank:0,Other:0},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,closed_12mo_total:0,closed_12mo_agents:0,by_agent:null};
+  s.split(";").slice(1).forEach(function(part){var p=part.split("=");if(p.length<2)return;var k=p[0],v=Number(p.slice(1).join("="))||0;if(k==="raw")out.raw_rows=v;else if(k==="A")out.levels.A=v;else if(k==="B")out.levels.B=v;else if(k==="C")out.levels.C=v;else if(k==="blank")out.levels.Blank=v;else if(k==="other")out.levels.Other=v;else if(k==="preq")out.active_prequals_total=v;else if(k==="preqAgents")out.active_prequals_agents=v;else if(k==="pipe")out.active_pipeline_total=v;else if(k==="pipeAgents")out.active_pipeline_agents=v;else if(k==="closed")out.closed_12mo_total=v;else if(k==="closedAgents")out.closed_12mo_agents=v;});
+  return out.raw_rows?out:null;
+}
+function ctPowerBiSummarySourceApp(snapshot){
+  var s=snapshot||{};var l=s.levels||{};
+  return "core-team-tracker;raw="+(Number(s.raw_rows)||0)+";A="+(Number(l.A)||0)+";B="+(Number(l.B)||0)+";C="+(Number(l.C)||0)+";blank="+(Number(l.Blank)||0)+";other="+(Number(l.Other)||0)+";preq="+(Number(s.active_prequals_total)||0)+";preqAgents="+(Number(s.active_prequals_agents)||0)+";pipe="+(Number(s.active_pipeline_total)||0)+";pipeAgents="+(Number(s.active_pipeline_agents)||0)+";closed="+(Number(s.closed_12mo_total)||0)+";closedAgents="+(Number(s.closed_12mo_agents)||0);
+}
+
 async function pfrLoad(){
   var body=document.getElementById("pfr-body");
   if(!body)return;
@@ -9123,9 +9201,9 @@ async function pfrLoad(){
       // Real last-lead-date per agent from Velocify (trailing 12 months) — more accurate than
       // latest_lead_date on agent_profiles, which only updates when the Power BI import runs.
       sbFetch("GET","velocify_leads?select=referral_partner_name,date_added&order=date_added.desc&limit=5000&date_added=gte."+(function(){var d=new Date();d.setFullYear(d.getFullYear()-1);return d.toISOString().slice(0,10);}())).catch(function(){return[];}),
-      sbFetch("GET","powerbi_import_log?select=imported_at,rows_processed,matched,created,updated,skipped,errors&order=imported_at.desc&limit=1").catch(function(){return[];})
+      sbFetch("GET","powerbi_import_log?select=imported_at,source_app,rows_processed,matched,created,updated,skipped,errors&order=imported_at.desc&limit=20").catch(function(){return[];})
     ]);
-    var allAgents=results[0]||[],allActs=results[1]||[],lpCalls=results[2]||[],migrations=results[3]||[],periodLeads=results[4]||[],monthLeads=results[5]||[],periodActs=results[6]||[],periodBreads=results[7]||[],allBreads=results[8]||[],allLeads=results[9]||[],lastImportLog=(results[10]&&results[10][0])||null;
+    var allAgents=results[0]||[],allActs=results[1]||[],lpCalls=results[2]||[],migrations=results[3]||[],periodLeads=results[4]||[],monthLeads=results[5]||[],periodActs=results[6]||[],periodBreads=results[7]||[],allBreads=results[8]||[],allLeads=results[9]||[],importLogs=results[10]||[],lastImportLog=(importLogs||[]).find(function(r){return String(r.source_app||"").indexOf("core-team-tracker")===0;})||null;
 
     // Build real last-lead-date per agent from Velocify — keyed by lowercase name for matching
     var lastLeadDateByAgent={};
@@ -9173,15 +9251,17 @@ async function pfrLoad(){
     var totalActive=active.length;
     var powerBiLevelCounts={A:0,B:0,C:0,Blank:0,Other:0};
     currentPowerBiAgents.forEach(function(a){var lv=String(a.powerbi_level||"").trim();if(lv==="A"||lv==="B"||lv==="C")powerBiLevelCounts[lv]++;else if(!lv)powerBiLevelCounts.Blank++;else powerBiLevelCounts.Other++;});
-    var pbSnapshot=window.CT_POWERBI_SNAPSHOT||null;
-    if(!pbSnapshot){try{pbSnapshot=JSON.parse(localStorage.getItem("ct_powerbi_snapshot_v1")||"null");}catch(e){pbSnapshot=null;}}
-    // Never show a stale browser snapshot if another device/import has refreshed the shared data since.
-    if(pbSnapshot&&lastImportLog&&lastImportLog.imported_at&&pbSnapshot.imported_at){
-      if(new Date(lastImportLog.imported_at).getTime()-new Date(pbSnapshot.imported_at).getTime()>300000)pbSnapshot=null;
-    }
+    var localPbSnapshot=window.CT_POWERBI_SNAPSHOT||null;
+    if(!localPbSnapshot){try{localPbSnapshot=JSON.parse(localStorage.getItem("ct_powerbi_snapshot_v1")||"null");}catch(e){localPbSnapshot=null;}}
+    var sharedPbSnapshot=lastImportLog?ctParsePowerBiSummaryFromSourceApp(lastImportLog.source_app,lastImportLog.imported_at):null;
+    var pbSnapshot=localPbSnapshot||sharedPbSnapshot||CT_DEFAULT_POWERBI_SNAPSHOT;
+    // If another browser ran a newer LP Admin upload, prefer its shared totals rather than stale local/default data.
+    if(sharedPbSnapshot&&pbSnapshot&&sharedPbSnapshot.imported_at&&pbSnapshot.imported_at&&new Date(sharedPbSnapshot.imported_at)>new Date(pbSnapshot.imported_at))pbSnapshot=sharedPbSnapshot;
     var uploadedRows=(pbSnapshot&&pbSnapshot.raw_rows)||((lastImportLog&&lastImportLog.rows_processed)||currentPowerBiPopulation);
     var displayPbLevels=(pbSnapshot&&pbSnapshot.levels)||powerBiLevelCounts;
-    var pbPipeline={prequalsTotal:(pbSnapshot&&pbSnapshot.active_prequals_total)||0,prequalsAgents:(pbSnapshot&&pbSnapshot.active_prequals_agents)||0,pipelineTotal:(pbSnapshot&&pbSnapshot.active_pipeline_total)||0,pipelineAgents:(pbSnapshot&&pbSnapshot.active_pipeline_agents)||0};
+    var powerBiActiveCount=Number(displayPbLevels.A||0)+Number(displayPbLevels.B||0)+Number(displayPbLevels.C||0);
+    var powerBiNoLevelCount=Number(displayPbLevels.Blank||0)+Number(displayPbLevels.Other||0);
+    var pbPipeline={prequalsTotal:(pbSnapshot&&pbSnapshot.active_prequals_total)||0,prequalsAgents:(pbSnapshot&&pbSnapshot.active_prequals_agents)||0,pipelineTotal:(pbSnapshot&&pbSnapshot.active_pipeline_total)||0,pipelineAgents:(pbSnapshot&&pbSnapshot.active_pipeline_agents)||0,closedTotal:(pbSnapshot&&pbSnapshot.closed_12mo_total)||0,closedAgents:(pbSnapshot&&pbSnapshot.closed_12mo_agents)||0};
 
     // Tier Migration is a managed-portfolio metric. Exclude removed/inactive/DNC agents and
     // null-tier transitions (for example C → ?), because "no tier" is not a real migration.
@@ -9232,8 +9312,9 @@ async function pfrLoad(){
     var dayOfMonth=Math.max(1,now.getDate());
     var daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
     var projectedMonthLeads=Math.round((leadsMTD/dayOfMonth)*daysInMonth);
-    var ratioMTD=totalActive>0?(leadsMTD/totalActive):0;
-    var projectedRatio=totalActive>0?(projectedMonthLeads/totalActive):0;
+    var ratioDenominator=powerBiActiveCount||totalActive;
+    var ratioMTD=ratioDenominator>0?(leadsMTD/ratioDenominator):0;
+    var projectedRatio=ratioDenominator>0?(projectedMonthLeads/ratioDenominator):0;
     var ratioLabel=projectedRatio>=1.30?"Elite pace":projectedRatio>=1.15?"On-target pace":projectedRatio>=0.90?"Acceptable pace":"Below minimum pace";
     var ratioColor=projectedRatio>=1.15?"#3E8E5A":projectedRatio>=0.90?"#B8842B":"#B54B42";
 
@@ -9314,7 +9395,7 @@ async function pfrLoad(){
     // per migration", which made the overall score look catastrophically low for no defensible reason.
     // Keep the live components visible, but do not publish a fake aggregate until that target is approved.
     var ratioScore=Math.min(100,(projectedRatio/1.15)*100);
-    var countScore=Math.min(100,(totalActive/PFR_TARGETS.total)*100);
+    var countScore=Math.min(100,((powerBiActiveCount||totalActive)/PFR_TARGETS.total)*100);
     var weighted=null;
     var dataGaps=[];
     if(migrations.length===0)dataGaps.push("Tier migration tracking has no movement logged for "+range.label.toLowerCase()+" yet. This is not scored as a failure.");
@@ -9342,6 +9423,8 @@ async function pfrLoad(){
       ratioMTD:ratioMTD,
       projectedRatio:projectedRatio,
       totalActive:totalActive,
+      powerBiActiveCount:powerBiActiveCount,
+      ratioDenominator:ratioDenominator,
       pbSnapshot:pbSnapshot,
       powerBiLevelCounts:displayPbLevels,
       uploadedRows:uploadedRows};
@@ -9352,43 +9435,55 @@ async function pfrLoad(){
       +'<div style="font-size:20px;font-weight:800;color:#1F4E79;margin-bottom:4px">Live components are working</div>'
       +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:12px">The single weighted number is intentionally paused until leadership confirms the monthly scoring targets. No placeholder target is allowed to drive a bonus or performance result.</div>'
       +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
-        +pfrStatTile("Projected monthly managed Agent-to-Lead",projectedRatio.toFixed(2)+" · "+ratioLabel,"pfrOpenDrill('ratio')")
-        +pfrStatTile("Managed Active Partners",totalActive+" / "+PFR_TARGETS.total,"pfrOpenDrill('tier:all')")
+        +pfrStatTile("Projected monthly Active Agent-to-Lead",projectedRatio.toFixed(2)+" · "+ratioLabel,"pfrOpenDrill('ratio')")
+        +pfrStatTile("Power BI Active Agents",powerBiActiveCount+" / "+PFR_TARGETS.total,"pfrOpenDrill('pb:levels')")
         +pfrStatTile("Tier migrations — "+range.label,(migCtoB+migBtoA+migAtoChannel+migOther),"pfrOpenDrill('mig:all')")
       +'</div>'
       +(dataGaps.length?'<div style="background:#FBF3E5;border:1px solid #E8DDC8;border-radius:8px;padding:8px 12px;margin-top:12px;font-size:11px;color:#8C7355">&#9888; '+dataGaps.join('<br>&#9888; ')+'</div>':'')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Power BI → Managed Portfolio Reconciliation</div>'
-      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:10px">Start with the raw upload, then show exactly what is excluded before the managed portfolio count.</div>'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Power BI → Tracker Reconciliation</div>'
+      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:10px">Management total is the Power BI Active Agent count: every uploaded row with an A, B, or C Level. Tracker-managed relationships are shown separately.</div>'
       +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'
-        +pfrStatTile("Power BI uploaded rows",uploadedRows,"pfrOpenDrill('pop:powerbi')")
-        +pfrStatTile("Current roster relationships",currentRosterRelationships.length,null)
-        +pfrStatTile("90-day active · lead/close",rmActivePartners.length,"pfrOpenDrill('pop:rmactive')")
-        +pfrStatTile("Managed Active Partners",totalActive,"pfrOpenDrill('tier:all')")
+        +pfrStatTile("Power BI Active Agents",powerBiActiveCount,"pfrOpenDrill('pb:levels')")
+        +pfrStatTile("Raw Power BI rows",uploadedRows,"pfrOpenDrill('pop:powerbi')")
+        +pfrStatTile("Shared tracker roster",currentRosterRelationships.length,null)
+        +pfrStatTile("Managed 90-day relationships",totalActive,"pfrOpenDrill('tier:all')")
       +'</div>'
-      +'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">Excluded from managed: '+inactiveRemovedCount+' inactive/removed relationship'+(inactiveRemovedCount===1?'':'s')+' in the latest stamped Power BI population and '+dncActiveCount+' active DNC relationship'+(dncActiveCount===1?'':'s')+'. Active Partner = latest lead OR close within 90 days. File-start/contract dates remain visible activity details but do not change Active Partner status.</div>'
-      +((uploadedRows>currentPowerBiPopulation)?'<div style="margin-top:8px;background:#FBF3E5;border:1px solid #E8DDC8;border-radius:8px;padding:7px 10px;font-size:10.5px;color:#8C7355">Re-upload the Power BI file once in Admin after this tracker update so every raw Power BI row — including removed relationships — receives the new audit stamp. This does not reactivate anyone.</div>':'')
+      +'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px"><strong>'+powerBiActiveCount+' Power BI Active Agents</strong> = '+Number(displayPbLevels.A||0)+' A + '+Number(displayPbLevels.B||0)+' B + '+Number(displayPbLevels.C||0)+' C. The file contains '+uploadedRows+' raw rows total; '+powerBiNoLevelCount+' row'+(powerBiNoLevelCount===1?' has':'s have')+' no A/B/C Level and therefore do not count in the Power BI Active Agent total. Separately, the tracker currently has '+currentRosterRelationships.length+' shared roster relationships, '+rmActivePartners.length+' of those meet the 90-day lead/close rule, and '+dncActiveCount+' active DNC relationship'+(dncActiveCount===1?' is':'s are')+' excluded, leaving '+totalActive+' managed 90-day relationships.</div>'
+    +'</div>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:3px">Power BI Active Portfolio</div>'
+      +'<div style="font-size:10.5px;color:var(--text-3);margin-bottom:10px">This is the management growth scoreboard and mirrors the A/B/C totals in the latest Power BI upload.</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">'
+        +pfrTile("Active Total",powerBiActiveCount,PFR_TARGETS.total,"pfrOpenDrill(\'pb:levels\')")
+        +pfrTile("A",Number(displayPbLevels.A||0),PFR_TARGETS.A,"pfrOpenDrill(\'pb:levels\')")
+        +pfrTile("B",Number(displayPbLevels.B||0),PFR_TARGETS.B,"pfrOpenDrill(\'pb:levels\')")
+        +pfrTile("C",Number(displayPbLevels.C||0),null,"pfrOpenDrill(\'pb:levels\')")
+        +pfrTile("No Level",powerBiNoLevelCount,null,"pfrOpenDrill(\'pop:powerbi\')")
+      +'</div>'
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:3px">Pipeline Signals from Power BI</div>'
       +'<div style="font-size:10.5px;color:var(--text-3);margin-bottom:10px">Useful production context without adding another tier scoreboard.</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'
-        +pfrStatTile("Active Prequals",pbPipeline.prequalsTotal+(pbPipeline.prequalsAgents?' · '+pbPipeline.prequalsAgents+' agents':''),pbSnapshot?"pfrOpenDrill('pb:prequals')":null)
-        +pfrStatTile("Active In Pipeline",pbPipeline.pipelineTotal+(pbPipeline.pipelineAgents?' · '+pbPipeline.pipelineAgents+' agents':''),pbSnapshot?"pfrOpenDrill('pb:pipeline')":null)
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
+        +pfrStatTile("Active Prequals",pbPipeline.prequalsTotal+(pbPipeline.prequalsAgents?' · '+pbPipeline.prequalsAgents+' agents':''),pbSnapshot&&pbSnapshot.by_agent?"pfrOpenDrill('pb:prequals')":null)
+        +pfrStatTile("Active In Pipeline",pbPipeline.pipelineTotal+(pbPipeline.pipelineAgents?' · '+pbPipeline.pipelineAgents+' agents':''),pbSnapshot&&pbSnapshot.by_agent?"pfrOpenDrill('pb:pipeline')":null)
+        +pfrStatTile("12mo Closings",pbPipeline.closedTotal+(pbPipeline.closedAgents?' · '+pbPipeline.closedAgents+' agents':''),null)
       +'</div>'
-      +(!pbSnapshot?'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">These populate after the next Admin Power BI upload.</div>':'')
+      +'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">Raw totals from the latest Power BI upload. These are portfolio context, not an LP workload target.</div>'
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Managed Relationship Tier</div><div style="font-size:10.5px;color:var(--text-3);margin-bottom:10px">Calculated from trailing-12-month closes/leads. This is intentionally separate from Power BI Level.</div>'
       +'<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">'
-        +pfrTile("Total",totalActive,PFR_TARGETS.total,"pfrOpenDrill(\'tier:all\')")
+        +pfrTile("Managed Total",totalActive,null,"pfrOpenDrill(\'tier:all\')")
         +pfrTile("Channel",countByTier.Channel,null,"pfrOpenDrill(\'tier:Channel\')")
-        +pfrTile("A",countByTier.A,PFR_TARGETS.A,"pfrOpenDrill(\'tier:A\')")
-        +pfrTile("B",countByTier.B,PFR_TARGETS.B,"pfrOpenDrill(\'tier:B\')")
+        +pfrTile("A",countByTier.A,null,"pfrOpenDrill(\'tier:A\')")
+        +pfrTile("B",countByTier.B,null,"pfrOpenDrill(\'tier:B\')")
         +pfrTile("C",countByTier.C,null,"pfrOpenDrill(\'tier:C\')")
         +pfrTile("No Tier",countByTier.None,null,"pfrOpenDrill(\'tier:None\')")
       +'</div>'
@@ -9396,8 +9491,8 @@ async function pfrLoad(){
     +'</div>';
 
     html+='<div onclick="pfrOpenDrill(\'ratio\')" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Managed Agent-to-Lead Ratio · Monthly <span style="font-size:10px;font-weight:600;color:var(--text-3)">· click for source data</span></div>'
-      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+leadsMTD+' Velocify leads MTD &divide; '+totalActive+' managed active partners = <strong>'+ratioMTD.toFixed(2)+'</strong></div>'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Active Agent-to-Lead Ratio · Monthly <span style="font-size:10px;font-weight:600;color:var(--text-3)">· click for source data</span></div>'
+      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+leadsMTD+' Velocify leads MTD &divide; '+ratioDenominator+' Power BI Active Agents = <strong>'+ratioMTD.toFixed(2)+'</strong></div>'
       +'<div style="font-size:24px;font-weight:800;color:'+ratioColor+'">'+projectedRatio.toFixed(2)+'<span style="font-size:13px;font-weight:600;margin-left:8px">'+ratioLabel+'</span></div>'
       +'<div style="font-size:10.5px;color:var(--text-3);margin-top:2px">Projected month-end pace: '+projectedMonthLeads+' leads. Min 0.90 &middot; Target 1.15+ &middot; Elite 1.30+</div>'
     +'</div>';
@@ -9526,7 +9621,7 @@ function pfrOpenDrill(key){
     title.textContent="Agent-to-Lead Ratio — source data";
     var mtd=pfrDrill.monthLeads||[];
     var summary='<div style="padding:12px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:12px;line-height:1.6">'
-      +'<strong>'+((pfrDrill.leadsMTD||0))+' Velocify leads MTD</strong> &divide; <strong>'+((pfrDrill.totalActive||0))+' managed active partners</strong> = <strong>'+((pfrDrill.ratioMTD||0).toFixed(2))+'</strong><br>'
+      +'<strong>'+((pfrDrill.leadsMTD||0))+' Velocify leads MTD</strong> &divide; <strong>'+((pfrDrill.ratioDenominator||pfrDrill.powerBiActiveCount||pfrDrill.totalActive||0))+' Power BI Active Agents</strong> = <strong>'+((pfrDrill.ratioMTD||0).toFixed(2))+'</strong><br>'
       +'Projected month-end: <strong>'+((pfrDrill.projectedMonthLeads||0))+' leads</strong> = projected ratio <strong>'+((pfrDrill.projectedRatio||0).toFixed(2))+'</strong>. The projected lead count is a pace calculation, not additional lead records.'
       +'</div>';
     items=mtd.map(function(l){return{name:(l.referral_partner_name||"Unassigned / no referral partner"),detail:fmt(l.date_added)};});
@@ -9546,8 +9641,14 @@ function pfrOpenDrill(key){
     vals.sort(function(a,b){var an=parseInt(a.detail)||0,bn=parseInt(b.detail)||0;return bn-an||String(a.name).localeCompare(String(b.name));});
     items=vals;
   }else if(key==="pop:powerbi"){
-    title.textContent="Current Power BI Population — latest import";
-    items=(pfrDrill.powerBiActiveRows||[]).map(function(a){return{name:a.agent_name,detail:(a.powerbi_level?"Power BI "+a.powerbi_level:"No Power BI level")+" · Managed tier "+pfrTierLabel(a.tier)};});
+    title.textContent="Raw Power BI Upload — "+String(pfrDrill.uploadedRows||0)+" rows";
+    var rawSnap=pfrDrill.pbSnapshot||null;
+    if(rawSnap&&rawSnap.by_agent){
+      items=Object.keys(rawSnap.by_agent).map(function(k){var r=rawSnap.by_agent[k]||{};return{name:r.name||k,detail:(r.level?"Power BI "+r.level:"No Power BI level")+" · "+Number(r.active_prequals||0)+" active prequal"+(Number(r.active_prequals||0)===1?"":"s")+" · "+Number(r.active_pipeline||0)+" in pipeline"};});
+      items.sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
+    }else{
+      items=(pfrDrill.powerBiActiveRows||[]).map(function(a){return{name:a.agent_name,detail:(a.powerbi_level?"Power BI "+a.powerbi_level:"No Power BI level")+" · current shared roster record"};});
+    }
   }else if(key==="pop:rmactive"){
     title.textContent="RM Active Partners — latest lead or close within 90 days";
     items=(pfrDrill.rmActivePartners||[]).map(function(a){
@@ -9819,6 +9920,6 @@ function v33CloseSharedFaceTime(){var m=document.getElementById('v33SharedFaceTi
 async function v33SaveSharedFaceTime(){var id=document.getElementById('v33FtId').value,name=document.getElementById('v33FtAgent').value,date=document.getElementById('v33FtDate').value,time=document.getElementById('v33FtTime').value||null,lp=document.getElementById('v33FtLp').value||null,rm=document.getElementById('v33FtRm').value||'Amanda',notes=document.getElementById('v33FtNotes').value.trim()||null;if(!name||!date){showToast('Choose an agent and date.','error');return;}var body={agent_name:name,event_date:date,event_time:time,lp:lp,rm:rm,status:'scheduled',notes:notes,created_by:lp||'LP Tracker',updated_at:new Date().toISOString()};try{if(id)await sbFetch('PATCH','face_time_events?id=eq.'+encodeURIComponent(id),body);else await sbFetch('POST','face_time_events',body);v33CloseSharedFaceTime();showToast('Face Time booked · Amanda can see it too ✓','success');await loadFaceTime();}catch(e){showToast('Could not save. Run the shared Face Time SQL if needed.','error');}}
 async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId').value;if(!id)return;try{await sbFetch('PATCH','face_time_events?id=eq.'+encodeURIComponent(id),{status:'cancelled',updated_at:new Date().toISOString()});v33CloseSharedFaceTime();showToast('Booking cancelled.','success');await loadFaceTime();}catch(e){showToast('Could not cancel booking.','error');}}
 </script>
-<!-- v36 SIMPLE LP + TRAINING · 2026-08-19 -->
+<!-- v42 MANAGEMENT TRUTH + PLATFORM CLOSINGS + OWNERSHIP SORT + TRAINING · 2026-08-19 -->
 </body>
 </html>
