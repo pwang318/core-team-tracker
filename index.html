@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260818-v29">
+  <meta name="version" content="20260818-v30">
   <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -624,7 +624,7 @@ td{line-height:1.4!important}
 
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v29.0</div>
+<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(91,68,152,.12);color:#5B4498;pointer-events:none">Build v30.0</div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -2789,7 +2789,7 @@ function renderCallCard(a,lp,isBonus){
 
   // Received Lead button — visible on all open cards
     var rlKey=a[0].toUpperCase();
-    var rlData=receivedLeadsData[rlKey]||null;
+    var rlData=receivedLeadsData[rlKey]||receivedLeadsData[ctAgentNameKey(a[0]).toUpperCase()]||null;
     var rlClass="received-lead-btn"+(rlData?" is-received":"");
     var rlLabel=rlData
       ?'<span style="font-size:16px">&#127919;</span><span>Lead received'+(rlData.buyer_name?" &#8212; "+escHtml(rlData.buyer_name):"")+" &#10003;</span>"
@@ -5189,7 +5189,9 @@ function loadReceivedLeads(){
   return sbFetch("GET","received_leads?week_key=eq."+weekKey+"&select=id,agent_name,lp,logged_date,buyer_name&limit=500").then(function(res){
     receivedLeadsData={};
     if(res)res.forEach(function(r){
-      receivedLeadsData[r.agent_name.toUpperCase()]={id:r.id,logged_date:r.logged_date,buyer_name:r.buyer_name,lp:r.lp};
+      var obj={id:r.id,logged_date:r.logged_date,buyer_name:r.buyer_name,lp:r.lp};
+      receivedLeadsData[r.agent_name.toUpperCase()]=obj;
+      receivedLeadsData[ctAgentNameKey(r.agent_name).toUpperCase()]=obj;
     });
   }).catch(function(){});
 }
@@ -5211,9 +5213,25 @@ function logReceivedLead(name,lp,btn){
     var data={agent_name:name,lp:lp,logged_date:localDateStr(TODAY),week_key:weekKey,buyer_name:buyerName||null,note:""};
     sbFetch("POST","received_leads",data).then(function(res){
       var saved=res&&res.length?res[0]:{};
-      receivedLeadsData[name.toUpperCase()]={id:saved.id,logged_date:localDateStr(TODAY),buyer_name:buyerName,lp:lp};
+      var leadDate=localDateStr(TODAY);
+      receivedLeadsData[name.toUpperCase()]={id:saved.id,logged_date:leadDate,buyer_name:buyerName,lp:lp};
       updateReceivedLeadBtn(btn,name,true,buyerName);
       selfReportedReferrals[name]=(selfReportedReferrals[name]||0)+1;
+
+      // v30: an LP-confirmed received lead is an immediate shared business signal.
+      // Update the live in-memory roster and shared profile so LP + RM health agree now,
+      // instead of waiting for the next Power BI / Velocify import.
+      var row=agents.find(function(a){return ctAgentNameKey(a[0])===ctAgentNameKey(name);});
+      if(row&&(!row[3]||leadDate>row[3]))row[3]=leadDate;
+      var v=getVelocifyForAgent(name)||{total:0,mtd:0};
+      v.last_lead_date=(!v.last_lead_date||leadDate>v.last_lead_date)?leadDate:v.last_lead_date;
+      v.total=Math.max(1,Number(v.total||0)+1);
+      VELOCIFY_SEED[String(name||"").trim().toUpperCase()]=v;
+      rebuildVelocifyMatch();
+      sbFetch("PATCH","agent_profiles?agent_name=ilike."+encodeURIComponent(name),{latest_lead_date:leadDate}).catch(function(){
+        // Non-critical: RM also reads received_leads directly in v67+, so the signal is not lost.
+      });
+      if(typeof renderLP==="function"&&currentUser===lp)renderLP(lp);
     }).catch(function(){});
   }
 }
