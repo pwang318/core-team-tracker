@@ -6933,14 +6933,30 @@ async function loadFaceTime(){
     });
     var ownerMap={};
     (r[4]||[]).forEach(function(a){var k=(a.agent_name||"").trim().toUpperCase();if(k)ownerMap[k]={lp:(a.lp&&a.lp!=="__REMOVED__")?a.lp:"Unassigned",rm:a.rm||"Unassigned",removed:a.lp==="__REMOVED__"};});
+    // FIX (2026-08-19): agent_assignments can have more than one row for the same agent (a stale
+    // duplicate legacy row, or genuine Amanda+Nyny dual credit), and this query has no explicit
+    // ORDER BY — so "whichever row Supabase happens to return last" was deciding rm above, which is
+    // non-deterministic and can silently disagree with RM Tracker reading the exact same table.
+    // Resolve rm conflicts the same deterministic way RM Tracker now does, so both tools always
+    // agree on the owner for a given relationship. Only rm changes here — lp/removed keep the
+    // existing behavior above.
+    var ctOwnerRecords={};
+    (r[4]||[]).forEach(function(a){var k=(a.agent_name||"").trim().toUpperCase();if(!k)return;if(!ctOwnerRecords[k])ctOwnerRecords[k]={rms:new Set()};if(a.rm==="Amanda"||a.rm==="Nyny")ctOwnerRecords[k].rms.add(a.rm);});
+    function ctResolveRmOwner(agentKey,tier){
+      var rec=ctOwnerRecords[agentKey];
+      if(rec&&rec.rms&&rec.rms.size===1)return Array.from(rec.rms)[0];
+      if(rec&&rec.rms&&rec.rms.size>1)return tier==="Channel"?"Nyny":"Amanda";
+      if(tier==="Channel")return"Nyny";
+      return"Unassigned";
+    }
     ftRosterRows=(r[3]||[]).filter(function(p){
       var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
       return !!k && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && p.retained!==false && !o.removed
         && String(p.relationship_type||"realtor")!=="strategic_partner"
         && String(p.lp_outreach_status||"active")!=="nurture";
     }).map(function(p){
-      var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
-      return {name:p.agent_name,tier:p.tier||"C",lp:o.lp||"Unassigned",rm:o.rm||"Unassigned",competitor_risk_flag:!!p.competitor_risk_flag,high_potential_flag:!!p.high_potential_flag,next_growth_opportunity:p.next_growth_opportunity||"",latest_lead_date:p.latest_lead_date||null,closes_past_year:p.closes_past_year||0,total_leads_past_year:p.total_leads_past_year||0};
+      var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{},tier=p.tier||"C";
+      return {name:p.agent_name,tier:tier,lp:o.lp||"Unassigned",rm:ctResolveRmOwner(k,tier),competitor_risk_flag:!!p.competitor_risk_flag,high_potential_flag:!!p.high_potential_flag,next_growth_opportunity:p.next_growth_opportunity||"",latest_lead_date:p.latest_lead_date||null,closes_past_year:p.closes_past_year||0,total_leads_past_year:p.total_leads_past_year||0};
     });
     renderFaceTime();
   }catch(e){if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--red);padding:30px;font-size:13px">Error loading — '+e.message+'</div>';}
