@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260819-v44-mobile-safe">
+  <meta name="version" content="20260820-v45-connection-stable">
   <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -44,7 +44,7 @@ body{font-family:'Geist','Inter',-apple-system,sans-serif;color:var(--text);font
 .week-pill{font-size:11px;background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:20px;color:var(--text-2);font-weight:500;font-family:'Geist','Inter',sans-serif;letter-spacing:.02em}
 .save-ind{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#cbd5e1;flex-shrink:0}
-.sync-dot.live{background:#15803d}.sync-dot.saving{background:#d97706}.sync-dot.error{background:#dc2626}
+.sync-dot.live{background:#15803d}.sync-dot.saving{background:#d97706}.sync-dot.slow{background:#d97706}.sync-dot.error{background:#dc2626}
 
 /* Who bar */
 .who-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;background:var(--surface);padding:.75rem 1rem;border-radius:var(--radius-md);border:1px solid var(--border)}
@@ -2275,13 +2275,16 @@ function lpDropBodyColumn(body,col){
   if(typeof body==="object"&&Object.prototype.hasOwnProperty.call(body,col)){var copy=Object.assign({},body);delete copy[col];return copy;}
   return null;
 }
+// v45 connection stability: use one realistic timeout for Supabase traffic. A slow request is
+// not the same thing as being offline, and any HTTP response proves the server was reached.
 function sbFetch(method,path,body,_schemaRetry){
   var retry=Number(_schemaRetry||0);
   var controller=new AbortController();
-  var timer=setTimeout(function(){controller.abort();},12000);
+  var timer=setTimeout(function(){controller.abort();},20000);
   var opts={method:method,signal:controller.signal,headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
   if(body!==undefined&&body!==null)opts.body=JSON.stringify(body);
   return fetch(SB_URL+"/rest/v1/"+path,opts).then(function(r){
+    lpMarkServerReachable();
     if(!r.ok)return r.text().then(function(t){
       var parsed=null;try{parsed=t?JSON.parse(t):null;}catch(e){}
       var msg=(parsed&&parsed.message)||t||("HTTP "+r.status);
@@ -2302,7 +2305,12 @@ function sbFetch(method,path,body,_schemaRetry){
     });
     return r.text().then(function(t){return t?JSON.parse(t):null;});
   }).catch(function(err){
-    if(err&&err.name==="AbortError")throw new Error("Connection timed out. Please retry.");
+    if(err&&err.name==="AbortError"){
+      var timeoutErr=new Error("Supabase is responding slowly. Please retry if this does not recover.");
+      timeoutErr.code="LP_TIMEOUT";
+      throw timeoutErr;
+    }
+    if(err&&err.status===undefined&&(/Failed to fetch|NetworkError|Load failed/i).test(String(err.message||err))){err.code=err.code||"LP_NETWORK";}
     throw err;
   }).finally(function(){clearTimeout(timer);});
 }
@@ -2325,21 +2333,23 @@ function lpProfileWrite(method,path,payload){
 }
 
 function loadCallLogs(){
-  setSyncStatus("saving");
+  if(!window._lpBootInProgress)setSyncStatus("saving");
   return Promise.all([
     sbFetch("GET","call_logs?week_key=eq."+weekKey+"&select=*"),
     sbFetch("GET","call_logs?week_key=eq."+lastWeekKey+"&select=*"),
-    sbFetch("GET","lp_flags?resolved=eq.false&select=id,agent_name,lp,note,created_at").catch(function(){return[];})
+    sbFetch("GET","lp_flags?resolved=eq.false&select=id,agent_name,lp,note,created_at").catch(function(err){console.warn("LP flags load skipped:",err);return[];})
   ]).then(function(res){
     callLogs={};lastWeekLogs={};lpOpenRmFlags={};
     if(res[0])res[0].forEach(function(r){callLogs[r.agent_name]=r;});
     if(res[1])res[1].forEach(function(r){lastWeekLogs[r.agent_name]=r;});
     if(res[2])res[2].forEach(function(r){if(r.agent_name)lpOpenRmFlags[assignmentKey(r.agent_name)]=r;});
     setSyncStatus("live");
-    Promise.all([loadPrevNotes(),loadRmActivity(),loadAgentFirstCalls(),loadVelocifyLeads(),loadCoMarketing(),loadAgentAssignments(),loadAgentMilestones(),loadChurnRisk(),loadLpEffectiveness(),loadReceivedLeads(),loadRmFollowups()]).catch(function(){});
-  }).catch(function(){
-    setSyncStatus("error");
-    return Promise.resolve();
+    lpScheduleBackgroundRefresh();
+    return res;
+  }).catch(function(err){
+    console.error("LP call-log load failed:",err);
+    lpHandleSyncError(err);
+    return null;
   });
 }
 
@@ -2361,7 +2371,7 @@ function upsertCallLog(name,lp,note){
       agentMilestones[nameUpper].first_lp_call_by=lp;
     }
     setSyncStatus("live");
-  }).catch(function(e){setSyncStatus("error");console.error("Call log save failed for "+name+":",e);});
+  }).catch(function(e){lpHandleSyncError(e);console.error("Call log save failed for "+name+":",e);});
 }
 
 function deleteCallLog(name){
@@ -2369,7 +2379,7 @@ function deleteCallLog(name){
   delete callLogs[name];
   setSyncStatus("saving");
   return sbFetch("DELETE","call_logs?id=eq."+encodeURIComponent(id))
-    .then(function(){setSyncStatus("live");}).catch(function(){setSyncStatus("error");});
+    .then(function(){setSyncStatus("live");}).catch(function(err){lpHandleSyncError(err);console.error("LP delete failed:",err);});
 }
 
 function setSyncStatus(s){
@@ -2377,13 +2387,58 @@ function setSyncStatus(s){
   if(!dot||!ind)return;
   if(s==="live"){dot.className="sync-dot live";ind.textContent="Live";}
   else if(s==="saving"){dot.className="sync-dot saving";ind.textContent="Syncing...";}
-  else{dot.className="sync-dot error";ind.textContent="Connection issue";}
+  else if(s==="loading"){dot.className="sync-dot saving";ind.textContent="Loading...";}
+  else if(s==="slow"){dot.className="sync-dot slow";ind.textContent="Slow connection · Retry";}
+  else if(s==="offline"){dot.className="sync-dot error";ind.textContent="Offline · Retry";}
+  else{dot.className="sync-dot error";ind.textContent="Sync problem · Retry";}
+}
+var lpLastServerSuccessAt=0;
+function lpMarkServerReachable(){
+  lpLastServerSuccessAt=Date.now();
+  var ind=document.getElementById("saveInd");
+  if(!ind)return;
+  var txt=String(ind.textContent||"");
+  if(/Connecting|Loading|Slow connection|Offline|Sync problem/.test(txt))setSyncStatus("live");
+}
+function lpHandleSyncError(err){
+  var msg=String((err&&err.message)||err||"");
+  if(typeof navigator!=="undefined"&&navigator.onLine===false){setSyncStatus("offline");return "offline";}
+  if((err&&err.code==="LP_TIMEOUT")||/responding slowly|timed out/i.test(msg)){setSyncStatus("slow");return "slow";}
+  if((err&&err.code==="LP_NETWORK")||/Failed to fetch|NetworkError|Load failed/i.test(msg)){setSyncStatus("offline");return "offline";}
+  setSyncStatus("error");return "error";
+}
+var lpLastBackgroundRefresh=0,lpBackgroundRefreshTimer=null;
+function lpStaggerTasks(tasks,gap){
+  (tasks||[]).forEach(function(task,i){setTimeout(function(){try{var p=task();if(p&&p.catch)p.catch(function(e){console.warn("LP background load skipped:",e);});}catch(e){console.warn("LP background load skipped:",e);}},i*(gap||180));});
+}
+function lpScheduleBackgroundRefresh(){
+  if(window._lpBootInProgress)return;
+  var now=Date.now();
+  if(now-lpLastBackgroundRefresh<60000)return;
+  lpLastBackgroundRefresh=now;
+  clearTimeout(lpBackgroundRefreshTimer);
+  lpBackgroundRefreshTimer=setTimeout(function(){
+    lpStaggerTasks([loadPrevNotes,loadVelocifyLeads,loadCoMarketing,loadAgentMilestones,loadChurnRisk,loadLpEffectiveness,loadReceivedLeads,loadRmFollowups],180);
+  },300);
+}
+function lpTestConnection(){
+  var started=Date.now();
+  setSyncStatus("loading");
+  return sbFetch("GET","amanda_activities?select=id&limit=1").then(function(){setSyncStatus("live");return true;}).catch(function(err){
+    // If any other Supabase request succeeded after this check began, connectivity is already proven.
+    if(lpLastServerSuccessAt>=started){setSyncStatus("live");return true;}
+    console.warn("LP connection check:",err);lpHandleSyncError(err);return false;
+  });
 }
 function lpRetryConnection(){
-  setSyncStatus("saving");
-  return loadCallLogs().then(function(){
-    if(typeof buildSnapshot==="function")buildSnapshot();
-  }).catch(function(){setSyncStatus("error");});
+  return lpTestConnection().then(function(ok){
+    if(!ok)return false;
+    return loadCallLogs().then(function(){if(typeof buildSnapshot==="function")buildSnapshot();return true;});
+  });
+}
+if(typeof window!=="undefined"){
+  window.addEventListener("online",function(){lpTestConnection();});
+  window.addEventListener("offline",function(){setSyncStatus("offline");});
 }
 
 
@@ -2536,7 +2591,7 @@ function openOwnershipView(btn){
 }
 function refreshOwnershipView(){
   var body=document.getElementById("ownership-body");if(body)body.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">Refreshing...</div>';
-  return Promise.all([loadAgentAssignments(),loadInactiveRosterNames()]).then(function(){renderOwnershipSummary();renderOwnershipRows();setSyncStatus("live");}).catch(function(){setSyncStatus("error");renderOwnershipRows();});
+  return Promise.all([loadAgentAssignments(),loadInactiveRosterNames()]).then(function(){renderOwnershipSummary();renderOwnershipRows();setSyncStatus("live");}).catch(function(err){lpHandleSyncError(err);console.error("Ownership load failed:",err);renderOwnershipRows();});
 }
 function renderOwnershipSummary(){
   var host=document.getElementById("ownership-summary");if(!host)return;
@@ -2626,7 +2681,7 @@ function saveOwnershipRow(btn){
   }).then(function(){
     agentRmOwners[assignmentKey(name)]=rmVal||"";var ag=(agents||[]).find(function(a){return assignmentKey(a[0])===assignmentKey(name);});if(ag)ag[2]=lpVal||"Unassigned";
     setSyncStatus("live");btn.textContent="Saved";if(status){status.textContent="✓";status.style.color="#15803d";}renderOwnershipSummary();setTimeout(function(){btn.textContent="Save";btn.disabled=false;if(status)status.textContent="";},1200);
-  }).catch(function(err){console.error("Ownership save failed",err);setSyncStatus("error");btn.disabled=false;btn.textContent="Retry";if(status){status.textContent="Failed";status.style.color="#b42318";}});
+  }).catch(function(err){console.error("Ownership save failed",err);lpHandleSyncError(err);btn.disabled=false;btn.textContent="Retry";if(status){status.textContent="Failed";status.style.color="#b42318";}});
 }
 async function bulkApplyOwnership(){
   var rmChoice=(document.getElementById("ownership-bulk-rm")||{}).value||"__NO_CHANGE__";
@@ -2654,7 +2709,7 @@ async function bulkApplyOwnership(){
     if(st){st.textContent=changed+" relationship"+(changed===1?"":"s")+" updated ✓";st.style.color="#15803d";}
     setSyncStatus("live");renderOwnershipSummary();renderOwnershipRows();
     if(btn){btn.textContent="Apply to selected";btn.disabled=true;}
-  }catch(err){console.error("Bulk ownership update failed",err);setSyncStatus("error");if(st){st.textContent="Bulk update failed — nothing was intentionally cleared.";st.style.color="#b42318";}if(btn){btn.disabled=false;btn.textContent="Retry bulk update";}}
+  }catch(err){console.error("Bulk ownership update failed",err);lpHandleSyncError(err);if(st){st.textContent="Bulk update failed — nothing was intentionally cleared.";st.style.color="#b42318";}if(btn){btn.disabled=false;btn.textContent="Retry bulk update";}}
 }
 async function cleanupHiddenOwnershipPlaceholders(){
   var note=document.getElementById("ownership-hidden-note");
@@ -4238,7 +4293,7 @@ function loadAmandaSnapshot(){
     if(document.getElementById("view-snapshot")&&document.getElementById("view-snapshot").classList.contains("active")){
       buildSnapshot();
     }
-  }).catch(function(){});
+  }).catch(function(err){console.warn("Amanda snapshot load failed:",err);});
 }
 
 function showLpInactiveAgents(lp){
@@ -4720,7 +4775,7 @@ function renderReassign(){
     }).join('');
   }).catch(function(e){tbody.innerHTML='<tr><td colspan="8" style="padding:18px;color:var(--red)">Could not load live assignments: '+e.message+'</td></tr>';});
 }
-function reassignLiveAgent(sel){var name=sel.getAttribute("data-reassign-name"),lp=sel.value||"Unassigned";if(!name)return;setSyncStatus("saving");sbFetch("POST","agent_assignments?on_conflict=agent_name",{agent_name:name,lp:lp,added:false}).then(function(){var a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});if(a)a[2]=lp;setSyncStatus("live");renderReassign();}).catch(function(){sbFetch("PATCH","agent_assignments?agent_name=eq."+encodeURIComponent(name),{lp:lp}).then(function(){var a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});if(a)a[2]=lp;setSyncStatus("live");renderReassign();}).catch(function(){setSyncStatus("error");alert("Could not save LP assignment. Please retry.");});});}
+function reassignLiveAgent(sel){var name=sel.getAttribute("data-reassign-name"),lp=sel.value||"Unassigned";if(!name)return;setSyncStatus("saving");sbFetch("POST","agent_assignments?on_conflict=agent_name",{agent_name:name,lp:lp,added:false}).then(function(){var a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});if(a)a[2]=lp;setSyncStatus("live");renderReassign(); }).catch(function(postErr){sbFetch("PATCH","agent_assignments?agent_name=eq."+encodeURIComponent(name),{lp:lp}).then(function(){var a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});if(a)a[2]=lp;setSyncStatus("live");renderReassign();}).catch(function(patchErr){lpHandleSyncError(patchErr||postErr);console.error("LP reassignment failed:",patchErr||postErr);alert("Could not save LP assignment. Please retry.");});});}
 function toggleLivePriority(btn){var name=btn.getAttribute("data-priority-name");if(!name)return;var next=btn.textContent.trim()!=="Priority";sbFetch("PATCH","agent_assignments?agent_name=eq."+encodeURIComponent(name),{priority:next}).then(function(){var a=agents.find(function(x){return assignmentKey(x[0])===assignmentKey(name);});if(a)a[7]=next;renderReassign();}).catch(function(){alert("Could not update priority. Please retry.");});}
 
 function renderRemoveList(){
@@ -5181,7 +5236,7 @@ function loadRmActivity(){
       // Also index uppercase so minor casing differences between trackers don't hide a live RM touch.
       if(!rmActivity[key]||r.act_date>rmActivity[key])rmActivity[key]=r.act_date;
     });
-  }).catch(function(){});
+  }).catch(function(err){console.warn("RM activity load failed:",err);});
 }
 
 function loadRmFollowups(){
@@ -5273,7 +5328,7 @@ function loadAgentFirstCalls(){
     lpCounts.forEach(function(r){
       lpHistoryCallCounts[r.lp]=r.call_count;
     });
-  }).catch(function(){});
+  }).catch(function(err){console.warn("Agent first-call summary load failed:",err);});
 }
 
 function upsertCallLogWithOutcome(name,lp,note,outcome,flagRm){
@@ -5284,7 +5339,7 @@ function upsertCallLogWithOutcome(name,lp,note,outcome,flagRm){
   setSyncStatus("saving");
   return sbFetch("POST","call_logs",data).then(function(){
     return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",flag_rm:fr});
-  }).then(function(){setSyncStatus("live");}).catch(function(e){setSyncStatus("error");console.error("Call log save failed for "+name+":",e);});
+  }).then(function(){setSyncStatus("live");}).catch(function(e){lpHandleSyncError(e);console.error("Call log save failed for "+name+":",e);});
 }
 
 function toggleRmFlag(btn){
@@ -5666,7 +5721,8 @@ function initRealtimeSync(){
 }
 initRealtimeSync();
 loadAgents();
-loadAgentAssignments();
+// Ownership is useful, but it no longer competes with the first connection/data paint.
+setTimeout(function(){try{loadAgentAssignments();}catch(e){console.warn("LP ownership preload:",e);}},500);
 // Auto-open Snapshot on load
 (function(){
   var snapBtn=document.querySelector(".wb-Snapshot");
@@ -5677,33 +5733,33 @@ loadAgentAssignments();
   // Show loading state immediately
   var el=document.getElementById("d-snapshot-body");
   if(el)el.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div>';
-  // Load data, then build snapshot
-  // Use allSettled so one failure doesn't block everything
-  var _bootPromises = [
-    loadCallLogs(),
-    loadAgentFirstCalls(),
-    loadRmActivity(),
-    loadAmandaSnapshot()
-  ];
-  // Timeout safety: build snapshot after 8s even if some loads hang
-  var _bootTimer = setTimeout(function(){
+  // v45: stagger startup instead of hitting Supabase with every dashboard query at once.
+  // The snapshot paints progressively; one slow optional dataset can never block the whole tracker.
+  window._lpBootInProgress=true;
+  setSyncStatus("loading");
+  function lpBootDelay(ms){return new Promise(function(resolve){setTimeout(resolve,ms);});}
+  function lpBootLoad(label,fn){
+    try{return Promise.resolve(fn()).catch(function(e){console.warn("LP startup "+label+" skipped:",e);return null;});}
+    catch(e){console.warn("LP startup "+label+" skipped:",e);return Promise.resolve(null);}
+  }
+  (async function(){
+    await lpBootLoad("call logs",loadCallLogs);
     buildSnapshot();
-    loadLeadPipeline();
-  }, 8000);
-  Promise.all(_bootPromises.map(function(p){
-    return p ? p.catch(function(){return null;}) : Promise.resolve(null);
-  })).then(function(){
-    clearTimeout(_bootTimer);
-    document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-    document.getElementById("view-snapshot").classList.add("active");
-    document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
-    var sb=document.querySelector(".wb-Snapshot");if(sb)sb.classList.add("active");
+    await lpBootDelay(180);
+    await lpBootLoad("agent first calls",loadAgentFirstCalls);
+    await lpBootDelay(180);
+    await lpBootLoad("RM activity",loadRmActivity);
+    await lpBootDelay(180);
+    await lpBootLoad("Amanda snapshot",loadAmandaSnapshot);
     buildSnapshot();
-    loadLeadPipeline();
-  }).catch(function(e){
-    clearTimeout(_bootTimer);
+    window._lpBootInProgress=false;
+    setTimeout(function(){lpBootLoad("lead pipeline",loadLeadPipeline);},300);
+    setTimeout(function(){lpScheduleBackgroundRefresh();},700);
+  })().catch(function(e){
     console.warn("Snapshot load error:",e);
+    window._lpBootInProgress=false;
     buildSnapshot();
+    lpHandleSyncError(e);
   });
 })();
 
@@ -6820,7 +6876,7 @@ async function loadFaceTime(){
       sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=4000"),
       sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
       loadCoMarketing(),
-      sbFetch("GET","agent_profiles?select=agent_name,tier,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,do_not_contact,relationship_status&limit=5000").catch(function(){return[];});}),
+      sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,do_not_contact,relationship_status&limit=5000").catch(function(){return[];});}),
       sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000").catch(function(){return[];}),
       sbFetch("GET","face_time_events?select=*&status=eq.scheduled&event_date=gte."+today2()+"&order=event_date.asc,event_time.asc&limit=1000").catch(function(){return[];})
     ]);
@@ -6862,7 +6918,7 @@ async function loadFaceTime(){
         && String(p.relationship_type||"realtor")!=="strategic_partner"
         && String(p.lp_outreach_status||"active")!=="nurture";
     }).map(function(p){
-      var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{},tier=p.tier||"C";
+      var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{},profileTier=String(p.tier||"").trim().toUpperCase(),pbTier=String(p.powerbi_level||"").trim().toUpperCase(),tier=profileTier==="CHANNEL"?"Channel":(["A","B","C"].includes(pbTier)?pbTier:(profileTier||"C"));
       return {name:p.agent_name,tier:tier,lp:o.lp||"Unassigned",rm:ctResolveRmOwner(k,tier),competitor_risk_flag:!!p.competitor_risk_flag,high_potential_flag:!!p.high_potential_flag,next_growth_opportunity:p.next_growth_opportunity||"",latest_lead_date:p.latest_lead_date||null,closes_past_year:p.closes_past_year||0,total_leads_past_year:p.total_leads_past_year||0};
     });
     renderFaceTime();
@@ -9662,11 +9718,12 @@ if(typeof refreshLpSharedData==="function"){
 // v17 — makeover layer + v16 load recovery; all operational logic preserved.
 function runLpUiIntegrityCheck(){const requiredViews=["snapshot","portfolio","ownership","leads","lp","rm","director","facetime","admin"];const missingViews=requiredViews.filter(n=>!document.getElementById("view-"+n));const requiredFns=["openSnapshotView","openPortfolioReviewView","openOwnershipView","openLeadsView","selectUser","openRmView","openDirectorView","loadAgents","loadCallLogs","buildSnapshot"];const missingFns=requiredFns.filter(n=>typeof window[n]!=="function");if(missingViews.length||missingFns.length)console.error("LP Tracker UI integrity issue",{missingViews,missingFns});else console.log("LP Tracker UI integrity check passed");}
 setTimeout(runLpUiIntegrityCheck,0);
-// Startup watchdog: do not let GitHub Pages sit forever on Connecting/Syncing if a request stalls.
+// v45 watchdog: a slow request is shown as slow, not falsely reported as disconnected.
+// Successful Supabase traffic automatically restores Live through lpMarkServerReachable().
 setTimeout(function(){
   var ind=document.getElementById("saveInd");
-  if(ind&&(/Connecting|Syncing/.test(ind.textContent||"")))setSyncStatus("error");
-},13000);
+  if(ind&&(/Connecting|Loading/.test(ind.textContent||"")))setSyncStatus("slow");
+},18000);
 </script>
 </div>
 
@@ -9717,6 +9774,11 @@ async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId
   window.addEventListener('error',function(){setTimeout(check,50);});
   window.addEventListener('unhandledrejection',function(){setTimeout(check,50);});
 })();
+</script>
+<script>console.log("LP Tracker Build v45.0 · connection status stabilization · staggered startup · false failure fix");</script>
+
+<script id="v45-facetime-tier-alignment">
+console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + current Power BI");
 </script>
 </body>
 </html>
