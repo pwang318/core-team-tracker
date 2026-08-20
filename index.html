@@ -1,4 +1,4 @@
-     
+    
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7129,10 +7129,11 @@ async function ctLoadRecentRmRelationshipNotes(lp){
     host.innerHTML='<div style="max-height:360px;overflow-y:auto;padding-right:3px">'+rows.map(function(a,i){
       var owner=ctRmOwnerFromNotes(a.notes)||"RM",note=ctStripRmMeta(a.notes),date=a.act_date?fmt(a.act_date):"";
       var rawDate=a.act_date?new Date(String(a.act_date).slice(0,10)+"T12:00:00"):null,isFresh=!!(rawDate&&rawDate>=recentCut);
-      return'<div style="margin:0 0 8px;padding:10px 11px;border:'+(isFresh?'1px solid #9EDDEC':'1px solid #DDE9ED')+';border-left:'+(isFresh?'4px solid #00A8D4':'3px solid #B7D5DD')+';border-radius:8px;background:'+(isFresh?'#FFFFFF':'#FBFDFE')+'">'
-        +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:13px;font-weight:900;color:#071B37">'+escHtml(displayName(a.agent_name||"Agent"))+'</div>'+(isFresh?'<span style="font-size:9px;font-weight:900;color:#07566D;background:#DDF7FC;border-radius:999px;padding:2px 6px">NEW</span>':'')+'</div><div style="font-size:10.5px;color:#58717D;font-weight:650">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div></div>'
-        +'<div style="font-size:12.5px;color:#233E4A;line-height:1.55;margin-top:6px;font-weight:'+(isFresh?'650':'500')+'">'+escHtml(note)+'</div>'
-        +(a.outcome?'<div style="font-size:10.5px;color:#607985;margin-top:5px"><strong>Outcome:</strong> '+escHtml(a.outcome)+(a.follow_up_date?' · <strong>Follow-up:</strong> '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')
+      return'<div class="lp-rm-note-item '+(isFresh?'lp-rm-note-fresh':'lp-rm-note-old')+'" style="margin:0 0 9px;padding:11px 12px;border:'+(isFresh?'1px solid #E2BE43':'1px solid #DDE9ED')+';border-left:'+(isFresh?'5px solid #D99A00':'3px solid #B7D5DD')+';border-radius:9px;background:'+(isFresh?'#FFF9D9':'#FBFDFE')+';box-shadow:'+(isFresh?'0 4px 12px rgba(217,154,0,.10)':'none')+'">'
+        +(isFresh?'<div style="display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:950;letter-spacing:.055em;color:#6F4B00;background:#FFE88A;border:1px solid #E2BE43;border-radius:5px;padding:3px 7px;margin-bottom:7px;text-transform:uppercase">RM NOTE · READ BEFORE OUTREACH</div>':'')
+        +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:13.5px;font-weight:950;color:#071B37">'+escHtml(displayName(a.agent_name||"Agent"))+'</div>'+(isFresh?'<span style="font-size:9px;font-weight:950;color:#6F4B00;background:#FFF1A8;border:1px solid #E2BE43;border-radius:999px;padding:2px 7px">NEW RM NOTE</span>':'')+'</div><div style="font-size:10.5px;color:#58717D;font-weight:650">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div></div>'
+        +'<div style="font-size:'+(isFresh?'13px':'12.5px')+';color:#233E4A;line-height:1.58;margin-top:7px;font-weight:'+(isFresh?'750':'500')+';background:'+(isFresh?'#FFF3A8':'transparent')+';padding:'+(isFresh?'8px 9px':'0')+';border-radius:'+(isFresh?'6px':'0')+'">'+escHtml(note)+'</div>'
+        +(a.outcome?'<div style="font-size:10.5px;color:#607985;margin-top:6px"><strong>Outcome:</strong> '+escHtml(a.outcome)+(a.follow_up_date?' · <strong>Follow-up:</strong> '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')
         +'</div>';
     }).join("")+'</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">RM context from Amanda/Nyny for agents assigned to '+escHtml(lp)+'. Fresh notes automatically open so they are seen before outreach.</div>';
   }catch(e){console.error("RM relationship notes failed",e);host.innerHTML='<div style="padding:6px 0;color:#A32D2D">Could not load RM notes.</div>';}
