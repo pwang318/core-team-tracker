@@ -4,12 +4,12 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260819-v43-management-truth">
+  <meta name="version" content="20260819-v44-mobile-safe">
   <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Core Team Tracker · Daniel Sa Team</title>
+<title>Core Team Tracker · Daniel Sa Team · Mobile Safe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -5783,35 +5783,10 @@ function lpscRenderTeamTotals(){
 
 
 var rmPollInterval=null,rmCoverageLastLoaded=0;
-function rmStartPolling(){
-  if(rmPollInterval)clearInterval(rmPollInterval);
-  rmCoverageLastLoaded=0; // reset so coverage loads immediately on tab open
-  rmPollInterval=setInterval(function(){
-    var now=Date.now();
-    if(userTyping)return; // don't refresh while typing
-    // Coverage is expensive (3 fetches) — throttle to every 5 minutes
-    if(now-rmCoverageLastLoaded>=300000){
-      rmLoadAll();
-      rmCoverageLastLoaded=now;
-    } else {
-      // Fast refresh: goals, flagged, feed only
-      Promise.all([rmLoadGoals(),rmLoadFlagged(),rmLoadFeed()]);
-    }
-  },30000);
-}
-function rmStopPolling(){
-  if(rmPollInterval){clearInterval(rmPollInterval);rmPollInterval=null;}
-}
 
-function openRmView(btn){
-  currentUser=null;
-  document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
-  if(btn)btn.classList.add("active");
-  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  document.getElementById("view-rm").classList.add("active");
-  rmLoadAll();
-  rmStartPolling();
-}
+
+
+
 
 const LPSC_METRICS_MAP={
   Isaak:[
@@ -6011,19 +5986,9 @@ function rmWeekRange(){
   return{start:localDateStr(mon),end:localDateStr(sun)};
 }
 
-function rmSwitchPeriod(period,btn){
-  document.querySelectorAll("#view-rm .lpsc-period-btn-light").forEach(function(b){b.classList.remove("active");});
-  if(btn)btn.classList.add("active");
-  rmCurrentPeriod=period;
-  rmRenderGoals();
-  rmRenderFeed();
-}
 
-async function rmLoadAll(){
-  await Promise.all([rmLoadGoals(),rmLoadFlagged(),rmLoadCoverage(),rmLoadFeed()]);
-  var el=document.getElementById("rm-last-refreshed");
-  if(el)el.textContent="Updated "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
-}
+
+
 
 var rmFeedCache={today:[],week:[],mtd:[]};
 
@@ -6061,26 +6026,7 @@ function lpIsInternalRmActivity(a){
   return false;
 }
 
-function rmRenderFeed(){
-  // Rebuild snapshot if it's active
-  if(typeof buildSnapshot==="function"&&document.getElementById("view-snapshot")&&document.getElementById("view-snapshot").classList.contains("active"))buildSnapshot();
-  var el=document.getElementById("rm-feed-list");
-  if(!el)return;
-  var typeF=document.getElementById("rm-feed-type")?document.getElementById("rm-feed-type").value:"";
-  var data=(rmFeedCache[rmCurrentPeriod]||[]).filter(function(a){return !lpIsInternalRmActivity(a);});
-  var filt=typeF?data.filter(function(a){return a.act_type===typeF;}):data;
-  if(!filt.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">No activity found.</div>';return;}
-  var showCount=Math.min(filt.length,80);
-  var capNote=filt.length>80?'<div style="text-align:center;font-size:11px;color:#aaa;padding:8px 0;border-top:1px solid #f0f2f8">Showing '+showCount+' of '+filt.length+' entries</div>':"";
-  el.innerHTML=filt.slice(0,80).map(function(a){
-    var h='<div style="padding:9px 0;border-bottom:1px solid #f0f2f8">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:13px">'+escHtml(displayName(a.agent_name||"—"))+'</span><span style="font-size:11px;color:#999">'+fmt(a.act_date)+'</span></div>';
-    h+='<div style="font-size:12px;color:#555;margin-top:2px">'+escHtml(a.act_type||"")+(a.outcome?' &middot; '+escHtml(a.outcome):'')+'</div>';
-    if(a.notes)h+='<div style="font-size:11px;color:#888;margin-top:3px;font-style:italic">"'+escHtml(String(a.notes).substring(0,80))+'"</div>';
-    h+='</div>';
-    return h;
-  }).join("")+capNote;
-}
+
 
 async function rmLoadGoals(){
   var body=document.getElementById("rm-goals-body");
@@ -6101,46 +6047,7 @@ async function rmLoadGoals(){
 
 var rmActsCache=null;
 
-function rmRenderGoals(){
-  var body=document.getElementById("rm-goals-body");
-  if(!rmActsCache){body.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Loading...</div>';return;}
-  var acts=rmActsCache.acts,todayStr=rmActsCache.todayStr,week=rmActsCache.week;
-  var period=rmCurrentPeriod;
-  var html="";
 
-  if(period==="today"){
-    var todaysActs=acts.filter(function(a){return a.act_date===todayStr;});
-    RM_GOALS.forEach(function(g){
-      var count=g.type==="Talk-to's"?amCntTalkTo(todaysActs):todaysActs.filter(function(a){return a.act_type===g.type;}).length;
-      var dailyTarget=Math.ceil(g.weekly/5);
-      var hit=count>=dailyTarget;
-      html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f8">'
-        +'<span style="font-size:16px;color:'+(hit?"#1a6e35":"#bbb")+'">'+(hit?"&#10003;":"&#9711;")+'</span>'
-        +'<span style="font-size:13px;flex:1'+(hit?"":";color:#888")+'">'+g.label+'</span>'
-        +'<span style="font-size:12px;color:#888">'+count+' of '+dailyTarget+' today</span></div>';
-    });
-  }else if(period==="week"){
-    var weekActs=acts.filter(function(a){return a.act_date>=week.start&&a.act_date<=week.end;});
-    RM_GOALS.forEach(function(g){
-      var count=g.type==="Talk-to's"?amCntTalkTo(weekActs):weekActs.filter(function(a){return a.act_type===g.type;}).length;
-      var pct=Math.min(count/g.weekly,1);
-      var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
-      html+='<div style="margin-bottom:12px">'
-        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px">'+g.label+'</span><span style="font-size:13px;font-weight:600">'+count+' / '+g.weekly+'</span></div>'
-        +'<div style="height:5px;background:#eee;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+'"></div></div></div>';
-    });
-  }else{
-    RM_GOALS.forEach(function(g){
-      var count=g.type==="Talk-to's"?amCntTalkTo(acts):acts.filter(function(a){return a.act_type===g.type;}).length;
-      var pct=Math.min(count/g.monthly,1);
-      var color=pct>=1?"#1a6e35":pct>=0.6?"#92600a":"#9ca3af";
-      html+='<div style="margin-bottom:12px">'
-        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px">'+g.label+'</span><span style="font-size:13px;font-weight:600">'+count+' / '+g.monthly+'</span></div>'
-        +'<div style="height:5px;background:#eee;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+'"></div></div></div>';
-    });
-  }
-  body.innerHTML=html;
-}
 
 function openRmFollowupForm(btn){
   var agentName=btn.getAttribute("data-agent");
@@ -8429,17 +8336,7 @@ window.ctResolveFlag=function(id){
   sbFetch("PATCH","lp_flags?id=eq."+id,{resolved:true,resolved_at:new Date().toISOString()}).then(function(){ ctShowToast("Marked handled"); ctLoadLpFlags(); }).catch(function(){});
 };
 
-function ctInjectRmPanels(){
-  var host=document.getElementById("view-rm");
-  if(!host || document.getElementById("ct-gesture-panel")) return;
-  var g=document.createElement("div"); g.id="ct-gesture-panel";
-  var f=document.createElement("div"); f.id="ct-lpflags-panel";
-  var feedLabel=host.querySelector('div[style*="Activity feed"]') || host.lastElementChild;
-  host.insertBefore(f, feedLabel);
-  host.insertBefore(g, feedLabel);
-  ctLoadGestureOpportunities();
-  ctLoadLpFlags();
-}
+
 if(typeof window.openRmView==="function"){
   var origOpenRmView=window.openRmView;
   window.openRmView=function(btn){
@@ -9787,5 +9684,39 @@ async function v33SaveSharedFaceTime(){var id=document.getElementById('v33FtId')
 async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId').value;if(!id)return;try{await sbFetch('PATCH','face_time_events?id=eq.'+encodeURIComponent(id),{status:'cancelled',updated_at:new Date().toISOString()});v33CloseSharedFaceTime();showToast('Booking cancelled.','success');await loadFaceTime();}catch(e){showToast('Could not cancel booking.','error');}}
 </script>
 <!-- v43 MANAGEMENT TRUTH + PLATFORM CLOSINGS + OWNERSHIP SORT + TRAINING · 2026-08-19 -->
+
+<style id="mobile-safe-fallback-style">
+@media(max-width:760px){
+  .app{padding-left:.75rem!important;padding-right:.75rem!important}
+  .who-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .who-btn{flex:0 0 auto}
+  .ft-summary{grid-template-columns:repeat(2,1fr)!important}
+  .d-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  table{font-size:11px}
+}
+#mobile-safe-fallback{display:none;margin:12px 0;padding:12px 14px;border:1px solid #E6D9C9;background:#FFF9F2;border-radius:10px;color:#5C4A35;font-size:12px;line-height:1.45}
+#mobile-safe-fallback.show{display:block}
+</style>
+<div id="mobile-safe-fallback">This tracker is loading its live data. If this message stays visible, open the hosted GitHub Pages version in Safari instead of the iPhone file preview, then refresh.</div>
+<script id="mobile-safe-fallback-script">
+(function(){
+  function visibleContent(){
+    var v=document.querySelector('.view.active');
+    if(!v)return false;
+    var txt=(v.innerText||'').replace(/\s+/g,' ').trim();
+    return txt.length>80;
+  }
+  function check(){
+    var el=document.getElementById('mobile-safe-fallback');
+    if(!el)return;
+    if(visibleContent()){el.classList.remove('show');return;}
+    el.classList.add('show');
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(check,1800);setTimeout(check,5000);});
+  else{setTimeout(check,1800);setTimeout(check,5000);}
+  window.addEventListener('error',function(){setTimeout(check,50);});
+  window.addEventListener('unhandledrejection',function(){setTimeout(check,50);});
+})();
+</script>
 </body>
 </html>
