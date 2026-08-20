@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260820-v45-connection-stable">
+  <meta name="version" content="20260820-v45-rm-notes-highlighted">
   <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -736,7 +736,11 @@ table tbody tr:hover{background:#F6FBFC!important}
 .contact-modal-box{border-color:#DCE7EC!important;box-shadow:0 24px 70px rgba(7,27,55,.24)!important}
 .cm-header{border-bottom-color:#E7EFF3!important}
 /* RM/shared-context surfaces: replace the old purple accent with NFM cyan/navy. */
-#lp-facetime-focus,#lp-rm-responses,#lp-rm-relationship-notes{border-color:#D7E8EF!important;border-left-color:#00A8D4!important}
+#lp-facetime-focus,#lp-rm-responses{border-color:#D7E8EF!important;border-left-color:#00A8D4!important}
+#lp-rm-relationship-notes.lp-rm-note-panel summary::-webkit-details-marker{display:none}
+#lp-rm-relationship-notes.lp-rm-note-panel summary{outline:none}
+#lp-rm-relationship-notes.lp-rm-note-panel[style*="78D2E8"]{animation:rmNotePulse .9s ease-out 1}
+@keyframes rmNotePulse{0%{box-shadow:0 0 0 0 rgba(0,168,212,.30)}100%{box-shadow:0 0 0 12px rgba(0,168,212,0)}}
 #lp-rm-responses [style*="#071B37"],#lp-rm-relationship-notes [style*="#071B37"]{color:#071B37!important}
 #ownership-selected-count{color:#071B37!important}
 .rm-owner-tag{color:#071B37!important;background:#EAF7FB!important;border-color:#CDEAF2!important}
@@ -1187,13 +1191,18 @@ table tbody tr:hover{background:#F6FBFC!important}
         <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#526575">Loading...</div>
       </details>
     </div>
-    <div id="lp-rm-relationship-notes" style="background:#fff;border:1px solid #D7E0EA;border-left:4px solid #00C0F0;border-radius:9px;padding:12px 14px;margin-bottom:12px">
-      <details>
+    <div id="lp-rm-relationship-notes" class="lp-rm-note-panel" style="background:#F3FBFD;border:1px solid #9EDDEC;border-left:5px solid #00A8D4;border-radius:10px;padding:13px 14px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,168,212,.08)">
+      <details id="lp-rm-relationship-notes-details">
         <summary style="cursor:pointer;list-style:none">
-          <div style="font-size:12.5px;font-weight:800;color:#071B37">Recent RM Relationship Notes</div>
-          <div style="font-size:11.5px;color:#526575;margin-top:2px">Shared RM context for your agents. Click to expand.</div>
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><span style="font-size:12.5px;font-weight:900;color:#071B37">RM UPDATES</span><span id="lp-rm-note-badge" style="display:none;font-size:9.5px;font-weight:900;letter-spacing:.04em;color:#07566D;background:#DDF7FC;border:1px solid #9EDDEC;border-radius:999px;padding:2px 7px">NEW</span></div>
+              <div id="lp-rm-note-summary" style="font-size:11.5px;color:#3E6070;margin-top:3px;font-weight:600">Amanda/Nyny notes for your relationships — review before outreach.</div>
+            </div>
+            <span style="font-size:10.5px;font-weight:800;color:#007FA4;white-space:nowrap">View notes ▾</span>
+          </div>
         </summary>
-        <div id="lp-rm-relationship-notes-list" style="margin-top:8px;font-size:12px;color:#526575">Loading...</div>
+        <div id="lp-rm-relationship-notes-list" style="margin-top:10px;font-size:12px;color:#526575">Loading...</div>
       </details>
     </div>
     <div class="search-panel">
@@ -7088,7 +7097,9 @@ window.ctLoadRecentRmResponses=ctLoadRecentRmResponses;
 
 async function ctLoadRecentRmRelationshipNotes(lp){
   var host=document.getElementById("lp-rm-relationship-notes-list");if(!host)return;
+  var panel=document.getElementById("lp-rm-relationship-notes"),details=document.getElementById("lp-rm-relationship-notes-details"),badge=document.getElementById("lp-rm-note-badge"),summary=document.getElementById("lp-rm-note-summary");
   host.innerHTML='<div style="padding:5px 0;color:#6B7E8A">Loading RM notes...</div>';
+  if(badge)badge.style.display="none";
   try{
     var safeLp=encodeURIComponent(lp||""),cut=new Date();cut.setDate(cut.getDate()-45);var cutStr=localDateStr(cut);
     var results=await Promise.all([
@@ -7102,11 +7113,28 @@ async function ctLoadRecentRmRelationshipNotes(lp){
       if(typeof lpIsInternalRmActivity==="function"&&lpIsInternalRmActivity(a))return false;
       return !ctIsDirectorLeadership(a.act_type);
     }).slice(0,15);
-    if(!rows.length){host.innerHTML='<div style="padding:6px 0;color:#6B7E8A">No recent RM notes for your assigned agents.</div>';return;}
-    host.innerHTML='<div style="max-height:300px;overflow-y:auto;padding-right:3px">'+rows.map(function(a,i){
-      var owner=ctRmOwnerFromNotes(a.notes),note=ctStripRmMeta(a.notes),date=a.act_date?fmt(a.act_date):"";
-      return'<div style="padding:9px 0;'+(i?'border-top:1px solid #E7EFF3;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="font-size:12.5px;font-weight:800;color:#071B37">'+escHtml(displayName(a.agent_name||"Agent"))+'</div><div style="font-size:10.5px;color:#6B7E8A">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div></div><div style="font-size:12px;color:#405565;line-height:1.5;margin-top:4px">'+escHtml(note)+'</div>'+(a.outcome?'<div style="font-size:10.5px;color:#6B7E8A;margin-top:3px">Outcome: '+escHtml(a.outcome)+(a.follow_up_date?' · Follow-up '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')+'</div>';
-    }).join("")+'</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">Showing recent relationship notes from the RM tracker for agents assigned to '+escHtml(lp)+'.</div>';
+    if(!rows.length){
+      if(panel){panel.style.background="#F8FBFC";panel.style.borderColor="#D7E8EF";panel.style.borderLeftColor="#9BC9D5";panel.style.boxShadow="none";}
+      if(summary)summary.textContent="No recent RM updates for your assigned relationships.";
+      if(details)details.open=false;
+      host.innerHTML='<div style="padding:6px 0;color:#6B7E8A">No recent RM notes for your assigned agents.</div>';
+      return;
+    }
+    var today=new Date();today.setHours(0,0,0,0);var recentCut=new Date(today);recentCut.setDate(recentCut.getDate()-7);
+    var freshCount=rows.filter(function(a){var d=a.act_date?new Date(String(a.act_date).slice(0,10)+"T12:00:00"):null;return d&&d>=recentCut;}).length;
+    if(panel){panel.style.background=freshCount?"#F1FBFE":"#F7FBFC";panel.style.borderColor=freshCount?"#78D2E8":"#CFE4EA";panel.style.borderLeftColor=freshCount?"#00A8D4":"#73B6C7";panel.style.boxShadow=freshCount?"0 5px 18px rgba(0,168,212,.12)":"none";}
+    if(badge){badge.style.display=freshCount?"inline-flex":"none";badge.textContent=freshCount+(freshCount===1?" NEW NOTE":" NEW NOTES");}
+    if(summary)summary.textContent=freshCount?(freshCount+" fresh RM update"+(freshCount===1?"":"s")+" in the last 7 days — review before outreach."):(rows.length+" recent RM notes for your relationships.");
+    if(details)details.open=!!freshCount;
+    host.innerHTML='<div style="max-height:360px;overflow-y:auto;padding-right:3px">'+rows.map(function(a,i){
+      var owner=ctRmOwnerFromNotes(a.notes)||"RM",note=ctStripRmMeta(a.notes),date=a.act_date?fmt(a.act_date):"";
+      var rawDate=a.act_date?new Date(String(a.act_date).slice(0,10)+"T12:00:00"):null,isFresh=!!(rawDate&&rawDate>=recentCut);
+      return'<div style="margin:0 0 8px;padding:10px 11px;border:'+(isFresh?'1px solid #9EDDEC':'1px solid #DDE9ED')+';border-left:'+(isFresh?'4px solid #00A8D4':'3px solid #B7D5DD')+';border-radius:8px;background:'+(isFresh?'#FFFFFF':'#FBFDFE')+'">'
+        +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:13px;font-weight:900;color:#071B37">'+escHtml(displayName(a.agent_name||"Agent"))+'</div>'+(isFresh?'<span style="font-size:9px;font-weight:900;color:#07566D;background:#DDF7FC;border-radius:999px;padding:2px 6px">NEW</span>':'')+'</div><div style="font-size:10.5px;color:#58717D;font-weight:650">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div></div>'
+        +'<div style="font-size:12.5px;color:#233E4A;line-height:1.55;margin-top:6px;font-weight:'+(isFresh?'650':'500')+'">'+escHtml(note)+'</div>'
+        +(a.outcome?'<div style="font-size:10.5px;color:#607985;margin-top:5px"><strong>Outcome:</strong> '+escHtml(a.outcome)+(a.follow_up_date?' · <strong>Follow-up:</strong> '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')
+        +'</div>';
+    }).join("")+'</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">RM context from Amanda/Nyny for agents assigned to '+escHtml(lp)+'. Fresh notes automatically open so they are seen before outreach.</div>';
   }catch(e){console.error("RM relationship notes failed",e);host.innerHTML='<div style="padding:6px 0;color:#A32D2D">Could not load RM notes.</div>';}
 }
 window.ctLoadRecentRmRelationshipNotes=ctLoadRecentRmRelationshipNotes;
