@@ -1,4 +1,4 @@
-     
+    
 <!DOCTYPE html>
 <!-- LP Tracker v49 · reliable RM response clear state + hidden-row suppression · 2026-08-21 -->
 <html lang="en">
@@ -774,7 +774,7 @@ table tbody tr:hover{background:#F6FBFC!important}
 </style>
 </head>
 <body>
-<!-- LP v50: RM response clear-button event wiring fix · 2026-08-21 -->
+<!-- LP v51: cleared RM responses disappear from active response panel · 2026-08-21 -->
 <div id="lpBuildBadge" style="display:none"></div>
 <div class="app">
 <div class="app-header">
@@ -7131,16 +7131,16 @@ window.ctClearAllRmResponseAlerts=function(lp,e){
   if(e){try{e.preventDefault();e.stopPropagation();}catch(_){} }
   lp=lp||currentUser;
   var key=String(lp||"").toLowerCase();
-  var rows=((window._ctRmResponseRowsByLp||{})[key]||[]).filter(function(r){return !ctRmHiddenRow(r)&&!!String(r.rm_note||"").trim();});
-  var unread=rows.filter(function(r){return !ctRmResponseIsRead(lp,r);});
-  if(!rows.length){if(typeof ctShowToast==="function")ctShowToast("No RM responses to clear");return false;}
+  var rows=((window._ctRmResponseRowsByLp||{})[key]||[]).filter(function(r){return !ctRmHiddenRow(r)&&!!String(r.rm_note||"").trim()&&!ctRmResponseIsRead(lp,r);});
+  var unread=rows.slice();
+  if(!rows.length){if(typeof ctShowToast==="function")ctShowToast("No new RM responses to clear");return false;}
   ctRmMarkAllResponsesRead(lp,rows);
   // Immediate visual feedback before the network refresh finishes.
   var panel=document.getElementById("lp-rm-responses"),badge=document.getElementById("lp-rm-response-badge"),clearAll=document.getElementById("lp-rm-response-clear-all"),summary=document.getElementById("lp-rm-response-summary");
   if(panel){panel.style.background="#fff";panel.style.borderColor="#D7E0EA";panel.style.borderLeftColor="#071B37";panel.style.boxShadow="none";}
   if(badge)badge.style.display="none";
   if(clearAll)clearAll.style.display="none";
-  if(summary)summary.textContent=rows.length+" recent RM response"+(rows.length===1?"":"s")+" — alerts cleared.";
+  if(summary)summary.textContent="No new RM responses.";
   if(typeof ctShowToast==="function")ctShowToast((unread.length||rows.length)+" RM response alert"+((unread.length||rows.length)===1?"":"s")+" cleared ✓");
   Promise.resolve(ctLoadRecentRmResponses(lp)).finally(function(){if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();});
   return false;
@@ -7155,7 +7155,13 @@ window.ctClearOneRmResponseAlert=function(lp,fingerprint,e){
     return false;
   }
   ctRmMarkResponsesRead(lp,[row]);
-  if(typeof ctShowToast==="function")ctShowToast("RM response alert cleared ✓");
+
+  // Clear means remove it from the active inbox, not merely remove the NEW badge.
+  try{
+    var encoded=encodeURIComponent(fingerprint),item=document.querySelector('.lp-rm-response-item[data-rm-response-fp="'+encoded+'"]');
+    if(item)item.remove();
+  }catch(_){ }
+  if(typeof ctShowToast==="function")ctShowToast("RM response cleared ✓");
   Promise.resolve(ctLoadRecentRmResponses(lp)).finally(function(){if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();});
   return false;
 };
@@ -7194,19 +7200,26 @@ async function ctLoadRecentRmResponses(lp){
     var rows=direct.concat(legacy).filter(function(r){return !ctRmHiddenRow(r)&&!!String(r.rm_note||"").trim();});
     rows.sort(function(a,b){var ad=a.rm_note_at||a.handled_at||a.created_at||"",bd=b.rm_note_at||b.handled_at||b.created_at||"";return String(bd).localeCompare(String(ad));});
     rows=rows.slice(0,15);
-    window._ctRmResponseRowsByLp[String(lp||"").toLowerCase()]=rows;
 
-    if(!rows.length){
+    // Keep the full fetched set in memory so Clear can match the clicked response,
+    // but the visible panel is an ACTION INBOX: once the LP clears a response,
+    // that response disappears from this panel. The underlying database record is untouched.
+    window._ctRmResponseRowsByLp[String(lp||"").toLowerCase()]=rows;
+    var visibleRows=rows.filter(function(r){return !ctRmResponseIsRead(lp,r);});
+
+    if(!visibleRows.length){
       if(panel){panel.style.background="#fff";panel.style.borderColor="#D7E0EA";panel.style.borderLeftColor="#071B37";panel.style.boxShadow="none";}
-      if(summary)summary.textContent="No RM responses yet. New replies from Amanda/Nyny will alert you here.";
+      if(badge)badge.style.display="none";
+      if(clearAll)clearAll.style.display="none";
+      if(summary)summary.textContent="No new RM responses.";
       if(openLabel)openLabel.textContent="View responses ▾";
       if(details)details.open=false;
-      host.innerHTML='<div style="padding:6px 0;color:#6B7E8A">No RM responses yet. When Amanda or Nyny replies to one of your flags, it will stay here for reference.</div>';
+      host.innerHTML='<div style="padding:6px 0;color:#6B7E8A">You’re caught up. New replies from Amanda/Nyny will appear here.</div>';
       return [];
     }
 
-    var actualReplies=rows.filter(function(r){return !!String(r.rm_note||"").trim();});
-    var unread=actualReplies.filter(function(r){return !ctRmResponseIsRead(lp,r);});
+    var actualReplies=visibleRows;
+    var unread=visibleRows;
     if(panel){
       panel.style.background=unread.length?"#FFF6F6":"#fff";
       panel.style.borderColor=unread.length?"#DE8888":"#D7E0EA";
@@ -7221,13 +7234,13 @@ async function ctLoadRecentRmResponses(lp){
     if(openLabel)openLabel.textContent=unread.length?"Open response"+(unread.length===1?"":"s")+" ▾":"View responses ▾";
 
     var html='<div style="max-height:320px;overflow-y:auto;padding-right:3px">';
-    rows.forEach(function(r,i){
+    visibleRows.forEach(function(r,i){
       var agent=r.agent_name?displayName(r.agent_name):"General flag",when=r.rm_note_at?fmt(String(r.rm_note_at).slice(0,10)):"",by=r.rm_note_by||"RM";
       var flagText=String(r.flag_note||"").trim(),response=String(r.rm_note||"").trim(),missingResponse=r.handled&&!response;
-      var isUnread=!!response&&!ctRmResponseIsRead(lp,r),fp=ctRmResponseFingerprint(lp,r);
+      var isUnread=!!response,fp=ctRmResponseFingerprint(lp,r);
       var status=missingResponse?"Handled · no response saved":(r.handled?"Handled":"Reply sent · still open");
       var statusColor=missingResponse?"#6B5E3E":(r.handled?"#15803d":"#B7791F"),statusBg=missingResponse?"#F8F3E7":(r.handled?"#ECFDF3":"#FFF8E8");
-      html+='<div class="lp-rm-response-item" style="padding:10px '+(isUnread?'10px':'0')+';'+(i&&!isUnread?'border-top:1px solid #E7EFF3;':'')+(isUnread?'margin:6px 0;border:1px solid #DE8888;border-left:4px solid #C83D3D;border-radius:8px;background:#FFF9F9;':'')+'">'
+      html+='<div class="lp-rm-response-item" data-rm-response-fp="'+encodeURIComponent(fp)+'" style="padding:10px '+(isUnread?'10px':'0')+';'+(i&&!isUnread?'border-top:1px solid #E7EFF3;':'')+(isUnread?'margin:6px 0;border:1px solid #DE8888;border-left:4px solid #C83D3D;border-radius:8px;background:#FFF9F9;':'')+'">'
         +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">'
           +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:13px;font-weight:800;color:#071B37">'+escHtml(agent)+'</div>'
           +(isUnread?'<span class="lp-rm-response-new" style="font-size:8.8px;font-weight:900;color:#A12727;background:#FFF1F1;border:1px solid #E3A0A0;border-radius:999px;padding:2px 6px">NEW</span>':'')+'</div>'
@@ -7240,7 +7253,7 @@ async function ctLoadRecentRmResponses(lp){
           :'<div style="margin-top:6px;background:#F3F8F3;border:1px solid #CFE5D2;border-radius:7px;padding:8px 10px"><div style="font-size:10.5px;font-weight:800;color:#071B37;margin-bottom:3px">RM response'+(by?' · '+escHtml(by):'')+(when?' · '+escHtml(when):'')+'</div><div style="font-size:12.5px;color:#243124;line-height:1.5">'+escHtml(response)+'</div></div>')
       +'</div>';
     });
-    html+='</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">RM response alerts stay red until you explicitly clear them. Opening this section does not clear anything.</div>';
+    html+='</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">New RM responses stay red until you explicitly clear them. Cleared responses leave this action inbox; the original RM record is preserved.</div>';
     host.innerHTML=html;
     if(details)details.dataset.lp=lp||"";
 
