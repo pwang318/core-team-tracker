@@ -1181,7 +1181,7 @@ table tbody tr:hover{background:#F6FBFC!important}
     <div id="bday-banner" class="bday-banner" style="display:none">&#127874; <span id="bday-banner-txt"></span></div>
     <div id="lp-facetime-focus" style="display:none;background:#fff;border:1px solid #D7E0EA;border-left:4px solid #00C0F0;border-radius:9px;padding:11px 13px;margin-bottom:12px"></div>
     <div id="lp-rm-flags-for-you" style="display:none;background:#fff;border:1px solid #E7C66B;border-left:4px solid #B8842B;border-radius:9px;padding:12px 14px;margin-bottom:12px">
-      <div style="font-size:12.5px;font-weight:800;color:#6F4E00">RM Flags for You</div>
+      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><div style="font-size:12.5px;font-weight:800;color:#6F4E00">RM Flags for You</div><span id="lp-rm-flag-badge" style="display:none;font-size:9px;font-weight:900;color:#A12727;background:#FFF1F1;border:1px solid #E3A0A0;border-radius:999px;padding:2px 7px">ACTION NEEDED</span></div>
       <div style="font-size:11.5px;color:#6C6252;margin-top:2px">Items Amanda or Nyny sent to you for follow-up. Reply here, then mark handled when complete.</div>
       <div id="lp-rm-flags-for-you-list" style="margin-top:8px;font-size:12px;color:#526575"></div>
     </div>
@@ -1194,13 +1194,13 @@ table tbody tr:hover{background:#F6FBFC!important}
         <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#526575">Loading...</div>
       </details>
     </div>
-    <div id="lp-rm-relationship-notes" class="lp-rm-note-panel" style="background:#F3FBFD;border:1px solid #9EDDEC;border-left:5px solid #00A8D4;border-radius:10px;padding:13px 14px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,168,212,.08)">
+    <div id="lp-rm-relationship-notes" class="lp-rm-note-panel" style="background:#fff;border:1px solid #D7E4E9;border-left:4px solid #9BBBC5;border-radius:10px;padding:12px 14px;margin-bottom:12px;box-shadow:none">
       <details id="lp-rm-relationship-notes-details">
         <summary style="cursor:pointer;list-style:none">
           <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">
             <div>
-              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><span style="font-size:12.5px;font-weight:900;color:#071B37">RM UPDATES</span><span id="lp-rm-note-badge" style="display:none;font-size:9.5px;font-weight:900;letter-spacing:.04em;color:#07566D;background:#DDF7FC;border:1px solid #9EDDEC;border-radius:999px;padding:2px 7px">NEW</span></div>
-              <div id="lp-rm-note-summary" style="font-size:11.5px;color:#3E6070;margin-top:3px;font-weight:600">Amanda/Nyny notes for your relationships — review before outreach.</div>
+              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><span style="font-size:12.5px;font-weight:900;color:#071B37">RM UPDATES</span><span id="lp-rm-note-badge" style="display:none;font-size:9.5px;font-weight:900;letter-spacing:.04em;color:#A12727;background:#FFF1F1;border:1px solid #E6A7A7;border-radius:999px;padding:2px 7px">NEW</span></div>
+              <div id="lp-rm-note-summary" style="font-size:11.5px;color:#526575;margin-top:3px;font-weight:500">Recent Amanda/Nyny context for your relationships.</div>
             </div>
             <span style="font-size:10.5px;font-weight:800;color:#007FA4;white-space:nowrap">View notes ▾</span>
           </div>
@@ -7147,7 +7147,7 @@ async function ctLoadRecentRmRelationshipNotes(lp){
     var safeLp=encodeURIComponent(lp||""),cut=new Date();cut.setDate(cut.getDate()-45);var cutStr=localDateStr(cut);
     var results=await Promise.all([
       sbFetch("GET","agent_assignments?lp=eq."+safeLp+"&select=agent_name&limit=1000").catch(function(){return[];}),
-      sbFetch("GET","amanda_activities?act_date=gte."+cutStr+"&select=agent_name,act_type,act_date,notes,outcome,follow_up_date&order=act_date.desc&limit=1500").catch(function(){return[];})
+      sbFetch("GET","amanda_activities?act_date=gte."+cutStr+"&select=id,agent_name,act_type,act_date,notes,outcome,follow_up_date,created_at&order=act_date.desc,created_at.desc&limit=1500").catch(function(){return[];})
     ]);
     var assigned={};(results[0]||[]).forEach(function(r){assigned[String(r.agent_name||"").trim().toUpperCase()]=true;});
     var rows=(results[1]||[]).filter(function(a){
@@ -7156,30 +7156,58 @@ async function ctLoadRecentRmRelationshipNotes(lp){
       if(typeof lpIsInternalRmActivity==="function"&&lpIsInternalRmActivity(a))return false;
       return !ctIsDirectorLeadership(a.act_type);
     }).slice(0,15);
+
     if(!rows.length){
-      if(panel){panel.style.background="#F8FBFC";panel.style.borderColor="#D7E8EF";panel.style.borderLeftColor="#9BC9D5";panel.style.boxShadow="none";}
+      if(panel){panel.style.background="#fff";panel.style.borderColor="#D7E4E9";panel.style.borderLeftColor="#9BBBC5";panel.style.boxShadow="none";}
       if(summary)summary.textContent="No recent RM updates for your assigned relationships.";
       if(details)details.open=false;
       host.innerHTML='<div style="padding:6px 0;color:#6B7E8A">No recent RM notes for your assigned agents.</div>';
       return;
     }
-    var today=new Date();today.setHours(0,0,0,0);var recentCut=new Date(today);recentCut.setDate(recentCut.getDate()-7);
-    var freshCount=rows.filter(function(a){var d=a.act_date?new Date(String(a.act_date).slice(0,10)+"T12:00:00"):null;return d&&d>=recentCut;}).length;
-    if(panel){panel.style.background=freshCount?"#F1FBFE":"#F7FBFC";panel.style.borderColor=freshCount?"#78D2E8":"#CFE4EA";panel.style.borderLeftColor=freshCount?"#00A8D4":"#73B6C7";panel.style.boxShadow=freshCount?"0 5px 18px rgba(0,168,212,.12)":"none";}
-    if(badge){badge.style.display=freshCount?"inline-flex":"none";badge.textContent=freshCount+(freshCount===1?" NEW NOTE":" NEW NOTES");}
-    if(summary)summary.textContent=freshCount?(freshCount+" fresh RM update"+(freshCount===1?"":"s")+" in the last 7 days — review before outreach."):(rows.length+" recent RM notes for your relationships.");
-    if(details)details.open=!!freshCount;
-    host.innerHTML='<div style="max-height:360px;overflow-y:auto;padding-right:3px">'+rows.map(function(a,i){
-      var owner=ctRmOwnerFromNotes(a.notes)||"RM",note=ctStripRmMeta(a.notes),date=a.act_date?fmt(a.act_date):"";
-      var rawDate=a.act_date?new Date(String(a.act_date).slice(0,10)+"T12:00:00"):null,isFresh=!!(rawDate&&rawDate>=recentCut);
-      return'<div class="lp-rm-note-item '+(isFresh?'lp-rm-note-fresh':'lp-rm-note-old')+'" style="margin:0 0 9px;padding:11px 12px;border:'+(isFresh?'1px solid #E2BE43':'1px solid #DDE9ED')+';border-left:'+(isFresh?'5px solid #D99A00':'3px solid #B7D5DD')+';border-radius:9px;background:'+(isFresh?'#FFF9D9':'#FBFDFE')+';box-shadow:'+(isFresh?'0 4px 12px rgba(217,154,0,.10)':'none')+'">'
-        +(isFresh?'<div style="display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:950;letter-spacing:.055em;color:#6F4B00;background:#FFE88A;border:1px solid #E2BE43;border-radius:5px;padding:3px 7px;margin-bottom:7px;text-transform:uppercase">RM NOTE · READ BEFORE OUTREACH</div>':'')
-        +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:13.5px;font-weight:950;color:#071B37">'+escHtml(displayName(a.agent_name||"Agent"))+'</div>'+(isFresh?'<span style="font-size:9px;font-weight:950;color:#6F4B00;background:#FFF1A8;border:1px solid #E2BE43;border-radius:999px;padding:2px 7px">NEW RM NOTE</span>':'')+'</div><div style="font-size:10.5px;color:#58717D;font-weight:650">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div></div>'
-        +'<div style="font-size:'+(isFresh?'13px':'12.5px')+';color:#233E4A;line-height:1.58;margin-top:7px;font-weight:'+(isFresh?'750':'500')+';background:'+(isFresh?'#FFF3A8':'transparent')+';padding:'+(isFresh?'8px 9px':'0')+';border-radius:'+(isFresh?'6px':'0')+'">'+escHtml(note)+'</div>'
-        +(a.outcome?'<div style="font-size:10.5px;color:#607985;margin-top:6px"><strong>Outcome:</strong> '+escHtml(a.outcome)+(a.follow_up_date?' · <strong>Follow-up:</strong> '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')
+
+    var unread=rows.filter(function(a){return !ctRmIsRead(lp,a)});
+    if(panel){
+      panel.style.background="#fff";
+      panel.style.borderColor=unread.length?"#E4B7B7":"#D7E4E9";
+      panel.style.borderLeftColor=unread.length?"#C83D3D":"#9BBBC5";
+      panel.style.boxShadow="none";
+    }
+    if(badge){
+      badge.style.display=unread.length?"inline-flex":"none";
+      badge.textContent=unread.length+(unread.length===1?" NEW":" NEW");
+    }
+    if(summary)summary.textContent=unread.length
+      ?unread.length+" new RM update"+(unread.length===1?"":"s")+" to read before outreach."
+      :rows.length+" recent RM update"+(rows.length===1?"":"s")+" — no new alerts.";
+    // Do not auto-open. Alert first, user chooses when to read.
+    if(details)details.open=false;
+
+    host.innerHTML='<div style="max-height:360px;overflow-y:auto;padding-right:3px">'+rows.map(function(a){
+      var owner=ctRmOwnerFromNotes(a.notes)||"RM",date=a.act_date?fmt(a.act_date):"",isUnread=!ctRmIsRead(lp,a);
+      return'<div class="lp-rm-note-item" style="margin:0 0 7px;padding:9px 10px;border:1px solid '+(isUnread?'#E4B7B7':'#DFE8EC')+';border-left:'+(isUnread?'4px solid #C83D3D':'3px solid #B7CCD4')+';border-radius:8px;background:#fff">'
+        +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">'
+          +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:13px;font-weight:850;color:#071B37">'+escHtml(displayName(a.agent_name||"Agent"))+'</div>'
+          +(isUnread?'<span style="font-size:8.8px;font-weight:900;color:#A12727;background:#FFF1F1;border:1px solid #E3A0A0;border-radius:999px;padding:2px 6px">NEW</span>':'')+'</div>'
+          +'<div style="font-size:10.3px;color:#687E88;font-weight:600">'+escHtml(owner)+' · '+escHtml(a.act_type||"RM touch")+(date?' · '+escHtml(date):'')+'</div>'
+        +'</div>'
+        +'<div style="margin-top:6px">'+ctRmPrettyNote(a.notes,a.act_type)+'</div>'
+        +(a.outcome?'<div style="font-size:10.3px;color:#687E88;margin-top:5px"><strong>Outcome:</strong> '+escHtml(a.outcome)+(a.follow_up_date?' · <strong>Follow-up:</strong> '+escHtml(fmt(a.follow_up_date)):'')+'</div>':'')
         +'</div>';
-    }).join("")+'</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">RM context from Amanda/Nyny for agents assigned to '+escHtml(lp)+'. Fresh notes automatically open so they are seen before outreach.</div>';
-  }catch(e){console.error("RM relationship notes failed",e);host.innerHTML='<div style="padding:6px 0;color:#A32D2D">Could not load RM notes.</div>';}
+    }).join("")+'</div>'
+    +'<div style="font-size:10.3px;color:#748791;margin-top:7px">RM context from Amanda/Nyny for agents assigned to '+escHtml(lp)+'. Internal tracker metadata is hidden here.</div>';
+
+    // Opening the notes counts as read for alert purposes. Keep the current visual state until next reload,
+    // so the LP can still see which ones were new while reading them.
+    if(details&&!details.dataset.rmReadBound){
+      details.dataset.rmReadBound="1";
+      details.addEventListener("toggle",function(){
+        if(details.open)ctRmMarkDisplayedRead(lp,rows.filter(function(a){return !ctRmIsRead(lp,a)}));
+      });
+    }
+  }catch(e){
+    console.error("RM relationship notes failed",e);
+    host.innerHTML='<div style="padding:6px 0;color:#A32D2D">Could not load RM notes.</div>';
+  }
 }
 window.ctLoadRecentRmRelationshipNotes=ctLoadRecentRmRelationshipNotes;
 
@@ -7191,12 +7219,17 @@ async function ctLoadRmFlagsForLp(lp){
     if(!rows.length){panel.style.display="none";host.innerHTML="";return;}
     panel.style.display="block";
     var open=rows.filter(function(r){return r.resolved!==true;}),handled=rows.filter(function(r){return r.resolved===true;}).slice(0,6);
+    var flagBadge=document.getElementById("lp-rm-flag-badge");
+    if(flagBadge){flagBadge.style.display=open.length?"inline-flex":"none";flagBadge.textContent=open.length+" ACTION"+(open.length===1?"":"S")+" NEEDED";}
+    panel.style.background=open.length?"#FFFDFD":"#fff";
+    panel.style.borderColor=open.length?"#E4B7B7":"#D7E0EA";
+    panel.style.borderLeftColor=open.length?"#C83D3D":"#071B37";
     var html="";
     if(open.length){
-      html+='<div style="font-size:10.5px;font-weight:800;color:#8A5A00;text-transform:uppercase;letter-spacing:.04em;margin:4px 0">Needs your attention · '+open.length+'</div>';
+      html+='<div style="font-size:10.5px;font-weight:850;color:#A12727;text-transform:uppercase;letter-spacing:.04em;margin:4px 0 6px">Action needed · '+open.length+'</div>';
       html+=open.map(function(r,i){
         var rid=String(r.id),reply=String(r.lp_note||""),date=String(r.created_at||"").slice(0,10);
-        return'<div style="padding:9px 0;'+(i?'border-top:1px solid #F0E4C2;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong style="font-size:12.5px;color:#352D1D">'+escHtml(displayName(r.agent_name||"General"))+'</strong><div style="font-size:10.5px;color:#7B6E52;margin-top:2px">From '+escHtml(r.created_by||"RM")+(date?' · '+escHtml(fmt(date)):'')+'</div></div><span style="font-size:10px;font-weight:800;color:#8A5A00;background:#FFF3C7;border-radius:999px;padding:3px 7px">OPEN</span></div><div style="font-size:12px;color:#514A3A;line-height:1.5;margin-top:5px"><strong>RM note:</strong> '+escHtml(r.note||"")+'</div><textarea id="rm-lp-reply-'+rid+'" rows="2" placeholder="Reply back to RM..." style="width:100%;box-sizing:border-box;margin-top:7px;border:1px solid #DDCFA8;border-radius:7px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical">'+escHtml(reply)+'</textarea><div style="display:flex;gap:7px;justify-content:flex-end;margin-top:6px"><button type="button" onclick="ctReplyToRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:1px solid #D7B85E;background:#FFF8E8;color:#745000;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Send reply</button><button type="button" onclick="ctHandleRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:0;background:#071B37;color:#fff;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Mark handled</button></div></div>';
+        return'<div style="padding:9px 0;'+(i?'border-top:1px solid #F0E4C2;':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong style="font-size:12.5px;color:#352D1D">'+escHtml(displayName(r.agent_name||"General"))+'</strong><div style="font-size:10.5px;color:#7B6E52;margin-top:2px">From '+escHtml(r.created_by||"RM")+(date?' · '+escHtml(fmt(date)):'')+'</div></div><span style="font-size:9.5px;font-weight:850;color:#A12727;background:#FFF1F1;border:1px solid #E3A0A0;border-radius:999px;padding:3px 7px">OPEN</span></div><div style="font-size:12px;color:#514A3A;line-height:1.5;margin-top:5px"><strong>RM note:</strong> '+escHtml(r.note||"")+'</div><textarea id="rm-lp-reply-'+rid+'" rows="2" placeholder="Reply back to RM..." style="width:100%;box-sizing:border-box;margin-top:7px;border:1px solid #DDCFA8;border-radius:7px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical">'+escHtml(reply)+'</textarea><div style="display:flex;gap:7px;justify-content:flex-end;margin-top:6px"><button type="button" onclick="ctReplyToRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:1px solid #D7B85E;background:#FFF8E8;color:#745000;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Send reply</button><button type="button" onclick="ctHandleRmFlag('+JSON.stringify(rid)+','+JSON.stringify(lp)+')" style="border:0;background:#071B37;color:#fff;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer">Mark handled</button></div></div>';
       }).join("");
     }else html+='<div style="font-size:11.5px;color:#6C6252;padding:4px 0">No open RM flags for you right now.</div>';
     if(handled.length){
@@ -9620,10 +9653,62 @@ function ctRmOwnerFromNotes(notes){
 function ctStripRmMeta(notes){
   try{
     var n=String(notes||""),start="\u2063\u2063\u2063",end="\u2064\u2064\u2064";
-    var a=n.lastIndexOf(start);if(a<0)return n.trim();
-    var b=n.indexOf(end,a+start.length);if(b<0)return n.trim();
-    return (n.slice(0,a)+n.slice(b+end.length)).trim();
-  }catch(e){return String(notes||"").trim();}
+    var a=n.lastIndexOf(start);
+    if(a>=0){
+      var b=n.indexOf(end,a+start.length);
+      if(b>=0)n=(n.slice(0,a)+n.slice(b+end.length));
+    }
+    // Hide internal transaction metadata from LP-facing notes.
+    n=n.replace(/\s*\[TXN_(?:ROLE|ID|TEXT_SENT):[^\]]*\]/gi,"");
+    n=n.replace(/\s*\[(?:RM_OWNER|RM_ATTENDEES|LP_ATTENDEES|NEXT_STEP_OWNER):[^\]]*\]/gi,"");
+    return n.replace(/\s{2,}/g," ").trim();
+  }catch(e){return String(notes||"").replace(/\s*\[TXN_[^\]]*\]/gi,"").trim();}
+}
+
+function ctRmNoteFingerprint(lp,a){
+  var basis=[
+    lp||"",a&&a.id||"",a&&a.agent_name||"",a&&a.act_type||"",
+    a&&a.act_date||"",ctStripRmMeta(a&&a.notes||"")
+  ].join("|");
+  var h=0;for(var i=0;i<basis.length;i++)h=((h<<5)-h+basis.charCodeAt(i))|0;
+  return "rmnote:"+String(lp||"").toLowerCase()+":"+Math.abs(h);
+}
+function ctRmReadMap(lp){
+  try{return JSON.parse(localStorage.getItem("lp_rm_notes_read_"+String(lp||"").toLowerCase())||"{}")}catch(e){return{}}
+}
+function ctRmIsRead(lp,a){var m=ctRmReadMap(lp);return !!m[ctRmNoteFingerprint(lp,a)]}
+function ctRmMarkDisplayedRead(lp,rows){
+  try{
+    var m=ctRmReadMap(lp),now=new Date().toISOString();
+    (rows||[]).forEach(function(a){m[ctRmNoteFingerprint(lp,a)]=now});
+    var keys=Object.keys(m);if(keys.length>250){keys.sort(function(a,b){return String(m[b]).localeCompare(String(m[a]))});var keep={};keys.slice(0,200).forEach(function(k){keep[k]=m[k]});m=keep}
+    localStorage.setItem("lp_rm_notes_read_"+String(lp||"").toLowerCase(),JSON.stringify(m));
+  }catch(e){}
+}
+function ctRmPrettyNote(note,type){
+  var clean=ctStripRmMeta(note);
+  if(!clean)return "";
+  if(String(type||"")==="CTC Call"||/^\s*☎️?\s*CTC\s*\|/i.test(clean)){
+    clean=clean.replace(/^\s*☎️?\s*CTC\s*\|\s*/i,"");
+    var bits=clean.split("|").map(function(x){return x.trim()}).filter(Boolean);
+    var role="",client="",property="",contact="",feedback="",other=[];
+    bits.forEach(function(x){
+      if(/^(Buyer|Listing|Seller)\s+agent$/i.test(x))role=x;
+      else if(/^Client:/i.test(x))client=x.replace(/^Client:\s*/i,"");
+      else if(/^Property:/i.test(x))property=x.replace(/^Property:\s*/i,"");
+      else if(/^Contact:/i.test(x))contact=x.replace(/^Contact:\s*/i,"");
+      else if(/^Feedback:/i.test(x))feedback=x.replace(/^Feedback:\s*/i,"");
+      else other.push(x);
+    });
+    var html="";
+    if(client||property)html+='<div style="font-size:11.5px;color:#445B67;margin-bottom:5px">'+(client?'<strong>Client:</strong> '+escHtml(client):'')+(client&&property?' &nbsp;·&nbsp; ':'')+(property?'<strong>Property:</strong> '+escHtml(property):'')+'</div>';
+    if(role)html+='<div style="font-size:10px;font-weight:850;color:#607985;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">'+escHtml(role)+'</div>';
+    if(contact)html+='<div style="font-size:12px;color:#243E4A;line-height:1.45"><strong>Contact:</strong> '+escHtml(contact)+'</div>';
+    if(feedback)html+='<div style="font-size:12px;color:#243E4A;line-height:1.5;margin-top:3px"><strong>Feedback:</strong> '+escHtml(feedback)+'</div>';
+    if(other.length)html+='<div style="font-size:11px;color:#607985;line-height:1.45;margin-top:3px">'+escHtml(other.join(" · "))+'</div>';
+    return html||escHtml(clean);
+  }
+  return '<div style="font-size:12px;color:#243E4A;line-height:1.5">'+escHtml(clean)+'</div>';
 }
 
 function ctIsExistingRmMeeting(type){
