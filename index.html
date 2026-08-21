@@ -1,11 +1,11 @@
      
 <!DOCTYPE html>
-<!-- LP Tracker v52 · authoritative snapshot hydration + hard-clearing RM response inbox · 2026-08-21 -->
+<!-- LP Tracker v53 · clickable Portfolio agent drilldowns + Daniel source-of-truth preserved · 2026-08-21 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260821-v52-snapshot-authoritative-rm-clear">
+  <meta name="version" content="20260821-v53-portfolio-agent-actions">
   <meta name="build-notes" content="Daniel-aligned Tier Growth: Channel 10+, A 4-9, B 2-3, C 1 close or 1 lead; month-end targets and 50-point net tier-count score; individual migrations remain diagnostic.">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -3427,6 +3427,7 @@ function openLpContactModal(name){
   document.getElementById("lpContactModal").classList.add("open");
 }
 
+window.openLpContactModal=openLpContactModal;
 function closeLpContactModal(){document.getElementById("lpContactModal").classList.remove("open");editingLpContact=null;}
 function openScriptsModal(){
   document.getElementById("scriptsModal").classList.add("open");
@@ -10512,7 +10513,7 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
       rows.sort((a,b)=>(b.risk-a.risk)||((b.freshest||0)-(a.freshest||0)));
       host.innerHTML='<div class="lp-health-grid"><div class="lp-health-stat"><span>Needs attention</span><b>'+red+'</b><div style="font-size:11px;color:#667085">Risk / seriously stale</div></div><div class="lp-health-stat"><span>Watch</span><b>'+yellow+'</b><div style="font-size:11px;color:#667085">Approaching cadence risk</div></div><div class="lp-health-stat"><span>Recent lead signal</span><b>'+recentBiz+'</b><div style="font-size:11px;color:#667085">Lead within 45 days suppresses generic stale-risk</div></div></div>'
         +'<div style="font-size:12px;font-weight:800;color:#071B37;margin:12px 0 8px">Relationships needing attention</div>'
-        +(rows.length?rows.slice(0,30).map(x=>'<div class="lp-health-row"><div><div style="font-size:13px;font-weight:800;color:#071B37">'+e(displayName(x.p.agent_name))+' <span class="badge badge-'+String(x.tier).toLowerCase()+'">'+e(x.tier)+'</span></div><div class="meta">'+(x.p.competitor_risk_flag?'Competitor risk flagged · ':'')+(x.freshest!=null?x.freshest+'d since freshest relationship signal':'No reliable recent signal')+(x.dl!=null?' · '+x.dl+'d since lead':'')+'</div></div><button class="btn btn-sm" onclick="openLpContactModal('+JSON.stringify(String(x.p.agent_name))+')">Open agent</button></div>').join(''):'<div class="no-data">No relationship-health priorities right now.</div>');
+        +(rows.length?rows.slice(0,30).map(x=>'<div class="lp-health-row"><div><div style="font-size:13px;font-weight:800;color:#071B37">'+e(displayName(x.p.agent_name))+' <span class="badge badge-'+String(x.tier).toLowerCase()+'">'+e(x.tier)+'</span></div><div class="meta">'+(x.p.competitor_risk_flag?'Competitor risk flagged · ':'')+(x.freshest!=null?x.freshest+'d since freshest relationship signal':'No reliable recent signal')+(x.dl!=null?' · '+x.dl+'d since lead':'')+'</div></div><button type="button" class="btn btn-sm" data-lp-open-agent="'+encodeURIComponent(String(x.p.agent_name))+'">Open agent</button></div>').join(''):'<div class="no-data">No relationship-health priorities right now.</div>');
     }catch(err){
       host.innerHTML='<div class="no-data">Health could not load. Click Refresh to try again.</div>';
       console.warn('LP health load',err);
@@ -10582,7 +10583,7 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
     }).slice(0,50);
     host.innerHTML=rows.length?rows.map(a=>{
       const name=a[0],tier=a[1]||'C',lp=a[2]||'Unassigned',rm=getRmOwner(name)||'Unassigned';
-      return '<div class="global-agent-row"><div><div class="name">'+e(displayName(name))+' <span class="badge badge-'+String(tier).toLowerCase()+'">'+e(tier)+'</span></div><div class="meta">RM: '+e(rm)+' · LP: '+e(lp)+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm" onclick="openLpContactModal('+JSON.stringify(String(name))+')">Contact + ownership</button></div></div>';
+      return '<div class="global-agent-row"><div><div class="name">'+e(displayName(name))+' <span class="badge badge-'+String(tier).toLowerCase()+'">'+e(tier)+'</span></div><div class="meta">RM: '+e(rm)+' · LP: '+e(lp)+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn btn-sm" data-lp-open-agent="'+encodeURIComponent(String(name))+'">Contact + ownership</button></div></div>';
     }).join(''):'<div class="no-data">No agents match that search.</div>';
   };
 
@@ -10598,6 +10599,21 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
       return oldSwitch.apply(this,arguments);
     };
   }
+
+  // v53: stable Portfolio/Agent Search agent drilldown. These rows are rendered asynchronously,
+  // so use delegated clicks instead of injecting agent names into inline onclick attributes.
+  document.addEventListener('click',function(ev){
+    const btn=ev.target&&ev.target.closest?ev.target.closest('[data-lp-open-agent]'):null;
+    if(!btn)return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    let name='';
+    try{name=decodeURIComponent(btn.getAttribute('data-lp-open-agent')||'')}catch(_){name=btn.getAttribute('data-lp-open-agent')||''}
+    if(!name)return;
+    if(typeof window.openLpContactModal==='function')window.openLpContactModal(name);
+    else if(typeof openLpContactModal==='function')openLpContactModal(name);
+    else console.error('LP agent drilldown unavailable',name);
+  });
 
   // Label cleanup for presentation.
   document.addEventListener('DOMContentLoaded',()=>{
@@ -10621,6 +10637,6 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
 })();
 </script>
 
-<script>console.log("LP Tracker Build v52 · authoritative Snapshot + persistent RM response inbox clear");</script>
+<script>console.log("LP Tracker Build v53 · Portfolio agent drilldowns + Daniel source-of-truth preserved");</script>
 </body>
 </html>
