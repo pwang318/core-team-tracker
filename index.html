@@ -1,11 +1,11 @@
-     
+    
 <!DOCTYPE html>
-<!-- LP Tracker v48 · persistent RM response alerts + hidden sentinel cleanup · 2026-08-21 -->
+<!-- LP Tracker v49 · reliable RM response clear state + hidden-row suppression · 2026-08-21 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260821-v46-daniel-tier-growth-aligned">
+  <meta name="version" content="20260821-v49-rm-response-alert-clear-fix">
   <meta name="build-notes" content="Daniel-aligned Tier Growth: Channel 10+, A 4-9, B 2-3, C 1 close or 1 lead; month-end targets and 50-point net tier-count score; individual migrations remain diagnostic.">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -1212,7 +1212,7 @@ table tbody tr:hover{background:#F6FBFC!important}
               <div id="lp-rm-response-summary" style="font-size:11.5px;color:#526575;margin-top:3px;font-weight:500">Replies from Amanda/Nyny to your flags. New replies will alert you here.</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-              <button id="lp-rm-response-clear-all" type="button" onclick="event.preventDefault();event.stopPropagation();ctClearAllRmResponseAlerts(currentUser)">Clear alert</button>
+              <button id="lp-rm-response-clear-all" type="button" onclick="return ctClearAllRmResponseAlerts(currentUser,event)">Clear alert</button>
               <span id="lp-rm-response-open-label" style="font-size:10.5px;font-weight:800;color:#007FA4;white-space:nowrap">View responses ▾</span>
             </div>
           </div>
@@ -7058,26 +7058,56 @@ function renderFtPriority(){
    visibly NEW until that LP opens the response panel. The read marker is kept
    per LP in this browser; a different device will still surface the reply so
    an important RM message is not silently suppressed elsewhere. */
+function ctRmResponseTime(r){
+  var raw=String(r&&r.rm_note_at||r&&r.handled_at||r&&r.created_at||"");
+  var t=Date.parse(raw);
+  if(!isNaN(t))return t;
+  // Date-only fallback remains sortable and stable.
+  t=Date.parse(raw.slice(0,10)+"T12:00:00");
+  return isNaN(t)?0:t;
+}
 function ctRmResponseFingerprint(lp,r){
-  var basis=[lp||"",r&&r.source||"",r&&r.id||"",r&&r.agent_name||"",r&&r.rm_note_at||"",r&&r.rm_note||""].join("|");
+  // Stable across re-renders and direct/legacy normalization. Do NOT include display name or note text.
+  var basis=[String(lp||"").toLowerCase(),String(r&&r.id||""),String(r&&r.rm_note_at||r&&r.created_at||"")].join("|");
   var h=0;for(var i=0;i<basis.length;i++)h=((h<<5)-h+basis.charCodeAt(i))|0;
   return "rmresponse:"+String(lp||"").toLowerCase()+":"+Math.abs(h);
 }
 function ctRmResponseReadMap(lp){
-  try{return JSON.parse(localStorage.getItem("lp_rm_responses_cleared_v48_"+String(lp||"").toLowerCase())||"{}")}catch(e){return{}}
+  try{return JSON.parse(localStorage.getItem("lp_rm_responses_cleared_v49_"+String(lp||"").toLowerCase())||"{}")}catch(e){return{}}
 }
-function ctRmResponseIsRead(lp,r){var m=ctRmResponseReadMap(lp);return !!m[ctRmResponseFingerprint(lp,r)]}
+function ctRmResponseClearThrough(lp){
+  try{return Number(localStorage.getItem("lp_rm_responses_clear_through_v49_"+String(lp||"").toLowerCase())||0)||0}catch(e){return 0}
+}
+function ctRmResponseIsRead(lp,r){
+  var cutoff=ctRmResponseClearThrough(lp),t=ctRmResponseTime(r);
+  if(cutoff&&t&&t<=cutoff)return true;
+  var m=ctRmResponseReadMap(lp);return !!m[ctRmResponseFingerprint(lp,r)];
+}
 function ctRmMarkResponsesRead(lp,rows){
   try{
     var m=ctRmResponseReadMap(lp),now=new Date().toISOString();
     (rows||[]).forEach(function(r){if(String(r&&r.rm_note||"").trim())m[ctRmResponseFingerprint(lp,r)]=now});
     var keys=Object.keys(m);if(keys.length>200){keys.sort(function(a,b){return String(m[b]).localeCompare(String(m[a]))});var keep={};keys.slice(0,150).forEach(function(k){keep[k]=m[k]});m=keep}
-    localStorage.setItem("lp_rm_responses_cleared_v48_"+String(lp||"").toLowerCase(),JSON.stringify(m));
-  }catch(e){}
+    localStorage.setItem("lp_rm_responses_cleared_v49_"+String(lp||"").toLowerCase(),JSON.stringify(m));
+  }catch(e){console.warn("Could not save RM response clear state",e)}
+}
+function ctRmMarkAllResponsesRead(lp,rows){
+  // Clear-through is intentionally based on the newest response timestamp. Anything newer later is NEW.
+  try{
+    var maxT=0;(rows||[]).forEach(function(r){if(String(r&&r.rm_note||"").trim())maxT=Math.max(maxT,ctRmResponseTime(r))});
+    if(maxT)localStorage.setItem("lp_rm_responses_clear_through_v49_"+String(lp||"").toLowerCase(),String(maxT));
+    ctRmMarkResponsesRead(lp,rows);
+  }catch(e){console.warn("Could not clear RM response alerts",e)}
 }
 function ctRmHiddenSentinel(name){
   var s=String(name||"").trim().toLowerCase().replace(/\s+/g," ");
-  return s==="__hidden__"||s==="hidden"||/^_+hidden_+$/.test(s);
+  return s==="__hidden__"||s==="hidden"||/^_+hidden_+$/.test(s)||s.indexOf("__hidden__")>=0;
+}
+function ctRmHiddenRow(r){
+  if(!r)return true;
+  var raw=String(r.agent_name||"");
+  var shown="";try{shown=String(displayName(raw)||"")}catch(e){}
+  return ctRmHiddenSentinel(raw)||ctRmHiddenSentinel(shown);
 }
 window._ctRmResponseRowsByLp=window._ctRmResponseRowsByLp||{};
 window.ctOpenRmResponses=async function(lp){
@@ -7096,24 +7126,33 @@ window.ctOpenRmResponses=async function(lp){
     if(panel)panel.scrollIntoView({behavior:"smooth",block:"center"});
   },80);
 };
-window.ctClearAllRmResponseAlerts=function(lp){
+window.ctClearAllRmResponseAlerts=function(lp,e){
+  if(e){try{e.preventDefault();e.stopPropagation();}catch(_){} }
   lp=lp||currentUser;
-  var rows=(window._ctRmResponseRowsByLp||{})[String(lp||"").toLowerCase()]||[];
-  var unread=rows.filter(function(r){return String(r.rm_note||"").trim()&&!ctRmResponseIsRead(lp,r);});
-  if(!unread.length){if(typeof ctShowToast==="function")ctShowToast("No new RM responses to clear");return;}
-  ctRmMarkResponsesRead(lp,unread);
-  if(typeof ctShowToast==="function")ctShowToast(unread.length+" RM response alert"+(unread.length===1?"":"s")+" cleared ✓");
-  ctLoadRecentRmResponses(lp);
-  if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
+  var key=String(lp||"").toLowerCase();
+  var rows=((window._ctRmResponseRowsByLp||{})[key]||[]).filter(function(r){return !ctRmHiddenRow(r)&&!!String(r.rm_note||"").trim();});
+  var unread=rows.filter(function(r){return !ctRmResponseIsRead(lp,r);});
+  if(!rows.length){if(typeof ctShowToast==="function")ctShowToast("No RM responses to clear");return false;}
+  ctRmMarkAllResponsesRead(lp,rows);
+  // Immediate visual feedback before the network refresh finishes.
+  var panel=document.getElementById("lp-rm-responses"),badge=document.getElementById("lp-rm-response-badge"),clearAll=document.getElementById("lp-rm-response-clear-all"),summary=document.getElementById("lp-rm-response-summary");
+  if(panel){panel.style.background="#fff";panel.style.borderColor="#D7E0EA";panel.style.borderLeftColor="#071B37";panel.style.boxShadow="none";}
+  if(badge)badge.style.display="none";
+  if(clearAll)clearAll.style.display="none";
+  if(summary)summary.textContent=rows.length+" recent RM response"+(rows.length===1?"":"s")+" — alerts cleared.";
+  if(typeof ctShowToast==="function")ctShowToast((unread.length||rows.length)+" RM response alert"+((unread.length||rows.length)===1?"":"s")+" cleared ✓");
+  Promise.resolve(ctLoadRecentRmResponses(lp)).finally(function(){if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();});
+  return false;
 };
-window.ctClearOneRmResponseAlert=function(lp,fingerprint){
+window.ctClearOneRmResponseAlert=function(lp,fingerprint,e){
+  if(e){try{e.preventDefault();e.stopPropagation();}catch(_){} }
   lp=lp||currentUser;
   var rows=(window._ctRmResponseRowsByLp||{})[String(lp||"").toLowerCase()]||[];
-  var row=rows.find(function(r){return ctRmResponseFingerprint(lp,r)===fingerprint;});
-  if(!row)return;
+  var row=rows.find(function(r){return !ctRmHiddenRow(r)&&ctRmResponseFingerprint(lp,r)===fingerprint;});
+  if(!row)return false;
   ctRmMarkResponsesRead(lp,[row]);
-  ctLoadRecentRmResponses(lp);
-  if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
+  Promise.resolve(ctLoadRecentRmResponses(lp)).finally(function(){if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();});
+  return false;
 };
 
 async function ctLoadRecentRmResponses(lp){
@@ -7132,7 +7171,7 @@ async function ctLoadRecentRmResponses(lp){
     ]);
     var directMap={};
     function addDirect(r){
-      if(!r||r.id===undefined||r.id===null||ctRmHiddenSentinel(r.agent_name))return;
+      if(!r||r.id===undefined||r.id===null||ctRmHiddenRow(r))return;
       var k=String(r.id),existing=directMap[k]||{};
       directMap[k]={
         source:"direct",id:r.id,agent_name:r.agent_name||existing.agent_name||"",flag_note:r.note||existing.flag_note||"",
@@ -7144,10 +7183,10 @@ async function ctLoadRecentRmResponses(lp){
     (Array.isArray(results[0])?results[0]:[]).forEach(addDirect);
     (Array.isArray(results[1])?results[1]:[]).forEach(addDirect);
     var direct=Object.keys(directMap).map(function(k){return directMap[k];});
-    var legacy=(Array.isArray(results[2])?results[2]:[]).filter(function(r){return !ctRmHiddenSentinel(r.agent_name);}).map(function(r){
+    var legacy=(Array.isArray(results[2])?results[2]:[]).filter(function(r){return !ctRmHiddenRow(r);}).map(function(r){
       return{source:"call",id:r.id,agent_name:r.agent_name||"",flag_note:r.note||"",rm_note:r.rm_note||"",rm_note_at:r.rm_note_at||r.call_date||"",rm_note_by:"RM",handled:r.flag_rm!==true,handled_at:null,created_at:r.call_date||"",outcome:r.outcome||""};
     });
-    var rows=direct.concat(legacy).filter(function(r){return !ctRmHiddenSentinel(r.agent_name)&&(String(r.rm_note||"").trim()||r.handled===true);});
+    var rows=direct.concat(legacy).filter(function(r){return !ctRmHiddenRow(r)&&!!String(r.rm_note||"").trim();});
     rows.sort(function(a,b){var ad=a.rm_note_at||a.handled_at||a.created_at||"",bd=b.rm_note_at||b.handled_at||b.created_at||"";return String(bd).localeCompare(String(ad));});
     rows=rows.slice(0,15);
     window._ctRmResponseRowsByLp[String(lp||"").toLowerCase()]=rows;
@@ -7188,7 +7227,7 @@ async function ctLoadRecentRmResponses(lp){
           +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:13px;font-weight:800;color:#071B37">'+escHtml(agent)+'</div>'
           +(isUnread?'<span class="lp-rm-response-new" style="font-size:8.8px;font-weight:900;color:#A12727;background:#FFF1F1;border:1px solid #E3A0A0;border-radius:999px;padding:2px 6px">NEW</span>':'')+'</div>'
           +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:10.5px;font-weight:800;color:'+statusColor+';background:'+statusBg+';border-radius:999px;padding:3px 8px">'+status+'</div>'
-          +(isUnread?'<button type="button" class="lp-rm-response-clear-one" onclick="ctClearOneRmResponseAlert('+JSON.stringify(lp||'')+','+JSON.stringify(fp)+')">Clear</button>':'')+'</div>'
+          +(isUnread?'<button type="button" class="lp-rm-response-clear-one" onclick="return ctClearOneRmResponseAlert('+JSON.stringify(lp||'')+','+JSON.stringify(fp)+',event)">Clear</button>':'')+'</div>'
         +'</div>'
         +(flagText?'<div style="font-size:11.5px;color:#526575;margin-top:5px;line-height:1.45"><span style="font-weight:700">Your flag:</span> '+escHtml(flagText)+'</div>':'')
         +(missingResponse
@@ -8742,7 +8781,7 @@ function ctLoadNotifications(){
     var flags=results[0]||[],gestures=results[1]||[],rmFlags=results[2]||[];
     var responseRows=(results[3]||[]).map(function(r){return{source:"direct",id:r.id,agent_name:r.agent_name||"",rm_note:r.rm_note||"",rm_note_at:r.rm_note_at||r.created_at||"",rm_note_by:r.rm_note_by||"RM"};})
       .concat((results[4]||[]).map(function(r){return{source:"call",id:r.id,agent_name:r.agent_name||"",rm_note:r.rm_note||"",rm_note_at:r.rm_note_at||r.call_date||"",rm_note_by:"RM"};}));
-    var seen={};responseRows=responseRows.filter(function(r){var k=r.source+"|"+r.id+"|"+r.rm_note_at+"|"+r.rm_note;if(seen[k])return false;seen[k]=1;return !ctRmHiddenSentinel(r.agent_name)&&!!String(r.rm_note||"").trim();});
+    var seen={};responseRows=responseRows.filter(function(r){var k=r.source+"|"+r.id+"|"+r.rm_note_at+"|"+r.rm_note;if(seen[k])return false;seen[k]=1;return !ctRmHiddenRow(r)&&!!String(r.rm_note||"").trim();});
     responseRows.sort(function(a,b){return String(b.rm_note_at||"").localeCompare(String(a.rm_note_at||""));});
     var unreadResponses=isLp?responseRows.filter(function(r){return !ctRmResponseIsRead(currentUser,r)}).slice(0,5):[];
     var total=flags.length+gestures.length+rmFlags.length+unreadResponses.length;
@@ -9996,7 +10035,7 @@ async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId
   window.addEventListener('unhandledrejection',function(){setTimeout(check,50);});
 })();
 </script>
-<script>console.log("LP Tracker Build v47.0 · unread RM response alerts · bell integration");</script>
+<script>console.log("LP Tracker Build v49.0 · persistent RM response alerts · reliable clear state");</script>
 
 <script id="v45-facetime-tier-alignment">
 console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + current Power BI");
@@ -10487,6 +10526,6 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
 })();
 </script>
 
-<script>console.log("LP Tracker Build v47 · direct RM response alerts active");</script>
+<script>console.log("LP Tracker Build v49 · RM response clear + hidden suppression active");</script>
 </body>
 </html>
