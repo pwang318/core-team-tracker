@@ -759,7 +759,7 @@ table tbody tr:hover{background:#F6FBFC!important}
 </style>
 </head>
 <body>
-<div id="lpBuildBadge" style="position:fixed;right:10px;bottom:8px;z-index:9999;font-size:10px;padding:3px 6px;border-radius:6px;background:rgba(0,192,240,.12);color:#071B37;pointer-events:none">Build v43.0</div>
+<div id="lpBuildBadge" style="display:none"></div>
 <div class="app">
 <div class="app-header">
   <div class="brand">
@@ -796,13 +796,16 @@ table tbody tr:hover{background:#F6FBFC!important}
   <div class="v14-nav-label">TEAM ACCOUNTABILITY</div>
   <button class="who-btn wb-Snapshot" onclick="openSnapshotView(this)" title="Team accountability, pace and today’s priorities">Snapshot</button>
   <div class="v14-nav-label">RELATIONSHIPS</div>
-  <button class="who-btn wb-Portfolio" onclick="openPortfolioReviewView(this)" title="Partner health, portfolio trends and relationship coverage">Portfolio Review</button>
+  <button class="who-btn wb-Portfolio" onclick="openPortfolioReviewView(this)" title="Partner health, portfolio trends and relationship coverage">Portfolio</button>
+  <button class="who-btn wb-AgentSearch" onclick="openAgentSearchView(this)" title="Find any agent across the shared roster">Agent Search</button>
   <button class="who-btn wb-Ownership" onclick="openOwnershipView(this)" title="See and edit RM + LP ownership for every relationship">Ownership</button>
   <button class="who-btn wb-RM" onclick="openRmView(this)">Relationship Manager</button>
   <button class="who-btn wb-FaceTime" onclick="selectUser(this,'FaceTime')">Face Time</button>
   <button class="who-btn wb-Director" onclick="openDirectorView(this)">Co-Marketing</button>
   <div class="v14-nav-label">PIPELINE</div>
   <button class="who-btn wb-Leads" onclick="openLeadsView(this)" title="Realtor and builder lead activity">Realtor / Builder Leads</button>
+  <div class="v14-nav-label">REPORTS</div>
+  <button class="who-btn wb-Scorecards" onclick="openScorecardsView(this)" title="LP and RM performance scorecards">Scorecards</button>
   <div class="v14-nav-label">TOOLS / ADMIN</div>
   <button class="who-btn wb-Admin" onclick="selectUser(this,'Admin')">Admin</button>
 </div>
@@ -1680,18 +1683,58 @@ table tbody tr:hover{background:#F6FBFC!important}
   <div id="director-cards"></div>
 </div>
 
-<div id="view-portfolio" class="view" style="padding:18px 20px;max-width:1100px;margin:0 auto">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:10px">
-    <div style="font-size:16px;font-weight:700;color:var(--text)">Monthly Portfolio Review</div>
-    <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">&larr; Back</button>
+
+<div id="view-agent-search" class="view">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+    <div>
+      <div class="section-head" style="margin:0 0 4px">Agent Search</div>
+      <div style="font-size:12px;color:var(--text-3);line-height:1.5">Find any relationship quickly. Search is separate from Portfolio so it is always one click away.</div>
+    </div>
+    <button class="btn" type="button" onclick="refreshAgentSearchView()">&#8635; Refresh</button>
   </div>
-  <div style="font-size:11.5px;color:var(--text-3);margin-bottom:14px">Where the RM and Team Lead review the current managed portfolio, tier movement, monthly Agent-to-Lead ratio, and Partner Health together. Power BI population, RM Active Partner, and managed-roster counts are reconciled separately so unlike definitions are never mixed.</div>
-  <div style="display:flex;gap:6px;margin-bottom:16px">
-    <button class="lpsc-period-btn-light active" id="pfrBtnWeek" onclick="pfrSwitchPeriod('week',this)">This Week</button>
-    <button class="lpsc-period-btn-light" id="pfrBtnMonth" onclick="pfrSwitchPeriod('month',this)">This Month</button>
+  <div class="search-panel" style="margin-bottom:12px">
+    <div class="search-input-row" style="margin:0">
+      <input id="global-agent-search-input" type="text" placeholder="Search agent by name, RM owner, LP owner or tier..." oninput="renderGlobalAgentSearch()">
+    </div>
   </div>
-  <div id="pfr-body">
-    <div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">Loading...</div>
+  <div id="global-agent-search-results">
+    <div class="no-data">Type an agent name to search.</div>
+  </div>
+</div>
+
+<div id="view-portfolio" class="view" style="padding:18px 20px;max-width:1180px;margin:0 auto">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-size:20px;font-weight:800;color:var(--text)">Portfolio</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:3px">One relationship command center: performance, tier growth, health and ownership.</div>
+    </div>
+    <button class="btn btn-sm" onclick="lpPortfolioRefreshCurrent()">&#8635; Refresh</button>
+  </div>
+  <div class="lp-portfolio-tabs" id="lpPortfolioTabs">
+    <button class="active" onclick="lpPortfolioTab('overview',this)">Overview</button>
+    <button onclick="lpPortfolioTab('tier',this)">Tier Growth</button>
+    <button onclick="lpPortfolioTab('health',this)">Health</button>
+    <button onclick="lpPortfolioTab('ownership',this)">Ownership</button>
+  </div>
+
+  <div id="lp-portfolio-overview" class="lp-portfolio-panel active">
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <button class="lpsc-period-btn-light active" id="pfrBtnWeek" onclick="pfrSwitchPeriod('week',this)">This Week</button>
+      <button class="lpsc-period-btn-light" id="pfrBtnMonth" onclick="pfrSwitchPeriod('month',this)">This Month</button>
+    </div>
+    <div id="pfr-body"><div class="no-data">Loading Portfolio Overview...</div></div>
+  </div>
+
+  <div id="lp-portfolio-tier" class="lp-portfolio-panel">
+    <div id="lp-portfolio-tier-body"><div class="no-data">Open Tier Growth to load Daniel’s current score.</div></div>
+  </div>
+
+  <div id="lp-portfolio-health" class="lp-portfolio-panel">
+    <div id="lp-portfolio-health-body"><div class="no-data">Open Health to load relationship priorities.</div></div>
+  </div>
+
+  <div id="lp-portfolio-ownership" class="lp-portfolio-panel">
+    <div id="lp-portfolio-ownership-mount"></div>
   </div>
 </div>
 
@@ -10044,6 +10087,240 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
     try{renderTierMovementPanel();}catch(e){}
     try{dtgFixLabels();}catch(e){}
   },250);
+})();
+</script>
+
+
+<style id="lp-final-organization-css">
+#scorecardsTopBtn{display:none!important}
+.wb-Ownership{display:none!important}
+#leads-tab-growth,
+#view-leads .d-tab[onclick*="'growth'"]{display:none!important}
+
+.lp-portfolio-tabs{
+  display:flex;gap:4px;padding:5px;background:#EEF3F5;border:1px solid #DCE7EC;border-radius:12px;margin-bottom:16px;overflow-x:auto
+}
+.lp-portfolio-tabs button{
+  border:0;background:transparent;color:#526575;padding:8px 15px;border-radius:9px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap
+}
+.lp-portfolio-tabs button.active{background:#fff;color:#071B37;box-shadow:0 2px 7px rgba(35,51,73,.09)}
+.lp-portfolio-panel{display:none}.lp-portfolio-panel.active{display:block}
+.lp-daniel-tier-card{background:#fff;border:1px solid #DCE7EC;border-top:4px solid #3D4E68;border-radius:14px;padding:18px;margin-bottom:14px}
+.lp-tier-head{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.lp-tier-score{text-align:right}.lp-tier-score b{display:block;font-size:30px;line-height:1.05;color:#071B37}.lp-tier-score span{font-size:10.5px;font-weight:800;color:#5B6677;text-transform:uppercase}
+.lp-tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.lp-tier-one{background:#F7F9FA;border:1px solid #E0E6E9;border-radius:11px;padding:13px}
+.lp-tier-one .top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:800;color:#536071}
+.lp-tier-one .num{font-size:24px;font-weight:800;color:#071B37;margin-top:4px}
+.lp-tier-one .bar{height:6px;background:#E5EAED;border-radius:999px;overflow:hidden;margin-top:8px}
+.lp-tier-one .bar i{display:block;height:100%;background:#3D4E68}
+.lp-tier-one .gap{font-size:11px;font-weight:700;margin-top:8px;color:#7A5A15}
+.lp-tier-one .gap.done{color:#2F6B4F}
+.lp-exec-note{margin-top:12px;padding:10px 12px;background:#F2F6F7;border-radius:9px;font-size:11.5px;color:#405565;line-height:1.55}
+.lp-health-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:12px}
+.lp-health-stat{background:#fff;border:1px solid #DCE7EC;border-radius:12px;padding:14px}
+.lp-health-stat b{font-size:25px;color:#071B37}.lp-health-stat span{display:block;font-size:10.5px;font-weight:800;color:#657381;text-transform:uppercase}
+.lp-health-row{background:#fff;border:1px solid #E3E8EB;border-radius:10px;padding:11px 13px;margin-bottom:7px;display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:10px;align-items:center}
+.lp-health-row .meta{font-size:11px;color:#667085;margin-top:3px}
+#view-agent-search{max-width:1120px!important}
+.global-agent-row{background:#fff;border:1px solid #E2E7EA;border-radius:10px;padding:11px 13px;margin-bottom:7px;display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:10px;align-items:center}
+.global-agent-row .name{font-size:13px;font-weight:800;color:#071B37}.global-agent-row .meta{font-size:11.5px;color:#667085;margin-top:3px}
+#lp-portfolio-ownership #view-ownership{display:block!important}
+#lp-portfolio-ownership #view-ownership>div:first-child button[onclick*="refreshOwnershipView"]{display:none}
+@media(max-width:800px){
+  .lp-tier-grid{grid-template-columns:1fr}.lp-tier-score{text-align:left}
+  .lp-health-row,.global-agent-row{grid-template-columns:1fr}
+}
+</style>
+
+<script id="lp-final-organization-js">
+(function(){
+  const DTARGETS=[
+    {label:'9/30 Target',date:'2026-09-30',Channel:2,A:14,B:21},
+    {label:'10/31 Target',date:'2026-10-31',Channel:2,A:16,B:24},
+    {label:'11/30 Target',date:'2026-11-30',Channel:3,A:18,B:27},
+    {label:'12/31 Goal',date:'2026-12-31',Channel:4,A:20,B:30}
+  ];
+  const W={Channel:15,A:15,B:20};
+  let currentPortfolioTab='overview';
+
+  function milestone(){
+    const now=new Date();
+    for(const t of DTARGETS) if(now<=new Date(t.date+'T23:59:59')) return t;
+    return DTARGETS[DTARGETS.length-1];
+  }
+  function pt(a,t,w){return !t?0:Math.min(w,(Number(a||0)/Number(t))*w)}
+  function tierFrom(c,l){c=Number(c||0);l=Number(l||0);return c>=10?'Channel':c>=4?'A':c>=2?'B':(c>=1||l>=1)?'C':null}
+  function e(s){return typeof escHtml==='function'?escHtml(String(s==null?'':s)):String(s==null?'':s)}
+  function d(raw){if(!raw)return null;const x=new Date(raw);return isNaN(x)?null:x}
+  function days(raw){const x=d(raw);return x?Math.max(0,Math.floor((Date.now()-x.getTime())/86400000)):null}
+
+  async function pop(){
+    if(typeof window.lpDanielTierPopulation==='function') return await window.lpDanielTierPopulation();
+    const rows=await sbFetch("GET","agent_profiles?select=agent_name,tier,closes_past_year,total_leads_past_year,relationship_status,do_not_contact,powerbi_last_seen_at&limit=5000").catch(()=>[]);
+    let latest=null;rows.forEach(r=>{if(r.powerbi_last_seen_at&&(!latest||new Date(r.powerbi_last_seen_at)>new Date(latest)))latest=r.powerbi_last_seen_at});
+    const current=(latest?rows.filter(r=>r.powerbi_last_seen_at&&Math.abs(new Date(r.powerbi_last_seen_at)-new Date(latest))<120000):rows)
+      .filter(r=>String(r.relationship_status||'active').toLowerCase()!=='inactive'&&r.do_not_contact!==true)
+      .map(r=>Object.assign({},r,{tier:tierFrom(r.closes_past_year,r.total_leads_past_year)}));
+    const counts={Channel:0,A:0,B:0,C:0,None:0};current.forEach(r=>counts.hasOwnProperty(r.tier)?counts[r.tier]++:counts.None++);
+    return {rows:current,counts,latest};
+  }
+
+  function tierBox(k,a,t,w,p){
+    const pct=t?Math.min(100,Math.round(a/t*100)):0,g=Math.max(0,t-a);
+    return '<div class="lp-tier-one"><div class="top"><span>'+k+' · '+w+' pts</span><span>'+p.toFixed(1)+' / '+w+'</span></div><div class="num">'+a+' / '+t+'</div><div class="bar"><i style="width:'+pct+'%"></i></div><div class="gap '+(g===0?'done':'')+'">'+(g===0?'✓ Current milestone reached':'Need '+g+' more by current milestone')+'</div></div>';
+  }
+
+  async function loadTier(){
+    const host=document.getElementById('lp-portfolio-tier-body');if(!host)return;
+    host.innerHTML='<div class="no-data">Loading Daniel’s Tier Growth score...</div>';
+    try{
+      const p=await pop(),c=p.counts,t=milestone();
+      const pc=pt(c.Channel,t.Channel,15),pa=pt(c.A,t.A,15),pb=pt(c.B,t.B,20),score=pc+pa+pb;
+      const gap={Channel:Math.max(0,t.Channel-c.Channel),A:Math.max(0,t.A-c.A),B:Math.max(0,t.B-c.B)};
+      host.innerHTML='<div class="lp-daniel-tier-card"><div class="lp-tier-head"><div><div style="font-size:10px;font-weight:900;color:#536071;letter-spacing:.11em">DANIEL’S TIER GROWTH · 50% OF SCORECARD</div><div style="font-size:20px;font-weight:800;color:#071B37;margin-top:3px">Current milestone: '+t.label+'</div><div style="font-size:12px;color:#667085;margin-top:4px">Score uses the net number of Channel, A and B partners. Individual migrations explain the growth but do not create the score.</div></div><div class="lp-tier-score"><span>Tier Growth Score</span><b>'+score.toFixed(1)+' / 50</b></div></div>'
+        +'<div class="lp-tier-grid">'+tierBox('Channel',c.Channel,t.Channel,15,pc)+tierBox('A',c.A,t.A,15,pa)+tierBox('B',c.B,t.B,20,pb)+'</div>'
+        +'<div class="lp-exec-note"><b>Gap to current target:</b> '+gap.Channel+' Channel · '+gap.A+' A · '+gap.B+' B. C = 1 closing or 1 lead and remains the development pipeline until the net B/A/Channel counts increase.</div></div>'
+        +'<div class="lp-daniel-tier-card"><div style="font-size:13px;font-weight:800;color:#071B37;margin-bottom:8px">Daniel’s roadmap</div><div class="tbl-wrap" style="max-height:none"><table><thead><tr><th>Milestone</th><th>Channel</th><th>A</th><th>B</th></tr></thead><tbody><tr><td>Current baseline</td><td>1</td><td>12</td><td>18</td></tr>'+DTARGETS.map(x=>'<tr'+(x.label===t.label?' style="background:#EEF5F7;font-weight:800"':'')+'><td>'+x.label+(x.label===t.label?' ← CURRENT':'')+'</td><td>'+x.Channel+'</td><td>'+x.A+'</td><td>'+x.B+'</td></tr>').join('')+'</tbody></table></div></div>'
+        +'<div id="lp-tier-movement-panel"></div>';
+      // Reuse the aligned diagnostic movement renderer in the existing tracker.
+      const old=document.getElementById('d-tier-movement-section');
+      if(old){
+        const mount=document.getElementById('lp-tier-movement-panel');
+        mount.innerHTML='<div class="lp-daniel-tier-card"><div style="font-size:13px;font-weight:800;color:#071B37;margin-bottom:4px">How we’re creating the growth</div><div style="font-size:11.5px;color:#667085;margin-bottom:10px">C→B, B→A and A→Channel are diagnostic movement lanes.</div><div id="d-tier-movement-section"></div></div>';
+        old.remove();
+      }
+      if(typeof window.renderTierMovementPanel==='function') await window.renderTierMovementPanel();
+    }catch(err){
+      host.innerHTML='<div class="no-data">Tier Growth could not load. Click Refresh to try again.</div>';
+      console.warn('LP Tier Growth load',err);
+    }
+  }
+
+  async function loadHealth(){
+    const host=document.getElementById('lp-portfolio-health-body');if(!host)return;
+    host.innerHTML='<div class="no-data">Loading relationship health...</div>';
+    try{
+      const [profiles,acts]=await Promise.all([
+        sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,closes_past_year,total_leads_past_year,latest_lead_date,last_meaningful_contact_date,competitor_risk_flag,high_potential_flag,relationship_status,do_not_contact,next_growth_opportunity&limit=5000").catch(()=>[]),
+        sbFetch("GET","amanda_activities?select=agent_name,act_type,act_date,created_at&order=act_date.desc&limit=5000").catch(()=>[])
+      ]);
+      const recent={};
+      acts.forEach(a=>{
+        if(!a||!a.agent_name)return;
+        const k=assignmentKey(a.agent_name),x=d(a.act_date||a.created_at);
+        if(x&&(!recent[k]||x>recent[k]))recent[k]=x;
+      });
+      const rows=[];
+      let red=0,yellow=0,recentBiz=0;
+      profiles.filter(p=>String(p.relationship_status||'active').toLowerCase()!=='inactive'&&p.do_not_contact!==true).forEach(p=>{
+        const tier=tierFrom(p.closes_past_year,p.total_leads_past_year)||String(p.tier||p.powerbi_level||'C');
+        const dl=days(p.latest_lead_date),dc=days(p.last_meaningful_contact_date),da=recent[assignmentKey(p.agent_name)]?days(recent[assignmentKey(p.agent_name)]):null;
+        const freshest=[dl,dc,da].filter(v=>v!==null).sort((a,b)=>a-b)[0];
+        const recentLead=dl!==null&&dl<=45;if(recentLead)recentBiz++;
+        const explicit=!!p.competitor_risk_flag;
+        const risk=explicit||(!recentLead&&freshest!==undefined&&freshest!==null&&freshest>=90);
+        const watch=!risk&&!recentLead&&freshest!==undefined&&freshest!==null&&freshest>=60;
+        if(risk||watch){
+          if(risk)red++;else yellow++;
+          rows.push({p,tier,risk,watch,freshest,dl});
+        }
+      });
+      rows.sort((a,b)=>(b.risk-a.risk)||((b.freshest||0)-(a.freshest||0)));
+      host.innerHTML='<div class="lp-health-grid"><div class="lp-health-stat"><span>Needs attention</span><b>'+red+'</b><div style="font-size:11px;color:#667085">Risk / seriously stale</div></div><div class="lp-health-stat"><span>Watch</span><b>'+yellow+'</b><div style="font-size:11px;color:#667085">Approaching cadence risk</div></div><div class="lp-health-stat"><span>Recent lead signal</span><b>'+recentBiz+'</b><div style="font-size:11px;color:#667085">Lead within 45 days suppresses generic stale-risk</div></div></div>'
+        +'<div style="font-size:12px;font-weight:800;color:#071B37;margin:12px 0 8px">Relationships needing attention</div>'
+        +(rows.length?rows.slice(0,30).map(x=>'<div class="lp-health-row"><div><div style="font-size:13px;font-weight:800;color:#071B37">'+e(displayName(x.p.agent_name))+' <span class="badge badge-'+String(x.tier).toLowerCase()+'">'+e(x.tier)+'</span></div><div class="meta">'+(x.p.competitor_risk_flag?'Competitor risk flagged · ':'')+(x.freshest!=null?x.freshest+'d since freshest relationship signal':'No reliable recent signal')+(x.dl!=null?' · '+x.dl+'d since lead':'')+'</div></div><button class="btn btn-sm" onclick="openLpContactModal('+JSON.stringify(String(x.p.agent_name))+')">Open agent</button></div>').join(''):'<div class="no-data">No relationship-health priorities right now.</div>');
+    }catch(err){
+      host.innerHTML='<div class="no-data">Health could not load. Click Refresh to try again.</div>';
+      console.warn('LP health load',err);
+    }
+  }
+
+  function mountOwnership(){
+    const src=document.getElementById('view-ownership'),mount=document.getElementById('lp-portfolio-ownership-mount');
+    if(!src||!mount)return;
+    if(!mount.dataset.mounted){
+      while(src.firstChild) mount.appendChild(src.firstChild);
+      mount.dataset.mounted='1';
+      src.style.display='none';
+    }
+    try{refreshOwnershipView()}catch(e){try{renderOwnershipSummary();renderOwnershipRows()}catch(_){}}
+  }
+
+  window.lpPortfolioTab=function(name,btn){
+    currentPortfolioTab=name;
+    document.querySelectorAll('#lpPortfolioTabs button').forEach(b=>b.classList.remove('active'));
+    if(btn)btn.classList.add('active');
+    document.querySelectorAll('#view-portfolio .lp-portfolio-panel').forEach(p=>p.classList.remove('active'));
+    const panel=document.getElementById('lp-portfolio-'+name);if(panel)panel.classList.add('active');
+    if(name==='overview'){try{pfrLoad()}catch(e){}}
+    if(name==='tier')loadTier();
+    if(name==='health')loadHealth();
+    if(name==='ownership')mountOwnership();
+  };
+  window.lpPortfolioRefreshCurrent=function(){
+    if(currentPortfolioTab==='overview'){try{pfrLoad()}catch(e){}}
+    else if(currentPortfolioTab==='tier')loadTier();
+    else if(currentPortfolioTab==='health')loadHealth();
+    else if(currentPortfolioTab==='ownership')mountOwnership();
+  };
+
+  // Make Portfolio always open on Overview, then user can drill down.
+  const oldPortfolio=window.openPortfolioReviewView;
+  window.openPortfolioReviewView=function(btn){
+    if(typeof oldPortfolio==='function')oldPortfolio(btn);
+    setTimeout(()=>{
+      const first=document.querySelector('#lpPortfolioTabs button');
+      lpPortfolioTab('overview',first);
+    },0);
+  };
+
+  window.openAgentSearchView=function(btn){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('active'));
+    const v=document.getElementById('view-agent-search');if(v)v.classList.add('active');
+    if(btn)btn.classList.add('active');
+    renderGlobalAgentSearch();
+  };
+
+  window.refreshAgentSearchView=async function(){
+    try{if(typeof loadAgents==='function')await loadAgents()}catch(e){}
+    try{if(typeof loadAgentAssignments==='function')await loadAgentAssignments()}catch(e){}
+    renderGlobalAgentSearch();
+  };
+
+  window.renderGlobalAgentSearch=function(){
+    const host=document.getElementById('global-agent-search-results');if(!host)return;
+    const q=String((document.getElementById('global-agent-search-input')||{}).value||'').trim().toLowerCase();
+    if(!q){host.innerHTML='<div class="no-data">Type an agent name, owner or tier to search.</div>';return}
+    const rows=(agents||[]).filter(a=>{
+      const name=displayName(a[0]),tier=a[1]||'C',lp=a[2]||'Unassigned',rm=getRmOwner(a[0])||'Unassigned';
+      return (name+' '+tier+' '+lp+' '+rm).toLowerCase().includes(q);
+    }).slice(0,50);
+    host.innerHTML=rows.length?rows.map(a=>{
+      const name=a[0],tier=a[1]||'C',lp=a[2]||'Unassigned',rm=getRmOwner(name)||'Unassigned';
+      return '<div class="global-agent-row"><div><div class="name">'+e(displayName(name))+' <span class="badge badge-'+String(tier).toLowerCase()+'">'+e(tier)+'</span></div><div class="meta">RM: '+e(rm)+' · LP: '+e(lp)+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm" onclick="openLpContactModal('+JSON.stringify(String(name))+')">Contact + ownership</button></div></div>';
+    }).join(''):'<div class="no-data">No agents match that search.</div>';
+  };
+
+  // If old Growth tab was persisted/opened, redirect to Portfolio > Tier Growth.
+  const oldSwitch=window.switchLeadsTab;
+  if(typeof oldSwitch==='function'){
+    window.switchLeadsTab=function(tab,btn){
+      if(tab==='growth'){
+        openPortfolioReviewView(document.querySelector('.wb-Portfolio'));
+        setTimeout(()=>lpPortfolioTab('tier',document.querySelectorAll('#lpPortfolioTabs button')[1]),10);
+        return;
+      }
+      return oldSwitch.apply(this,arguments);
+    };
+  }
+
+  // Label cleanup for presentation.
+  document.addEventListener('DOMContentLoaded',()=>{
+    const pr=document.querySelector('.wb-Portfolio');if(pr)pr.textContent='Portfolio';
+    const own=document.querySelector('.wb-Ownership');if(own)own.style.display='none';
+  });
 })();
 </script>
 
