@@ -1,4 +1,4 @@
-    
+     
 <!DOCTYPE html>
 <!-- LP Tracker v49 · reliable RM response clear state + hidden-row suppression · 2026-08-21 -->
 <html lang="en">
@@ -774,6 +774,7 @@ table tbody tr:hover{background:#F6FBFC!important}
 </style>
 </head>
 <body>
+<!-- LP v50: RM response clear-button event wiring fix · 2026-08-21 -->
 <div id="lpBuildBadge" style="display:none"></div>
 <div class="app">
 <div class="app-header">
@@ -1212,7 +1213,7 @@ table tbody tr:hover{background:#F6FBFC!important}
               <div id="lp-rm-response-summary" style="font-size:11.5px;color:#526575;margin-top:3px;font-weight:500">Replies from Amanda/Nyny to your flags. New replies will alert you here.</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-              <button id="lp-rm-response-clear-all" type="button" onclick="return ctClearAllRmResponseAlerts(currentUser,event)">Clear alert</button>
+              <button id="lp-rm-response-clear-all" type="button">Clear alert</button>
               <span id="lp-rm-response-open-label" style="font-size:10.5px;font-weight:800;color:#007FA4;white-space:nowrap">View responses ▾</span>
             </div>
           </div>
@@ -7149,8 +7150,12 @@ window.ctClearOneRmResponseAlert=function(lp,fingerprint,e){
   lp=lp||currentUser;
   var rows=(window._ctRmResponseRowsByLp||{})[String(lp||"").toLowerCase()]||[];
   var row=rows.find(function(r){return !ctRmHiddenRow(r)&&ctRmResponseFingerprint(lp,r)===fingerprint;});
-  if(!row)return false;
+  if(!row){
+    if(typeof ctShowToast==="function")ctShowToast("Could not match that RM response — refresh and try again");
+    return false;
+  }
   ctRmMarkResponsesRead(lp,[row]);
+  if(typeof ctShowToast==="function")ctShowToast("RM response alert cleared ✓");
   Promise.resolve(ctLoadRecentRmResponses(lp)).finally(function(){if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();});
   return false;
 };
@@ -7227,7 +7232,7 @@ async function ctLoadRecentRmResponses(lp){
           +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:13px;font-weight:800;color:#071B37">'+escHtml(agent)+'</div>'
           +(isUnread?'<span class="lp-rm-response-new" style="font-size:8.8px;font-weight:900;color:#A12727;background:#FFF1F1;border:1px solid #E3A0A0;border-radius:999px;padding:2px 6px">NEW</span>':'')+'</div>'
           +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:10.5px;font-weight:800;color:'+statusColor+';background:'+statusBg+';border-radius:999px;padding:3px 8px">'+status+'</div>'
-          +(isUnread?'<button type="button" class="lp-rm-response-clear-one" onclick="return ctClearOneRmResponseAlert('+JSON.stringify(lp||'')+','+JSON.stringify(fp)+',event)">Clear</button>':'')+'</div>'
+          +(isUnread?'<button type="button" class="lp-rm-response-clear-one" data-rm-clear-fp="'+encodeURIComponent(fp)+'">Clear</button>':'')+'</div>'
         +'</div>'
         +(flagText?'<div style="font-size:11.5px;color:#526575;margin-top:5px;line-height:1.45"><span style="font-weight:700">Your flag:</span> '+escHtml(flagText)+'</div>':'')
         +(missingResponse
@@ -7238,6 +7243,23 @@ async function ctLoadRecentRmResponses(lp){
     html+='</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">RM response alerts stay red until you explicitly clear them. Opening this section does not clear anything.</div>';
     host.innerHTML=html;
     if(details)details.dataset.lp=lp||"";
+
+    // v50: explicit event wiring. Inline handlers were being broken by nested
+    // quote characters in generated fingerprints, so Clear looked clickable
+    // but the browser never received a valid function call.
+    host.querySelectorAll('.lp-rm-response-clear-one').forEach(function(btn){
+      btn.onclick=function(ev){
+        try{ev.preventDefault();ev.stopPropagation();}catch(_){ }
+        var fp='';try{fp=decodeURIComponent(btn.getAttribute('data-rm-clear-fp')||'')}catch(_){fp=btn.getAttribute('data-rm-clear-fp')||''}
+        return window.ctClearOneRmResponseAlert(lp,fp,ev);
+      };
+    });
+    if(clearAll){
+      clearAll.onclick=function(ev){
+        try{ev.preventDefault();ev.stopPropagation();}catch(_){ }
+        return window.ctClearAllRmResponseAlerts(lp,ev);
+      };
+    }
     return unread;
   }catch(e){
     console.error("RM response history failed",e);
