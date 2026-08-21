@@ -762,6 +762,13 @@ table tbody tr:hover{background:#F6FBFC!important}
 #referral-truth-note{font-size:10.5px;color:#667085;margin:-4px 0 10px}
 </style>
 
+
+<style id="v47-rm-response-alert-style">
+#lp-rm-responses summary::-webkit-details-marker{display:none}
+#lp-rm-responses summary::marker{content:""}
+#lp-rm-response-badge{align-items:center}
+#ct-notif-panel button:hover{background:#FFF0F0!important}
+</style>
 </head>
 <body>
 <div id="lpBuildBadge" style="display:none"></div>
@@ -1190,13 +1197,21 @@ table tbody tr:hover{background:#F6FBFC!important}
       <div style="font-size:11.5px;color:#6C6252;margin-top:2px">Items Amanda or Nyny sent to you for follow-up. Reply here, then mark handled when complete.</div>
       <div id="lp-rm-flags-for-you-list" style="margin-top:8px;font-size:12px;color:#526575"></div>
     </div>
-    <div id="lp-rm-responses" style="background:#fff;border:1px solid #D7E0EA;border-left:4px solid #071B37;border-radius:9px;padding:12px 14px;margin-bottom:12px">
-      <details>
+    <div id="lp-rm-responses" class="lp-rm-response-panel" style="background:#fff;border:1px solid #D7E0EA;border-left:4px solid #071B37;border-radius:10px;padding:12px 14px;margin-bottom:12px;box-shadow:none">
+      <details id="lp-rm-responses-details">
         <summary style="cursor:pointer;list-style:none">
-          <div style="font-size:12.5px;font-weight:800;color:#071B37">Recent RM Responses</div>
-          <div style="font-size:11.5px;color:#526575;margin-top:2px">Replies from Amanda/Nyny stay here even after the flag is marked handled. Click to expand.</div>
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+                <span style="font-size:12.5px;font-weight:900;color:#071B37">Recent RM Responses</span>
+                <span id="lp-rm-response-badge" style="display:none;font-size:9.5px;font-weight:900;letter-spacing:.04em;color:#A12727;background:#FFF1F1;border:1px solid #E6A7A7;border-radius:999px;padding:2px 7px">NEW</span>
+              </div>
+              <div id="lp-rm-response-summary" style="font-size:11.5px;color:#526575;margin-top:3px;font-weight:500">Replies from Amanda/Nyny to your flags. New replies will alert you here.</div>
+            </div>
+            <span id="lp-rm-response-open-label" style="font-size:10.5px;font-weight:800;color:#007FA4;white-space:nowrap">View responses ▾</span>
+          </div>
         </summary>
-        <div id="lp-rm-responses-list" style="margin-top:8px;font-size:12px;color:#526575">Loading...</div>
+        <div id="lp-rm-responses-list" style="margin-top:10px;font-size:12px;color:#526575">Loading...</div>
       </details>
     </div>
     <div id="lp-rm-relationship-notes" class="lp-rm-note-panel" style="background:#fff;border:1px solid #D7E4E9;border-left:4px solid #9BBBC5;border-radius:10px;padding:12px 14px;margin-bottom:12px;box-shadow:none">
@@ -7033,17 +7048,53 @@ function renderFtPriority(){
 }
 
 /* ── Persistent LP-side RM response history ───────────────────────────────
-   The bell remains an OPEN-items queue. This panel intentionally includes
-   both open and handled flags so an LP can always see what Amanda/Nyny sent
-   back after the actionable notification disappears. */
+   Direct RM replies are communications, not passive history. A reply stays
+   visibly NEW until that LP opens the response panel. The read marker is kept
+   per LP in this browser; a different device will still surface the reply so
+   an important RM message is not silently suppressed elsewhere. */
+function ctRmResponseFingerprint(lp,r){
+  var basis=[lp||"",r&&r.source||"",r&&r.id||"",r&&r.agent_name||"",r&&r.rm_note_at||"",r&&r.rm_note||""].join("|");
+  var h=0;for(var i=0;i<basis.length;i++)h=((h<<5)-h+basis.charCodeAt(i))|0;
+  return "rmresponse:"+String(lp||"").toLowerCase()+":"+Math.abs(h);
+}
+function ctRmResponseReadMap(lp){
+  try{return JSON.parse(localStorage.getItem("lp_rm_responses_read_"+String(lp||"").toLowerCase())||"{}")}catch(e){return{}}
+}
+function ctRmResponseIsRead(lp,r){var m=ctRmResponseReadMap(lp);return !!m[ctRmResponseFingerprint(lp,r)]}
+function ctRmMarkResponsesRead(lp,rows){
+  try{
+    var m=ctRmResponseReadMap(lp),now=new Date().toISOString();
+    (rows||[]).forEach(function(r){if(String(r&&r.rm_note||"").trim())m[ctRmResponseFingerprint(lp,r)]=now});
+    var keys=Object.keys(m);if(keys.length>200){keys.sort(function(a,b){return String(m[b]).localeCompare(String(m[a]))});var keep={};keys.slice(0,150).forEach(function(k){keep[k]=m[k]});m=keep}
+    localStorage.setItem("lp_rm_responses_read_"+String(lp||"").toLowerCase(),JSON.stringify(m));
+  }catch(e){}
+}
+window._ctRmResponseRowsByLp=window._ctRmResponseRowsByLp||{};
+window.ctOpenRmResponses=async function(lp){
+  lp=lp||currentUser;
+  if(!lp)return;
+  try{
+    if(currentUser!==lp&&["Gavin","Karen","Osgood","Jordan","Said"].indexOf(lp)>=0){
+      var btn=Array.from(document.querySelectorAll(".who-btn")).find(function(b){return String(b.textContent||"").trim()===lp});
+      selectUser(btn||null,lp);
+    }
+    if(typeof ctLoadRecentRmResponses==="function")await ctLoadRecentRmResponses(lp);
+  }catch(e){}
+  setTimeout(function(){
+    var details=document.getElementById("lp-rm-responses-details"),panel=document.getElementById("lp-rm-responses");
+    if(details)details.open=true;
+    if(panel)panel.scrollIntoView({behavior:"smooth",block:"center"});
+  },80);
+};
+
 async function ctLoadRecentRmResponses(lp){
   var host=document.getElementById("lp-rm-responses-list");
   if(!host)return;
+  var panel=document.getElementById("lp-rm-responses"),details=document.getElementById("lp-rm-responses-details"),badge=document.getElementById("lp-rm-response-badge"),summary=document.getElementById("lp-rm-response-summary"),openLabel=document.getElementById("lp-rm-response-open-label");
   host.innerHTML='<div style="padding:5px 0;color:#6B7E8A">Loading responses...</div>';
+  if(badge)badge.style.display="none";
   try{
     var safeLp=encodeURIComponent(lp||"");
-    // Pull replies AND handled flags separately, then merge them.
-    // This intentionally preserves handled flags where an older tracker failed to save the RM note.
     var results=await Promise.all([
       sbFetch("GET","lp_flags?lp=eq."+safeLp+"&rm_note=not.is.null&select=id,agent_name,lp,note,rm_note,rm_note_at,rm_note_by,resolved,resolved_at,created_at&order=rm_note_at.desc&limit=30").catch(function(){return[];}),
       sbFetch("GET","lp_flags?lp=eq."+safeLp+"&resolved=eq.true&select=id,agent_name,lp,note,rm_note,rm_note_at,rm_note_by,resolved,resolved_at,created_at&order=resolved_at.desc&limit=30").catch(function(){return[];}),
@@ -7052,9 +7103,8 @@ async function ctLoadRecentRmResponses(lp){
     var directMap={};
     function addDirect(r){
       if(!r||r.id===undefined||r.id===null)return;
-      var key=String(r.id);
-      var existing=directMap[key]||{};
-      directMap[key]={
+      var k=String(r.id),existing=directMap[k]||{};
+      directMap[k]={
         source:"direct",id:r.id,agent_name:r.agent_name||existing.agent_name||"",flag_note:r.note||existing.flag_note||"",
         rm_note:r.rm_note||existing.rm_note||"",rm_note_at:r.rm_note_at||existing.rm_note_at||r.resolved_at||existing.handled_at||r.created_at||existing.created_at||"",
         rm_note_by:r.rm_note_by||existing.rm_note_by||"RM",handled:r.resolved===true||existing.handled===true,
@@ -7065,58 +7115,85 @@ async function ctLoadRecentRmResponses(lp){
     (Array.isArray(results[1])?results[1]:[]).forEach(addDirect);
     var direct=Object.keys(directMap).map(function(k){return directMap[k];});
     var legacy=(Array.isArray(results[2])?results[2]:[]).map(function(r){
-      return{
-        source:"call",id:r.id,agent_name:r.agent_name||"",flag_note:r.note||"",rm_note:r.rm_note||"",
-        rm_note_at:r.rm_note_at||r.call_date||"",rm_note_by:"RM",
-        handled:r.flag_rm!==true,handled_at:null,created_at:r.call_date||"",outcome:r.outcome||""
-      };
+      return{source:"call",id:r.id,agent_name:r.agent_name||"",flag_note:r.note||"",rm_note:r.rm_note||"",rm_note_at:r.rm_note_at||r.call_date||"",rm_note_by:"RM",handled:r.flag_rm!==true,handled_at:null,created_at:r.call_date||"",outcome:r.outcome||""};
     });
-    var rows=direct.concat(legacy).filter(function(r){
-      return String(r.rm_note||"").trim() || r.handled===true;
-    });
-    rows.sort(function(a,b){
-      var ad=a.rm_note_at||a.handled_at||a.created_at||"";
-      var bd=b.rm_note_at||b.handled_at||b.created_at||"";
-      return String(bd).localeCompare(String(ad));
-    });
+    var rows=direct.concat(legacy).filter(function(r){return String(r.rm_note||"").trim()||r.handled===true;});
+    rows.sort(function(a,b){var ad=a.rm_note_at||a.handled_at||a.created_at||"",bd=b.rm_note_at||b.handled_at||b.created_at||"";return String(bd).localeCompare(String(ad));});
     rows=rows.slice(0,15);
+    window._ctRmResponseRowsByLp[String(lp||"").toLowerCase()]=rows;
+
     if(!rows.length){
+      if(panel){panel.style.background="#fff";panel.style.borderColor="#D7E0EA";panel.style.borderLeftColor="#071B37";panel.style.boxShadow="none";}
+      if(summary)summary.textContent="No RM responses yet. New replies from Amanda/Nyny will alert you here.";
+      if(openLabel)openLabel.textContent="View responses ▾";
+      if(details)details.open=false;
       host.innerHTML='<div style="padding:6px 0;color:#6B7E8A">No RM responses yet. When Amanda or Nyny replies to one of your flags, it will stay here for reference.</div>';
-      return;
+      return [];
     }
-    var html='<div style="max-height:280px;overflow-y:auto;padding-right:3px">';
+
+    var actualReplies=rows.filter(function(r){return !!String(r.rm_note||"").trim();});
+    var unread=actualReplies.filter(function(r){return !ctRmResponseIsRead(lp,r);});
+    if(panel){
+      panel.style.background=unread.length?"#FFFDFD":"#fff";
+      panel.style.borderColor=unread.length?"#E4B7B7":"#D7E0EA";
+      panel.style.borderLeftColor=unread.length?"#C83D3D":"#071B37";
+      panel.style.boxShadow=unread.length?"0 0 0 2px rgba(200,61,61,.05)":"none";
+    }
+    if(badge){badge.style.display=unread.length?"inline-flex":"none";badge.textContent=unread.length+" NEW";}
+    if(summary)summary.textContent=unread.length
+      ?unread.length+" new RM response"+(unread.length===1?"":"s")+" from Amanda/Nyny — open before outreach."
+      :actualReplies.length+" recent RM response"+(actualReplies.length===1?"":"s")+" — all viewed.";
+    if(openLabel)openLabel.textContent=unread.length?"Open new response"+(unread.length===1?"":"s")+" ▾":"View responses ▾";
+    // Alert while collapsed. Do not force the panel open, so the LP controls when a response is acknowledged.
+    if(details&&!details.open)details.open=false;
+
+    var html='<div style="max-height:300px;overflow-y:auto;padding-right:3px">';
     rows.forEach(function(r,i){
-      var agent=r.agent_name?displayName(r.agent_name):"General flag";
-      var when=r.rm_note_at?fmt(String(r.rm_note_at).slice(0,10)):"";
-      var by=r.rm_note_by||"RM";
-      var flagText=String(r.flag_note||"").trim();
-      var response=String(r.rm_note||"").trim();
-      var missingResponse=r.handled&&!response;
+      var agent=r.agent_name?displayName(r.agent_name):"General flag",when=r.rm_note_at?fmt(String(r.rm_note_at).slice(0,10)):"",by=r.rm_note_by||"RM";
+      var flagText=String(r.flag_note||"").trim(),response=String(r.rm_note||"").trim(),missingResponse=r.handled&&!response;
+      var isUnread=!!response&&!ctRmResponseIsRead(lp,r);
       var status=missingResponse?"Handled · no response saved":(r.handled?"Handled":"Reply sent · still open");
-      var statusColor=missingResponse?"#6B5E3E":(r.handled?"#15803d":"#B7791F");
-      var statusBg=missingResponse?"#F8F3E7":(r.handled?"#ECFDF3":"#FFF8E8");
-      html+='<div style="padding:10px 0;'+(i?'border-top:1px solid #E7EFF3;':'')+'">'
+      var statusColor=missingResponse?"#6B5E3E":(r.handled?"#15803d":"#B7791F"),statusBg=missingResponse?"#F8F3E7":(r.handled?"#ECFDF3":"#FFF8E8");
+      html+='<div class="lp-rm-response-item" style="padding:10px '+(isUnread?'10px':'0')+';'+(i&&!isUnread?'border-top:1px solid #E7EFF3;':'')+(isUnread?'margin:6px 0;border:1px solid #E4B7B7;border-left:4px solid #C83D3D;border-radius:8px;background:#fff;':'')+'">'
         +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">'
-          +'<div style="font-size:13px;font-weight:800;color:#071B37">'+escHtml(agent)+'</div>'
+          +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div style="font-size:13px;font-weight:800;color:#071B37">'+escHtml(agent)+'</div>'
+          +(isUnread?'<span class="lp-rm-response-new" style="font-size:8.8px;font-weight:900;color:#A12727;background:#FFF1F1;border:1px solid #E3A0A0;border-radius:999px;padding:2px 6px">NEW</span>':'')+'</div>'
           +'<div style="font-size:10.5px;font-weight:800;color:'+statusColor+';background:'+statusBg+';border-radius:999px;padding:3px 8px">'+status+'</div>'
         +'</div>'
         +(flagText?'<div style="font-size:11.5px;color:#526575;margin-top:5px;line-height:1.45"><span style="font-weight:700">Your flag:</span> '+escHtml(flagText)+'</div>':'')
         +(missingResponse
-          ?'<div style="margin-top:6px;background:#FAF7EF;border:1px solid #E7DCC3;border-radius:7px;padding:8px 10px">'
-            +'<div style="font-size:10.5px;font-weight:800;color:#6B5E3E;margin-bottom:3px">Handled'+(when?" · "+escHtml(when):"")+'</div>'
-            +'<div style="font-size:12px;color:#526575;line-height:1.5">No RM response was recorded before this flag was handled. This can happen with flags cleared in an older tracker version.</div>'
-          +'</div>'
-          :'<div style="margin-top:6px;background:#F3F8F3;border:1px solid #CFE5D2;border-radius:7px;padding:8px 10px">'
-            +'<div style="font-size:10.5px;font-weight:800;color:#071B37;margin-bottom:3px">RM response'+(by?" · "+escHtml(by):"")+(when?" · "+escHtml(when):"")+'</div>'
-            +'<div style="font-size:12.5px;color:#243124;line-height:1.5">'+escHtml(response)+'</div>'
-          +'</div>')
+          ?'<div style="margin-top:6px;background:#FAF7EF;border:1px solid #E7DCC3;border-radius:7px;padding:8px 10px"><div style="font-size:10.5px;font-weight:800;color:#6B5E3E;margin-bottom:3px">Handled'+(when?' · '+escHtml(when):'')+'</div><div style="font-size:12px;color:#526575;line-height:1.5">No RM response was recorded before this flag was handled.</div></div>'
+          :'<div style="margin-top:6px;background:#F3F8F3;border:1px solid #CFE5D2;border-radius:7px;padding:8px 10px"><div style="font-size:10.5px;font-weight:800;color:#071B37;margin-bottom:3px">RM response'+(by?' · '+escHtml(by):'')+(when?' · '+escHtml(when):'')+'</div><div style="font-size:12.5px;color:#243124;line-height:1.5">'+escHtml(response)+'</div></div>')
       +'</div>';
     });
-    html+='</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">Showing the 15 most recent RM flag outcomes for '+escHtml(lp)+'. Handled flags remain here even when no RM response was recorded. Open items still appear in the bell until handled.</div>';
+    html+='</div><div style="font-size:10.5px;color:#6B7E8A;margin-top:7px">Showing recent RM flag outcomes for '+escHtml(lp)+'. New RM replies stay visibly flagged until you open this panel.</div>';
     host.innerHTML=html;
+
+    if(details){
+      details.dataset.lp=lp||"";
+      if(!details.dataset.rmResponseReadBound){
+        details.dataset.rmResponseReadBound="1";
+        details.addEventListener("toggle",function(){
+          if(!details.open)return;
+          var who=details.dataset.lp||currentUser||"",currentRows=(window._ctRmResponseRowsByLp||{})[String(who).toLowerCase()]||[];
+          var fresh=currentRows.filter(function(r){return String(r.rm_note||"").trim()&&!ctRmResponseIsRead(who,r);});
+          if(!fresh.length)return;
+          ctRmMarkResponsesRead(who,fresh);
+          var b=document.getElementById("lp-rm-response-badge"),s=document.getElementById("lp-rm-response-summary"),p=document.getElementById("lp-rm-responses"),lbl=document.getElementById("lp-rm-response-open-label");
+          if(b)b.style.display="none";
+          if(s)s.textContent=(currentRows.filter(function(r){return String(r.rm_note||"").trim();}).length)+" recent RM responses — all viewed.";
+          if(lbl)lbl.textContent="View responses ▾";
+          if(p){p.style.background="#fff";p.style.borderColor="#D7E0EA";p.style.borderLeftColor="#071B37";p.style.boxShadow="none";}
+          document.querySelectorAll("#lp-rm-responses .lp-rm-response-new").forEach(function(x){x.style.display="none";});
+          if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
+        });
+      }
+    }
+    return unread;
   }catch(e){
     console.error("RM response history failed",e);
     host.innerHTML='<div style="padding:6px 0;color:#A32D2D">Could not load RM responses. Refresh or try again in a moment.</div>';
+    return [];
   }
 }
 window.ctLoadRecentRmResponses=ctLoadRecentRmResponses;
@@ -8637,39 +8714,44 @@ if(typeof window.renderReferralLeadsDirect==="function"){
 (function(){
 
 function ctLoadNotifications(){
-  var badge=document.getElementById("ct-notif-badge");
-  var list=document.getElementById("ct-notif-list");
-  if(!badge||!list) return;
+  var badge=document.getElementById("ct-notif-badge"),list=document.getElementById("ct-notif-list");
+  if(!badge||!list)return;
   var isLp=["Gavin","Karen","Osgood","Jordan","Said"].indexOf(currentUser)>=0;
-  var rmToLpPath="rm_lp_flags?resolved=eq.false"+(isLp?"&lp=eq."+encodeURIComponent(currentUser):"")+"&select=*&order=created_at.desc&limit=5";
+  var lpFilter=isLp?"&lp=eq."+encodeURIComponent(currentUser):"";
+  var openLpFlags="lp_flags?resolved=eq.false"+lpFilter+"&select=*&order=created_at.desc&limit=5";
+  var rmToLpPath="rm_lp_flags?resolved=eq.false"+lpFilter+"&select=*&order=created_at.desc&limit=5";
+  var directReplies=isLp?"lp_flags?lp=eq."+encodeURIComponent(currentUser)+"&rm_note=not.is.null&select=id,agent_name,lp,rm_note,rm_note_at,rm_note_by,resolved,created_at&order=rm_note_at.desc&limit=10":null;
+  var callReplies=isLp?"call_logs?lp=eq."+encodeURIComponent(currentUser)+"&rm_note=not.is.null&select=id,agent_name,lp,rm_note,rm_note_at,flag_rm,call_date&order=rm_note_at.desc&limit=10":null;
   Promise.all([
-    sbFetch("GET","lp_flags?resolved=eq.false&select=*&order=created_at.desc&limit=5").catch(function(){return [];}),
-    sbFetch("GET","lead_notes?notify_rm_gesture=eq.true&gesture_sent=eq.false&select=lead_buyer_name,lead_agent_name,lp,created_at&order=created_at.desc&limit=5").catch(function(){return [];}),
-    sbFetch("GET",rmToLpPath).catch(function(){return [];})
+    sbFetch("GET",openLpFlags).catch(function(){return[];}),
+    sbFetch("GET","lead_notes?notify_rm_gesture=eq.true&gesture_sent=eq.false&select=lead_buyer_name,lead_agent_name,lp,created_at&order=created_at.desc&limit=5").catch(function(){return[];}),
+    sbFetch("GET",rmToLpPath).catch(function(){return[];}),
+    directReplies?sbFetch("GET",directReplies).catch(function(){return[]}):Promise.resolve([]),
+    callReplies?sbFetch("GET",callReplies).catch(function(){return[]}):Promise.resolve([])
   ]).then(function(results){
-    var flags=results[0]||[], gestures=results[1]||[], rmFlags=results[2]||[];
-    var total=flags.length+gestures.length+rmFlags.length;
-    if(total>0){
-      badge.textContent=total>9?"9+":total;
-      badge.style.display="flex";
-    } else {
-      badge.style.display="none";
-    }
-    if(total===0){ list.innerHTML='<div style="padding:8px 0;color:var(--text-3)">Nothing new right now</div>'; return; }
+    var flags=results[0]||[],gestures=results[1]||[],rmFlags=results[2]||[];
+    var responseRows=(results[3]||[]).map(function(r){return{source:"direct",id:r.id,agent_name:r.agent_name||"",rm_note:r.rm_note||"",rm_note_at:r.rm_note_at||r.created_at||"",rm_note_by:r.rm_note_by||"RM"};})
+      .concat((results[4]||[]).map(function(r){return{source:"call",id:r.id,agent_name:r.agent_name||"",rm_note:r.rm_note||"",rm_note_at:r.rm_note_at||r.call_date||"",rm_note_by:"RM"};}));
+    var seen={};responseRows=responseRows.filter(function(r){var k=r.source+"|"+r.id+"|"+r.rm_note_at+"|"+r.rm_note;if(seen[k])return false;seen[k]=1;return !!String(r.rm_note||"").trim();});
+    responseRows.sort(function(a,b){return String(b.rm_note_at||"").localeCompare(String(a.rm_note_at||""));});
+    var unreadResponses=isLp?responseRows.filter(function(r){return !ctRmResponseIsRead(currentUser,r)}).slice(0,5):[];
+    var total=flags.length+gestures.length+rmFlags.length+unreadResponses.length;
+    if(total>0){badge.textContent=total>9?"9+":total;badge.style.display="flex";}else badge.style.display="none";
+    if(total===0){list.innerHTML='<div style="padding:8px 0;color:var(--text-3)">Nothing new right now</div>';return;}
     var html="";
+    unreadResponses.forEach(function(r){
+      html+='<button type="button" onclick="ctOpenRmResponses('+JSON.stringify(currentUser)+')" style="display:block;width:100%;text-align:left;padding:8px 7px;border:0;border-bottom:1px solid var(--border-light);background:#FFF7F7;cursor:pointer;font:inherit">'
+        +'<div style="font-weight:850;color:#A12727">💬 NEW RM RESPONSE · '+escHtml(r.agent_name?displayName(r.agent_name):"General")+'</div>'
+        +'<div style="color:#526575;font-size:11px;margin-top:2px">'+escHtml(r.rm_note_by||"RM")+' — “'+escHtml(String(r.rm_note||"").substring(0,95))+'”</div>'
+        +'<div style="color:#007FA4;font-size:10px;font-weight:800;margin-top:3px">Open response →</div></button>';
+    });
     flags.forEach(function(f){
-      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🚩 '+(f.agent_name?escHtml(displayName(f.agent_name)):"General flag")+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(f.lp)+' — "'+escHtml((f.note||"").substring(0,60))+'"</div>'
-        +(f.rm_note?'<div style="margin-top:5px;padding:5px 7px;background:#ecfdf5;border-radius:6px;color:#166534;font-size:11px"><strong>RM reply'+(f.rm_note_by?' · '+escHtml(f.rm_note_by):'')+':</strong> '+escHtml(String(f.rm_note).substring(0,120))+'</div>':'')
-        +'</div>';
+      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🚩 '+(f.agent_name?escHtml(displayName(f.agent_name)):"General flag")+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(f.lp||"")+' — “'+escHtml((f.note||"").substring(0,60))+'”</div>'+(f.rm_note?'<div style="margin-top:5px;padding:5px 7px;background:#ecfdf5;border-radius:6px;color:#166534;font-size:11px"><strong>RM reply'+(f.rm_note_by?' · '+escHtml(f.rm_note_by):'')+':</strong> '+escHtml(String(f.rm_note).substring(0,120))+'</div>':'')+'</div>';
     });
-    rmFlags.forEach(function(f){
-      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light);background:#FFFDF7"><div style="font-weight:700;color:#6F4E00">📥 RM → '+escHtml(f.lp||"LP")+' · '+escHtml(f.agent_name?displayName(f.agent_name):"General")+'</div><div style="color:#6C6252;font-size:11px">from '+escHtml(f.created_by||"RM")+' — "'+escHtml(String(f.note||"").substring(0,80))+'"</div></div>';
-    });
-    gestures.forEach(function(g){
-      html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🎁 '+escHtml(g.lead_buyer_name||g.lead_agent_name)+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(g.lp)+' — gesture opportunity</div></div>';
-    });
+    rmFlags.forEach(function(f){html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light);background:#FFFDF7"><div style="font-weight:700;color:#6F4E00">📥 RM → '+escHtml(f.lp||"LP")+' · '+escHtml(f.agent_name?displayName(f.agent_name):"General")+'</div><div style="color:#6C6252;font-size:11px">from '+escHtml(f.created_by||"RM")+' — “'+escHtml(String(f.note||"").substring(0,80))+'”</div></div>';});
+    gestures.forEach(function(g){html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🎁 '+escHtml(g.lead_buyer_name||g.lead_agent_name)+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(g.lp||"")+' — gesture opportunity</div></div>';});
     list.innerHTML=html;
-  }).catch(function(){ list.innerHTML='<div style="color:var(--text-3)">Could not load</div>'; });
+  }).catch(function(){list.innerHTML='<div style="color:var(--text-3)">Could not load</div>';});
 }
 window.ctLoadNotifications=ctLoadNotifications;
 
@@ -9904,7 +9986,7 @@ async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId
   window.addEventListener('unhandledrejection',function(){setTimeout(check,50);});
 })();
 </script>
-<script>console.log("LP Tracker Build v45.0 · connection status stabilization · staggered startup · false failure fix");</script>
+<script>console.log("LP Tracker Build v47.0 · unread RM response alerts · bell integration");</script>
 
 <script id="v45-facetime-tier-alignment">
 console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + current Power BI");
@@ -10395,5 +10477,6 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
 })();
 </script>
 
+<script>console.log("LP Tracker Build v47 · direct RM response alerts active");</script>
 </body>
 </html>
