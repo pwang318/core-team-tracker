@@ -1,11 +1,11 @@
-    
+     
 <!DOCTYPE html>
-<!-- LP Tracker v49 · reliable RM response clear state + hidden-row suppression · 2026-08-21 -->
+<!-- LP Tracker v52 · authoritative snapshot hydration + hard-clearing RM response inbox · 2026-08-21 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260821-v49-rm-response-alert-clear-fix">
+  <meta name="version" content="20260821-v52-snapshot-authoritative-rm-clear">
   <meta name="build-notes" content="Daniel-aligned Tier Growth: Channel 10+, A 4-9, B 2-3, C 1 close or 1 lead; month-end targets and 50-point net tier-count score; individual migrations remain diagnostic.">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -774,7 +774,7 @@ table tbody tr:hover{background:#F6FBFC!important}
 </style>
 </head>
 <body>
-<!-- LP v51: cleared RM responses disappear from active response panel · 2026-08-21 -->
+<!-- LP v52: first-paint snapshot waits for live sources; cleared RM responses leave the inbox · 2026-08-21 -->
 <div id="lpBuildBadge" style="display:none"></div>
 <div class="app">
 <div class="app-header">
@@ -1394,10 +1394,14 @@ table tbody tr:hover{background:#F6FBFC!important}
 <!-- DANIEL VIEW -->
 <!-- DANIEL VIEW -->
 <div id="view-snapshot" class="view">
-  <div class="section-head">Team Accountability <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'Geist','Inter',sans-serif;font-size:10px"></span></div>
-  <div style="font-size:11px;color:var(--text-3);margin:-6px 0 7px"><b>Loan Partners:</b> choose your name at the top of the sidebar for your work list. <b>Leadership:</b> this page is the team accountability view.</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="section-head" style="margin-bottom:0">Team Accountability <span id="snapshot-time" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3);font-family:'Geist','Inter',sans-serif;font-size:10px"></span></div>
+    <button id="snapshot-live-refresh" class="btn btn-sm" type="button" onclick="refreshSnapshotFresh(this)">&#8635; Refresh Live Data</button>
+  </div>
+  <div id="snapshot-live-status" style="font-size:10.5px;color:var(--text-3);margin:3px 0 7px">Syncing current assignments, calls, leads, and RM activity before showing totals...</div>
+  <div style="font-size:11px;color:var(--text-3);margin:0 0 7px"><b>Loan Partners:</b> choose your name at the top of the sidebar for your work list. <b>Leadership:</b> this page is the team accountability view.</div>
   <div style="font-size:11px;color:var(--text-3);margin:0 0 10px">Calls, Talk's, Leads, 1003's, Pre-apps, and Contracts below are all <b>week-to-date</b> (Monday through now) — not just today. Only the "Leads Today / WTD / MTD" totals up top reset daily.</div>
-  <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div></div>
+  <div id="d-snapshot-body"><div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Syncing live team data...</div></div>
 </div>
 
 <!-- OWNERSHIP VIEW -->
@@ -2357,7 +2361,7 @@ function sbFetch(method,path,body,_schemaRetry){
   var retry=Number(_schemaRetry||0);
   var controller=new AbortController();
   var timer=setTimeout(function(){controller.abort();},20000);
-  var opts={method:method,signal:controller.signal,headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
+  var opts={method:method,signal:controller.signal,cache:"no-store",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
   if(body!==undefined&&body!==null)opts.body=JSON.stringify(body);
   return fetch(SB_URL+"/rest/v1/"+path,opts).then(function(r){
     lpMarkServerReachable();
@@ -2509,6 +2513,7 @@ function lpTestConnection(){
 function lpRetryConnection(){
   return lpTestConnection().then(function(ok){
     if(!ok)return false;
+    if(document.getElementById("view-snapshot")&&document.getElementById("view-snapshot").classList.contains("active")&&typeof window.lpLoadSnapshotFresh==="function")return window.lpLoadSnapshotFresh({force:true});
     return loadCallLogs().then(function(){if(typeof buildSnapshot==="function")buildSnapshot();return true;});
   });
 }
@@ -4105,6 +4110,7 @@ async function loadLeadPipeline(){
   var dlEl=document.getElementById("pipeline-date-label");
   if(dlEl)dlEl.textContent=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
   renderLeadPipelinePanels(res);
+  if(document.getElementById("view-snapshot")&&document.getElementById("view-snapshot").classList.contains("active")&&!window._lpBootInProgress){buildSnapshot();}
   }).catch(function(e){
     console.warn("loadLeadPipeline error:",e);
     var el=document.getElementById("d-lead-pipeline-today");
@@ -4379,6 +4385,83 @@ function showLpInactiveAgents(lp){
   ov.style.display="flex";
 }
 
+var lpSnapshotHydrationSeq=0;
+var lpSnapshotHydratedAt=0;
+var lpSnapshotHydrationPromise=null;
+
+function lpSnapshotSetStatus(msg,isError){
+  var s=document.getElementById("snapshot-live-status");
+  if(s){s.textContent=msg||"";s.style.color=isError?"#B42318":"var(--text-3)";}
+}
+function lpSnapshotSafe(label,fn){
+  try{
+    return Promise.resolve(fn()).then(function(v){return{label:label,ok:true,value:v};}).catch(function(e){console.warn("Snapshot source "+label+" failed:",e);return{label:label,ok:false,error:e};});
+  }catch(e){console.warn("Snapshot source "+label+" failed:",e);return Promise.resolve({label:label,ok:false,error:e});}
+}
+function lpLoadSnapshotScorecardsFresh(){
+  var wk=getWeekKey(new Date()),persons=LPS.concat(["Isaak","Amanda"]);
+  return sbFetch("GET","lp_scorecards?week_key=eq."+wk+"&person=in.("+persons.join(",")+")&select=person,data").then(function(res){
+    window._snapScWeek=wk;window._snapScData={};
+    (res||[]).forEach(function(r){window._snapScData[r.person]=r.data||{};});
+    return res||[];
+  });
+}
+async function lpLoadSnapshotFresh(opts){
+  opts=opts||{};
+  var seq=++lpSnapshotHydrationSeq;
+  if(lpSnapshotHydrationPromise&&!opts.force)return lpSnapshotHydrationPromise;
+  var body=document.getElementById("d-snapshot-body"),btn=document.getElementById("snapshot-live-refresh");
+  if(body)body.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px"><div style="font-weight:750;color:#071B37;margin-bottom:5px">Syncing live team data...</div><div>Current assignments · calls · leads · scorecards · RM activity</div></div>';
+  if(btn){btn.disabled=true;btn.textContent="Syncing...";}
+  lpSnapshotSetStatus("Syncing current assignments, calls, leads, and RM activity before showing totals...");
+  window._lpBootInProgress=true;setSyncStatus("loading");
+
+  lpSnapshotHydrationPromise=(async function(){
+    // Batch 1 establishes the roster and ownership FIRST. Snapshot call totals depend on
+    // the current LP assignment, so rendering before this finishes creates the stale first paint.
+    var core=await Promise.all([
+      lpSnapshotSafe("inactive roster",loadInactiveRosterNames),
+      lpSnapshotSafe("assignments",loadAgentAssignments),
+      lpSnapshotSafe("call logs",loadCallLogs)
+    ]);
+    if(seq!==lpSnapshotHydrationSeq)return false;
+
+    // Batch 2 loads every source used by the Snapshot before it is allowed to paint.
+    var context=await Promise.all([
+      lpSnapshotSafe("agent call history",loadAgentFirstCalls),
+      lpSnapshotSafe("RM activity",loadRmActivity),
+      lpSnapshotSafe("received leads",loadReceivedLeads),
+      lpSnapshotSafe("Velocify summary",loadVelocifyLeads),
+      lpSnapshotSafe("RM follow-ups",loadRmFollowups),
+      lpSnapshotSafe("Amanda activity",loadAmandaSnapshot),
+      lpSnapshotSafe("scorecards",lpLoadSnapshotScorecardsFresh)
+    ]);
+    if(seq!==lpSnapshotHydrationSeq)return false;
+
+    // Lead pipeline uses current assignments plus lead sources, so it runs after both batches.
+    var pipe=await lpSnapshotSafe("lead pipeline",loadLeadPipeline);
+    if(seq!==lpSnapshotHydrationSeq)return false;
+
+    lpSnapshotHydratedAt=Date.now();
+    if(currentUser==="Snapshot"||document.getElementById("view-snapshot")?.classList.contains("active"))buildSnapshot();
+    var failures=core.concat(context,[pipe]).filter(function(x){return x&&x.ok===false;});
+    if(failures.length){
+      lpSnapshotSetStatus("Live Snapshot loaded, but "+failures.length+" optional source"+(failures.length===1?"":"s")+" could not refresh. Click Refresh Live Data to retry.",true);
+    }else{
+      lpSnapshotSetStatus("Live Snapshot synced from current server data · "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}));
+      setSyncStatus("live");
+    }
+    return true;
+  })().catch(function(e){
+    console.warn("Authoritative Snapshot load failed:",e);lpSnapshotSetStatus("Snapshot could not fully sync. Click Refresh Live Data to retry.",true);lpHandleSyncError(e);return false;
+  }).finally(function(){
+    if(seq===lpSnapshotHydrationSeq){window._lpBootInProgress=false;lpSnapshotHydrationPromise=null;if(btn){btn.disabled=false;btn.innerHTML="&#8635; Refresh Live Data";}}
+  });
+  return lpSnapshotHydrationPromise;
+}
+window.lpLoadSnapshotFresh=lpLoadSnapshotFresh;
+window.refreshSnapshotFresh=function(btn){return lpLoadSnapshotFresh({force:true});};
+
 function openSnapshotView(btn){
   if(typeof rmStopPolling==="function")rmStopPolling();
   if(typeof lpStopPolling==="function")lpStopPolling();
@@ -4386,12 +4469,8 @@ function openSnapshotView(btn){
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   if(btn)btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  document.getElementById("view-snapshot").classList.add("active");
-  Promise.resolve(typeof loadInactiveRosterNames==="function"?loadInactiveRosterNames():null).then(function(){
-    buildSnapshot();
-    return loadCallLogs();
-  }).then(buildSnapshot).catch(function(){buildSnapshot();});
-  if(typeof loadAmandaSnapshot==="function")loadAmandaSnapshot();
+  var view=document.getElementById("view-snapshot");if(view)view.classList.add("active");
+  return lpLoadSnapshotFresh({force:true});
 }
 
 function amCnt(src,type){
@@ -4683,7 +4762,7 @@ function buildSnapshot(){
   var nextR=new Date(now);nextR.setHours(18,0,0,0);
   if(now>=nextR)nextR.setDate(nextR.getDate()+1);
   var hrs=Math.ceil((nextR-now)/3600000);
-  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3);font-family:\'Geist\',\'Inter\',sans-serif">Refreshes every 30s · updated '+now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'})+'</div>';
+  h+='<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-3);font-family:\'Geist\',\'Inter\',sans-serif">Live data synced on open/refresh · rendered '+now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'})+'</div>';
 
   el.innerHTML=h;
   clearTimeout(window._snapshotTimer);
@@ -5781,44 +5860,18 @@ function initRealtimeSync(){
 loadAgents();
 // Ownership is useful, but it no longer competes with the first connection/data paint.
 setTimeout(function(){try{loadAgentAssignments();}catch(e){console.warn("LP ownership preload:",e);}},500);
-// Auto-open Snapshot on load
+// Auto-open Snapshot on load — v52 authoritative first paint.
 (function(){
   var snapBtn=document.querySelector(".wb-Snapshot");
+  currentUser="Snapshot";
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  document.getElementById("view-snapshot").classList.add("active");
+  var snap=document.getElementById("view-snapshot");if(snap)snap.classList.add("active");
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   if(snapBtn)snapBtn.classList.add("active");
-  // Show loading state immediately
-  var el=document.getElementById("d-snapshot-body");
-  if(el)el.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-3);font-size:13px">Loading...</div>';
-  // v45: stagger startup instead of hitting Supabase with every dashboard query at once.
-  // The snapshot paints progressively; one slow optional dataset can never block the whole tracker.
-  window._lpBootInProgress=true;
-  setSyncStatus("loading");
-  function lpBootDelay(ms){return new Promise(function(resolve){setTimeout(resolve,ms);});}
-  function lpBootLoad(label,fn){
-    try{return Promise.resolve(fn()).catch(function(e){console.warn("LP startup "+label+" skipped:",e);return null;});}
-    catch(e){console.warn("LP startup "+label+" skipped:",e);return Promise.resolve(null);}
-  }
-  (async function(){
-    await lpBootLoad("call logs",loadCallLogs);
-    buildSnapshot();
-    await lpBootDelay(180);
-    await lpBootLoad("agent first calls",loadAgentFirstCalls);
-    await lpBootDelay(180);
-    await lpBootLoad("RM activity",loadRmActivity);
-    await lpBootDelay(180);
-    await lpBootLoad("Amanda snapshot",loadAmandaSnapshot);
-    buildSnapshot();
-    window._lpBootInProgress=false;
-    setTimeout(function(){lpBootLoad("lead pipeline",loadLeadPipeline);},300);
-    setTimeout(function(){lpScheduleBackgroundRefresh();},700);
-  })().catch(function(e){
-    console.warn("Snapshot load error:",e);
-    window._lpBootInProgress=false;
-    buildSnapshot();
-    lpHandleSyncError(e);
-  });
+  // Do not render partially hydrated numbers. The loader owns the first paint.
+  setTimeout(function(){
+    if(typeof window.lpLoadSnapshotFresh==="function")window.lpLoadSnapshotFresh({force:true});
+  },0);
 })();
 
 // ── TEAM-WIDE ROLLUP (Scorecards tab) ────────────────────────────────────
@@ -7079,6 +7132,13 @@ function ctRmResponseReadMap(lp){
 function ctRmResponseClearThrough(lp){
   try{return Number(localStorage.getItem("lp_rm_responses_clear_through_v49_"+String(lp||"").toLowerCase())||0)||0}catch(e){return 0}
 }
+function ctRmClearFingerprintDirect(lp,fingerprint){
+  try{
+    var m=ctRmResponseReadMap(lp);m[String(fingerprint||"")]=new Date().toISOString();
+    localStorage.setItem("lp_rm_responses_cleared_v49_"+String(lp||"").toLowerCase(),JSON.stringify(m));
+    return true;
+  }catch(e){console.warn("Could not persist cleared RM response",e);return false;}
+}
 function ctRmResponseIsRead(lp,r){
   var cutoff=ctRmResponseClearThrough(lp),t=ctRmResponseTime(r);
   if(cutoff&&t&&t<=cutoff)return true;
@@ -7102,7 +7162,8 @@ function ctRmMarkAllResponsesRead(lp,rows){
 }
 function ctRmHiddenSentinel(name){
   var s=String(name||"").trim().toLowerCase().replace(/\s+/g," ");
-  return s==="__hidden__"||s==="hidden"||/^_+hidden_+$/.test(s)||s.indexOf("__hidden__")>=0;
+  var compact=s.replace(/[^a-z]/g,"");
+  return compact==="hidden"||s==="__hidden__"||/^_+hidden_+$/.test(s)||s.indexOf("__hidden__")>=0;
 }
 function ctRmHiddenRow(r){
   if(!r)return true;
@@ -7131,38 +7192,37 @@ window.ctClearAllRmResponseAlerts=function(lp,e){
   if(e){try{e.preventDefault();e.stopPropagation();}catch(_){} }
   lp=lp||currentUser;
   var key=String(lp||"").toLowerCase();
-  var rows=((window._ctRmResponseRowsByLp||{})[key]||[]).filter(function(r){return !ctRmHiddenRow(r)&&!!String(r.rm_note||"").trim()&&!ctRmResponseIsRead(lp,r);});
-  var unread=rows.slice();
-  if(!rows.length){if(typeof ctShowToast==="function")ctShowToast("No new RM responses to clear");return false;}
-  ctRmMarkAllResponsesRead(lp,rows);
-  // Immediate visual feedback before the network refresh finishes.
-  var panel=document.getElementById("lp-rm-responses"),badge=document.getElementById("lp-rm-response-badge"),clearAll=document.getElementById("lp-rm-response-clear-all"),summary=document.getElementById("lp-rm-response-summary");
+  var rows=((window._ctRmResponseRowsByLp||{})[key]||[]).filter(function(r){return !ctRmHiddenRow(r)&&!!String(r.rm_note||"").trim();});
+  // Clear THROUGH this exact moment. This makes every response already on screen leave the
+  // active inbox, while a later RM response (timestamp newer than this) becomes NEW normally.
+  try{localStorage.setItem("lp_rm_responses_clear_through_v49_"+key,String(Date.now()));}catch(_){ }
+  ctRmMarkResponsesRead(lp,rows);
+  var host=document.getElementById("lp-rm-responses-list"),panel=document.getElementById("lp-rm-responses"),badge=document.getElementById("lp-rm-response-badge"),clearAll=document.getElementById("lp-rm-response-clear-all"),summary=document.getElementById("lp-rm-response-summary"),details=document.getElementById("lp-rm-responses-details");
+  if(host)host.innerHTML='<div style="padding:6px 0;color:#6B7E8A">You’re caught up. New replies from Amanda/Nyny will appear here.</div>';
   if(panel){panel.style.background="#fff";panel.style.borderColor="#D7E0EA";panel.style.borderLeftColor="#071B37";panel.style.boxShadow="none";}
-  if(badge)badge.style.display="none";
-  if(clearAll)clearAll.style.display="none";
-  if(summary)summary.textContent="No new RM responses.";
-  if(typeof ctShowToast==="function")ctShowToast((unread.length||rows.length)+" RM response alert"+((unread.length||rows.length)===1?"":"s")+" cleared ✓");
-  Promise.resolve(ctLoadRecentRmResponses(lp)).finally(function(){if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();});
+  if(badge)badge.style.display="none";if(clearAll)clearAll.style.display="none";if(summary)summary.textContent="No new RM responses.";if(details)details.open=false;
+  if(typeof ctShowToast==="function")ctShowToast("RM response inbox cleared ✓");
+  setTimeout(function(){Promise.resolve(ctLoadRecentRmResponses(lp)).finally(function(){if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();});},40);
   return false;
 };
 window.ctClearOneRmResponseAlert=function(lp,fingerprint,e){
   if(e){try{e.preventDefault();e.stopPropagation();}catch(_){} }
-  lp=lp||currentUser;
+  lp=lp||currentUser;fingerprint=String(fingerprint||"");
   var rows=(window._ctRmResponseRowsByLp||{})[String(lp||"").toLowerCase()]||[];
   var row=rows.find(function(r){return !ctRmHiddenRow(r)&&ctRmResponseFingerprint(lp,r)===fingerprint;});
-  if(!row){
-    if(typeof ctShowToast==="function")ctShowToast("Could not match that RM response — refresh and try again");
-    return false;
-  }
-  ctRmMarkResponsesRead(lp,[row]);
+  // Persist the clicked fingerprint DIRECTLY. A stale in-memory row list must never make a
+  // visible Clear button fail.
+  ctRmClearFingerprintDirect(lp,fingerprint);
+  if(row)ctRmMarkResponsesRead(lp,[row]);
 
-  // Clear means remove it from the active inbox, not merely remove the NEW badge.
+  // Remove the exact clicked card immediately for unambiguous feedback.
   try{
-    var encoded=encodeURIComponent(fingerprint),item=document.querySelector('.lp-rm-response-item[data-rm-response-fp="'+encoded+'"]');
+    var item=e&&e.target&&e.target.closest?e.target.closest('.lp-rm-response-item'):null;
+    if(!item){var encoded=encodeURIComponent(fingerprint);item=document.querySelector('.lp-rm-response-item[data-rm-response-fp="'+encoded+'"]');}
     if(item)item.remove();
   }catch(_){ }
   if(typeof ctShowToast==="function")ctShowToast("RM response cleared ✓");
-  Promise.resolve(ctLoadRecentRmResponses(lp)).finally(function(){if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();});
+  setTimeout(function(){Promise.resolve(ctLoadRecentRmResponses(lp)).finally(function(){if(typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();});},40);
   return false;
 };
 
@@ -10561,6 +10621,6 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
 })();
 </script>
 
-<script>console.log("LP Tracker Build v49 · RM response clear + hidden suppression active");</script>
+<script>console.log("LP Tracker Build v52 · authoritative Snapshot + persistent RM response inbox clear");</script>
 </body>
 </html>
