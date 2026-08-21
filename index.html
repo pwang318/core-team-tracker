@@ -757,6 +757,11 @@ table tbody tr:hover{background:#F6FBFC!important}
 <style id="v43-management-truth">
 @media(max-width:900px){#ownership-sort{min-width:0}#view-portfolio-review [style*="grid-template-columns:repeat(5,1fr)"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
+
+<style id="v209-lp-source-truth-css">
+#referral-truth-note{font-size:10.5px;color:#667085;margin:-4px 0 10px}
+</style>
+
 </head>
 <body>
 <div id="lpBuildBadge" style="display:none"></div>
@@ -2018,14 +2023,11 @@ function loadReferralLeadsDirect(){
   var lu2=document.getElementById("ref-last-updated-v2");
   if(lu2)lu2.textContent="Loading...";
   var mtdStart=TODAY.getFullYear()+"-"+String(TODAY.getMonth()+1).padStart(2,"0")+"-01";
-  sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=1000").then(function(res){
-    var CORE_LP_KEYWORDS=["Dill","Gavin","De La Riva","Karen","Saleh","Said","McMahon","Osgood","Johnston","Jordan"];
-    var filtered=(res||[]).filter(function(r){
-      var lp=r.lp_user||"";
-      return CORE_LP_KEYWORDS.some(function(k){return lp.indexOf(k)>=0;});
-    });
-    referralLeadsCache=filtered;
-    renderReferralLeadsDirect(filtered);
+  sbFetch("GET","velocify_leads?date_added=gte."+mtdStart+"&select=*&order=date_added.desc&limit=5000").then(function(res){
+    // Management top-line = every lead returned by the Core Team Velocify mirror.
+    // Do not silently discard leads assigned to another Core Team user (ex: Isaak).
+    referralLeadsCache=(res||[]);
+    renderReferralLeadsDirect(referralLeadsCache);
     if(lu2)lu2.textContent="Updated "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
   }).catch(function(){
     if(lu2)lu2.textContent="Could not load — check connection";
@@ -2549,10 +2551,7 @@ function loadAgentAssignments(){
 }
 
 var lpPollInterval=null;
-function lpStartPolling(lp){
-  if(lpPollInterval)clearInterval(lpPollInterval);
-  lpPollInterval=setInterval(function(){if(userTyping)return;Promise.all([loadCallLogs(),loadInactiveRosterNames()]).then(function(){if(currentUser===lp&&Object.keys(pendingNote).length===0)renderLP(lp);});},30000);
-}
+function lpStartPolling(lp){ lpStopPolling(); }
 function lpStopPolling(){
   if(lpPollInterval){clearInterval(lpPollInterval);lpPollInterval=null;}
 }
@@ -3972,7 +3971,7 @@ function runConversionRangeSearch(){
     res.forEach(function(r){
       var lp=getLp(r.lp_user);
       var isStarted=r.status&&r.status.toLowerCase().indexOf("start")>=0;
-      if(!lp){unmatched++;return;}
+      if(!lp){unmatched++;teamTotal++;if(isStarted)teamStarted++;return;}
       stats[lp].total++;teamTotal++;
       if(isStarted){stats[lp].started++;teamStarted++;}
     });
@@ -5672,19 +5671,7 @@ function buildLeadsTable(rows,emptyMsg,showUrgency){
 
 
 
-setInterval(function(){
-  if(userTyping)return;
-  loadAgentAssignments().catch(function(){});
-  if(currentUser==="Daniel"&&Object.keys(pendingNote).length===0){
-    loadCallLogs().then(function(){renderDaniel();});
-  } else if(currentUser==="Snapshot"&&Object.keys(pendingNote).length===0){
-    loadCallLogs().then(function(){buildSnapshot();});
-    if(typeof loadAmandaSnapshot==="function")loadAmandaSnapshot();
-  } else if(currentUser==="Leads"){
-    loadReferralLeadsDirect();
-    renderGrowthScoreboard();renderVelocifyLeaderboard();renderLeaderboard();
-  }
-},30000);
+/* automatic 30-second dashboard repaint retired; Refresh/save actions are authoritative */
 document.getElementById("weekPill").textContent=getWeekLabel(weekKey);
 // Pause auto-refresh while user is typing in any input or textarea
 document.addEventListener("focusin",function(e){if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"){userTyping=true;}});
@@ -5700,10 +5687,7 @@ document.addEventListener("focusout",function(e){if(e.target.tagName==="TEXTAREA
 // next time any agent card is viewed it refetches fresh — typically within a couple of minutes
 // of a change, not instantly, and never while someone's actively typing or has the contact
 // modal open.
-setInterval(function(){
-  if(userTyping||editingLpContact)return;
-  contactCache={};
-},120000);
+/* periodic contact-cache timer retired */
 document.addEventListener("visibilitychange",function(){
   if(!document.hidden&&!userTyping&&!editingLpContact)contactCache={};
 });
@@ -5771,7 +5755,7 @@ function initRealtimeSync(){
     window._coreTeamRealtimeChannel=ch;
   }catch(e){console.warn("Realtime setup failed (non-critical — falling back to polling):",e.message);}
 }
-initRealtimeSync();
+/* realtime dashboard auto-repaint retired for stability */
 loadAgents();
 // Ownership is useful, but it no longer competes with the first connection/data paint.
 setTimeout(function(){try{loadAgentAssignments();}catch(e){console.warn("LP ownership preload:",e);}},500);
@@ -8281,42 +8265,33 @@ function ctRenderLpConversionBoxes(data){
   var host=document.getElementById("lp-conversion-boxes-v2");
   if(!host||!data) return;
   var lpMap={"Gavin":["Dill","Gavin"],"Karen":["De La Riva","Karen"],"Osgood":["McMahon","Osgood"],"Jordan":["Johnston","Jordan"],"Said":["Saleh","Said"]};
-  var now=new Date();
-  var todayStr=localDateStr(now);
-  var stats={};
-  Object.keys(lpMap).forEach(function(lp){stats[lp]={today:0,sent:0,started:0};});
-
+  var order=["Gavin","Karen","Osgood","Jordan","Said","Other / Core Team"];
+  var now=new Date(),todayStr=localDateStr(now),stats={};
+  order.forEach(function(lp){stats[lp]={today:0,sent:0,started:0};});
+  function bucket(r){
+    var u=(r.lp_user||"");
+    for(var lp in lpMap){if(lpMap[lp].some(function(k){return u.indexOf(k)>=0;}))return lp;}
+    return "Other / Core Team";
+  }
   data.forEach(function(r){
-    var lpName=null;
-    Object.keys(lpMap).forEach(function(lp){
-      if(lpMap[lp].some(function(k){return (r.lp_user||"").indexOf(k)>=0;})) lpName=lp;
-    });
-    if(!lpName) return;
-    stats[lpName].sent++;
-    if(r.date_added===todayStr) stats[lpName].today++;
-    if((r.status||"").toLowerCase().indexOf("start")>=0) stats[lpName].started++;
+    var lp=bucket(r),s=stats[lp];s.sent++;
+    if(r.date_added===todayStr)s.today++;
+    if((r.status||"").toLowerCase().indexOf("start")>=0)s.started++;
   });
-
-  var allLtf=Object.keys(stats).map(function(lp){
-    var s=stats[lp]; return s.sent>0 ? Math.round(s.started/s.sent*100) : 0;
-  });
-  var teamAvg=Math.round(allLtf.reduce(function(a,b){return a+b;},0)/allLtf.length);
-
-  var html='<div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Per-LP conversion — MTD</div>';
+  var teamSent=data.length,teamStarted=data.filter(function(r){return(r.status||"").toLowerCase().indexOf("start")>=0;}).length;
+  var teamAvg=teamSent?Math.round(teamStarted/teamSent*100):0;
+  var html='<div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Per-user conversion — MTD</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">';
-  Object.keys(lpMap).forEach(function(lp){
-    var s=stats[lp];
-    var ltf=s.sent>0?Math.round(s.started/s.sent*100):0;
+  order.forEach(function(lp){
+    var s=stats[lp],ltf=s.sent?Math.round(s.started/s.sent*100):0;
+    if(lp==="Other / Core Team"&&!s.sent)return;
     var color=ltf>=teamAvg?"#3E8E5A":ltf>0?"#B8842B":"#94a3b8";
     html+='<div style="background:#fff;border:1px solid var(--border);border-top:3px solid #3D4E68;border-radius:10px;padding:12px 14px">'
       +'<div style="font-size:13px;font-weight:700;color:#3D4E68;margin-bottom:6px">'+lp+'</div>'
       +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">Today</span><span style="font-weight:700">'+s.today+' sent</span></div>'
       +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">Leads sent MTD</span><span style="font-weight:700">'+s.sent+'</span></div>'
       +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">File starts</span><span style="font-weight:700">'+s.started+'</span></div>'
-      +'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">'
-        +'<span style="font-size:10.5px;color:var(--text-3)">Lead → File</span><span style="font-size:16px;font-weight:800;color:'+color+'">'+ltf+'%</span>'
-      +'</div>'
-      +'<div style="font-size:9.5px;color:var(--text-3);margin-top:2px">vs. team avg '+teamAvg+'%</div>'
+      +'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between"><span style="font-size:10.5px;color:var(--text-3)">Lead → File</span><span style="font-size:16px;font-weight:800;color:'+color+'">'+ltf+'%</span></div>'
       +'</div>';
   });
   html+='</div>';
@@ -9850,10 +9825,7 @@ function openRmView(btn){
   rmLoadAll();
   rmStartPolling();
 }
-function rmStartPolling(){
-  if(rmPollInterval)clearInterval(rmPollInterval);
-  rmPollInterval=setInterval(function(){if(currentUser==="RM"&&!userTyping)rmLoadAll();},30000);
-}
+function rmStartPolling(){ rmStopPolling(); }
 function rmStopPolling(){if(rmPollInterval){clearInterval(rmPollInterval);rmPollInterval=null;}}
 
 // The old LP-side RM execution injectors are intentionally disabled.
@@ -10406,6 +10378,20 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
     const pr=document.querySelector('.wb-Portfolio');if(pr)pr.textContent='Portfolio';
     const own=document.querySelector('.wb-Ownership');if(own)own.style.display='none';
   });
+})();
+</script>
+
+
+<script id="v209-lp-source-truth-js">
+(function(){
+  function add(){
+    const h=document.querySelector('#view-leads h2,#view-leads .section-title');
+    if(!h||document.getElementById('referral-truth-note'))return;
+    const n=document.createElement('div');n.id='referral-truth-note';
+    n.textContent='Top-line lead counts include all Core Team users. LP cards break out the five primary LPs; any remaining Core Team users stay in Other / Core Team.';
+    h.insertAdjacentElement('afterend',n);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();
 })();
 </script>
 
