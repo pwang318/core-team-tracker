@@ -1,11 +1,11 @@
-    
+     
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260820-v45-rm-notes-highlighted">
-  <meta name="build-notes" content="v29 live Velocify recency reconciliation: normalized cross-system agent matching + live lead dates drive LP last activity/active status; v28 culture + RM nurture retained">
+  <meta name="version" content="20260821-v46-daniel-tier-growth-aligned">
+  <meta name="build-notes" content="Daniel-aligned Tier Growth: Channel 10+, A 4-9, B 2-3, C 1 close or 1 lead; month-end targets and 50-point net tier-count score; individual migrations remain diagnostic.">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1513,7 +1513,7 @@ table tbody tr:hover{background:#F6FBFC!important}
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
         <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
         <select id="d-rm" onchange="renderDaniel()"><option value="">All RM Owners</option><option>Amanda</option><option>Nyny</option><option value="Unassigned">Unassigned</option></select>
-        <select id="d-lvl" onchange="renderDaniel()"><option value="">All levels</option><option>A</option><option>B</option><option>C</option></select>
+        <select id="d-lvl" onchange="renderDaniel()"><option value="">All tiers</option><option>Channel</option><option>A</option><option>B</option><option>C</option></select>
         <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
         <input type="text" id="d-q" placeholder="Search..." oninput="renderDaniel()" style="width:120px">
       </div>
@@ -2115,7 +2115,7 @@ function renderTierMovementPanel(){
   var el=document.getElementById("d-tier-movement-section");
   if(!el)return;
   // C→B and B→A each get two buckets: "ready now" (already qualifies, closes>=threshold) and
-  // "one away" (exactly one close short). Real thresholds: C=0-1, B=2-3, A=4+ closes.
+  // "one away" (exactly one close short). Daniel-approved thresholds: Channel=10+, A=4-9, B=2-3, C=1 close or 1 lead.
   var cToB_ready=[],cToB_close=[],bToA_ready=[],bToA_close=[];
   agents.forEach(function(a){
     if(!isActive(a))return;
@@ -9809,5 +9809,243 @@ async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId
 <script id="v45-facetime-tier-alignment">
 console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + current Power BI");
 </script>
+
+<script id="v46-daniel-tier-growth-alignment">
+/* Daniel alignment · 2026-08-21
+   Source of truth:
+   Channel 10+ closings
+   A 4-9 closings
+   B 2-3 closings
+   C 1 closing OR 1 lead
+   Tier Growth score (50 pts): Channel 15 + A 15 + B 20
+   Score is based on NET COUNTS vs current month-end target.
+   Individual C→B / B→A / A→Channel movements stay visible as diagnostics only.
+*/
+(function(){
+  const DTG_TARGETS = [
+    {key:"baseline", label:"Current baseline", date:"2026-08-20", Channel:1, A:12, B:18},
+    {key:"sep", label:"9/30 Target", date:"2026-09-30", Channel:2, A:14, B:21},
+    {key:"oct", label:"10/31 Target", date:"2026-10-31", Channel:2, A:16, B:24},
+    {key:"nov", label:"11/30 Target", date:"2026-11-30", Channel:3, A:18, B:27},
+    {key:"dec", label:"12/31 Goal", date:"2026-12-31", Channel:4, A:20, B:30}
+  ];
+  const DTG_WEIGHTS = {Channel:15, A:15, B:20};
+
+  function dtgTier(closes, leads){
+    closes=Number(closes||0); leads=Number(leads||0);
+    return closes>=10?"Channel":closes>=4?"A":closes>=2?"B":(closes>=1||leads>=1)?"C":null;
+  }
+  window.lpDanielTierFromProduction = dtgTier;
+
+  function dtgMilestone(now){
+    const d=new Date(now||Date.now()); d.setHours(0,0,0,0);
+    for(let i=1;i<DTG_TARGETS.length;i++){
+      const t=new Date(DTG_TARGETS[i].date+"T23:59:59");
+      if(d<=t)return DTG_TARGETS[i];
+    }
+    return DTG_TARGETS[DTG_TARGETS.length-1];
+  }
+
+  function dtgPts(actual,target,weight){
+    if(!target)return 0;
+    return Math.min(weight, (Number(actual||0)/Number(target))*weight);
+  }
+
+  function dtgEsc(s){
+    return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  async function dtgPopulation(){
+    const rows=await sbFetch("GET","agent_profiles?select=agent_name,tier,closes_past_year,total_leads_past_year,relationship_status,do_not_contact,powerbi_last_seen_at&limit=5000").catch(function(){return[];});
+    if(!Array.isArray(rows))return {rows:[],counts:{Channel:0,A:0,B:0,C:0,None:0},latest:null};
+
+    let latest=null;
+    rows.forEach(function(r){
+      if(r.powerbi_last_seen_at&&(!latest||new Date(r.powerbi_last_seen_at)>new Date(latest)))latest=r.powerbi_last_seen_at;
+    });
+
+    let current=latest?rows.filter(function(r){
+      return r.powerbi_last_seen_at&&Math.abs(new Date(r.powerbi_last_seen_at)-new Date(latest))<120000;
+    }):rows.slice();
+
+    // Power BI is production data, not roster authority. Respect manual removals and DNC.
+    current=current.filter(function(r){
+      return r.relationship_status!=="inactive" && r.do_not_contact!==true;
+    });
+
+    current=current.map(function(r){
+      const calc=dtgTier(r.closes_past_year,r.total_leads_past_year);
+      return Object.assign({},r,{tier:calc});
+    });
+
+    const counts={Channel:0,A:0,B:0,C:0,None:0};
+    current.forEach(function(r){
+      if(counts.hasOwnProperty(r.tier))counts[r.tier]++;
+      else counts.None++;
+    });
+    return {rows:current,counts:counts,latest:latest};
+  }
+  window.lpDanielTierPopulation=dtgPopulation;
+
+  function dtgStatus(score){
+    if(score>=47.5)return {label:"ON PACE",color:"#2F6B4F",bg:"#EEF7F1"};
+    if(score>=40)return {label:"WATCH",color:"#8A6728",bg:"#FBF6E8"};
+    return {label:"BEHIND",color:"#A64B45",bg:"#FCEFED"};
+  }
+
+  function dtgProgress(actual,target){
+    return target?Math.min(100,Math.round((actual/target)*100)):0;
+  }
+
+  function dtgBar(actual,target,color){
+    const pct=dtgProgress(actual,target);
+    return '<div style="height:6px;background:#EEF0EA;border-radius:999px;overflow:hidden;margin-top:8px">'
+      +'<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:999px"></div></div>'
+      +'<div style="font-size:11px;color:#667085;margin-top:5px">'+pct+'% of current target</div>';
+  }
+
+  function dtgRoadmap(){
+    return '<div style="overflow-x:auto;margin-top:14px"><table style="min-width:560px"><thead><tr>'
+      +'<th>Milestone</th><th>Channel</th><th>A</th><th>B</th></tr></thead><tbody>'
+      +DTG_TARGETS.map(function(t){
+        return '<tr><td style="font-weight:700">'+t.label+'</td><td>'+t.Channel+'</td><td>'+t.A+'</td><td>'+t.B+'</td></tr>';
+      }).join("")+'</tbody></table></div>';
+  }
+
+  async function dtgScoreboardHtml(){
+    const pop=await dtgPopulation();
+    const c=pop.counts, target=dtgMilestone();
+    const pCh=dtgPts(c.Channel,target.Channel,DTG_WEIGHTS.Channel);
+    const pA=dtgPts(c.A,target.A,DTG_WEIGHTS.A);
+    const pB=dtgPts(c.B,target.B,DTG_WEIGHTS.B);
+    const score=pCh+pA+pB, stat=dtgStatus(score);
+
+    return '<div data-daniel-tier-scorecard="1" style="background:#fff;border:1px solid #DDE2EA;border-radius:14px;padding:16px;box-shadow:0 4px 16px rgba(26,26,46,.05)">'
+      +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px">'
+        +'<div><div style="font-size:14px;font-weight:800;color:#18181B">Tier Growth · 50% of Scorecard</div>'
+        +'<div style="font-size:12px;color:#667085;margin-top:3px">Net partner counts · current milestone: <b>'+target.label+'</b></div></div>'
+        +'<div style="text-align:right"><div style="font-size:26px;font-weight:800;color:#18181B">'+score.toFixed(1)+' <span style="font-size:14px;color:#667085">/ 50</span></div>'
+        +'<span style="display:inline-block;padding:3px 9px;border-radius:999px;background:'+stat.bg+';color:'+stat.color+';font-size:10px;font-weight:800">'+stat.label+'</span></div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px">'
+        +'<div style="background:#FAFBF8;border:1px solid #E3E7DD;border-radius:11px;padding:13px"><div style="font-size:11px;font-weight:800;color:#536071;text-transform:uppercase">Channel · 15 pts</div><div style="font-size:25px;font-weight:800;margin-top:4px">'+c.Channel+' <span style="font-size:14px;color:#667085">/ '+target.Channel+'</span></div>'+dtgBar(c.Channel,target.Channel,"#6E8B55")+'<div style="font-size:11px;color:#536071;margin-top:5px">'+pCh.toFixed(1)+' / 15 pts</div></div>'
+        +'<div style="background:#FAFBF8;border:1px solid #E3E7DD;border-radius:11px;padding:13px"><div style="font-size:11px;font-weight:800;color:#536071;text-transform:uppercase">A · 15 pts</div><div style="font-size:25px;font-weight:800;margin-top:4px">'+c.A+' <span style="font-size:14px;color:#667085">/ '+target.A+'</span></div>'+dtgBar(c.A,target.A,"#6E8B55")+'<div style="font-size:11px;color:#536071;margin-top:5px">'+pA.toFixed(1)+' / 15 pts</div></div>'
+        +'<div style="background:#FAFBF8;border:1px solid #E3E7DD;border-radius:11px;padding:13px"><div style="font-size:11px;font-weight:800;color:#536071;text-transform:uppercase">B · 20 pts</div><div style="font-size:25px;font-weight:800;margin-top:4px">'+c.B+' <span style="font-size:14px;color:#667085">/ '+target.B+'</span></div>'+dtgBar(c.B,target.B,"#6E8B55")+'<div style="font-size:11px;color:#536071;margin-top:5px">'+pB.toFixed(1)+' / 20 pts</div></div>'
+        +'<div style="background:#F8F8FA;border:1px solid #E6E6EA;border-radius:11px;padding:13px"><div style="font-size:11px;font-weight:800;color:#667085;text-transform:uppercase">C · Development</div><div style="font-size:25px;font-weight:800;margin-top:4px">'+c.C+'</div><div style="font-size:11px;color:#667085;margin-top:10px">1 closing OR 1 lead. C is tracked, but carries no direct Tier Growth points.</div></div>'
+      +'</div>'
+      +'<div style="font-size:11.5px;color:#4B5563;line-height:1.55;margin-top:12px;padding:10px 12px;background:#F7F8F5;border-radius:9px"><b>Daniel-approved definitions:</b> Channel 10+ closings · A 4–9 · B 2–3 · C 1 closing or 1 lead. Individual C→B, B→A and A→Channel movements explain how growth is happening, but do not create the performance score.</div>'
+      +dtgRoadmap()
+    +'</div>';
+  }
+
+  // Replace the old 200 / 25 A / 35 B scoreboard wherever the LP tracker uses it.
+  window.renderGrowthScoreboard = async function(){
+    const ids=["d-growth-scoreboard","d-growth-scoreboard-tab"];
+    const html=await dtgScoreboardHtml();
+    ids.forEach(function(id){
+      const el=document.getElementById(id);
+      if(el)el.innerHTML=html;
+    });
+  };
+
+  // Movement panel now includes the full Daniel path: C→B, B→A, A→Channel.
+  window.renderTierMovementPanel = async function(){
+    const el=document.getElementById("d-tier-movement-section");
+    if(!el)return;
+    el.innerHTML='<div style="padding:14px;color:#667085">Loading tier movement opportunities…</div>';
+    const pop=await dtgPopulation();
+    const groups=[
+      {key:"C→B",from:"C",ready:2,oneAway:1},
+      {key:"B→A",from:"B",ready:4,oneAway:3},
+      {key:"A→Channel",from:"A",ready:10,oneAway:9}
+    ];
+    function card(r,label){
+      const closes=Number(r.closes_past_year||0), leads=Number(r.total_leads_past_year||0);
+      return '<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #EDF0F4">'
+        +'<div><div style="font-size:12.5px;font-weight:700">'+dtgEsc(r.agent_name)+'</div><div style="font-size:11px;color:#667085">'+closes+' close'+(closes===1?'':'s')+' · '+leads+' lead'+(leads===1?'':'s')+'</div></div>'
+        +'<span style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;background:'+(label==="READY"?"#EEF7F1":"#FBF6E8")+';color:'+(label==="READY"?"#2F6B4F":"#8A6728")+'">'+label+'</span>'
+      +'</div>';
+    }
+    let html='<div style="background:#fff;border:1px solid #DDE2EA;border-radius:12px;overflow:hidden">'
+      +'<div style="padding:13px 15px;border-bottom:1px solid #EDF0F4"><div style="font-size:13px;font-weight:800">How we’re creating the growth</div><div style="font-size:11.5px;color:#667085;margin-top:3px">Diagnostic only — these movements do not create Tier Growth points.</div></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0">';
+    groups.forEach(function(g){
+      const from=pop.rows.filter(function(r){return r.tier===g.from;});
+      const ready=from.filter(function(r){return Number(r.closes_past_year||0)>=g.ready;});
+      const one=from.filter(function(r){return Number(r.closes_past_year||0)===g.oneAway;});
+      html+='<div style="padding:13px 15px;border-right:1px solid #EDF0F4;min-height:130px">'
+        +'<div style="font-size:12px;font-weight:800;color:#3D4E68;margin-bottom:6px">'+g.key+'</div>';
+      if(!ready.length&&!one.length){
+        html+='<div style="font-size:11.5px;color:#8A8F98;padding:10px 0">No immediate candidates from current production.</div>';
+      }else{
+        ready.slice(0,5).forEach(function(r){html+=card(r,"READY");});
+        one.slice(0,5).forEach(function(r){html+=card(r,"ONE AWAY");});
+      }
+      html+='</div>';
+    });
+    html+='</div></div>';
+    el.innerHTML=html;
+  };
+
+  // Portfolio Review: keep the detailed operational report, but replace stale scoring/goal blocks
+  // with Daniel's now-approved net tier-count scorecard.
+  const _pfrLoadDanielBase=window.pfrLoad;
+  if(typeof _pfrLoadDanielBase==="function"){
+    window.pfrLoad=async function(){
+      await _pfrLoadDanielBase.apply(this,arguments);
+      const body=document.getElementById("pfr-body");
+      if(!body)return;
+      const official=document.createElement("div");
+      official.id="pfr-daniel-tier-growth";
+      official.style.marginBottom="14px";
+      official.innerHTML=await dtgScoreboardHtml();
+      const old=document.getElementById("pfr-daniel-tier-growth");
+      if(old&&old!==official)old.remove();
+      body.insertBefore(official,body.firstChild);
+
+      // Hide stale/duplicative leadership cards that still use the superseded 200 / 25 / 35 goals
+      // or say scoring is paused. Keep migration detail elsewhere as diagnostic history.
+      Array.from(body.children).forEach(function(ch){
+        if(ch===official)return;
+        const t=(ch.textContent||"").replace(/\s+/g," ").trim();
+        if(t.indexOf("Portfolio Scorecard")>=0 && t.indexOf("single weighted number")>=0)ch.style.display="none";
+        if(t.indexOf("Power BI Active Portfolio")>=0 && (t.indexOf("25")>=0||t.indexOf("35")>=0))ch.style.display="none";
+      });
+    };
+  }
+
+  // Keep static help text honest anywhere old wording appears after render.
+  function dtgFixLabels(){
+    document.querySelectorAll("#view-leads,#view-daniel,#view-portfolio-review").forEach(function(root){
+      root.querySelectorAll("*").forEach(function(el){
+        if(el.children.length)return;
+        const t=(el.textContent||"").trim();
+        if(t==="Tier Migration")el.textContent="Tier Growth";
+        if(t.indexOf("C=0-1, B=2-3, A=4+")>=0)el.textContent=t.replace("C=0-1, B=2-3, A=4+","Channel=10+, A=4-9, B=2-3, C=1 close or 1 lead");
+      });
+    });
+  }
+
+  // Refresh official panels whenever the Growth tab is opened.
+  const _switchLeadsTabDaniel=window.switchLeadsTab;
+  if(typeof _switchLeadsTabDaniel==="function"){
+    window.switchLeadsTab=function(tab,btn){
+      const r=_switchLeadsTabDaniel.apply(this,arguments);
+      if(tab==="growth"){
+        setTimeout(function(){renderGrowthScoreboard();renderTierMovementPanel();dtgFixLabels();},0);
+      }
+      return r;
+    };
+  }
+
+  // Initial safe refresh if those surfaces already exist.
+  setTimeout(function(){
+    try{renderGrowthScoreboard();}catch(e){}
+    try{renderTierMovementPanel();}catch(e){}
+    try{dtgFixLabels();}catch(e){}
+  },250);
+})();
+</script>
+
 </body>
 </html>
