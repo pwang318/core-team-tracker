@@ -1,4 +1,4 @@
-    
+     
 <!DOCTYPE html>
 <!-- v54: Daniel alignment copy audit; preserves v53 button fixes and v52 live-data sync -->
 <!-- LP Tracker v53 · clickable Portfolio agent drilldowns + Daniel source-of-truth preserved · 2026-08-21 -->
@@ -1284,17 +1284,17 @@ table tbody tr:hover{background:#F6FBFC!important}
       <div style="font-size:10.5px;color:#64748b;margin-top:2px">Awaiting RM response/handling</div>
     </div>
     <div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px 16px">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#475569;margin-bottom:4px">Amanda RM activity</div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#475569;margin-bottom:4px">Amanda execution</div>
       <div id="rm-period-activity-count" style="font-size:24px;font-weight:800;color:#1F4E79">—</div>
-      <div id="rm-period-activity-label" style="font-size:10.5px;color:#64748b;margin-top:2px">Current period</div>
+      <div id="rm-period-activity-label" style="font-size:10.5px;color:#64748b;margin-top:2px">Logged work only · open tasks excluded</div>
     </div>
   </div>
 
   <div style="background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden">
     <div style="padding:11px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
       <div>
-        <div style="font-size:12px;font-weight:800;color:var(--text)">Recent Amanda RM activity</div>
-        <div style="font-size:10.5px;color:#64748b;margin-top:2px">Read-only here. Use the RM Tracker for logging, coaching, and LP-flag follow-up.</div>
+        <div style="font-size:12px;font-weight:800;color:var(--text)">Recent Amanda execution</div>
+        <div style="font-size:10.5px;color:#64748b;margin-top:2px">Completed/logged RM work only. Open New Contract, CTC, and other to-do items stay in the RM Tracker until Amanda actually works them.</div>
       </div>
       <div style="padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:800;color:#1F4E79;background:#f8fafc">Amanda</div>
     </div>
@@ -9865,7 +9865,10 @@ function ctStripRmMeta(notes){
     n=n.replace(/\s*\[TXN_TRIGGER\]/gi,"");
     n=n.replace(/\s*\[TXN_[A-Z_]+(?::[^\]]*)?\]/gi,"");
     n=n.replace(/\s*\[(?:RM_OWNER|RM_ATTENDEES|LP_ATTENDEES|NEXT_STEP_OWNER):[^\]]*\]/gi,"");
-    return n.replace(/\s{2,}/g," ").trim();
+    // Privacy guard: loan/account identifiers never belong in a human-facing tracker note.
+    n=n.replace(/\b(?:Loan\s*(?:Number|No\.?|#)|Ln\s*#)\s*[:#-]?\s*[A-Z0-9][A-Z0-9-]{3,}\b/gi,"");
+    n=n.replace(/\b(?:new-contract|clear-to-close)-loan-[A-Z0-9-]+\b/gi,"");
+    return n.replace(/\s{2,}/g," ").replace(/\s*[·|]\s*(?=$)/g,"").trim();
   }catch(e){return String(notes||"").replace(/\s*\[TXN_TRIGGER\]/gi,"").replace(/\s*\[TXN_[^\]]*\]/gi,"").trim();}
 }
 
@@ -9957,8 +9960,20 @@ function ctRmCount(rows,type){
 var rmLeadershipCache={all:[],todayStr:"",week:null,monthStart:"",openFlags:0};
 rmCurrentPeriod="mtd";
 
+// Core Team leadership view = EXECUTION, not Amanda's to-do list.
+// Machine-created New Contract / CTC triggers stay in RM Tracker where the work is performed,
+// but they do not count as activity and do not appear in the Core Team feed.
+function ctRmIsExecutedActivity(a){
+  if(!a)return false;
+  try{if(typeof lpIsInternalRmActivity==="function"&&lpIsInternalRmActivity(a))return false;}catch(e){}
+  var notes=String(a.notes||""),type=String(a.act_type||"").trim().toLowerCase(),outcome=String(a.outcome||"").trim().toLowerCase();
+  if(/\[TXN_TRIGGER\]/i.test(notes))return false;
+  if((type==="new contract"||type==="clear to close")&&(/\[TXN_/i.test(notes)||outcome==="requires follow-up"))return false;
+  return true;
+}
+
 function rmPeriodRows(){
-  var rows=rmLeadershipCache.all||[];
+  var rows=(rmLeadershipCache.all||[]).filter(ctRmIsExecutedActivity);
   if(rmCurrentPeriod==="today")return rows.filter(function(a){return a.act_date===rmLeadershipCache.todayStr;});
   if(rmCurrentPeriod==="week")return rows.filter(function(a){return a.act_date>=rmLeadershipCache.week.start&&a.act_date<=rmLeadershipCache.week.end;});
   return rows;
@@ -10020,7 +10035,7 @@ function rmRenderFeed(){
   if(!el)return;
   var data=rmPeriodRows().filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Amanda";}).slice();
   data.sort(function(a,b){return String(b.act_date||"").localeCompare(String(a.act_date||""));});
-  if(!data.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#64748b;font-size:13px">No Amanda RM activity found for this period.</div>';return;}
+  if(!data.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#64748b;font-size:13px">No completed Amanda RM activity found for this period.</div>';return;}
   el.innerHTML=data.slice(0,80).map(function(a){
     var noteHtml=ctRmFeedNote(a);
     return '<div style="padding:10px 0;border-bottom:1px solid #edf0f4">'
@@ -10049,7 +10064,7 @@ async function rmLoadAll(){
     var rows=rmPeriodRows();
     var fc=document.getElementById("rm-open-flags-count");if(fc)fc.textContent=rmLeadershipCache.openFlags;
     var ac=document.getElementById("rm-period-activity-count");if(ac)ac.textContent=rows.filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Amanda";}).length;
-    var al=document.getElementById("rm-period-activity-label");if(al)al.textContent=rmCurrentPeriod==="today"?"Today":rmCurrentPeriod==="week"?"This week":"Month to date";
+    var al=document.getElementById("rm-period-activity-label");if(al)al.textContent=(rmCurrentPeriod==="today"?"Today":rmCurrentPeriod==="week"?"This week":"Month to date")+" · logged work only";
     var lr=document.getElementById("rm-last-refreshed");if(lr)lr.textContent="Updated "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
   }catch(e){
     console.warn("RM leadership view failed",e);
@@ -10063,7 +10078,7 @@ function rmSwitchPeriod(period,btn){
   rmRenderGoals();rmRenderFeed();
   var rows=rmPeriodRows(),ac=document.getElementById("rm-period-activity-count"),al=document.getElementById("rm-period-activity-label");
   if(ac)ac.textContent=rows.filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Amanda";}).length;
-  if(al)al.textContent=period==="today"?"Today":period==="week"?"This week":"Month to date";
+  if(al)al.textContent=(period==="today"?"Today":period==="week"?"This week":"Month to date")+" · logged work only";
 }
 function openRmView(btn){
   if(typeof lpStopPolling==="function")lpStopPolling();
