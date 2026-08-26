@@ -1,13 +1,13 @@
-     
+      
 <!DOCTYPE html>
-<!-- v54: Daniel alignment copy audit; preserves v53 button fixes and v52 live-data sync -->
+<!-- v56: Lead-to-App conversion fix; DQ Credit/Income count as apps because qualification requires an application -->
 <!-- LP Tracker v53 · clickable Portfolio agent drilldowns + Daniel source-of-truth preserved · 2026-08-21 -->
 <!-- v54: keeps v53 clearable RM inbox + restores Aug 26 Better Quote of the Day deck -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260821-v53-portfolio-agent-actions">
+  <meta name="version" content="20260826-v56-lead-to-app-dq-included">
   <meta name="build-notes" content="Daniel-aligned Tier Growth: Channel 10+, A 4-9, B 2-3, C 1 close or 1 lead; month-end targets and 50-point net tier-count score; individual migrations remain diagnostic.">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -59,6 +59,7 @@ body{font-family:'Geist','Inter',-apple-system,sans-serif;color:var(--text);font
 .wb-Osgood.active{background:#EEF1F6;border-color:#3D4E68;color:#3D4E68;font-weight:600}
 .wb-Jordan.active{background:#EEF1F6;border-color:#3D4E68;color:#3D4E68;font-weight:600}
 .wb-Said.active{background:#EEF1F6;border-color:#3D4E68;color:#3D4E68;font-weight:600}
+.wb-Isaak.active{background:#EEF1F6;border-color:#3D4E68;color:#3D4E68;font-weight:600}
 .wb-Daniel{}.wb-Daniel:hover{background:#1e293b;border-color:#1e293b;color:#fff}.wb-Daniel.active{background:#1F4E79;border-color:#3b82f6;color:#fff;font-weight:700;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
 .wb-RM.active{background:#FAF7F2;border-color:#8C7355;color:#8C7355;font-weight:600}
 .wb-Admin.active{background:#FAF7F2;border-color:#8C7355;color:#8C7355;font-weight:600}
@@ -133,9 +134,10 @@ body{font-family:'Geist','Inter',-apple-system,sans-serif;color:var(--text);font
 .lp-tag-Osgood{background:var(--lp-osgood-bg);color:var(--lp-osgood)}
 .lp-tag-Jordan{background:var(--lp-jordan-bg);color:var(--lp-jordan)}
 .lp-tag-Said{background:var(--lp-said-bg);color:var(--lp-said)}
+.lp-tag-Isaak{background:#EEF1F6;color:#3D4E68}
 .lp-tag-Unassigned{background:#f1f5f9;color:#64748b}
-.lp-c-Gavin{color:var(--lp-gavin)}.lp-c-Karen{color:var(--lp-karen)}.lp-c-Osgood{color:var(--lp-osgood)}.lp-c-Jordan{color:var(--lp-jordan)}.lp-c-Said{color:var(--lp-said)}
-.bar-Gavin{background:var(--lp-gavin)}.bar-Karen{background:var(--lp-karen)}.bar-Osgood{background:var(--lp-osgood)}.bar-Jordan{background:var(--lp-jordan)}.bar-Said{background:var(--lp-said)}
+.lp-c-Gavin{color:var(--lp-gavin)}.lp-c-Karen{color:var(--lp-karen)}.lp-c-Osgood{color:var(--lp-osgood)}.lp-c-Jordan{color:var(--lp-jordan)}.lp-c-Said{color:var(--lp-said)}.lp-c-Isaak{color:#3D4E68}
+.bar-Gavin{background:var(--lp-gavin)}.bar-Karen{background:var(--lp-karen)}.bar-Osgood{background:var(--lp-osgood)}.bar-Jordan{background:var(--lp-jordan)}.bar-Said{background:var(--lp-said)}.bar-Isaak{background:#3D4E68}
 
 /* Section heads */
 .section-head{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin:1.1rem 0 .6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-family:'Geist','Inter',sans-serif}
@@ -1458,13 +1460,20 @@ table tbody tr:hover{background:#F6FBFC!important}
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem">
     <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads-v2">--</div><div id="ref-mtd-goal-pace" style="font-size:10px;color:var(--text-3);margin-top:2px"></div></div>
-    <div class="ref-stat-card"><div class="ref-stat-label">File Starts</div><div class="ref-stat-value good" id="ref-file-starts-v2">--</div></div>
-    <div class="ref-stat-card"><div class="ref-stat-label">Lead-to-File</div><div class="ref-stat-value" id="ref-ltf-v2">--</div></div>
+    <div class="ref-stat-card"><div class="ref-stat-label">Converted to App</div><div class="ref-stat-value good" id="ref-file-starts-v2">--</div></div>
+    <div class="ref-stat-card"><div class="ref-stat-label">Lead → App</div><div class="ref-stat-value" id="ref-ltf-v2">--</div></div>
     <div class="ref-stat-card urgent"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch-v2">--</div></div>
   </div>
+  <div style="font-size:11px;color:var(--text-2);background:#F4FAFC;border:1px solid #DCEAF0;border-radius:8px;padding:8px 10px;margin:-2px 0 .75rem">
+    <b>Lead → App:</b> counts Started, Does Not Qualify (Credit/Income), Application Withdrawn/Denied, and later Encompass-synced loan milestones (for example Approval, RFPO, Submittal, Funding). A later milestone stays converted.
+  </div>
+  <details style="background:#fff;border:1px solid #DCE7EC;border-radius:9px;padding:8px 10px;margin:0 0 .8rem">
+    <summary style="cursor:pointer;font-size:11px;font-weight:700;color:#405565">Why this conversion number? View source status audit</summary>
+    <div id="ref-status-audit-v2" style="margin-top:8px;font-size:11px;color:var(--text-2)">Loading current status breakdown...</div>
+  </details>
   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.75rem;align-items:center">
     <span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Status:</span>
-    <span class="ref-badge rs-started ref-filter-btn" onclick="toggleRefFilter('status','File Started',this)" style="cursor:pointer">File Started</span>
+    <span class="ref-badge rs-started ref-filter-btn" onclick="toggleRefFilter('status','Converted to App',this)" style="cursor:pointer">Converted to App</span>
     <span class="ref-badge rs-contact ref-filter-btn" onclick="toggleRefFilter('status','Contact Attempt',this)" style="cursor:pointer">Contact Attempt</span>
     
     <span class="ref-badge rs-contacted ref-filter-btn" onclick="toggleRefFilter('status','Contacted',this)" style="cursor:pointer">Contacted</span>
@@ -1504,7 +1513,7 @@ table tbody tr:hover{background:#F6FBFC!important}
   </div>
   <div class="ref-section">
     <div class="ref-section-header">
-      <div><div class="ref-section-title">All unconverted &#8212; MTD</div><div class="ref-section-subtitle">Not yet a file start</div></div>
+      <div><div class="ref-section-title">Not yet converted &#8212; MTD</div><div class="ref-section-subtitle">Has not reached Started or a later loan milestone</div></div>
       <span class="ref-section-count" id="ref-uncovered-count-v2">0 leads</span>
     </div>
     <div id="ref-uncovered-table-v2"></div>
@@ -1514,7 +1523,7 @@ table tbody tr:hover{background:#F6FBFC!important}
   <div id="leads-tab-roster" class="d-tab-panel">
     <div class="section-head">Conversion by date range</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
-      <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">Search any date range for team and per-LP lead-to-file-started conversion — not limited to MTD/YTD.</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">Search any date range for team and per-LP Lead → App conversion. Started and later Encompass-synced milestones all count as converted.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
         <div><label style="font-size:10px;color:var(--text-3);text-transform:uppercase;display:block;margin-bottom:2px">Start date</label>
           <input type="date" id="conv-range-start" style="border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;font-family:inherit"></div>
@@ -1787,13 +1796,13 @@ table tbody tr:hover{background:#F6FBFC!important}
 </div>
 <script>
 var STORAGE_KEY="ct_agents_v3";
-var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
+var LPS=["Gavin","Jordan","Karen","Osgood","Said","Isaak"];
 var RMS=["Amanda","Nyny"];
 var agentRmOwners={};
 function assignmentKey(name){return (name||"").trim().toLowerCase().replace(/\s+/g," ");}
 function getRmOwner(name){return agentRmOwners[assignmentKey(name)]||"";}
 function rmOwnerBadge(name){var o=getRmOwner(name)||"Unassigned";return '<span class="rm-owner-tag" style="font-size:10.5px;font-weight:700;color:#071B37;background:#EAF7FB;border:1px solid #CDEAF2;border-radius:999px;padding:2px 7px;white-space:nowrap">RM: '+escHtml(o)+'</span>';}
-var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
+var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68",Isaak:"#3D4E68"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
@@ -1944,8 +1953,8 @@ function isMeaningfulOutcome(outcome,list,actType){
 }
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbHVjYmRranF5cWR2aWZ5cHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTUyMTMsImV4cCI6MjA5NjA3MTIxM30.VnqWcFT1WLQwCJxSdEIzIgOvETaOQly2IQxht-9uI7E";
 var STORAGE_KEY="ct_agents_v3";
-var LPS=["Gavin","Jordan","Karen","Osgood","Said"];
-var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
+var LPS=["Gavin","Jordan","Karen","Osgood","Said","Isaak"];
+var LP_COLORS={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68",Isaak:"#3D4E68"};
 var WEEKLY_TARGET=15;
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var CUTOFF=new Date(TODAY);CUTOFF.setDate(TODAY.getDate()-90);
@@ -2061,7 +2070,7 @@ function loadReferralLeadsDirect(){
     // Do not silently discard leads assigned to another Core Team user (ex: Isaak).
     referralLeadsCache=(res||[]);
     renderReferralLeadsDirect(referralLeadsCache);
-    if(lu2)lu2.textContent="Updated "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+    if(lu2)lu2.textContent="Fetched "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
   }).catch(function(){
     if(lu2)lu2.textContent="Could not load — check connection";
     renderReferralLeadsDirect([]);
@@ -2074,6 +2083,81 @@ function sortArrow(col){
 }
 
 
+// v55 — ONE source of truth for Lead → App conversion.
+// "Started" is the LP's manual conversion point. After the Encompass file exists,
+// Velocify can replace Started with later loan milestones. Those later statuses must
+// stay converted instead of falling back into the unconverted denominator.
+function ctIsLeadAppConverted(value){
+  var row=(value&&typeof value==="object")?value:null;
+  if(row){
+    // Future-proofing: if Zapier/Supabase later stores a permanent conversion marker,
+    // honor it without requiring another tracker rewrite.
+    if(row.converted_to_app===true||row.converted_to_app==="true"||row.app_started_at||row.file_started_at||row.started_at)return true;
+  }
+  var s=((row?row.status:value)||"").toString().toLowerCase().trim();
+  if(!s)return false;
+
+  var convertedSignals=[
+    "started","file started",
+    // Does Not Qualify requires enough application/file data to evaluate credit or income,
+    // so it is still a successful Lead -> App conversion even though the loan did not qualify.
+    "does not qualify",
+    "application withdrawn","application denied",
+    "approval","approved","preapproval","pre-approval",
+    "ready for pack out","rfpo",
+    "submittal","submitted","submission",
+    "processing","underwriting","underwriter",
+    "conditional approval","conditions",
+    "clear to close","ctc",
+    "closing","funding","funded",
+    "loan closed","closed"
+  ];
+  return convertedSignals.some(function(k){return s.indexOf(k)>=0;});
+}
+
+// Resolved statuses should not be sent back into "Needs Touch" just because they
+// are not an app conversion (for example, Not Interested, Bad Lead, or DNC).
+function ctIsLeadResolved(value){
+  var s=((value&&typeof value==="object"?value.status:value)||"").toString().toLowerCase().trim();
+  if(ctIsLeadAppConverted(value))return true;
+  return s.indexOf("not interested")>=0||
+         s.indexOf("bad lead")>=0||
+         s.indexOf("fake data")>=0||
+         s.indexOf("do not contact")>=0||
+         s.indexOf("duplicate")>=0;
+}
+
+// v57 source audit: explains exactly which current Supabase/Velocify statuses are driving
+// the Lead -> App number. This does not change counts; it makes stale/missing Zap updates visible.
+function ctLeadStatusBucket(value){
+  if(ctIsLeadAppConverted(value))return "converted";
+  if(ctIsLeadResolved(value))return "resolved-nonapp";
+  var s=((value&&typeof value==="object"?value.status:value)||"").toString().toLowerCase().trim();
+  if(!s||s==="new"||s.indexOf("contact attempt")>=0||s==="contacted"||s.indexOf("nurture")>=0||s.indexOf("scheduled")>=0)return "pre-app";
+  return "unmapped";
+}
+function ctRenderLeadStatusAudit(data){
+  var host=document.getElementById("ref-status-audit-v2");
+  if(!host)return;
+  var map={};
+  (data||[]).forEach(function(r){
+    var label=(r.status||"(blank)").toString().trim()||"(blank)";
+    if(!map[label])map[label]={status:label,count:0,bucket:ctLeadStatusBucket(r)};
+    map[label].count++;
+  });
+  var rows=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return b.count-a.count||a.status.localeCompare(b.status);});
+  var sums={converted:0,"resolved-nonapp":0,"pre-app":0,unmapped:0};
+  rows.forEach(function(r){sums[r.bucket]=(sums[r.bucket]||0)+r.count;});
+  function lab(b){return b==="converted"?"Counts as app":b==="resolved-nonapp"?"Resolved, no app":b==="pre-app"?"Pre-app / open":"Unmapped — review";}
+  function bg(b){return b==="converted"?"#EAF5EE":b==="resolved-nonapp"?"#F4F6F9":b==="pre-app"?"#EFF6FF":"#FFF4E5";}
+  function fg(b){return b==="converted"?"#276749":b==="resolved-nonapp"?"#596579":b==="pre-app"?"#1D4ED8":"#9A5B13";}
+  var h='<div style="padding:8px 9px;background:#F8FBFC;border-radius:7px;margin-bottom:8px;line-height:1.5"><b>This is the current database truth:</b> '+(data||[]).length+' MTD lead rows · <b>'+sums.converted+'</b> currently prove an application · '+sums["pre-app"]+' are still showing pre-app/open statuses · '+sums["resolved-nonapp"]+' are resolved without an app'+(sums.unmapped?' · <b style="color:#9A5B13">'+sums.unmapped+' unmapped</b>':'')+'.<br><span style="color:#667085">If someone was Started in Velocify but appears below as New, Contacted, Contact Attempt, or Nurture, the later milestone/status did not make it into the Supabase row.</span></div>';
+  h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr><th style="text-align:left;padding:6px 8px">Current status in database</th><th style="text-align:center;padding:6px 8px">Leads</th><th style="text-align:left;padding:6px 8px">Lead → App treatment</th></tr></thead><tbody>';
+  rows.forEach(function(r){h+='<tr><td style="padding:6px 8px">'+escHtml(r.status)+'</td><td style="padding:6px 8px;text-align:center;font-weight:700">'+r.count+'</td><td style="padding:6px 8px"><span style="display:inline-block;padding:2px 7px;border-radius:20px;background:'+bg(r.bucket)+';color:'+fg(r.bucket)+';font-weight:700">'+lab(r.bucket)+'</span></td></tr>';});
+  h+='</tbody></table></div>';
+  host.innerHTML=h;
+}
+
 function renderReferralLeadsDirect(data){
   // Compute stats
   var now=new Date();
@@ -2084,7 +2168,7 @@ function renderReferralLeadsDirect(data){
   var activeFilters={status:refFilters.status?[refFilters.status]:[],lp:refFilters.lp?[refFilters.lp]:[]};
 
   function lpMatch(r){
-    var lpMap={"Gavin":["Dill","Gavin"],"Karen":["De La Riva","Karen"],"Osgood":["McMahon","Osgood"],"Jordan":["Johnston","Jordan"],"Said":["Saleh","Said"]};
+    var lpMap={"Gavin":["Dill","Gavin"],"Karen":["De La Riva","Karen"],"Osgood":["McMahon","Osgood"],"Jordan":["Johnston","Jordan"],"Said":["Saleh","Said"],"Isaak":["Caldwell","Isaak"]};
     if(!activeFilters.lp||!activeFilters.lp.length)return true;
     return activeFilters.lp.some(function(lp){
       return lpMap[lp]&&lpMap[lp].some(function(k){return(r.lp_user||"").indexOf(k)>=0;});
@@ -2094,13 +2178,13 @@ function renderReferralLeadsDirect(data){
     if(!activeFilters.status||!activeFilters.status.length)return true;
     var st=(r.status||"").toLowerCase();
     return activeFilters.status.some(function(s){
-      if(s==="File Started")return st.indexOf("start")>=0;
+      if(s==="Converted to App")return ctIsLeadAppConverted(r);
       if(s==="Contact Attempt")return st.indexOf("contact attempt")>=0||st.indexOf("contact_attempt")>=0;
       if(s==="Contacted")return st==="contacted";
       if(s==="Nurture")return st.indexOf("nurture")>=0;
       if(s==="App Withdrawn")return st.indexOf("withdrawn")>=0||st.indexOf("app withdrawn")>=0;
       if(s==="Scheduled")return st.indexOf("scheduled")>=0;
-      if(s==="Other")return st===""||st==="new"||["started","contacted","contact attempt","nurture","withdrawn","scheduled"].every(function(k){return st.indexOf(k)<0;});
+      if(s==="Other")return !ctIsLeadAppConverted(r)&&(st===""||st==="new"||["contacted","contact attempt","nurture","withdrawn","scheduled"].every(function(k){return st.indexOf(k)<0;}));
       return true;
     });
   }
@@ -2114,25 +2198,27 @@ function renderReferralLeadsDirect(data){
   });
   // MTD = all leads including nurture (total volume)
   var mtd=data.filter(function(r){return lpMatch(r);}).length;
-  var fileStarts=filtered.filter(function(r){return(r.status||"").toLowerCase().indexOf("start")>=0;}).length;
-  var ltf=mtd>0?Math.round(fileStarts/mtd*100):0;
+  var appConversions=filtered.filter(function(r){return ctIsLeadAppConverted(r);}).length;
+  var ltf=mtd>0?Math.round(appConversions/mtd*100):0;
   var todayLeads=filtered.filter(function(r){return r.date_added===todayStr;});
   var priorLeads=filtered.filter(function(r){return r.date_added===priorStr;});
-  var unconverted=filtered.filter(function(r){return(r.status||"").toLowerCase().indexOf("start")<0;});
+  var unconverted=filtered.filter(function(r){return!ctIsLeadAppConverted(r);});
   var needsTouch=filtered.filter(function(r){
     var st=(r.status||"").toLowerCase();
-    // Exclude started and scheduled — those are handled
-    if(st.indexOf("start")>=0||st.indexOf("scheduled")>=0)return false;
+    // Exclude converted/resolved and scheduled leads — those are already handled
+    if(ctIsLeadResolved(r)||st.indexOf("scheduled")>=0)return false;
     // Include new, contact attempt, nurture, contacted-but-stale
     if(!r.last_update)return true;
     var lastUp=new Date(r.last_update+"T12:00:00");
     return(now-lastUp)>86400000;
   });
 
+  ctRenderLeadStatusAudit(data);
+
   // Update stat cards
   var el=function(id){return document.getElementById(id);};
   if(el("ref-mtd-leads-v2"))el("ref-mtd-leads-v2").textContent=mtd;
-  if(el("ref-file-starts-v2"))el("ref-file-starts-v2").textContent=fileStarts;
+  if(el("ref-file-starts-v2"))el("ref-file-starts-v2").textContent=appConversions;
   if(el("ref-ltf-v2"))el("ref-ltf-v2").textContent=ltf+"%";
   if(el("ref-needs-touch-v2"))el("ref-needs-touch-v2").textContent=needsTouch.length;
 
@@ -3958,7 +4044,8 @@ function renderLpEffectiveness(){
   sorted.forEach(function(r){
     var lp=r.lp;
     var leads=r.mtd_leads_received||0;
-    var files=r.mtd_file_starts||0;
+    var correctedPipe=(window.leadPipelineData&&window.leadPipelineData.lps&&window.leadPipelineData.lps[lp])?window.leadPipelineData.lps[lp]:null;
+    var files=correctedPipe?correctedPipe.file_starts_mtd:(r.mtd_file_starts||0);
     var calls=r.total_calls_logged||0;
     var ratio=r.leads_per_100_calls||0;
     var ltf=leads>0?Math.round(files/leads*100):0;
@@ -3968,8 +4055,8 @@ function renderLpEffectiveness(){
       +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px">'
       +'<span style="font-size:13px;font-weight:700;color:'+LP_COLORS[lp]+';width:55px">'+lp+'</span>'
       +'<span style="font-size:12px;font-weight:700;color:'+barColor+'">'+leads+' lead'+(leads!==1?'s':'')+' MTD</span>'
-      +(files>0?'<span style="font-size:11px;color:var(--green)">· '+files+' file'+(files!==1?'s':'')+' started</span>':'')
-      +(ltf>0?'<span style="font-size:11px;color:var(--text-3)">'+ltf+'% lead-to-file</span>':'')
+      +(files>0?'<span style="font-size:11px;color:var(--green)">· '+files+' app'+(files!==1?'s':'')+' converted</span>':'')
+      +(ltf>0?'<span style="font-size:11px;color:var(--text-3)">'+ltf+'% lead-to-app</span>':'')
       +'<span style="font-size:10px;color:var(--text-3);margin-left:auto">'+calls+' calls · '+ratio+'/100</span>'
       +'</div>'
       +'<div style="height:4px;background:var(--border-light);border-radius:2px;overflow:hidden">'
@@ -3993,26 +4080,26 @@ function runConversionRangeSearch(){
     res=res||[];
     var lpMap={"Dill":"Gavin","Gavin":"Gavin","De La Riva":"Karen","Karen":"Karen",
                "McMahon":"Osgood","Osgood":"Osgood","Johnston":"Jordan","Jordan":"Jordan",
-               "Saleh":"Said","Said":"Said"};
+               "Saleh":"Said","Said":"Said","Caldwell":"Isaak","Isaak":"Isaak"};
     function getLp(lp_user){
       if(!lp_user)return null;
       for(var k in lpMap){if(lp_user.toLowerCase().indexOf(k.toLowerCase())>=0)return lpMap[k];}
       return null;
     }
-    var LPS_ORDER=["Gavin","Karen","Osgood","Jordan","Said"];
+    var LPS_ORDER=["Gavin","Karen","Osgood","Jordan","Said","Isaak"];
     var stats={};
     LPS_ORDER.forEach(function(lp){stats[lp]={total:0,started:0};});
     var teamTotal=0,teamStarted=0,unmatched=0;
     res.forEach(function(r){
       var lp=getLp(r.lp_user);
-      var isStarted=r.status&&r.status.toLowerCase().indexOf("start")>=0;
+      var isStarted=ctIsLeadAppConverted(r);
       if(!lp){unmatched++;teamTotal++;if(isStarted)teamStarted++;return;}
       stats[lp].total++;teamTotal++;
       if(isStarted){stats[lp].started++;teamStarted++;}
     });
     var teamPct=teamTotal>0?(teamStarted/teamTotal*100):0;
     var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
-    html+='<thead><tr style="background:#1F4E79;color:#fff"><th style="padding:6px 10px;text-align:left">LP</th><th style="padding:6px 10px;text-align:center">Leads</th><th style="padding:6px 10px;text-align:center">File Started</th><th style="padding:6px 10px;text-align:center">Conversion</th></tr></thead><tbody>';
+    html+='<thead><tr style="background:#1F4E79;color:#fff"><th style="padding:6px 10px;text-align:left">LP</th><th style="padding:6px 10px;text-align:center">Leads</th><th style="padding:6px 10px;text-align:center">Converted to App</th><th style="padding:6px 10px;text-align:center">Lead → App</th></tr></thead><tbody>';
     LPS_ORDER.forEach(function(lp,i){
       var s=stats[lp];var pct=s.total>0?(s.started/s.total*100):0;
       var pc=pct>=65?"#1D9E75":pct>=50?"#BA7517":"#E53935";
@@ -4059,7 +4146,7 @@ async function loadLeadPipeline(){
 
     var lpMap={"Dill":"Gavin","Gavin":"Gavin","De La Riva":"Karen","Karen":"Karen",
                "McMahon":"Osgood","Osgood":"Osgood","Johnston":"Jordan","Jordan":"Jordan",
-               "Saleh":"Said","Said":"Said"};
+               "Saleh":"Said","Said":"Said","Caldwell":"Isaak","Isaak":"Isaak"};
     
 
     var today=new Date();today.setHours(0,0,0,0);
@@ -4082,7 +4169,7 @@ async function loadLeadPipeline(){
       var lp=getLp(r.lp_user);
       if(!lp)return;
       var d=r.date_added||"";
-      var isFile=r.status&&r.status.toLowerCase().indexOf("start")>=0;
+      var isFile=ctIsLeadAppConverted(r);
       var agent=(r.referral_partner_name||"").trim().toUpperCase();
 
       if(d>=ytdS){
@@ -4142,7 +4229,7 @@ function renderLeadPipelinePanels(raw){
     s+='<div style="text-align:center"><div style="color:#fff;font-size:16px;font-weight:700">'+totals.wtd+'</div><div style="color:#93c5fd;font-size:9px">WTD</div></div>';
     s+='<div style="text-align:center"><div style="color:#fff;font-size:16px;font-weight:700">'+totals.mtd+'</div><div style="color:#93c5fd;font-size:9px">MTD</div></div>';
     s+='<div style="text-align:center"><div style="color:#fff;font-size:16px;font-weight:700">'+totals.ytd+'</div><div style="color:#93c5fd;font-size:9px">YTD</div></div>';
-    s+='<div style="text-align:center"><div style="color:var(--accent);font-size:16px;font-weight:700">'+totals.file_starts_mtd+'</div><div style="color:#93c5fd;font-size:9px">FILES MTD</div></div>';
+    s+='<div style="text-align:center"><div style="color:var(--accent);font-size:16px;font-weight:700">'+totals.file_starts_mtd+'</div><div style="color:#93c5fd;font-size:9px">APPS MTD</div></div>';
     s+='</div></div>';
 
     // Column header row
@@ -4157,7 +4244,7 @@ function renderLeadPipelinePanels(raw){
     s+='</div>';
 
     // Per-LP rows
-    ["Gavin","Karen","Osgood","Jordan","Said"].forEach(function(lp){
+    ["Gavin","Karen","Osgood","Jordan","Said","Isaak"].forEach(function(lp){
       var r=lps[lp];
       var ltf=r.mtd>0?Math.round(r.file_starts_mtd/r.mtd*100):0;
       var col=r.daily>0?"var(--green)":r.wtd>0?"var(--amber-text)":"var(--text-3)";
@@ -4168,9 +4255,9 @@ function renderLeadPipelinePanels(raw){
       s+='<span style="font-size:12px;color:var(--text-2);width:20px;text-align:center">'+r.wtd+'</span>';
       s+='<span style="font-size:12px;color:var(--text-2);width:28px;text-align:center">'+r.mtd+'</span>';
       s+='<span style="font-size:12px;color:var(--text-3);width:28px;text-align:center">'+r.ytd+'</span>';
-      s+='<span style="font-size:11px;color:var(--green);width:36px;text-align:center">'+r.file_starts_mtd+' files</span>';
+      s+='<span style="font-size:11px;color:var(--green);width:36px;text-align:center">'+r.file_starts_mtd+' apps</span>';
       s+=(ltf>0?'<span style="font-size:10px;background:'+(ltf>=20?"#dcfce7":ltf>=10?"#FAF7F2":"#fee2e2")
-        +';color:'+(ltf>=20?"#15803d":ltf>=10?"#5C4A35":"#991b1b")+';padding:2px 7px;border-radius:4px">'+ltf+'% lead-to-file</span>':'');
+        +';color:'+(ltf>=20?"#15803d":ltf>=10?"#5C4A35":"#991b1b")+';padding:2px 7px;border-radius:4px">'+ltf+'% lead-to-app</span>':'');
       var quietId='quiet-'+lp;
       var mtdCalled=lpCallCounts[lp]||0;
       var totalLpAgents=agents.filter(function(a){return a[2]===lp&&isActive(a)&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());}).length;
@@ -4207,7 +4294,7 @@ function renderLeadPipelinePanels(raw){
     f+='<div style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">Lead pipeline — retention & conversion</div>';
     f+='</div>';
 
-    ["Gavin","Karen","Osgood","Jordan","Said"].forEach(function(lp){
+    ["Gavin","Karen","Osgood","Jordan","Said","Isaak"].forEach(function(lp){
       var r=lps[lp];
       var ltfMtd=r.mtd>0?Math.round(r.file_starts_mtd/r.mtd*100):0;
       var ltfYtd=r.ytd>0?Math.round(r.file_starts_ytd/r.ytd*100):0;
@@ -4221,8 +4308,8 @@ function renderLeadPipelinePanels(raw){
       f+='<span style="font-size:11px"><b>'+r.wtd+'</b> <span style="color:var(--text-3)">WTD</span></span>';
       f+='<span style="font-size:11px"><b>'+r.mtd+'</b> <span style="color:var(--text-3)">MTD</span></span>';
       f+='<span style="font-size:11px"><b>'+r.ytd+'</b> <span style="color:var(--text-3)">YTD</span></span>';
-      f+='<span style="font-size:11px;color:var(--green)"><b>'+r.file_starts_mtd+'</b> files MTD</span>';
-      f+=(ltfMtd>0?'<span style="font-size:10px;background:'+(ltfMtd>=20?"#dcfce7":ltfMtd>=10?"#FAF7F2":"#fee2e2")+';color:'+(ltfMtd>=20?"#15803d":ltfMtd>=10?"#5C4A35":"#991b1b")+';padding:2px 8px;border-radius:4px;font-weight:600">'+ltfMtd+'% lead-to-file</span>':"");
+      f+='<span style="font-size:11px;color:var(--green)"><b>'+r.file_starts_mtd+'</b> apps MTD</span>';
+      f+=(ltfMtd>0?'<span style="font-size:10px;background:'+(ltfMtd>=20?"#dcfce7":ltfMtd>=10?"#FAF7F2":"#fee2e2")+';color:'+(ltfMtd>=20?"#15803d":ltfMtd>=10?"#5C4A35":"#991b1b")+';padding:2px 8px;border-radius:4px;font-weight:600">'+ltfMtd+'% lead-to-app</span>':"");
       f+='</div>';
       f+='<span style="font-size:11px;color:var(--text-3)">'+r.agents_mtd.size+' agents active MTD · '+r.agents_ytd.size+' YTD</span>';
       f+='</div>';
@@ -4259,7 +4346,7 @@ function openLpLeadDrilldown(lp, rawLeads){
   // Filter leads for this LP
   var lpMap={"Dill":"Gavin","Gavin":"Gavin","De La Riva":"Karen","Karen":"Karen",
     "McMahon":"Osgood","Osgood":"Osgood","Johnston":"Jordan","Jordan":"Jordan",
-    "Saleh":"Said","Said":"Said"};
+    "Saleh":"Said","Said":"Said","Caldwell":"Isaak","Isaak":"Isaak"};
   function getLpName(lp_user){
     if(!lp_user)return null;
     for(var k in lpMap){if(lp_user.toLowerCase().indexOf(k.toLowerCase())>=0)return lpMap[k];}
@@ -4295,8 +4382,10 @@ function openLpLeadDrilldown(lp, rawLeads){
       var date=r.date_added?new Date(r.date_added+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"—";
       var daysSince=r.date_added?Math.floor((new Date()-new Date(r.date_added+"T12:00:00"))/86400000):null;
       var status=r.status||"—";
-      var statusBg=status.toLowerCase().indexOf("start")>=0?"#dcfce7":status.toLowerCase().indexOf("contact")>=0?"#dbeafe":"#f1f5f9";
-      var statusColor=status.toLowerCase().indexOf("start")>=0?"#15803d":status.toLowerCase().indexOf("contact")>=0?"#1e40af":"#475569";
+      var statusLower=status.toLowerCase();
+      var negativeApp=statusLower.indexOf("withdrawn")>=0||statusLower.indexOf("denied")>=0;
+      var statusBg=negativeApp?"#fee2e2":ctIsLeadAppConverted(r)?"#dcfce7":statusLower.indexOf("contact")>=0?"#dbeafe":"#f1f5f9";
+      var statusColor=negativeApp?"#991b1b":ctIsLeadAppConverted(r)?"#15803d":statusLower.indexOf("contact")>=0?"#1e40af":"#475569";
       h+='<div style="padding:10px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:flex-start;gap:10px">';
       h+='<div style="flex:1;min-width:0">';
       h+='<div style="font-size:12px;font-weight:700;color:var(--text)">'+agent+'</div>';
@@ -4407,7 +4496,7 @@ function lpSnapshotSafe(label,fn){
   }catch(e){console.warn("Snapshot source "+label+" failed:",e);return Promise.resolve({label:label,ok:false,error:e});}
 }
 function lpLoadSnapshotScorecardsFresh(){
-  var wk=getWeekKey(new Date()),persons=LPS.concat(["Isaak","Amanda"]);
+  var wk=getWeekKey(new Date()),persons=LPS.concat(["Amanda"]);
   return sbFetch("GET","lp_scorecards?week_key=eq."+wk+"&person=in.("+persons.join(",")+")&select=person,data").then(function(res){
     window._snapScWeek=wk;window._snapScData={};
     (res||[]).forEach(function(r){window._snapScData[r.person]=r.data||{};});
@@ -4533,7 +4622,7 @@ function buildSnapshot(){
   // Fetch scorecard data if not cached
   if(!window._snapScWeek||window._snapScWeek!==weekKey){
     window._snapScWeek=weekKey;
-    var persons=LPS.concat(["Isaak","Amanda"]);
+    var persons=LPS.concat(["Amanda"]);
     sbFetch("GET","lp_scorecards?week_key=eq."+weekKey+"&select=person,data").then(function(res){
       window._snapScData={};
       if(res)res.forEach(function(r){window._snapScData[r.person]=r.data||{};});
@@ -4930,7 +5019,7 @@ function renderReassign(){
     if(countEl)countEl.textContent=(flp?list.length+" relationship"+(list.length!==1?"s":"")+" assigned to "+flp:list.length+" relationship"+(list.length!==1?"s":"")+" shown")+(frm?" · RM: "+frm:"");
     if(!list.length){tbody.innerHTML='<tr><td colspan="8" style="padding:18px;text-align:center;color:var(--text-3)">No agents match these filters.</td></tr>';return;}
     tbody.innerHTML=list.map(function(r){
-      var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said"].map(function(lp){return '<option'+(r.lp===lp?' selected':'')+'>'+lp+'</option>';}).join('');
+      var opts=["Unassigned","Gavin","Karen","Osgood","Jordan","Said","Isaak"].map(function(lp){return '<option'+(r.lp===lp?' selected':'')+'>'+lp+'</option>';}).join('');
       return '<tr><td style="font-weight:650">'+displayName(r.name)+'</td><td><span class="badge badge-'+String(r.tier).toLowerCase()+'">'+r.tier+'</span></td><td>'+rmOwnerBadge(r.name,r.rm)+'</td><td>'+(r.status==="nurture"?'<span style="background:#FFF2D6;color:#8A5A00;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700" title="'+(r.nurture_reason||'RM-directed light-touch relationship')+(r.next_rm_followup?' · Next RM check-in '+r.next_rm_followup:'')+'">RM NURTURE</span>':r.status==="active"?'<span style="color:#43A047">Active</span>':'<span class="badge badge-inactive">INACTIVE</span>')+'</td><td><button class="btn btn-sm '+(r.priority?'btn-success':'')+'" data-priority-name="'+r.name.replace(/"/g,'&quot;')+'" onclick="toggleLivePriority(this)">'+(r.priority?'Priority':'Set Priority')+'</button></td><td><span class="lp-tag lp-tag-'+r.lp+'">'+r.lp+'</span></td><td><select data-reassign-name="'+r.name.replace(/"/g,'&quot;')+'" onchange="reassignLiveAgent(this)">'+opts+'</select></td><td><button class="btn btn-sm btn-danger" data-name="'+r.name.replace(/"/g,'&quot;')+'" onclick="removeAgent(this)">Remove</button></td></tr>';
     }).join('');
   }).catch(function(e){tbody.innerHTML='<tr><td colspan="8" style="padding:18px;color:var(--red)">Could not load live assignments: '+e.message+'</td></tr>';});
@@ -5546,11 +5635,11 @@ var referralLeadsCache=null;
 function getStatusBadgeClass(status){
   if(!status)return"rs-other";
   var s=status.toLowerCase();
-  if(s.indexOf("file started")>=0||s==="started")return"rs-started";
+  if(s.indexOf("withdrawn")>=0||s.indexOf("denied")>=0)return"rs-withdrawn";
+  if(ctIsLeadAppConverted(status))return"rs-started";
   if(s.indexOf("contact attempt")>=0)return"rs-contact";
   if(s.indexOf("nurture")>=0)return"rs-nurture";
   if(s.indexOf("contacted")>=0)return"rs-contacted";
-  if(s.indexOf("withdrawn")>=0)return"rs-withdrawn";
   return"rs-other";
 }
 
@@ -5609,12 +5698,12 @@ function applyRefFilters(data){
     var sf=refFilters.status.toLowerCase();
     d=d.filter(function(r){
       var s=(r.status||"").toLowerCase();
-      if(sf==="file started")return s.indexOf("started")>=0;
+      if(sf==="converted to app")return ctIsLeadAppConverted(r);
       if(sf==="contact attempt")return s.indexOf("contact attempt")>=0;
       if(sf==="nurture")return s.indexOf("nurture")>=0;
       if(sf==="contacted")return s==="contacted";
       if(sf==="app withdrawn")return s.indexOf("withdrawn")>=0;
-      if(sf==="other")return["started","contact attempt","nurture","contacted","withdrawn"].every(function(k){return s.indexOf(k)<0;});
+      if(sf==="other")return !ctIsLeadAppConverted(r)&&["contact attempt","nurture","contacted","withdrawn"].every(function(k){return s.indexOf(k)<0;});
       return true;
     });
   }
@@ -5652,12 +5741,10 @@ function renderReferralLeads(data){
   var priorStr=localDateStr(priorDay);
 
   function isFileStarted(status){
-    if(!status)return false;
-    var s=status.toLowerCase();
-    return s.indexOf("file started")>=0||s==="started";
+    return ctIsLeadAppConverted(status);
   }
   function isOverdue(r){
-    if(isFileStarted(r.status))return false;
+    if(ctIsLeadResolved(r))return false;
     var s=(r.status||"").toLowerCase();
     if(s.indexOf("nurture")>=0)return false;
     var lu=r.last_update||r.date_added;
@@ -5827,7 +5914,7 @@ function refreshLpSharedData(source){
 
       if(currentUser==="Snapshot"){
         buildSnapshot();
-      }else if(["Gavin","Karen","Osgood","Jordan","Said"].indexOf(currentUser)>=0&&Object.keys(pendingNote).length===0){
+      }else if(["Gavin","Karen","Osgood","Jordan","Said","Isaak"].indexOf(currentUser)>=0&&Object.keys(pendingNote).length===0){
         renderLP(currentUser);
       }
 
@@ -5883,7 +5970,7 @@ setTimeout(function(){try{loadAgentAssignments();}catch(e){console.warn("LP owne
 })();
 
 // ── TEAM-WIDE ROLLUP (Scorecards tab) ────────────────────────────────────
-const LPSC_TEAM_LPS=["Gavin","Karen","Osgood","Said","Jordan"];
+const LPSC_TEAM_LPS=["Gavin","Karen","Osgood","Said","Jordan","Isaak"];
 var lpscTeamCurrentPeriod="daily",lpscTeamCache=null;
 
 function lpscTeamPeriod(period,btn){
@@ -5989,7 +6076,7 @@ const LPSC_AMANDA_GOALS=[
 
 
 const LPSC_DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-const LPSC_CHART_COLORS=["#1F4E79","#b8922a","#2a7a3b","#c0392b","#8e44ad"];
+const LPSC_CHART_COLORS=["#1F4E79","#b8922a","#2a7a3b","#c0392b","#8e44ad","#64748b"];
 var lpscCurrentLP="Isaak",lpscCharts=[];
 var lpscAmandaActsByWeek={};
 
@@ -6816,8 +6903,8 @@ async function loadSystemHealth(){
 async function renderLpAssignList(){
   var el=document.getElementById("lp-assign-list");
   if(!el){console.warn("lp-assign-list not found");return;}
-  var LPS=["Gavin","Jordan","Karen","Osgood","Said","Unassigned"];
-  var LP_COLORS={"Gavin":"#3D4E68","Karen":"#3D4E68","Osgood":"#3D4E68","Jordan":"#3D4E68","Said":"#3D4E68"};
+  var LPS=["Gavin","Jordan","Karen","Osgood","Said","Isaak","Unassigned"];
+  var LP_COLORS={"Gavin":"#3D4E68","Karen":"#3D4E68","Osgood":"#3D4E68","Jordan":"#3D4E68","Said":"#3D4E68","Isaak":"#3D4E68"};
   var searchEl=document.getElementById("lp-assign-search");
   var showAllEl=document.getElementById("lp-assign-show-all");
   var q=searchEl?searchEl.value.toLowerCase():"";
@@ -7090,7 +7177,7 @@ function ftOpenAgentLog(name,lp){
 }
 function renderFtPriority(){
   var el=document.getElementById("ft-priority");if(!el)return;
-  var lps=["Gavin","Karen","Osgood","Jordan","Said"],html="",focusTotal=0;
+  var lps=["Gavin","Karen","Osgood","Jordan","Said","Isaak"],html="",focusTotal=0;
   lps.forEach(function(lp){
     var list=ftPriorityForLp(lp,3);focusTotal+=list.length;
     html+='<div style="border-top:1px solid #ECE8F5;padding:10px 0 8px">'
@@ -7184,7 +7271,7 @@ window.ctOpenRmResponses=async function(lp){
   lp=lp||currentUser;
   if(!lp)return;
   try{
-    if(currentUser!==lp&&["Gavin","Karen","Osgood","Jordan","Said"].indexOf(lp)>=0){
+    if(currentUser!==lp&&["Gavin","Karen","Osgood","Jordan","Said","Isaak"].indexOf(lp)>=0){
       var btn=Array.from(document.querySelectorAll(".who-btn")).find(function(b){return String(b.textContent||"").trim()===lp});
       selectUser(btn||null,lp);
     }
@@ -8500,21 +8587,20 @@ function ctGetBirthdayValue(){
 
 // Real status strings from Velocify, mapped to a milestone position.
 // Extend this list if your CRM uses additional status values.
-var CT_MILESTONE_ORDER=["New","Contact Attempt","Contacted","Nurture","File Started","App Withdrawn"];
+var CT_MILESTONE_ORDER=["New","Contact Attempt","Contacted","Nurture","Converted to App"];
 function ctMapStatusToStage(status){
   var s=(status||"").toLowerCase();
-  if(s.indexOf("start")>=0) return 4;
-  if(s.indexOf("withdrawn")>=0) return 5;
+  if(ctIsLeadAppConverted(status)) return 4;
   if(s.indexOf("nurture")>=0) return 3;
   if(s.indexOf("contact attempt")>=0) return 1;
   if(s==="contacted") return 2;
   return 0;
 }
-// A lead is "stalled" if it hasn't moved in 5+ days and isn't already
-// resolved (started or withdrawn) — separate signal from agent staleness.
+// A lead is "stalled" if it hasn't moved in 5+ days and is not already
+// converted/resolved — separate signal from agent staleness.
 function ctIsLeadStalled(r){
   var s=(r.status||"").toLowerCase();
-  if(s.indexOf("start")>=0||s.indexOf("withdrawn")>=0) return false;
+  if(ctIsLeadResolved(r)) return false;
   var lu=r.last_update||r.date_added;
   if(!lu) return true;
   var days=Math.floor((new Date()-new Date(lu+"T00:00:00"))/86400000);
@@ -8524,8 +8610,8 @@ function ctIsLeadStalled(r){
 function ctRenderLpConversionBoxes(data){
   var host=document.getElementById("lp-conversion-boxes-v2");
   if(!host||!data) return;
-  var lpMap={"Gavin":["Dill","Gavin"],"Karen":["De La Riva","Karen"],"Osgood":["McMahon","Osgood"],"Jordan":["Johnston","Jordan"],"Said":["Saleh","Said"]};
-  var order=["Gavin","Karen","Osgood","Jordan","Said","Other / Core Team"];
+  var lpMap={"Gavin":["Dill","Gavin"],"Karen":["De La Riva","Karen"],"Osgood":["McMahon","Osgood"],"Jordan":["Johnston","Jordan"],"Said":["Saleh","Said"],"Isaak":["Caldwell","Isaak"]};
+  var order=["Gavin","Karen","Osgood","Jordan","Said","Isaak","Other / Core Team"];
   var now=new Date(),todayStr=localDateStr(now),stats={};
   order.forEach(function(lp){stats[lp]={today:0,sent:0,started:0};});
   function bucket(r){
@@ -8536,9 +8622,9 @@ function ctRenderLpConversionBoxes(data){
   data.forEach(function(r){
     var lp=bucket(r),s=stats[lp];s.sent++;
     if(r.date_added===todayStr)s.today++;
-    if((r.status||"").toLowerCase().indexOf("start")>=0)s.started++;
+    if(ctIsLeadAppConverted(r))s.started++;
   });
-  var teamSent=data.length,teamStarted=data.filter(function(r){return(r.status||"").toLowerCase().indexOf("start")>=0;}).length;
+  var teamSent=data.length,teamStarted=data.filter(function(r){return ctIsLeadAppConverted(r);}).length;
   var teamAvg=teamSent?Math.round(teamStarted/teamSent*100):0;
   var html='<div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Per-user conversion — MTD</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">';
@@ -8550,8 +8636,8 @@ function ctRenderLpConversionBoxes(data){
       +'<div style="font-size:13px;font-weight:700;color:#3D4E68;margin-bottom:6px">'+lp+'</div>'
       +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">Today</span><span style="font-weight:700">'+s.today+' sent</span></div>'
       +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">Leads sent MTD</span><span style="font-weight:700">'+s.sent+'</span></div>'
-      +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">File starts</span><span style="font-weight:700">'+s.started+'</span></div>'
-      +'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between"><span style="font-size:10.5px;color:var(--text-3)">Lead → File</span><span style="font-size:16px;font-weight:800;color:'+color+'">'+ltf+'%</span></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text-3)">Converted to app</span><span style="font-weight:700">'+s.started+'</span></div>'
+      +'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between"><span style="font-size:10.5px;color:var(--text-3)">Lead → App</span><span style="font-size:16px;font-weight:800;color:'+color+'">'+ltf+'%</span></div>'
       +'</div>';
   });
   html+='</div>';
@@ -8780,7 +8866,7 @@ function ctComputeWeeklyMetrics(){
   var pcts=LPS.map(function(lp){ return getLpPctThisWeek(lp); });
   var avgTalkTo=Math.round(pcts.reduce(function(a,b){return a+b;},0)/pcts.length);
 
-  // Lead-to-file % from whatever pipeline data is already loaded
+  // Lead-to-app % from the corrected raw pipeline data already loaded
   var ltf=0;
   if(window.leadPipelineData && window.leadPipelineData.totals && window.leadPipelineData.totals.mtd>0){
     ltf=Math.round(window.leadPipelineData.totals.file_starts_mtd/window.leadPipelineData.totals.mtd*100);
@@ -8817,7 +8903,7 @@ function ctRenderTrendPanel(){
       {key:"stale_contacts",label:"Stale contacts (14d+)",lowerIsBetter:true},
       {key:"rm_flagged_count",label:"Flagged by RM",lowerIsBetter:true},
       {key:"team_avg_talkto_pct",label:"Team avg talk-to rate",lowerIsBetter:false,suffix:"%"},
-      {key:"lead_to_file_pct",label:"Lead-to-file rate",lowerIsBetter:false,suffix:"%"}
+      {key:"lead_to_file_pct",label:"Lead-to-app rate",lowerIsBetter:false,suffix:"%"}
     ];
 
     var box=document.createElement("div");
@@ -8899,7 +8985,7 @@ if(typeof window.renderReferralLeadsDirect==="function"){
 function ctLoadNotifications(){
   var badge=document.getElementById("ct-notif-badge"),list=document.getElementById("ct-notif-list");
   if(!badge||!list)return;
-  var isLp=["Gavin","Karen","Osgood","Jordan","Said"].indexOf(currentUser)>=0;
+  var isLp=["Gavin","Karen","Osgood","Jordan","Said","Isaak"].indexOf(currentUser)>=0;
   var lpFilter=isLp?"&lp=eq."+encodeURIComponent(currentUser):"";
   var openLpFlags="lp_flags?resolved=eq.false"+lpFilter+"&select=*&order=created_at.desc&limit=5";
   var rmToLpPath="rm_lp_flags?resolved=eq.false"+lpFilter+"&select=*&order=created_at.desc&limit=5";
@@ -10102,7 +10188,7 @@ async function rmLoadAll(){
     var fc=document.getElementById("rm-open-flags-count");if(fc)fc.textContent=rmLeadershipCache.openFlags;
     var ac=document.getElementById("rm-period-activity-count");if(ac)ac.textContent=rows.filter(function(a){return ctRmOwnerFromNotes(a.notes)==="Amanda";}).length;
     var al=document.getElementById("rm-period-activity-label");if(al)al.textContent=(rmCurrentPeriod==="today"?"Today":rmCurrentPeriod==="week"?"This week":"Month to date")+" · logged work only";
-    var lr=document.getElementById("rm-last-refreshed");if(lr)lr.textContent="Updated "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+    var lr=document.getElementById("rm-last-refreshed");if(lr)lr.textContent="Fetched "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
   }catch(e){
     console.warn("RM leadership view failed",e);
     if(body)body.innerHTML='<div style="text-align:center;padding:20px;color:#888;font-size:13px">Could not load RM stats.</div>';
@@ -10708,13 +10794,13 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
     const h=document.querySelector('#view-leads h2,#view-leads .section-title');
     if(!h||document.getElementById('referral-truth-note'))return;
     const n=document.createElement('div');n.id='referral-truth-note';
-    n.textContent='Top-line lead counts include all Core Team users. LP cards break out the five primary LPs; any remaining Core Team users stay in Other / Core Team.';
+    n.textContent='Top-line lead counts include all Core Team users. LP cards break out the six Core Team LPs, including Isaak; any remaining Core Team users stay in Other / Core Team.';
     h.insertAdjacentElement('afterend',n);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();
 })();
 </script>
 
-<script>console.log("LP Tracker Build v53 · Portfolio agent drilldowns + Daniel source-of-truth preserved");</script>
+<script>console.log("LP Tracker Build v58 · Isaak added + Lead-to-App source audit");</script>
 </body>
 </html>
