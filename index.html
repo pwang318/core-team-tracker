@@ -1,4 +1,4 @@
-      
+     
 <!DOCTYPE html>
 <!-- v56: Lead-to-App conversion fix; DQ Credit/Income count as apps because qualification requires an application -->
 <!-- LP Tracker v53 · clickable Portfolio agent drilldowns + Daniel source-of-truth preserved · 2026-08-21 -->
@@ -270,6 +270,9 @@ tr:hover td{background:var(--bg)}
 .d-tab-panel{display:none}.d-tab-panel.active{display:block}
 
 .ref-stat-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--navy);border-radius:var(--radius-md);padding:1rem 1.1rem}
+.ref-stat-card.ref-stat-clickable{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
+.ref-stat-card.ref-stat-clickable:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(16,42,67,.10);border-color:#B9CBD6}
+.ref-stat-card.ref-stat-clickable:focus{outline:2px solid #2F80ED;outline-offset:2px}
 .ref-stat-card.urgent{border-top-color:var(--red)}
 .ref-stat-label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-weight:600}
 .ref-stat-value{font-size:28px;font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1}
@@ -1460,10 +1463,10 @@ table tbody tr:hover{background:#F6FBFC!important}
     </div>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem">
-    <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads-v2">--</div><div id="ref-mtd-goal-pace" style="font-size:10px;color:var(--text-3);margin-top:2px"></div></div>
-    <div class="ref-stat-card"><div class="ref-stat-label">Converted to App</div><div class="ref-stat-value good" id="ref-file-starts-v2">--</div></div>
-    <div class="ref-stat-card"><div class="ref-stat-label">Lead → App</div><div class="ref-stat-value" id="ref-ltf-v2">--</div><div id="ref-ltf-formula-v2" style="font-size:10px;color:var(--text-3);margin-top:2px">--</div></div>
-    <div class="ref-stat-card urgent"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch-v2">--</div></div>
+    <div class="ref-stat-card ref-stat-clickable" role="button" tabindex="0" onclick="ctOpenLeadMetric('all')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ctOpenLeadMetric('all')}" title="Click to view all MTD lead records"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads-v2">--</div><div id="ref-mtd-goal-pace" style="font-size:10px;color:var(--text-3);margin-top:2px"></div></div>
+    <div class="ref-stat-card ref-stat-clickable" role="button" tabindex="0" onclick="ctOpenLeadMetric('converted')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ctOpenLeadMetric('converted')}" title="Click to view the leads counted as Converted to App"><div class="ref-stat-label">Converted to App</div><div class="ref-stat-value good" id="ref-file-starts-v2">--</div></div>
+    <div class="ref-stat-card ref-stat-clickable" role="button" tabindex="0" onclick="ctOpenLeadMetric('rate')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ctOpenLeadMetric('rate')}" title="Click to audit the Lead to App calculation"><div class="ref-stat-label">Lead → App</div><div class="ref-stat-value" id="ref-ltf-v2">--</div><div id="ref-ltf-formula-v2" style="font-size:10px;color:var(--text-3);margin-top:2px">--</div></div>
+    <div class="ref-stat-card urgent ref-stat-clickable" role="button" tabindex="0" onclick="ctOpenLeadMetric('needs')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ctOpenLeadMetric('needs')}" title="Click to view every lead currently counted as Needs Touch"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch-v2">--</div></div>
   </div>
   <div style="font-size:11px;color:#405565;background:#F4FAFC;border:1px solid #DCEAF0;border-radius:8px;padding:8px 10px;margin:-2px 0 .55rem;line-height:1.45">
     <b>Data timing:</b> Velocify sends this tracker one scheduled update per day. <b>Refresh tracker</b> only reloads the latest data already synced to Supabase; it does not force a new Velocify update. Lead counts and statuses can therefore lag changes made later in the day until the next daily sync.
@@ -1497,8 +1500,8 @@ table tbody tr:hover{background:#F6FBFC!important}
   <div id="ref-filter-results-section-v2" class="ref-section" style="display:none;border-color:#BFDCE8;margin-bottom:1rem">
     <div class="ref-section-header" style="background:#F4FAFC">
       <div>
-        <div class="ref-section-title">Filtered MTD results <span id="ref-filter-results-label-v2" style="font-weight:600;color:var(--text-2)"></span></div>
-        <div class="ref-section-subtitle">Click a status and/or LP above to view every matching MTD lead here.</div>
+        <div class="ref-section-title">Lead detail <span id="ref-filter-results-label-v2" style="font-weight:600;color:var(--text-2)"></span></div>
+        <div class="ref-section-subtitle">This is the underlying lead-level data behind the selected metric or filter.</div>
       </div>
       <span class="ref-section-count" id="ref-filter-results-count-v2">0 leads</span>
     </div>
@@ -2226,9 +2229,12 @@ function renderReferralLeadsDirect(data){
     return(now-lastUp)>86400000;
   });
 
-  // Filter chips are a drill-down view, not a KPI recalculation.
+  // Filter chips and KPI cards are drill-down views, not KPI recalculations.
   var filterResults=metricBase.filter(function(r){return statusMatch(r);});
-  var hasActiveFilter=!!(refFilters.status||refFilters.lp);
+  if(refMetricDrilldown==="all")filterResults=metricBase.slice();
+  if(refMetricDrilldown==="converted"||refMetricDrilldown==="rate")filterResults=metricBase.filter(function(r){return ctIsLeadAppConverted(r);});
+  if(refMetricDrilldown==="needs")filterResults=needsTouch.slice();
+  var hasActiveFilter=!!(refFilters.status||refFilters.lp||refMetricDrilldown);
 
   ctRenderLeadStatusAudit(data);
 
@@ -2292,6 +2298,10 @@ function renderReferralLeadsDirect(data){
     filterSect.style.display=hasActiveFilter?"block":"none";
     if(hasActiveFilter){
       var filterLabel=[];
+      if(refMetricDrilldown==="all")filterLabel.push("All MTD leads");
+      if(refMetricDrilldown==="converted")filterLabel.push("Converted to App");
+      if(refMetricDrilldown==="rate")filterLabel.push("Lead → App audit: "+appConversions+" converted of "+mtd+" MTD = "+ltf+"%");
+      if(refMetricDrilldown==="needs")filterLabel.push("Needs Touch");
       if(refFilters.lp)filterLabel.push(refFilters.lp);
       if(refFilters.status)filterLabel.push(refFilters.status);
       if(el("ref-filter-results-label-v2"))el("ref-filter-results-label-v2").textContent="— "+filterLabel.join(" · ");
@@ -5675,8 +5685,28 @@ function getStatusBadgeClass(status){
 
 var refFilters={status:"",lp:""};
 var refSort={col:"",dir:1};
+var refMetricDrilldown="";
+
+function ctScrollLeadDetails(){
+  setTimeout(function(){
+    var s=document.getElementById("ref-filter-results-section-v2");
+    if(s&&s.style.display!=="none")s.scrollIntoView({behavior:"smooth",block:"start"});
+  },60);
+}
+
+function ctOpenLeadMetric(metric){
+  refMetricDrilldown=metric||"";
+  refFilters={status:"",lp:""};
+  window._refFilters={status:[],lp:[]};
+  document.querySelectorAll(".ref-filter-btn").forEach(function(b){
+    b.style.outline="none";b.style.fontWeight="";
+  });
+  renderReferralLeadsDirect(referralLeadsCache||[]);
+  ctScrollLeadDetails();
+}
 
 function toggleRefFilter(type,val,el){
+  refMetricDrilldown="";
   if(refFilters[type]===val){refFilters[type]="";}
   else{refFilters[type]=val;}
   // Sync to _refFilters format used by standalone view
@@ -5701,9 +5731,11 @@ function toggleRefFilter(type,val,el){
   } else {
     renderReferralLeads(referralLeadsCache||[]);
   }
+  if(refFilters.status||refFilters.lp)ctScrollLeadDetails();
 }
 
 function clearRefFilters(){
+  refMetricDrilldown="";
   refFilters={status:"",lp:""};
   window._refFilters={status:[],lp:[]};
   document.querySelectorAll(".ref-filter-btn").forEach(function(b){
