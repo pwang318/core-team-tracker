@@ -1,5 +1,4 @@
- 
-     
+      
 <!DOCTYPE html>
 <!-- v56: Lead-to-App conversion fix; DQ Credit/Income count as apps because qualification requires an application -->
 <!-- LP Tracker v53 · clickable Portfolio agent drilldowns + Daniel source-of-truth preserved · 2026-08-21 -->
@@ -1457,17 +1456,20 @@ table tbody tr:hover{background:#F6FBFC!important}
     <div style="font-size:18px;font-weight:700;color:var(--text)">Referral Leads</div>
     <div style="display:flex;align-items:center;gap:10px">
       <div style="font-size:11px;color:var(--text-3)" id="ref-last-updated-v2">Loading...</div>
-      <button class="ref-refresh-btn" onclick="loadReferralLeadsDirect()">&#8635; Refresh</button>
+      <button class="ref-refresh-btn" onclick="loadReferralLeadsDirect()">&#8635; Refresh tracker</button>
     </div>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem">
     <div class="ref-stat-card"><div class="ref-stat-label">MTD Leads</div><div class="ref-stat-value" id="ref-mtd-leads-v2">--</div><div id="ref-mtd-goal-pace" style="font-size:10px;color:var(--text-3);margin-top:2px"></div></div>
     <div class="ref-stat-card"><div class="ref-stat-label">Converted to App</div><div class="ref-stat-value good" id="ref-file-starts-v2">--</div></div>
-    <div class="ref-stat-card"><div class="ref-stat-label">Lead → App</div><div class="ref-stat-value" id="ref-ltf-v2">--</div></div>
+    <div class="ref-stat-card"><div class="ref-stat-label">Lead → App</div><div class="ref-stat-value" id="ref-ltf-v2">--</div><div id="ref-ltf-formula-v2" style="font-size:10px;color:var(--text-3);margin-top:2px">--</div></div>
     <div class="ref-stat-card urgent"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch-v2">--</div></div>
   </div>
-  <div style="font-size:11px;color:var(--text-2);background:#F4FAFC;border:1px solid #DCEAF0;border-radius:8px;padding:8px 10px;margin:-2px 0 .75rem">
-    <b>Lead → App:</b> counts a confirmed file/application: Started, Application Withdrawn/Denied, or a later Encompass-synced loan milestone (for example Approval, RFPO, Submittal, Funding). Does Not Qualify by itself does <b>not</b> count as an app.
+  <div style="font-size:11px;color:#405565;background:#F4FAFC;border:1px solid #DCEAF0;border-radius:8px;padding:8px 10px;margin:-2px 0 .55rem;line-height:1.45">
+    <b>Data timing:</b> Velocify sends this tracker one scheduled update per day. <b>Refresh tracker</b> only reloads the latest data already synced to Supabase; it does not force a new Velocify update. Lead counts and statuses can therefore lag changes made later in the day until the next daily sync.
+  </div>
+  <div style="font-size:11px;color:var(--text-2);background:#F8FBFC;border:1px solid #E4EBEF;border-radius:8px;padding:8px 10px;margin:0 0 .75rem">
+    <b>Lead → App:</b> Converted to App ÷ MTD Leads. A conversion requires a confirmed file/application: Started, Application Withdrawn/Denied, or a later Encompass-synced loan milestone (for example Approval, RFPO, Submittal, Funding). Does Not Qualify by itself does <b>not</b> count as an app.
   </div>
   <details style="background:#fff;border:1px solid #DCE7EC;border-radius:9px;padding:8px 10px;margin:0 0 .8rem">
     <summary style="cursor:pointer;font-size:11px;font-weight:700;color:#405565">Why this conversion number? View source status audit</summary>
@@ -1491,6 +1493,16 @@ table tbody tr:hover{background:#F6FBFC!important}
     <span class="lp-tag lp-tag-Jordan ref-filter-btn" onclick="toggleRefFilter('lp','Jordan',this)" style="cursor:pointer">Jordan</span>
     <span class="lp-tag lp-tag-Said ref-filter-btn" onclick="toggleRefFilter('lp','Said',this)" style="cursor:pointer">Said</span>
     <span class="lp-tag lp-tag-Isaak ref-filter-btn" onclick="toggleRefFilter('lp','Isaak',this)" style="cursor:pointer">Isaak</span>
+  </div>
+  <div id="ref-filter-results-section-v2" class="ref-section" style="display:none;border-color:#BFDCE8;margin-bottom:1rem">
+    <div class="ref-section-header" style="background:#F4FAFC">
+      <div>
+        <div class="ref-section-title">Filtered MTD results <span id="ref-filter-results-label-v2" style="font-weight:600;color:var(--text-2)"></span></div>
+        <div class="ref-section-subtitle">Click a status and/or LP above to view every matching MTD lead here.</div>
+      </div>
+      <span class="ref-section-count" id="ref-filter-results-count-v2">0 leads</span>
+    </div>
+    <div id="ref-filter-results-table-v2"></div>
   </div>
   <div id="lp-conversion-boxes-v2" style="margin-bottom:1rem"></div>
   <div class="ref-section urgent" id="ref-needs-touch-section-v2" style="display:none">
@@ -2073,7 +2085,7 @@ function loadReferralLeadsDirect(){
     // Do not silently discard leads assigned to another Core Team user (ex: Isaak).
     referralLeadsCache=(res||[]);
     renderReferralLeadsDirect(referralLeadsCache);
-    if(lu2)lu2.textContent="Fetched "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+    if(lu2)lu2.textContent="Tracker refreshed "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
   }).catch(function(){
     if(lu2)lu2.textContent="Could not load — check connection";
     renderReferralLeadsDirect([]);
@@ -2152,7 +2164,7 @@ function ctRenderLeadStatusAudit(data){
   function lab(b){return b==="converted"?"Counts as app":b==="resolved-nonapp"?"Resolved, no app":b==="pre-app"?"Pre-app / open":"Unmapped — review";}
   function bg(b){return b==="converted"?"#EAF5EE":b==="resolved-nonapp"?"#F4F6F9":b==="pre-app"?"#EFF6FF":"#FFF4E5";}
   function fg(b){return b==="converted"?"#276749":b==="resolved-nonapp"?"#596579":b==="pre-app"?"#1D4ED8":"#9A5B13";}
-  var h='<div style="padding:8px 9px;background:#F8FBFC;border-radius:7px;margin-bottom:8px;line-height:1.5"><b>This is the current database truth:</b> '+(data||[]).length+' MTD lead rows · <b>'+sums.converted+'</b> currently prove an application · '+sums["pre-app"]+' are still showing pre-app/open statuses · '+sums["resolved-nonapp"]+' are resolved without an app'+(sums.unmapped?' · <b style="color:#9A5B13">'+sums.unmapped+' unmapped</b>':'')+'.<br><span style="color:#667085">If someone was Started in Velocify but appears below as New, Contacted, Contact Attempt, or Nurture, the later milestone/status did not make it into the Supabase row.</span></div>';
+  var h='<div style="padding:8px 9px;background:#F8FBFC;border-radius:7px;margin-bottom:8px;line-height:1.5"><b>This is the latest synced database view:</b> '+(data||[]).length+' MTD lead rows · <b>'+sums.converted+'</b> currently prove an application · '+sums["pre-app"]+' are still showing pre-app/open statuses · '+sums["resolved-nonapp"]+' are resolved without an app'+(sums.unmapped?' · <b style="color:#9A5B13">'+sums.unmapped+' unmapped</b>':'')+'.<br><span style="color:#667085">Velocify syncs once daily, so this is not real-time. If someone was Started in Velocify later today but still appears below as New, Contacted, Contact Attempt, or Nurture, the tracker will not see that change until the next daily sync.</span></div>';
   h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr><th style="text-align:left;padding:6px 8px">Current status in database</th><th style="text-align:center;padding:6px 8px">Leads</th><th style="text-align:left;padding:6px 8px">Lead → App treatment</th></tr></thead><tbody>';
   rows.forEach(function(r){h+='<tr><td style="padding:6px 8px">'+escHtml(r.status)+'</td><td style="padding:6px 8px;text-align:center;font-weight:700">'+r.count+'</td><td style="padding:6px 8px"><span style="display:inline-block;padding:2px 7px;border-radius:20px;background:'+bg(r.bucket)+';color:'+fg(r.bucket)+';font-weight:700">'+lab(r.bucket)+'</span></td></tr>';});
   h+='</tbody></table></div>';
@@ -2190,29 +2202,33 @@ function renderReferralLeadsDirect(data){
     });
   }
 
-  // Exclude nurture by default unless nurture filter is explicitly active
-  var nurtureActive=(refFilters.status||"").toLowerCase().indexOf("nurture")>=0;
-  var filtered=data.filter(function(r){
-    if(!lpMatch(r)||!statusMatch(r))return false;
-    if(!nurtureActive&&(r.status||"").toLowerCase().indexOf("nurture")>=0)return false;
-    return true;
-  });
-  // MTD = all leads including nurture (total volume)
-  var mtd=data.filter(function(r){return lpMatch(r);}).length;
-  var appConversions=filtered.filter(function(r){return ctIsLeadAppConverted(r);}).length;
+  // KPI math is based on the full MTD population (or the selected LP), NOT the selected status chip.
+  // This prevents a status filter such as Contact Attempt from changing the Lead → App KPI itself.
+  var metricBase=data.filter(function(r){return lpMatch(r);});
+  var mtd=metricBase.length;
+  var appConversions=metricBase.filter(function(r){return ctIsLeadAppConverted(r);}).length;
   var ltf=mtd>0?Math.round(appConversions/mtd*100):0;
-  var todayLeads=filtered.filter(function(r){return r.date_added===todayStr;});
-  var priorLeads=filtered.filter(function(r){return r.date_added===priorStr;});
-  var unconverted=filtered.filter(function(r){return!ctIsLeadAppConverted(r);});
-  var needsTouch=filtered.filter(function(r){
+
+  // Operational sections stay useful while a status chip is selected. Nurture remains excluded
+  // from the default work queues, but is still available in the all-MTD filtered-results panel.
+  var operational=metricBase.filter(function(r){
+    return (r.status||"").toLowerCase().indexOf("nurture")<0;
+  });
+  var todayLeads=operational.filter(function(r){return r.date_added===todayStr;});
+  var priorLeads=operational.filter(function(r){return r.date_added===priorStr;});
+  var unconverted=operational.filter(function(r){return!ctIsLeadAppConverted(r);});
+  var needsTouch=operational.filter(function(r){
     var st=(r.status||"").toLowerCase();
     // Exclude converted/resolved and scheduled leads — those are already handled
     if(ctIsLeadResolved(r)||st.indexOf("scheduled")>=0)return false;
-    // Include new, contact attempt, nurture, contacted-but-stale
     if(!r.last_update)return true;
     var lastUp=new Date(r.last_update+"T12:00:00");
     return(now-lastUp)>86400000;
   });
+
+  // Filter chips are a drill-down view, not a KPI recalculation.
+  var filterResults=metricBase.filter(function(r){return statusMatch(r);});
+  var hasActiveFilter=!!(refFilters.status||refFilters.lp);
 
   ctRenderLeadStatusAudit(data);
 
@@ -2221,6 +2237,7 @@ function renderReferralLeadsDirect(data){
   if(el("ref-mtd-leads-v2"))el("ref-mtd-leads-v2").textContent=mtd;
   if(el("ref-file-starts-v2"))el("ref-file-starts-v2").textContent=appConversions;
   if(el("ref-ltf-v2"))el("ref-ltf-v2").textContent=ltf+"%";
+  if(el("ref-ltf-formula-v2"))el("ref-ltf-formula-v2").textContent=appConversions+" apps ÷ "+mtd+" leads";
   if(el("ref-needs-touch-v2"))el("ref-needs-touch-v2").textContent=needsTouch.length;
 
   // Today label
@@ -2268,6 +2285,18 @@ function renderReferralLeadsDirect(data){
       h+='</div>';
     });
     c.innerHTML=h;
+  }
+
+  var filterSect=el("ref-filter-results-section-v2");
+  if(filterSect){
+    filterSect.style.display=hasActiveFilter?"block":"none";
+    if(hasActiveFilter){
+      var filterLabel=[];
+      if(refFilters.lp)filterLabel.push(refFilters.lp);
+      if(refFilters.status)filterLabel.push(refFilters.status);
+      if(el("ref-filter-results-label-v2"))el("ref-filter-results-label-v2").textContent="— "+filterLabel.join(" · ");
+      renderTable(filterResults,"ref-filter-results-table-v2","ref-filter-results-count-v2");
+    }
   }
 
   renderTable(needsTouch,"ref-needs-touch-table-v2","ref-needs-touch-count-v2");
@@ -5667,7 +5696,7 @@ function toggleRefFilter(type,val,el){
     }
   });
   // Render into whichever view is active
-  if(currentUser==="Leads"){
+  if(currentUser==="Leads" || (document.getElementById("view-leads")&&document.getElementById("view-leads").classList.contains("active"))){
     renderReferralLeadsDirect(referralLeadsCache||[]);
   } else {
     renderReferralLeads(referralLeadsCache||[]);
@@ -5680,7 +5709,7 @@ function clearRefFilters(){
   document.querySelectorAll(".ref-filter-btn").forEach(function(b){
     b.style.outline="none";b.style.fontWeight="";
   });
-  if(currentUser==="Leads"){
+  if(currentUser==="Leads" || (document.getElementById("view-leads")&&document.getElementById("view-leads").classList.contains("active"))){
     renderReferralLeadsDirect(referralLeadsCache||[]);
   } else {
     renderReferralLeads(referralLeadsCache||[]);
