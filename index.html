@@ -815,6 +815,7 @@ table tbody tr:hover{background:#F6FBFC!important}
   <button class="who-btn wb-Osgood" onclick="selectUser(this,'Osgood')">Osgood</button>
   <button class="who-btn wb-Jordan" onclick="selectUser(this,'Jordan')">Jordan</button>
   <button class="who-btn wb-Said" onclick="selectUser(this,'Said')">Said</button>
+  <button class="who-btn wb-Isaak" onclick="selectUser(this,'Isaak')">Isaak</button>
   <div class="v14-nav-label">TEAM ACCOUNTABILITY</div>
   <button class="who-btn wb-Snapshot" onclick="openSnapshotView(this)" title="Team accountability, pace and today’s priorities">Snapshot</button>
   <div class="v14-nav-label">RELATIONSHIPS</div>
@@ -861,7 +862,7 @@ table tbody tr:hover{background:#F6FBFC!important}
       <div style="font-size:10.5px;font-weight:700;color:#071B37;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px">Partner Ownership</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="cm-field" style="margin:0"><label>RM Owner</label><select id="lp-cm-rm-owner" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text)"><option value="">Unassigned</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option></select></div>
-        <div class="cm-field" style="margin:0"><label>LP Owner</label><select id="lp-cm-lp-owner" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text)"><option value="Unassigned">Unassigned</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option></select></div>
+        <div class="cm-field" style="margin:0"><label>LP Owner</label><select id="lp-cm-lp-owner" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text)"><option value="Unassigned">Unassigned</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Isaak">Isaak</option></select></div>
       </div>
       <div style="font-size:10px;color:#888;margin-top:6px">Shared with the RM tracker.</div>
     </div>
@@ -1428,13 +1429,13 @@ table tbody tr:hover{background:#F6FBFC!important}
     <div style="display:grid;grid-template-columns:minmax(220px,2fr) minmax(140px,1fr) minmax(140px,1fr) minmax(145px,.9fr);gap:8px">
       <input id="ownership-search" type="text" placeholder="Search agent..." oninput="renderOwnershipRows()" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px">
       <select id="ownership-rm-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All RM owners</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option><option value="__UNASSIGNED__">RM unassigned</option></select>
-      <select id="ownership-lp-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All LP owners</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Unassigned">LP unassigned</option></select>
+      <select id="ownership-lp-filter" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="">All LP owners</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Isaak">Isaak</option><option value="Unassigned">LP unassigned</option></select>
       <select id="ownership-sort" onchange="renderOwnershipRows()" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px"><option value="unassigned">Sort: unassigned first</option><option value="name">Sort: name A–Z</option><option value="rm">Sort: RM owner</option><option value="lp">Sort: LP owner</option></select>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)">
       <div id="ownership-selected-count" style="font-size:11.5px;font-weight:800;color:#071B37;min-width:72px">0 selected</div>
       <select id="ownership-bulk-rm" style="padding:7px 9px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px"><option value="__NO_CHANGE__">RM: no change</option><option value="Amanda">RM: Amanda</option><option value="Nyny">RM: Nyny</option><option value="__UNASSIGNED__">RM: Unassigned</option></select>
-      <select id="ownership-bulk-lp" style="padding:7px 9px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px"><option value="__NO_CHANGE__">LP: no change</option><option value="Gavin">LP: Gavin</option><option value="Karen">LP: Karen</option><option value="Osgood">LP: Osgood</option><option value="Jordan">LP: Jordan</option><option value="Said">LP: Said</option><option value="Unassigned">LP: Unassigned</option></select>
+      <select id="ownership-bulk-lp" style="padding:7px 9px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:11.5px"><option value="__NO_CHANGE__">LP: no change</option><option value="Gavin">LP: Gavin</option><option value="Karen">LP: Karen</option><option value="Osgood">LP: Osgood</option><option value="Jordan">LP: Jordan</option><option value="Said">LP: Said</option><option value="Isaak">LP: Isaak</option><option value="Unassigned">LP: Unassigned</option></select>
       <button id="ownership-bulk-apply" class="btn btn-primary btn-sm" type="button" onclick="bulkApplyOwnership()" disabled>Apply to selected</button>
       <button class="btn btn-sm" type="button" onclick="clearOwnershipSelection()">Clear selection</button>
       <span id="ownership-bulk-status" style="font-size:10.5px;color:var(--text-3)"></span>
@@ -1465,7 +1466,7 @@ table tbody tr:hover{background:#F6FBFC!important}
     <div class="ref-stat-card urgent"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch-v2">--</div></div>
   </div>
   <div style="font-size:11px;color:var(--text-2);background:#F4FAFC;border:1px solid #DCEAF0;border-radius:8px;padding:8px 10px;margin:-2px 0 .75rem">
-    <b>Lead → App:</b> counts Started, Does Not Qualify (Credit/Income), Application Withdrawn/Denied, and later Encompass-synced loan milestones (for example Approval, RFPO, Submittal, Funding). A later milestone stays converted.
+    <b>Lead → App:</b> counts a confirmed file/application: Started, Application Withdrawn/Denied, or a later Encompass-synced loan milestone (for example Approval, RFPO, Submittal, Funding). Does Not Qualify by itself does <b>not</b> count as an app.
   </div>
   <details style="background:#fff;border:1px solid #DCE7EC;border-radius:9px;padding:8px 10px;margin:0 0 .8rem">
     <summary style="cursor:pointer;font-size:11px;font-weight:700;color:#405565">Why this conversion number? View source status audit</summary>
@@ -1488,6 +1489,7 @@ table tbody tr:hover{background:#F6FBFC!important}
     <span class="lp-tag lp-tag-Osgood ref-filter-btn" onclick="toggleRefFilter('lp','Osgood',this)" style="cursor:pointer">Osgood</span>
     <span class="lp-tag lp-tag-Jordan ref-filter-btn" onclick="toggleRefFilter('lp','Jordan',this)" style="cursor:pointer">Jordan</span>
     <span class="lp-tag lp-tag-Said ref-filter-btn" onclick="toggleRefFilter('lp','Said',this)" style="cursor:pointer">Said</span>
+    <span class="lp-tag lp-tag-Isaak ref-filter-btn" onclick="toggleRefFilter('lp','Isaak',this)" style="cursor:pointer">Isaak</span>
   </div>
   <div id="lp-conversion-boxes-v2" style="margin-bottom:1rem"></div>
   <div class="ref-section urgent" id="ref-needs-touch-section-v2" style="display:none">
@@ -1523,7 +1525,7 @@ table tbody tr:hover{background:#F6FBFC!important}
   <div id="leads-tab-roster" class="d-tab-panel">
     <div class="section-head">Conversion by date range</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
-      <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">Search any date range for team and per-LP Lead → App conversion. Started and later Encompass-synced milestones all count as converted.</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">Search any date range for team and per-LP Lead → App conversion. Only confirmed file/application stages count; Does Not Qualify alone does not.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
         <div><label style="font-size:10px;color:var(--text-3);text-transform:uppercase;display:block;margin-bottom:2px">Start date</label>
           <input type="date" id="conv-range-start" style="border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;font-family:inherit"></div>
@@ -1561,7 +1563,7 @@ table tbody tr:hover{background:#F6FBFC!important}
     <div id="d-tier-movement-section" style="margin-bottom:1rem"></div>
     <div class="section-head">Full roster
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
-        <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
+        <select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option><option value="Unassigned">Unassigned</option></select>
         <select id="d-rm" onchange="renderDaniel()"><option value="">All RM Owners</option><option>Amanda</option><option>Nyny</option><option value="Unassigned">Unassigned</option></select>
         <select id="d-lvl" onchange="renderDaniel()"><option value="">All tiers</option><option>Channel</option><option>A</option><option>B</option><option>C</option></select>
         <select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
@@ -1596,7 +1598,7 @@ table tbody tr:hover{background:#F6FBFC!important}
     <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
       <input type="text" id="reassign-q" placeholder="Search agent..." oninput="renderReassign()" style="flex:1;min-width:140px">
       <select id="reassign-filter-rm" onchange="renderReassign()"><option value="">All RM Owners</option><option>Amanda</option><option>Nyny</option><option value="Unassigned">Unassigned</option></select>
-      <select id="reassign-filter-lp" onchange="renderReassign()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="Unassigned">Unassigned</option></select>
+      <select id="reassign-filter-lp" onchange="renderReassign()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option><option value="Unassigned">Unassigned</option></select>
     </div>
     <div class="tbl-wrap" style="max-height:none;overflow:visible"><div id="reassign-count-label" style="padding:0 0 8px;font-size:11px;color:var(--text-3)"></div><table><thead><tr><th>Agent</th><th>Lvl</th><th>RM Owner</th><th>Status</th><th>Priority</th><th>Current LP</th><th>Reassign LP</th><th></th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
   </div>
@@ -1615,7 +1617,7 @@ table tbody tr:hover{background:#F6FBFC!important}
     <div class="form-row">
       <div class="form-group"><label>Name</label><input type="text" id="add-name" placeholder="Full name" style="width:180px"></div>
       <div class="form-group"><label>Level</label><select id="add-level"><option>A</option><option>B</option><option selected>C</option></select></div>
-      <div class="form-group"><label>LP</label><select id="add-lp"><option value="Unassigned">Unassigned</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option></select></div>
+      <div class="form-group"><label>LP</label><select id="add-lp"><option value="Unassigned">Unassigned</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option></select></div>
       <div class="form-group"><label>Priority</label><select id="add-priority"><option value="false">No</option><option value="true">Yes</option></select></div>
       <div class="form-group"><label>&nbsp;</label><button class="btn btn-primary" onclick="addAgent()">Add</button></div>
     </div>
@@ -1686,7 +1688,7 @@ table tbody tr:hover{background:#F6FBFC!important}
     <summary style="cursor:pointer;padding:13px 16px;font-size:13px;font-weight:800;color:var(--text-1);background:#F8F9FB">View full Face Time coverage &amp; filters</summary>
     <div style="padding:14px 16px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <select id="ft-lp-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
-        <option value="all">All LPs</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option>
+        <option value="all">All LPs</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Isaak">Isaak</option>
       </select>
       <select id="ft-tier-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
         <option value="all">All tiers</option><option value="Channel">Channel only</option><option value="A">A-tier only</option><option value="B">B-tier only</option><option value="C">C-tier only</option>
@@ -2084,9 +2086,9 @@ function sortArrow(col){
 
 
 // v55 — ONE source of truth for Lead → App conversion.
-// "Started" is the LP's manual conversion point. After the Encompass file exists,
-// Velocify can replace Started with later loan milestones. Those later statuses must
-// stay converted instead of falling back into the unconverted denominator.
+// Lead -> App means an Encompass file/application is confirmed. "Started" is the conversion point.
+// Later Encompass loan milestones also prove an app exists. Does Not Qualify alone is intentionally
+// excluded because it is not reliable proof that the Loans I Started milestone occurred.
 function ctIsLeadAppConverted(value){
   var row=(value&&typeof value==="object")?value:null;
   if(row){
@@ -2099,9 +2101,6 @@ function ctIsLeadAppConverted(value){
 
   var convertedSignals=[
     "started","file started",
-    // Does Not Qualify requires enough application/file data to evaluate credit or income,
-    // so it is still a successful Lead -> App conversion even though the loan did not qualify.
-    "does not qualify",
     "application withdrawn","application denied",
     "approval","approved","preapproval","pre-approval",
     "ready for pack out","rfpo",
@@ -2120,7 +2119,8 @@ function ctIsLeadAppConverted(value){
 function ctIsLeadResolved(value){
   var s=((value&&typeof value==="object"?value.status:value)||"").toString().toLowerCase().trim();
   if(ctIsLeadAppConverted(value))return true;
-  return s.indexOf("not interested")>=0||
+  return s.indexOf("does not qualify")>=0||
+         s.indexOf("not interested")>=0||
          s.indexOf("bad lead")>=0||
          s.indexOf("fake data")>=0||
          s.indexOf("do not contact")>=0||
@@ -2828,7 +2828,7 @@ function renderOwnershipRows(){
   ownershipVisibleKeys=rows.map(function(a){return assignmentKey(a[0]);});
   if(!rows.length){host.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">No relationships match those filters.</div>';renderOwnershipBulkStatus();return;}
   var rmOptions='<option value="">Unassigned</option><option value="Amanda">Amanda</option><option value="Nyny">Nyny</option>';
-  var lpOptions='<option value="Unassigned">Unassigned</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option>';
+  var lpOptions='<option value="Unassigned">Unassigned</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Isaak">Isaak</option>';
   var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:760px"><thead><tr style="background:var(--surface-2);text-align:left"><th style="padding:10px 8px;width:32px;text-align:center"><input id="ownership-select-all" type="checkbox" onchange="toggleOwnershipSelectAll(this)" title="Select all visible"></th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">Agent</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">Tier</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">RM Owner</th><th style="padding:10px 8px;font-size:10px;text-transform:uppercase;color:var(--text-3)">LP Owner</th><th style="padding:10px 12px"></th></tr></thead><tbody>';
   rows.forEach(function(a){
     var name=a[0],rm=getRmOwner(name)||"",lp=a[2]||"Unassigned",key=assignmentKey(name),checked=ownershipSelected.has(key)?' checked':'';
@@ -4162,7 +4162,7 @@ async function loadLeadPipeline(){
 
     // Build per-LP counts
     var init=function(){return{daily:0,wtd:0,mtd:0,ytd:0,file_starts_mtd:0,file_starts_ytd:0,agents_mtd:new Set(),agents_ytd:new Set(),quiet_agents:[]};};
-    var lps={Gavin:init(),Karen:init(),Osgood:init(),Jordan:init(),Said:init()};
+    var lps={Gavin:init(),Karen:init(),Osgood:init(),Jordan:init(),Said:init(),Isaak:init()};
     var totals=init();
 
     res.forEach(function(r){
@@ -6040,7 +6040,7 @@ function lpscRenderTeamTotals(){
   });
 
   body.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">'+cardsHtml+'</div>'
-    +'<div style="font-size:10px;color:#aaa;margin-top:10px;text-align:center">'+(period==="daily"?"Today's combined activity":period==="mtd"?"Month-to-date combined activity":"Year-to-date combined activity")+' across Gavin, Karen, Osgood, Said, and Jordan</div>';
+    +'<div style="font-size:10px;color:#aaa;margin-top:10px;text-align:center">'+(period==="daily"?"Today's combined activity":period==="mtd"?"Month-to-date combined activity":"Year-to-date combined activity")+' across Gavin, Karen, Osgood, Said, Jordan, and Isaak</div>';
 }
 
 
@@ -7637,7 +7637,7 @@ function renderFaceTime(){
     B:"B-Tier — target every 30 days · 🟡 21d · 🔴 30d · 🚨 45d",
     C:"C-Tier — target every 60 days · 🟡 45d · 🔴 60d · 🚨 90d"
   };
-  var lpColors={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68"};
+  var lpColors={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68",Isaak:"#3D4E68"};
 
   // Build rows using DOM-safe approach (no inline onclick with dynamic strings)
   var rows=[];
@@ -7677,7 +7677,7 @@ function renderFaceTime(){
             +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Date</label>'
             +'<input type="date" id="'+fid+'-date" value="'+today2()+'" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"></div>'
             +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Logged by</label>'
-            +'<select id="'+fid+'-by" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"><option>Nyny</option><option>Amanda</option><option>Gavin</option><option>Jordan</option><option>Karen</option><option>Osgood</option><option>Said</option></select></div>'
+            +'<select id="'+fid+'-by" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"><option>Nyny</option><option>Amanda</option><option>Gavin</option><option>Jordan</option><option>Karen</option><option>Osgood</option><option>Said</option><option>Isaak</option></select></div>'
           +'</div>'
           +'<textarea id="'+fid+'-notes" placeholder="What did you talk about? Any referral opportunities discussed, next steps, what they need from us..." style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:12px;font-family:inherit;resize:vertical;min-height:72px;margin-bottom:8px;box-sizing:border-box"></textarea>'
           +'<div style="display:flex;gap:7px">'
@@ -10253,7 +10253,7 @@ setTimeout(function(){
 #v33SharedFaceTimeModal label{font-size:10px;font-weight:800;text-transform:uppercase;color:#69766E;display:block;margin:10px 0 4px}
 #v33SharedFaceTimeModal input,#v33SharedFaceTimeModal select,#v33SharedFaceTimeModal textarea{width:100%;box-sizing:border-box;border:1px solid #CBD6CD;border-radius:8px;padding:8px 9px;font:12px Arial,Helvetica,sans-serif}
 </style>
-<div id="v33SharedFaceTimeModal"><div class="v33-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div style="font-size:17px;font-weight:850;color:#26352D">Book Face Time</div><div id="v33FtAgentLabel" style="font-size:12px;color:#68756D;margin-top:2px"></div></div><button onclick="v33CloseSharedFaceTime()" style="border:0;background:#F1F4F1;width:32px;height:32px;border-radius:8px;cursor:pointer">×</button></div><input type="hidden" id="v33FtId"><input type="hidden" id="v33FtAgent"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>Date</label><input id="v33FtDate" type="date"></div><div><label>Time</label><input id="v33FtTime" type="time"></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>LP attending</label><select id="v33FtLp"><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option value="">TBD</option></select></div><div><label>RM partner</label><select id="v33FtRm"><option>Amanda</option><option>Nyny</option><option>Amanda + Nyny</option></select></div></div><label>Purpose / notes</label><textarea id="v33FtNotes" rows="3" placeholder="Why are we meeting? Anything Amanda/RM should know?"></textarea><div style="background:#F2F6F2;border:1px solid #D7E2D9;border-radius:8px;padding:8px 9px;margin-top:9px;font-size:11px;color:#536258">One shared booking. It appears in the LP Face Time view and Amanda’s RM Face Time view.</div><div style="display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap;margin-top:13px"><button id="v33FtCancelBooking" onclick="v33CancelSharedFaceTime()" style="display:none;border:1px solid #E1CBC4;background:#FFF8F6;color:#8A4A3E;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer">Cancel booking</button><button onclick="v33CloseSharedFaceTime()" style="border:1px solid #D4DDD6;background:#fff;color:#59655E;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer">Close</button><button onclick="v33SaveSharedFaceTime()" style="border:0;background:#557565;color:#fff;border-radius:8px;padding:7px 11px;font-weight:750;cursor:pointer">Save booking</button></div></div></div>
+<div id="v33SharedFaceTimeModal"><div class="v33-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div style="font-size:17px;font-weight:850;color:#26352D">Book Face Time</div><div id="v33FtAgentLabel" style="font-size:12px;color:#68756D;margin-top:2px"></div></div><button onclick="v33CloseSharedFaceTime()" style="border:0;background:#F1F4F1;width:32px;height:32px;border-radius:8px;cursor:pointer">×</button></div><input type="hidden" id="v33FtId"><input type="hidden" id="v33FtAgent"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>Date</label><input id="v33FtDate" type="date"></div><div><label>Time</label><input id="v33FtTime" type="time"></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>LP attending</label><select id="v33FtLp"><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option><option value="">TBD</option></select></div><div><label>RM partner</label><select id="v33FtRm"><option>Amanda</option><option>Nyny</option><option>Amanda + Nyny</option></select></div></div><label>Purpose / notes</label><textarea id="v33FtNotes" rows="3" placeholder="Why are we meeting? Anything Amanda/RM should know?"></textarea><div style="background:#F2F6F2;border:1px solid #D7E2D9;border-radius:8px;padding:8px 9px;margin-top:9px;font-size:11px;color:#536258">One shared booking. It appears in the LP Face Time view and Amanda’s RM Face Time view.</div><div style="display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap;margin-top:13px"><button id="v33FtCancelBooking" onclick="v33CancelSharedFaceTime()" style="display:none;border:1px solid #E1CBC4;background:#FFF8F6;color:#8A4A3E;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer">Cancel booking</button><button onclick="v33CloseSharedFaceTime()" style="border:1px solid #D4DDD6;background:#fff;color:#59655E;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer">Close</button><button onclick="v33SaveSharedFaceTime()" style="border:0;background:#557565;color:#fff;border-radius:8px;padding:7px 11px;font-weight:750;cursor:pointer">Save booking</button></div></div></div>
 <script>
 async function v33OpenSharedFaceTime(name,lp,id){var m=document.getElementById('v33SharedFaceTimeModal');if(!m)return;document.getElementById('v33FtId').value=id||'';document.getElementById('v33FtAgent').value=name||'';document.getElementById('v33FtAgentLabel').textContent=displayName(name||'')+' · shared with RM Tracker';document.getElementById('v33FtDate').value=today2();document.getElementById('v33FtTime').value='';document.getElementById('v33FtLp').value=lp||'';document.getElementById('v33FtRm').value='Amanda';document.getElementById('v33FtNotes').value='';document.getElementById('v33FtCancelBooking').style.display=id?'inline-block':'none';if(id){try{var rows=await sbFetch('GET','face_time_events?id=eq.'+encodeURIComponent(id)+'&select=*&limit=1');if(rows&&rows[0]){var e=rows[0];document.getElementById('v33FtDate').value=e.event_date||today2();document.getElementById('v33FtTime').value=String(e.event_time||'').slice(0,5);document.getElementById('v33FtLp').value=e.lp||lp||'';document.getElementById('v33FtRm').value=e.rm||'Amanda';document.getElementById('v33FtNotes').value=e.notes||'';}}catch(e){console.warn(e);}}m.style.display='flex';}
 function v33CloseSharedFaceTime(){var m=document.getElementById('v33SharedFaceTimeModal');if(m)m.style.display='none';}
@@ -10794,13 +10794,13 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
     const h=document.querySelector('#view-leads h2,#view-leads .section-title');
     if(!h||document.getElementById('referral-truth-note'))return;
     const n=document.createElement('div');n.id='referral-truth-note';
-    n.textContent='Top-line lead counts include all Core Team users. LP cards break out the six Core Team LPs, including Isaak; any remaining Core Team users stay in Other / Core Team.';
+    n.textContent='Top-line lead counts include all Core Team users. LP views now include Gavin, Karen, Osgood, Jordan, Said, and Isaak consistently.';
     h.insertAdjacentElement('afterend',n);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();
 })();
 </script>
 
-<script>console.log("LP Tracker Build v58 · Isaak added + Lead-to-App source audit");</script>
+<script>console.log("LP Tracker Build v59 · Isaak fully added + strict Lead-to-App logic");</script>
 </body>
 </html>
