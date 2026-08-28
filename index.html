@@ -8,8 +8,8 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260828-v62-shared-contact-coordination">
-  <meta name="build-notes" content="v62 built directly from the current v61 KPI Drilldowns LP tracker. Preserves all existing functionality and adds RM/LP shared-contact coordination: meaningful RM touches and dated RM follow-ups suppress duplicate routine LP outreach; live LP connections stamp shared relationship contact history.">
+  <meta name="version" content="20260828-v64-single-isaak-lp1-app-support">
+  <meta name="build-notes" content="v64 preserves Face Time source-of-truth + RM/LP coordination and fixes Isaak role display: one Isaak only, LP1, 100-call target, with app-support production metrics shown on the same card. Isaak remains included in team production totals but is excluded from LP2-only rows/comparisons.">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -3879,7 +3879,7 @@ async function renderLpScorecardSummary(){
     thead+='</tr></thead>';
 
     var tbody='<tbody>';
-    LPSC_TEAM_LPS.forEach(function(lp){
+    LPSC_TEAM_LPS.filter(function(lp){return lp!=="Isaak";}).forEach(function(lp){
       var data=byPerson[lp]||{};
       tbody+='<tr><td style="padding:8px 12px;font-size:12px;font-weight:600;border-bottom:1px solid #f0f2f8;color:'+LP_COLORS[lp]+'">'+lp+'</td>';
       metrics.forEach(function(m){
@@ -3893,7 +3893,7 @@ async function renderLpScorecardSummary(){
     tbody+='</tbody>';
 
     el.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+thead+tbody+'</table></div>'
-      +'<div style="font-size:10px;color:#aaa;margin-top:8px">Based on scorecard entries for the current week. LPs with no entries are omitted.</div>';
+      +'<div style="font-size:10px;color:#aaa;margin-top:8px">LP2 comparison only. Isaak is LP1 and is tracked separately; his app-support production still rolls into team totals.</div>';
   }catch(e){el.innerHTML='<div style="font-size:12px;color:#aaa;text-align:center;padding:10px">Could not load scorecard data.</div>';}
 }
 
@@ -4753,8 +4753,10 @@ function buildSnapshot(){
   // ── SCOREBOARD ROWS (no grid, works at any width) ──
   h+='<div style="width:100%;margin-bottom:1rem">';
 
-  // ── LP rows ──
-  LPS.forEach(function(lp){
+  // ── LP2 rows ──
+  // Isaak is LP1, not a sixth LP2. Keep him in shared data/ownership and team production totals,
+  // but render him only once in his dedicated LP1 card below.
+  LPS.filter(function(lp){return lp!=="Isaak";}).forEach(function(lp){
     var called=callsLogged[lp]||0;
     var target=WEEKLY_TARGET;
     var paceTarget=Math.round(target*paceFraction);
@@ -4802,6 +4804,8 @@ function buildSnapshot(){
 // Isaak card
   var isaakData2=snapScData["Isaak"]||{};
   var isaakApps=scTotal(isaakData2,"apps_1003");
+  var isaakPreApps=scTotal(isaakData2,"pre_approvals");
+  var isaakContracts=scTotal(isaakData2,"contracts");
   var isaakRCalls=scTotal(isaakData2,"realtor_calls");
   var isaakMeetings=scTotal(isaakData2,"meetings");
   // Also use lpHistoryCallCounts as fallback
@@ -4819,7 +4823,7 @@ function buildSnapshot(){
   else{isaakStatus='Behind pace';isaakSc='#B54B42';}
   h+='<div style="border-left:4px solid #3D4E68;padding:10px 14px;margin-bottom:6px;border-radius:0 6px 6px 0;background:var(--surface)">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">';
-  h+='<div style="min-width:72px"><span style="font-size:14px;font-weight:600;color:#3D4E68">Isaak</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP1</span></div>';
+  h+='<div style="min-width:128px"><span style="font-size:14px;font-weight:600;color:#3D4E68">Isaak</span> <span style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">LP1 · APP SUPPORT</span></div>';
   h+='<span style="font-family:\'Geist\',\'Inter\',sans-serif;font-size:24px;font-weight:700;color:var(--text)">'+isaakRCalls+'</span>';
   h+='<span style="font-size:11px;color:var(--text-3)">/ 100 calls this week</span>';
   h+='<span style="font-family:\'Geist\',\'Inter\',sans-serif;font-size:16px;font-weight:700;color:#3D4E68">'+isaakPct+'%</span>';
@@ -4828,8 +4832,10 @@ function buildSnapshot(){
   h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
   h+='<div style="flex:1;min-width:120px"><div style="height:3px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+isaakPct+'%;background:#3D4E68"></div></div></div>';
   h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'Geist\',\'Inter\',sans-serif;color:'+(isaakRCalls>=100?'#3E8E5A':isaakRCalls>0?'#B8842B':'var(--text-3)')+'">'+isaakRCalls+'<span style="font-size:9px;color:var(--text-3)">/100</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Calls</div></div>';
-  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'Geist\',\'Inter\',sans-serif;color:'+(isaakApps>=10?'#3E8E5A':isaakApps>0?'#B8842B':'var(--text-3)')+'">'+isaakApps+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">1003\'s</div></div>';
   h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'Geist\',\'Inter\',sans-serif;color:'+(isaakMeetings>=10?'#3E8E5A':isaakMeetings>0?'#B8842B':'var(--text-3)')+'">'+isaakMeetings+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Meetings</div></div>';
+  h+='<div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;font-family:\'Geist\',\'Inter\',sans-serif;color:'+(isaakApps>=10?'#3E8E5A':isaakApps>0?'#B8842B':'var(--text-3)')+'">'+isaakApps+'<span style="font-size:9px;color:var(--text-3)">/10</span></div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">1003\'s</div></div>';
+  h+='<div style="text-align:center;min-width:48px"><div style="font-size:12px;font-weight:600;font-family:\'Geist\',\'Inter\',sans-serif;color:'+(isaakPreApps>0?'#3E8E5A':'var(--text-3)')+'">'+isaakPreApps+'</div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Pre-apps</div></div>';
+  h+='<div style="text-align:center;min-width:48px"><div style="font-size:12px;font-weight:600;font-family:\'Geist\',\'Inter\',sans-serif;color:'+(isaakContracts>0?'#3E8E5A':'var(--text-3)')+'">'+isaakContracts+'</div><div style="font-size:8px;color:var(--text-3);text-transform:uppercase">Contracts</div></div>';
   h+='</div>';
   h+='</div>';
 
@@ -7194,7 +7200,7 @@ async function loadFaceTime(){
   var listEl=document.getElementById("ft-list");
   if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px;font-size:13px">Loading...</div>';
   try{
-    // Shared source-of-truth with the RM Break Bread list: same active partner population,
+    // v63 source-of-truth for BOTH trackers: latest Power BI active partner population,
     // same assignments, same two visit sources, same cadence thresholds.
     var r=await Promise.all([
       sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=4000"),
@@ -7236,9 +7242,18 @@ async function loadFaceTime(){
       if(tier==="Channel")return"Nyny";
       return"Unassigned";
     }
+    // v63 FACE TIME SOURCE OF TRUTH: only the latest Power BI-stamped ACTIVE PARTNER population
+    // can enter Face Time. A thin contact/profile row is not enough. This is the same definition
+    // the RM tracker consumes, so both apps start from one population before applying ownership.
+    var latestFtPbMs=0;
+    (r[3]||[]).forEach(function(p){var ms=Date.parse(p&&p.powerbi_last_seen_at||"");if(Number.isFinite(ms)&&ms>latestFtPbMs)latestFtPbMs=ms;});
+    function ftIsCurrentPowerBiRow(p){
+      var ms=Date.parse(p&&p.powerbi_last_seen_at||"");
+      return !!latestFtPbMs&&Number.isFinite(ms)&&Math.abs(ms-latestFtPbMs)<120000;
+    }
     ftRosterRows=(r[3]||[]).filter(function(p){
       var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
-      return !!k && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && p.retained!==false && !o.removed
+      return !!k && ftIsCurrentPowerBiRow(p) && p.retained===true && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && !o.removed
         && String(p.relationship_type||"realtor")!=="strategic_partner"
         && String(p.lp_outreach_status||"active")!=="nurture";
     }).map(function(p){
@@ -10920,5 +10935,9 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
 </script>
 
 <script>console.log("LP Tracker Build v62 · shared RM/LP contact coordination + duplicate-outreach suppression");</script>
+
+<script id="v63-facetime-source-marker">
+window.CT_SHARED_FACETIME_RULES_VERSION="20260828-v63";
+</script>
 </body>
 </html>
