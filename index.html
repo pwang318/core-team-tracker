@@ -1,3 +1,4 @@
+ <!-- v62: RM/LP shared-contact coordination suppresses duplicate routine outreach after meaningful team touches and while RM follow-ups are scheduled. -->
      
 <!DOCTYPE html>
 <!-- v56: Lead-to-App conversion fix; DQ Credit/Income count as apps because qualification requires an application -->
@@ -7,8 +8,8 @@
 <head>
 <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="version" content="20260826-v56-lead-to-app-dq-included">
-  <meta name="build-notes" content="Daniel-aligned Tier Growth: Channel 10+, A 4-9, B 2-3, C 1 close or 1 lead; month-end targets and 50-point net tier-count score; individual migrations remain diagnostic.">
+  <meta name="version" content="20260828-v62-shared-contact-coordination">
+  <meta name="build-notes" content="v62 built directly from the current v61 KPI Drilldowns LP tracker. Preserves all existing functionality and adds RM/LP shared-contact coordination: meaningful RM touches and dated RM follow-ups suppress duplicate routine LP outreach; live LP connections stamp shared relationship contact history.">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1909,7 +1910,7 @@ function getLpIncompleteFromLastWeek(lp){
 function getLpTotalTargetThisWeek(lp){
   var raw=WEEKLY_TARGET+getLpIncompleteFromLastWeek(lp);
   // Cap at the LP's active agent count - can't call more unique agents than exist
-  var activeCount=agents.filter(function(a){return a[2]===lp&&isActive(a);}).length;
+  var activeCount=agents.filter(function(a){return a[2]===lp&&isActive(a)&&(calledThisWeek(a[0])||!lpRmCoordinationHold(a));}).length;
   return Math.min(raw,Math.max(WEEKLY_TARGET,activeCount));
 }
 
@@ -2390,9 +2391,9 @@ function renderTierMovementPanel(){
 // buildLeadsTable defined below (active version)
 
 function effectiveDays(a){
-  // Relationship cadence should not be reset by a voicemail/text attempt in the current week.
-  // Only a live LP connection counts from call_logs here; Power BI/Velocify business activity still counts.
-  var logDate=null,histDate=null,actDate=null;
+  // Relationship cadence is TEAM-aware: a real RM connection counts just like a real LP connection.
+  // Voicemail/text attempts still do not reset cadence.
+  var logDate=null,histDate=null,actDate=null,rmDate=null;
   var log=callLogs[a[0]];
   if(log&&log.call_date&&lpHasLiveConnectionLog(log))logDate=new Date(log.call_date+'T12:00:00');
   var hist=agentLastCall[a[0]]||null;
@@ -2401,7 +2402,9 @@ function effectiveDays(a){
   if(hist&&!(log&&log.call_date===hist&&!lpHasLiveConnectionLog(log)))histDate=new Date(hist+'T12:00:00');
   var act=mostRecent(a);
   if(act)actDate=new Date(act+'T12:00:00');
-  var candidates=[logDate,histDate,actDate].filter(Boolean);
+  var rmd=rmLatestMeaningful[assignmentKey(a[0])]||null;
+  if(rmd)rmDate=new Date(rmd+'T12:00:00');
+  var candidates=[logDate,histDate,actDate,rmDate].filter(Boolean);
   if(!candidates.length)return null;
   var best=candidates.reduce(function(a,b){return a>b?a:b;});
   best.setHours(0,0,0,0);
@@ -2422,7 +2425,7 @@ function daysOverdue(a){
 }
 
 function getRotation(lp){
-  var active=agents.filter(function(a){return a[2]===lp&&ctRosterEligible(a)&&isActive(a)&&!lpOpenRmFlags[assignmentKey(a[0])];});
+  var active=agents.filter(function(a){return a[2]===lp&&ctRosterEligible(a)&&isActive(a)&&!lpOpenRmFlags[assignmentKey(a[0])]&&(calledThisWeek(a[0])||!lpRmCoordinationHold(a));});
   if(!active.length)return[];
   var priority=active.filter(isPriority);
   var normal=active.filter(function(a){return!isPriority(a);});
@@ -2437,7 +2440,7 @@ function getRotation(lp){
   notDue.sort(function(a,b){return daysOverdue(b)-daysOverdue(a);});
 
   // CARRYOVER: pin last week's missed agents to the top so they can't be skipped again
-  var missedLastWeek=getLpMissedLastWeek(lp).filter(function(a){return isActive(a);});
+  var missedLastWeek=getLpMissedLastWeek(lp).filter(function(a){return isActive(a)&&(calledThisWeek(a[0])||!lpRmCoordinationHold(a));});
 
   // Priority first, then last week's misses, then overdue, then fill with closest-to-due
   var combined=priority.concat(missedLastWeek).concat(overdue).concat(notDue);
@@ -2631,7 +2634,7 @@ function lpScheduleBackgroundRefresh(){
   lpLastBackgroundRefresh=now;
   clearTimeout(lpBackgroundRefreshTimer);
   lpBackgroundRefreshTimer=setTimeout(function(){
-    lpStaggerTasks([loadPrevNotes,loadVelocifyLeads,loadCoMarketing,loadAgentMilestones,loadChurnRisk,loadLpEffectiveness,loadReceivedLeads,loadRmFollowups],180);
+    lpStaggerTasks([loadPrevNotes,loadRmActivity,loadVelocifyLeads,loadCoMarketing,loadAgentMilestones,loadChurnRisk,loadLpEffectiveness,loadReceivedLeads,loadRmFollowups],180);
   },300);
 }
 function lpTestConnection(){
@@ -2735,8 +2738,11 @@ function selectUser(btn,u){
     document.getElementById("view-welcome").classList.add("active");
   } else {
     document.getElementById("view-lp").classList.add("active");
-    renderLP(u);
-    Promise.all([loadCallLogs().catch(function(){}),loadFaceTime().catch(function(){}),loadInactiveRosterNames().catch(function(){})]).then(function(){renderLP(u);});
+    var lpList=document.getElementById("lp-call-list"),heroName=document.getElementById("lp-hero-name"),heroSub=document.getElementById("lp-hero-sub");
+    if(heroName)heroName.textContent=u+"'s calls this week";
+    if(heroSub)heroSub.textContent="Syncing shared RM + LP activity before building the call list…";
+    if(lpList)lpList.innerHTML='<div class="no-data">Checking the latest team touches and follow-up ownership…</div>';
+    Promise.all([loadCallLogs().catch(function(){}),loadRmActivity().catch(function(){}),loadFaceTime().catch(function(){}),loadInactiveRosterNames().catch(function(){})]).then(function(){renderLP(u);});
     lpStartPolling(u);
   }
 }
@@ -2973,8 +2979,9 @@ function renderLP(lp){
   var all=agents.filter(function(a){return a[2]===lp&&ctRosterEligible(a);});
   var ac=all.filter(isActive).length,ic=all.filter(function(a){return!isActive(a);}).length;
   var pc=all.filter(function(a){return isPriority(a)&&isActive(a);}).length;
+  var coordHolds=all.filter(function(a){return isActive(a)&&!calledThisWeek(a[0])&&!!lpRmCoordinationHold(a);}).length;
   document.getElementById("lp-hero-name").textContent=lp+"'s calls this week";
-  document.getElementById("lp-hero-sub").textContent=ac+" active / "+ic+" inactive"+(pc?" / "+pc+" priority":"");
+  document.getElementById("lp-hero-sub").textContent=ac+" active / "+ic+" inactive"+(pc?" / "+pc+" priority":"")+(coordHolds?" / "+coordHolds+" team-coordinated hold"+(coordHolds===1?"":"s"):"");
   var done=getLpCallsThisWeek(lp);
   var heroTarget=getLpTotalTargetThisWeek(lp);
   var pct=Math.min(100,Math.round(done/heroTarget*100));
@@ -3118,7 +3125,7 @@ function ctGetPbAgentSnapshot(name){
 }
 
 function renderCallCard(a,lp,isBonus){
-  var name=a[0],called=calledThisWeek(name),ds=effectiveDays(a),act=mostRecent(a),pri=isPriority(a);
+  var name=a[0],called=calledThisWeek(name),ds=effectiveDays(a),act=mostRecent(a),pri=isPriority(a),teamHold=lpRmCoordinationHold(a);
   var isCarryover=(typeof lastWeekLogs!=="undefined")&&getLpMissedLastWeek(a[2]).some(function(x){return x[0]===name;});
   var isPending=!!(pendingNote&&pendingNote[name]);
   var log=callLogs[name],note=log?log.note:"",outcome=log?log.outcome||"":"";
@@ -3170,7 +3177,8 @@ function renderCallCard(a,lp,isBonus){
   if(act)html+='<span style="color:var(--text-3)">Last activity '+fmt(act)+'</span>';
   html+='</div>';
 
-  if(!called)html+='<div class="ct-focus-line"><strong>Focus:</strong> '+escHtml(focus)+'</div>';
+  if(teamHold&&!called)html+='<div style="margin-top:7px;padding:7px 9px;border:1px solid #C9D8E2;background:#F4F8FA;border-radius:7px;font-size:10.8px;color:#365365"><strong>Team coordination:</strong> '+escHtml(teamHold.message)+'</div>';
+  if(!called&&!teamHold)html+='<div class="ct-focus-line"><strong>Focus:</strong> '+escHtml(focus)+'</div>';
 
   var chips=[];
   if(velMtd>0)chips.push('<span class="ct-business-chip hot">'+velMtd+' lead'+(velMtd===1?'':'s')+' MTD</span>');
@@ -5338,6 +5346,11 @@ var VELOCIFY_SEED={"JOHN BRUNNER":{"total":1,"mtd":0,"wtd":0},"ANNIE MORENO":{"t
 
 var prevNotes={};
 var rmActivity={};
+// v62: shared team-contact coordination. These maps are built from RM activity so an LP
+// does not get a routine call task immediately after Amanda/Nyny connected or while the RM
+// already owns a dated follow-up.
+var rmLatestMeaningful={};
+var rmCoordinationHolds={};
 var selfReportedReferrals={};
 var receivedLeadsData={};
 var rmFollowupsData={};
@@ -5514,18 +5527,55 @@ function loadPrevNotes(){
 }
 
 function loadRmActivity(){
-  var d=new Date(weekKey+"T12:00:00");d.setDate(d.getDate()+6);
-  var wEnd=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-  return sbFetch("GET","amanda_activities?act_date=gte."+weekKey+"&act_date=lte."+wEnd+"&select=agent_name,act_date&limit=1000").then(function(res){
-    rmActivity={};
-    if(res)res.forEach(function(r){
-      var exact=r.agent_name||"";
-      var key=exact.toUpperCase();
-      if(!rmActivity[exact]||r.act_date>rmActivity[exact])rmActivity[exact]=r.act_date;
-      // Also index uppercase so minor casing differences between trackers don't hide a live RM touch.
-      if(!rmActivity[key]||r.act_date>rmActivity[key])rmActivity[key]=r.act_date;
+  // Pull enough shared RM history to coordinate work across BOTH trackers, not just this week.
+  // The LP queue uses meaningful RM connections as team touches and future RM follow-up dates
+  // as explicit holds so we do not double-contact the same partner.
+  var todayStr=localDateStr(TODAY);
+  var cutoff=new Date(TODAY);cutoff.setDate(cutoff.getDate()-180);
+  var cutoffStr=localDateStr(cutoff);
+  return sbFetch("GET","amanda_activities?act_date=gte."+cutoffStr+"&select=agent_name,act_type,act_date,outcome,follow_up_date,notes,created_at&order=act_date.desc,created_at.desc&limit=5000").then(function(res){
+    rmActivity={};rmLatestMeaningful={};rmCoordinationHolds={};
+    var rows=res||[];
+    rows.forEach(function(r){
+      if(!r||!r.agent_name)return;
+      var exact=r.agent_name||"",upper=exact.toUpperCase(),ak=assignmentKey(exact);
+      // Existing card context keeps the latest RM activity of any kind.
+      if(!rmActivity[exact]||String(r.act_date||"")>rmActivity[exact])rmActivity[exact]=r.act_date;
+      if(!rmActivity[upper]||String(r.act_date||"")>rmActivity[upper])rmActivity[upper]=r.act_date;
+      // Coordination cadence uses only real connections/held meetings — not voicemail/no answer.
+      if(isMeaningfulOutcome(r.outcome,NOT_MEANINGFUL_RM_OUTCOMES,r.act_type)){
+        if(ak&&(!rmLatestMeaningful[ak]||String(r.act_date||"")>rmLatestMeaningful[ak]))rmLatestMeaningful[ak]=String(r.act_date||"").slice(0,10);
+      }
+    });
+    rows.forEach(function(r){
+      if(!r||!r.agent_name||!r.follow_up_date)return;
+      var fu=String(r.follow_up_date).slice(0,10);
+      var ak=assignmentKey(r.agent_name),origin=String(r.act_date||r.created_at||"").slice(0,10),later=rmLatestMeaningful[ak]||"";
+      // A later real connection closes an older promised follow-up; do not let stale dates pause LP work.
+      if(origin&&later&&later>origin)return;
+      var owner="RM";try{if(typeof ctRmOwnerFromNotes==="function")owner=ctRmOwnerFromNotes(r.notes)||"RM";}catch(e){}
+      var cur=rmCoordinationHolds[ak];
+      if(!cur||fu<cur.follow_up_date)rmCoordinationHolds[ak]={follow_up_date:fu,act_date:origin,act_type:r.act_type||"RM follow-up",outcome:r.outcome||"",owner:owner};
     });
   }).catch(function(err){console.warn("RM activity load failed:",err);});
+}
+
+function lpRmCoordinationHold(a){
+  if(!a||!a[0])return null;
+  var ak=assignmentKey(a[0]),todayStr=localDateStr(TODAY),hold=rmCoordinationHolds[ak]||null;
+  if(hold){
+    var overdue=hold.follow_up_date<todayStr;
+    return {kind:"followup",until:hold.follow_up_date,last:hold.act_date||null,owner:hold.owner||"RM",message:(hold.owner||"RM")+" owns "+(overdue?"OVERDUE follow-up ":"follow-up ")+fmt(hold.follow_up_date)+" — routine LP outreach paused"};
+  }
+  var last=rmLatestMeaningful[ak]||null;
+  if(last){
+    var dt=new Date(last+"T12:00:00"),days=Math.max(0,Math.floor((TODAY-dt)/86400000)),wait=tierWindow(a);
+    if(days<wait){
+      var due=new Date(dt);due.setDate(due.getDate()+wait);var dueStr=localDateStr(due);
+      return {kind:"recent",until:dueStr,last:last,owner:"RM team",message:"RM team connected "+fmt(last)+" — routine LP outreach paused until "+fmt(dueStr)};
+    }
+  }
+  return null;
 }
 
 function loadRmFollowups(){
@@ -5628,6 +5678,12 @@ function upsertCallLogWithOutcome(name,lp,note,outcome,flagRm){
   setSyncStatus("saving");
   return sbFetch("POST","call_logs",data).then(function(){
     return sbFetch("POST","call_logs_history",{agent_name:name,lp:lp,week_key:weekKey,call_date:localDateStr(TODAY),note:note||"",flag_rm:fr});
+  }).then(function(){
+    // A real LP connection is shared relationship history. Stamp the shared profile so the RM
+    // tracker immediately treats it as the team's latest meaningful touch. Attempts do not stamp it.
+    if(lpHasLiveConnectionLog(data)){
+      return lpProfileWrite("PATCH","agent_profiles?agent_name=ilike."+encodeURIComponent(name),{last_meaningful_contact_date:localDateStr(TODAY)}).catch(function(err){console.warn("Shared meaningful-contact stamp skipped:",err);});
+    }
   }).then(function(){setSyncStatus("live");}).catch(function(e){lpHandleSyncError(e);console.error("Call log save failed for "+name+":",e);});
 }
 
@@ -10863,6 +10919,6 @@ console.log("LP Tracker Build v45 · Face Time tier source aligned with RM + cur
 })();
 </script>
 
-<script>console.log("LP Tracker Build v59 · Isaak fully added + strict Lead-to-App logic");</script>
+<script>console.log("LP Tracker Build v62 · shared RM/LP contact coordination + duplicate-outreach suppression");</script>
 </body>
 </html>
