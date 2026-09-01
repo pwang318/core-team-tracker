@@ -12112,12 +12112,47 @@ function normalizeHeaders(h){h=(h||[]).map(x=>String(x||'').trim());if(h.length)
 function validContact(n){const s=norm(n);return !!s&&!['n/a','na','none','null','no agent','0','00','000','jane doe','john doe'].includes(s)}
 async function replaceWeekRows(planDate,lane){
   if(!planDate)return;
-  if(lane==='LP'){
-    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&outcome=eq.LP%20Transaction').catch(()=>{});
-    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&agent_name=eq.'+encodeURIComponent('__LP_TUESDAY_PLAN__')).catch(()=>{});
-  }else if(lane==='RM'){
-    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&outcome=eq.RM%20Listing').catch(()=>{});
-    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&agent_name=eq.'+encodeURIComponent('__RM_TUESDAY_PLAN__')).catch(()=>{});
+
+  // Remove only weekly PLAN SNAPSHOTS. Never delete actual logged calls/updates.
+  // This also cleans the superseded v300 [TUESDAY_PLAN_SNAPSHOT] rows so old
+  // weekly plans cannot stack in the database or confuse future reporting.
+  const existing=await sbFetch(
+    'GET',
+    'amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+
+    '&select=id,agent_name,outcome,notes&limit=5000'
+  ).catch(()=>[]);
+
+  const ids=[];
+  (existing||[]).forEach(r=>{
+    const notes=String(r&&r.notes||'');
+    const v310=/\[TUE_SPLIT_V310\]/i.test(notes);
+    const legacy=/\[TUESDAY_PLAN_SNAPSHOT\]/i.test(notes);
+    const planLane=meta(notes,'TUE_PLAN_LANE');
+
+    if(lane==='LP'){
+      if((v310&&planLane==='LP_TXN') ||
+         (v310&&planLane==='LP_HEADER') ||
+         String(r.agent_name||'')==='__LP_TUESDAY_PLAN__'){
+        if(r.id)ids.push(r.id);
+      }
+    }else if(lane==='RM'){
+      // Current RM plan rows + all superseded legacy v300 listing/Go-To/header rows.
+      if((v310&&(planLane==='RM_LISTING'||planLane==='RM_HEADER')) ||
+         String(r.agent_name||'')==='__RM_TUESDAY_PLAN__' ||
+         legacy){
+        if(r.id)ids.push(r.id);
+      }
+    }
+  });
+
+  for(let i=0;i<ids.length;i+=100){
+    const chunk=ids.slice(i,i+100);
+    if(chunk.length){
+      await sbFetch(
+        'DELETE',
+        'amanda_activities?id=in.('+chunk.map(x=>encodeURIComponent(x)).join(',')+')'
+      ).catch(()=>{});
+    }
   }
 }
 
@@ -12127,7 +12162,7 @@ function installHub(){
   const old=document.getElementById('v300PlanSource');if(old)old.remove();
   let wrap=document.getElementById('v310TuesdaySources');
   if(!wrap){wrap=document.createElement('section');wrap.id='v310TuesdaySources';wrap.innerHTML='<div class="v310-source-grid"><div class="v310-source" style="grid-column:1/-1;border-left:4px solid #132B50"><div class="v310-kicker" style="color:#132B50">MANAGEMENT REPORTING</div><h3>Tuesday Completion Report</h3><p>Export one management workbook with a team summary, all-call detail, and a separate tab for Amanda and each LP showing exactly who they were assigned, completed, and still have open.</p><button class="v310-btn" type="button" onclick="v312ExportTuesdayCompletion()">Export Tuesday Completion Report</button><div class="v310-status" id="v312ExportStatus">Uses the latest weekly LP + RM Tuesday plans and the actual logged completion activity.</div></div>'+
-    '<div class="v310-source lp"><div class="v310-kicker">LP ACTIVE-CONTRACT CALLS</div><h3>1. Upload TUESDAY UPDATE CALLS LP2.xlsx</h3><p>Uses the <b>ACTIVE CONTRACTS</b> master sheet and splits each row by Loan Partner 2. This drives each LP’s buyer/client + buyer-agent Tuesday file updates.</p><button class="v310-btn" type="button" onclick="v310PickLP()">Upload LP Tuesday Calls</button><input id="v310LPFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="v310-status" id="v310LPStatus">No LP Tuesday workbook uploaded yet.</div></div>'+
+    '<div class="v310-source lp"><div class="v310-kicker">LP ACTIVE-CONTRACT CALLS</div><h3>1. Upload TUESDAY UPDATE CALLS LP2.xlsx</h3><p>Uses the <b>ACTIVE CONTRACTS</b> master sheet and splits each row by Loan Partner 2. This drives each LP’s buyer/client + buyer-agent Tuesday file updates. Re-uploading the same week replaces the weekly plan; completed calls stay intact.</p><button class="v310-btn" type="button" onclick="v310PickLP()">Upload LP Tuesday Calls</button><input id="v310LPFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="v310-status" id="v310LPStatus">No LP Tuesday workbook uploaded yet.</div></div>'+
     '<div class="v310-source rm"><div class="v310-kicker">RM LISTING-AGENT CALLS</div><h3>2. Upload RM TUESDAY CALLS.xlsx</h3><p>This upload feeds Amanda’s RM Tuesday listing-agent queue only. The <b>RM LISTING AGENT CALLS</b> sheet is the source. It does not add work to the LP Tuesday lane.</p><button class="v310-btn" type="button" onclick="v310PickRM()">Upload RM + Go-To Calls</button><input id="v310RMFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="v310-status" id="v310RMStatus">No RM/Go-To workbook uploaded yet.</div></div>'+
     '</div>';grid.appendChild(wrap);document.getElementById('v310LPFile').addEventListener('change',e=>importLP(e.target));document.getElementById('v310RMFile').addEventListener('change',e=>importRM(e.target))}
 }
