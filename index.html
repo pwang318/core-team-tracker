@@ -1,4 +1,4 @@
-
+ 
 <!DOCTYPE html>
 
 <html lang="en">
@@ -11,8 +11,8 @@
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Core Team Tracker · Version 1</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -3848,7 +3848,7 @@ async function renderRmSummary(){
       {type:"New Realtor Meeting",label:"New meetings",weekly:3},
       {type:"__existing__",label:"Existing partner meetings",weekly:5},
       {type:"__talkto__",label:"Talk-to's",weekly:100},
-      {type:"Buddy Intro Received",label:"Buddy intros received",weekly:3}
+      {type:"Realtor Buddy Referral Ask",label:"Buddy referral asks",weekly:3}
     ];
     var cards=goals.map(function(g){
       var count=g.type==="__talkto__"?amCntTalkTo(acts)
@@ -6240,7 +6240,7 @@ const LPSC_AMANDA_GOALS=[
   {key:"__existingmeeting__",label:"Existing partner meetings",goal:5,monthlyGoal:20},
   {key:"Cold Calls",label:"Cold calls",goal:125,monthlyGoal:500},
   {key:"Talk-to's",label:"Talk-to's",goal:100,monthlyGoal:400},
-  {key:"Buddy Intro Received",label:"Buddy intros received",goal:3,monthlyGoal:12}
+  {key:"Buddy Intro Received",label:"Buddy referral asks",goal:3,monthlyGoal:12}
 ];
 
 
@@ -10328,7 +10328,7 @@ function rmRenderGoals(){
       +rmLeadershipTile("Total partner meetings",aTotal,rmMetricTarget("total","Amanda"),"30+ monthly working goal")
       +rmLeadershipTile("Cold calls",ctRmCount(am,"Cold Calls"),rmMetricTarget("cold","Amanda"),"Primary outbound")
       +rmLeadershipTile("Talk-to's",ctRmCount(am,"__talkto__"),rmMetricTarget("talk","Amanda"),"Meaningful relationship touches")
-      +rmLeadershipTile("Buddy intros received",ctRmCount(am,"Buddy Intro Received"),rmMetricTarget("buddy","Amanda"),"Referral growth")
+      +rmLeadershipTile("Buddy referral asks",ctRmCount(am,"Buddy Intro Received"),rmMetricTarget("buddy","Amanda"),"Referral growth")
     +'</div>';
 }
 
@@ -11546,7 +11546,7 @@ const total=(d,k)=>Object.keys(d||{}).reduce((n,x)=>n+((x===k||x.startsWith(k+'_
 const pct=(a,b)=>b?Math.round(a/b*100):null;
 function appConverted(r){try{return typeof ctIsLeadAppConverted==='function'?ctIsLeadAppConverted(r):/started|approval|pre-approval|preapproval|contract|processing|underwrit|clear to close|funded|closed/i.test(String(r&&r.status||''))}catch(e){return false}}
 function pb(){try{return typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():(window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null'))}catch(e){return null}}
-function pbActive(s){if(!s)return 0;if(Number.isFinite(Number(s.active_partner_rows))&&Number(s.active_partner_rows)>0)return Number(s.active_partner_rows);const l=s.levels||{};return Number(l.A||0)+Number(l.B||0)+Number(l.C||0)+Number(l.Channel||0)}
+function pbActive(s){if(!s)return 0;if(Number.isFinite(Number(s.active_partner_rows))&&Number(s.active_partner_rows)>0)return Number(s.active_partner_rows);return 0}
 function card(k,v,sub,p,cls){p=Math.max(0,Math.min(100,Number(p)||0));return '<div class="ct-live-card '+(cls||'')+'"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+'</div><div class="s">'+sub+'</div>'+(p>=0?'<div class="bar"><div class="fill" style="width:'+p+'%"></div></div>':'')+'</div>'}
 async function data(){
  let vel=[],scores=[],tx=[];
@@ -11749,7 +11749,7 @@ window.lpv2Route=function(route,btn){
   {label:"Existing partner meetings",type:"__existingmeeting__",goal:5},
   {label:"Cold calls",type:"Cold Calls",goal:125},
   {label:"Talk-to's",type:"__talkto__",goal:100},
-  {label:"Buddy intros received",type:"Buddy Intro Received",goal:3}
+  {label:"Buddy referral asks",type:"Realtor Buddy Referral Ask",goal:3}
  ];
  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  function monday(){
@@ -11786,9 +11786,9 @@ window.lpv2Route=function(route,btn){
    let box=document.getElementById('ct-amanda-snapshot');
    if(!box){box=document.createElement('div');box.id='ct-amanda-snapshot';roster.appendChild(box)}
    else if(box.parentElement!==roster)roster.appendChild(box);
-   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-loading">Loading Amanda’s execution…</div>';
+   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · supporting RM execution pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-loading">Loading Amanda’s execution…</div>';
    const acts=await loadActs();
-   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-amanda-grid">'+GOALS.map(g=>{const v=count(acts,g),pct=Math.min(100,Math.round(v/g.goal*100));return '<div class="ct-amanda-metric"><div class="k">'+esc(g.label)+'</div><div class="v">'+v+' <span>/ '+g.goal+'</span></div><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div></div>'}).join('')+'</div>';
+   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · supporting RM execution pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-amanda-grid">'+GOALS.map(g=>{const v=count(acts,g),pct=Math.min(100,Math.round(v/g.goal*100));return '<div class="ct-amanda-metric"><div class="k">'+esc(g.label)+'</div><div class="v">'+v+' <span>/ '+g.goal+'</span></div><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div></div>'}).join('')+'</div>';
    const btn=document.getElementById('ct-amanda-open-rm');
    if(btn)btn.onclick=function(){
      try{
@@ -12019,5 +12019,99 @@ window.ctOpenAmandaRmTracker=function(){
    };
  }
 })();
-</script></body>
+</script>
+<!-- RM SNAPSHOT ALIGNMENT v2: scorecard-only; no LP workflow changes -->
+
+
+<!-- VERIFIED RM SCORECARD DATA GUARD v3 -->
+
+
+<style id="core-calibri-global-v1">
+html,body,button,input,select,textarea,table,th,td,
+body *,button *,input *,select *,textarea *,table *{
+  font-family:Calibri,"Calibri Light",Arial,sans-serif!important;
+}
+button,input,select,textarea{font-size:inherit}
+button,.btn,.btn-sm,.ct-link-btn,.ct-primary-btn,.who-btn{
+  text-transform:none!important;letter-spacing:0!important;
+}
+</style>
+
+<style id="lp-amanda-aligned-v6-css">
+#ct-amanda-snapshot{font-family:Calibri,"Calibri Light",Arial,sans-serif!important}
+#ct-amanda-snapshot .ct-amanda-title{font-size:15px!important;font-weight:700!important}
+#ct-amanda-snapshot .ct-amanda-sub{font-size:11px!important}
+#ct-amanda-snapshot .ct-rm-v6-outcome{margin:10px 0;padding:11px;border:1px solid #D7E3EA;border-radius:10px;background:#fff}
+#ct-amanda-snapshot .ct-rm-v6-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+#ct-amanda-snapshot .ct-rm-v6-k{font-size:10px;font-weight:700;color:#0B789E}
+#ct-amanda-snapshot .ct-rm-v6-title{font-size:13px;font-weight:700;color:#102A43;margin-top:2px}
+#ct-amanda-snapshot .ct-rm-v6-total{font-size:20px;font-weight:700;color:#102A43}
+#ct-amanda-snapshot .ct-rm-v6-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:9px}
+#ct-amanda-snapshot .ct-rm-v6-m{border:1px solid #E0E8ED;border-radius:8px;padding:9px;background:#FAFCFD}
+#ct-amanda-snapshot .ct-rm-v6-m b{display:block;font-size:10.5px;font-weight:700}
+#ct-amanda-snapshot .ct-rm-v6-m strong{display:block;font-size:17px;margin-top:2px}
+#ct-amanda-snapshot .ct-rm-v6-m small{display:block;font-size:9px;color:#6B7E8A;line-height:1.35;margin-top:3px}
+#ct-amanda-snapshot .ct-amanda-grid:before{content:"Amanda weekly execution · supporting metrics";grid-column:1/-1;font-size:10px;font-weight:700;color:#607582;margin:2px 0 0}
+@media(max-width:760px){#ct-amanda-snapshot .ct-rm-v6-grid{grid-template-columns:1fr}}
+</style>
+<script id="lp-amanda-aligned-v6-js">
+(function(){
+'use strict';
+const VERIFIED={active:109,levels:{Channel:2,A:16,B:18,C:111},stamp:'2026-08-31T23:59:59'};
+const n=v=>Number(v||0)||0;
+function pb(){
+  try{
+    const s=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():(window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null'));
+    if(s&&n(s.active_partner_rows)>0){
+      const l=s.levels||{};
+      return{active:n(s.active_partner_rows),levels:{Channel:n(l.Channel),A:n(l.A),B:n(l.B),C:n(l.C)},source:'latest Power BI'};
+    }
+  }catch(e){}
+  return{active:VERIFIED.active,levels:Object.assign({},VERIFIED.levels),source:'verified 8/31 Power BI baseline'};
+}
+function milestone(){
+  const m=new Date().getMonth()+1;
+  if(m<=9)return{label:'9/30 Target',Channel:2,A:14,B:21};
+  if(m===10)return{label:'10/31 Target',Channel:2,A:16,B:24};
+  if(m===11)return{label:'11/30 Target',Channel:3,A:18,B:27};
+  return{label:'12/31 Goal',Channel:4,A:20,B:30};
+}
+async function render(){
+  const box=document.getElementById('ct-amanda-snapshot');if(!box)return;
+  const grid=box.querySelector('.ct-amanda-grid');if(!grid)return;
+  let host=box.querySelector('.ct-rm-v6-outcome');
+  if(!host){host=document.createElement('div');host.className='ct-rm-v6-outcome';grid.before(host)}
+  const p=pb(),t=milestone(),pts=(a,b,w)=>b?Math.min(w,n(a)/b*w):0;
+  const tier=pts(p.levels.Channel,t.Channel,15)+pts(p.levels.A,t.A,15)+pts(p.levels.B,t.B,20);
+  const now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),1),iso=d=>d.toISOString().slice(0,10);
+  let currentLeads=[],priorLeads=[];
+  try{[currentLeads,priorLeads]=await Promise.all([
+    sbFetch('GET','velocify_leads?date_added=gte.'+iso(monthStart)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[]),
+    sbFetch('GET','velocify_leads?date_added=gte.'+iso(prevStart)+'&date_added=lt.'+iso(prevEnd)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[])
+  ])}catch(e){}
+  const dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const mtd=(currentLeads||[]).length,proj=Math.round((mtd/dom)*dim),priorActual=(priorLeads||[]).length;
+  const ratio=p.active?priorActual/p.active:0,currentPace=p.active?proj/p.active:0;
+  const ratioPts=Math.min(30,ratio/1.15*30),countPts=Math.min(20,p.active/200*20),total=tier+ratioPts+countPts;
+  host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">RM outcome scorecard · shared portfolio</div><div class="ct-rm-v6-title">50% Tier Growth · 30% Agent-to-Lead · 20% Active Partner Count</div></div><div class="ct-rm-v6-total">'+total.toFixed(1)+' / 100</div></div>'+
+    '<div class="ct-rm-v6-grid">'+
+    '<div class="ct-rm-v6-m"><b>Tier Growth · 50%</b><strong>'+tier.toFixed(1)+' / 50</strong><small>'+p.levels.Channel+' Channel · '+p.levels.A+' A · '+p.levels.B+' B · '+t.label+'</small></div>'+
+    '<div class="ct-rm-v6-m"><b>Agent-to-Lead · 30%</b><strong>'+ratioPts.toFixed(1)+' / 30</strong><small>Last completed month: '+priorActual+' leads ÷ '+p.active+' Active Partners = '+ratio.toFixed(2)+' · current month pace '+currentPace.toFixed(2)+'</small></div>'+
+    '<div class="ct-rm-v6-m"><b>Active Partner Count · 20%</b><strong>'+countPts.toFixed(1)+' / 20</strong><small>'+p.active+' / 200 · lead or closing within 90 days</small></div>'+
+    '</div>';
+}
+window.ctRenderAmandaOutcomeV6=render;
+const prev=window.ctRenderAmandaSnapshot;
+if(typeof prev==='function'&&!prev.__alignedV6){
+  const w=async function(){const r=await prev.apply(this,arguments);await render();return r};w.__alignedV6=true;window.ctRenderAmandaSnapshot=w;
+}
+const snap=window.lpv2RenderSnapshot;
+if(typeof snap==='function'&&!snap.__amandaAlignedV6){
+  const w=async function(){const r=await snap.apply(this,arguments);setTimeout(render,50);return r};w.__amandaAlignedV6=true;window.lpv2RenderSnapshot=w;
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(render,700)},{once:true});else setTimeout(render,350);
+})();
+</script>
+
+</body>
 </html>
