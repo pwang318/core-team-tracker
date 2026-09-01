@@ -11759,9 +11759,17 @@ window.lpv2Route=function(route,btn){
         return;
       }
       if(route==='agent-health'){
-        activate('view-agent-health',btn);
-        if(typeof lpv3RenderAgentHealth==='function')await Promise.resolve(lpv3RenderAgentHealth()).catch(()=>{});
-        else if(typeof lpv3OpenAgentHealth==='function')await Promise.resolve(lpv3OpenAgentHealth(btn)).catch(()=>{});
+        // Agent Health must hydrate from the shared server-backed Power BI population first.
+        // Calling lpv3RenderAgentHealth directly only re-renders whatever is already in memory
+        // and produced the false all-zero screen after reopening a fresh tracker file.
+        const filter=document.getElementById('lpv3-health-filter');
+        if(filter && (!filter.dataset.userPicked || filter.value==='archive')) filter.value='action';
+        if(typeof lpv3OpenAgentHealth==='function'){
+          await Promise.resolve(lpv3OpenAgentHealth(btn)).catch(e=>console.warn('Agent Health hydrate',e));
+        }else{
+          activate('view-agent-health',btn);
+          if(typeof lpv3RenderAgentHealth==='function')await Promise.resolve(lpv3RenderAgentHealth()).catch(()=>{});
+        }
         return;
       }
       if(route==='co-marketing'){
@@ -11866,6 +11874,19 @@ window.lpv2Route=function(route,btn){
     if(body)body.innerHTML='<div class="ct-card" style="margin:0"><div style="font-size:12px;line-height:1.6;color:#526B78">'+x.body+'</div></div>';
     if(drill)drill.classList.add('open');
   };
+})();
+</script>
+
+
+<script id="ct-health-default-filter-fix">
+(function(){
+  function wire(){
+    const f=document.getElementById('lpv3-health-filter');
+    if(!f || f.dataset.defaultFixWired)return;
+    f.dataset.defaultFixWired='1';
+    f.addEventListener('change',()=>{f.dataset.userPicked='1'});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();
 })();
 </script>
 
