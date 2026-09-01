@@ -12136,5 +12136,69 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<!-- LP SCRIPTS + TRAINING HARDENING v10 -->
+<style id="lp-scripts-hardening-v10-css">
+#scriptsModal{z-index:20000!important;pointer-events:auto!important}
+#scriptsModal.open{display:flex!important}
+#scriptsModal .contact-modal-box{pointer-events:auto!important;max-width:760px!important;width:min(760px,calc(100vw - 28px))!important;max-height:88vh!important;overflow-y:auto!important}
+#scriptsModal .script-cat>summary{cursor:pointer!important;pointer-events:auto!important;user-select:none!important;-webkit-user-select:none!important;touch-action:manipulation!important}
+#scriptsModal .script-cat[open]>.script-cat-body{display:block!important}
+@media(max-width:700px){#scriptsModal{padding:8px!important}#scriptsModal .contact-modal-box{width:100%!important;max-height:94vh!important;padding:16px!important}}
+</style>
+<script id="lp-scripts-hardening-v10-js">
+(function(){
+'use strict';
+function modal(){return document.getElementById('scriptsModal')}
+function resetSearch(){
+  const input=document.getElementById('scriptSearchInput');if(input)input.value='';
+  document.querySelectorAll('#scriptsModal .script-cat').forEach(d=>{d.style.display='block'});
+  const no=document.getElementById('scriptNoResults');if(no)no.style.display='none';
+}
+function open(btn){
+  const m=modal();
+  if(!m){console.error('Scripts modal missing');return false}
+  document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active'));
+  if(btn&&btn.classList)btn.classList.add('active');
+  resetSearch();
+  m.classList.add('open');m.style.display='flex';m.style.pointerEvents='auto';m.setAttribute('aria-hidden','false');
+  const box=m.querySelector('.contact-modal-box');if(box)box.scrollTop=0;
+  return true;
+}
+function close(){const m=modal();if(!m)return;m.classList.remove('open');m.style.display='none';m.setAttribute('aria-hidden','true')}
+window.openScriptsModal=function(){return open(document.querySelector('.ct-nav-btn[data-route="scripts"]'))};
+window.ctOpenScripts=open;
+window.closeScriptsModal=close;
+
+/* Final route authority for Scripts regardless of which legacy/recovered router currently owns lpv2Route. */
+const priorRoute=window.lpv2Route;
+if(typeof priorRoute==='function'&&!priorRoute.__scriptsV10){
+  const routed=function(route,btn){if(String(route)==='scripts')return open(btn);return priorRoute.apply(this,arguments)};
+  routed.__scriptsV10=true;window.lpv2Route=routed;
+}
+
+function wire(){
+  document.querySelectorAll('.ct-nav-btn[data-route="scripts"],.who-btn[data-route="scripts"]').forEach(btn=>{
+    if(btn.dataset.scriptsV10)return;btn.dataset.scriptsV10='1';
+    btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();open(btn)},true);
+  });
+  document.querySelectorAll('#scriptsModal .script-cat>summary').forEach(sum=>{
+    if(sum.dataset.scriptsV10)return;sum.dataset.scriptsV10='1';
+    sum.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      const d=sum.parentElement;if(d&&d.tagName==='DETAILS')d.open=!d.open;
+    });
+  });
+  const m=modal();if(m&&!m.dataset.backdropV10){m.dataset.backdropV10='1';m.addEventListener('click',e=>{if(e.target===m)close()})}
+}
+window.lpScriptsHealthV10=function(){
+  const m=modal(),cats=document.querySelectorAll('#scriptsModal .script-cat').length,sums=document.querySelectorAll('#scriptsModal .script-cat>summary').length;
+  return {modal:!!m,categories:cats,summaries:sums,routeButton:!!document.querySelector('[data-route="scripts"]')};
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal()?.classList.contains('open'))close()});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();
+})();
+</script>
+
 </body>
 </html>
