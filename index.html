@@ -12319,6 +12319,10 @@ window.v312ExportTuesdayCompletion=async function(){
     // Support both the current v310 plan format and the earlier v300 shared-plan format.
     const v310=acts.filter(a=>a.act_type==='Tuesday Call Plan Snapshot'&&/\[TUE_SPLIT_V310\]/i.test(String(a.notes||'')));
     const v300=acts.filter(a=>a.act_type==='Tuesday Call Plan Snapshot'&&/\[TUESDAY_PLAN_SNAPSHOT\]/i.test(String(a.notes||'')));
+    const rmOverrides={};
+    acts.filter(a=>a.act_type==='Transaction Contact Override')
+      .sort((a,b)=>String(b.created_at||b.act_date||'').localeCompare(String(a.created_at||a.act_date||'')))
+      .forEach(a=>{const id=meta(a.notes,'TXN_ID');if(id&&!rmOverrides[id])rmOverrides[id]=a;});
 
     function newestBatch(rows,headerLanes){
       const hs=rows.filter(a=>headerLanes.includes(meta(a.notes,'TUE_PLAN_LANE')))
@@ -12384,10 +12388,12 @@ window.v312ExportTuesdayCompletion=async function(){
 
     // Amanda / RM listing-agent Tuesday calls — current v310 OR legacy v300.
     rmPlanRows.forEach(p=>{
-      const role=meta(p.notes,'TUE_CONTACT_ROLE')||meta(p.notes,'TUE_CONTACT_ROLE')||String(p.outcome||'');
+      const role=meta(p.notes,'TUE_CONTACT_ROLE')||String(p.outcome||'');
       const contactName=meta(p.notes,'TUE_CONTACT_NAME')||p.agent_name;
-      const excluded=/^FSBO$/i.test(role)||/^Missing$/i.test(role)||/contact issue/i.test(role);
       const planKey=meta(p.notes,'TUE_PLAN_KEY');
+      const override=rmOverrides[planKey],overrideReason=override?meta(override.notes,'TUE_EXCLUDE_REASON'):'';
+      const excludedByOverride=override&&meta(override.notes,'LISTING_AGENT_NA')==='Y';
+      const excluded=excludedByOverride||/^FSBO$/i.test(role)||/^Missing$/i.test(role)||/contact issue/i.test(role);
       const planDate=meta(p.notes,'TUE_PLAN_DATE')||rmDate||String(p.act_date||'').slice(0,10);
 
       // Match any actual Amanda listing-agent update from this plan/week.
@@ -12408,7 +12414,7 @@ window.v312ExportTuesdayCompletion=async function(){
         agent:contactName,
         closeDate:meta(p.notes,'TXN_CLOSE_DATE'),
         milestone:meta(p.notes,'TXN_MILESTONE'),
-        status:excluded?(/FSBO/i.test(role)?'Excluded - FSBO':'Excluded - Contact issue'):(done?'Completed':'Open'),
+        status:excluded?(overrideReason==='NEW_BUILD'?'Excluded - New Build':((overrideReason==='FSBO'||/FSBO/i.test(role))?'Excluded - FSBO':'Excluded - Contact issue')):(done?'Completed':'Open'),
         completionDate:done?fmtDate(done.act_date):'',
         outcome:done?String(done.outcome||''):'',
         notes:done?String(done.notes||'').replace(/\[[A-Z0-9_]+:[^\]]*\]/g,'').replace(/\[TUESDAY_LISTING\]/g,'').trim():''
@@ -12488,7 +12494,7 @@ window.v312ExportTuesdayCompletion=async function(){
       X.utils.book_append_sheet(wb,ws1,'Management Summary');
 
       const personOrder={'Amanda':0,'Gavin':1,'Karen':2,'Osgood':3,'Jordan':4,'Said':5,'Isaak':6};
-      const statusOrder={'Open':0,'Completed':1,'Excluded - FSBO':2,'Excluded - Contact issue':3};
+      const statusOrder={'Open':0,'Completed':1,'Excluded - FSBO':2,'Excluded - New Build':3,'Excluded - Contact issue':4};
       const allSorted=detailRows.slice().sort((a,b)=>{
         const pa=personOrder[a['Team Member']]??99,pb=personOrder[b['Team Member']]??99;
         if(pa!==pb)return pa-pb;
