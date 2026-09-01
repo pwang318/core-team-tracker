@@ -1,4 +1,4 @@
-
+ 
 <!DOCTYPE html>
 
 <html lang="en">
@@ -834,7 +834,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 .ct-legacy-state{display:none!important}.carryover-banner,.monday-banner,.target-complete-bar,.streak-bar,.priority-banner,.inactive-banner,.bday-banner{display:none!important}.search-panel{display:none!important}#lp-call-list{display:none!important}.section-head{letter-spacing:.05em}
 #lp-weekly-execution-host .v65-wrap,#lp-weekly-execution-host .v65-card{border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;background:transparent!important}#lp-weekly-execution-host .v65-head{display:none!important}#lp-weekly-execution-host .v65-row{border:1px solid #E0E9ED!important;border-radius:10px!important;margin:7px 0!important;background:#fff!important;padding:10px!important}#lp-weekly-execution-host .v65-actions button{background:#1E83A8!important;border-color:#1E83A8!important}
 #lp-facetime-focus>div{border-top:1px solid #EDF2F4;padding:8px 0!important}.lp-rm-response-panel,.lp-rm-note-panel{background:transparent!important;border:0!important;padding:0!important;margin:0!important;box-shadow:none!important}
-#view-portfolio,#view-ownership,#view-rm,#view-director{display:none!important}
+#view-portfolio,#view-ownership,#view-rm{display:none!important}
 @media(max-width:980px){.app{padding-left:20px!important}.app-header{margin-left:-20px!important;padding-left:20px!important}.who-bar{position:static!important;width:auto!important;display:flex!important;gap:8px!important;overflow-x:auto!important;padding:10px!important;margin:0 0 14px!important;border:1px solid var(--ct-line)!important;border-radius:12px!important}.ct-nav-section{display:contents}.ct-nav-label{display:none}.ct-nav-btn{width:auto!important;white-space:nowrap!important;padding:8px 10px!important}.ct-gate-grid{grid-template-columns:repeat(2,1fr)}.ct-score-grid,.ct-gates-inline{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.ct-page-head,.ct-section-head,.ct-standard-strip{flex-direction:column}.ct-model-chips{width:100%}.ct-gate-grid,.ct-score-grid,.ct-gates-inline{grid-template-columns:1fr}.ct-team-table{font-size:11px}.ct-team-table th,.ct-team-table td{padding:8px 5px}.ct-role-pill{white-space:normal}}
 </style>
@@ -861,6 +861,12 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 #ct-amanda-snapshot .ct-amanda-grid{display:grid!important;grid-template-columns:repeat(5,minmax(125px,1fr))!important;gap:8px!important;margin-top:10px!important}
 #ct-amanda-snapshot .ct-amanda-metric{background:#fff!important;border:1px solid #dce7ed!important;border-radius:9px!important;padding:10px 11px!important}
 @media(max-width:1000px){#ct-amanda-snapshot .ct-amanda-grid{grid-template-columns:repeat(2,minmax(140px,1fr))!important}}
+</style>
+
+<style id="ct-co-marketing-restore-css">
+#view-co-marketing{display:none;max-width:1320px!important;margin:0 auto!important;padding:8px 0 40px!important}
+#view-co-marketing.active{display:block!important}
+#view-co-marketing #director-cards{margin-top:10px}
 </style>
 </head>
 <body>
@@ -890,7 +896,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-nav-section"><div class="ct-nav-label">TEAM</div><button class="who-btn ct-nav-btn wb-Snapshot" data-route="snapshot" onclick="lpv2Route('snapshot',this)" type="button"><span class="ct-nav-icon">▦</span><span>Team Snapshot</span></button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LOAN PARTNERS</div>
 <button class="who-btn ct-nav-btn wb-Gavin" data-lp="Gavin" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Gavin</button><button class="who-btn ct-nav-btn wb-Karen" data-lp="Karen" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Karen</button><button class="who-btn ct-nav-btn wb-Osgood" data-lp="Osgood" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Osgood</button><button class="who-btn ct-nav-btn wb-Jordan" data-lp="Jordan" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Jordan</button><button class="who-btn ct-nav-btn wb-Said" data-lp="Said" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Said</button><button class="who-btn ct-nav-btn wb-Isaak" data-lp="Isaak" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Isaak</button></div>
-<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Integrity</button><button class="who-btn ct-nav-btn" data-route="income" onclick="lpv2Route('income',this)" type="button">Income Calculation</button></div>
+<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Integrity</button><button class="who-btn ct-nav-btn" data-route="income" onclick="lpv2Route('income',this)" type="button">Income Calculation</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">DATA</div><button class="who-btn ct-nav-btn" data-route="data-hub" onclick="lpv2Route('data-hub',this)" type="button">Weekly Data Hub</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LEARN + TOOLS</div><button class="who-btn ct-nav-btn wb-OperatingStandard" data-route="standard" onclick="lpv2Route('standard',this)" type="button">Operating Standard</button><button class="who-btn ct-nav-btn ct-action-btn" data-route="scripts" onclick="lpv2Route('scripts',this)" type="button">Scripts + Training</button><button class="who-btn ct-nav-btn wb-Admin" data-route="admin" onclick="lpv2Route('admin',this)" type="button">Admin</button></div>
 </div>
@@ -1742,10 +1748,10 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 </details>
 </div>
-<div class="view" id="view-director" style="padding:18px 20px;max-width:1140px;margin:0 auto">
+<div class="view" id="view-co-marketing" style="padding:18px 20px;max-width:1140px;margin:0 auto">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-<div style="font-size:16px;font-weight:700;color:var(--text-1)">Co-Marketing Report</div>
-<button class="btn btn-sm" onclick="selectUser(null,'Welcome')">← Back</button>
+<div><div style="font-size:9px;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:#0C7699;margin-bottom:3px">SHARED WORK · CO-MARKETING</div><div style="font-size:22px;font-weight:800;color:#102A43">Co-Marketing Relationships</div><div style="font-size:12px;color:#607582;margin-top:3px">Track partner spend, opportunities, leads, closings and relationship performance.</div></div>
+<button class="btn btn-sm" onclick="lpv2Route('snapshot',document.querySelector('.ct-nav-btn[data-route=\"snapshot\"]'))">← Team Snapshot</button>
 </div>
 <div style="background:#FAF7F2;border:1px solid #E8DDD0;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:600;color:#5C4A35">
     Target: 1 opportunity per $250 spent each month — either a buddy intro or warm lead. Goal: 80%
@@ -7914,13 +7920,14 @@ var coMktClosedCounts={};
 var coMktLeadCountsSource="Live sync (velocify_leads, year-to-date)";
 
 function openDirectorView(btn){
-  rmStopPolling(); lpStopPolling();
+  try{if(typeof rmStopPolling==='function')rmStopPolling()}catch(e){}
+  try{if(typeof lpStopPolling==='function')lpStopPolling()}catch(e){}
   currentUser="Director";
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   if(btn) btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  document.getElementById("view-director").classList.add("active");
-  loadCoMktPartners();
+  var view=document.getElementById("view-co-marketing");if(view)view.classList.add("active");
+  if(typeof loadCoMktPartners==='function')loadCoMktPartners();
 }
 
 function loadCoMktPartners(){
@@ -11607,6 +11614,12 @@ window.lpv2Route=function(route,btn){
     if(route==='lp'){const lp=btn&&btn.dataset&&btn.dataset.lp;if(typeof selectUser==='function'&&lp){selectUser(btn,lp);return}ctActivate('view-lp',btn);if(lp&&typeof lpv2PrimeLp==='function')lpv2PrimeLp(lp);return}
     if(route==='data-hub'||route==='upload'){window.lpv3OpenDataHub(btn);return}
     if(route==='agent-health'){window.lpv3OpenAgentHealth(btn);return}
+    if(route==='co-marketing'){
+      ctActivate('view-co-marketing',btn);
+      currentUser='Director';
+      try{if(typeof loadCoMktPartners==='function')Promise.resolve(loadCoMktPartners()).catch(()=>{});else if(typeof renderDirectorView==='function')renderDirectorView()}catch(e){console.warn('Co-marketing load failed',e)}
+      return
+    }
     if(route==='scripts'){ctOpenScripts(btn);return}
     if(route==='standard'){ctActivate('view-operating-standard',btn);if(typeof pbsLoadLiveProgress==='function')setTimeout(()=>Promise.resolve(pbsLoadLiveProgress(true)).catch(()=>{}),20);return}
     if(route==='income'){ctActivate('view-income-standard',btn);return}
