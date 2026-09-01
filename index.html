@@ -834,7 +834,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 .ct-legacy-state{display:none!important}.carryover-banner,.monday-banner,.target-complete-bar,.streak-bar,.priority-banner,.inactive-banner,.bday-banner{display:none!important}.search-panel{display:none!important}#lp-call-list{display:none!important}.section-head{letter-spacing:.05em}
 #lp-weekly-execution-host .v65-wrap,#lp-weekly-execution-host .v65-card{border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;background:transparent!important}#lp-weekly-execution-host .v65-head{display:none!important}#lp-weekly-execution-host .v65-row{border:1px solid #E0E9ED!important;border-radius:10px!important;margin:7px 0!important;background:#fff!important;padding:10px!important}#lp-weekly-execution-host .v65-actions button{background:#1E83A8!important;border-color:#1E83A8!important}
 #lp-facetime-focus>div{border-top:1px solid #EDF2F4;padding:8px 0!important}.lp-rm-response-panel,.lp-rm-note-panel{background:transparent!important;border:0!important;padding:0!important;margin:0!important;box-shadow:none!important}
-#view-portfolio,#view-ownership,#view-rm{display:none!important}
+#view-portfolio,#view-ownership,#view-rm,#view-director{display:none!important}
 @media(max-width:980px){.app{padding-left:20px!important}.app-header{margin-left:-20px!important;padding-left:20px!important}.who-bar{position:static!important;width:auto!important;display:flex!important;gap:8px!important;overflow-x:auto!important;padding:10px!important;margin:0 0 14px!important;border:1px solid var(--ct-line)!important;border-radius:12px!important}.ct-nav-section{display:contents}.ct-nav-label{display:none}.ct-nav-btn{width:auto!important;white-space:nowrap!important;padding:8px 10px!important}.ct-gate-grid{grid-template-columns:repeat(2,1fr)}.ct-score-grid,.ct-gates-inline{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.ct-page-head,.ct-section-head,.ct-standard-strip{flex-direction:column}.ct-model-chips{width:100%}.ct-gate-grid,.ct-score-grid,.ct-gates-inline{grid-template-columns:1fr}.ct-team-table{font-size:11px}.ct-team-table th,.ct-team-table td{padding:8px 5px}.ct-role-pill{white-space:normal}}
 </style>
@@ -853,22 +853,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </style>
 <style id="ct-v5-health-tier-style">
 .ct-health-summary small{display:block;margin-top:4px;font-size:10px;color:#6b7788;line-height:1.35}.ct-health-action-banner{padding:10px 12px;border:1px solid #c9d9e3;background:#f4f9fc;border-radius:9px;margin:0 0 10px;font-size:11.5px;color:#315a73}.ct-health-action-banner.yellow{background:#fff8e8;border-color:#ead18d;color:#7c5a13}.ct-health-action-banner.red{background:#fff0ef;border-color:#efb5b0;color:#9a352f}.ct-health-table td small{display:block;margin-top:3px;font-size:10px;color:#6b7788}.ct-health-scroll{overflow:auto}.ct-tier-grid{display:grid;grid-template-columns:repeat(4,minmax(155px,1fr));gap:10px;margin-top:14px}.ct-tier-click,.ct-tier-development{appearance:none;text-align:left;background:#fff;border:1px solid #d9e2e8;border-radius:12px;padding:14px;color:#102640;font:inherit}.ct-tier-click{cursor:pointer}.ct-tier-click:hover{border-color:#71abc8;background:#f7fbfd}.ct-tier-big{font-size:26px;font-weight:800;margin:5px 0}.ct-tier-big span,.ct-tier-score span{font-size:13px;color:#6b7788}.ct-tier-bar{height:6px;background:#edf1f3;border-radius:999px;overflow:hidden;margin:8px 0}.ct-tier-bar i{display:block;height:100%;background:#2d7fa6;border-radius:999px}.ct-tier-score{font-size:26px;font-weight:800}.ct-tier-name-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}.ct-tier-name{border:1px solid #d9e2e8;background:#fff;border-radius:9px;padding:10px 12px;text-align:left;cursor:pointer;font:inherit}.ct-tier-name:hover{background:#f5fafc}@media(max-width:900px){.ct-tier-grid{grid-template-columns:repeat(2,minmax(145px,1fr))}}@media(max-width:520px){.ct-tier-grid{grid-template-columns:1fr}}
-</style>
-<style id="ct-amanda-visible-top-css">
-#ct-amanda-snapshot{margin:0 0 14px!important;padding:14px 16px!important;border:1px solid #b9dfe9!important;border-radius:12px!important;background:#f7fcfe!important;box-shadow:none!important}
-#ct-amanda-snapshot .ct-amanda-title{font-size:14px!important;font-weight:850!important;color:#071b37!important}
-#ct-amanda-snapshot .ct-amanda-sub{font-size:11px!important;color:#607789!important;margin-top:2px!important}
-#ct-amanda-snapshot .ct-amanda-grid{display:grid!important;grid-template-columns:repeat(5,minmax(125px,1fr))!important;gap:8px!important;margin-top:10px!important}
-#ct-amanda-snapshot .ct-amanda-metric{background:#fff!important;border:1px solid #dce7ed!important;border-radius:9px!important;padding:10px 11px!important}
-@media(max-width:1000px){#ct-amanda-snapshot .ct-amanda-grid{grid-template-columns:repeat(2,minmax(140px,1fr))!important}}
-</style>
-
-<style id="ct-co-marketing-restore-css">
-#view-co-marketing{display:none;max-width:1320px!important;margin:0 auto!important;padding:8px 0 40px!important}
-#view-co-marketing.active{display:block!important}
-#view-co-marketing #director-cards{margin-top:10px}
-</style>
-</head>
+</style></head>
 <body>
 <div id="lpBuildBadge" style="display:none"></div>
 <div class="app">
@@ -896,7 +881,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-nav-section"><div class="ct-nav-label">TEAM</div><button class="who-btn ct-nav-btn wb-Snapshot" data-route="snapshot" onclick="lpv2Route('snapshot',this)" type="button"><span class="ct-nav-icon">▦</span><span>Team Snapshot</span></button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LOAN PARTNERS</div>
 <button class="who-btn ct-nav-btn wb-Gavin" data-lp="Gavin" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Gavin</button><button class="who-btn ct-nav-btn wb-Karen" data-lp="Karen" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Karen</button><button class="who-btn ct-nav-btn wb-Osgood" data-lp="Osgood" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Osgood</button><button class="who-btn ct-nav-btn wb-Jordan" data-lp="Jordan" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Jordan</button><button class="who-btn ct-nav-btn wb-Said" data-lp="Said" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Said</button><button class="who-btn ct-nav-btn wb-Isaak" data-lp="Isaak" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Isaak</button></div>
-<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Integrity</button><button class="who-btn ct-nav-btn" data-route="income" onclick="lpv2Route('income',this)" type="button">Income Calculation</button></div>
+<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button">Co-Marketing</button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Integrity</button><button class="who-btn ct-nav-btn" data-route="income" onclick="lpv2Route('income',this)" type="button">Income Calculation</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">DATA</div><button class="who-btn ct-nav-btn" data-route="data-hub" onclick="lpv2Route('data-hub',this)" type="button">Weekly Data Hub</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LEARN + TOOLS</div><button class="who-btn ct-nav-btn wb-OperatingStandard" data-route="standard" onclick="lpv2Route('standard',this)" type="button">Operating Standard</button><button class="who-btn ct-nav-btn ct-action-btn" data-route="scripts" onclick="lpv2Route('scripts',this)" type="button">Scripts + Training</button><button class="who-btn ct-nav-btn wb-Admin" data-route="admin" onclick="lpv2Route('admin',this)" type="button">Admin</button></div>
 </div>
@@ -1242,7 +1227,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 </div>
 <div class="view" id="view-welcome">
-<div class="welcome"><div class="welcome-logo">CORE TEAM</div><h2>Intelligence Platform</h2><p>Select your name to see current execution work, Tuesday active-contract updates, and scorecard progress. Shared updates sync across the team.</p></div>
+<div class="welcome"><div class="welcome-logo">CORE TEAM</div><h2>Intelligence Platform</h2><p>Select your name to see your 15 calls for this week. All updates sync in real time.</p></div>
 </div><div class="view" id="view-lp"><div class="ct-lp-page">
 <div class="ct-page-head"><div><div class="ct-eyebrow">LOAN PARTNER</div><h1 id="lp-hero-name">Weekly Execution</h1><div class="ct-page-sub" id="lp-hero-sub">Loading current work…</div></div><div class="ct-role-pill" id="lp-v2-role-pill">LP2 · Client + transaction execution</div></div>
 <section class="ct-card ct-scorecard-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>My current position</h2></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="ct-link-btn" onclick="lpv4OpenMyScorecard(currentUser)" type="button">Update my scorecard</button><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div></div><div id="lp-v2-scorecard"><div class="ct-loading">Loading scorecard…</div></div></section>
@@ -1336,19 +1321,19 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="view" id="view-operating-standard">
 <div class="operating standard-standard">
 <div class="pbs-hero"><div class="pbs-kicker">CORE TEAM OPERATING STANDARD</div><h1>Produce. Convert. Execute. Grow.</h1><p>The tracker should make ownership visible, catch execution gaps early, and keep the team working the same operating system from lead through funding and relationship growth.</p></div>
-<div class="pbs-live" id="pbs-live-team-progress"><div class="pbs-live-head"><div><b>Live team position</b><span>Current scorecard data compared with the performance targets.</span></div><button onclick="pbsLoadLiveProgress(true)" type="button">Refresh</button></div><div class="pbs-live-grid" id="pbs-live-grid"><div class="pbs-live-loading">Loading current measurements…</div></div></div>
+<div class="pbs-live" id="pbs-live-team-progress"><div class="pbs-live-head"><div><b>Live team position</b><span>Current scorecard data compared with the required gates.</span></div><button onclick="pbsLoadLiveProgress(true)" type="button">Refresh</button></div><div class="pbs-live-grid" id="pbs-live-grid"><div class="pbs-live-loading">Loading current measurements…</div></div></div>
 <div class="pbs-grid">
 <div class="pbs-card" onclick="lpv3OpenStandardDetail('production')" role="button" tabindex="0"><div class="pbs-weight">60%<span>Production</span></div><h3>What it measures</h3><p>Funded results, current-month pace and sustained rolling production. Strong production matters most, but it cannot erase a fundamental execution failure.</p></div>
 <div class="pbs-card" onclick="lpv3OpenStandardDetail('conversion')" role="button" tabindex="0"><div class="pbs-weight">25%<span>Conversion</span></div><h3>What it measures</h3><p>Effectiveness across the buyer funnel: Lead → 1003 → Pre-Approval → Contract → Funding.</p></div>
 <div class="pbs-card" onclick="lpv3OpenStandardDetail('execution')" role="button" tabindex="0"><div class="pbs-weight">15%<span>Execution</span></div><h3>What it measures</h3><p>Documented compliance with CORE standards that protect conversion, client experience and partner confidence.</p></div>
 </div>
-<div class="pbs-card" style="margin-top:12px"><h3>Core conversion targets</h3><div class="pbs-gates"><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('funded')"><b>400</b><span>Funded units target</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('lead1003')"><b>60%</b><span>Lead → 1003</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('1003pre')"><b>85%</b><span>1003 → Pre-Approval</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('precontract')"><b>55%</b><span>Pre-Approval → Contract</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('contractfunded')"><b>87%</b><span>Contract → Funded</span></div></div></div>
+<div class="pbs-card" style="margin-top:12px"><h3>Non-negotiable conversion gates</h3><div class="pbs-gates"><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('funded')"><b>400</b><span>Funded units target</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('lead1003')"><b>60%</b><span>Lead → 1003</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('1003pre')"><b>85%</b><span>1003 → Pre-Approval</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('precontract')"><b>55%</b><span>Pre-Approval → Contract</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('contractfunded')"><b>87%</b><span>Contract → Funded</span></div></div></div>
 <div class="pbs-grid" style="margin-top:12px">
 <div class="pbs-card"><h3>Clear ownership lanes</h3><ul><li><b>RM:</b> partner portfolio health, relationship rhythm, retention and growth.</li><li><b>LP2:</b> client + transaction experience and buyer/buyer-agent execution.</li><li><b>LP1:</b> conversion/front-end support and early buyer movement.</li><li><b>Production leadership:</b> visibility, coaching and accountability.</li></ul></div>
 <div class="pbs-card"><h3>Weekly operating rhythm</h3><ul><li><b>Monday:</b> set up the week and review production plan.</li><li><b>Tuesday–Thursday:</b> execute, communicate and move files/buyers.</li><li><b>Friday:</b> inspect WIP, unresolved gaps and next actions.</li><li>Use early-warning status: Green = current, Yellow = correctable miss, Red = repeated/material miss.</li></ul></div>
-<div class="pbs-card"><h3>Execution standards</h3><ul><li>Required leads entered into CRM.</li><li>Required under-contract buyer-agent/client updates completed from each LP’s own worklist.</li><li>Mandatory conversion steps executed and documented.</li><li>File Integrity starts at Ready for Pack Out; respond quickly to daily Processing/LOA asks.</li></ul></div>
+<div class="pbs-card"><h3>Execution gates</h3><ul><li>Required leads entered into CRM.</li><li>Required under-contract buyer-agent/client updates completed from each LP’s own worklist.</li><li>Mandatory conversion steps executed and documented.</li><li>File Integrity starts at Ready for Pack Out; respond quickly to daily Processing/LOA asks.</li></ul></div>
 </div>
-<div class="pbs-strip"><b>Operating rule:</b> a zero-tolerance designation creates an accountability event; it is not averaged away by production elsewhere. The tracker should show the missed standard, owner, corrective action and next result.</div>
+<div class="pbs-strip"><b>Operating rule:</b> a zero-tolerance designation creates an accountability event; it is not averaged away by production elsewhere. The tracker should show the missed gate, owner, corrective action and next result.</div>
 </div>
 </div>
 <div class="view" id="view-scorecards">
@@ -1356,7 +1341,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="lp-hero-name" style="color:var(--text);font-size:18px">Scorecards</div>
 <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">← Back</button>
 </div>
-<div class="operating standard-score-model"><div style="font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#0B789E">LP2 PERFORMANCE SCORECARD</div><div style="font-size:12px;font-weight:800;color:#102A43;margin-top:3px">Weighted performance model</div><div class="weights"><div class="w"><b>60%</b><span>Production · funded results and pace</span></div><div class="w"><b>25%</b><span>Conversion · Lead → 1003 → Pre-Approval → Contract → Funding</span></div><div class="w"><b>15%</b><span>Execution · documented CORE standards and partner/client experience</span></div></div><div style="font-size:10.5px;color:#627786;margin-top:8px">Conversion targets: 60% Lead→1003 · 85% 1003→Pre-Approval · 55% Pre-Approval→Contract · 87% Contract→Funded.</div></div><div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px">
+<div class="operating standard-score-model"><div style="font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#0B789E">LP2 PERFORMANCE SCORECARD</div><div style="font-size:12px;font-weight:800;color:#102A43;margin-top:3px">Weighted performance model</div><div class="weights"><div class="w"><b>60%</b><span>Production · funded results and pace</span></div><div class="w"><b>25%</b><span>Conversion · Lead → 1003 → Pre-Approval → Contract → Funding</span></div><div class="w"><b>15%</b><span>Execution · documented CORE standards and partner/client experience</span></div></div><div style="font-size:10.5px;color:#627786;margin-top:8px">Conversion reference gates: 60% Lead→1003 · 85% 1003→Pre-Approval · 55% Pre-Approval→Contract · 87% Contract→Funded.</div></div><div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px">
 <div style="background:#1F4E79;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
 <span style="color:#fff;font-size:13px;font-weight:600">Core team goal</span>
 <div style="display:flex;gap:6px">
@@ -1429,8 +1414,8 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <div class="view" id="view-snapshot"><div class="ct-snapshot-page">
 <div class="ct-page-head"><div><div class="ct-eyebrow">TEAM ACCOUNTABILITY</div><h1>Team Snapshot</h1><div class="ct-page-sub">Current team production, conversion and execution.</div></div><div class="ct-snapshot-actions"><span class="ct-muted" id="snapshot-time"></span><button class="ct-link-btn" id="snapshot-live-refresh" onclick="refreshSnapshotFresh(this)" type="button">Refresh live data</button></div></div><div class="ct-sync-line" id="snapshot-live-status">Syncing current team data…</div>
-<section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>Current position vs. performance targets</h2></div><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div><div id="lp-v2-team-gates"><div class="ct-loading">Loading performance targets…</div></div></section>
-<section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">THIS WEEK</div><h2>Loan Partner scorecard</h2></div></div><div id="lp-v2-team-roster"><div class="ct-loading">Loading team scorecard…</div></div><div id="ct-amanda-snapshot-anchor" class="ct-amanda-anchor"></div></section>
+<section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>Current position vs. required gates</h2></div><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div><div id="lp-v2-team-gates"><div class="ct-loading">Loading conversion gates…</div></div></section>
+<section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">THIS WEEK</div><h2>Loan Partner scorecard</h2></div></div><div id="lp-v2-team-roster"><div class="ct-loading">Loading team scorecard…</div></div></section>
 <section class="ct-card ct-standard-strip"><div><div class="ct-kicker">OPERATING STANDARD</div><h2>Produce. Convert. Execute. Grow.</h2><p>LP2 owns client + transaction execution and buyer/buyer-agent work on active contracts. LP1 supports front-end conversion. RM owns partner portfolio health, retention, growth and the listing-agent relationship lane.</p></div><button class="ct-primary-btn" onclick="lpv2Route('standard',this)" type="button">Open Operating Standard</button></section>
 <div class="ct-legacy-state" id="d-snapshot-body"></div></div></div>
 <div class="view" id="view-ownership">
@@ -1466,16 +1451,16 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <input accept=".xlsx,.xls" id="fileInput" onchange="handleUpload(this)" style="display:none" type="file"/><div id="upload-result" style="margin:0 0 10px;font-size:12px"></div><div class="ct-page-head"><div><div class="ct-eyebrow">WEEKLY DATA</div><h1>Weekly Data Hub</h1><div class="ct-page-sub">The only upload location. Encompass drives active-contract work; Power BI drives active-partner health, roster and co-marketing data.</div></div></div>
 <div class="ct-data-grid">
 <section class="ct-card ct-data-source"><div class="ct-kicker">TUESDAY TRANSACTION WORK</div><h2>Encompass Active Files</h2><p>Upload once each week. This shared snapshot drives each LP’s under-contract buyer/client updates and RM listing-agent updates. Same buyer + property stays one transaction across weeks.</p><div class="ct-data-actions"><button class="ct-primary-btn" onclick="lpV1OpenTuesdayUpload()" type="button">Upload Encompass Active Files</button><button class="ct-link-btn" onclick="lpV1OpenContactManager()" type="button">Review / Edit Contacts</button></div><div class="ct-data-note">Loan numbers are ignored. Contact corrections, FSBO and unrepresented exceptions stay attached to the transaction.</div></section>
-<section class="ct-card ct-data-source"><div class="ct-kicker">AGENT HEALTH</div><h2>Power BI Agent Portfolio</h2><p>Upload the current Power BI export to refresh active prequals, active pipeline, recent production and the relationship-health view.</p><div class="ct-data-actions"><button class="ct-primary-btn" onclick="loadXLSX()" type="button">Upload Power BI</button><button class="ct-link-btn" onclick="lpv3OpenAgentHealth()" type="button">Open Agent Health / Roster</button></div><div class="ct-data-note" id="lpv3-pb-status">No Power BI file loaded yet.</div></section>
+<section class="ct-card ct-data-source"><div class="ct-kicker">AGENT HEALTH</div><h2>Power BI Agent Portfolio</h2><p>Upload the current Power BI export to refresh the current roster, lead/close recency, tiers, buyer context and relationship-health view.</p><div class="ct-data-actions"><button class="ct-primary-btn" onclick="loadXLSX()" type="button">Upload Power BI</button><button class="ct-link-btn" onclick="lpv3OpenAgentHealth()" type="button">Open Agent Health / Roster</button></div><div class="ct-data-note" id="lpv3-pb-status">No Power BI file loaded yet.</div></section>
 </div>
 <section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">WHAT EACH FILE CONTROLS</div><h2>Keep the sources clean</h2></div></div><div class="ct-source-map"><div><b>Encompass</b><span>Active contracts, buyer/listing agent contacts, LP assignment, milestone, closing date.</span></div><div><b>Power BI + lead activity</b><span>Active prequals, active pipeline, production, last lead, latest file/contract/close and agent health.</span></div></div></section>
 </div>
 </div>
 <div class="view" id="view-agent-health">
 <div class="ct-page-wrap">
-<div class="ct-page-head"><div><div class="ct-eyebrow">RELATIONSHIP VISIBILITY</div><h1>Agent Health / Roster</h1><div class="ct-page-sub">Active Partner = at least one lead OR one close in the last 90 days. Lead gaps surface early: green ≤30 days, yellow 31–60 days, red 61+ days or no lead in 90 days.</div></div></div>
+<div class="ct-page-head"><div><div class="ct-eyebrow">RELATIONSHIP VISIBILITY</div><h1>Agent Health / Roster</h1><div class="ct-page-sub">This page separates the populations on purpose: Power BI roster → 90-day Active Partners → Managed Active Partners. Relationship alerts are based on lead recency, and active-contract buyer agents stay in the transaction workflow instead of a duplicate relationship-call queue.</div></div></div>
 <div id="lpv3-health-summary"></div>
-<section class="ct-card"><div class="ct-health-toolbar"><input id="lpv3-health-q" oninput="lpv3RenderAgentHealth()" placeholder="Search agent…"/><select id="lpv3-health-filter" onchange="lpv3RenderAgentHealth()"><option value="">Action view</option><option value="red">Red · Needs action</option><option value="yellow">Yellow · Watch</option><option value="green">Green · Current</option><option value="archive">No current signal</option></select><select id="lpv3-health-lp" onchange="lpv3RenderAgentHealth()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option><option>Unassigned</option></select></div><div id="lpv3-health-table"><div class="ct-loading">Loading agent health…</div></div></section>
+<section class="ct-card"><div class="ct-health-toolbar"><input id="lpv3-health-q" oninput="lpv3RenderAgentHealth()" placeholder="Search agent…"/><select id="lpv3-health-filter" onchange="lpv3RenderAgentHealth()"><option value="action">Needs relationship attention</option><option value="red">Red · Priority relationship follow-up</option><option value="yellow">Yellow · Relationship check-in</option><option value="green">Green · Recent lead</option><option value="contract">Active contract · transaction workflow</option><option value="archive">Outside 90-day Active Partner definition</option><option value="all">All managed active partners</option></select><select id="lpv3-health-lp" onchange="lpv3RenderAgentHealth()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option><option>Unassigned</option></select></div><div id="lpv3-health-table"><div class="ct-loading">Loading agent health…</div></div></section>
 </div>
 </div>
 <div class="view" id="view-income-standard">
@@ -1748,10 +1733,14 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 </details>
 </div>
-<div class="view" id="view-co-marketing" style="padding:18px 20px;max-width:1140px;margin:0 auto">
+<div class="view" id="view-director" style="padding:18px 20px;max-width:1140px;margin:0 auto">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-<div><div style="font-size:9px;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:#0C7699;margin-bottom:3px">SHARED WORK · CO-MARKETING</div><div style="font-size:22px;font-weight:800;color:#102A43">Co-Marketing Relationships</div><div style="font-size:12px;color:#607582;margin-top:3px">Track partner spend, opportunities, leads, closings and relationship performance.</div></div>
-<button class="btn btn-sm" onclick="lpv2Route('snapshot',document.querySelector('.ct-nav-btn[data-route=\"snapshot\"]'))">← Team Snapshot</button>
+<div>
+<div style="font-size:9px;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:#0C7699;margin-bottom:3px">SHARED WORK · CO-MARKETING</div>
+<div style="font-size:22px;font-weight:800;color:#102A43">Co-Marketing Relationships</div>
+<div style="font-size:12px;color:#607582;margin-top:3px">Track active co-marketing partners, spend, opportunities, leads, closings and relationship performance.</div>
+</div>
+<button class="btn btn-sm" onclick="lpv2Route('snapshot',document.querySelector('.ct-nav-btn[data-route=&quot;snapshot&quot;]'))">← Team Snapshot</button>
 </div>
 <div style="background:#FAF7F2;border:1px solid #E8DDD0;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:600;color:#5C4A35">
     Target: 1 opportunity per $250 spent each month — either a buddy intro or warm lead. Goal: 80%
@@ -6152,7 +6141,7 @@ function lpscRenderTeamTotals(){
     rows=rows.filter(function(r){return r.week_key>=monthStart;});
   }
 
-  var TEAM_WEEKLY_GOALS={past_client_talks:50,referred_leads:80,apps_1003:50,pre_approvals:25,contracts:14};
+  var TEAM_WEEKLY_GOALS={apps_1003:50,pre_approvals:25,contracts:14};
 
   var cardsHtml="";
   metrics.forEach(function(m){
@@ -6195,7 +6184,7 @@ const LPSC_METRICS_MAP={
     {key:"meetings",label:"Realtor meetings scheduled",goal:10}
   ],
   _lp2:[
-    {key:"past_client_talks",label:"Meaningful past-client talk-to's",goal:10},
+    {key:"rltr_talks",label:"Realtor talk to's",goal:10},
     {key:"referred_leads",label:"Referred leads",goal:16},
     {key:"apps_1003",label:"1003's",goal:13},
     {key:"pre_approvals",label:"Pre-approvals",goal:6},
@@ -7920,14 +7909,13 @@ var coMktClosedCounts={};
 var coMktLeadCountsSource="Live sync (velocify_leads, year-to-date)";
 
 function openDirectorView(btn){
-  try{if(typeof rmStopPolling==='function')rmStopPolling()}catch(e){}
-  try{if(typeof lpStopPolling==='function')lpStopPolling()}catch(e){}
+  rmStopPolling(); lpStopPolling();
   currentUser="Director";
   document.querySelectorAll(".who-btn").forEach(function(b){b.classList.remove("active");});
   if(btn) btn.classList.add("active");
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
-  var view=document.getElementById("view-co-marketing");if(view)view.classList.add("active");
-  if(typeof loadCoMktPartners==='function')loadCoMktPartners();
+  document.getElementById("view-director").classList.add("active");
+  loadCoMktPartners();
 }
 
 function loadCoMktPartners(){
@@ -10947,7 +10935,7 @@ window.CT_SHARED_FACETIME_RULES_VERSION="20260828-v63";
 #v65Modal{display:none;position:fixed;inset:0;z-index:10010;background:rgba(12,40,53,.47);align-items:center;justify-content:center;padding:16px}#v65Modal.open{display:flex}#v65Modal .v65-modal{width:min(650px,100%);max-height:90vh;overflow:auto;background:#fff;border:1px solid #D0E0E6;border-radius:14px;padding:17px;box-shadow:0 25px 70px rgba(10,36,49,.26)}#v65Modal .v65-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}#v65Modal label{display:block;font-size:9.4px;font-weight:850;text-transform:uppercase;letter-spacing:.04em;color:#536B77;margin-bottom:4px}#v65Modal select,#v65Modal textarea,#v65Modal input{width:100%;box-sizing:border-box;border:1px solid #D2E0E5;border-radius:8px;padding:9px;font:inherit;font-size:12px;background:#fff}#v65Modal textarea{min-height:90px;resize:vertical}.v65-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.v65-modal-actions button{border:1px solid #CBDCE3;background:#fff;color:#46616D;border-radius:8px;padding:8px 11px;font:800 10.5px inherit;cursor:pointer}.v65-modal-actions button.primary{background:#007FA4;color:#fff;border-color:#007FA4}
 @media(max-width:760px){.v65-row{grid-template-columns:1fr}.v65-actions{justify-content:flex-start}#v65Modal .v65-grid{grid-template-columns:1fr}#lp-tuesday-work{padding:10px}}
 </style>
-<div aria-hidden="true" id="v65Modal"><div class="v65-modal"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:11px"><div><div class="v65-kicker" id="v65ModalKicker">Tuesday update</div><div id="v65ModalTitle" style="font-size:16px;font-weight:900;color:#071B37"></div><div id="v65ModalMeta" style="font-size:10.5px;color:#687D89;margin-top:3px"></div></div><button onclick="v65CloseModal()" style="border:0;background:none;font-size:22px;cursor:pointer;color:#7D9099" type="button">×</button></div><div id="v65FileFields"><div style="font-size:10.5px;color:#45606D;background:#F4FAFC;border:1px solid #D8E8EE;border-radius:8px;padding:8px 9px;line-height:1.5;margin-bottom:10px"><strong>Tuesday standard:</strong> ACTIVE CONTRACTS ONLY for buyer-agent outreach. Call/update the buyer first, then the buyer agent. After the file update, use the live conversation to ask: <strong>“Do you have any showings coming up? Anything else you’re working on where we can help?”</strong> If there is no active contract, the Realtor relationship lane belongs to RM.</div><div class="v65-grid"><div><label>Buyer agent</label><select id="v65BuyerOutcome"><option value="Not worked">Not worked yet</option><option value="Reached">Reached / talked</option><option value="Text Conversation">Text conversation</option><option value="VM + Text">Voicemail + follow-up text</option><option value="Text Update">Text update sent</option><option value="No Buyer Agent">No buyer agent / unrepresented — don't show agent call again</option></select></div><div><label>Client</label><select id="v65ClientOutcome"><option value="Not worked">Not worked yet</option><option value="Reached">Reached / talked</option><option value="Text Conversation">Text conversation</option><option value="VM + Text">Voicemail + follow-up text</option><option value="Text Update">Text update sent</option></select></div><div><label>Move-the-needle result</label><select id="v65FileResult"><option value="On track">On track / no action needed</option><option value="Buyer action">Buyer action needed</option><option value="Agent action">Buyer-agent action needed</option><option value="LP action">LP follow-up needed</option><option value="Escalation">Needs help / escalation</option></select></div><div><label>Next follow-up</label><input id="v65FileFollow" type="date"/></div><div style="grid-column:1/-1"><label>Go-To conversation · required when you connect live</label><select id="v65GoToResult"><option value="Not reached / not applicable">Not reached / not applicable</option><option value="Asked — no showings right now">Asked — no showings right now</option><option value="Asked — showings coming up">Asked — showings coming up</option><option value="Opportunity identified">Asked — opportunity identified / next move created</option></select><div style="font-size:10px;color:#637987;line-height:1.4;margin-top:4px">Always ask what else they are working on and whether they have showings coming up. This is the Go-To conversation inside the active-contract buyer-agent touch.</div></div></div><label style="display:flex!important;align-items:flex-start;gap:8px;margin-top:10px;padding:9px 10px;border:1px solid #D8E8EE;border-radius:8px;background:#F8FBFD;text-transform:none!important;letter-spacing:0!important;font-size:11px!important;font-weight:700!important;color:#365365!important;cursor:pointer"><input id="v65FsboNoListing" style="width:auto!important;margin-top:2px" type="checkbox"/> <span><strong>FSBO / no listing agent</strong><br/><span style="font-weight:500;color:#637987">Listing side only. Use this when the seller is not represented. This permanently removes Amanda's listing-agent Tuesday call for this transaction, including future weekly uploads. It does not complete the LP buyer/client update.</span></span></label><div style="margin-top:9px"><label>Quick note</label><textarea id="v65FileNote" placeholder="What did you update them on? What is the next move?"></textarea></div></div><div id="v65PipelineFields" style="display:none"><div style="font-size:10.5px;color:#45606D;background:#F4FAFC;border:1px solid #D8E8EE;border-radius:8px;padding:8px 9px;line-height:1.5;margin-bottom:10px"><strong>Pipeline review:</strong> this is buyer/client movement, not a non-contract Realtor call list. Review the actual buyers in your loan system. If you uncover an agent relationship opportunity without an active contract, send it to RM rather than starting a separate LP relationship cadence.</div><div class="v65-grid"><div><label>Result</label><select id="v65PipeResult"><option value="Reviewed / no action">Reviewed / no action needed</option><option value="RM handoff">RM handoff — agent opportunity / no active contract</option><option value="Client contacted">Contacted client</option><option value="Moved forward">Moved buyer forward</option><option value="Follow-up needed">Follow-up needed</option></select></div><div><label>Next follow-up</label><input id="v65PipeFollow" type="date"/></div></div><div style="margin-top:9px"><label>What did you find / do?</label><textarea id="v65PipeNote" placeholder="Example: Reviewed 3 active prequals. Smith buyer needs an updated price point before weekend showings; client follow-up set. Agent opportunity sent to RM because there is no active contract."></textarea></div></div><div id="v65Err" style="display:none;color:#A33C35;font-size:10px;margin-top:7px"></div><div class="v65-modal-actions"><button onclick="v65CloseModal()" type="button">Cancel</button><button class="primary" id="v65SaveBtn" onclick="v65Save()" type="button">Save Tuesday work</button></div></div></div>
+<div aria-hidden="true" id="v65Modal"><div class="v65-modal"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:11px"><div><div class="v65-kicker" id="v65ModalKicker">Tuesday update</div><div id="v65ModalTitle" style="font-size:16px;font-weight:900;color:#071B37"></div><div id="v65ModalMeta" style="font-size:10.5px;color:#687D89;margin-top:3px"></div></div><button onclick="v65CloseModal()" style="border:0;background:none;font-size:22px;cursor:pointer;color:#7D9099" type="button">×</button></div><div id="v65FileFields"><div style="font-size:10.5px;color:#45606D;background:#F4FAFC;border:1px solid #D8E8EE;border-radius:8px;padding:8px 9px;line-height:1.5;margin-bottom:10px"><strong>Tuesday standard:</strong> once the buyer is under contract, update the buyer’s agent and the client, then identify the next thing that can move the file forward. Before contract, work the buyer through pipeline review instead. Face Time and relationship calls remain separate.</div><div class="v65-grid"><div><label>Buyer agent</label><select id="v65BuyerOutcome"><option value="Not worked">Not worked yet</option><option value="Reached">Reached / talked</option><option value="Text Conversation">Text conversation</option><option value="VM + Text">Voicemail + follow-up text</option><option value="Text Update">Text update sent</option><option value="No Buyer Agent">No buyer agent / unrepresented — don't show agent call again</option></select></div><div><label>Client</label><select id="v65ClientOutcome"><option value="Not worked">Not worked yet</option><option value="Reached">Reached / talked</option><option value="Text Conversation">Text conversation</option><option value="VM + Text">Voicemail + follow-up text</option><option value="Text Update">Text update sent</option></select></div><div><label>Move-the-needle result</label><select id="v65FileResult"><option value="On track">On track / no action needed</option><option value="Buyer action">Buyer action needed</option><option value="Agent action">Buyer-agent action needed</option><option value="LP action">LP follow-up needed</option><option value="Escalation">Needs help / escalation</option></select></div><div><label>Next follow-up</label><input id="v65FileFollow" type="date"/></div></div><label style="display:flex!important;align-items:flex-start;gap:8px;margin-top:10px;padding:9px 10px;border:1px solid #D8E8EE;border-radius:8px;background:#F8FBFD;text-transform:none!important;letter-spacing:0!important;font-size:11px!important;font-weight:700!important;color:#365365!important;cursor:pointer"><input id="v65FsboNoListing" style="width:auto!important;margin-top:2px" type="checkbox"/> <span><strong>FSBO / no listing agent</strong><br/><span style="font-weight:500;color:#637987">Listing side only. Use this when the seller is not represented. This permanently removes Amanda's listing-agent Tuesday call for this transaction, including future weekly uploads. It does not complete the LP buyer/client update.</span></span></label><div style="margin-top:9px"><label>Quick note</label><textarea id="v65FileNote" placeholder="What did you update them on? What is the next move?"></textarea></div></div><div id="v65PipelineFields" style="display:none"><div style="font-size:10.5px;color:#45606D;background:#F4FAFC;border:1px solid #D8E8EE;border-radius:8px;padding:8px 9px;line-height:1.5;margin-bottom:10px"><strong>Pipeline review:</strong> use the active prequal/preapproval count as a prompt to review the actual buyers in your loan system, then call the agent/client where a useful action can move someone closer to contract.</div><div class="v65-grid"><div><label>Result</label><select id="v65PipeResult"><option value="Reviewed / no action">Reviewed / no action needed</option><option value="Agent contacted">Contacted agent</option><option value="Client contacted">Contacted client</option><option value="Moved forward">Moved buyer forward</option><option value="Follow-up needed">Follow-up needed</option></select></div><div><label>Next follow-up</label><input id="v65PipeFollow" type="date"/></div></div><div style="margin-top:9px"><label>What did you find / do?</label><textarea id="v65PipeNote" placeholder="Example: Reviewed 3 active prequals. Called agent on Smith buyer; needs updated price point before weekend showings."></textarea></div></div><div id="v65Err" style="display:none;color:#A33C35;font-size:10px;margin-top:7px"></div><div class="v65-modal-actions"><button onclick="v65CloseModal()" type="button">Cancel</button><button class="primary" id="v65SaveBtn" onclick="v65Save()" type="button">Save Tuesday work</button></div></div></div>
 <script id="v65-tuesday-work-js">
 (function(){
   const norm=s=>String(s||'').trim().toLowerCase(), esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -10970,7 +10958,7 @@ window.CT_SHARED_FACETIME_RULES_VERSION="20260828-v63";
   function txnId(r){return meta(r.notes,'TXN_ID')||[key(r.agent_name),meta(r.notes,'TXN_CLIENT'),meta(r.notes,'TXN_PROPERTY')].join('|')}
   function role(r){return meta(r.notes,'TXN_ROLE')||'Agent'}
   function encodeRmMeta(notes,lp){try{const obj={owner:'LP:'+lp,focus:'LP Tuesday',attendees:lp,rmAttendees:[],lpAttendees:[lp],nextStepOwner:lp};const b64=btoa(unescape(encodeURIComponent(JSON.stringify(obj))));let bits='';for(let i=0;i<b64.length;i++)bits+=b64.charCodeAt(i).toString(2).padStart(8,'0');const zw=bits.replace(/0/g,'\u200B').replace(/1/g,'\u200C');return String(notes||'')+'\n\u2063\u2063\u2063'+zw+'\u2064\u2064\u2064'}catch(e){return notes}}
-  function ensure(){if(document.getElementById('lp-tuesday-work'))return;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return;const c=document.createElement('div');c.id='lp-tuesday-work';c.innerHTML='<div class="v65-head"><div><div class="v65-kicker">WEEKLY EXECUTION</div><div class="v65-title">Active-contract buyer updates + buyer movement</div><div class="v65-sub">LP2 Realtor outreach belongs here only when the buyer agent has an ACTIVE CONTRACT with us. Tuesday sequence: buyer first → buyer agent → Go-To conversation. Active partners without an active contract stay RM-owned.</div></div><span class="v65-summary" id="v65Summary">Loading…</span></div><div class="v65-section"><div class="v65-section-head">Under-contract files</div><div id="v65FileList" class="v65-list"><div class="v65-empty">Loading contract work…</div></div></div><div class="v65-section"><div class="v65-section-head">Preapproval / prequal movement</div><div id="v65PipelineList" class="v65-list"><div class="v65-empty">Loading pipeline…</div></div></div>';anchor.appendChild(c)}
+  function ensure(){if(document.getElementById('lp-tuesday-work'))return;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return;const c=document.createElement('div');c.id='lp-tuesday-work';c.innerHTML='<div class="v65-head"><div><div class="v65-kicker">WEEKLY EXECUTION</div><div class="v65-title">Transaction updates + buyer movement</div><div class="v65-sub">Under contract: update the buyer agent + client. Before contract: move active preapprovals/prequals toward the next step. Face Time stays separate and stays visible above this work.</div></div><span class="v65-summary" id="v65Summary">Loading…</span></div><div class="v65-section"><div class="v65-section-head">Under-contract files</div><div id="v65FileList" class="v65-list"><div class="v65-empty">Loading contract work…</div></div></div><div class="v65-section"><div class="v65-section-head">Preapproval / prequal movement</div><div id="v65PipelineList" class="v65-list"><div class="v65-empty">Loading pipeline…</div></div></div>';anchor.appendChild(c)}
   let state={lp:'',files:new Map(),pipes:new Map()};let current=null;
   async function load(lp,force){lp=String(lp||currentUser||'').trim();if(!lp||lp==='Snapshot')return;ensure();const card=document.getElementById('lp-tuesday-work');if(!card)return;card.style.display='block';state.lp=lp;const fileHost=document.getElementById('v65FileList'),pipeHost=document.getElementById('v65PipelineList'),sum=document.getElementById('v65Summary');if(force){fileHost.innerHTML='<div class="v65-empty">Refreshing shared transaction data…</div>';pipeHost.innerHTML='<div class="v65-empty">Refreshing pipeline…</div>'}const tue=recentTuesday();
     try{
@@ -10992,14 +10980,14 @@ window.CT_SHARED_FACETIME_RULES_VERSION="20260828-v63";
       files.sort((a,b)=>(a.buyerDone&&a.clientDone)-(b.buyerDone&&b.clientDone)||String(a.closeDate||a.triggerDate).localeCompare(String(b.closeDate||b.triggerDate)));
       const dueFiles=files.filter(f=>!(f.buyerDone&&f.clientDone));fileHost.innerHTML=dueFiles.length?dueFiles.map(f=>{const done=[];if(f.buyerNoAgent)done.push('no buyer agent ✓');else if(f.buyerDone&&!f.contactIssue)done.push('buyer agent ✓');if(f.clientDone)done.push('client ✓');const stage=f.stage==='Clear to Close'?'CTC':'Active contract';const metaLine=[f.client,f.property,f.closeDate?'close '+f.closeDate:''].filter(Boolean).join(' · ')||'Shared active transaction';const quality=f.contactIssue?'<span class="v65-pill hot">Contact data issue</span>':'';const fsboBadge=f.fsboNoListing?'<span class="v65-pill">FSBO / no listing agent ✓</span>':'';const status=f.contactIssue?'Buyer agent: N/A in Encompass · client '+(f.clientDone?'✓':'due'):(done.length?done.join(' · '):'buyer agent + client both due');const edit=f.contactIssue?'<button type="button" onclick="lpV1OpenContactManager();setTimeout(function(){const q=document.querySelector(\'#lpV1ContactManager input[type=search],#lpV1ContactManager input[placeholder*=Search]\');if(q){q.value='+JSON.stringify(f.client||f.property||'')+';q.dispatchEvent(new Event(\'input\',{bubbles:true}))}},150)">Fix contact</button>':'';return '<div class="v65-row"><div><div class="v65-name">'+esc(f.agent)+'</div><div class="v65-meta">'+esc(metaLine)+'</div><div class="v65-badges"><span class="v65-pill '+(f.stage==='Clear to Close'?'hot':'')+'">'+stage+'</span>'+(f.milestone?'<span class="v65-pill">'+esc(f.milestone)+'</span>':'')+quality+fsboBadge+'</div></div><div class="v65-state"><strong>Tuesday status:</strong> '+status+(f.contactIssue?'<br><strong>Coach:</strong> LP should correct the agent contact in Encompass so future uploads are clean.':'')+(f.stage==='Clear to Close'?'<br><strong>Milestone:</strong> CTC update should be handled promptly, even if it is not Tuesday.':'')+'</div><div class="v65-actions">'+edit+'<button class="primary" type="button" onclick="v65OpenFile(\''+encodeURIComponent(f.id)+'\')">Log update</button></div></div>'}).join(''):'<div class="v65-empty"><strong>Active-file updates complete.</strong><br>No additional under-contract buyer/client updates are due from this week’s shared Encompass snapshot.</div>';
       // Pipeline is agent-level because the shared Power BI snapshot provides counts, not borrower PII.
-      const snap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null,by=(snap&&snap.by_agent)||{},reviewed=new Set(acts.filter(a=>a.act_type==='LP Tuesday Pipeline Review'&&String(a.act_date)>=tue&&norm(meta(a.notes,'LP'))===lp.toLowerCase()).map(a=>key(meta(a.notes,'PIPELINE_AGENT')||a.agent_name)));const pipes=[];state.pipes=new Map();Object.keys(by||{}).forEach(k=>{const r=by[k]||{},name=r.name||k,a=am[key(name)]||{};if(String(a.lp||'').toLowerCase()!==lp.toLowerCase())return;const pre=Number(r.active_prequals||0),pipe=Number(r.active_pipeline||0);if(pre<=0)return;const item={name,pre,pipe,level:r.level||'',done:reviewed.has(key(name))};pipes.push(item);state.pipes.set(key(name),item)});pipes.sort((a,b)=>a.done-b.done||b.pre-a.pre||a.name.localeCompare(b.name));const duePipes=pipes.filter(p=>!p.done);pipeHost.innerHTML=duePipes.length?duePipes.map(p=>'<div class="v65-row"><div><div class="v65-name">'+esc(p.name)+'</div><div class="v65-meta">Review the actual buyers in Encompass/loan system before you call.</div><div class="v65-badges"><span class="v65-pill hot">'+p.pre+' active prequal'+(p.pre===1?'':'s')+'</span>'+(p.pipe?'<span class="v65-pill">'+p.pipe+' in process</span>':'')+(p.level?'<span class="v65-pill">'+esc(p.level)+' tier</span>':'')+'</div></div><div class="v65-state"><strong>Move-the-needle prompt:</strong> review the buyer/client. Do not create a separate LP Realtor relationship call without an active contract; hand that opportunity to RM.</div><div class="v65-actions"><button class="primary" type="button" onclick="v65OpenPipeline(\''+encodeURIComponent(key(p.name))+'\')">Review + log</button></div></div>').join(''):'<div class="v65-empty"><strong>Prequal review complete.</strong><br>No additional active prequals require Tuesday action.</div>';
+      const snap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null,by=(snap&&snap.by_agent)||{},reviewed=new Set(acts.filter(a=>a.act_type==='LP Tuesday Pipeline Review'&&String(a.act_date)>=tue&&norm(meta(a.notes,'LP'))===lp.toLowerCase()).map(a=>key(meta(a.notes,'PIPELINE_AGENT')||a.agent_name)));const pipes=[];state.pipes=new Map();Object.keys(by||{}).forEach(k=>{const r=by[k]||{},name=r.name||k,a=am[key(name)]||{};if(String(a.lp||'').toLowerCase()!==lp.toLowerCase())return;const pre=Number(r.active_prequals||0),pipe=Number(r.active_pipeline||0);if(pre<=0)return;const item={name,pre,pipe,level:r.level||'',done:reviewed.has(key(name))};pipes.push(item);state.pipes.set(key(name),item)});pipes.sort((a,b)=>a.done-b.done||b.pre-a.pre||a.name.localeCompare(b.name));const duePipes=pipes.filter(p=>!p.done);pipeHost.innerHTML=duePipes.length?duePipes.map(p=>'<div class="v65-row"><div><div class="v65-name">'+esc(p.name)+'</div><div class="v65-meta">Review the actual buyers in Encompass/loan system before you call.</div><div class="v65-badges"><span class="v65-pill hot">'+p.pre+' active prequal'+(p.pre===1?'':'s')+'</span>'+(p.pipe?'<span class="v65-pill">'+p.pipe+' in process</span>':'')+(p.level?'<span class="v65-pill">'+esc(p.level)+' tier</span>':'')+'</div></div><div class="v65-state"><strong>Move-the-needle prompt:</strong> who is stuck, what do they need, and can you or the agent create a next action today?</div><div class="v65-actions"><button class="primary" type="button" onclick="v65OpenPipeline(\''+encodeURIComponent(key(p.name))+'\')">Review + log</button></div></div>').join(''):'<div class="v65-empty"><strong>Prequal review complete.</strong><br>No additional active prequals require Tuesday action.</div>';
       if(sum)sum.textContent=(dueFiles.length+duePipes.length)+' open · '+(files.length-dueFiles.length+pipes.length-duePipes.length)+' handled · week of '+tue+(latestBatch?' · Encompass snapshot '+latestBatch.slice(4,6)+'/'+latestBatch.slice(6,8):' · no weekly upload yet');
     }catch(e){console.warn('v65 Tuesday workflow',e);if(sum)sum.textContent='Could not load';const hint='<br><span style="font-size:9px;color:#7b8d97">Open Weekly Data Hub and confirm the latest Encompass snapshot is saved.</span>';fileHost.innerHTML='<div class="v65-empty">Could not load active-file work.'+hint+'</div>';pipeHost.innerHTML='<div class="v65-empty">Could not load prequal review.'+hint+'</div>'}
   }
-  window.v65OpenFile=function(encId){const f=state.files.get(decodeURIComponent(encId||''));if(!f)return;current={mode:'file',item:f};const m=document.getElementById('v65Modal');m.classList.add('open');m.setAttribute('aria-hidden','false');document.getElementById('v65ModalKicker').textContent='Tuesday buyer + client update';document.getElementById('v65ModalTitle').textContent=f.agent;document.getElementById('v65ModalMeta').textContent=[f.client,f.property,f.closeDate?'Close '+f.closeDate:''].filter(Boolean).join(' · ');document.getElementById('v65FileFields').style.display='block';document.getElementById('v65PipelineFields').style.display='none';document.getElementById('v65BuyerOutcome').value=f.buyerNoAgent?'No Buyer Agent':(f.buyerDone?'Reached':'Not worked');document.getElementById('v65ClientOutcome').value=f.clientDone?'Reached':'Not worked';const fs=document.getElementById('v65FsboNoListing');if(fs)fs.checked=!!f.fsboNoListing;document.getElementById('v65FileResult').value='On track';document.getElementById('v65FileFollow').value='';document.getElementById('v65FileNote').value='';const g=document.getElementById('v65GoToResult');if(g)g.value='Not reached / not applicable';document.getElementById('v65Err').style.display='none'};
+  window.v65OpenFile=function(encId){const f=state.files.get(decodeURIComponent(encId||''));if(!f)return;current={mode:'file',item:f};const m=document.getElementById('v65Modal');m.classList.add('open');m.setAttribute('aria-hidden','false');document.getElementById('v65ModalKicker').textContent='Tuesday buyer + client update';document.getElementById('v65ModalTitle').textContent=f.agent;document.getElementById('v65ModalMeta').textContent=[f.client,f.property,f.closeDate?'Close '+f.closeDate:''].filter(Boolean).join(' · ');document.getElementById('v65FileFields').style.display='block';document.getElementById('v65PipelineFields').style.display='none';document.getElementById('v65BuyerOutcome').value=f.buyerNoAgent?'No Buyer Agent':(f.buyerDone?'Reached':'Not worked');document.getElementById('v65ClientOutcome').value=f.clientDone?'Reached':'Not worked';const fs=document.getElementById('v65FsboNoListing');if(fs)fs.checked=!!f.fsboNoListing;document.getElementById('v65FileResult').value='On track';document.getElementById('v65FileFollow').value='';document.getElementById('v65FileNote').value='';document.getElementById('v65Err').style.display='none'};
   window.v65OpenPipeline=function(encKey){const p=state.pipes.get(decodeURIComponent(encKey||''));if(!p)return;current={mode:'pipeline',item:p};const m=document.getElementById('v65Modal');m.classList.add('open');m.setAttribute('aria-hidden','false');document.getElementById('v65ModalKicker').textContent='Tuesday prequal / preapproval review';document.getElementById('v65ModalTitle').textContent=p.name;document.getElementById('v65ModalMeta').textContent=p.pre+' active prequal'+(p.pre===1?'':'s')+(p.pipe?' · '+p.pipe+' in process':'');document.getElementById('v65FileFields').style.display='none';document.getElementById('v65PipelineFields').style.display='block';document.getElementById('v65PipeResult').value='Reviewed / no action';document.getElementById('v65PipeFollow').value='';document.getElementById('v65PipeNote').value='';document.getElementById('v65Err').style.display='none'};
   window.v65CloseModal=function(){current=null;const m=document.getElementById('v65Modal');if(m){m.classList.remove('open');m.setAttribute('aria-hidden','true')}};
-  window.v65Save=async function(){if(!current)return;const err=document.getElementById('v65Err'),btn=document.getElementById('v65SaveBtn');let body=null;if(current.mode==='file'){const f=current.item,b=document.getElementById('v65BuyerOutcome').value,c=document.getElementById('v65ClientOutcome').value,result=document.getElementById('v65FileResult').value,note=(document.getElementById('v65FileNote').value||'').trim(),fu=document.getElementById('v65FileFollow').value||null,fsbo=!!(document.getElementById('v65FsboNoListing')&&document.getElementById('v65FsboNoListing').checked),noBuyer=b==='No Buyer Agent',goEl=document.getElementById('v65GoToResult'),goTo=goEl?goEl.value:'Not reached / not applicable';if(b==='Not worked'&&c==='Not worked'){err.textContent=fsbo?'FSBO clears Amanda’s listing-agent side only. Update the buyer agent/client, or choose “No buyer agent / unrepresented” if that is also true.':'Work the buyer agent, the client, or both before saving.';err.style.display='block';return}if((b==='Reached'||b==='Text Conversation')&&goTo==='Not reached / not applicable'){err.textContent='Before saving a live buyer-agent conversation, log the Go-To ask: showings coming up / what else are they working on?';err.style.display='block';return}if(note.split(/\s+/).filter(Boolean).length<3&&!noBuyer&&!fsbo){err.textContent='Add a short note with the update or next move.';err.style.display='block';return}if((noBuyer||fsbo)&&note.split(/\s+/).filter(Boolean).length<3){document.getElementById('v65FileNote').value=noBuyer&&fsbo?'No buyer agent and FSBO confirmed.':(noBuyer?'No buyer agent confirmed.':'FSBO / no listing agent confirmed.')}const finalNote=(document.getElementById('v65FileNote').value||'').trim();let notes='[LP_TUESDAY][LP:'+state.lp+'][TXN_ID:'+f.id+'][TXN_ROLE:Buyer][TXN_CLIENT:'+String(f.client||'').replace(/\]/g,'')+'][TXN_PROPERTY:'+String(f.property||'').replace(/\]/g,'')+'][BUYER_AGENT_DONE:'+(b==='Not worked'?'N':'Y')+'][CLIENT_DONE:'+(c==='Not worked'?'N':'Y')+'][BUYER_OUTCOME:'+b+'][CLIENT_OUTCOME:'+c+'][GOTO:'+String(goTo||'').replace(/\]/g,'')+'][SHOWINGS_ASK:'+(goTo==='Not reached / not applicable'?'N':'Y')+'][RESULT:'+result+'] '+finalNote;notes=encodeRmMeta(notes,state.lp);body={agent_name:f.agent,act_type:'LP Tuesday File Update',act_date:todayS(),outcome:result,notes,follow_up_date:fu}}else{const p=current.item,result=document.getElementById('v65PipeResult').value,note=(document.getElementById('v65PipeNote').value||'').trim(),fu=document.getElementById('v65PipeFollow').value||null;if(note.split(/\s+/).filter(Boolean).length<3){err.textContent='Add a short note about what you reviewed or did.';err.style.display='block';return}let notes='[LP_TUESDAY_PIPELINE][LP:'+state.lp+'][PIPELINE_AGENT:'+p.name+'][PREQUALS:'+p.pre+'][PIPELINE:'+p.pipe+'][RESULT:'+result+'] '+note;notes=encodeRmMeta(notes,state.lp);body={agent_name:p.name,act_type:'LP Tuesday Pipeline Review',act_date:todayS(),outcome:result,notes,follow_up_date:fu}}btn.disabled=true;btn.textContent='Saving…';try{if(current.mode==='file'){const f=current.item,b=document.getElementById('v65BuyerOutcome').value,fsbo=!!(document.getElementById('v65FsboNoListing')&&document.getElementById('v65FsboNoListing').checked),noBuyer=b==='No Buyer Agent';if(noBuyer||fsbo){let ov='[TXN_CONTACT_OVERRIDE][TXN_ID:'+f.id+']';if(noBuyer)ov+='[BUYER_AGENT_NA:Y][BUYER_AGENT_OVERRIDE:__NONE__]';if(fsbo)ov+='[LISTING_AGENT_NA:Y][LISTING_AGENT_OVERRIDE:__NONE__]';ov+=' Permanent transaction exception confirmed by '+state.lp+'.';await sbFetch('POST','amanda_activities',{agent_name:f.client||f.property||'Active transaction',act_type:'Transaction Contact Override',act_date:todayS(),outcome:'Updated',notes:ov,follow_up_date:null});}}await sbFetch('POST','amanda_activities',body);if(typeof ctShowToast==='function')ctShowToast('Tuesday work saved ✓');v65CloseModal();await load(state.lp,true)}catch(e){console.warn(e);err.textContent='Could not save. Try again.';err.style.display='block'}finally{btn.disabled=false;btn.textContent='Save Tuesday work'}};
+  window.v65Save=async function(){if(!current)return;const err=document.getElementById('v65Err'),btn=document.getElementById('v65SaveBtn');let body=null;if(current.mode==='file'){const f=current.item,b=document.getElementById('v65BuyerOutcome').value,c=document.getElementById('v65ClientOutcome').value,result=document.getElementById('v65FileResult').value,note=(document.getElementById('v65FileNote').value||'').trim(),fu=document.getElementById('v65FileFollow').value||null,fsbo=!!(document.getElementById('v65FsboNoListing')&&document.getElementById('v65FsboNoListing').checked),noBuyer=b==='No Buyer Agent';if(b==='Not worked'&&c==='Not worked'){err.textContent=fsbo?'FSBO clears Amanda’s listing-agent side only. Update the buyer agent/client, or choose “No buyer agent / unrepresented” if that is also true.':'Work the buyer agent, the client, or both before saving.';err.style.display='block';return}if(note.split(/\s+/).filter(Boolean).length<3&&!noBuyer&&!fsbo){err.textContent='Add a short note with the update or next move.';err.style.display='block';return}if((noBuyer||fsbo)&&note.split(/\s+/).filter(Boolean).length<3){document.getElementById('v65FileNote').value=noBuyer&&fsbo?'No buyer agent and FSBO confirmed.':(noBuyer?'No buyer agent confirmed.':'FSBO / no listing agent confirmed.')}const finalNote=(document.getElementById('v65FileNote').value||'').trim();let notes='[LP_TUESDAY][LP:'+state.lp+'][TXN_ID:'+f.id+'][TXN_ROLE:Buyer][TXN_CLIENT:'+String(f.client||'').replace(/\]/g,'')+'][TXN_PROPERTY:'+String(f.property||'').replace(/\]/g,'')+'][BUYER_AGENT_DONE:'+(b==='Not worked'?'N':'Y')+'][CLIENT_DONE:'+(c==='Not worked'?'N':'Y')+'][BUYER_OUTCOME:'+b+'][CLIENT_OUTCOME:'+c+'][RESULT:'+result+'] '+finalNote;notes=encodeRmMeta(notes,state.lp);body={agent_name:f.agent,act_type:'LP Tuesday File Update',act_date:todayS(),outcome:result,notes,follow_up_date:fu}}else{const p=current.item,result=document.getElementById('v65PipeResult').value,note=(document.getElementById('v65PipeNote').value||'').trim(),fu=document.getElementById('v65PipeFollow').value||null;if(note.split(/\s+/).filter(Boolean).length<3){err.textContent='Add a short note about what you reviewed or did.';err.style.display='block';return}let notes='[LP_TUESDAY_PIPELINE][LP:'+state.lp+'][PIPELINE_AGENT:'+p.name+'][PREQUALS:'+p.pre+'][PIPELINE:'+p.pipe+'][RESULT:'+result+'] '+note;notes=encodeRmMeta(notes,state.lp);body={agent_name:p.name,act_type:'LP Tuesday Pipeline Review',act_date:todayS(),outcome:result,notes,follow_up_date:fu}}btn.disabled=true;btn.textContent='Saving…';try{if(current.mode==='file'){const f=current.item,b=document.getElementById('v65BuyerOutcome').value,fsbo=!!(document.getElementById('v65FsboNoListing')&&document.getElementById('v65FsboNoListing').checked),noBuyer=b==='No Buyer Agent';if(noBuyer||fsbo){let ov='[TXN_CONTACT_OVERRIDE][TXN_ID:'+f.id+']';if(noBuyer)ov+='[BUYER_AGENT_NA:Y][BUYER_AGENT_OVERRIDE:__NONE__]';if(fsbo)ov+='[LISTING_AGENT_NA:Y][LISTING_AGENT_OVERRIDE:__NONE__]';ov+=' Permanent transaction exception confirmed by '+state.lp+'.';await sbFetch('POST','amanda_activities',{agent_name:f.client||f.property||'Active transaction',act_type:'Transaction Contact Override',act_date:todayS(),outcome:'Updated',notes:ov,follow_up_date:null});}}await sbFetch('POST','amanda_activities',body);if(typeof ctShowToast==='function')ctShowToast('Tuesday work saved ✓');v65CloseModal();await load(state.lp,true)}catch(e){console.warn(e);err.textContent='Could not save. Try again.';err.style.display='block'}finally{btn.disabled=false;btn.textContent='Save Tuesday work'}};
   window.v65LoadTuesday=(lp,force)=>load(lp,!!force);
   window.v65RefreshTuesday=()=>load(state.lp||currentUser,true);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensure,{once:true});else ensure();
@@ -11103,7 +11091,7 @@ window.CT_SHARED_FACETIME_RULES_VERSION="20260828-v63";
   function badge(){const b=document.getElementById('lpV1TuesdayBadge'),s=document.getElementById('v65Summary');if(!b)return;const m=String(s&&s.textContent||'').match(/(\d+)\s+open/i);b.textContent=m?m[1]:'—'}
   window.lpV1SwitchWorkTab=function(){return;};
   function boot(){const f=document.getElementById('lpV1UploadFile');if(f&&!f.__v1){f.__v1=true;f.addEventListener('change',async function(e){const file=e.target.files&&e.target.files[0];if(!file)return;document.getElementById('lpV1UploadFileName').textContent=file.name;const msg=document.getElementById('lpV1UploadMsg');msg.style.color='#637987';msg.textContent='Reading '+file.name+'…';try{const p=await parseFile(file);rows=p.rows;msg.style.color='#1F4E79';msg.textContent='Smart read: '+rows.length+' active transaction'+(rows.length===1?'':'s')+' closing through '+p.windowEnd+(p.longDatedCount?' · '+p.longDatedCount+' long-dated file'+(p.longDatedCount===1?'':'s')+' excluded':'')+(p.pastCount?' · '+p.pastCount+' past closing date'+(p.pastCount===1?'':'s')+' excluded':'')+(p.missingCloseCount?' · '+p.missingCloseCount+' missing closing date'+(p.missingCloseCount===1?'':'s')+' excluded':'')+(p.rawCount!==p.mergedCount?' · duplicate source rows merged':'')+'. Loan numbers are ignored. Review, then save.';render()}catch(err){rows=[];render();msg.style.color='#A33C35';msg.textContent=err.message||String(err)}})}setTimeout(function(){ensureHome();place();badge();const s=document.getElementById('v65Summary');if(s)new MutationObserver(badge).observe(s,{childList:true,subtree:true,characterData:true})},250)}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();document.addEventListener('visibilitychange',function(){if(!document.hidden){ensureHome();badge();}});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();setInterval(function(){ensureHome();badge()},1500);
 })();
 </script>
 <style id="txn-contact-manager-css">
@@ -11153,6 +11141,31 @@ function openOperatingStandardView(btn){
   var v=document.getElementById('view-operating-standard');if(v)v.classList.add('active');
 }
 </script>
+<script id="lp-v1-integrated-work-and-live-score">
+(function(){
+ const norm=s=>String(s||'').trim().toLowerCase();
+ const total=(d,k)=>{if(!d)return 0;let n=0;Object.keys(d).forEach(x=>{if(x===k||x.startsWith(k+'_'))n+=Number(d[x]||0)||0});return n};
+ window.pbsLoadLiveProgress=async function(force){
+   const host=document.getElementById('pbs-live-grid');if(!host)return;host.innerHTML='<div class="pbs-live-loading">Loading current measurements…</div>';
+   try{
+     const now=new Date(), y=now.getFullYear()+'-01-01';
+     const rows=await sbFetch('GET','lp_scorecards?person=in.(Gavin,Karen,Osgood,Jordan,Said)&week_key=gte.'+y+'&select=person,week_key,data&limit=5000').catch(()=>[]);
+     let leads=0,apps=0,pre=0,contracts=0,funded=0,hasFunded=false;
+     (rows||[]).forEach(r=>{const d=r.data||{};leads+=total(d,'referred_leads');apps+=total(d,'apps_1003');pre+=total(d,'pre_approvals');contracts+=total(d,'contracts');['funded_units','funded','fundings','closings'].forEach(k=>{if(Object.prototype.hasOwnProperty.call(d,k)||Object.keys(d).some(x=>x.startsWith(k+'_'))){hasFunded=true;funded+=total(d,k)}})});
+     const pct=(a,b)=>b?Math.round(a/b*100):0;
+     const vals=[
+       {label:'Funded units',value:hasFunded?funded:'—',target:'Target 400',p:hasFunded?Math.min(100,Math.round(funded/400*100)):0,na:!hasFunded},
+       {label:'Lead → 1003',value:pct(apps,leads)+'%',target:'Gate 60%',p:Math.min(100,pct(apps,leads)/60*100)},
+       {label:'1003 → Pre-Approval',value:pct(pre,apps)+'%',target:'Gate 85%',p:Math.min(100,pct(pre,apps)/85*100)},
+       {label:'Pre-Approval → Contract',value:pct(contracts,pre)+'%',target:'Gate 55%',p:Math.min(100,pct(contracts,pre)/55*100)},
+       {label:'Contract → Funded',value:hasFunded?pct(funded,contracts)+'%':'—',target:hasFunded?'Gate 87%':'Funded result not in scorecard feed',p:hasFunded?Math.min(100,pct(funded,contracts)/87*100):0,na:!hasFunded}
+     ];
+     host.innerHTML=vals.map(v=>{const cls=v.na?'':(v.p>=100?'met':v.p>=75?'warn':'');return '<div class="pbs-live-metric '+cls+'"><div class="m-label">'+v.label+'</div><div class="m-value">'+v.value+'</div><div class="m-target">'+v.target+'</div><div class="m-bar"><div class="m-fill" style="width:'+Math.max(0,Math.min(100,v.p))+'%"></div></div></div>'}).join('');
+   }catch(e){console.warn(e);host.innerHTML='<div class="pbs-live-loading">Could not load current measurements.</div>'}
+ };
+ const oldOpen=window.openOperatingStandardView;if(typeof oldOpen==='function'&&!oldOpen.__live){const w=function(){const r=oldOpen.apply(this,arguments);setTimeout(()=>window.pbsLoadLiveProgress(false),50);return r};w.__live=true;window.openOperatingStandardView=w}
+})();
+</script>
 <style id="ct-v3-health-data-css">
 .ct-data-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.ct-data-source h2{margin:4px 0 7px;font-size:19px;color:#102A43}.ct-data-source p{font-size:12px;line-height:1.55;color:#5D7180}.ct-data-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.ct-data-note{font-size:10.5px;color:#6B7E8A;margin-top:10px;line-height:1.45}.ct-source-map{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ct-source-map>div{background:#F5F9FC;border:1px solid #D9E6ED;border-radius:10px;padding:12px}.ct-source-map b{display:block;color:#102A43;font-size:12px;margin-bottom:4px}.ct-source-map span{font-size:11px;color:#627786;line-height:1.45}.ct-health-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.ct-health-toolbar input,.ct-health-toolbar select{border:1px solid #CBD9E2;border-radius:8px;padding:8px 10px;font:inherit;font-size:12px;background:#fff}.ct-health-toolbar input{min-width:240px;flex:1}.ct-health-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.ct-health-summary{background:#fff;border:1px solid #D7E3EA;border-radius:12px;padding:12px 14px}.ct-health-summary b{display:block;font-size:22px;color:#0B789E}.ct-health-summary span{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#6B7E8A;font-weight:800}.ct-health-table{width:100%;border-collapse:collapse}.ct-health-table th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#6B7E8A;background:#F3F7FA;padding:9px;text-align:left}.ct-health-table td{padding:10px 9px;border-top:1px solid #E6EDF2;font-size:11px;color:#425A6A}.ct-health-table tr{cursor:pointer}.ct-health-table tr:hover td{background:#FAFCFD}.ct-health-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}.ct-health-dot.green{background:#2E8B57}.ct-health-dot.yellow{background:#C78A16}.ct-health-dot.red{background:#C54B43}.ct-health-table tr.health-green td{background:#F4FBF6}.ct-health-table tr.health-yellow td{background:#FFF9EA}.ct-health-table tr.health-red td{background:#FFF4F2}.ct-health-table tr.health-green:hover td{background:#EDF8F0}.ct-health-table tr.health-yellow:hover td{background:#FFF4D8}.ct-health-table tr.health-red:hover td{background:#FFECE8}.ct-health-legend{display:flex;gap:8px;flex-wrap:wrap;margin:-2px 0 12px}.ct-health-pill{border-radius:999px;padding:6px 10px;font-size:10px;font-weight:800;border:1px solid}.ct-health-pill.green{background:#F0F8F2;border-color:#B8DCC2;color:#27633B}.ct-health-pill.yellow{background:#FFF8E5;border-color:#E8D39A;color:#7A5A09}.ct-health-pill.red{background:#FFF1EF;border-color:#E6B6AF;color:#9A332C}.ct-health-archive{margin-top:12px;border:1px solid #DDE7ED;border-radius:10px;background:#FAFCFD}.ct-health-archive summary{cursor:pointer;padding:11px 13px;font-size:11px;font-weight:800;color:#536B79}.ct-health-archive .archive-inner{padding:0 12px 12px}.ct-health-archive-note{font-size:10.5px;color:#6B7E8A;margin:0 0 8px}.ct-stall-explainer{margin:9px 0 13px;border:1px solid #E3D29C;background:#FFF9EB;border-radius:9px;padding:9px 11px;font-size:10.8px;line-height:1.5;color:#614D1F}.ct-income-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:10px}.ct-income-step{display:flex;gap:10px;background:#F5F9FC;border:1px solid #D7E5ED;border-radius:12px;padding:14px}.ct-income-step>b{width:26px;height:26px;border-radius:8px;background:#0B789E;color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto}.ct-income-step h3{font-size:13px;margin:1px 0 5px;color:#102A43}.ct-income-step p{font-size:11px;line-height:1.5;color:#5D7180;margin:0}.ct-income-arrow{display:flex;align-items:center;color:#0B789E;font-size:20px;font-weight:800}.ct-gate{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}.ct-gate:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(16,42,67,.08)}.pbs-live-metric{cursor:pointer}.ct-snapshot-drill{position:fixed;inset:0;background:rgba(15,34,52,.5);z-index:9000;display:none;align-items:center;justify-content:center;padding:18px}.ct-snapshot-drill.open{display:flex}.ct-snapshot-drill-card{background:#fff;border-radius:16px;max-width:640px;width:100%;max-height:82vh;overflow:auto;padding:18px;border:1px solid #D7E3EA;box-shadow:0 20px 55px rgba(15,34,52,.22)}@media(max-width:800px){.ct-data-grid,.ct-source-map,.ct-health-summary-grid{grid-template-columns:1fr}.ct-income-flow{grid-template-columns:1fr}.ct-income-arrow{transform:rotate(90deg);justify-content:center}}
 </style>
@@ -11201,7 +11214,7 @@ function openOperatingStandardView(btn){
     return {leads,apps,pre,contracts,funded,hasFunded}
   }
   const rate=(a,b)=>b?Math.round(a/b*100):null;
-  function gate(label,val,target){const cls=statusClass(val,target),shown=val===null?'—':val+'%';return '<div class="ct-mini-gate '+cls+'"><b>'+shown+'</b><span>'+label+' · target '+target+'%</span></div>'}
+  function gate(label,val,target){const cls=statusClass(val,target),shown=val===null?'—':val+'%';return '<div class="ct-mini-gate '+cls+'"><b>'+shown+'</b><span>'+label+' · gate '+target+'%</span></div>'}
   async function lpv2RenderLpScorecard(lp){
     const host=document.getElementById('lp-v2-scorecard');if(!host)return;
     host.innerHTML='<div class="ct-loading">Loading scorecard…</div>';
@@ -11235,7 +11248,7 @@ function openOperatingStandardView(btn){
     const y=new Date().getFullYear()+'-01-01';
     try{return await sbFetch('GET','lp_scorecards?person=in.(Gavin,Karen,Osgood,Jordan,Said,Isaak)&week_key=gte.'+y+'&select=person,week_key,data&order=week_key.asc&limit=10000')}catch(e){console.warn(e);return []}
   }
-  function bigGate(label,val,target,sub,key){const p=val===null?0:Math.max(0,Math.min(100,Math.round(val/target*100))),cls=statusClass(val,target);return '<div class="ct-gate '+cls+'" data-snap-gate="'+esc(key||label)+'" onclick="lpv3OpenSnapshotDrill(this.dataset.snapGate)"><div class="label">'+esc(label)+'</div><div class="value">'+(val===null?'—':val+'%')+'</div><div class="target">'+esc(sub||('Target '+target+'%'))+'</div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div></div>'}
+  function bigGate(label,val,target,sub,key){const p=val===null?0:Math.max(0,Math.min(100,Math.round(val/target*100))),cls=statusClass(val,target);return '<div class="ct-gate '+cls+'" data-snap-gate="'+esc(key||label)+'" onclick="lpv3OpenSnapshotDrill(this.dataset.snapGate)"><div class="label">'+esc(label)+'</div><div class="value">'+(val===null?'—':val+'%')+'</div><div class="target">'+esc(sub||('Required gate '+target+'%'))+'</div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div></div>'}
   async function lpv2RenderSnapshot(){
     const gates=document.getElementById('lp-v2-team-gates'), roster=document.getElementById('lp-v2-team-roster');if(!gates||!roster)return;
     const rows=await teamRows(), agg=aggregate(rows), wk=mondayKey(new Date()); window.__LPV3_SNAPSHOT_ROWS=rows; window.__LPV3_SNAPSHOT_WK=wk;
@@ -11243,7 +11256,7 @@ function openOperatingStandardView(btn){
     const fundedProgress=agg.hasFunded?Math.min(100,Math.round(agg.funded/400*100)):0;
     gates.innerHTML='<div class="ct-gate-grid">'+
       '<div class="ct-gate '+(agg.hasFunded&&fundedProgress>=100?'good':agg.hasFunded&&fundedProgress>=75?'warn':'')+'" onclick="lpv3OpenSnapshotDrill(\'funded\')"><div class="label">Funded units</div><div class="value">'+(agg.hasFunded?agg.funded:'—')+'</div><div class="target">Team target 400'+(!agg.hasFunded?' · funded result not in scorecard feed':'')+'</div><div class="bar"><div class="fill" style="width:'+fundedProgress+'%"></div></div></div>'+
-      bigGate('Lead → 1003',rate(agg.apps,agg.leads),60,null,'lead1003')+bigGate('1003 → Pre-Approval',rate(agg.pre,agg.apps),85,null,'1003pre')+bigGate('Pre-Approval → Contract',rate(agg.contracts,agg.pre),55,null,'precontract')+bigGate('Contract → Funded',fundedPct,87,agg.hasFunded?'Target 87%':'Funded result not in scorecard feed','contractfunded')+'</div>';
+      bigGate('Lead → 1003',rate(agg.apps,agg.leads),60,null,'lead1003')+bigGate('1003 → Pre-Approval',rate(agg.pre,agg.apps),85,null,'1003pre')+bigGate('Pre-Approval → Contract',rate(agg.contracts,agg.pre),55,null,'precontract')+bigGate('Contract → Funded',fundedPct,87,agg.hasFunded?'Required gate 87%':'Funded result not in scorecard feed','contractfunded')+'</div>';
     const body=LPS2.map(lp=>{const rr=rows.filter(r=>r.person===lp&&r.week_key===wk),a=aggregate(rr),role=lp==='Isaak'?'LP1':'LP2';return '<tr><td>'+esc(lp)+'<span class="ct-role-small">'+role+'</span></td><td class="'+(!a.leads?'ct-metric-zero':'')+'">'+a.leads+'</td><td class="'+(!a.apps?'ct-metric-zero':'')+'">'+a.apps+'</td><td class="'+(!a.pre?'ct-metric-zero':'')+'">'+a.pre+'</td><td class="'+(!a.contracts?'ct-metric-zero':'')+'">'+a.contracts+'</td><td><button class="ct-link-btn" type="button" data-lp-open="'+esc(lp)+'">Open</button></td></tr>'}).join('');
     roster.innerHTML='<div style="overflow:auto"><table class="ct-team-table"><thead><tr><th>Loan Partner</th><th>Leads</th><th>1003s</th><th>Pre-Approvals</th><th>Contracts</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>';
     roster.querySelectorAll('[data-lp-open]').forEach(b=>b.addEventListener('click',()=>{const lp=b.dataset.lpOpen,nav=[...document.querySelectorAll('.ct-nav-btn[data-lp]')].find(x=>x.dataset.lp===lp);if(nav)lpv2Route('lp',nav)}));
@@ -11354,341 +11367,228 @@ function openOperatingStandardView(btn){
  const old=window.switchLeadsTab;if(typeof old==='function'&&!old.__ctTierLive){const w=function(name,btn){const r=old.apply(this,arguments);if(name==='roster'||name==='growth')setTimeout(()=>renderGrowthScoreboard(),60);return r};w.__ctTierLive=true;window.switchLeadsTab=w}
 })();
 </script>
-<style id="ct-accuracy-v1-css">
-.ct-source-note{font-size:10px;color:#718391;margin-top:5px;line-height:1.35}
-.ct-gate .ct-source-note{font-weight:600}
-.ct-accuracy-banner{margin:0 0 12px;padding:9px 11px;border:1px solid #CFE2EA;border-radius:9px;background:#F5FBFD;font-size:11px;line-height:1.45;color:#49606D}
-.ct-accuracy-banner b{color:#0B789E}
-</style>
-<style id="ct-final-playbook-data-governance-css">
-.ct-source-grid{display:grid;grid-template-columns:repeat(4,minmax(145px,1fr));gap:8px}.ct-source-fresh{border:1px solid #DCE6EB;border-radius:10px;padding:10px 11px;background:#fff}.ct-source-fresh b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#4D6572}.ct-source-fresh span{display:block;font-size:12px;font-weight:800;color:#17324D;margin-top:3px}.ct-source-fresh small{display:block;font-size:9.5px;line-height:1.35;color:#768892;margin-top:4px}.ct-source-fresh.good{border-left:4px solid #2E8B57}.ct-source-fresh.warn{border-left:4px solid #C18B22}.ct-source-fresh.stale{border-left:4px solid #B44A42}.ct-cadence-note{margin-top:9px;padding:9px 11px;border-radius:9px;background:#F5F9FB;border:1px solid #DCE8ED;color:#46616E;font-size:10.5px;line-height:1.5}.ct-goal-grid{margin-top:8px}#v65GoToResult{background:#FFFDF7!important;border-color:#DCCB9D!important}@media(max-width:800px){.ct-source-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.ct-source-grid{grid-template-columns:1fr}}
-</style><script id="ct-final-playbook-data-governance">(function(){
-'use strict';
-const CT_LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
-const CT_LP2=['Gavin','Karen','Osgood','Jordan','Said'];
-const TEAM_GOALS={past_client_talks:50,referred_leads:80,apps_1003:50,pre_approvals:25,contracts:14};
-const METRICS=[
- {key:'past_client_talks',label:'Meaningful past-client talk-to’s',scope:'LP2',source:'LP scorecard'},
- {key:'referred_leads',label:'Referred leads',scope:'LP2',source:'LP scorecard + Velocify cross-check'},
- {key:'apps_1003',label:'1003s',scope:'TEAM',source:'LP scorecard'},
- {key:'pre_approvals',label:'Pre-approvals',scope:'TEAM',source:'LP scorecard'},
- {key:'contracts',label:'Contracts',scope:'TEAM',source:'LP scorecard'}
-];
-const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const weekKey=()=>typeof getWeekKey==='function'?getWeekKey(new Date()):(new Date().toISOString().slice(0,10));
-const total=(d,k)=>{let n=0;Object.keys(d||{}).forEach(x=>{if(x===k||x.startsWith(k+'_'))n+=Number(d[x]||0)||0});return n};
-const pct=(a,b)=>b?Math.round(Number(a||0)/Number(b)*100):null;
-const ytd=()=>new Date().getFullYear()+'-01-01';
-const lpName=v=>{const s=String(v||'').toLowerCase();if(s.includes('gavin'))return'Gavin';if(s.includes('karen'))return'Karen';if(s.includes('osgood'))return'Osgood';if(s.includes('jordan'))return'Jordan';if(s.includes('said'))return'Said';if(s.includes('isaak')||s.includes('isaac'))return'Isaak';return''};
-function stage(r){const st=String(r&&r.status||'').toLowerCase().trim();let rank=0;try{if(typeof ctIsLeadAppConverted==='function'&&ctIsLeadAppConverted(r))rank=1}catch(e){}if(!rank&&/\b(started|file started|application|app taken)\b/.test(st))rank=1;if(/pre[\s-]?approval|preapproved|approved|\bapproval\b|ready for pack out|\brfpo\b|submittal|submitted|processing|underwrit|conditional|contract|clear to close|\bctc\b|received by closer|docs signing|closing|funded|loan closed|\bclosed\b/.test(st))rank=Math.max(rank,2);if(/contract|submittal|submitted|processing|underwrit|conditional|clear to close|\bctc\b|received by closer|docs signing|closing|funded|loan closed|\bclosed\b/.test(st))rank=Math.max(rank,3);if(/\bfunded\b|loan closed|\bclosed\b|funding complete/.test(st))rank=4;return rank}
-let velCache={at:0,rows:[]};
-async function vel(force){if(!force&&velCache.rows.length&&Date.now()-velCache.at<60000)return velCache.rows;let rows=[];try{rows=await sbFetch('GET','velocify_leads?date_added=gte.'+ytd()+'&select=*&order=date_added.desc&limit=20000')}catch(e){console.warn('Velocify cohort',e)}velCache={at:Date.now(),rows:Array.isArray(rows)?rows:[]};return velCache.rows}
-function agg(rows){const o={leads:0,apps:0,pre:0,contracts:0,funded:0};(rows||[]).forEach(r=>{o.leads++;const x=stage(r);if(x>=1)o.apps++;if(x>=2)o.pre++;if(x>=3)o.contracts++;if(x>=4)o.funded++});return o}
-async function scoreRows(){try{return await sbFetch('GET','lp_scorecards?week_key=eq.'+encodeURIComponent(weekKey())+'&person=in.('+CT_LPS.join(',')+')&select=person,data&limit=100')}catch(e){console.warn('weekly scorecard',e);return[]}}
-function scoreBy(rows){const b={};(rows||[]).forEach(r=>b[r.person]=r.data||{});return b}
-function metricTotal(by,m){const names=m.scope==='LP2'?CT_LP2:CT_LPS;return names.reduce((s,n)=>s+total(by[n]||{},m.key),0)}
-function goalCard(m,by){const v=metricTotal(by,m),g=TEAM_GOALS[m.key],p=g?Math.min(100,Math.round(v/g*100)):0,cls=p>=100?'good':p>=75?'warn':'';return '<div class="ct-gate '+cls+'"><div class="label">'+esc(m.label)+'</div><div class="value">'+v+' <span style="font-size:16px;color:#6C7F8B">/ '+g+'</span></div><div class="target">Weekly team goal · '+esc(m.scope==='LP2'?'5 LP2s':'all LPs')+'</div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div><div class="ct-source-note">'+esc(m.source)+'</div></div>'}
-function gate(label,val,target,detail,key){const p=val==null?0:Math.max(0,Math.min(100,Math.round(val/target*100))),cls=val==null?'':(val>=target?'good':val>=target*.75?'warn':'');return '<div class="ct-gate '+cls+'" data-snap-gate="'+esc(key)+'" onclick="lpv3OpenSnapshotDrill(this.dataset.snapGate)"><div class="label">'+esc(label)+'</div><div class="value">'+(val==null?'—':val+'%')+'</div><div class="target">Target '+target+'%</div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div><div class="ct-source-note">'+esc(detail)+'</div></div>'}
-async function freshness(){
- const safe=(p)=>Promise.resolve(p).catch(()=>[]);
- let pbLocal=null;try{pbLocal=window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')}catch(e){}
- const [vr,pr,tr,sr]=await Promise.all([
-  safe(sbFetch('GET','velocify_leads?select=date_added&order=date_added.desc&limit=1')),
-  safe(sbFetch('GET','agent_profiles?powerbi_last_seen_at=not.is.null&select=powerbi_last_seen_at&order=powerbi_last_seen_at.desc&limit=1')),
-  safe(sbFetch('GET','amanda_activities?act_type=eq.Transaction%20Snapshot&select=act_date,created_at,notes&order=created_at.desc&limit=1')),
-  safe(sbFetch('GET','lp_scorecards?week_key=eq.'+encodeURIComponent(weekKey())+'&select=person&limit=100'))
- ]);
- const iso=x=>{if(!x)return null;const d=new Date(x);return isNaN(d)?null:d};
- const age=x=>{const d=iso(x);if(!d)return null;return Math.floor((Date.now()-d.getTime())/86400000)};
- const fmt=x=>{const d=iso(x);return d?d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'No upload found'};
- const v=vr&&vr[0]&&vr[0].date_added,pb=(pr&&pr[0]&&pr[0].powerbi_last_seen_at)||(pbLocal&&pbLocal.imported_at),tx=tr&&tr[0]&&(tr[0].created_at||tr[0].act_date),scCount=(sr||[]).length;
- return {v,pb,tx,scCount,fmt,age};
-}
-function freshnessCard(label,value,detail,state){return '<div class="ct-source-fresh '+esc(state||'')+'"><b>'+esc(label)+'</b><span>'+esc(value)+'</span><small>'+esc(detail)+'</small></div>'}
-async function renderFreshness(targetId){const host=document.getElementById(targetId);if(!host)return;const f=await freshness();const va=f.age(f.v),pa=f.age(f.pb),ta=f.age(f.tx);const vs=va==null?'stale':va<=1?'good':va<=2?'warn':'stale',ps=pa==null?'stale':pa<=1?'good':pa<=3?'warn':'stale',ts=ta==null?'stale':ta<=7?'good':ta<=10?'warn':'stale';host.innerHTML='<div class="ct-source-grid">'+freshnessCard('Velocify',f.fmt(f.v),'Daily lead + funnel source',vs)+freshnessCard('Power BI',f.fmt(f.pb),'Active partners, prequals, pipeline, latest contract/close',ps)+freshnessCard('Encompass',f.fmt(f.tx),'Active-contract Tuesday work',ts)+freshnessCard('LP scorecards',f.scCount+' of 6 entered','This-week self-reported execution/accountability',f.scCount>=6?'good':f.scCount>=3?'warn':'stale')+'</div><div class="ct-cadence-note"><b>Recommended cadence:</b> Velocify daily. <b>Power BI daily on workdays</b> if you want daily partner/pipeline intelligence; Monday/Wednesday/Friday is the minimum I’d use. Encompass once before Tuesday updates, plus an extra upload only when material active-file changes need to be reflected immediately. The tracker now shows the source timestamp instead of pretending a weekly upload is live.</div>'}
-async function renderSnapshot(force){const gates=document.getElementById('lp-v2-team-gates'),roster=document.getElementById('lp-v2-team-roster');if(!gates||!roster)return;const [vr,sr]=await Promise.all([vel(!!force),scoreRows()]);const a=agg(vr),by=scoreBy(sr);gates.innerHTML='<div id="ct-snapshot-freshness" style="margin-bottom:12px"></div><div class="ct-accuracy-banner"><b>Source-of-truth rules:</b> conversion = Velocify lead cohort; weekly goal progress = LP scorecard entries; active partner/pipeline = latest Power BI upload; Tuesday active-contract work = latest Encompass upload. One source is never substituted for another.</div><div class="ct-gate-grid"><div class="ct-gate"><div class="label">Funded units</div><div class="value">—</div><div class="target">Team target 400</div><div class="bar"><div class="fill" style="width:0%"></div></div><div class="ct-source-note">No authoritative total-production feed is connected. Velocify funded leads and Realtor production are not substituted for the 400-unit team result.</div></div>'+gate('Lead → 1003',pct(a.apps,a.leads),60,a.apps+' Started-or-later / '+a.leads+' Velocify YTD leads','lead1003')+gate('1003 → Pre-Approval',pct(a.pre,a.apps),85,a.pre+' pre-approval-or-later / '+a.apps+' apps','1003pre')+gate('Pre-Approval → Contract',pct(a.contracts,a.pre),55,a.contracts+' contract-or-later / '+a.pre+' pre-approvals','precontract')+gate('Contract → Funded',pct(a.funded,a.contracts),87,a.funded+' funded / '+a.contracts+' contracts','contractfunded')+'</div>';renderFreshness('ct-snapshot-freshness');
- const hdr='<div class="ct-accuracy-banner"><b>Weekly team goal vs. what the team has logged:</b> these numbers come only from this week’s LP scorecards. They are accountability totals, not funnel-conversion math.</div><div class="ct-gate-grid ct-goal-grid">'+METRICS.map(m=>goalCard(m,by)).join('')+'</div>';
- const cols=METRICS.map(m=>'<th>'+esc(m.label)+'</th>').join('');
- const body=CT_LPS.map(lp=>'<tr><td>'+esc(lp)+'<span class="ct-role-small">'+(lp==='Isaak'?'LP1':'LP2')+'</span></td>'+METRICS.map(m=>'<td>'+((m.scope==='LP2'&&lp==='Isaak')?'—':total(by[lp]||{},m.key))+'</td>').join('')+'<td><button class="ct-link-btn" data-lp-open="'+esc(lp)+'" type="button">Open</button></td></tr>').join('');
- roster.innerHTML=hdr+'<div style="overflow:auto;margin-top:12px"><table class="ct-team-table"><thead><tr><th>Loan Partner</th>'+cols+'<th></th></tr></thead><tbody>'+body+'</tbody></table></div><div class="ct-data-note" style="margin-top:8px">Past-client talk-to and referred-lead goals apply to the five LP2s. Isaak remains LP1/front-end support. Team goals are shown separately from each person’s raw entries so missing scorecards are visible instead of silently treated as production truth.</div>';roster.querySelectorAll('[data-lp-open]').forEach(b=>b.addEventListener('click',()=>{const nav=[...document.querySelectorAll('.ct-nav-btn[data-lp]')].find(x=>x.dataset.lp===b.dataset.lpOpen);if(nav&&typeof lpv2Route==='function')lpv2Route('lp',nav)}));}
-window.lpv2RenderSnapshot=function(){return renderSnapshot(false)};
-const oldRefresh=window.refreshSnapshotFresh;if(typeof oldRefresh==='function'&&!oldRefresh.__ctFinal){const w=async function(btn){try{await oldRefresh.apply(this,arguments)}catch(e){}return renderSnapshot(true)};w.__ctFinal=true;window.refreshSnapshotFresh=w}
-window.pbsLoadLiveProgress=async function(force){const host=document.getElementById('pbs-live-grid');if(!host)return;host.innerHTML='<div class="pbs-live-loading">Loading current measurements…</div>';const a=agg(await vel(!!force));const vals=[['Funded units','—','Needs authoritative total-production feed',0,true],['Lead → 1003',pct(a.apps,a.leads),a.apps+' / '+a.leads+' · Velocify YTD',60,false],['1003 → Pre-Approval',pct(a.pre,a.apps),a.pre+' / '+a.apps+' · Velocify YTD',85,false],['Pre-Approval → Contract',pct(a.contracts,a.pre),a.contracts+' / '+a.pre+' · Velocify YTD',55,false],['Contract → Funded',pct(a.funded,a.contracts),a.funded+' / '+a.contracts+' · Velocify YTD',87,false]];host.innerHTML=vals.map(v=>{const q=v[1]==='—'?0:(v[1]==null?0:Math.min(100,v[1]/v[3]*100)),cls=v[4]?'':(q>=100?'met':q>=75?'warn':'');return '<div class="pbs-live-metric '+cls+'"><div class="m-label">'+v[0]+'</div><div class="m-value">'+(typeof v[1]==='number'?v[1]+'%':v[1]||'—')+'</div><div class="m-target">'+v[2]+'</div><div class="m-bar"><div class="m-fill" style="width:'+q+'%"></div></div></div>'}).join('')};
-window.lpv3OpenSnapshotDrill=async function(metric){const modal=document.getElementById('lpv3-snapshot-drill'),title=document.getElementById('lpv3-drill-title'),sub=document.getElementById('lpv3-drill-sub'),body=document.getElementById('lpv3-drill-body');if(!modal||!title||!sub||!body)return;if(metric==='funded'){title.textContent='Funded units';sub.textContent='Team target: 400.';body.innerHTML='<div class="ct-accuracy-banner"><b>Not populated until an authoritative production feed exists.</b> This prevents referral-lead fundings, Realtor closings, or manual scorecard entries from being mistaken for total team funded units.</div>';modal.classList.add('open');return}const cfg={lead1003:['Lead → 1003','apps','leads',60],'1003pre':['1003 → Pre-Approval','pre','apps',85],precontract:['Pre-Approval → Contract','contracts','pre',55],contractfunded:['Contract → Funded','funded','contracts',87]}[metric];if(!cfg)return;const rows=await vel(false),a=agg(rows),n=a[cfg[1]],d=a[cfg[2]],v=pct(n,d);title.textContent=cfg[0];sub.textContent='Velocify YTD cohort · '+n+' / '+d+' = '+(v==null?'N/A':v+'%')+' · target '+cfg[3]+'%.';body.innerHTML='<div class="ct-accuracy-banner"><b>Why this is trustworthy:</b> one lead cohort, each lead counted once at its latest synced stage. Weekly scorecard entries do not create this conversion rate.</div>'+CT_LPS.map(lp=>{const x=agg(rows.filter(r=>lpName(r.lp_user)===lp)),nn=x[cfg[1]],dd=x[cfg[2]],vv=pct(nn,dd);return '<div class="ct-card" style="margin-bottom:7px"><b>'+lp+'</b><span style="float:right;font-weight:800;color:#0B789E">'+(vv==null?'—':vv+'%')+'</span><div style="font-size:10.5px;color:#6B7E8A;margin-top:3px">'+nn+' / '+dd+'</div></div>'}).join('');modal.classList.add('open')};
-// Scorecard page: make team totals use the approved weekly goals and correct role scope.
-window.lpscRenderTeamTotals=function(){const body=document.getElementById('lpsc-team-body');if(!body)return;if(!lpscTeamCache){body.innerHTML='<div style="padding:20px;text-align:center;color:#888">Loading team totals…</div>';return}const period=lpscTeamCurrentPeriod||'daily',now=new Date(),todayWk=typeof lpscAmWeekKeyOf==='function'?lpscAmWeekKeyOf(localDateStr(now)):weekKey(),monthStart=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01',day=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][now.getDay()];let rows=lpscTeamCache||[];if(period==='daily')rows=rows.filter(r=>r.week_key===todayWk);else if(period==='mtd')rows=rows.filter(r=>r.week_key>=monthStart);const by={};rows.forEach(r=>{if(!by[r.person])by[r.person]=[];by[r.person].push(r.data||{})});function val(lp,key){return (by[lp]||[]).reduce((s,d)=>s+(period==='daily'?(Number(d[key+'_'+day]||0)||0):total(d,key)),0)}function teamVal(m){return (m.scope==='LP2'?CT_LP2:CT_LPS).reduce((s,lp)=>s+val(lp,m.key),0)}const periodFactor=period==='daily'?1/5:period==='mtd'?4.3:52;body.innerHTML='<div class="ct-accuracy-banner"><b>Team goal vs. logged:</b> daily/MTD/YTD views scale from the weekly team standard; raw entries remain visible by LP below.</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px">'+METRICS.map(m=>{const g=Math.round(TEAM_GOALS[m.key]*periodFactor),v=teamVal(m),p=g?Math.min(100,Math.round(v/g*100)):0;return '<div style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:12px"><div style="font-size:20px;font-weight:800;color:#17324D">'+v+' <span style="font-size:12px;color:#83929B">/ '+g+'</span></div><div style="font-size:10px;font-weight:800;color:#526775;text-transform:uppercase;margin-top:3px">'+esc(m.label)+'</div><div style="height:4px;background:#EDF1F3;border-radius:9px;margin-top:7px"><div style="height:4px;width:'+p+'%;background:#1686A8;border-radius:9px"></div></div></div>'}).join('')+'</div>'};
-// Data Hub source-health block; no extra polling. Refreshes on entry and explicit uploads.
-function ensureFreshBlock(){let host=document.getElementById('ct-data-freshness');if(host)return host;const grid=document.querySelector('#view-data-hub .ct-data-grid');if(!grid)return null;host=document.createElement('section');host.id='ct-data-freshness';host.className='ct-card';host.style.marginBottom='14px';host.innerHTML='<div class="ct-section-head"><div><div class="ct-kicker">SOURCE HEALTH</div><h2>What is current — and what is only as fresh as your last upload</h2></div></div><div id="ct-data-freshness-body"><div class="ct-loading">Checking source dates…</div></div>';grid.parentNode.insertBefore(host,grid);return host}
-async function refreshDataFresh(){if(!ensureFreshBlock())return;await renderFreshness('ct-data-freshness-body')}
-const oldHub=window.lpv3OpenDataHub;if(typeof oldHub==='function'&&!oldHub.__ctFinal){const w=function(){const r=oldHub.apply(this,arguments);setTimeout(refreshDataFresh,40);return r};w.__ctFinal=true;window.lpv3OpenDataHub=w}
-// Refresh source health after successful manual uploads without introducing background timers.
-['handleUpload','loadVelocifyLeadsCsv','lpV1SaveTuesdayUpload'].forEach(name=>{const fn=window[name];if(typeof fn==='function'&&!fn.__ctFreshWrap){const w=function(){const r=fn.apply(this,arguments);Promise.resolve(r).finally(()=>setTimeout(refreshDataFresh,300));return r};w.__ctFreshWrap=true;window[name]=w}});
-// Ensure current LP2 scorecard labels use the playbook standard from this week forward.
-try{if(typeof LPSC_METRICS_MAP!=='undefined'){const m=LPSC_METRICS_MAP._lp2&&LPSC_METRICS_MAP._lp2[0];if(m){m.key='past_client_talks';m.label='Meaningful past-client talk-to\'s';m.goal=10}CT_LP2.forEach(n=>{if(LPSC_METRICS_MAP[n])LPSC_METRICS_MAP[n]=LPSC_METRICS_MAP._lp2})}}catch(e){}
-// Retire the old generic LP Realtor-call rotation. The placeholder DOM remains only so legacy shared functions cannot throw, but no rotation/carryover work is calculated or surfaced.
-try{window.getLpIncompleteFromLastWeek=function(){return 0};window.getLpMissedLastWeek=function(){return[]};window.getRotation=function(){return[]};window.renderCarryoverAlerts=function(){};window.renderTeamStreak=function(){};window.renderNoteQuality=function(){};window.callNextAgent=function(){if(typeof ctShowToast==='function')ctShowToast('LP Realtor outreach now comes from active-contract Tuesday work.')} }catch(e){}
-const boot=()=>{const snap=document.getElementById('view-snapshot');if(snap&&snap.classList.contains('active'))renderSnapshot(false);const hub=document.getElementById('view-data-hub');if(hub&&hub.classList.contains('active'))refreshDataFresh()};
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,200),{once:true});else setTimeout(boot,200);
-})();</script>
-<style id="ct-final-live-scorecard-clarity-css">
-.ct-live-grid{display:grid;grid-template-columns:repeat(4,minmax(145px,1fr));gap:10px;margin-top:10px}
-.ct-live-card{border:1px solid #DDE7EC;border-radius:12px;padding:13px;background:#fff;min-height:110px}
-.ct-live-card .k{font-size:10px;font-weight:850;letter-spacing:.055em;text-transform:uppercase;color:#637986}
-.ct-live-card .v{font-size:27px;line-height:1;font-weight:850;color:#102A43;margin-top:8px}
-.ct-live-card .s{font-size:10.5px;line-height:1.4;color:#71848F;margin-top:7px}
-.ct-live-card.good{border-color:#8CCADD;background:#F5FCFE}.ct-live-card.warn{border-color:#E1C983;background:#FFFDF7}.ct-live-card.info{border-color:#C9DCE5;background:#F8FBFC}
-.ct-live-card .bar{height:5px;background:#EAF0F3;border-radius:99px;overflow:hidden;margin-top:9px}.ct-live-card .fill{height:100%;background:#1787A7;border-radius:99px}
-.ct-live-rules{padding:10px 12px;border:1px solid #D7E5EB;background:#F5FAFC;border-radius:10px;font-size:10.8px;line-height:1.5;color:#46616E;margin-top:10px}
-.ct-source-mini{font-weight:800;color:#0B789E}
-@media(max-width:900px){.ct-live-grid{grid-template-columns:repeat(2,minmax(145px,1fr))}}@media(max-width:520px){.ct-live-grid{grid-template-columns:1fr}}
-</style>
-<script id="ct-final-live-scorecard-clarity">
+<script id="ct-comarketing-shared-work-restore">
 (function(){
-'use strict';
-const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'],LP2=['Gavin','Karen','Osgood','Jordan','Said'];
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const wk=()=>typeof getWeekKey==='function'?getWeekKey(new Date()):(typeof mondayKey==='function'?mondayKey(new Date()):'');
-const ytd=()=>new Date().getFullYear()+'-01-01';
-const total=(d,k)=>Object.keys(d||{}).reduce((n,x)=>n+((x===k||x.startsWith(k+'_'))?(Number(d[x])||0):0),0);
-const pct=(a,b)=>b?Math.round(a/b*100):null;
-function appConverted(r){try{return typeof ctIsLeadAppConverted==='function'?ctIsLeadAppConverted(r):/started|approval|pre-approval|preapproval|contract|processing|underwrit|clear to close|funded|closed/i.test(String(r&&r.status||''))}catch(e){return false}}
-function pb(){try{return typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():(window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null'))}catch(e){return null}}
-function pbActive(s){if(!s)return 0;if(Number.isFinite(Number(s.active_partner_rows))&&Number(s.active_partner_rows)>0)return Number(s.active_partner_rows);const l=s.levels||{};return Number(l.A||0)+Number(l.B||0)+Number(l.C||0)+Number(l.Channel||0)}
-function card(k,v,sub,p,cls){p=Math.max(0,Math.min(100,Number(p)||0));return '<div class="ct-live-card '+(cls||'')+'"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+'</div><div class="s">'+sub+'</div>'+(p>=0?'<div class="bar"><div class="fill" style="width:'+p+'%"></div></div>':'')+'</div>'}
-async function data(){
- let vel=[],scores=[],tx=[];
- try{[vel,scores,tx]=await Promise.all([
-   sbFetch('GET','velocify_leads?date_added=gte.'+ytd()+'&select=date_added,status,lp_user&limit=20000').catch(()=>[]),
-   sbFetch('GET','lp_scorecards?week_key=eq.'+encodeURIComponent(wk())+'&person=in.('+LPS.join(',')+')&select=person,data&limit=100').catch(()=>[]),
-   sbFetch('GET','amanda_activities?act_type=eq.Transaction%20Snapshot&select=act_date,created_at,notes&order=created_at.desc&limit=2000').catch(()=>[])
- ])}catch(e){}
- const by={};(scores||[]).forEach(r=>by[r.person]=r.data||{});
- const leads=(vel||[]).length,apps=(vel||[]).filter(appConverted).length;
- const sum=(key,names=LPS)=>names.reduce((s,n)=>s+total(by[n]||{},key),0);
- const snap=pb()||{};
- const scoreCount=(scores||[]).length;
- let latestTx=null;if(tx&&tx[0])latestTx=tx[0].created_at||tx[0].act_date||null;
- return {leads,apps,by,scoreCount,snap,latestTx,pre:sum('pre_approvals'),contracts:sum('contracts'),talks:sum('past_client_talks',LP2),refs:sum('referred_leads')};
-}
-async function render(){
- const gates=document.getElementById('lp-v2-team-gates');if(!gates)return;
- const d=await data(),leadPct=pct(d.apps,d.leads),s=d.snap||{},active=pbActive(s),preq=Number(s.active_prequals_total||0),pipe=Number(s.active_pipeline_total||0);
- const leadProgress=leadPct==null?0:Math.min(100,Math.round(leadPct/60*100));
- const preProgress=Math.min(100,Math.round(d.pre/25*100)),conProgress=Math.min(100,Math.round(d.contracts/14*100));
- const scoreProgress=Math.min(100,Math.round(d.scoreCount/6*100));
- let imported=s.imported_at?new Date(s.imported_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'No Power BI snapshot';
- gates.innerHTML=
-  '<div id="ct-snapshot-freshness" style="margin-bottom:12px"></div>'+
-  '<div class="ct-accuracy-banner"><b>Live scorecard logic:</b> use each source only for what it can actually prove. Velocify proves lead → application. LP scorecards prove this week’s execution against team goals. Power BI provides the latest uploaded partner/pipeline snapshot. Encompass drives active-contract Tuesday work.</div>'+
-  '<div class="ct-live-grid">'+
-   card('2026 funded-unit goal','400','Year-end goal · by Dec 31. Current funded actual stays separate until a true Core Team production feed is connected.',0,'info')+
-   card('Lead → 1003',leadPct==null?'No data':leadPct+'%','<span class="ct-source-mini">Velocify YTD</span> · '+d.apps+' Started-or-later / '+d.leads+' leads · target 60%',leadProgress,leadPct!==null&&leadPct>=60?'good':'')+
-   card('Pre-approvals logged',d.pre+' / 25','<span class="ct-source-mini">LP scorecards · this week</span> · execution pace, not a fake cohort conversion rate',preProgress,d.pre>=25?'good':'')+
-   card('Contracts logged',d.contracts+' / 14','<span class="ct-source-mini">LP scorecards · this week</span> · execution pace, not a fake cohort conversion rate',conProgress,d.contracts>=14?'good':'')+
-   card('Active prequals',preq,'<span class="ct-source-mini">Power BI snapshot</span> · current buyers attached to active partners',preq?100:0,'info')+
-   card('Active in pipeline',pipe,'<span class="ct-source-mini">Power BI snapshot</span> · current pipeline attached to active partners',pipe?100:0,'info')+
-   card('Scorecards entered',d.scoreCount+' / 6','<span class="ct-source-mini">This week</span> · missing entries stay visible instead of becoming zero performance',scoreProgress,d.scoreCount===6?'good':d.scoreCount>=3?'warn':'')+
-  '</div>'+
-  '';
- try{if(typeof window.__ctRenderFreshnessPublic==='function')window.__ctRenderFreshnessPublic('ct-snapshot-freshness');else{const el=document.getElementById('ct-snapshot-freshness');if(el)el.innerHTML='';}}catch(e){}
-}
-window.__ctRenderAccurateLiveSnapshot=render;
-window.lpv2RenderSnapshot=render;
-// Preserve the existing server refresh, then repaint with the corrected source logic last.
-const prev=window.refreshSnapshotFresh;
-window.refreshSnapshotFresh=async function(btn){try{if(typeof prev==='function')await prev.apply(this,arguments)}catch(e){}await render();};
-// Stop the Operating Standard live panel from showing false 1%/0% cohort rates too.
-window.pbsLoadLiveProgress=async function(){const host=document.getElementById('pbs-live-grid');if(!host)return;const d=await data(),leadPct=pct(d.apps,d.leads),s=d.snap||{},preq=Number(s.active_prequals_total||0),pipe=Number(s.active_pipeline_total||0);const vals=[['2026 funded-unit goal','400','Year-end goal · current actual requires production feed'],['Lead → 1003',leadPct==null?'—':leadPct+'%',d.apps+' / '+d.leads+' · Velocify YTD'],['Pre-approvals this week',d.pre+' / 25','LP scorecards'],['Contracts this week',d.contracts+' / 14','LP scorecards'],['Active prequals',preq,'Power BI'],['Active pipeline',pipe,'Power BI']];host.innerHTML=vals.map(v=>'<div class="pbs-live-metric"><div class="m-label">'+esc(v[0])+'</div><div class="m-value">'+esc(v[1])+'</div><div class="m-target">'+esc(v[2])+'</div></div>').join('')};
-const boot=()=>{const v=document.getElementById('view-snapshot');if(v&&v.classList.contains('active'))render()};
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,350),{once:true});else setTimeout(boot,350);
+  const previousRoute = window.lpv2Route;
+  window.lpv2Route = function(route, btn){
+    if(route === 'co-marketing'){
+      try{
+        if(typeof rmStopPolling === 'function') rmStopPolling();
+        if(typeof lpStopPolling === 'function') lpStopPolling();
+        if(typeof currentUser !== 'undefined') currentUser = 'Director';
+        document.querySelectorAll('.who-btn,.ct-nav-btn').forEach(function(b){ b.classList.remove('active'); });
+        if(btn) btn.classList.add('active');
+        document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+        const view = document.getElementById('view-director');
+        if(view) view.classList.add('active');
+        if(typeof loadCoMktPartners === 'function'){
+          Promise.resolve(loadCoMktPartners()).then(function(){
+            if(typeof renderDirectorView === 'function') renderDirectorView();
+          }).catch(function(e){ console.warn('Co-marketing load failed', e); });
+        } else if(typeof renderDirectorView === 'function'){
+          renderDirectorView();
+        }
+        return;
+      }catch(e){
+        console.error('Co-marketing navigation error',e);
+      }
+    }
+    if(typeof previousRoute === 'function') return previousRoute.apply(this, arguments);
+  };
 })();
 </script>
 
-<style id="ct-nav-health-repair-css">
-#view-agent-health .ct-health-loading{padding:28px;text-align:center;color:#607887;font-size:12px}
-#view-agent-health .ct-health-error{padding:14px;border:1px solid #efc9c5;background:#fff7f6;color:#9d3731;border-radius:9px;font-size:12px;line-height:1.5}
-#view-data-hub .ct-hub-live-note{margin:0 0 12px;padding:9px 11px;background:#f4fafc;border:1px solid #d4e7ee;border-radius:9px;font-size:11px;color:#496573;line-height:1.45}
-</style>
-<script id="ct-nav-health-repair-js">
-(function(){
-'use strict';
-const CT_DAY=86400000;
-const ctKey=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
-const ctEsc=v=>String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const ctDate=v=>{if(!v)return null;const d=new Date(String(v).slice(0,10)+'T12:00:00');return isNaN(d)?null:d};
-const ctAge=v=>{const d=ctDate(v);return d?Math.max(0,Math.floor((Date.now()-d.getTime())/CT_DAY)):null};
-const ctFmt=v=>{const d=ctDate(v);return d?(String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+'/'+d.getFullYear()):'—'};
-function ctActivate(viewId,btn){
-  try{if(typeof rmStopPolling==='function')rmStopPolling()}catch(e){}
-  try{if(typeof lpStopPolling==='function')lpStopPolling()}catch(e){}
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const view=document.getElementById(viewId); if(view)view.classList.add('active');
-  document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active'));
-  const target=btn&&btn.classList?btn:document.querySelector('.ct-nav-btn[data-route="'+String((btn&&btn.dataset&&btn.dataset.route)||'')+'"]');
-  if(target&&target.classList)target.classList.add('active');
-  window.scrollTo(0,0);
-  return view;
-}
-function ctOpenScripts(btn){
-  document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active')); if(btn&&btn.classList)btn.classList.add('active');
-  const m=document.getElementById('scriptsModal');
-  if(!m)return;
-  m.classList.add('open');m.style.display='flex';
-  const box=m.querySelector('.contact-modal-box');if(box)box.scrollTop=0;
-}
-// Make closing reliable even if an older modal function was shadowed.
-window.closeScriptsModal=function(){const m=document.getElementById('scriptsModal');if(m){m.classList.remove('open');m.style.display='none'}};
 
-async function ctLoadAgentHealthFresh(){
-  const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');
-  if(!host)return;
-  host.innerHTML='<div class="ct-health-loading">Loading latest Power BI-backed roster…</div>';
-  try{
-    const [profiles,assignments]=await Promise.all([
-      sbFetch('GET','agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,latest_lead_date,latest_close_date,closes_past_year,total_leads_past_year&limit=5000').catch(()=>[]),
-      sbFetch('GET','agent_assignments?select=agent_name,lp,rm&limit=5000').catch(()=>[])
-    ]);
-    let latestMs=0;
-    (profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(Number.isFinite(ms)&&ms>latestMs)latestMs=ms});
-    let snap=null;try{snap=window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')}catch(e){}
-    const pbAll=(snap&&((snap.all_by_agent&&Object.keys(snap.all_by_agent).length&&snap.all_by_agent)||snap.by_agent))||{};
-    const amap={};(assignments||[]).forEach(a=>amap[ctKey(a.agent_name)]=a);
-    const legacy={};
-    try{(window.agents||[]).forEach(a=>{if(a&&a[0])legacy[ctKey(a[0])]=a})}catch(e){}
-    let current=(profiles||[]).filter(p=>{
-      const ms=Date.parse(p&&p.powerbi_last_seen_at||'');
-      return latestMs&&Number.isFinite(ms)&&Math.abs(ms-latestMs)<120000 && p.do_not_contact!==true && String(p.relationship_status||'active').toLowerCase()!=='inactive';
-    });
-    // If the server has not retained a Power BI stamp, fall back to the latest browser snapshot instead of showing a false zero.
-    if(!current.length && Object.keys(pbAll).length){
-      current=Object.values(pbAll).map(r=>({agent_name:r.name,powerbi_level:r.level,retained:r.official_active!==false,latest_lead_date:r.latest_lead||null,latest_close_date:r.latest_close||null}));
-    }
-    const rows=current.map(p=>{
-      const k=ctKey(p.agent_name),pb=pbAll[k]||{},a=legacy[k]||[],asn=amap[k]||{};
-      const latestLead=p.latest_lead_date||pb.latest_lead||a[3]||null;
-      const latestClose=p.latest_close_date||pb.latest_close||a[6]||null;
-      const latestStart=pb.latest_started||a[4]||null;
-      const latestContract=pb.latest_contract||a[5]||null;
-      const ld=ctAge(latestLead),cd=ctAge(latestClose);
-      const active=p.retained===true || (ld!==null&&ld<=90)||(cd!==null&&cd<=90);
-      let health='archive',action='Outside Active Partner definition',why='No lead or close in last 90 days';
-      if(active){if(ld!==null&&ld<=30){health='green';action='Current';why=ld+'d since last lead'}else if(ld!==null&&ld<=60){health='yellow';action='Call / review';why=ld+'d since last lead'}else{health='red';action='Call today';why=(ld===null?'No lead on record':ld+'d since last lead')+(cd!==null&&cd<=90?' · active from recent close':'')}}
-      return {name:p.agent_name,tier:p.powerbi_level||p.tier||pb.level||'—',lp:asn.lp||'Unassigned',pre:Number(pb.active_prequals||0),pipe:Number(pb.active_pipeline||0),last:latestLead,lastStart:latestStart,lastContract:latestContract,lastClose:latestClose,daysLead:ld,health,archive:!active,action,why};
-    });
-    window.__CT_HEALTH_ROWS=rows;
-    ctRenderHealthRows();
-  }catch(e){
-    console.error('Agent Health load failed',e);
-    host.innerHTML='<div class="ct-health-error"><b>Agent Health could not load.</b><br>'+ctEsc(e&&e.message||'Unknown data error')+'</div>';
-    if(sum)sum.innerHTML='';
+<style id="ct-health-playbook-reconcile-css">
+#view-agent-health .ct-health-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+#view-agent-health .ct-health-summary b{font-size:24px}
+#view-agent-health .ct-health-summary small{line-height:1.35}
+.ct-health-reconcile-note{margin:0 0 12px;padding:10px 12px;border:1px solid #D6E3EA;border-radius:9px;background:#F7FAFC;color:#526B78;font-size:11px;line-height:1.5}
+.ct-health-reconcile-note strong{color:#17324D}
+.ct-health-pill.contract{background:#EEF6FB;border-color:#B9D8EA;color:#1F6488}
+.ct-health-row-contract{background:#F4F9FC!important}
+.ct-health-row-contract .ct-health-dot{background:#3B82A8!important}
+.ct-health-source-tag{display:inline-flex;align-items:center;gap:5px;border:1px solid #D7E4EA;border-radius:999px;padding:3px 7px;font-size:9px;font-weight:800;color:#55717F;background:#fff}
+@media(max-width:900px){#view-agent-health .ct-health-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<script id="ct-health-playbook-reconcile-js">
+(function(){
+  const DAY=86400000;
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const key=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+  const proper=s=>String(s||'').trim().toLowerCase().replace(/\b([a-z])/g,m=>m.toUpperCase());
+  const age=v=>{if(!v)return null;const d=new Date(String(v).slice(0,10)+'T12:00:00');return isNaN(d)?null:Math.max(0,Math.floor((Date.now()-d.getTime())/DAY))};
+  const fmt=v=>{if(!v)return'—';const d=new Date(String(v).slice(0,10)+'T12:00:00');return isNaN(d)?'—':String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+'/'+d.getFullYear()};
+  const meta=(n,t)=>{const m=String(n||'').match(new RegExp('\\['+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+':([^\\]]*)\\]','i'));return m?(m[1]||'').trim():''};
+  const normMilestone=s=>String(s||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,' ');
+  const isContractStage=(milestone,group)=>{
+    const s=normMilestone(milestone),g=normMilestone(group);
+    if(/\b(started|application|pre ?approval|prequal|pre qualification|pre approval)\b/.test(s))return false;
+    return /\b(ready for pack out|processing|processed|underwriting|underwritten|submittal|submitted|approval|approved|appraisal|conditions|conditional approval|docs|doc signing|docs signing|docs out|drawn|received by closer|rec d by closer|clear to close|ctc|closing|funding|funded)\b/.test(s+' '+g);
+  };
+  function snapshot(){try{return window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')||{all_by_agent:{},by_agent:{}}}catch(_){return{all_by_agent:{},by_agent:{}}}}
+  function lpFor(n){const a=(window.agents||[]).find(x=>key(x?.[0])===key(n));return a?.[2]||'Unassigned'}
+  function badName(n){
+    const k=key(n);
+    if(!k||['agent','nan','n/a','na','realtor','self','rockford','rockford homes',"i'm a realtor partner."].includes(k))return true;
+    if(k.split(/\s+/).length<2 && !/[&-]/.test(k))return true;
+    return false;
   }
-}
-function ctRenderHealthRows(){
-  const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');if(!host)return;
-  let all=(window.__CT_HEALTH_ROWS||[]).slice();
-  const q=ctKey((document.getElementById('lpv3-health-q')||{}).value),hf=(document.getElementById('lpv3-health-filter')||{}).value||'',lf=(document.getElementById('lpv3-health-lp')||{}).value||'';
-  const current=all.filter(r=>!r.archive),archive=all.filter(r=>r.archive);
-  let show=hf==='archive'?archive.slice():current.slice();
-  if(hf==='action')show=show.filter(r=>r.health==='red'||r.health==='yellow'); else if(hf&&hf!=='all'&&hf!=='archive')show=show.filter(r=>r.health===hf);
-  if(q)show=show.filter(r=>ctKey(r.name).includes(q));if(lf)show=show.filter(r=>r.lp===lf);
-  const rank={red:0,yellow:1,green:2,archive:3};show.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??999)-(a.daysLead??999))||String(a.name).localeCompare(String(b.name)));
-  const cnt=h=>current.filter(r=>r.health===h).length,pre=current.reduce((n,r)=>n+r.pre,0),pipe=current.reduce((n,r)=>n+r.pipe,0),follow=cnt('red')+cnt('yellow');
-  if(sum)sum.innerHTML='<div class="ct-health-summary-grid"><button class="ct-health-summary" type="button" onclick="document.getElementById(\'lpv3-health-filter\').value=\'all\';ctRenderHealthRows()"><b>'+current.length+'</b><span>Active Partners</span><small>Latest Power BI population + 90-day business signal</small></button><div class="ct-health-summary"><b>'+pre+'</b><span>Current Prequal Buyers</span><small>Latest uploaded Power BI</small></div><div class="ct-health-summary"><b>'+pipe+'</b><span>Current Buyers in Pipeline</span><small>Latest uploaded Power BI</small></div><button class="ct-health-summary" type="button" onclick="document.getElementById(\'lpv3-health-filter\').value=\'action\';ctRenderHealthRows()"><b>'+follow+'</b><span>Need Follow-Up</span><small>Yellow + red lead-gap calls</small></button></div><div class="ct-health-chip-row"><span class="ct-health-chip green">Green · lead ≤30d · '+cnt('green')+'</span><span class="ct-health-chip yellow">Yellow · no lead 31–60d · '+cnt('yellow')+'</span><span class="ct-health-chip red">Red · no lead 61+d / 90d gap · '+cnt('red')+'</span></div>';
-  const rowHtml=show.map(r=>'<tr><td><span class="ct-health-dot '+r.health+'"></span><b>'+ctEsc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+ctEsc(r.action)+'</small></td><td><b>'+ctEsc(r.name)+'</b><small>'+ctEsc(r.why)+'</small></td><td>'+ctEsc(r.tier)+'</td><td>'+ctEsc(r.lp)+'</td><td>'+r.pre+'</td><td>'+r.pipe+'</td><td>'+ctFmt(r.last)+'</td><td>'+ctFmt(r.lastStart)+'</td><td>'+ctFmt(r.lastContract)+'</td><td>'+ctFmt(r.lastClose)+'</td></tr>').join('');
-  const archivedCount=archive.length;
-  host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>LP</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead><tbody>'+(rowHtml||'<tr><td colspan="10" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+'</tbody></table></div>'+(hf==='archive'?'':'<button type="button" class="ct-archive-row" onclick="document.getElementById(\'lpv3-health-filter\').value=\'archive\';ctRenderHealthRows()">▸ Outside Active Partner definition · '+archivedCount+' agents</button>');
-}
-window.ctRenderHealthRows=ctRenderHealthRows;
-window.lpv3RenderAgentHealth=ctRenderHealthRows;
-window.lpv3OpenAgentHealth=function(btn){ctActivate('view-agent-health',btn||document.querySelector('.ct-nav-btn[data-route="agent-health"]'));ctLoadAgentHealthFresh()};
-window.lpv3OpenDataHub=function(btn){
-  ctActivate('view-data-hub',btn||document.querySelector('.ct-nav-btn[data-route="data-hub"]'));
-  const wrap=document.querySelector('#view-data-hub .ct-page-wrap');
-  if(wrap&&!document.getElementById('ct-hub-live-note')){const n=document.createElement('div');n.id='ct-hub-live-note';n.className='ct-hub-live-note';n.innerHTML='<b>Upload center:</b> Power BI refreshes Agent Health / Roster and pipeline intelligence. Encompass refreshes Tuesday active-contract work. Velocify remains the daily lead source.';wrap.insertBefore(n,wrap.firstChild)}
-};
 
-// Final, dependency-light navigation. Each menu item can open even if a legacy helper is missing.
-window.lpv2Route=function(route,btn){
-  try{
-    if(route==='snapshot'){ctActivate('view-snapshot',btn);if(typeof lpv2RenderSnapshot==='function')Promise.resolve(lpv2RenderSnapshot()).catch(()=>{});return}
-    if(route==='lp'){const lp=btn&&btn.dataset&&btn.dataset.lp;if(typeof selectUser==='function'&&lp){selectUser(btn,lp);return}ctActivate('view-lp',btn);if(lp&&typeof lpv2PrimeLp==='function')lpv2PrimeLp(lp);return}
-    if(route==='data-hub'||route==='upload'){window.lpv3OpenDataHub(btn);return}
-    if(route==='agent-health'){window.lpv3OpenAgentHealth(btn);return}
-    if(route==='co-marketing'){
-      ctActivate('view-co-marketing',btn);
-      currentUser='Director';
-      try{if(typeof loadCoMktPartners==='function')Promise.resolve(loadCoMktPartners()).catch(()=>{});else if(typeof renderDirectorView==='function')renderDirectorView()}catch(e){console.warn('Co-marketing load failed',e)}
-      return
+  window.__CT_HEALTH_META={profiles:{},contractAgents:new Set(),loaded:false};
+
+  async function loadMeta(){
+    const state=window.__CT_HEALTH_META;
+    try{
+      if(typeof loadInactiveRosterNames==='function')await loadInactiveRosterNames();
+      if(typeof sbFetch==='function'){
+        const [profiles,acts]=await Promise.all([
+          sbFetch('GET','agent_profiles?select=agent_name,relationship_status,do_not_contact&limit=5000').catch(()=>[]),
+          sbFetch('GET','amanda_activities?act_type=eq.Transaction%20Snapshot&select=agent_name,act_date,notes,created_at&order=created_at.desc&limit=5000').catch(()=>[])
+        ]);
+        state.profiles={};
+        (profiles||[]).forEach(p=>{if(p&&p.agent_name)state.profiles[key(p.agent_name)]=p});
+        let latest='';
+        (acts||[]).forEach(a=>{const b=meta(a.notes,'TXN_BATCH');if(b>latest)latest=b});
+        const seen=new Set(),contractAgents=new Set();
+        (acts||[]).filter(a=>meta(a.notes,'TXN_BATCH')===latest).forEach(a=>{
+          const id=meta(a.notes,'TXN_ID');if(!id||seen.has(id))return;seen.add(id);
+          const ba=meta(a.notes,'TXN_BUYER_AGENT'),m=meta(a.notes,'TXN_MILESTONE'),g=meta(a.notes,'TXN_MILESTONE_GROUP');
+          if(ba&&isContractStage(m,g))contractAgents.add(key(ba));
+        });
+        state.contractAgents=contractAgents;
+      }
+    }catch(e){console.warn('Health reconciliation metadata',e)}
+    state.loaded=true;
+    return state;
+  }
+  window.ctHealthLoadMeta=loadMeta;
+
+  function buildRows(){
+    const s=snapshot(),src=s.all_by_agent||{},state=window.__CT_HEALTH_META||{profiles:{},contractAgents:new Set()};
+    return Object.values(src).filter(p=>p&&p.name&&!badName(p.name)).map(p=>{
+      const ld=age(p.latest_lead),cd=age(p.latest_close);
+      const rmActive=(ld!==null&&ld<=90)||(cd!==null&&cd<=90);
+      const prof=state.profiles[key(p.name)]||{};
+      const removed=(typeof ctInactiveRosterNames!=='undefined'&&ctInactiveRosterNames&&ctInactiveRosterNames.has(key(p.name)))||prof.relationship_status==='inactive';
+      const dnc=prof.do_not_contact===true;
+      const managed=rmActive&&!removed&&!dnc;
+      const contract=managed&&state.contractAgents&&state.contractAgents.has(key(p.name));
+      let health='archive',action='Outside 90-day definition',why='No qualifying lead or close in the last 90 days';
+      if(managed){
+        if(contract){health='contract';action='Transaction workflow';why='Active contract — LP owns buyer/client + buyer-agent transaction communication'}
+        else if(ld!==null&&ld<=30){health='green';action='Current';why=ld+'d since last lead'}
+        else if(ld!==null&&ld<=60){health='yellow';action='Relationship check-in';why=ld+'d since last lead'}
+        else{health='red';action='Priority follow-up';why=(ld===null?'No lead on record':ld+'d since last lead')+(cd!==null&&cd<=90?' · still Active Partner from recent close':'')}
+      } else if(rmActive && (removed||dnc)){
+        health='archive';action='Not in managed book';why=dnc?'DNC — excluded from managed active partners':'Inactive/removed — excluded from managed active partners';
+      }
+      return {name:p.name,tier:p.level||'—',lp:lpFor(p.name),pre:+p.active_prequals||0,pipe:+p.active_pipeline||0,last:p.latest_lead,lastStart:p.latest_started,lastContract:p.latest_contract,lastClose:p.latest_close,daysLead:ld,daysClose:cd,rmActive,managed,removed,dnc,health,action,why}
+    });
+  }
+
+  window.lpv3HealthFilter=function(f){
+    const s=document.getElementById('lpv3-health-filter');
+    if(s)s.value=f||'action';
+    window.lpv3RenderAgentHealth();
+  };
+
+  window.lpv3OpenAgentHealth=async function(btn){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-agent-health')?.classList.add('active');
+    document.querySelectorAll('.ct-nav-btn').forEach(b=>b.classList.remove('active'));
+    (btn?.classList?btn:document.querySelector('.ct-nav-btn[data-route="agent-health"]'))?.classList.add('active');
+    await loadMeta();
+    window.lpv3RenderAgentHealth();
+  };
+
+  window.lpv3RenderAgentHealth=function(){
+    const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');if(!host)return;
+    const q=key(document.getElementById('lpv3-health-q')?.value);
+    const hf=document.getElementById('lpv3-health-filter')?.value||'action';
+    const lf=document.getElementById('lpv3-health-lp')?.value||'';
+    const all=buildRows(),powerBi=all,rmActive=all.filter(r=>r.rmActive),managed=all.filter(r=>r.managed);
+    const outside=all.filter(r=>!r.rmActive||!r.managed);
+    let show=managed.slice();
+    if(hf==='archive')show=outside.slice();
+    else if(hf==='action')show=show.filter(r=>r.health==='red'||r.health==='yellow');
+    else if(hf==='all')show=show;
+    else if(hf)show=show.filter(r=>r.health===hf);
+    if(q)show=show.filter(r=>key(r.name).includes(q));
+    if(lf)show=show.filter(r=>r.lp===lf);
+    const rank={red:0,yellow:1,contract:2,green:3,archive:4};
+    show.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??9999)-(a.daysLead??9999))||String(a.name).localeCompare(String(b.name)));
+
+    const cnt=h=>managed.filter(r=>r.health===h).length;
+    const follow=cnt('red')+cnt('yellow');
+    if(sum){
+      sum.innerHTML=
+        '<div class="ct-health-reconcile-note"><strong>Playbook reconciliation:</strong> Power BI shows the imported relationship population. Active Partner means a lead OR close within 90 days. Managed Active Partners remove inactive/removed and DNC records. The call queue below then removes active-contract buyer agents so LP transaction work is not duplicated.</div>'+
+        '<div class="ct-health-summary-grid">'+
+          '<button class="ct-health-summary" type="button" data-health-filter="powerbi"><b>'+powerBi.length+'</b><span>Power BI Roster</span><small>Current cleaned imported population</small></button>'+
+          '<button class="ct-health-summary" type="button" data-health-filter="rmactive"><b>'+rmActive.length+'</b><span>Active Partners · 90d</span><small>Latest lead OR close within 90 days</small></button>'+
+          '<button class="ct-health-summary" type="button" data-health-filter="all"><b>'+managed.length+'</b><span>Managed Active Partners</span><small>Excludes inactive / removed / DNC</small></button>'+
+          '<button class="ct-health-summary" type="button" data-health-filter="action"><b>'+follow+'</b><span>Relationship Follow-Up</span><small>31+ day lead gaps · active contracts excluded</small></button>'+
+        '</div>'+
+        '<div class="ct-health-legend">'+
+          '<button type="button" class="ct-health-pill green '+(hf==='green'?'is-selected':'')+'" data-health-filter="green">Green · lead ≤30d · '+cnt('green')+'</button>'+
+          '<button type="button" class="ct-health-pill yellow '+(hf==='yellow'?'is-selected':'')+'" data-health-filter="yellow">Yellow · lead gap 31–60d · '+cnt('yellow')+'</button>'+
+          '<button type="button" class="ct-health-pill red '+(hf==='red'?'is-selected':'')+'" data-health-filter="red">Red · lead gap 61+d · '+cnt('red')+'</button>'+
+          '<button type="button" class="ct-health-pill contract '+(hf==='contract'?'is-selected':'')+'" data-health-filter="contract">Active contract · transaction workflow · '+cnt('contract')+'</button>'+
+        '</div>';
+      sum.querySelectorAll('[data-health-filter]').forEach(b=>b.addEventListener('click',()=>{
+        const f=b.dataset.healthFilter;
+        if(f==='powerbi'){
+          const sel=document.getElementById('lpv3-health-filter'); if(sel)sel.value='archive';
+          window.__CT_HEALTH_SHOW_POWERBI=true;
+          window.lpv3RenderAgentHealth();
+        }else if(f==='rmactive'){
+          const sel=document.getElementById('lpv3-health-filter'); if(sel)sel.value='all';
+          window.__CT_HEALTH_SHOW_RMACTIVE=true;
+          window.lpv3RenderAgentHealth();
+        }else{
+          window.__CT_HEALTH_SHOW_POWERBI=false;window.__CT_HEALTH_SHOW_RMACTIVE=false;
+          window.lpv3HealthFilter(f);
+        }
+      }));
     }
-    if(route==='scripts'){ctOpenScripts(btn);return}
-    if(route==='standard'){ctActivate('view-operating-standard',btn);if(typeof pbsLoadLiveProgress==='function')setTimeout(()=>Promise.resolve(pbsLoadLiveProgress(true)).catch(()=>{}),20);return}
-    if(route==='income'){ctActivate('view-income-standard',btn);return}
-    if(route==='file-integrity'){ctActivate('view-file-integrity',btn);try{if(typeof loadFileIntegrity==='function')loadFileIntegrity()}catch(e){}return}
-    if(route==='leads'){ctActivate('view-leads',btn);try{if(typeof loadReferralLeadsDirect==='function')loadReferralLeadsDirect()}catch(e){}return}
-    if(route==='facetime'){if(typeof selectUser==='function'){selectUser(btn,'FaceTime');return}ctActivate('view-facetime',btn);return}
-    if(route==='admin'){ctActivate('view-admin',btn);try{if(typeof renderAdmin==='function')renderAdmin()}catch(e){}return}
-    if(route==='contacts'){if(typeof lpV1OpenContactManager==='function')lpV1OpenContactManager();return}
-    console.warn('Unknown route',route);
-  }catch(e){console.error('Navigation error',route,e);try{if(typeof ctShowToast==='function')ctShowToast('Could not open '+route+'.')}catch(_){} }
-};
 
-// Keep health controls wired to the fresh hydrated rows.
-['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=ctRenderHealthRows;el.onchange=ctRenderHealthRows}});
+    // Special summary drilldowns.
+    if(window.__CT_HEALTH_SHOW_POWERBI){show=powerBi.slice();window.__CT_HEALTH_SHOW_POWERBI=false}
+    if(window.__CT_HEALTH_SHOW_RMACTIVE){show=rmActive.slice();window.__CT_HEALTH_SHOW_RMACTIVE=false}
+    if(q)show=show.filter(r=>key(r.name).includes(q));
+    if(lf)show=show.filter(r=>r.lp===lf);
+
+    const healthLabel=r=>r.health==='green'?'Green':r.health==='yellow'?'Yellow':r.health==='red'?'Red':r.health==='contract'?'Active contract':'Outside';
+    const rowClass=r=>r.health==='contract'?'ct-health-row-contract':'';
+    host.innerHTML=
+      '<div style="overflow:auto"><table class="ct-team-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>LP</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead><tbody>'+
+      (show.length?show.map(r=>
+        '<tr class="'+rowClass(r)+'">'+
+          '<td><span class="ct-health-dot '+esc(r.health)+'"></span><strong>'+esc(healthLabel(r))+'</strong><div class="ct-role-small">'+esc(r.action)+'</div></td>'+
+          '<td><button type="button" class="ct-agent-link" data-health-agent="'+esc(r.name)+'">'+esc(proper(r.name))+'</button><div class="ct-role-small">'+esc(r.why)+'</div></td>'+
+          '<td>'+esc(r.tier)+'</td><td>'+esc(r.lp)+'</td><td>'+r.pre+'</td><td>'+r.pipe+'</td>'+
+          '<td>'+fmt(r.last)+(r.daysLead!==null?' · '+r.daysLead+'d':'')+'</td><td>'+fmt(r.lastStart)+'</td><td>'+fmt(r.lastContract)+'</td><td>'+fmt(r.lastClose)+'</td>'+
+        '</tr>'
+      ).join(''):'<tr><td colspan="10"><div class="no-data">No agents match this view.</div></td></tr>')+
+      '</tbody></table></div>'+
+      (outside.length&&hf!=='archive'?'<details style="margin-top:12px"><summary style="cursor:pointer;font-weight:800;color:#536B78">Outside 90-day Active Partner definition · '+outside.length+' records</summary><div class="ct-data-note" style="margin-top:8px">These records are intentionally kept out of the daily relationship-call queue. Open only when reviewing/reactivating the broader Power BI roster.</div></details>':'');
+    host.querySelectorAll('[data-health-agent]').forEach(b=>b.addEventListener('click',()=>{if(typeof openAgentSearch==='function')openAgentSearch(b.dataset.healthAgent);else if(typeof openLpContactModal==='function')openLpContactModal(b.dataset.healthAgent)}));
+  };
+
+  // Refresh metadata before re-rendering after a Power BI upload.
+  const oldHandle=window.handleUpload;
+  if(typeof oldHandle==='function'&&!oldHandle.__ctHealthReconcile){
+    const wrapped=function(input){
+      const r=oldHandle.apply(this,arguments);
+      setTimeout(()=>loadMeta().then(()=>window.lpv3RenderAgentHealth()),1000);
+      return r;
+    };
+    wrapped.__ctHealthReconcile=true;
+    window.handleUpload=wrapped;
+  }
 })();
 </script>
 
-<style id="ct-amanda-snapshot-css">
-.ct-amanda-anchor{margin-top:18px}
-.ct-amanda-divider{display:flex;align-items:center;gap:10px;margin:18px 0 10px;padding-top:14px;border-top:2px solid #E7EDF2}
-.ct-amanda-divider .tag{display:inline-flex;align-items:center;gap:6px;background:#EEF7FB;color:#0B6780;border:1px solid #CFE7EF;border-radius:999px;padding:5px 11px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
-.ct-amanda-divider .line-title{font-size:15px;font-weight:850;color:#102A43}
-.ct-amanda-divider .line-sub{font-size:11px;color:#6F8290}
-.ct-amanda-snapshot{margin-top:0;padding:16px 16px 14px;border:1px solid #CFE3EA;border-left:6px solid #1787A7;border-radius:14px;background:linear-gradient(180deg,#F8FCFE 0%,#F2F9FC 100%);box-shadow:0 2px 10px rgba(16,42,67,.04)}
-.ct-amanda-head{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:-2px 0 12px;flex-wrap:wrap}
-.ct-amanda-title{font-size:17px;font-weight:850;color:#102A43}.ct-amanda-sub{font-size:11px;color:#607887;margin-top:4px;max-width:760px;line-height:1.45}
-.ct-amanda-grid{display:grid;grid-template-columns:repeat(5,minmax(125px,1fr));gap:9px}
-.ct-amanda-metric{border:1px solid #D7E7ED;border-radius:11px;padding:11px 12px;background:#fff}
-.ct-amanda-metric.good{border-color:#8CCADD;background:#F5FCFE}.ct-amanda-metric.warn{border-color:#E1C983;background:#FFFDF7}
-.ct-amanda-metric .k{font-size:9.5px;font-weight:850;letter-spacing:.045em;text-transform:uppercase;color:#617785}
-.ct-amanda-metric .v{font-size:22px;font-weight:850;color:#102A43;margin-top:6px}.ct-amanda-metric .v span{font-size:11px;color:#80909A}
-.ct-amanda-metric .bar{height:4px;background:#EAF0F3;border-radius:99px;margin-top:7px;overflow:hidden}.ct-amanda-metric .fill{height:100%;background:#1787A7;border-radius:99px}
-@media(max-width:1000px){.ct-amanda-grid{grid-template-columns:repeat(3,minmax(125px,1fr))}}@media(max-width:620px){.ct-amanda-grid{grid-template-columns:1fr 1fr}}
-</style>
-<script id="ct-amanda-snapshot-scorecard">
-(function(){
-'use strict';
-const GOALS=[
- {type:'New Realtor Meeting',label:'New partner meetings',goal:3},
- {type:'__existingmeeting__',label:'Existing partner meetings',goal:5},
- {type:'Cold Calls',label:'Cold calls',goal:125},
- {type:'Talk-to\'s',label:'Talk-to\'s',goal:100},
- {type:'Buddy Intro Received',label:'Buddy intros received',goal:3}
-];
-const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function localDay(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function monday(){const d=new Date();d.setHours(0,0,0,0);const n=d.getDay();d.setDate(d.getDate()-(n===0?6:n-1));return localDay(d)}
-function sunday(){const d=new Date(monday()+'T12:00:00');d.setDate(d.getDate()+6);return localDay(d)}
-function ownerIsAmanda(a){try{if(typeof ctRmOwnerFromNotes==='function')return ctRmOwnerFromNotes(a.notes)==='Amanda'}catch(e){}const n=String(a&&a.notes||'');return /\[RM_OWNER\s*:\s*Amanda\]/i.test(n)||!/\[RM_OWNER\s*:/i.test(n)}
-function isExisting(a){try{if(typeof ctIsExistingRmMeeting==='function')return !!ctIsExistingRmMeeting(a.act_type)}catch(e){}return ['Partner Meeting','Strategic Partner Meeting','Channel Meeting','Retention Meeting','Break Breads'].includes(String(a.act_type||''))}
-function talkCount(acts){try{if(typeof amCntTalkTo==='function')return amCntTalkTo(acts||[])}catch(e){}const types=['Agent Talk-to','Active Agent Talk-to','Active Agent Check-in','Reconnect Outreach','CTC Call','Under Contract Call','Birthday Outreach','Holiday Outreach','Agent Appreciation','Market Update','Market Update Call','Sent Market Report','Sent Referral','Co-Marketing Discussion','New Agent Follow-up','Closed Deal Thank You'];return (acts||[]).filter(a=>types.includes(a.act_type)).length}
-function count(acts,g){if(g.type==='__existingmeeting__')return acts.filter(isExisting).length;if(g.type==="Talk-to's")return talkCount(acts);return acts.filter(a=>a.act_type===g.type).length}
-async function loadActs(){try{let rows=await sbFetch('GET','amanda_activities?act_date=gte.'+monday()+'&act_date=lte.'+sunday()+'&select=act_type,act_date,notes&order=act_date.desc&limit=5000');return (Array.isArray(rows)?rows:[]).filter(ownerIsAmanda)}catch(e){console.warn('Amanda snapshot scorecard',e);return []}}
-async function renderAmanda(){
- const anchor=document.getElementById('ct-amanda-snapshot-anchor');if(!anchor)return;
- let box=document.getElementById('ct-amanda-snapshot');
- if(!box){box=document.createElement('div');box.id='ct-amanda-snapshot';box.className='ct-amanda-snapshot';}
- if(box.parentNode!==anchor)anchor.appendChild(box);
- box.innerHTML='<div class="ct-amanda-divider"><span class="tag">RM scorecard</span><div><div class="line-title">Amanda · Relationship Manager</div><div class="line-sub">From RM Tracker</div></div></div><div class="ct-amanda-head"><div></div><button class="ct-link-btn" type="button" id="ct-amanda-open-rm">Open RM Tracker</button></div><div class="ct-loading">Loading Amanda’s execution…</div>';
- const acts=await loadActs();
- box.innerHTML='<div class="ct-amanda-divider"><span class="tag">RM scorecard</span><div><div class="line-title">Amanda · Relationship Manager</div><div class="line-sub">From RM Tracker</div></div></div><div class="ct-amanda-head"><div></div><button class="ct-link-btn" type="button" id="ct-amanda-open-rm">Open RM Tracker</button></div><div class="ct-amanda-grid">'+GOALS.map(g=>{const v=count(acts,g),p=g.goal?Math.min(100,Math.round(v/g.goal*100)):0,cls=p>=100?'good':p>=75?'warn':'';return '<div class="ct-amanda-metric '+cls+'"><div class="k">'+esc(g.label)+'</div><div class="v">'+v+' <span>/ '+g.goal+'</span></div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div></div>'}).join('')+'</div>';
- const b=document.getElementById('ct-amanda-open-rm');if(b){b.setAttribute('aria-label','Open Amanda RM Tracker');b.onclick=function(){window.open('https://pwang318.github.io/amanda-tracker/','_blank','noopener,noreferrer')}};
-}
-window.ctRenderAmandaSnapshot=renderAmanda;
-const old=window.lpv2RenderSnapshot;if(typeof old==='function'&&!old.__amanda){const w=async function(){const r=await old.apply(this,arguments);await renderAmanda();return r};w.__amanda=true;window.lpv2RenderSnapshot=w}
-const oldRef=window.refreshSnapshotFresh;if(typeof oldRef==='function'&&!oldRef.__amanda){const w=async function(){const r=await oldRef.apply(this,arguments);setTimeout(renderAmanda,30);return r};w.__amanda=true;window.refreshSnapshotFresh=w}
-function boot(){const v=document.getElementById('view-snapshot');if(v&&v.classList.contains('active'))setTimeout(renderAmanda,250)}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-})();
-</script>
 </body>
 </html>
