@@ -11503,7 +11503,7 @@ async function renderSnapshot(force){const gates=document.getElementById('lp-v2-
  const hdr='<div class="ct-accuracy-banner"><b>Weekly team goal vs. what the team has logged:</b> these numbers come only from this week’s LP scorecards. They are accountability totals, not funnel-conversion math.</div><div class="ct-gate-grid ct-goal-grid">'+METRICS.map(m=>goalCard(m,by)).join('')+'</div>';
  const cols=METRICS.map(m=>'<th>'+esc(m.label)+'</th>').join('');
  const body=CT_LPS.map(lp=>'<tr><td>'+esc(lp)+'<span class="ct-role-small">'+(lp==='Isaak'?'LP1':'LP2')+'</span></td>'+METRICS.map(m=>'<td>'+((m.scope==='LP2'&&lp==='Isaak')?'—':total(by[lp]||{},m.key))+'</td>').join('')+'<td><button class="ct-link-btn" data-lp-open="'+esc(lp)+'" type="button">Open</button></td></tr>').join('');
- roster.innerHTML=hdr+'<div style="overflow:auto;margin-top:12px"><table class="ct-team-table"><thead><tr><th>Loan Partner</th>'+cols+'<th></th></tr></thead><tbody>'+body+'</tbody></table></div><div class="ct-data-note" style="margin-top:8px">Past-client talk-to and referred-lead goals apply to the five LP2s. Isaak remains LP1/front-end support. Team goals are shown separately from each person’s raw entries so missing scorecards are visible instead of silently treated as production truth.</div>';roster.querySelectorAll('[data-lp-open]').forEach(b=>b.addEventListener('click',()=>{const nav=[...document.querySelectorAll('.ct-nav-btn[data-lp]')].find(x=>x.dataset.lp===b.dataset.lpOpen);if(nav&&typeof lpv2Route==='function')lpv2Route('lp',nav)}));}
+ roster.innerHTML=hdr+'<div style="overflow:auto;margin-top:12px"><table class="ct-team-table"><thead><tr><th>Loan Partner</th>'+cols+'<th></th></tr></thead><tbody>'+body+'</tbody></table></div><div class="ct-data-note" style="margin-top:8px"></div>';roster.querySelectorAll('[data-lp-open]').forEach(b=>b.addEventListener('click',()=>{const nav=[...document.querySelectorAll('.ct-nav-btn[data-lp]')].find(x=>x.dataset.lp===b.dataset.lpOpen);if(nav&&typeof lpv2Route==='function')lpv2Route('lp',nav)}));}
 window.lpv2RenderSnapshot=function(){return renderSnapshot(false)};
 const oldRefresh=window.refreshSnapshotFresh;if(typeof oldRefresh==='function'&&!oldRefresh.__ctFinal){const w=async function(btn){try{await oldRefresh.apply(this,arguments)}catch(e){}return renderSnapshot(true)};w.__ctFinal=true;window.refreshSnapshotFresh=w}
 window.pbsLoadLiveProgress=async function(force){const host=document.getElementById('pbs-live-grid');if(!host)return;host.innerHTML='<div class="pbs-live-loading">Loading current measurements…</div>';const a=agg(await vel(!!force));const vals=[['Funded units','—','Needs authoritative total-production feed',0,true],['Lead → 1003',pct(a.apps,a.leads),a.apps+' / '+a.leads+' · Velocify YTD',60,false],['1003 → Pre-Approval',pct(a.pre,a.apps),a.pre+' / '+a.apps+' · Velocify YTD',85,false],['Pre-Approval → Contract',pct(a.contracts,a.pre),a.contracts+' / '+a.pre+' · Velocify YTD',55,false],['Contract → Funded',pct(a.funded,a.contracts),a.funded+' / '+a.contracts+' · Velocify YTD',87,false]];host.innerHTML=vals.map(v=>{const q=v[1]==='—'?0:(v[1]==null?0:Math.min(100,v[1]/v[3]*100)),cls=v[4]?'':(q>=100?'met':q>=75?'warn':'');return '<div class="pbs-live-metric '+cls+'"><div class="m-label">'+v[0]+'</div><div class="m-value">'+(typeof v[1]==='number'?v[1]+'%':v[1]||'—')+'</div><div class="m-target">'+v[2]+'</div><div class="m-bar"><div class="m-fill" style="width:'+q+'%"></div></div></div>'}).join('')};
@@ -12110,6 +12110,29 @@ if(typeof snap==='function'&&!snap.__amandaAlignedV6){
   const w=async function(){const r=await snap.apply(this,arguments);setTimeout(render,50);return r};w.__amandaAlignedV6=true;window.lpv2RenderSnapshot=w;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(render,700)},{once:true});else setTimeout(render,350);
+})();
+</script>
+
+
+<!-- LP/RM TRANSACTION OWNERSHIP ALIGNMENT v9 -->
+<style id="lp-rm-txn-v9-css">
+#lp-tuesday-work .ct-role-split-v9{font-size:10.5px;line-height:1.45;color:#405B68;background:#F8FBFC;border:1px solid #D7E6EC;border-radius:8px;padding:8px 10px;margin:0 0 9px}
+</style>
+<script id="lp-rm-txn-v9-js">
+(function(){
+'use strict';
+function align(){
+  const host=document.getElementById('lp-tuesday-work');if(!host)return;
+  let n=host.querySelector('.ct-role-split-v9');
+  if(!n){n=document.createElement('div');n.className='ct-role-split-v9';const sec=host.querySelector('.v65-section');host.insertBefore(n,sec||host.firstChild)}
+  n.innerHTML='<b>Transaction ownership:</b> Amanda handles the initial New Contract calls to <b>both buyer agent + listing agent</b>. After that, LP2 owns buyer/client + buyer-agent Tuesday file updates. Amanda continues listing-agent communication through funding. At <b>CTC</b>, Amanda calls both agents again; LP2 still owns the buyer/client side.';
+  const sub=host.querySelector('.v65-sub');
+  if(sub)sub.textContent='LP2 buyer-agent transaction work starts after Amanda’s New Contract calls. Tuesday sequence: buyer/client update → buyer agent → Go-To conversation. Amanda owns listing-agent updates through funding and calls both agents again at CTC.';
+}
+window.ctAlignTxnOwnershipV9=align;
+const old=window.v65Load||window.v65LoadTuesday;
+if(typeof old==='function'&&!old.__txnV9){const w=async function(){const r=await old.apply(this,arguments);align();return r};w.__txnV9=true;if(window.v65Load)window.v65Load=w;else window.v65LoadTuesday=w}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(align,900),{once:true});else setTimeout(align,450);
 })();
 </script>
 
