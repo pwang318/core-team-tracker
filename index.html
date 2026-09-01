@@ -1,5 +1,4 @@
  
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -12105,36 +12104,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <!-- POWER BI VALID-LEVEL AUTHORITY v12 -->
 
 <!-- CLEAN POWER BI + AGENT HEALTH + EXPORT v31 -->
-<style id="ct-clean-health-v31-css">
-.ct-cadence-note{display:none!important}
-#ctExportActiveOwnershipBtn{white-space:nowrap}
-#ct-pb-rule-note{margin:0 0 10px;padding:8px 10px;border:1px solid #CFE2EA;border-radius:8px;background:#F6FBFD;color:#46616E;font-size:10.5px;line-height:1.4}
-#ct-pb-rule-note b{color:#0B789E}
 
+<!-- AGENT HEALTH MANAGEMENT WORKSPACE v40 -->
+<style id="ct-health-workspace-v40-css">
 #lpv3-health-summary{margin:16px 0 12px}
-.ct-health-summary-grid{
-  display:grid!important;
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  gap:12px!important;
-  align-items:stretch!important;
-}
-.ct-health-summary{
-  display:flex!important;
-  flex-direction:column!important;
-  justify-content:center!important;
-  min-height:104px!important;
-  padding:15px 16px!important;
-  background:#fff!important;
-  border:1px solid #D8E3E9!important;
-  border-radius:12px!important;
-  box-shadow:none!important;
-  text-align:left!important;
-  width:100%!important;
-  color:#071B37!important;
-  font-family:inherit!important;
-}
-button.ct-health-summary{cursor:pointer}
-button.ct-health-summary:hover{border-color:#9CC7DA!important;background:#F8FCFE!important}
+.ct-health-summary-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
+.ct-health-summary{display:flex!important;flex-direction:column!important;justify-content:center!important;min-height:104px!important;padding:15px 16px!important;background:#fff!important;border:1px solid #D8E3E9!important;border-radius:12px!important;text-align:left!important;width:100%!important;color:#071B37!important}
 .ct-health-summary b{font-size:25px!important;line-height:1!important;color:#16729B!important;margin-bottom:7px!important}
 .ct-health-summary span{font-size:10px!important;font-weight:800!important;letter-spacing:.055em!important;text-transform:uppercase!important;color:#435E6E!important}
 .ct-health-summary small{font-size:9.5px!important;color:#718391!important;margin-top:7px!important;line-height:1.35!important}
@@ -12143,310 +12118,235 @@ button.ct-health-summary:hover{border-color:#9CC7DA!important;background:#F8FCFE
 .ct-health-chip.green{background:#EFF9F0!important;border:1px solid #B9DEBF!important;color:#236B35!important}
 .ct-health-chip.yellow{background:#FFF8E7!important;border:1px solid #E8D191!important;color:#8A6300!important}
 .ct-health-chip.red{background:#FFF0ED!important;border:1px solid #E7B2AA!important;color:#A23A32!important}
-
-#view-agent-health .ct-card{padding:14px 16px!important}
-.ct-health-toolbar{
-  display:grid!important;
-  grid-template-columns:minmax(260px,1fr) 220px 160px!important;
-  gap:8px!important;
-  margin-bottom:10px!important;
-  align-items:center!important;
-}
-.ct-health-toolbar input,.ct-health-toolbar select{
-  width:100%!important;height:38px!important;padding:7px 10px!important;border:1px solid #C9D9E1!important;
-  border-radius:8px!important;background:#fff!important;font-family:inherit!important;color:#071B37!important;font-size:12px!important
-}
 .ct-health-table-wrap{width:100%!important;overflow:auto!important}
-.ct-health-table{width:100%!important;border-collapse:collapse!important;table-layout:auto!important}
-.ct-health-table th{
-  position:sticky;top:0;z-index:1;background:#EEF3F6!important;color:#395669!important;
-  font-size:9px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.045em!important;
-  text-align:left!important;padding:9px 8px!important;border-bottom:1px solid #D8E3E9!important;white-space:nowrap!important
-}
+.ct-health-table{width:100%!important;border-collapse:collapse!important;min-width:1180px!important}
+.ct-health-table th{background:#EEF3F6!important;color:#395669!important;font-size:9px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.045em!important;text-align:left!important;padding:9px 8px!important;border-bottom:1px solid #D8E3E9!important;white-space:nowrap!important}
 .ct-health-table td{padding:9px 8px!important;border-bottom:1px solid #E5EDF1!important;vertical-align:middle!important;font-size:10.5px!important;color:#071B37!important}
 .ct-health-table td small{display:block!important;margin-top:3px!important;font-size:9px!important;color:#718391!important}
 .ct-health-agent-link{background:none!important;border:0!important;padding:0!important;font:inherit!important;color:#071B37!important;text-align:left!important;cursor:pointer!important;font-weight:800!important}
 .ct-health-agent-link:hover{text-decoration:underline}
-.ct-owner-select{
-  min-width:112px!important;height:32px!important;padding:4px 7px!important;border:1px solid #C8D7DF!important;
-  border-radius:7px!important;background:#fff!important;font-family:inherit!important;font-size:10.5px!important;color:#071B37!important
-}
-.ct-owner-save{
-  height:32px!important;padding:4px 11px!important;border:0!important;border-radius:7px!important;
-  background:#167AA5!important;color:#fff!important;font-family:inherit!important;font-size:10px!important;font-weight:800!important;cursor:pointer!important
-}
-.ct-owner-save:hover{filter:brightness(.95)}
-.ct-owner-save[disabled]{opacity:.55!important;cursor:wait!important}
-.ct-owner-status{display:block!important;min-width:58px!important;margin-top:3px!important;font-size:8.5px!important;color:#718391!important}
+.ct-owner-select{min-width:112px!important;height:32px!important;padding:4px 7px!important;border:1px solid #C8D7DF!important;border-radius:7px!important;background:#fff!important;font-family:inherit!important;font-size:10.5px!important;color:#071B37!important}
+.ct-owner-actions{display:flex!important;gap:5px!important;align-items:center!important;white-space:nowrap!important}
+.ct-owner-save{height:32px!important;padding:4px 11px!important;border:0!important;border-radius:7px!important;background:#167AA5!important;color:#fff!important;font-size:10px!important;font-weight:800!important;cursor:pointer!important}
+.ct-owner-delete{height:32px!important;padding:4px 10px!important;border:1px solid #D8A7A1!important;border-radius:7px!important;background:#FFF3F1!important;color:#A23A32!important;font-size:9.5px!important;font-weight:800!important;cursor:pointer!important}
+.ct-owner-status{display:block!important;margin-top:3px!important;font-size:8.5px!important;color:#718391!important}
 .ct-owner-status.ok{color:#287A54!important;font-weight:700!important}
 .ct-owner-status.err{color:#A23A32!important;font-weight:700!important}
-
-@media(max-width:1050px){
-  .ct-health-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  .ct-health-toolbar{grid-template-columns:1fr 1fr!important}
-  .ct-health-toolbar input{grid-column:1/-1}
-}
-@media(max-width:760px){
-  #ctExportActiveOwnershipBtn{width:100%}
-  .ct-health-summary-grid{grid-template-columns:1fr!important}
-  .ct-health-toolbar{grid-template-columns:1fr!important}
-}
-
-.ct-owner-actions{display:flex!important;gap:5px!important;align-items:center!important;flex-wrap:wrap!important;min-width:150px!important}
-.ct-owner-delete{
-  height:32px!important;padding:4px 10px!important;border:1px solid #D8A7A1!important;border-radius:7px!important;
-  background:#FFF3F1!important;color:#A23A32!important;font-family:inherit!important;font-size:9.5px!important;font-weight:800!important;cursor:pointer!important
-}
-.ct-owner-delete:hover{background:#FFE8E4!important}
-.ct-owner-delete[disabled]{opacity:.55!important;cursor:wait!important}
+#ctExportActiveOwnershipBtn{white-space:nowrap}
+@media(max-width:1050px){.ct-health-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:760px){.ct-health-summary-grid{grid-template-columns:1fr!important}#ctExportActiveOwnershipBtn{width:100%}}
 </style>
-<script id="ct-clean-health-v31-js">
+
+<script id="ct-health-workspace-v40-js">
 (function(){
 'use strict';
-const DAY=86400000,LEVELS=new Set(['A','B','C','CHANNEL']);
+
+const DELETE_MARKER='__ROSTER_DELETE_V40__';
+const LEVELS=new Set(['A','B','C','CHANNEL']);
 const key=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const num=v=>Number.isFinite(Number(v))?Number(v):0;
-const pick=(r,names)=>{for(const n of names){if(r&&r[n]!==undefined&&r[n]!==null&&String(r[n]).trim()!=='')return r[n]}return null};
-const level=v=>{const x=String(v||'').trim().toUpperCase();return LEVELS.has(x)?(x==='CHANNEL'?'Channel':x):null};
-const dateVal=v=>{if(v===null||v===undefined||v==='')return null;try{let d=v instanceof Date?v:(typeof v==='number'&&v>1000?new Date(Math.round((v-25569)*86400000)):new Date(v));return !isNaN(d)&&d.getFullYear()>1971?d.toISOString().slice(0,10):null}catch(e){return null}};
-const age=v=>{if(!v)return null;const d=new Date(String(v).slice(0,10)+'T12:00:00');return isNaN(d)?null:Math.max(0,Math.floor((Date.now()-d.getTime())/DAY))};
+const level=v=>{const s=String(v||'').trim().toUpperCase();return LEVELS.has(s)?(s==='CHANNEL'?'Channel':s):null};
 const fmt=v=>{if(!v)return'—';const d=new Date(String(v).slice(0,10)+'T12:00:00');return isNaN(d)?'—':String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+'/'+d.getFullYear()};
-const shortLp=v=>{const s=key(v);if(s.includes('de la riva')||s==='karen')return'Karen';if(s.includes('mcmahon')||s==='osgood')return'Osgood';if(s.includes('johnston')||s==='jordan')return'Jordan';if(s.includes('saleh')||s==='said')return'Said';if(s.includes('dill')||s==='gavin')return'Gavin';if(s.includes('isaak'))return'Isaak';return String(v||'').trim()};
-const cleanOwner=v=>{const s=String(v||'').trim();return(!s||/^_+removed_+$/i.test(s)||/^removed$/i.test(s))?'Unassigned':s};
+const age=v=>{if(!v)return null;const d=new Date(String(v).slice(0,10)+'T12:00:00');return isNaN(d)?null:Math.max(0,Math.floor((Date.now()-d.getTime())/86400000))};
+const shortLp=v=>{const s=key(v);if(!s||s.indexOf('__removed')>=0)return'Unassigned';if(s.includes('de la riva')||s==='karen')return'Karen';if(s.includes('mcmahon')||s==='osgood')return'Osgood';if(s.includes('johnston')||s==='jordan')return'Jordan';if(s.includes('saleh')||s==='said')return'Said';if(s.includes('dill')||s==='gavin')return'Gavin';if(s.includes('isaak'))return'Isaak';return String(v||'').trim()};
+const cleanRm=v=>{const s=String(v||'').trim();return(!s||s.startsWith('__'))?'Unassigned':s};
 const RM_OPTIONS=['Unassigned','Amanda','Nyny'];
 const LP_OPTIONS=['Unassigned','Gavin','Karen','Osgood','Jordan','Said','Isaak'];
-function ownerOptions(values,current){
-  const cur=cleanOwner(current);
-  return values.map(v=>'<option value="'+esc(v)+'"'+(v===cur?' selected':'')+'>'+esc(v)+'</option>').join('');
+function opts(values,current){current=String(current||'Unassigned');return values.map(v=>'<option value="'+esc(v)+'"'+(v===current?' selected':'')+'>'+esc(v)+'</option>').join('')}
+
+function getSnap(){try{return window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')}catch(e){return null}}
+function sourceRows(){
+  const s=getSnap(); if(!s)return[];
+  const src=(s.all_by_agent&&Object.keys(s.all_by_agent).length)?s.all_by_agent:(s.by_agent||{});
+  return Object.values(src).filter(r=>r&&level(r.level));
 }
-
-
-function snap(){try{return window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')}catch(e){return null}}
-function save(s){window.CT_POWERBI_SNAPSHOT=s;try{localStorage.setItem('ct_powerbi_snapshot_v1',JSON.stringify(s))}catch(e){}}
-function make(rows){
-  const all={},levels={A:0,B:0,C:0,Channel:0,Blank:0,Other:0};let pre=0,pipe=0;
-  (rows||[]).forEach(raw=>{
-    const name=String(pick(raw,['Agent','Agent Name','agent','agent_name'])||'').trim();if(!name||/^(agent|nan|nat)$/i.test(name))return;
-    const rawLv=pick(raw,['Level','level','Power BI Level','powerbi_level']),lv=level(rawLv);if(lv)levels[lv]++;else if(!String(rawLv||'').trim())levels.Blank++;else levels.Other++;
-    const r={name,level:lv,official_active:!!lv,active_prequals:num(pick(raw,['Active Prequals','active_prequals'])),active_pipeline:num(pick(raw,['Active In Pipeline','Active Pipeline','active_pipeline'])),total_leads_12mo:num(pick(raw,['Total Leads Past Year','total_leads_12mo'])),closed_12mo:num(pick(raw,['Closed Past Year','closed_12mo'])),latest_lead:dateVal(pick(raw,['Latest Lead (In Velocify)','Latest Lead','latest_lead'])),latest_started:dateVal(pick(raw,['Latest File Started','latest_started'])),latest_contract:dateVal(pick(raw,['Latest Contract','latest_contract'])),latest_close:dateVal(pick(raw,['Latest Close','latest_close'])),email:String(pick(raw,['Email','email'])||'').trim()||null,phone:String(pick(raw,['Phone Number','Phone','phone'])||'').trim()||null};
-    all[key(name)]=r;if(lv){pre+=r.active_prequals;pipe+=r.active_pipeline}
-  });
-  const by={};Object.keys(all).forEach(k=>{if(all[k].official_active)by[k]=all[k]});
-  return{imported_at:new Date().toISOString(),active_partner_definition:'POWER_BI_VALID_LEVEL',raw_rows:Object.keys(all).length,active_partner_rows:Object.keys(by).length,levels,active_prequals_total:pre,active_pipeline_total:pipe,all_by_agent:all,by_agent:by};
-}
-function activeRows(){const s=snap();if(!s)return[];const src=(s.all_by_agent&&Object.keys(s.all_by_agent).length)?s.all_by_agent:(s.by_agent||{});return Object.values(src).filter(r=>r&&level(r.level)&&r.removed_everywhere!==true)}
-function statusText(){const rows=activeRows(),c={A:0,B:0,C:0,Channel:0};let pre=0,pipe=0;rows.forEach(r=>{c[level(r.level)]++;pre+=num(r.active_prequals);pipe+=num(r.active_pipeline)});const s=snap(),outside=Math.max(0,num(s&&s.raw_rows)-rows.length);return'Power BI loaded: '+rows.length+' Active Agents · '+c.A+' A · '+c.B+' B · '+c.C+' C'+(c.Channel?' · '+c.Channel+' Channel':'')+' · '+pre+' current prequal buyers · '+pipe+' current buyers in pipeline'+(outside?' · '+outside+' rows without a valid Level':'')+'.'}
-function paint(){if(!snap())return;const msg=statusText();['upload-result','lpv3-pb-status'].forEach(id=>{const e=document.getElementById(id);if(e){e.textContent=msg;e.style.color='#315A73'}});document.querySelectorAll('.ct-cadence-note').forEach(x=>x.remove());const g=document.querySelector('#view-data-hub .ct-data-grid');if(g&&!document.getElementById('ct-pb-rule-note')){const n=document.createElement('div');n.id='ct-pb-rule-note';n.innerHTML='<b>Active Agent rule:</b> every current Power BI row with a valid Level. Lead/close recency only controls relationship-health color; it never removes an agent from the roster.';g.parentNode.insertBefore(n,g)}}
-
-window.loadXLSX=function(){const input=document.getElementById('fileInput');if(!input)return;input.removeAttribute('onchange');input.onchange=pbChanged;const go=()=>input.click();if(window.XLSX){go();return}const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=go;s.onerror=()=>alert('Could not load Excel reader.');document.head.appendChild(s)};
-async function pbChanged(e){const input=e.target,file=input&&input.files&&input.files[0];if(!file)return;try{const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null}),s=make(rows);save(s);try{if(typeof window.lpSyncAgentProfilesFromUpload==='function')await window.lpSyncAgentProfilesFromUpload(rows)}catch(_){}paint();await loadHealth();try{if(typeof renderGrowthScoreboard==='function')renderGrowthScoreboard()}catch(_){}}catch(err){const e=document.getElementById('upload-result');if(e){e.textContent='Power BI import failed: '+err.message;e.style.color='#A33A35'}}finally{input.value=''}}
-
-async function hydrate(rows){
-  let profiles=[],assign=[];
+async function hydrate(){
+  let profiles=[],assignments=[];
   if(typeof sbFetch==='function'){
-    [profiles,assign]=await Promise.all([
-      sbFetch('GET','agent_profiles?select=agent_name,email,phone,relationship_status&limit=5000').catch(()=>[]),
-      sbFetch('GET','agent_assignments?select=agent_name,lp,rm&limit=5000').catch(()=>[])
+    [profiles,assignments]=await Promise.all([
+      sbFetch('GET','agent_profiles?select=agent_name,display_name,email,phone&limit=5000').catch(()=>[]),
+      sbFetch('GET','agent_assignments?select=agent_name,lp,rm,priority,added,level,closed_past_year&limit=5000').catch(()=>[])
     ]);
   }
-  const pm={},am={},removed=new Set();
-  profiles.forEach(x=>{
-    pm[key(x.agent_name)]=x;
-    if(String(x.relationship_status||'').toLowerCase()==='inactive')removed.add(key(x.agent_name));
+  const pm={},am={},deleted=new Set();
+  (profiles||[]).forEach(p=>{
+    if(!p||!p.agent_name)return;
+    pm[key(p.agent_name)]=p;
+    // ONLY this new explicit marker may shrink the current 138 Power BI population.
+    if(String(p.display_name||'').trim()===DELETE_MARKER)deleted.add(key(p.agent_name));
   });
-  assign.forEach(x=>{
-    am[key(x.agent_name)]=x;
-    if(String(x.lp||'')==='__REMOVED__')removed.add(key(x.agent_name));
-  });
-  return rows.filter(p=>!removed.has(key(p.name))).map(p=>{
+  (assignments||[]).forEach(a=>{if(a&&a.agent_name)am[key(a.agent_name)]=a});
+  return sourceRows().filter(p=>!deleted.has(key(p.name))).map(p=>{
     const pr=pm[key(p.name)]||{},a=am[key(p.name)]||{},ld=age(p.latest_lead),cd=age(p.latest_close);
     let health='red',action='Call today',why=ld===null?'No lead on record':ld+'d since last lead';
     if(ld!==null&&ld<=30){health='green';action='Current';why=ld+'d since last lead'}
     else if(ld!==null&&ld<=60){health='yellow';action='Call / review';why=ld+'d since last lead'}
     else if(cd!==null&&cd<=90)why+=' · recent close';
     return{
-      name:p.name,email:p.email||pr.email||'',phone:p.phone||pr.phone||'',tier:level(p.level)||'—',
-      rm:cleanOwner(a.rm),lp:cleanOwner(shortLp(a.lp)),pre:num(p.active_prequals),pipe:num(p.active_pipeline),
-      last:p.latest_lead,lastStart:p.latest_started,lastContract:p.latest_contract,lastClose:p.latest_close,
-      daysLead:ld,health,archive:false,action,why
+      name:p.name,tier:level(p.level)||'—',
+      rm:cleanRm(a.rm),lp:shortLp(a.lp),
+      email:p.email||pr.email||'',phone:p.phone||pr.phone||'',
+      pre:num(p.active_prequals),pipe:num(p.active_pipeline),
+      last:p.latest_lead||null,lastStart:p.latest_started||null,lastContract:p.latest_contract||null,lastClose:p.latest_close||null,
+      daysLead:ld,health,action,why
     };
   });
 }
-async function loadHealth(){const h=document.getElementById('lpv3-health-table');if(h)h.innerHTML='<div class="ct-health-loading">Loading current Power BI roster…</div>';window.__CT_HEALTH_ROWS=await hydrate(activeRows());renderHealth();paint()}
-function renderHealth(){
+
+function render(){
   const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');if(!host)return;
-  const all=(window.__CT_HEALTH_ROWS||[]).slice(),
-        q=key((document.getElementById('lpv3-health-q')||{}).value),
-        hf=(document.getElementById('lpv3-health-filter')||{}).value||'',
-        lf=(document.getElementById('lpv3-health-lp')||{}).value||'';
-  let show=all.slice();
-  if(hf==='action')show=show.filter(r=>r.health==='red'||r.health==='yellow');
-  else if(['red','yellow','green'].includes(hf))show=show.filter(r=>r.health===hf);
-  if(q)show=show.filter(r=>key(r.name).includes(q));
-  if(lf)show=show.filter(r=>cleanOwner(r.lp)===lf);
+  const all=(window.__CT_HEALTH_ROWS||[]).slice();
+  const q=key((document.getElementById('lpv3-health-q')||{}).value);
+  const hf=(document.getElementById('lpv3-health-filter')||{}).value||'';
+  const lf=(document.getElementById('lpv3-health-lp')||{}).value||'';
+  let rows=all.slice();
+  if(hf==='action')rows=rows.filter(r=>r.health==='red'||r.health==='yellow');
+  else if(['red','yellow','green'].includes(hf))rows=rows.filter(r=>r.health===hf);
+  if(q)rows=rows.filter(r=>key(r.name).includes(q));
+  if(lf)rows=rows.filter(r=>r.lp===lf);
   const rank={red:0,yellow:1,green:2};
-  show.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??999)-(a.daysLead??999))||String(a.name).localeCompare(String(b.name)));
-  const cnt=h=>all.filter(r=>r.health===h).length,
-        pre=all.reduce((n,r)=>n+r.pre,0),
-        pipe=all.reduce((n,r)=>n+r.pipe,0),
-        follow=cnt('red')+cnt('yellow');
-  if(sum)sum.innerHTML=
-    '<div class="ct-health-summary-grid">'+
-      '<button class="ct-health-summary" type="button" onclick="document.getElementById(\'lpv3-health-filter\').value=\'all\';ctCleanRenderHealth()"><b>'+all.length+'</b><span>Active Agents</span><small>Current Power BI · valid Level</small></button>'+
-      '<div class="ct-health-summary"><b>'+pre+'</b><span>Current Prequal Buyers</span><small>Latest Power BI buyer count</small></div>'+
-      '<div class="ct-health-summary"><b>'+pipe+'</b><span>Current Buyers in Pipeline</span><small>Latest Power BI buyer count</small></div>'+
-      '<button class="ct-health-summary" type="button" onclick="document.getElementById(\'lpv3-health-filter\').value=\'action\';ctCleanRenderHealth()"><b>'+follow+'</b><span>Relationship Follow-Up</span><small>31+ day lead gap</small></button>'+
-    '</div>'+
-    '<div class="ct-health-chip-row">'+
-      '<span class="ct-health-chip green">Green · lead in last 30 days · '+cnt('green')+'</span>'+
-      '<span class="ct-health-chip yellow">Yellow · 31–60 days since last lead · '+cnt('yellow')+'</span>'+
-      '<span class="ct-health-chip red">Red · 61+ days since last lead · '+cnt('red')+'</span>'+
-    '</div>';
+  rows.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??999)-(a.daysLead??999))||String(a.name).localeCompare(String(b.name)));
 
-  const trs=show.map(r=>{
-    const id='ct-own-'+Math.abs(Array.from(String(r.name)).reduce((h,c)=>((h<<5)-h)+c.charCodeAt(0)|0,0));
-    return '<tr>'+
-      '<td><span class="ct-health-dot '+r.health+'"></span><b>'+esc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+esc(r.action)+'</small></td>'+
-      '<td><button class="ct-health-agent-link" type="button" onclick="openLpContactModal('+JSON.stringify(r.name)+')">'+esc(r.name)+'</button><small>'+esc(r.why)+'</small></td>'+
+  const cnt=h=>all.filter(r=>r.health===h).length,pre=all.reduce((n,r)=>n+r.pre,0),pipe=all.reduce((n,r)=>n+r.pipe,0),follow=cnt('red')+cnt('yellow');
+  if(sum)sum.innerHTML='<div class="ct-health-summary-grid">'+
+    '<div class="ct-health-summary"><b>'+all.length+'</b><span>Active Agents</span><small>Current Power BI · valid Level</small></div>'+
+    '<div class="ct-health-summary"><b>'+pre+'</b><span>Current Prequal Buyers</span><small>Latest Power BI buyer count</small></div>'+
+    '<div class="ct-health-summary"><b>'+pipe+'</b><span>Current Buyers in Pipeline</span><small>Latest Power BI buyer count</small></div>'+
+    '<div class="ct-health-summary"><b>'+follow+'</b><span>Relationship Follow-Up</span><small>31+ day lead gap</small></div>'+
+    '</div><div class="ct-health-chip-row"><span class="ct-health-chip green">Green · lead in last 30 days · '+cnt('green')+'</span><span class="ct-health-chip yellow">Yellow · 31–60 days since last lead · '+cnt('yellow')+'</span><span class="ct-health-chip red">Red · 61+ days since last lead · '+cnt('red')+'</span></div>';
+
+  host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr>'+
+    '<th>Health</th><th>Agent / Action</th><th>Tier</th><th>RM Owner</th><th>LP Owner</th><th>Actions</th>'+
+    '<th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th>'+
+    '</tr></thead><tbody>'+
+    (rows.length?rows.map(r=>
+      '<tr data-health-agent="'+esc(r.name)+'">'+
+      '<td><b>'+esc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+esc(r.action)+'</small></td>'+
+      '<td><button type="button" class="ct-health-agent-link" data-health-action="contact">'+esc(r.name)+'</button><small>'+esc(r.why)+'</small></td>'+
       '<td>'+esc(r.tier)+'</td>'+
-      '<td><select class="ct-owner-select" id="'+id+'-rm" aria-label="RM owner for '+esc(r.name)+'">'+ownerOptions(RM_OPTIONS,r.rm)+'</select></td>'+
-      '<td><select class="ct-owner-select" id="'+id+'-lp" aria-label="LP owner for '+esc(r.name)+'">'+ownerOptions(LP_OPTIONS,r.lp)+'</select></td>'+
-      '<td><div class="ct-owner-actions"><button class="ct-owner-save" id="'+id+'-save" type="button" onclick="ctSaveInlineOwnership('+JSON.stringify(r.name)+','+JSON.stringify(id)+')">Save</button><button class="ct-owner-delete" id="'+id+'-delete" type="button" onclick="ctRemoveAgentEverywhere('+JSON.stringify(r.name)+','+JSON.stringify(id)+')">Remove Everywhere</button></div><span class="ct-owner-status" id="'+id+'-status"></span></td>'+
-      '<td>'+r.pre+'</td><td>'+r.pipe+'</td>'+
-      '<td>'+fmt(r.last)+'</td><td>'+fmt(r.lastStart)+'</td><td>'+fmt(r.lastContract)+'</td><td>'+fmt(r.lastClose)+'</td>'+
-    '</tr>';
-  }).join('');
+      '<td><select class="ct-owner-select" data-owner-role="rm">'+opts(RM_OPTIONS,r.rm)+'</select></td>'+
+      '<td><select class="ct-owner-select" data-owner-role="lp">'+opts(LP_OPTIONS,r.lp)+'</select></td>'+
+      '<td><div class="ct-owner-actions"><button type="button" class="ct-owner-save" data-health-action="save">Save</button><button type="button" class="ct-owner-delete" data-health-action="delete">Delete Everywhere</button></div><span class="ct-owner-status"></span></td>'+
+      '<td>'+r.pre+'</td><td>'+r.pipe+'</td><td>'+fmt(r.last)+'</td><td>'+fmt(r.lastStart)+'</td><td>'+fmt(r.lastContract)+'</td><td>'+fmt(r.lastClose)+'</td>'+
+      '</tr>'
+    ).join(''):'<tr><td colspan="12" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+
+    '</tbody></table></div>';
+}
+async function loadHealth(){
+  const host=document.getElementById('lpv3-health-table');
+  if(host)host.innerHTML='<div style="padding:20px;color:#718391">Loading current Power BI roster…</div>';
+  window.__CT_HEALTH_ROWS=await hydrate();
+  render();
+}
+window.ctLoadAgentHealthFresh=loadHealth;
+window.ctRenderHealthRows=render;
+window.lpv3RenderAgentHealth=render;
 
-  host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table">'+
-    '<thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>RM Owner</th><th>LP Owner</th><th>Save</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead>'+
-    '<tbody>'+(trs||'<tr><td colspan="12" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+'</tbody></table></div>';
+async function saveRow(tr,btn){
+  const name=tr&&tr.getAttribute('data-health-agent');if(!name)return;
+  const rmSel=tr.querySelector('select[data-owner-role="rm"]'),lpSel=tr.querySelector('select[data-owner-role="lp"]'),st=tr.querySelector('.ct-owner-status');
+  const rmVal=rmSel&&rmSel.value!=='Unassigned'?rmSel.value:null,lpVal=lpSel?lpSel.value:'Unassigned';
+  btn.disabled=true;btn.textContent='Saving…';if(st){st.textContent='';st.className='ct-owner-status'}
+  try{
+    // Use the exact same assignment structure as the tracker's working Ownership page.
+    const existing=await sbFetch('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(name)+'&select=*&limit=5').catch(()=>[]);
+    const ar=(existing||[]).find(r=>key(r.agent_name)===key(name))||(existing||[])[0]||{};
+    const row=(window.__CT_HEALTH_ROWS||[]).find(r=>key(r.name)===key(name))||{};
+    const payload={agent_name:ar.agent_name||name,lp:lpVal||'Unassigned',rm:rmVal,priority:ar.priority!==undefined?!!ar.priority:false,added:ar.added!==undefined?!!ar.added:false,level:ar.level||row.tier||'C'};
+    if(ar.closed_past_year!==undefined)payload.closed_past_year=ar.closed_past_year;
+    await sbFetch('POST','agent_assignments?on_conflict=agent_name',payload);
+    row.rm=rmVal||'Unassigned';row.lp=lpVal||'Unassigned';
+    if(st){st.textContent='Saved ✓';st.className='ct-owner-status ok'}btn.textContent='Saved';
+    setTimeout(()=>{btn.disabled=false;btn.textContent='Save';if(st)st.textContent=''},1200);
+  }catch(err){
+    console.error(err);btn.disabled=false;btn.textContent='Retry';
+    if(st){st.textContent='Save failed';st.className='ct-owner-status err'}
+  }
 }
 
-window.ctSaveInlineOwnership=async function(agentName,id){
-  const rmEl=document.getElementById(id+'-rm'),lpEl=document.getElementById(id+'-lp'),
-        btn=document.getElementById(id+'-save'),st=document.getElementById(id+'-status');
-  if(!rmEl||!lpEl||!agentName)return;
-  const rm=rmEl.value==='Unassigned'?null:rmEl.value,lp=lpEl.value||'Unassigned';
-  if(btn){btn.disabled=true;btn.textContent='Saving…'}if(st){st.className='ct-owner-status';st.textContent=''}
+async function deleteRow(tr,btn){
+  const name=tr&&tr.getAttribute('data-health-agent');if(!name)return;
+  if(!window.confirm('Delete '+name+' from the active roster everywhere? Historical activity will remain.'))return;
+  const st=tr.querySelector('.ct-owner-status');btn.disabled=true;btn.textContent='Deleting…';if(st){st.textContent='';st.className='ct-owner-status'}
   try{
-    let existing=[];
-    if(typeof sbFetch==='function')existing=await sbFetch('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(agentName)+'&select=*&limit=5').catch(()=>[]);
-    const a=(existing||[]).find(x=>key(x.agent_name)===key(agentName))||(existing||[])[0]||{};
-    const payload={
-      agent_name:a.agent_name||agentName,
-      lp:lp,
-      rm:rm,
-      priority:!!a.priority,
-      added:!!a.added,
-      level:a.level||((window.__CT_HEALTH_ROWS||[]).find(x=>key(x.name)===key(agentName))||{}).tier||'C'
-    };
-    if(a.closed_past_year!==undefined)payload.closed_past_year=a.closed_past_year;
-    if(typeof sbFetch==='function')await sbFetch('POST','agent_assignments?on_conflict=agent_name',payload);
-    const row=(window.__CT_HEALTH_ROWS||[]).find(x=>key(x.name)===key(agentName));
-    if(row){row.rm=rm||'Unassigned';row.lp=lp||'Unassigned'}
-    try{
-      const ag=(window.agents||[]).find(x=>key(x&&x[0])===key(agentName));
-      if(ag)ag[2]=lp||'Unassigned';
-    }catch(_){}
-    if(st){st.className='ct-owner-status ok';st.textContent='Saved ✓'}
-    if(btn){btn.textContent='Saved'}
-    setTimeout(()=>{if(btn){btn.disabled=false;btn.textContent='Save'}if(st)st.textContent=''},1200);
+    let canonical=name;
+    try{if(typeof resolveCanonicalProfileName==='function')canonical=(await resolveCanonicalProfileName(name))||name}catch(e){}
+    let prof=await sbFetch('GET','agent_profiles?agent_name=ilike.'+encodeURIComponent(canonical)+'&select=agent_name&limit=5').catch(()=>[]);
+    const pr=(prof||[]).find(r=>key(r.agent_name)===key(canonical))||(prof||[])[0];
+    if(pr&&pr.agent_name){
+      await sbFetch('PATCH','agent_profiles?agent_name=eq.'+encodeURIComponent(pr.agent_name),{display_name:DELETE_MARKER,relationship_status:'inactive'});
+      canonical=pr.agent_name;
+    }else{
+      // agent_profiles has both display_name and relationship_status in this tracker.
+      await sbFetch('POST','agent_profiles?on_conflict=agent_name',{agent_name:canonical,display_name:DELETE_MARKER,relationship_status:'inactive'});
+    }
+    const ex=await sbFetch('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(canonical)+'&select=*&limit=5').catch(()=>[]);
+    const ar=(ex||[]).find(r=>key(r.agent_name)===key(canonical))||(ex||[])[0]||{};
+    await sbFetch('POST','agent_assignments?on_conflict=agent_name',{
+      agent_name:ar.agent_name||canonical,lp:'__REMOVED__',rm:null,priority:false,added:false,level:ar.level||((window.__CT_HEALTH_ROWS||[]).find(r=>key(r.name)===key(name))||{}).tier||'C'
+    });
+    try{if(typeof clearAgentFromRmWorkflows==='function')await clearAgentFromRmWorkflows(canonical)}catch(e){}
+    window.__CT_HEALTH_ROWS=(window.__CT_HEALTH_ROWS||[]).filter(r=>key(r.name)!==key(name));
+    render();
   }catch(err){
-    console.error('Ownership save failed',err);
-    if(st){st.className='ct-owner-status err';st.textContent='Not saved'}
-    if(btn){btn.disabled=false;btn.textContent='Save'}
+    console.error(err);btn.disabled=false;btn.textContent='Delete Everywhere';
+    if(st){st.textContent='Delete failed';st.className='ct-owner-status err'}
+    window.alert('Delete did not save. Nothing was intentionally removed. Please retry.');
   }
+}
+
+function exportCsv(){
+  const rows=(window.__CT_HEALTH_ROWS||[]).slice().sort((a,b)=>String(a.lp).localeCompare(String(b.lp))||String(a.name).localeCompare(String(b.name)));
+  const cols=['Agent','Email','Phone','Tier','RM Owner','LP Owner','Relationship Health','Active Prequals','Active Pipeline','Last Lead','Last Close'];
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const data=[cols].concat(rows.map(r=>[r.name,r.email,r.phone,r.tier,r.rm,r.lp,r.health,r.pre,r.pipe,fmt(r.last)==='—'?'':fmt(r.last),fmt(r.lastClose)==='—'?'':fmt(r.lastClose)]));
+  const blob=new Blob([data.map(row=>row.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'),url=URL.createObjectURL(blob);
+  a.href=url;a.download='Active-Agent-Ownership-'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+window.ctExportActiveAgentOwnership=exportCsv;
+
+function wire(){
+  const view=document.getElementById('view-agent-health');if(!view||view.dataset.v40wired==='1')return;
+  view.dataset.v40wired='1';
+  view.addEventListener('click',function(e){
+    const btn=e.target.closest('[data-health-action]');if(!btn)return;
+    const tr=btn.closest('tr[data-health-agent]');
+    const act=btn.getAttribute('data-health-action');
+    if(act==='save'){e.preventDefault();saveRow(tr,btn)}
+    else if(act==='delete'){e.preventDefault();deleteRow(tr,btn)}
+    else if(act==='contact'){e.preventDefault();const n=tr&&tr.getAttribute('data-health-agent');if(n&&typeof openLpContactModal==='function')openLpContactModal(n)}
+  });
+  ['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{
+    const el=document.getElementById(id);if(el){el.oninput=render;el.onchange=render}
+  });
+  const exp=document.getElementById('ctExportActiveOwnershipBtn');
+  if(exp){exp.onclick=function(e){e.preventDefault();exportCsv()}}
+}
+function openHealth(btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const v=document.getElementById('view-agent-health');if(v)v.classList.add('active');
+  document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active'));if(btn&&btn.classList)btn.classList.add('active');
+  const lpSel=document.getElementById('lpv3-health-lp');if(lpSel)lpSel.value='';
+  wire();loadHealth();window.scrollTo(0,0);
+}
+window.lpv3OpenAgentHealth=openHealth;
+
+const priorRoute=window.lpv2Route;
+window.lpv2Route=function(route,btn){
+  if(route==='agent-health'){openHealth(btn);return}
+  return priorRoute?priorRoute(route,btn):undefined;
 };
 
-window.ctCleanRenderHealth=renderHealth;window.ctRenderHealthRows=renderHealth;window.lpv3RenderAgentHealth=renderHealth;window.ctLoadAgentHealthFresh=loadHealth;
-
-window.ctRemoveAgentEverywhere=async function(agentName,id){
-  if(!agentName)return;
-  const ok=window.confirm(
-    'Remove "'+agentName+'" from the shared active-agent roster everywhere?\n\n'+
-    'This will exclude the agent from the LP roster/export and RM tracker, and future Power BI uploads will not bring the row back. Historical activity will be kept.'
-  );
-  if(!ok)return;
-
-  const btn=document.getElementById(id+'-delete'),
-        saveBtn=document.getElementById(id+'-save'),
-        st=document.getElementById(id+'-status');
-  if(btn){btn.disabled=true;btn.textContent='Removing…'}
-  if(saveBtn)saveBtn.disabled=true;
-  if(st){st.className='ct-owner-status';st.textContent=''}
-
-  try{
-    let profiles=[],assign=[];
-    if(typeof sbFetch==='function'){
-      [profiles,assign]=await Promise.all([
-        sbFetch('GET','agent_profiles?agent_name=ilike.'+encodeURIComponent(agentName)+'&select=*&limit=5').catch(()=>[]),
-        sbFetch('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(agentName)+'&select=*&limit=5').catch(()=>[])
-      ]);
-    }
-
-    const pr=(profiles||[]).find(x=>key(x.agent_name)===key(agentName))||(profiles||[])[0]||null;
-    const ar=(assign||[]).find(x=>key(x.agent_name)===key(agentName))||(assign||[])[0]||null;
-
-    // Shared profile flag: RM + LP readers already respect relationship_status=inactive.
-    if(typeof sbFetch==='function'){
-      if(pr){
-        await sbFetch('PATCH','agent_profiles?agent_name=eq.'+encodeURIComponent(pr.agent_name),{relationship_status:'inactive'}).catch(async err=>{
-          // If optional schema field is unavailable, legacy assignment sentinel still guarantees exclusion.
-          console.warn('Profile inactive flag could not be written; using assignment removal sentinel.',err);
-        });
-      }else{
-        // Best effort create; if relationship_status is unsupported, sentinel below remains authoritative.
-        await sbFetch('POST','agent_profiles?on_conflict=agent_name',{agent_name:agentName,relationship_status:'inactive'}).catch(()=>{});
-      }
-
-      const payload={
-        agent_name:(ar&&ar.agent_name)||agentName,
-        lp:'__REMOVED__',
-        rm:null,
-        priority:false,
-        added:false,
-        level:(ar&&ar.level)||((window.__CT_HEALTH_ROWS||[]).find(x=>key(x.name)===key(agentName))||{}).tier||'C'
-      };
-      if(ar&&ar.closed_past_year!==undefined)payload.closed_past_year=ar.closed_past_year;
-      await sbFetch('POST','agent_assignments?on_conflict=agent_name',payload);
-    }
-
-    // Remove from current browser roster/snapshot immediately.
-    window.__CT_HEALTH_ROWS=(window.__CT_HEALTH_ROWS||[]).filter(x=>key(x.name)!==key(agentName));
-    try{
-      if(Array.isArray(window.agents))window.agents=window.agents.filter(a=>key(a&&a[0])!==key(agentName));
-    }catch(_){}
-
-    const s=snap();
-    if(s){
-      const k=key(agentName);
-      if(s.by_agent)delete s.by_agent[k];
-      // Keep original Power BI row in all_by_agent for audit, but mark excluded locally.
-      if(s.all_by_agent&&s.all_by_agent[k])s.all_by_agent[k].removed_everywhere=true;
-      s.active_partner_rows=Object.keys(s.by_agent||{}).length;
-      save(s);
-    }
-
-    renderHealth();
-    paint();
-    if(st){st.className='ct-owner-status ok';st.textContent='Removed ✓'}
-  }catch(err){
-    console.error('Remove Everywhere failed',err);
-    if(st){st.className='ct-owner-status err';st.textContent='Not removed'}
-    if(btn){btn.disabled=false;btn.textContent='Remove Everywhere'}
-    if(saveBtn)saveBtn.disabled=false;
-  }
-};
-
-
-function exportButton(){const head=document.querySelector('#view-agent-health .ct-page-head');if(!head)return;if(document.getElementById('ctExportActiveOwnershipBtn'))return;const w=document.createElement('div');w.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';const b=document.createElement('button');b.id='ctExportActiveOwnershipBtn';b.className='ct-primary-btn';b.type='button';b.textContent='Export Active Agent Ownership';b.onclick=()=>window.ctExportActiveAgentOwnership();w.appendChild(b);head.appendChild(w)}
-window.ctExportActiveAgentOwnership=async function(){if(!(window.__CT_HEALTH_ROWS||[]).length)await loadHealth();const rows=(window.__CT_HEALTH_ROWS||[]).slice().sort((a,b)=>String(a.lp).localeCompare(String(b.lp))||String(a.name).localeCompare(String(b.name))),data=rows.map(r=>({'Agent':r.name,'Email':r.email,'Phone':r.phone,'Tier':r.tier,'RM Owner':cleanOwner(r.rm),'LP Owner':cleanOwner(r.lp),'Relationship Health':r.health==='green'?'Green · Recent lead':r.health==='yellow'?'Yellow · 31–60d lead gap':'Red · 61+d lead gap','Active Prequals':r.pre,'Active Pipeline':r.pipe,'Last Lead':fmt(r.last)==='—'?'':fmt(r.last),'Last Close':fmt(r.lastClose)==='—'?'':fmt(r.lastClose)}));try{if(!window.XLSX)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});const ws=XLSX.utils.json_to_sheet(data);ws['!cols']=[{wch:28},{wch:32},{wch:17},{wch:10},{wch:16},{wch:16},{wch:25},{wch:15},{wch:15},{wch:13},{wch:13}];ws['!autofilter']={ref:'A1:K'+(data.length+1)};const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Active Agent Ownership');XLSX.writeFile(wb,'Active-Agent-Ownership-'+new Date().toISOString().slice(0,10)+'.xlsx')}catch(e){alert('Excel export could not start. Please try again.')}};
-
-const oldRoute=window.lpv2Route;window.lpv2Route=function(route,btn){if(route==='agent-health'){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-agent-health')?.classList.add('active');document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active'));btn?.classList.add('active');exportButton();loadHealth();return}if(route==='data-hub'||route==='upload'){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-data-hub')?.classList.add('active');paint();return}return oldRoute?oldRoute(route,btn):undefined};
-
-function boot(){document.querySelectorAll('.ct-cadence-note').forEach(x=>x.remove());const sub=document.querySelector('#view-agent-health .ct-page-sub');if(sub)sub.textContent='Current Power BI Active Agents only. Use this roster to manage RM + LP ownership, relationship health and export. Lead recency controls health color only.';exportButton();paint();['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const e=document.getElementById(id);if(e){e.oninput=renderHealth;e.onchange=renderHealth}})}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,80),{once:true});else setTimeout(boot,80);
+function boot(){
+  const sub=document.querySelector('#view-agent-health .ct-page-sub');
+  if(sub)sub.textContent='Current Power BI Active Agents. Start with every valid-Level Power BI row. Only agents explicitly deleted from this roster are excluded.';
+  wire();
+  if(document.getElementById('view-agent-health')?.classList.contains('active'))loadHealth();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,50),{once:true});else setTimeout(boot,50);
 })();
 </script>
 
