@@ -893,9 +893,10 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </style>
 <style id="ct-conversion-growth-page-css">
 #view-leads #leads-tab-leads{display:block!important}
-#view-conversion-growth .ct-page-wrap>.ct-page-wrap{padding:0!important;max-width:none!important}
-#view-conversion-growth #conversion-growth-content{padding:0!important;max-width:none!important}
-#view-conversion-growth .section-head:first-child{margin-top:4px}
+#view-lp-conversion .ct-page-wrap>.ct-page-wrap{padding:0!important;max-width:none!important}
+#view-lp-conversion #lp-conversion-content{padding:0!important;max-width:none!important}
+#view-partner-growth .ct-page-wrap{max-width:none}
+#view-partner-growth .section-head:first-of-type{margin-top:8px}
 </style></head>
 <body>
 <div id="lpBuildBadge" style="display:none"></div>
@@ -924,7 +925,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-nav-section"><div class="ct-nav-label">TEAM</div><button class="who-btn ct-nav-btn wb-Snapshot" data-route="snapshot" onclick="lpv2Route('snapshot',this)" type="button"><span class="ct-nav-icon">▦</span><span>Team Snapshot</span></button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LOAN PARTNERS</div>
 <button class="who-btn ct-nav-btn wb-Gavin" data-lp="Gavin" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Gavin</button><button class="who-btn ct-nav-btn wb-Karen" data-lp="Karen" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Karen</button><button class="who-btn ct-nav-btn wb-Osgood" data-lp="Osgood" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Osgood</button><button class="who-btn ct-nav-btn wb-Jordan" data-lp="Jordan" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Jordan</button><button class="who-btn ct-nav-btn wb-Said" data-lp="Said" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Said</button><button class="who-btn ct-nav-btn wb-Isaak" data-lp="Isaak" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Isaak</button></div>
-<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="conversion-growth" onclick="lpv2Route('conversion-growth',this)" type="button">Conversion + Growth</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Integrity</button><button class="who-btn ct-nav-btn" data-route="income" onclick="lpv2Route('income',this)" type="button">Income Calculation</button></div>
+<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="lp-conversion" onclick="lpv2Route('lp-conversion',this)" type="button">LP Conversion</button><button class="who-btn ct-nav-btn" data-route="partner-growth" onclick="lpv2Route('partner-growth',this)" type="button">Partner Growth</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Integrity</button><button class="who-btn ct-nav-btn" data-route="income" onclick="lpv2Route('income',this)" type="button">Income Calculation</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">DATA</div><button class="who-btn ct-nav-btn" data-route="data-hub" onclick="lpv2Route('data-hub',this)" type="button">Weekly Data Hub</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LEARN + TOOLS</div><button class="who-btn ct-nav-btn wb-OperatingStandard" data-route="standard" onclick="lpv2Route('standard',this)" type="button">Operating Standard</button><button class="who-btn ct-nav-btn ct-action-btn" data-route="scripts" onclick="lpv2Route('scripts',this)" type="button">Scripts + Training</button><button class="who-btn ct-nav-btn wb-Admin" data-route="admin" onclick="lpv2Route('admin',this)" type="button">Admin</button></div>
 </div>
@@ -1275,7 +1276,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-page-head"><div><div class="ct-eyebrow">LOAN PARTNER</div><h1 id="lp-hero-name">Weekly Execution</h1><div class="ct-page-sub" id="lp-hero-sub">Loading current work…</div></div><div class="ct-role-pill" id="lp-v2-role-pill">LP2 · Client + transaction execution</div></div>
 <section class="ct-card ct-scorecard-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>My current position</h2></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="ct-link-btn" onclick="lpv4OpenMyScorecard(currentUser)" type="button">Update my scorecard</button><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div></div><div id="lp-v2-scorecard"><div class="ct-loading">Loading scorecard…</div></div></section>
 <section class="ct-card ct-focus-card"><div class="ct-section-head"><div><div class="ct-kicker">RELATIONSHIP MOMENT</div><h2>Face Time priorities</h2></div><button class="ct-link-btn" onclick="lpv2Route('facetime',this)" type="button">Open Face Time</button></div><div class="ct-embedded-block" id="lp-facetime-focus"><div class="ct-loading">Loading Face Time priorities…</div></div></section>
-<section class="ct-card ct-execution-card"><div class="ct-section-head"><div><div class="ct-kicker">EXECUTION</div><h2>Active contracts + buyer movement</h2></div><div class="ct-execution-tools"><button class="ct-link-btn" onclick="lpv3OpenDataHub()" type="button">Weekly Data Hub</button></div></div><div class="ct-helper">Work under-contract buyer/client updates first. Then review preapprovals and prequals for the next meaningful move. Routine listing-agent relationship work belongs to RM.</div><div class="ct-stall-explainer"><strong>What “Stalled” means:</strong> the buyer has stayed in the same unresolved stage for 5+ days without a meaningful status update. Open the buyer, choose the reason they are stuck, document what changed, and set the next action/owner. Updating the record resets the stall clock.</div><div id="lp-weekly-execution-host"><div class="ct-loading">Loading current transaction and pipeline work…</div></div></section>
+<section class="ct-card ct-execution-card"><div class="ct-section-head"><div><div class="ct-kicker">EXECUTION</div><h2>Active contracts + buyer movement</h2></div></div><div class="ct-helper">Work under-contract buyer/client updates first. Then review preapprovals and prequals for the next meaningful move. Routine listing-agent relationship work belongs to RM.</div><div class="ct-stall-explainer"><strong>What “Stalled” means:</strong> the buyer has stayed in the same unresolved stage for 5+ days without a meaningful status update. Open the buyer, choose the reason they are stuck, document what changed, and set the next action/owner. Updating the record resets the stall clock.</div><div id="lp-weekly-execution-host"><div class="ct-loading">Loading current transaction and pipeline work…</div></div></section>
 <section class="ct-card ct-handoff-card"><div class="ct-section-head"><div><div class="ct-kicker">TEAM HANDOFFS</div><h2>RM → LP actions</h2></div></div>
 <div class="ct-embedded-block" id="lp-rm-flags-for-you"><div id="lp-rm-flags-for-you-list"></div><span id="lp-rm-flag-badge" style="display:none"></span></div>
 <div class="lp-rm-response-panel" id="lp-rm-responses"><details id="lp-rm-responses-details"><summary><b>Recent RM responses</b><span id="lp-rm-response-badge" style="display:none">NEW</span><span id="lp-rm-response-open-label">View ▾</span></summary><button id="lp-rm-response-clear-all" type="button">Clear alert</button><div id="lp-rm-response-summary"></div><div id="lp-rm-responses-list">Loading…</div></details></div>
@@ -1524,7 +1525,6 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 </div>
 <div class="view" id="view-leads">
-
 <div class="active" id="leads-tab-leads">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
 <div style="font-size:18px;font-weight:700;color:var(--text)">Referral Leads</div>
@@ -1607,8 +1607,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div id="ref-uncovered-table-v2"></div>
 </div>
 </div>
-
-<div class="d-tab-panel" id="leads-tab-growth">
+<div aria-hidden="true" class="d-tab-panel" id="leads-tab-growth" style="display:none!important">
 <div id="d-growth-scoreboard-tab" style="margin-bottom:1rem"></div>
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
 <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Growth tracking</div>
@@ -1629,16 +1628,16 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>RM Owner</th><th>LP Owner</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
 </div>
-</div><div class="view" id="view-conversion-growth"><div class="ct-page-wrap">
+</div><div class="view" id="view-lp-conversion"><div class="ct-page-wrap">
 <div class="ct-page-head">
 <div>
 <div class="ct-eyebrow">SHARED WORK</div>
-<h1>Conversion + Growth</h1>
-<div class="ct-page-sub">Use this page for lead-to-application conversion, team growth scoreboards and performance visibility. Realtor / Builder Leads stays focused on the actual lead work.</div>
+<h1>LP Conversion</h1>
+<div class="ct-page-sub">Use this page to review Loan Partner lead-to-application conversion, pipeline movement and LP effectiveness. Agent relationship growth is kept on the separate Partner Growth page.</div>
 </div>
 </div>
-<div class="ct-page-wrap" id="conversion-growth-content">
-<div class="section-head">Conversion by date range</div>
+<div class="ct-page-wrap" id="lp-conversion-content">
+<div class="section-head">Lead → Application conversion</div>
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
 <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">Search any date range for team and per-LP Lead → App conversion. Only confirmed file/application stages count; Does Not Qualify alone does not.</div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
@@ -1650,20 +1649,19 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <div id="conv-range-results" style="margin-top:12px"></div>
 </div>
-<div id="d-allclear-section" style="margin-bottom:.75rem"></div>
-<div id="d-rm-summary" style="margin-bottom:1rem"></div>
-<div id="d-lp-scorecard-summary" style="margin-bottom:1rem"></div>
-<div id="velocify-leaderboard-anchor" style="margin-bottom:1rem"></div>
-<div id="d-lead-pipeline-full" style="margin-bottom:1rem"><div style="text-align:center;padding:16px;color:var(--text-3);font-size:12px">Loading lead data...</div></div>
-<div id="d-churn-risk-section" style="margin-bottom:1rem"></div>
-<div id="d-lp-effectiveness-section" style="margin-bottom:1rem"></div>
-<div class="section-head">Growth scoreboard</div>
-<div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div>
-<div class="section-head">Lead leaderboard</div>
-<div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading...</div></div>
-<div class="section-head" style="margin-top:1rem">All-time leaderboard</div>
-<div id="leaderboard"></div>
-</div></div></div>
+<div id="d-allclear-section" style="display:none!important"></div>
+<div id="d-rm-summary" style="display:none!important"></div>
+<div class="section-head">LP weekly scorecards</div><div id="d-lp-scorecard-summary" style="margin-bottom:1rem"></div>
+<div id="velocify-leaderboard-anchor" style="display:none!important"></div>
+<div class="section-head">LP lead pipeline</div><div id="d-lead-pipeline-full" style="margin-bottom:1rem"><div style="text-align:center;padding:16px;color:var(--text-3);font-size:12px">Loading lead data...</div></div>
+<div class="section-head">LP effectiveness</div><div id="d-lp-effectiveness-section" style="margin-bottom:1rem"></div>
+</div></div></div><div class="view" id="view-partner-growth"><div class="ct-page-wrap"><div class="ct-page-head">
+<div>
+<div class="ct-eyebrow">SHARED WORK</div>
+<h1>Partner Growth</h1>
+<div class="ct-page-sub">Use this page for agent growth: tier progress and which partners are producing business. Relationship call priorities stay in Agent Health / Roster.</div>
+</div>
+</div><div class="section-head">Tier growth scoreboard</div><div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div><div aria-hidden="true" id="d-churn-risk-section" style="display:none!important"></div><div class="section-head">Lead-producing partners</div><div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading...</div></div><div class="section-head">All-time partner leaderboard</div><div id="leaderboard"></div></div></div>
 <div id="lead-drilldown-overlay" onclick="if(event.target===this)closeDrilldown()" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;align-items:center;justify-content:center;padding:16px">
 <div style="background:var(--surface);border-radius:12px;width:100%;max-width:560px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border)">
 <div id="drilldown-header" style="background:#1F4E79;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
@@ -11850,21 +11848,29 @@ window.lpv2Route=function(route,btn){
         if(typeof loadReferralLeadsDirect==='function')await Promise.resolve(loadReferralLeadsDirect()).catch(()=>{});
         return;
       }
-      if(route==='conversion-growth'){
-        activate('view-conversion-growth',btn);
+      if(route==='lp-conversion'){
+        activate('view-lp-conversion',btn);
+        try{
+          if(typeof renderLpScorecardSummary==='function')renderLpScorecardSummary();
+          if(typeof loadLeadPipeline==='function')loadLeadPipeline();
+          if(typeof renderLpEffectiveness==='function')renderLpEffectiveness();
+          const cs=document.getElementById('conv-range-start'),ce=document.getElementById('conv-range-end');
+          if(cs&&!cs.value){
+            cs.value='2026-04-01';
+            if(ce)ce.value=typeof localDateStr==='function'?localDateStr(new Date()):new Date().toISOString().slice(0,10);
+            if(typeof runConversionRangeSearch==='function')runConversionRangeSearch();
+          }
+        }catch(e){console.warn('LP Conversion load',e)}
+        return;
+      }
+      if(route==='partner-growth'){
+        activate('view-partner-growth',btn);
         try{
           if(typeof renderGrowthScoreboard==='function')renderGrowthScoreboard();
           if(typeof renderVelocifyLeaderboard==='function')renderVelocifyLeaderboard();
           if(typeof renderLeaderboard==='function')renderLeaderboard();
           if(typeof renderChurnRisk==='function')renderChurnRisk();
-          if(typeof renderLpEffectiveness==='function')renderLpEffectiveness();
-          const csEl=document.getElementById('conv-range-start'),ceEl=document.getElementById('conv-range-end');
-          if(csEl&&!csEl.value){
-            csEl.value='2026-04-01';
-            if(ceEl)ceEl.value=typeof localDateStr==='function'?localDateStr(new Date()):new Date().toISOString().slice(0,10);
-            if(typeof runConversionRangeSearch==='function')runConversionRangeSearch();
-          }
-        }catch(e){console.warn('Conversion + Growth load',e)}
+        }catch(e){console.warn('Partner Growth load',e)}
         return;
       }
       if(route==='agent-health'){
@@ -11945,7 +11951,7 @@ window.lpv2Route=function(route,btn){
   window.ctRouteHealth=function(){
     const expected={
       snapshot:'view-snapshot',lp:'view-lp',facetime:'view-facetime',leads:'view-leads',
-      'agent-health':'view-agent-health','co-marketing':'view-co-marketing',
+      'lp-conversion':'view-lp-conversion','partner-growth':'view-partner-growth','agent-health':'view-agent-health','co-marketing':'view-co-marketing',
       'file-integrity':'view-file-integrity',income:'view-income-standard',
       'data-hub':'view-data-hub',standard:'view-operating-standard',admin:'view-admin'
     };
@@ -12006,8 +12012,8 @@ window.ctOpenAmandaRmTracker=function(){
  if(typeof oldSwitch==='function'){
    window.switchLeadsTab=function(tab,btn){
      if(tab==='roster'){
-       const nav=document.querySelector('.ct-nav-btn[data-route="conversion-growth"]');
-       if(typeof lpv2Route==='function')return lpv2Route('conversion-growth',nav);
+       const nav=document.querySelector('.ct-nav-btn[data-route="lp-conversion"]');
+       if(typeof lpv2Route==='function')return lpv2Route('lp-conversion',nav);
      }
      return oldSwitch.apply(this,arguments);
    };
