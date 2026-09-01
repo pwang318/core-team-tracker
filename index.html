@@ -12108,41 +12108,20 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <!-- AGENT HEALTH MANAGEMENT WORKSPACE v40 -->
 
 <!-- AGENT HEALTH SINGLE AUTHORITY v41 -->
-<style id="ct-health-v41-css">
+
+<!-- AGENT HEALTH SINGLE AUTHORITY v42 -->
+<style id="ct-health-v42-css">
 #ctHealthBuildBadge{display:inline-flex;align-items:center;margin-left:8px;padding:3px 7px;border-radius:999px;background:#EAF7FB;border:1px solid #B8DDEB;color:#0B789E;font-size:9px;font-weight:800;vertical-align:middle}
-#lpv3-health-summary{margin:16px 0 12px}
-.ct-health-summary-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
-.ct-health-summary{display:flex!important;flex-direction:column!important;justify-content:center!important;min-height:104px!important;padding:15px 16px!important;background:#fff!important;border:1px solid #D8E3E9!important;border-radius:12px!important;text-align:left!important;width:100%!important;color:#071B37!important}
-.ct-health-summary b{font-size:25px!important;line-height:1!important;color:#16729B!important;margin-bottom:7px!important}
-.ct-health-summary span{font-size:10px!important;font-weight:800!important;letter-spacing:.055em!important;text-transform:uppercase!important;color:#435E6E!important}
-.ct-health-summary small{font-size:9.5px!important;color:#718391!important;margin-top:7px!important;line-height:1.35!important}
-.ct-health-chip-row{display:flex!important;gap:8px!important;flex-wrap:wrap!important;margin:0 0 12px!important}
-.ct-health-chip{display:inline-flex!important;align-items:center!important;padding:7px 10px!important;border-radius:999px!important;font-size:10px!important;font-weight:700!important}
-.ct-health-chip.green{background:#EFF9F0!important;border:1px solid #B9DEBF!important;color:#236B35!important}
-.ct-health-chip.yellow{background:#FFF8E7!important;border:1px solid #E8D191!important;color:#8A6300!important}
-.ct-health-chip.red{background:#FFF0ED!important;border:1px solid #E7B2AA!important;color:#A23A32!important}
-.ct-health-table-wrap{width:100%!important;overflow:auto!important}
-.ct-health-table{width:100%!important;border-collapse:collapse!important;min-width:1180px!important}
-.ct-health-table th{background:#EEF3F6!important;color:#395669!important;font-size:9px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.045em!important;text-align:left!important;padding:9px 8px!important;border-bottom:1px solid #D8E3E9!important;white-space:nowrap!important}
-.ct-health-table td{padding:9px 8px!important;border-bottom:1px solid #E5EDF1!important;vertical-align:middle!important;font-size:10.5px!important;color:#071B37!important}
-.ct-health-table td small{display:block!important;margin-top:3px!important;font-size:9px!important;color:#718391!important}
-.ct-health-agent-link{background:none!important;border:0!important;padding:0!important;font:inherit!important;color:#071B37!important;text-align:left!important;cursor:pointer!important;font-weight:800!important}
-.ct-owner-select{min-width:112px!important;height:32px!important;padding:4px 7px!important;border:1px solid #C8D7DF!important;border-radius:7px!important;background:#fff!important;font-family:inherit!important;font-size:10.5px!important;color:#071B37!important}
-.ct-owner-actions{display:flex!important;gap:5px!important;align-items:center!important;white-space:nowrap!important}
-.ct-owner-save{height:32px!important;padding:4px 11px!important;border:0!important;border-radius:7px!important;background:#167AA5!important;color:#fff!important;font-size:10px!important;font-weight:800!important;cursor:pointer!important}
-.ct-owner-delete{height:32px!important;padding:4px 10px!important;border:1px solid #D8A7A1!important;border-radius:7px!important;background:#FFF3F1!important;color:#A23A32!important;font-size:9.5px!important;font-weight:800!important;cursor:pointer!important}
-.ct-owner-status{display:block!important;margin-top:3px!important;font-size:8.5px!important;color:#718391!important}
-.ct-owner-status.ok{color:#287A54!important;font-weight:700!important}
-.ct-owner-status.err{color:#A23A32!important;font-weight:700!important}
-#ctExportActiveOwnershipBtn{white-space:nowrap}
-@media(max-width:1050px){.ct-health-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:760px){.ct-health-summary-grid{grid-template-columns:1fr!important}#ctExportActiveOwnershipBtn{width:100%}}
+#lpv3-health-summary{margin:16px 0 12px}.ct-health-summary-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}.ct-health-summary{display:flex!important;flex-direction:column!important;justify-content:center!important;min-height:104px!important;padding:15px 16px!important;background:#fff!important;border:1px solid #D8E3E9!important;border-radius:12px!important;text-align:left!important;width:100%!important;color:#071B37!important}.ct-health-summary b{font-size:25px!important;line-height:1!important;color:#16729B!important;margin-bottom:7px!important}.ct-health-summary span{font-size:10px!important;font-weight:800!important;letter-spacing:.055em!important;text-transform:uppercase!important;color:#435E6E!important}.ct-health-summary small{font-size:9.5px!important;color:#718391!important;margin-top:7px!important;line-height:1.35!important}.ct-health-chip-row{display:flex!important;gap:8px!important;flex-wrap:wrap!important;margin:0 0 12px!important}.ct-health-chip{display:inline-flex!important;align-items:center!important;padding:7px 10px!important;border-radius:999px!important;font-size:10px!important;font-weight:700!important}.ct-health-chip.green{background:#EFF9F0!important;border:1px solid #B9DEBF!important;color:#236B35!important}.ct-health-chip.yellow{background:#FFF8E7!important;border:1px solid #E8D191!important;color:#8A6300!important}.ct-health-chip.red{background:#FFF0ED!important;border:1px solid #E7B2AA!important;color:#A23A32!important}
+.ct-health-table-wrap{width:100%!important;overflow:auto!important}.ct-health-table{width:100%!important;border-collapse:collapse!important;min-width:1180px!important}.ct-health-table th{background:#EEF3F6!important;color:#395669!important;font-size:9px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.045em!important;text-align:left!important;padding:9px 8px!important;border-bottom:1px solid #D8E3E9!important;white-space:nowrap!important}.ct-health-table td{padding:9px 8px!important;border-bottom:1px solid #E5EDF1!important;vertical-align:middle!important;font-size:10.5px!important;color:#071B37!important}.ct-health-table td small{display:block!important;margin-top:3px!important;font-size:9px!important;color:#718391!important}.ct-health-agent-link{background:none!important;border:0!important;padding:0!important;font:inherit!important;color:#071B37!important;text-align:left!important;cursor:pointer!important;font-weight:800!important}.ct-owner-select{min-width:112px!important;height:32px!important;padding:4px 7px!important;border:1px solid #C8D7DF!important;border-radius:7px!important;background:#fff!important;font-family:inherit!important;font-size:10.5px!important;color:#071B37!important}.ct-owner-actions{display:flex!important;gap:5px!important;align-items:center!important;white-space:nowrap!important}.ct-owner-save{height:32px!important;padding:4px 11px!important;border:0!important;border-radius:7px!important;background:#167AA5!important;color:#fff!important;font-size:10px!important;font-weight:800!important;cursor:pointer!important}.ct-owner-delete{height:32px!important;padding:4px 10px!important;border:1px solid #D8A7A1!important;border-radius:7px!important;background:#FFF3F1!important;color:#A23A32!important;font-size:9.5px!important;font-weight:800!important;cursor:pointer!important}.ct-owner-status{display:block!important;margin-top:3px!important;font-size:8.5px!important;color:#718391!important}.ct-owner-status.ok{color:#287A54!important;font-weight:700!important}.ct-owner-status.err{color:#A23A32!important;font-weight:700!important}
+#ctRemovedAgentsBox{margin:14px 0 0;border:1px solid #E6DDEB;border-radius:12px;background:#FBF9FD;overflow:hidden}.ct-removed-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-bottom:1px solid #E6DDEB}.ct-removed-head strong{font-size:12px;color:#3E3155}.ct-removed-list{padding:0 13px}.ct-removed-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #EEE8F2}.ct-removed-row:last-child{border-bottom:0}.ct-restore-btn{border:1px solid #B9D9C5;background:#F2FAF5;color:#2F6E47;border-radius:7px;padding:6px 10px;font-size:10px;font-weight:800;cursor:pointer}.ct-restore-btn[disabled]{opacity:.6;cursor:wait}.ct-empty-removed{padding:12px 0;color:#7B7187;font-size:10.5px}
+@media(max-width:1050px){.ct-health-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}@media(max-width:760px){.ct-health-summary-grid{grid-template-columns:1fr!important}}
 </style>
-<script id="ct-health-v41-js">
+<script id="ct-health-v42-js">
 (function(){
 'use strict';
-
-const DELETE_MARKER='__ROSTER_DELETE_V41__';
+const DELETE_MARKERS=new Set(['__ROSTER_DELETE_V41__','__ROSTER_DELETE_V42__']);
+const DELETE_MARKER='__ROSTER_DELETE_V42__';
 const LEVELS=new Set(['A','B','C','CHANNEL']);
 const key=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -12152,172 +12131,198 @@ const fmt=v=>{if(!v)return'—';const d=new Date(String(v).slice(0,10)+'T12:00:0
 const age=v=>{if(!v)return null;const d=new Date(String(v).slice(0,10)+'T12:00:00');return isNaN(d)?null:Math.max(0,Math.floor((Date.now()-d.getTime())/86400000))};
 const shortLp=v=>{const s=key(v);if(!s||s.indexOf('__removed')>=0)return'Unassigned';if(s.includes('de la riva')||s==='karen')return'Karen';if(s.includes('mcmahon')||s==='osgood')return'Osgood';if(s.includes('johnston')||s==='jordan')return'Jordan';if(s.includes('saleh')||s==='said')return'Said';if(s.includes('dill')||s==='gavin')return'Gavin';if(s.includes('isaak'))return'Isaak';return String(v||'').trim()};
 const cleanRm=v=>{const s=String(v||'').trim();return(!s||s.startsWith('__'))?'Unassigned':s};
-const RM_OPTIONS=['Unassigned','Amanda','Nyny'];
-const LP_OPTIONS=['Unassigned','Gavin','Karen','Osgood','Jordan','Said','Isaak'];
+const RM_OPTIONS=['Unassigned','Amanda','Nyny'],LP_OPTIONS=['Unassigned','Gavin','Karen','Osgood','Jordan','Said','Isaak'];
 function options(values,current){current=String(current||'Unassigned');return values.map(v=>'<option value="'+esc(v)+'"'+(v===current?' selected':'')+'>'+esc(v)+'</option>').join('')}
-
 function snapshot(){try{return window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')}catch(e){return null}}
-function powerBiRows(){
-  const s=snapshot();if(!s)return[];
-  const src=(s.all_by_agent&&Object.keys(s.all_by_agent).length)?s.all_by_agent:(s.by_agent||{});
-  return Object.values(src).filter(r=>r&&level(r.level));
-}
+function powerBiRows(){const s=snapshot();if(!s)return[];const src=(s.all_by_agent&&Object.keys(s.all_by_agent).length)?s.all_by_agent:(s.by_agent||{});return Object.values(src).filter(r=>r&&level(r.level))}
+async function db(method,path,body){if(typeof sbFetch!=='function')throw new Error('Database connection not available');return sbFetch(method,path,body)}
+async function getProfiles(){return db('GET','agent_profiles?select=agent_name,display_name,email,phone,relationship_status&limit=5000').catch(()=>[])}
+async function getAssignments(){return db('GET','agent_assignments?select=agent_name,lp,rm,priority,added,level,closed_past_year&limit=5000').catch(()=>[])}
 async function buildRows(){
-  let profiles=[],assignments=[];
-  if(typeof sbFetch==='function'){
-    [profiles,assignments]=await Promise.all([
-      sbFetch('GET','agent_profiles?select=agent_name,display_name,email,phone&limit=5000').catch(()=>[]),
-      sbFetch('GET','agent_assignments?select=agent_name,lp,rm,priority,added,level,closed_past_year&limit=5000').catch(()=>[])
-    ]);
-  }
+  const [profiles,assignments]=await Promise.all([getProfiles(),getAssignments()]);
   const pm={},am={},deleted=new Set();
-  (profiles||[]).forEach(p=>{
-    if(!p||!p.agent_name)return;
-    pm[key(p.agent_name)]=p;
-    // ONLY v41 deletes are allowed to reduce the current Power BI roster.
-    if(String(p.display_name||'').trim()===DELETE_MARKER)deleted.add(key(p.agent_name));
-  });
+  (profiles||[]).forEach(p=>{if(!p||!p.agent_name)return;pm[key(p.agent_name)]=p;if(DELETE_MARKERS.has(String(p.display_name||'').trim()))deleted.add(key(p.agent_name))});
   (assignments||[]).forEach(a=>{if(a&&a.agent_name)am[key(a.agent_name)]=a});
-  return powerBiRows().filter(p=>!deleted.has(key(p.name))).map(p=>{
-    const pr=pm[key(p.name)]||{},a=am[key(p.name)]||{},ld=age(p.latest_lead),cd=age(p.latest_close);
-    let health='red',action='Call today',why=ld===null?'No lead on record':ld+'d since last lead';
-    if(ld!==null&&ld<=30){health='green';action='Current';why=ld+'d since last lead'}
-    else if(ld!==null&&ld<=60){health='yellow';action='Call / review';why=ld+'d since last lead'}
-    else if(cd!==null&&cd<=90)why+=' · recent close';
-    return{name:p.name,tier:level(p.level)||'—',rm:cleanRm(a.rm),lp:shortLp(a.lp),email:p.email||pr.email||'',phone:p.phone||pr.phone||'',pre:num(p.active_prequals),pipe:num(p.active_pipeline),last:p.latest_lead||null,lastStart:p.latest_started||null,lastContract:p.latest_contract||null,lastClose:p.latest_close||null,daysLead:ld,health,action,why};
-  });
+  window.__CT_REMOVED_ROWS=(profiles||[]).filter(p=>p&&DELETE_MARKERS.has(String(p.display_name||'').trim())).map(p=>({name:p.agent_name,marker:p.display_name}));
+  return powerBiRows().filter(p=>!deleted.has(key(p.name))).map(p=>{const pr=pm[key(p.name)]||{},a=am[key(p.name)]||{},ld=age(p.latest_lead),cd=age(p.latest_close);let health='red',action='Call today',why=ld===null?'No lead on record':ld+'d since last lead';if(ld!==null&&ld<=30){health='green';action='Current';why=ld+'d since last lead'}else if(ld!==null&&ld<=60){health='yellow';action='Call / review';why=ld+'d since last lead'}else if(cd!==null&&cd<=90)why+=' · recent close';return{name:p.name,tier:level(p.level)||'—',rm:cleanRm(a.rm),lp:shortLp(a.lp),email:p.email||pr.email||'',phone:p.phone||pr.phone||'',pre:num(p.active_prequals),pipe:num(p.active_pipeline),last:p.latest_lead||null,lastStart:p.latest_started||null,lastContract:p.latest_contract||null,lastClose:p.latest_close||null,daysLead:ld,health,action,why}})
 }
+function renderRemoved(){let box=document.getElementById('ctRemovedAgentsBox');const card=document.querySelector('#view-agent-health .ct-card');if(!card)return;if(!box){box=document.createElement('div');box.id='ctRemovedAgentsBox';card.appendChild(box)}const rows=(window.__CT_REMOVED_ROWS||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)));box.innerHTML='<div class="ct-removed-head"><strong>Removed Agents ('+rows.length+')</strong><span style="font-size:9.5px;color:#7B7187">Accidental delete? Restore here.</span></div><div class="ct-removed-list">'+(rows.length?rows.map(r=>'<div class="ct-removed-row"><span>'+esc(r.name)+'</span><button type="button" class="ct-restore-btn" onclick="return ctV42Restore('+JSON.stringify(r.name)+',this)">Restore</button></div>').join(''):'<div class="ct-empty-removed">No agents removed from this roster.</div>')+'</div>'}
 function render(){
-  const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');if(!host)return;
-  const all=(window.__CT_HEALTH_ROWS||[]).slice();
-  const q=key((document.getElementById('lpv3-health-q')||{}).value);
-  const hf=(document.getElementById('lpv3-health-filter')||{}).value||'';
-  const lf=(document.getElementById('lpv3-health-lp')||{}).value||'';
-  let rows=all.slice();
-  if(hf==='action')rows=rows.filter(r=>r.health==='red'||r.health==='yellow');
-  else if(['red','yellow','green'].includes(hf))rows=rows.filter(r=>r.health===hf);
-  if(q)rows=rows.filter(r=>key(r.name).includes(q));
-  if(lf)rows=rows.filter(r=>r.lp===lf);
-  const rank={red:0,yellow:1,green:2};
-  rows.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??999)-(a.daysLead??999))||String(a.name).localeCompare(String(b.name)));
-
-  const cnt=h=>all.filter(r=>r.health===h).length,pre=all.reduce((n,r)=>n+r.pre,0),pipe=all.reduce((n,r)=>n+r.pipe,0),follow=cnt('red')+cnt('yellow');
-  if(sum)sum.innerHTML='<div class="ct-health-summary-grid">'+
-    '<div class="ct-health-summary"><b>'+all.length+'</b><span>Active Agents</span><small>Current Power BI · valid Level</small></div>'+
-    '<div class="ct-health-summary"><b>'+pre+'</b><span>Current Prequal Buyers</span><small>Latest Power BI buyer count</small></div>'+
-    '<div class="ct-health-summary"><b>'+pipe+'</b><span>Current Buyers in Pipeline</span><small>Latest Power BI buyer count</small></div>'+
-    '<div class="ct-health-summary"><b>'+follow+'</b><span>Relationship Follow-Up</span><small>31+ day lead gap</small></div>'+
-    '</div><div class="ct-health-chip-row"><span class="ct-health-chip green">Green · lead in last 30 days · '+cnt('green')+'</span><span class="ct-health-chip yellow">Yellow · 31–60 days since last lead · '+cnt('yellow')+'</span><span class="ct-health-chip red">Red · 61+ days since last lead · '+cnt('red')+'</span></div>';
-
-  host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>RM Owner</th><th>LP Owner</th><th>Actions</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead><tbody>'+
-    (rows.length?rows.map(r=>'<tr data-health-agent="'+esc(r.name)+'">'+
-      '<td><b>'+esc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+esc(r.action)+'</small></td>'+
-      '<td><button type="button" class="ct-health-agent-link" onclick="return ctV41OpenContact(this)">'+esc(r.name)+'</button><small>'+esc(r.why)+'</small></td>'+
-      '<td>'+esc(r.tier)+'</td>'+
-      '<td><select class="ct-owner-select" data-owner-role="rm">'+options(RM_OPTIONS,r.rm)+'</select></td>'+
-      '<td><select class="ct-owner-select" data-owner-role="lp">'+options(LP_OPTIONS,r.lp)+'</select></td>'+
-      '<td><div class="ct-owner-actions"><button type="button" class="ct-owner-save" onclick="return ctV41Save(this)">Save</button><button type="button" class="ct-owner-delete" onclick="return ctV41Delete(this)">Delete Everywhere</button></div><span class="ct-owner-status"></span></td>'+
-      '<td>'+r.pre+'</td><td>'+r.pipe+'</td><td>'+fmt(r.last)+'</td><td>'+fmt(r.lastStart)+'</td><td>'+fmt(r.lastContract)+'</td><td>'+fmt(r.lastClose)+'</td></tr>').join(''):'<tr><td colspan="12" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+
-    '</tbody></table></div>';
+ const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');if(!host)return;const all=(window.__CT_HEALTH_ROWS||[]).slice(),q=key((document.getElementById('lpv3-health-q')||{}).value),hf=(document.getElementById('lpv3-health-filter')||{}).value||'',lf=(document.getElementById('lpv3-health-lp')||{}).value||'';let rows=all.slice();if(hf==='action')rows=rows.filter(r=>r.health==='red'||r.health==='yellow');else if(['red','yellow','green'].includes(hf))rows=rows.filter(r=>r.health===hf);if(q)rows=rows.filter(r=>key(r.name).includes(q));if(lf)rows=rows.filter(r=>r.lp===lf);const rank={red:0,yellow:1,green:2};rows.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??999)-(a.daysLead??999))||String(a.name).localeCompare(String(b.name)));const cnt=h=>all.filter(r=>r.health===h).length,pre=all.reduce((n,r)=>n+r.pre,0),pipe=all.reduce((n,r)=>n+r.pipe,0),follow=cnt('red')+cnt('yellow');
+ if(sum)sum.innerHTML='<div class="ct-health-summary-grid"><div class="ct-health-summary"><b>'+all.length+'</b><span>Active Agents</span><small>Current Power BI · valid Level</small></div><div class="ct-health-summary"><b>'+pre+'</b><span>Current Prequal Buyers</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+pipe+'</b><span>Current Buyers in Pipeline</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+follow+'</b><span>Relationship Follow-Up</span><small>31+ day lead gap</small></div></div><div class="ct-health-chip-row"><span class="ct-health-chip green">Green · lead in last 30 days · '+cnt('green')+'</span><span class="ct-health-chip yellow">Yellow · 31–60 days since last lead · '+cnt('yellow')+'</span><span class="ct-health-chip red">Red · 61+ days since last lead · '+cnt('red')+'</span></div>';
+ host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>RM Owner</th><th>LP Owner</th><th>Actions</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead><tbody>'+(rows.length?rows.map(r=>'<tr data-health-agent="'+esc(r.name)+'"><td><b>'+esc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+esc(r.action)+'</small></td><td><button type="button" class="ct-health-agent-link" onclick="return ctV42OpenContact(this)">'+esc(r.name)+'</button><small>'+esc(r.why)+'</small></td><td>'+esc(r.tier)+'</td><td><select class="ct-owner-select" data-owner-role="rm">'+options(RM_OPTIONS,r.rm)+'</select></td><td><select class="ct-owner-select" data-owner-role="lp">'+options(LP_OPTIONS,r.lp)+'</select></td><td><div class="ct-owner-actions"><button type="button" class="ct-owner-save" onclick="return ctV42Save(this)">Save</button><button type="button" class="ct-owner-delete" onclick="return ctV42Delete(this)">Delete Everywhere</button></div><span class="ct-owner-status"></span></td><td>'+r.pre+'</td><td>'+r.pipe+'</td><td>'+fmt(r.last)+'</td><td>'+fmt(r.lastStart)+'</td><td>'+fmt(r.lastContract)+'</td><td>'+fmt(r.lastClose)+'</td></tr>').join(''):'<tr><td colspan="12" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+'</tbody></table></div>';renderRemoved()
 }
-async function refresh(){
-  const host=document.getElementById('lpv3-health-table');if(host)host.innerHTML='<div style="padding:20px;color:#718391">Loading current Power BI roster…</div>';
-  window.__CT_HEALTH_ROWS=await buildRows();
-  render();
-}
+async function refresh(){const host=document.getElementById('lpv3-health-table');if(host)host.innerHTML='<div style="padding:20px;color:#718391">Loading current Power BI roster…</div>';window.__CT_HEALTH_ROWS=await buildRows();render()}
 window.ctLoadAgentHealthFresh=refresh;window.ctRenderHealthRows=render;window.lpv3RenderAgentHealth=render;
+window.ctV42OpenContact=function(btn){const tr=btn&&btn.closest('tr[data-health-agent]'),name=tr&&tr.dataset.healthAgent;if(name&&typeof openLpContactModal==='function')openLpContactModal(name);return false};
+window.ctV42Save=async function(btn){const tr=btn&&btn.closest('tr[data-health-agent]'),name=tr&&tr.dataset.healthAgent;if(!tr||!name)return false;const rmSel=tr.querySelector('[data-owner-role="rm"]'),lpSel=tr.querySelector('[data-owner-role="lp"]'),st=tr.querySelector('.ct-owner-status'),rmVal=rmSel&&rmSel.value!=='Unassigned'?rmSel.value:null,lpVal=lpSel?lpSel.value:'Unassigned';btn.disabled=true;btn.textContent='Saving…';try{const existing=await db('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(name)+'&select=*&limit=5').catch(()=>[]),ar=(existing||[]).find(r=>key(r.agent_name)===key(name))||(existing||[])[0]||{},row=(window.__CT_HEALTH_ROWS||[]).find(r=>key(r.name)===key(name))||{},payload={agent_name:ar.agent_name||name,lp:lpVal||'Unassigned',rm:rmVal,priority:ar.priority!==undefined?!!ar.priority:false,added:ar.added!==undefined?!!ar.added:false,level:ar.level||row.tier||'C'};if(ar.closed_past_year!==undefined)payload.closed_past_year=ar.closed_past_year;await db('POST','agent_assignments?on_conflict=agent_name',payload);row.rm=rmVal||'Unassigned';row.lp=lpVal||'Unassigned';if(st){st.textContent='Saved ✓';st.className='ct-owner-status ok'}btn.textContent='Saved';setTimeout(()=>{btn.disabled=false;btn.textContent='Save';if(st)st.textContent=''},1200)}catch(err){console.error(err);btn.disabled=false;btn.textContent='Retry';if(st){st.textContent='Save failed';st.className='ct-owner-status err'}alert('Assignment did not save. Please retry.')}return false};
+window.ctV42Delete=async function(btn){const tr=btn&&btn.closest('tr[data-health-agent]'),name=tr&&tr.dataset.healthAgent;if(!tr||!name)return false;if(!confirm('Delete '+name+' from the active roster everywhere? You can restore it later from Removed Agents.'))return false;const row=(window.__CT_HEALTH_ROWS||[]).find(r=>key(r.name)===key(name))||{};btn.disabled=true;btn.textContent='Deleting…';try{const prof=await db('GET','agent_profiles?agent_name=ilike.'+encodeURIComponent(name)+'&select=agent_name&limit=5').catch(()=>[]),pr=(prof||[]).find(r=>key(r.agent_name)===key(name))||(prof||[])[0],canonical=(pr&&pr.agent_name)||name;if(pr&&pr.agent_name)await db('PATCH','agent_profiles?agent_name=eq.'+encodeURIComponent(canonical),{display_name:DELETE_MARKER,relationship_status:'inactive'});else await db('POST','agent_profiles?on_conflict=agent_name',{agent_name:canonical,display_name:DELETE_MARKER,relationship_status:'inactive'});const ex=await db('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(canonical)+'&select=*&limit=5').catch(()=>[]),ar=(ex||[])[0]||{};try{localStorage.setItem('ct_deleted_owner_'+key(canonical),JSON.stringify({rm:row.rm||'Unassigned',lp:row.lp||'Unassigned'}))}catch(e){}await db('POST','agent_assignments?on_conflict=agent_name',{agent_name:ar.agent_name||canonical,lp:'__REMOVED__',rm:null,priority:false,added:false,level:ar.level||row.tier||'C'});try{if(typeof clearAgentFromRmWorkflows==='function')await clearAgentFromRmWorkflows(canonical)}catch(e){}await refresh()}catch(err){console.error(err);btn.disabled=false;btn.textContent='Delete Everywhere';alert('Delete did not save. Nothing was removed.')}return false};
+window.ctV42Restore=async function(name,btn){if(!name)return false;if(btn){btn.disabled=true;btn.textContent='Restoring…'}try{const prof=await db('GET','agent_profiles?agent_name=ilike.'+encodeURIComponent(name)+'&select=agent_name,display_name&limit=5').catch(()=>[]),pr=(prof||[]).find(r=>key(r.agent_name)===key(name))||(prof||[])[0],canonical=(pr&&pr.agent_name)||name;if(pr&&pr.agent_name)await db('PATCH','agent_profiles?agent_name=eq.'+encodeURIComponent(canonical),{display_name:canonical,relationship_status:'active'});else await db('POST','agent_profiles?on_conflict=agent_name',{agent_name:canonical,display_name:canonical,relationship_status:'active'});let prev={rm:'Unassigned',lp:'Unassigned'};try{prev=JSON.parse(localStorage.getItem('ct_deleted_owner_'+key(canonical))||'null')||prev}catch(e){}const ex=await db('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(canonical)+'&select=*&limit=5').catch(()=>[]),ar=(ex||[])[0]||{},pb=powerBiRows().find(r=>key(r.name)===key(canonical))||{};await db('POST','agent_assignments?on_conflict=agent_name',{agent_name:ar.agent_name||canonical,lp:prev.lp&&prev.lp!=='Unassigned'?prev.lp:'Unassigned',rm:prev.rm&&prev.rm!=='Unassigned'?prev.rm:null,priority:false,added:false,level:ar.level||level(pb.level)||'C'});try{localStorage.removeItem('ct_deleted_owner_'+key(canonical))}catch(e){}await refresh()}catch(err){console.error(err);if(btn){btn.disabled=false;btn.textContent='Restore'}alert('Restore failed. Please retry.')}return false};
+async function autoRestoreShayne(){const name='Shayne Boyd';try{const rows=await db('GET','agent_profiles?agent_name=ilike.'+encodeURIComponent(name)+'&select=agent_name,display_name&limit=5').catch(()=>[]),r=(rows||[]).find(x=>key(x.agent_name)===key(name));if(r&&DELETE_MARKERS.has(String(r.display_name||'').trim())){await window.ctV42Restore(r.agent_name,null);try{sessionStorage.setItem('ct_shayne_restored_v42','1')}catch(e){}}}catch(e){console.warn('Shayne Boyd auto-restore',e)}}
+window.ctV42Export=function(){const rows=(window.__CT_HEALTH_ROWS||[]).slice().sort((a,b)=>String(a.lp).localeCompare(String(b.lp))||String(a.name).localeCompare(String(b.name))),cols=['Agent','Email','Phone','Tier','RM Owner','LP Owner','Relationship Health','Active Prequals','Active Pipeline','Last Lead','Last Close'],q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"',data=[cols].concat(rows.map(r=>[r.name,r.email,r.phone,r.tier,r.rm,r.lp,r.health,r.pre,r.pipe,fmt(r.last)==='—'?'':fmt(r.last),fmt(r.lastClose)==='—'?'':fmt(r.lastClose)])),blob=new Blob([data.map(row=>row.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download='Active-Agent-Ownership-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);return false};window.ctExportActiveAgentOwnership=window.ctV42Export;
+function openHealth(btn){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));const view=document.getElementById('view-agent-health');if(view)view.classList.add('active');document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active'));if(btn&&btn.classList)btn.classList.add('active');refresh();window.scrollTo(0,0)}window.lpv3OpenAgentHealth=openHealth;const priorRoute=window.lpv2Route;window.lpv2Route=function(route,btn){if(route==='agent-health'){openHealth(btn);return}return priorRoute?priorRoute(route,btn):undefined};
+async function boot(){const title=document.querySelector('#view-agent-health .ct-page-title');if(title){const old=document.getElementById('ctHealthBuildBadge');if(old)old.remove();title.insertAdjacentHTML('beforeend',' <span id="ctHealthBuildBadge">Agent Health v42</span>')}const sub=document.querySelector('#view-agent-health .ct-page-sub');if(sub)sub.textContent='Current Power BI Active Agents. Delete is reversible: use Removed Agents below to restore anyone accidentally removed.';const exp=document.getElementById('ctExportActiveOwnershipBtn');if(exp){exp.setAttribute('onclick','return ctV42Export()');exp.onclick=window.ctV42Export}['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=render;el.onchange=render}});await autoRestoreShayne();if(document.getElementById('view-agent-health')?.classList.contains('active'))await refresh()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,50),{once:true});else setTimeout(boot,50);
+})();
+</script>
 
-window.ctV41OpenContact=function(btn){
-  const tr=btn&&btn.closest('tr[data-health-agent]'),name=tr&&tr.dataset.healthAgent;
-  if(name&&typeof openLpContactModal==='function')openLpContactModal(name);
-  return false;
-};
 
-window.ctV41Save=async function(btn){
-  const tr=btn&&btn.closest('tr[data-health-agent]'),name=tr&&tr.dataset.healthAgent;if(!tr||!name)return false;
-  const rmSel=tr.querySelector('[data-owner-role="rm"]'),lpSel=tr.querySelector('[data-owner-role="lp"]'),st=tr.querySelector('.ct-owner-status');
-  const rmVal=rmSel&&rmSel.value!=='Unassigned'?rmSel.value:null,lpVal=lpSel?lpSel.value:'Unassigned';
-  btn.disabled=true;btn.textContent='Saving…';if(st){st.textContent='';st.className='ct-owner-status'}
-  try{
-    const existing=await sbFetch('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(name)+'&select=*&limit=5').catch(()=>[]);
-    const ar=(existing||[]).find(r=>key(r.agent_name)===key(name))||(existing||[])[0]||{};
-    const row=(window.__CT_HEALTH_ROWS||[]).find(r=>key(r.name)===key(name))||{};
-    const payload={agent_name:ar.agent_name||name,lp:lpVal||'Unassigned',rm:rmVal,priority:ar.priority!==undefined?!!ar.priority:false,added:ar.added!==undefined?!!ar.added:false,level:ar.level||row.tier||'C'};
-    if(ar.closed_past_year!==undefined)payload.closed_past_year=ar.closed_past_year;
-    await sbFetch('POST','agent_assignments?on_conflict=agent_name',payload);
-    row.rm=rmVal||'Unassigned';row.lp=lpVal||'Unassigned';
-    if(st){st.textContent='Saved ✓';st.className='ct-owner-status ok'}btn.textContent='Saved';
-    setTimeout(()=>{btn.disabled=false;btn.textContent='Save';if(st)st.textContent=''},1200);
-  }catch(err){
-    console.error('v41 save',err);btn.disabled=false;btn.textContent='Retry';
-    if(st){st.textContent='Save failed';st.className='ct-owner-status err'}
-    alert('Assignment did not save. Please retry.');
-  }
-  return false;
-};
-
-window.ctV41Delete=async function(btn){
-  const tr=btn&&btn.closest('tr[data-health-agent]'),name=tr&&tr.dataset.healthAgent;if(!tr||!name)return false;
-  if(!confirm('Delete '+name+' from the active roster everywhere? Historical activity will remain.'))return false;
-  const st=tr.querySelector('.ct-owner-status');btn.disabled=true;btn.textContent='Deleting…';
-  try{
-    let prof=await sbFetch('GET','agent_profiles?agent_name=ilike.'+encodeURIComponent(name)+'&select=agent_name&limit=5').catch(()=>[]);
-    const pr=(prof||[]).find(r=>key(r.agent_name)===key(name))||(prof||[])[0];
-    const canonical=(pr&&pr.agent_name)||name;
-    if(pr&&pr.agent_name)await sbFetch('PATCH','agent_profiles?agent_name=eq.'+encodeURIComponent(canonical),{display_name:DELETE_MARKER,relationship_status:'inactive'});
-    else await sbFetch('POST','agent_profiles?on_conflict=agent_name',{agent_name:canonical,display_name:DELETE_MARKER,relationship_status:'inactive'});
-
-    const check=await sbFetch('GET','agent_profiles?agent_name=eq.'+encodeURIComponent(canonical)+'&select=agent_name,display_name&limit=1').catch(()=>[]);
-    if(!(check||[]).some(r=>String(r.display_name||'')===DELETE_MARKER))throw new Error('Delete marker did not save');
-
-    const ex=await sbFetch('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(canonical)+'&select=*&limit=5').catch(()=>[]);
-    const ar=(ex||[])[0]||{},row=(window.__CT_HEALTH_ROWS||[]).find(r=>key(r.name)===key(name))||{};
-    await sbFetch('POST','agent_assignments?on_conflict=agent_name',{agent_name:ar.agent_name||canonical,lp:'__REMOVED__',rm:null,priority:false,added:false,level:ar.level||row.tier||'C'});
-    try{if(typeof clearAgentFromRmWorkflows==='function')await clearAgentFromRmWorkflows(canonical)}catch(e){}
-    window.__CT_HEALTH_ROWS=(window.__CT_HEALTH_ROWS||[]).filter(r=>key(r.name)!==key(name));
-    render();
-  }catch(err){
-    console.error('v41 delete',err);btn.disabled=false;btn.textContent='Delete Everywhere';
-    if(st){st.textContent='Delete failed';st.className='ct-owner-status err'}
-    alert('Delete did not save. Nothing was removed.');
-  }
-  return false;
-};
-
-window.ctV41Export=function(){
-  const rows=(window.__CT_HEALTH_ROWS||[]).slice().sort((a,b)=>String(a.lp).localeCompare(String(b.lp))||String(a.name).localeCompare(String(b.name)));
-  const cols=['Agent','Email','Phone','Tier','RM Owner','LP Owner','Relationship Health','Active Prequals','Active Pipeline','Last Lead','Last Close'];
-  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-  const data=[cols].concat(rows.map(r=>[r.name,r.email,r.phone,r.tier,r.rm,r.lp,r.health,r.pre,r.pipe,fmt(r.last)==='—'?'':fmt(r.last),fmt(r.lastClose)==='—'?'':fmt(r.lastClose)]));
-  const blob=new Blob([data.map(row=>row.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download='Active-Agent-Ownership-'+new Date().toISOString().slice(0,10)+'.csv';
-  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
-  return false;
-};
-window.ctExportActiveAgentOwnership=window.ctV41Export;
-
-function openHealth(btn){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const view=document.getElementById('view-agent-health');if(view)view.classList.add('active');
-  document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active'));if(btn&&btn.classList)btn.classList.add('active');
-  refresh();window.scrollTo(0,0);
+<!-- MACK WEEKLY TUESDAY CALL PLAN v300 -->
+<style id="v300-tuesday-plan-css">
+#v300PlanSource{border-left:4px solid #167AA5}
+#v300TuesdayPlanCard{margin-top:14px}
+.v300-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.v300-kicker{font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#167AA5}
+.v300-title{font-size:18px;font-weight:800;color:#071B37;margin-top:2px}
+.v300-sub{font-size:10.5px;color:#667A88;margin-top:4px;line-height:1.45;max-width:760px}
+.v300-summary{font-size:10px;font-weight:800;background:#F1F7FA;border:1px solid #CFE1E8;border-radius:999px;padding:6px 9px;color:#315A73}
+.v300-section{border:1px solid #DDE7EC;border-radius:11px;background:#fff;margin-top:10px;overflow:hidden}
+.v300-section-head{padding:10px 12px;background:#F7FAFC;border-bottom:1px solid #E4ECEF;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.v300-section-head b{font-size:12px;color:#17324D}.v300-section-head span{font-size:9.5px;color:#718391}
+.v300-row{display:grid;grid-template-columns:minmax(220px,1.4fr) minmax(180px,1fr) minmax(170px,.9fr) auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid #EDF2F4}
+.v300-row:last-child{border-bottom:0}.v300-name{font-size:12px;font-weight:800;color:#071B37}.v300-meta{font-size:9.5px;color:#718391;margin-top:2px;line-height:1.4}.v300-tag{display:inline-block;margin:4px 4px 0 0;padding:3px 6px;border-radius:999px;background:#F2EFF8;color:#5A4685;font-size:8.5px;font-weight:800}.v300-tag.today{background:#FFF0ED;color:#A23A32}.v300-tag.week{background:#EEF7F1;color:#287A54}.v300-contact{font-size:10px;color:#315A73;line-height:1.5}.v300-state{font-size:10px;color:#5E6F7A}.v300-state.done{color:#287A54;font-weight:800}.v300-btn{border:0;border-radius:8px;background:#167AA5;color:#fff;padding:8px 10px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap}.v300-btn.secondary{background:#fff;color:#167AA5;border:1px solid #BFD7E1}.v300-empty{padding:16px 12px;color:#718391;font-size:10.5px}
+#v300Modal{display:none;position:fixed;inset:0;z-index:99999;background:rgba(7,27,55,.42);align-items:center;justify-content:center;padding:16px}
+#v300Modal.show{display:flex}.v300-modal-card{width:min(620px,96vw);background:#fff;border-radius:14px;border:1px solid #D6E3EA;box-shadow:0 18px 55px rgba(7,27,55,.22);padding:16px}.v300-modal-head{display:flex;justify-content:space-between;gap:10px}.v300-modal-head h3{margin:0;font-size:17px;color:#17324D}.v300-close{border:0;background:none;font-size:22px;cursor:pointer;color:#718391}.v300-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.v300-field{display:grid;gap:4px}.v300-field.full{grid-column:1/-1}.v300-field label{font-size:9px;font-weight:800;color:#5E6F7A;text-transform:uppercase;letter-spacing:.04em}.v300-field input,.v300-field select,.v300-field textarea{font-family:inherit;border:1px solid #C9D9E1;border-radius:8px;padding:8px 9px;font-size:11px;color:#071B37;background:#fff}.v300-field textarea{min-height:95px;resize:vertical}.v300-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.v300-error{display:none;color:#A23A32;font-size:10px;margin-top:8px}
+#lp-tuesday-work{display:none!important}
+@media(max-width:850px){.v300-row{grid-template-columns:1fr}.v300-fields{grid-template-columns:1fr}.v300-field.full{grid-column:auto}}
+</style>
+<script id="v300-tuesday-plan-js">
+(function(){
+'use strict';
+const TYPE='Tuesday Call Plan Snapshot', LOG_LIST='LP Tuesday Listing Update', LOG_GOTO='LP Go-To Conversation';
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const norm=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+const clean=s=>String(s==null?'':s).trim();
+const tag=(n,v)=>v?'['+n+':'+String(v).replace(/[\]\r\n]/g,' ').trim().slice(0,220)+']':'';
+const meta=(notes,k)=>{const m=String(notes||'').match(new RegExp('\\['+k+':([^\\]]*)\\]','i'));return m?m[1].trim():''};
+const lpShort=v=>{const s=norm(v);if(s.includes('dill')||s==='gavin')return'Gavin';if(s.includes('de la riva')||s==='karen')return'Karen';if(s.includes('mcmahon')||s==='osgood')return'Osgood';if(s.includes('johnston')||s==='jordan')return'Jordan';if(s.includes('saleh')||s==='said')return'Said';if(s.includes('isaak'))return'Isaak';return clean(v)};
+const validName=v=>{const s=norm(v);return !!s&&!['n/a','na','no agent','none','null','0','00','000','fsbo'].includes(s)};
+function dateText(v){
+  if(v===null||v===undefined||v==='')return'';
+  if(v instanceof Date&&!isNaN(v))return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0')+'-'+String(v.getDate()).padStart(2,'0');
+  if(typeof v==='number'&&v>1000){const d=new Date(Math.round((v-25569)*86400000));return isNaN(d)?'':d.toISOString().slice(0,10)}
+  const d=new Date(v);return isNaN(d)?String(v).slice(0,10):d.toISOString().slice(0,10)
 }
-window.lpv3OpenAgentHealth=openHealth;
-
-const priorRoute=window.lpv2Route;
-window.lpv2Route=function(route,btn){if(route==='agent-health'){openHealth(btn);return}return priorRoute?priorRoute(route,btn):undefined};
+function friOf(date){const d=new Date((date||new Date().toISOString().slice(0,10))+'T12:00:00');const day=d.getDay();d.setDate(d.getDate()+((5-day+7)%7));return d.toISOString().slice(0,10)}
+function planKey(parts){return parts.map(norm).filter(Boolean).join('|').replace(/[^a-z0-9|]+/g,' ').replace(/\s+/g,' ').slice(0,180)}
+function rowObj(headers,row){const o={};headers.forEach((h,i)=>o[String(h||'').trim()]=row[i]);return o}
+function headerIndex(rows,required){for(let i=0;i<Math.min(rows.length,10);i++){const s=(rows[i]||[]).map(x=>String(x||'')).join('|').toLowerCase();if(required.every(r=>s.includes(r)))return i}return-1}
+function normalizeListingHeaders(h){return (h||[]).map((x,i)=>{let s=String(x||'').trim();if(i===0&&s.toLowerCase().includes('loan team member name - loan partner 2'))return'Loan Team Member Name - Loan Partner 2';return s})}
+function ensureUi(){
+  const grid=document.querySelector('#view-data-hub .ct-data-grid');
+  if(grid&&!document.getElementById('v300PlanSource')){
+    const s=document.createElement('section');s.className='ct-card ct-data-source';s.id='v300PlanSource';
+    s.innerHTML='<div class="ct-kicker">TUESDAY CALL PLAN</div><h2>Mack Weekly Tuesday Calls</h2><p>Upload the weekly workbook with <b>RM LISTING AGENT CALLS</b> + <b>AGENT WITH NO ACTIVE CONTRACTS</b>. Upload once here; LP and RM trackers read the same shared plan.</p><div class="ct-data-actions"><button class="ct-primary-btn" type="button" onclick="v300PickPlan()">Upload Tuesday Call Plan</button></div><input id="v300PlanFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="ct-data-note" id="v300PlanStatus">No Tuesday Call Plan uploaded in this browser yet.</div>';
+    grid.appendChild(s);
+    document.getElementById('v300PlanFile').addEventListener('change',e=>upload(e.target));
+  }
+  if(!document.getElementById('v300Modal')){
+    const m=document.createElement('div');m.id='v300Modal';m.innerHTML='<div class="v300-modal-card"><div class="v300-modal-head"><div><h3 id="v300ModalTitle">Log Tuesday call</h3><div class="v300-meta" id="v300ModalMeta"></div></div><button class="v300-close" type="button" onclick="v300Close()">×</button></div><div class="v300-fields"><div class="v300-field"><label>Outcome</label><select id="v300Outcome"><option>Connected / meaningful conversation</option><option>Left voicemail + text sent</option><option>No answer + text sent</option><option>Follow-up needed</option><option>Meeting scheduled</option></select></div><div class="v300-field"><label>Follow-up</label><input id="v300Follow" type="date"></div><div class="v300-field full"><label>Notes</label><textarea id="v300Notes" placeholder="What did you communicate or learn? What is the next move?"></textarea></div></div><div class="v300-error" id="v300Err"></div><div class="v300-actions"><button class="v300-btn secondary" type="button" onclick="v300Close()">Cancel</button><button class="v300-btn" id="v300Save" type="button" onclick="v300Save()">Save call</button></div></div>';document.body.appendChild(m)
+  }
+}
+window.v300PickPlan=function(){
+  ensureUi();const input=document.getElementById('v300PlanFile');
+  const go=()=>input.click();
+  if(window.XLSX){go();return}
+  const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=go;s.onerror=()=>alert('Could not load Excel reader.');document.head.appendChild(s)
+};
+async function upload(input){
+  const f=input&&input.files&&input.files[0];if(!f)return;
+  const status=document.getElementById('v300PlanStatus');if(status)status.textContent='Reading Tuesday Call Plan…';
+  try{
+    if(!window.XLSX)throw new Error('Excel reader not loaded');
+    const book=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});
+    const listingSheet=book.Sheets['RM LISTING AGENT CALLS'],gotoSheet=book.Sheets['AGENT WITH NO ACTIVE CONTRACTS'];
+    if(!listingSheet||!gotoSheet)throw new Error('Workbook must contain both required sheets.');
+    const lrows=XLSX.utils.sheet_to_json(listingSheet,{header:1,defval:null,raw:true});
+    const grows=XLSX.utils.sheet_to_json(gotoSheet,{header:1,defval:null,raw:true});
+    const li=headerIndex(lrows,['est closing date','borrower name','sellers agent contact name']);
+    const gi=headerIndex(grows,['agent','lp owner','rm owner']);
+    if(li<0||gi<0)throw new Error('Could not find the expected headers.');
+    const lh=normalizeListingHeaders(lrows[li]),gh=(grows[gi]||[]).map(x=>String(x||'').trim());
+    const firstDate=dateText((lrows[0]||[])[0])||new Date().toISOString().slice(0,10);
+    const batch='TUE-'+firstDate.replace(/-/g,'')+'-'+Date.now();
+    const payload=[];
+    let listAction=0,listFsbo=0,listMissing=0,gotoCount=0;
+    lrows.slice(li+1).forEach(row=>{
+      const r=rowObj(lh,row),purpose=norm(r['Loan Purpose']);
+      if(purpose!=='purchase')return;
+      const lp=lpShort(r['Loan Team Member Name - Loan Partner 2']);if(!lp)return;
+      const seller=clean(r['Sellers Agent Contact Name']),builder=clean(r['Builder Contact Name']);
+      const fsbo=norm(seller)==='fsbo';
+      let contact='',role='Missing',phone='',email='';
+      if(validName(seller)){contact=seller;role='Listing Agent';phone=clean(r['Sellers Agent Phone']);email=clean(r['Sellers Agent Email']);listAction++}
+      else if(validName(builder)){contact=builder;role='Builder Contact';phone=clean(r['Builder Phone']);email=clean(r['Builder Email']);listAction++}
+      else if(fsbo){contact='FSBO';role='FSBO';listFsbo++}
+      else{contact='Listing contact missing';role='Missing';listMissing++}
+      const borrower=clean(r['Borrower Name']),close=dateText(r['Est Closing Date']),milestone=clean(r['Last Finished Milestone']);
+      const k=planKey(['listing',borrower,close,contact,lp]);
+      const notes='[TUESDAY_PLAN_SNAPSHOT]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',firstDate)+tag('TUE_PLAN_LANE','LISTING')+tag('TUE_PLAN_KEY',k)+tag('LP_OWNER',lp)+tag('TUE_CONTACT_ROLE',role)+tag('TUE_CONTACT_NAME',contact)+tag('TUE_PHONE',phone)+tag('TUE_EMAIL',email)+tag('TXN_CLIENT',borrower)+tag('TXN_CLOSE_DATE',close)+tag('TXN_MILESTONE',milestone)+' Weekly Tuesday listing-side call plan. No loan number stored.';
+      payload.push({agent_name:contact||borrower||'Tuesday Listing Call',act_type:TYPE,act_date:firstDate,outcome:role,notes,follow_up_date:firstDate});
+    });
+    grows.slice(gi+1).forEach(row=>{
+      const r=rowObj(gh,row),agent=clean(r['Agent']),lp=lpShort(r['LP Owner']);if(!agent||!lp)return;
+      const rm=clean(r['RM Owner']),tier=clean(r['Tier']),phone=clean(r['Phone']),email=clean(r['Email']),health=clean(r['Relationship Health']),pre=clean(r['Active Prequals']),pipe=clean(r['Active Pipeline']),due=friOf(firstDate);
+      const k=planKey(['goto',agent,lp,firstDate]);
+      const notes='[TUESDAY_PLAN_SNAPSHOT]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',firstDate)+tag('TUE_PLAN_LANE','GOTO')+tag('TUE_PLAN_KEY',k)+tag('LP_OWNER',lp)+tag('RM_OWNER',rm)+tag('TIER',tier)+tag('TUE_PHONE',phone)+tag('TUE_EMAIL',email)+tag('REL_HEALTH',health)+tag('ACTIVE_PREQUALS',pre)+tag('ACTIVE_PIPELINE',pipe)+tag('TUE_DUE',due)+' Weekly Go-To Conversation plan for an active partner with no active contract.';
+      payload.push({agent_name:agent,act_type:TYPE,act_date:firstDate,outcome:'Go-To',notes,follow_up_date:due});gotoCount++;
+    });
+    // header row for auditing/version selection
+    payload.push({agent_name:'__TUESDAY_CALL_PLAN__',act_type:TYPE,act_date:firstDate,outcome:'Batch',notes:'[TUESDAY_PLAN_SNAPSHOT]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',firstDate)+tag('TUE_PLAN_LANE','HEADER')+tag('LISTING_ACTIONABLE',listAction)+tag('LISTING_FSBO',listFsbo)+tag('LISTING_MISSING',listMissing)+tag('GOTO_COUNT',gotoCount)+' Weekly Tuesday Call Plan upload.',follow_up_date:null});
+    for(let i=0;i<payload.length;i+=50)await sbFetch('POST','amanda_activities',payload.slice(i,i+50));
+    try{localStorage.setItem('v300_tuesday_plan_last',JSON.stringify({batch,date:firstDate,listing:listAction,fsbo:listFsbo,missing:listMissing,goto:gotoCount,at:new Date().toISOString()}))}catch(e){}
+    if(status)status.textContent='Loaded '+firstDate+' · '+listAction+' actionable listing-side calls · '+listFsbo+' FSBO · '+listMissing+' contact issues · '+gotoCount+' Go-To calls. Shared with LP + RM trackers ✓';
+    if(window.currentUser)await loadPlan(window.currentUser,true);
+  }catch(err){console.error(err);if(status)status.textContent='Tuesday Call Plan import failed: '+err.message}
+  finally{input.value=''}
+}
+let state={lp:'',batch:'',rows:[],logs:[]},current=null;
+async function latest(){
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-21);const since=cutoff.toISOString().slice(0,10);
+  const acts=await sbFetch('GET','amanda_activities?act_date=gte.'+since+'&act_type=in.('+encodeURIComponent(TYPE)+','+encodeURIComponent(LOG_LIST)+','+encodeURIComponent(LOG_GOTO)+',Listing%20Agent%20Update,Agent%20Partner%20conversation)&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=5000').catch(()=>[]);
+  const snaps=(acts||[]).filter(a=>a.act_type===TYPE&&/\[TUESDAY_PLAN_SNAPSHOT\]/i.test(String(a.notes||'')));
+  const batches={};snaps.forEach(a=>{const b=meta(a.notes,'TUE_PLAN_BATCH');if(b)batches[b]=Math.max(batches[b]||0,Date.parse(a.created_at||a.act_date||0)||0)});
+  const batch=Object.keys(batches).sort((a,b)=>(batches[b]-batches[a])||b.localeCompare(a))[0]||'';
+  return{batch,rows:snaps.filter(a=>meta(a.notes,'TUE_PLAN_BATCH')===batch&&meta(a.notes,'TUE_PLAN_LANE')!=='HEADER'),logs:(acts||[]).filter(a=>a.act_type!==TYPE)}
+}
+function card(){
+  let c=document.getElementById('v300TuesdayPlanCard');if(c)return c;
+  const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;
+  c=document.createElement('div');c.id='v300TuesdayPlanCard';c.innerHTML='<div class="v300-head"><div><div class="v300-kicker">MACK WEEKLY CALL PLAN</div><div class="v300-title">Tuesday Updates + Go-To Conversations</div><div class="v300-sub">Listing-side calls are due Tuesday. Agents with no active contract are assigned by LP Owner and due by end of week. This card comes directly from the weekly Tuesday Call Plan upload.</div></div><span class="v300-summary" id="v300Summary">Loading…</span></div><div class="v300-section"><div class="v300-section-head"><b>Listing-side Tuesday updates</b><span>Complete today</span></div><div id="v300Listing"></div></div><div class="v300-section"><div class="v300-section-head"><b>Go-To Conversations · no active contract</b><span>Complete by end of week</span></div><div id="v300Goto"></div></div>';
+  anchor.appendChild(c);return c
+}
+function doneFor(keyv,lane){
+  return state.logs.some(a=>meta(a.notes,'TUE_PLAN_KEY')===keyv && (lane==='LISTING'?a.act_type===LOG_LIST:a.act_type===LOG_GOTO));
+}
+async function loadPlan(lp,force){
+  lp=lpShort(lp||window.currentUser||'');if(!lp||lp==='Snapshot')return;
+  ensureUi();const c=card();if(!c)return;state.lp=lp;
+  try{const d=await latest();state.batch=d.batch;state.rows=d.rows;state.logs=d.logs;
+    const mine=d.rows.filter(r=>lpShort(meta(r.notes,'LP_OWNER'))===lp),listing=mine.filter(r=>meta(r.notes,'TUE_PLAN_LANE')==='LISTING'),go=mine.filter(r=>meta(r.notes,'TUE_PLAN_LANE')==='GOTO');
+    const actionable=listing.filter(r=>!['FSBO','Missing'].includes(meta(r.notes,'TUE_CONTACT_ROLE')));
+    const listOpen=actionable.filter(r=>!doneFor(meta(r.notes,'TUE_PLAN_KEY'),'LISTING')),goOpen=go.filter(r=>!doneFor(meta(r.notes,'TUE_PLAN_KEY'),'GOTO'));
+    document.getElementById('v300Summary').textContent=(d.batch?meta((d.rows[0]||{}).notes,'TUE_PLAN_DATE')+' · ':'')+listOpen.length+' listing due today · '+goOpen.length+' Go-To due this week';
+    const lh=document.getElementById('v300Listing');
+    lh.innerHTML=listing.length?listing.map(r=>{const role=meta(r.notes,'TUE_CONTACT_ROLE'),k=meta(r.notes,'TUE_PLAN_KEY'),done=doneFor(k,'LISTING'),issue=role==='Missing'||role==='FSBO',nm=meta(r.notes,'TUE_CONTACT_NAME'),client=meta(r.notes,'TXN_CLIENT'),close=meta(r.notes,'TXN_CLOSE_DATE'),mile=meta(r.notes,'TXN_MILESTONE'),ph=meta(r.notes,'TUE_PHONE'),em=meta(r.notes,'TUE_EMAIL');return '<div class="v300-row"><div><div class="v300-name">'+esc(nm)+'</div><div class="v300-meta">'+esc(client)+(close?' · close '+esc(close):'')+(mile?' · '+esc(mile):'')+'</div><span class="v300-tag today">'+esc(role)+'</span></div><div class="v300-contact">'+esc(ph||'No phone')+'<br>'+esc(em||'No email')+'</div><div class="v300-state '+(done?'done':'')+'">'+(done?'Completed ✓':issue?(role==='FSBO'?'FSBO · no listing-agent call':'Contact issue · fix before calling'):'Due today')+'</div><div>'+(issue?'':'<button class="v300-btn" type="button" onclick="v300Open(\''+encodeURIComponent(k)+'\',\'LISTING\')">'+(done?'Add note':'Log update')+'</button>')+'</div></div>'}).join(''):'<div class="v300-empty">No listing-side rows assigned to '+esc(lp)+'.</div>';
+    const gh=document.getElementById('v300Goto');
+    gh.innerHTML=go.length?go.map(r=>{const k=meta(r.notes,'TUE_PLAN_KEY'),done=doneFor(k,'GOTO'),nm=r.agent_name,ph=meta(r.notes,'TUE_PHONE'),em=meta(r.notes,'TUE_EMAIL'),tier=meta(r.notes,'TIER'),rm=meta(r.notes,'RM_OWNER'),pre=meta(r.notes,'ACTIVE_PREQUALS'),health=meta(r.notes,'REL_HEALTH'),due=meta(r.notes,'TUE_DUE');return '<div class="v300-row"><div><div class="v300-name">'+esc(nm)+'</div><div class="v300-meta">Tier '+esc(tier||'—')+' · RM '+esc(rm||'—')+' · '+esc(health||'')+'</div><span class="v300-tag week">'+esc(pre||'0')+' active prequals</span></div><div class="v300-contact">'+esc(ph||'No phone')+'<br>'+esc(em||'No email')+'</div><div class="v300-state '+(done?'done':'')+'">'+(done?'Completed ✓':'Due by '+esc(due||'Friday'))+'</div><div><button class="v300-btn" type="button" onclick="v300Open(\''+encodeURIComponent(k)+'\',\'GOTO\')">'+(done?'Add note':'Log Go-To')+'</button></div></div>'}).join(''):'<div class="v300-empty">No no-contract Go-To calls assigned to '+esc(lp)+'.</div>';
+  }catch(e){console.error(e);const s=document.getElementById('v300Summary');if(s)s.textContent='Could not load shared Tuesday plan'}
+}
+window.v300LoadPlan=loadPlan;
+window.v300Open=function(encoded,lane){const k=decodeURIComponent(encoded),r=state.rows.find(x=>meta(x.notes,'TUE_PLAN_KEY')===k);if(!r)return;current={row:r,lane,key:k};ensureUi();document.getElementById('v300ModalTitle').textContent=lane==='LISTING'?'Listing-side Tuesday update':'Go-To Conversation';document.getElementById('v300ModalMeta').textContent=(lane==='LISTING'?meta(r.notes,'TUE_CONTACT_NAME'):r.agent_name)+' · '+state.lp;document.getElementById('v300Notes').value='';document.getElementById('v300Follow').value='';document.getElementById('v300Err').style.display='none';document.getElementById('v300Modal').classList.add('show')};
+window.v300Close=function(){document.getElementById('v300Modal')?.classList.remove('show');current=null};
+window.v300Save=async function(){if(!current)return;const notes=clean(document.getElementById('v300Notes').value),out=document.getElementById('v300Outcome').value,fu=document.getElementById('v300Follow').value||null,err=document.getElementById('v300Err'),btn=document.getElementById('v300Save');if(notes.split(/\s+/).filter(Boolean).length<3){err.textContent='Add a short note with what you communicated or learned.';err.style.display='block';return}btn.disabled=true;btn.textContent='Saving…';try{const r=current.row,lane=current.lane,base='[TUESDAY_PLAN_WORK]'+tag('TUE_PLAN_BATCH',state.batch)+tag('TUE_PLAN_KEY',current.key)+tag('TUE_PLAN_LANE',lane)+tag('LP_OWNER',state.lp);const body={agent_name:lane==='LISTING'?meta(r.notes,'TUE_CONTACT_NAME'):r.agent_name,act_type:lane==='LISTING'?LOG_LIST:LOG_GOTO,act_date:new Date().toISOString().slice(0,10),outcome:out,notes:base+' '+notes,follow_up_date:fu};await sbFetch('POST','amanda_activities',body);v300Close();await loadPlan(state.lp,true)}catch(e){console.error(e);err.textContent='Could not save. Try again.';err.style.display='block'}finally{btn.disabled=false;btn.textContent='Save call'}};
 
 function boot(){
-  const title=document.querySelector('#view-agent-health .ct-page-title');
-  if(title&&!document.getElementById('ctHealthBuildBadge'))title.insertAdjacentHTML('beforeend',' <span id="ctHealthBuildBadge">Agent Health v41</span>');
-  const sub=document.querySelector('#view-agent-health .ct-page-sub');
-  if(sub)sub.textContent='Current Power BI Active Agents. Start with every valid-Level Power BI row. Only agents deleted from this v41 roster are excluded.';
-  const exp=document.getElementById('ctExportActiveOwnershipBtn');
-  if(exp){exp.setAttribute('onclick','return ctV41Export()');exp.onclick=window.ctV41Export}
-  ['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=render;el.onchange=render}});
-  if(document.getElementById('view-agent-health')?.classList.contains('active'))refresh();
+  ensureUi();
+  const old=document.getElementById('lp-tuesday-work');if(old)old.style.display='none';
+  const prior=window.v65LoadTuesday||window.v65Load;
+  // New plan is authoritative Tuesday work; preserve old function under a debug-only name.
+  if(prior)window.v300LegacyTuesdayLoad=prior;
+  window.v65LoadTuesday=loadPlan;window.v65Load=loadPlan;
+  try{const last=JSON.parse(localStorage.getItem('v300_tuesday_plan_last')||'null');if(last&&document.getElementById('v300PlanStatus'))document.getElementById('v300PlanStatus').textContent='Last uploaded '+last.date+' · '+last.listing+' actionable listing-side · '+last.goto+' Go-To calls.'}catch(e){}
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,50),{once:true});else setTimeout(boot,50);
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,80),{once:true});else setTimeout(boot,80);
 })();
 </script>
 
