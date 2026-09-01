@@ -12233,6 +12233,17 @@ function findHeader(rows,need){for(let i=0;i<Math.min(rows.length,12);i++){const
 function mapRow(h,r){const o={};h.forEach((x,i)=>o[String(x||'').trim()]=r[i]);return o}
 function normalizeHeaders(h){h=(h||[]).map(x=>String(x||'').trim());if(h.length)h[0]='Loan Team Member Name - Loan Partner 2';return h}
 function validContact(n){const s=norm(n);return !!s&&!['n/a','na','none','null','no agent','0','00','000','jane doe','john doe'].includes(s)}
+async function replaceWeekRows(planDate,lane){
+  if(!planDate)return;
+  if(lane==='LP'){
+    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&outcome=eq.LP%20Transaction').catch(()=>{});
+    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&agent_name=eq.'+encodeURIComponent('__LP_TUESDAY_PLAN__')).catch(()=>{});
+  }else if(lane==='RM'){
+    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&outcome=in.(RM%20Listing,Go-To)').catch(()=>{});
+    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&agent_name=eq.'+encodeURIComponent('__RM_TUESDAY_PLAN__')).catch(()=>{});
+  }
+}
+
 
 function installHub(){
   const grid=document.querySelector('#view-data-hub .ct-data-grid');if(!grid)return;
@@ -12261,6 +12272,7 @@ async function importLP(input){
       payload.push({agent_name:buyer,act_type:SNAP,act_date:planDate,outcome:'LP Transaction',notes,follow_up_date:planDate});count++;
     });
     payload.push({agent_name:'__LP_TUESDAY_PLAN__',act_type:SNAP,act_date:planDate,outcome:'Batch',notes:'[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',planDate)+tag('TUE_PLAN_LANE','LP_HEADER')+tag('ROW_COUNT',count),follow_up_date:null});
+    await replaceWeekRows(planDate,'LP');
     for(let i=0;i<payload.length;i+=50)await sbFetch('POST','amanda_activities',payload.slice(i,i+50));
     st.className='v310-status ok';st.textContent='Loaded '+count+' LP active-contract calls from ACTIVE CONTRACTS ✓';
     if(window.currentUser)await loadPlan(window.currentUser,true);
@@ -12285,6 +12297,7 @@ async function importRM(input){
       payload.push({agent_name:agent,act_type:SNAP,act_date:planDate,outcome:'Go-To',notes,follow_up_date:due});goCount++;
     });
     payload.push({agent_name:'__RM_TUESDAY_PLAN__',act_type:SNAP,act_date:planDate,outcome:'Batch',notes:'[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',planDate)+tag('TUE_PLAN_LANE','RM_HEADER')+tag('RM_COUNT',rmCount)+tag('GOTO_COUNT',goCount),follow_up_date:null});
+    await replaceWeekRows(planDate,'RM');
     for(let i=0;i<payload.length;i+=50)await sbFetch('POST','amanda_activities',payload.slice(i,i+50));
     st.className='v310-status ok';st.textContent='Loaded '+rmCount+' Amanda/RM listing calls + '+goCount+' LP Go-To calls ✓';
     if(window.currentUser)await loadPlan(window.currentUser,true);
@@ -12299,10 +12312,29 @@ async function fetchPlan(){
   snaps.filter(a=>['LP_HEADER','RM_HEADER'].includes(meta(a.notes,'TUE_PLAN_LANE'))).forEach(a=>{const lane=meta(a.notes,'TUE_PLAN_LANE'),ms=Date.parse(a.created_at||a.act_date||0)||0;if(!latest[lane]||ms>latest[lane].ms)latest[lane]={ms,batch:meta(a.notes,'TUE_PLAN_BATCH')}});
   const lpBatch=latest.LP_HEADER?.batch||'',rmBatch=latest.RM_HEADER?.batch||'';
   const rows=snaps.filter(a=>{const lane=meta(a.notes,'TUE_PLAN_LANE'),b=meta(a.notes,'TUE_PLAN_BATCH');return (lane==='LP_TXN'&&b===lpBatch)||(lane==='GOTO'&&b===rmBatch)});
-  const logs=(acts||[]).filter(a=>[LOG_TXN,LOG_GOTO].includes(a.act_type)&&/\[TUE_SPLIT_V310_WORK\]/i.test(String(a.notes||'')));
+  const logs=(acts||[]).filter(a=>{
+    const t=String(a.act_type||'');
+    return [LOG_TXN,LOG_GOTO,'Agent Partner conversation','Agent Talk-to','Active Agent Talk-to','Active Agent Check-in','Reconnect Outreach'].includes(t);
+  });
   return{lpBatch,rmBatch,rows,logs}
 }
-function done(row,lane){const k=meta(row.notes,'TUE_PLAN_KEY');return S.logs.some(a=>meta(a.notes,'TUE_PLAN_KEY')===k&&a.act_type===(lane==='LP_TXN'?LOG_TXN:LOG_GOTO))}
+function done(row,lane){
+  const k=meta(row.notes,'TUE_PLAN_KEY'),planDate=meta(row.notes,'TUE_PLAN_DATE'),lp=lpShort(meta(row.notes,'LP_OWNER'));
+  const client=norm(meta(row.notes,'TXN_CLIENT')),agent=norm(row.agent_name);
+  return S.logs.some(a=>{
+    if(String(a.act_date||'')<String(planDate||''))return false;
+    const t=String(a.act_type||''),ak=meta(a.notes,'TUE_PLAN_KEY'),loggedLp=lpShort(meta(a.notes,'LP')||meta(a.notes,'LP_OWNER'));
+    if(ak&&ak===k)return lane==='LP_TXN'?t===LOG_TXN:t===LOG_GOTO;
+    if(loggedLp&&lp&&loggedLp!==lp)return false;
+    if(lane==='LP_TXN'&&t===LOG_TXN){
+      return client&&norm(meta(a.notes,'TXN_CLIENT'))===client;
+    }
+    if(lane==='GOTO'&&[LOG_GOTO,'Agent Partner conversation','Agent Talk-to','Active Agent Talk-to','Active Agent Check-in','Reconnect Outreach'].includes(t)){
+      return norm(a.agent_name)===agent;
+    }
+    return false;
+  })
+}
 function ensureExec(){
   let c=document.getElementById('v310Execution');if(c)return c;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;c=document.createElement('section');c.id='v310Execution';c.innerHTML='<div class="v310-head"><div><div class="v310-title">Tuesday Updates + Go-To Conversations</div><div class="v310-sub">LP transaction calls come only from TUESDAY UPDATE CALLS LP2.xlsx. Go-To calls come only from AGENT WITH NO ACTIVE CONTRACTS.</div></div><div class="v310-pill" id="v310Summary">Loading…</div></div><div class="v310-section"><div class="v310-section-head"><b>LP active-contract Tuesday updates</b><span>Due Tuesday</span></div><div id="v310Txn"></div></div><div class="v310-section"><div class="v310-section-head"><b>Go-To Conversations · no active contract</b><span>Due by end of week</span></div><div id="v310Goto"></div></div>';anchor.appendChild(c);return c}
 async function loadPlan(lp){
