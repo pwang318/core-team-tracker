@@ -11202,14 +11202,76 @@ function openOperatingStandardView(btn){
   }
   const rate=(a,b)=>b?Math.round(a/b*100):null;
   function gate(label,val,target){const cls=statusClass(val,target),shown=val===null?'—':val+'%';return '<div class="ct-mini-gate '+cls+'"><b>'+shown+'</b><span>'+label+' · target '+target+'%</span></div>'}
+  function ctLpUserMatches(lp, user){
+    const s=String(user||'').toLowerCase();
+    const map={
+      Gavin:['gavin','dill'],
+      Karen:['karen','de la riva','delariva'],
+      Osgood:['osgood','mcmahon'],
+      Jordan:['jordan','johnston'],
+      Said:['said','saleh'],
+      Isaak:['isaak','caldwell']
+    };
+    return (map[lp]||[String(lp||'').toLowerCase()]).some(x=>s.indexOf(x)>=0);
+  }
+  function ctVelocifyStage(row){
+    const s=String((row&&row.status)||'').toLowerCase().trim();
+    const app=typeof ctIsLeadAppConverted==='function'
+      ? ctIsLeadAppConverted(row)
+      : /started|application|approval|pre.?approval|processing|underwriting|submitt|clear to close|ctc|closing|fund|closed/.test(s);
+    const funded=/\bfunded\b|loan closed|\bclosed\b/.test(s);
+    const contract=funded||/ready for pack out|\brfpo\b|processing|underwriting|underwriter|submittal|submitted|submission|conditional approval|conditions|appraisal|clear to close|\bctc\b|closing|docs|received by closer/.test(s);
+    const pre=contract||/pre.?approval|\bapproval\b|\bapproved\b/.test(s);
+    return {app,pre,contract,funded};
+  }
+  async function ctLpVelocifyFunnel(lp){
+    const y=new Date().getFullYear()+'-01-01';
+    try{
+      const rows=await sbFetch('GET','velocify_leads?date_added=gte.'+y+'&select=date_added,lp_user,status,converted_to_app,app_started_at,file_started_at,started_at&order=date_added.desc&limit=20000');
+      const mine=(rows||[]).filter(r=>ctLpUserMatches(lp,r.lp_user));
+      let apps=0,pre=0,contracts=0,funded=0;
+      mine.forEach(r=>{
+        const st=ctVelocifyStage(r);
+        if(st.app)apps++;
+        if(st.pre)pre++;
+        if(st.contract)contracts++;
+        if(st.funded)funded++;
+      });
+      return {ok:true,leads:mine.length,apps,pre,contracts,funded};
+    }catch(e){
+      console.warn('LP Velocify funnel unavailable',lp,e);
+      return {ok:false,leads:0,apps:0,pre:0,contracts:0,funded:0};
+    }
+  }
+  function ctFunnelCard(label,num,den,target,source){
+    const val=den>0?Math.round(num/den*100):null;
+    const cls=statusClass(val,target),shown=val===null?'—':val+'%';
+    const detail=source+(den>0?' · '+num+' / '+den:'');
+    return '<div class="ct-mini-gate '+cls+'"><b>'+shown+'</b><span>'+label+' · target '+target+'%</span><small style="display:block;margin-top:4px;color:#718391;font-size:9px">'+esc(detail)+'</small></div>';
+  }
   async function lpv2RenderLpScorecard(lp){
     const host=document.getElementById('lp-v2-scorecard');if(!host)return;
     host.innerHTML='<div class="ct-loading">Loading scorecard…</div>';
-    const rows=await scoreRows(lp), wk=mondayKey(new Date()), week=rows.filter(r=>r.week_key===wk), all=aggregate(rows), w=aggregate(week);
+
+    // Top row = THIS WEEK only, exactly what the LP has entered in Update My Scorecard.
+    const rows=await scoreRows(lp), wk=mondayKey(new Date()), week=rows.filter(r=>r.week_key===wk), w=aggregate(week);
     const role=document.getElementById('lp-v2-role-pill');if(role)role.textContent=lp==='Isaak'?'LP1 · Conversion + front-end support':'LP2 · Client + transaction execution';
-    const metrics=lp==='Isaak'?[['1003s',w.apps],['Pre-approvals',w.pre],['Contracts',w.contracts],['Referred leads',w.leads]]:[['Referred leads',w.leads],['1003s',w.apps],['Pre-approvals',w.pre],['Contracts',w.contracts]];
-    host.innerHTML='<div class="ct-score-grid">'+metrics.map(m=>'<div class="ct-score-metric"><div class="num">'+m[1]+'</div><div class="lbl">'+esc(m[0])+' · this week</div></div>').join('')+'</div>'+
-      '<div class="ct-gates-inline">'+gate('Lead → 1003',rate(all.apps,all.leads),60)+gate('1003 → Pre-Approval',rate(all.pre,all.apps),85)+gate('Pre-Approval → Contract',rate(all.contracts,all.pre),55)+gate('Contract → Funded',all.hasFunded?rate(all.funded,all.contracts):null,87)+'</div>';
+    const metrics=lp==='Isaak'
+      ?[['1003s',w.apps],['Pre-approvals',w.pre],['Contracts',w.contracts],['Referred leads',w.leads]]
+      :[['Referred leads',w.leads],['1003s',w.apps],['Pre-approvals',w.pre],['Contracts',w.contracts]];
+
+    const funnel=await ctLpVelocifyFunnel(lp);
+    const conversionHtml=funnel.ok
+      ? ctFunnelCard('Lead → 1003',funnel.apps,funnel.leads,60,'Velocify YTD')+
+        ctFunnelCard('1003 → Pre-Approval',funnel.pre,funnel.apps,85,'Velocify YTD')+
+        ctFunnelCard('Pre-Approval → Contract',funnel.contracts,funnel.pre,55,'Velocify YTD')+
+        ctFunnelCard('Contract → Funded',funnel.funded,funnel.contracts,87,'Velocify YTD')
+      : '<div class="ct-mini-gate"><b>—</b><span>Conversion data</span><small style="display:block;margin-top:4px;color:#718391;font-size:9px">Velocify YTD source not loaded</small></div>';
+
+    host.innerHTML=
+      '<div class="ct-score-grid">'+metrics.map(m=>'<div class="ct-score-metric"><div class="num">'+m[1]+'</div><div class="lbl">'+esc(m[0])+' · this week</div></div>').join('')+'</div>'+
+      '<div style="font-size:10px;color:#6B7E8A;margin:8px 0 5px"><b>Conversion:</b> live YTD Velocify funnel. Weekly boxes above are LP-entered scorecard activity.</div>'+
+      '<div class="ct-gates-inline">'+conversionHtml+'</div>';
   }
   window.lpv2PrimeLp=function(lp){
     const name=document.getElementById('lp-hero-name');if(name)name.textContent=lp+' · Weekly Execution';
@@ -11694,16 +11756,17 @@ window.lpv2Route=function(route,btn){
    let box=document.getElementById('ct-amanda-snapshot');
    if(!box){box=document.createElement('div');box.id='ct-amanda-snapshot';roster.appendChild(box)}
    else if(box.parentElement!==roster)roster.appendChild(box);
-   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM view</button></div><div class="ct-loading">Loading Amanda’s execution…</div>';
+   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-loading">Loading Amanda’s execution…</div>';
    const acts=await loadActs();
-   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM view</button></div><div class="ct-amanda-grid">'+GOALS.map(g=>{const v=count(acts,g),pct=Math.min(100,Math.round(v/g.goal*100));return '<div class="ct-amanda-metric"><div class="k">'+esc(g.label)+'</div><div class="v">'+v+' <span>/ '+g.goal+'</span></div><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div></div>'}).join('')+'</div>';
+   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-amanda-grid">'+GOALS.map(g=>{const v=count(acts,g),pct=Math.min(100,Math.round(v/g.goal*100));return '<div class="ct-amanda-metric"><div class="k">'+esc(g.label)+'</div><div class="v">'+v+' <span>/ '+g.goal+'</span></div><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div></div>'}).join('')+'</div>';
    const btn=document.getElementById('ct-amanda-open-rm');
    if(btn)btn.onclick=function(){
      try{
-       document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-       document.getElementById('view-rm')?.classList.add('active');
-       if(typeof loadRmSummary==='function')loadRmSummary();
-     }catch(e){console.warn(e)}
+       window.open('https://pwang318.github.io/amanda-tracker/','_blank','noopener,noreferrer');
+     }catch(e){
+       console.warn('Could not open RM Tracker',e);
+       window.location.href='https://pwang318.github.io/amanda-tracker/';
+     }
    };
  }
  window.ctRenderAmandaSnapshot=renderAmanda;
@@ -11888,6 +11951,14 @@ window.lpv2Route=function(route,btn){
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();
 })();
+</script>
+
+
+<script id="ct-open-amanda-rm-tracker">
+window.ctOpenAmandaRmTracker=function(){
+  try{window.open('https://pwang318.github.io/amanda-tracker/','_blank','noopener,noreferrer');}
+  catch(e){window.location.href='https://pwang318.github.io/amanda-tracker/';}
+};
 </script>
 
 </body>
