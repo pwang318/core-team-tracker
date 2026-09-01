@@ -1,4 +1,4 @@
- 
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -867,7 +867,6 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 #view-co-marketing.active{display:block!important}
 #view-co-marketing #director-cards{margin-top:10px}
 </style>
-
 <style id="ct-health-clarity-css">
 #view-agent-health .ct-health-summary-grid{margin-top:12px}
 #view-agent-health .ct-health-summary{min-height:108px;text-align:left}
@@ -892,8 +891,12 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 }
 #view-agent-health .ct-health-clarity-note b{color:#17324D}
 </style>
-
-</head>
+<style id="ct-conversion-growth-page-css">
+#view-leads #leads-tab-leads{display:block!important}
+#view-conversion-growth .ct-page-wrap>.ct-page-wrap{padding:0!important;max-width:none!important}
+#view-conversion-growth #conversion-growth-content{padding:0!important;max-width:none!important}
+#view-conversion-growth .section-head:first-child{margin-top:4px}
+</style></head>
 <body>
 <div id="lpBuildBadge" style="display:none"></div>
 <div class="app">
@@ -921,7 +924,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-nav-section"><div class="ct-nav-label">TEAM</div><button class="who-btn ct-nav-btn wb-Snapshot" data-route="snapshot" onclick="lpv2Route('snapshot',this)" type="button"><span class="ct-nav-icon">▦</span><span>Team Snapshot</span></button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LOAN PARTNERS</div>
 <button class="who-btn ct-nav-btn wb-Gavin" data-lp="Gavin" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Gavin</button><button class="who-btn ct-nav-btn wb-Karen" data-lp="Karen" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Karen</button><button class="who-btn ct-nav-btn wb-Osgood" data-lp="Osgood" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Osgood</button><button class="who-btn ct-nav-btn wb-Jordan" data-lp="Jordan" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Jordan</button><button class="who-btn ct-nav-btn wb-Said" data-lp="Said" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Said</button><button class="who-btn ct-nav-btn wb-Isaak" data-lp="Isaak" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Isaak</button></div>
-<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Integrity</button><button class="who-btn ct-nav-btn" data-route="income" onclick="lpv2Route('income',this)" type="button">Income Calculation</button></div>
+<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="conversion-growth" onclick="lpv2Route('conversion-growth',this)" type="button">Conversion + Growth</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Integrity</button><button class="who-btn ct-nav-btn" data-route="income" onclick="lpv2Route('income',this)" type="button">Income Calculation</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">DATA</div><button class="who-btn ct-nav-btn" data-route="data-hub" onclick="lpv2Route('data-hub',this)" type="button">Weekly Data Hub</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LEARN + TOOLS</div><button class="who-btn ct-nav-btn wb-OperatingStandard" data-route="standard" onclick="lpv2Route('standard',this)" type="button">Operating Standard</button><button class="who-btn ct-nav-btn ct-action-btn" data-route="scripts" onclick="lpv2Route('scripts',this)" type="button">Scripts + Training</button><button class="who-btn ct-nav-btn wb-Admin" data-route="admin" onclick="lpv2Route('admin',this)" type="button">Admin</button></div>
 </div>
@@ -1521,12 +1524,8 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 </div>
 <div class="view" id="view-leads">
-<div class="d-tab-bar" style="margin-bottom:.75rem">
-<div class="d-tab active" onclick="switchLeadsTab('leads',this)">Leads</div>
-<div class="d-tab" onclick="switchLeadsTab('roster',this)">Roster</div>
-<div class="d-tab" onclick="switchLeadsTab('growth',this)">Growth</div>
-</div>
-<div class="d-tab-panel active" id="leads-tab-leads">
+
+<div class="active" id="leads-tab-leads">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
 <div style="font-size:18px;font-weight:700;color:var(--text)">Referral Leads</div>
 <div style="display:flex;align-items:center;gap:10px">
@@ -1608,7 +1607,37 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div id="ref-uncovered-table-v2"></div>
 </div>
 </div>
-<div class="d-tab-panel" id="leads-tab-roster">
+
+<div class="d-tab-panel" id="leads-tab-growth">
+<div id="d-growth-scoreboard-tab" style="margin-bottom:1rem"></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
+<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Growth tracking</div>
+<div style="font-size:12px;color:var(--text-2);line-height:1.6">
+<b>Relationship Tier:</b> Channel = 10+ closes  ·  A = 4–9 closes  ·  B = 2–3 closes  ·  C = at least 1 close OR 1 lead  ·  0 closes + 0 leads = No Tier. Tier is calculated from trailing-12-month production/referral activity; Power BI Level is reference data only and does not set the Relationship Tier.<br/>
+<b>Active Partner:</b> at least one qualifying lead OR close within the last 90 days. <b>Managed Active Partners</b> exclude inactive/removed relationships and DNC. Updates automatically when you upload the Power BI export in Admin.
+      </div>
+</div>
+<div id="d-tier-movement-section" style="margin-bottom:1rem"></div>
+<div class="section-head">Full roster
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+<select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option><option value="Unassigned">Unassigned</option></select>
+<select id="d-rm" onchange="renderDaniel()"><option value="">All RM Owners</option><option>Amanda</option><option>Nyny</option><option value="Unassigned">Unassigned</option></select>
+<select id="d-lvl" onchange="renderDaniel()"><option value="">All tiers</option><option>Channel</option><option>A</option><option>B</option><option>C</option></select>
+<select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+<input id="d-q" oninput="renderDaniel()" placeholder="Search..." style="width:120px" type="text"/>
+</div>
+</div>
+<div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>RM Owner</th><th>LP Owner</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
+</div>
+</div><div class="view" id="view-conversion-growth"><div class="ct-page-wrap">
+<div class="ct-page-head">
+<div>
+<div class="ct-eyebrow">SHARED WORK</div>
+<h1>Conversion + Growth</h1>
+<div class="ct-page-sub">Use this page for lead-to-application conversion, team growth scoreboards and performance visibility. Realtor / Builder Leads stays focused on the actual lead work.</div>
+</div>
+</div>
+<div class="ct-page-wrap" id="conversion-growth-content">
 <div class="section-head">Conversion by date range</div>
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
 <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">Search any date range for team and per-LP Lead → App conversion. Only confirmed file/application stages count; Does Not Qualify alone does not.</div>
@@ -1634,29 +1663,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading...</div></div>
 <div class="section-head" style="margin-top:1rem">All-time leaderboard</div>
 <div id="leaderboard"></div>
-</div>
-<div class="d-tab-panel" id="leads-tab-growth">
-<div id="d-growth-scoreboard-tab" style="margin-bottom:1rem"></div>
-<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
-<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Growth tracking</div>
-<div style="font-size:12px;color:var(--text-2);line-height:1.6">
-<b>Relationship Tier:</b> Channel = 10+ closes  ·  A = 4–9 closes  ·  B = 2–3 closes  ·  C = at least 1 close OR 1 lead  ·  0 closes + 0 leads = No Tier. Tier is calculated from trailing-12-month production/referral activity; Power BI Level is reference data only and does not set the Relationship Tier.<br/>
-<b>Active Partner:</b> at least one qualifying lead OR close within the last 90 days. <b>Managed Active Partners</b> exclude inactive/removed relationships and DNC. Updates automatically when you upload the Power BI export in Admin.
-      </div>
-</div>
-<div id="d-tier-movement-section" style="margin-bottom:1rem"></div>
-<div class="section-head">Full roster
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
-<select id="d-lp" onchange="renderDaniel()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option><option value="Unassigned">Unassigned</option></select>
-<select id="d-rm" onchange="renderDaniel()"><option value="">All RM Owners</option><option>Amanda</option><option>Nyny</option><option value="Unassigned">Unassigned</option></select>
-<select id="d-lvl" onchange="renderDaniel()"><option value="">All tiers</option><option>Channel</option><option>A</option><option>B</option><option>C</option></select>
-<select id="d-status" onchange="renderDaniel()"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
-<input id="d-q" oninput="renderDaniel()" placeholder="Search..." style="width:120px" type="text"/>
-</div>
-</div>
-<div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>RM Owner</th><th>LP Owner</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
-</div>
-</div>
+</div></div></div>
 <div id="lead-drilldown-overlay" onclick="if(event.target===this)closeDrilldown()" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;align-items:center;justify-content:center;padding:16px">
 <div style="background:var(--surface);border-radius:12px;width:100%;max-width:560px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border)">
 <div id="drilldown-header" style="background:#1F4E79;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
@@ -6221,7 +6228,7 @@ const LPSC_METRICS_MAP={
     {key:"meetings",label:"Realtor meetings scheduled",goal:10}
   ],
   _lp2:[
-    {key:"past_client_talks",label:"Meaningful past-client talk-to's",goal:10},
+    
     {key:"referred_leads",label:"Referred leads",goal:16},
     {key:"apps_1003",label:"1003's",goal:13},
     {key:"pre_approvals",label:"Pre-approvals",goal:6},
@@ -11456,7 +11463,7 @@ const CT_LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
 const CT_LP2=['Gavin','Karen','Osgood','Jordan','Said'];
 const TEAM_GOALS={past_client_talks:50,referred_leads:80,apps_1003:50,pre_approvals:25,contracts:14};
 const METRICS=[
- {key:'past_client_talks',label:'Meaningful past-client talk-to’s',scope:'LP2',source:'LP scorecard'},
+ 
  {key:'referred_leads',label:'Referred leads',scope:'LP2',source:'LP scorecard + Velocify cross-check'},
  {key:'apps_1003',label:'1003s',scope:'TEAM',source:'LP scorecard'},
  {key:'pre_approvals',label:'Pre-approvals',scope:'TEAM',source:'LP scorecard'},
@@ -11723,7 +11730,6 @@ window.lpv2Route=function(route,btn){
 ['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=ctRenderHealthRows;el.onchange=ctRenderHealthRows}});
 })();
 </script>
-
 <style id="ct-amanda-recovered-css">
 #ct-amanda-snapshot{margin-top:14px;padding-top:14px;border-top:1px solid #DCE7EC}
 .ct-amanda-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
@@ -11804,9 +11810,6 @@ window.lpv2Route=function(route,btn){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
-
-
-
 <script id="ct-central-recovered-router">
 (function(){
   function activate(viewId,btn){
@@ -11845,6 +11848,23 @@ window.lpv2Route=function(route,btn){
       if(route==='leads'){
         activate('view-leads',btn);
         if(typeof loadReferralLeadsDirect==='function')await Promise.resolve(loadReferralLeadsDirect()).catch(()=>{});
+        return;
+      }
+      if(route==='conversion-growth'){
+        activate('view-conversion-growth',btn);
+        try{
+          if(typeof renderGrowthScoreboard==='function')renderGrowthScoreboard();
+          if(typeof renderVelocifyLeaderboard==='function')renderVelocifyLeaderboard();
+          if(typeof renderLeaderboard==='function')renderLeaderboard();
+          if(typeof renderChurnRisk==='function')renderChurnRisk();
+          if(typeof renderLpEffectiveness==='function')renderLpEffectiveness();
+          const csEl=document.getElementById('conv-range-start'),ceEl=document.getElementById('conv-range-end');
+          if(csEl&&!csEl.value){
+            csEl.value='2026-04-01';
+            if(ceEl)ceEl.value=typeof localDateStr==='function'?localDateStr(new Date()):new Date().toISOString().slice(0,10);
+            if(typeof runConversionRangeSearch==='function')runConversionRangeSearch();
+          }
+        }catch(e){console.warn('Conversion + Growth load',e)}
         return;
       }
       if(route==='agent-health'){
@@ -11939,8 +11959,6 @@ window.lpv2Route=function(route,btn){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();
 })();
 </script>
-
-
 <script id="ct-recovered-missing-helpers">
 (function(){
   window.lpv3CloseSnapshotDrill=function(){
@@ -11965,8 +11983,6 @@ window.lpv2Route=function(route,btn){
   };
 })();
 </script>
-
-
 <script id="ct-health-default-filter-fix">
 (function(){
   function wire(){
@@ -11978,14 +11994,24 @@ window.lpv2Route=function(route,btn){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();
 })();
 </script>
-
-
 <script id="ct-open-amanda-rm-tracker">
 window.ctOpenAmandaRmTracker=function(){
   try{window.open('https://pwang318.github.io/amanda-tracker/','_blank','noopener,noreferrer');}
   catch(e){window.location.href='https://pwang318.github.io/amanda-tracker/';}
 };
 </script>
-
-</body>
+<script id="ct-roster-to-shared-page">
+(function(){
+ const oldSwitch=window.switchLeadsTab;
+ if(typeof oldSwitch==='function'){
+   window.switchLeadsTab=function(tab,btn){
+     if(tab==='roster'){
+       const nav=document.querySelector('.ct-nav-btn[data-route="conversion-growth"]');
+       if(typeof lpv2Route==='function')return lpv2Route('conversion-growth',nav);
+     }
+     return oldSwitch.apply(this,arguments);
+   };
+ }
+})();
+</script></body>
 </html>
