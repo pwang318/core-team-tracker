@@ -832,7 +832,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 .ct-score-grid{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:9px;margin-bottom:11px}.ct-score-metric{background:#F8FBFC;border:1px solid #E0E9ED;border-radius:10px;padding:10px 11px}.ct-score-metric .num{font-size:22px;font-weight:800;color:var(--ct-navy)}.ct-score-metric .lbl{font-size:9.5px;color:#748893;text-transform:uppercase;letter-spacing:.05em;font-weight:700}.ct-gates-inline{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:8px}.ct-mini-gate{border:1px solid #E2EAEE;border-radius:9px;padding:9px 10px}.ct-mini-gate b{display:block;font-size:15px;color:var(--ct-navy)}.ct-mini-gate span{font-size:9.5px;color:#7A8C96}.ct-mini-gate.good{background:#F2FAFC;border-color:#B9DFE9}.ct-mini-gate.warn{background:#FFF9ED;border-color:#E9D39B}
 .ct-embedded-block{display:block!important;background:transparent!important;border:0!important;border-left:0!important;padding:0!important;margin:0!important}.ct-embedded-block:empty:before{content:'No current items.';display:block;padding:14px;color:#82919A;font-size:11px;border:1px dashed #D8E4EA;border-radius:9px}.ct-handoff-card details{border:1px solid #E2E9ED;border-radius:9px;padding:9px 11px;margin-top:8px;background:#FBFDFE}.ct-handoff-card summary{display:flex;gap:8px;align-items:center;cursor:pointer;color:#29485B;font-size:11.5px}.ct-handoff-card details button{float:right;margin-top:7px}.ct-handoff-card [id$='summary']{font-size:10.5px;color:#7A8C96;margin:5px 0}.ct-handoff-card [id$='list']{clear:both;padding-top:8px}
 .ct-legacy-state{display:none!important}.carryover-banner,.monday-banner,.target-complete-bar,.streak-bar,.priority-banner,.inactive-banner,.bday-banner{display:none!important}.search-panel{display:none!important}#lp-call-list{display:none!important}.section-head{letter-spacing:.05em}
-#lp-weekly-execution-host .v65-wrap,#lp-weekly-execution-host .v65-card{border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;background:transparent!important}#lp-weekly-execution-host .v65-head{display:none!important}#lp-weekly-execution-host .v65-row{border:1px solid #E0E9ED!important;border-radius:10px!important;margin:7px 0!important;background:#fff!important;padding:10px!important}#lp-weekly-execution-host .v65-actions button{background:#1E83A8!important;border-color:#1E83A8!important}
+
 #lp-facetime-focus>div{border-top:1px solid #EDF2F4;padding:8px 0!important}.lp-rm-response-panel,.lp-rm-note-panel{background:transparent!important;border:0!important;padding:0!important;margin:0!important;box-shadow:none!important}
 #view-portfolio,#view-ownership,#view-rm{display:none!important}
 @media(max-width:980px){.app{padding-left:20px!important}.app-header{margin-left:-20px!important;padding-left:20px!important}.who-bar{position:static!important;width:auto!important;display:flex!important;gap:8px!important;overflow-x:auto!important;padding:10px!important;margin:0 0 14px!important;border:1px solid var(--ct-line)!important;border-radius:12px!important}.ct-nav-section{display:contents}.ct-nav-label{display:none}.ct-nav-btn{width:auto!important;white-space:nowrap!important;padding:8px 10px!important}.ct-gate-grid{grid-template-columns:repeat(2,1fr)}.ct-score-grid,.ct-gates-inline{grid-template-columns:repeat(2,1fr)}}
@@ -1276,7 +1276,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-page-head"><div><div class="ct-eyebrow">LOAN PARTNER</div><h1 id="lp-hero-name">Weekly Execution</h1><div class="ct-page-sub" id="lp-hero-sub">Loading current work…</div></div><div class="ct-role-pill" id="lp-v2-role-pill">LP2 · Client + transaction execution</div></div>
 <section class="ct-card ct-scorecard-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>My current position</h2></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="ct-link-btn" onclick="lpv4OpenMyScorecard(currentUser)" type="button">Update my scorecard</button><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div></div><div id="lp-v2-scorecard"><div class="ct-loading">Loading scorecard…</div></div></section>
 <section class="ct-card ct-focus-card"><div class="ct-section-head"><div><div class="ct-kicker">RELATIONSHIP MOMENT</div><h2>Face Time priorities</h2></div><button class="ct-link-btn" onclick="lpv2Route('facetime',this)" type="button">Open Face Time</button></div><div class="ct-embedded-block" id="lp-facetime-focus"><div class="ct-loading">Loading Face Time priorities…</div></div></section>
-<section class="ct-card ct-execution-card"><div class="ct-section-head"><div><div class="ct-kicker">EXECUTION</div><h2>Active contracts + buyer movement</h2></div></div><div class="ct-helper">Work under-contract buyer/client updates first. Then review preapprovals and prequals for the next meaningful move. Routine listing-agent relationship work belongs to RM.</div><div class="ct-stall-explainer"><strong>What “Stalled” means:</strong> the buyer has stayed in the same unresolved stage for 5+ days without a meaningful status update. Open the buyer, choose the reason they are stuck, document what changed, and set the next action/owner. Updating the record resets the stall clock.</div><div id="lp-weekly-execution-host"><div class="ct-loading">Loading current transaction and pipeline work…</div></div></section>
+<section class="ct-card ct-execution-card"><div class="ct-section-head"><div><div class="ct-kicker">EXECUTION</div><h2>Active contracts + buyer movement</h2></div></div><div class="ct-helper">Work under-contract buyer/client updates first. Then review preapprovals and prequals for the next meaningful move. Routine listing-agent relationship work belongs to RM.</div><div class="ct-stall-explainer"><strong>What “Stalled” means:</strong> the buyer has stayed in the same unresolved stage for 5+ days without a meaningful status update. Open the buyer, choose the reason they are stuck, document what changed, and set the next action/owner. Updating the record resets the stall clock.</div><div id="lp-weekly-execution-host"></div></section>
 <section class="ct-card ct-handoff-card"><div class="ct-section-head"><div><div class="ct-kicker">TEAM HANDOFFS</div><h2>RM → LP actions</h2></div></div>
 <div class="ct-embedded-block" id="lp-rm-flags-for-you"><div id="lp-rm-flags-for-you-list"></div><span id="lp-rm-flag-badge" style="display:none"></span></div>
 <div class="lp-rm-response-panel" id="lp-rm-responses"><details id="lp-rm-responses-details"><summary><b>Recent RM responses</b><span id="lp-rm-response-badge" style="display:none">NEW</span><span id="lp-rm-response-open-label">View ▾</span></summary><button id="lp-rm-response-clear-all" type="button">Clear alert</button><div id="lp-rm-response-summary"></div><div id="lp-rm-responses-list">Loading…</div></details></div>
@@ -2787,7 +2787,7 @@ function selectUser(btn,u){
     if(heroName)heroName.textContent=u+"'s calls this week";
     if(heroSub)heroSub.textContent="Syncing shared RM + LP activity before building the call list…";
     if(lpList)lpList.innerHTML='<div class="no-data">Checking the latest team touches and follow-up ownership…</div>';
-    Promise.all([loadCallLogs().catch(function(){}),loadRmActivity().catch(function(){}),loadFaceTime().catch(function(){}),loadInactiveRosterNames().catch(function(){})]).then(function(){renderLP(u);if(typeof window.v65LoadTuesday==='function'){Promise.resolve(window.v65LoadTuesday(u,true)).catch(function(e){console.warn('transaction/pipeline work refresh failed',e);});}});
+    Promise.all([loadCallLogs().catch(function(){}),loadRmActivity().catch(function(){}),loadFaceTime().catch(function(){}),loadInactiveRosterNames().catch(function(){})]).then(function(){renderLP(u);if(typeof window.v310LoadPlan==='function'){Promise.resolve(window.v310LoadPlan(u,true)).catch(function(e){console.warn('transaction/pipeline work refresh failed',e);});}});
     lpStartPolling(u);
   }
 }
@@ -10971,82 +10971,6 @@ async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId
 <script id="v63-facetime-source-marker">
 window.CT_SHARED_FACETIME_RULES_VERSION="20260828-v63";
 </script>
-<style id="v65-tuesday-work-css">
-#lp-tuesday-work{display:block;background:linear-gradient(100deg,#F2F8FB,#fff);border:1px solid #C8DDE6;border-left:5px solid #007FA4;border-radius:12px;padding:12px 13px;margin-bottom:12px;box-shadow:0 3px 14px rgba(0,98,126,.055)}
-#lp-tuesday-work .v65-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:9px}#lp-tuesday-work .v65-kicker{font-size:9px;font-weight:900;letter-spacing:.55px;text-transform:uppercase;color:#007291;margin-bottom:3px}#lp-tuesday-work .v65-title{font-size:13px;font-weight:900;color:#071B37}#lp-tuesday-work .v65-sub{font-size:10.5px;color:#526A78;line-height:1.45;margin-top:2px;max-width:850px}#lp-tuesday-work .v65-summary{font-size:9.5px;font-weight:850;color:#065C76;background:#EAF7FB;border:1px solid #B9DDE8;border-radius:999px;padding:5px 8px;white-space:nowrap}
-#lp-tuesday-work .v65-rule{font-size:10px;line-height:1.45;color:#405B68;background:#fff;border:1px solid #D7E6EC;border-radius:8px;padding:7px 9px;margin-bottom:9px}.v65-section{margin-top:9px}.v65-section-head{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#476473;margin:0 0 6px}.v65-list{display:grid;gap:7px}.v65-row{display:grid;grid-template-columns:minmax(220px,1.3fr) minmax(190px,1fr) auto;gap:9px;align-items:center;background:#fff;border:1px solid #DDE9EE;border-radius:9px;padding:9px 10px}.v65-name{font-size:11.5px;font-weight:900;color:#102B43}.v65-meta{font-size:9.7px;color:#687D89;line-height:1.4;margin-top:2px}.v65-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.v65-pill{font-size:8.6px;font-weight:850;border-radius:999px;padding:3px 6px;background:#EEF6F8;color:#315C69;border:1px solid #D2E4E9}.v65-pill.hot{background:#FFF5DF;color:#76540A;border-color:#E8D39E}.v65-state{font-size:9.8px;line-height:1.45;color:#506875}.v65-state strong{color:#214A5B}.v65-actions{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}.v65-actions button{border:1px solid #C9DDE5;background:#fff;color:#0D6681;border-radius:8px;padding:7px 9px;font:800 9.5px/1.1 inherit;cursor:pointer;white-space:nowrap}.v65-actions button.primary{background:#007FA4;color:#fff;border-color:#007FA4}.v65-empty{padding:11px;text-align:center;border:1px dashed #CFE0E6;border-radius:8px;background:#fff;color:#6E818B;font-size:10px}
-#v65Modal{display:none;position:fixed;inset:0;z-index:10010;background:rgba(12,40,53,.47);align-items:center;justify-content:center;padding:16px}#v65Modal.open{display:flex}#v65Modal .v65-modal{width:min(650px,100%);max-height:90vh;overflow:auto;background:#fff;border:1px solid #D0E0E6;border-radius:14px;padding:17px;box-shadow:0 25px 70px rgba(10,36,49,.26)}#v65Modal .v65-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}#v65Modal label{display:block;font-size:9.4px;font-weight:850;text-transform:uppercase;letter-spacing:.04em;color:#536B77;margin-bottom:4px}#v65Modal select,#v65Modal textarea,#v65Modal input{width:100%;box-sizing:border-box;border:1px solid #D2E0E5;border-radius:8px;padding:9px;font:inherit;font-size:12px;background:#fff}#v65Modal textarea{min-height:90px;resize:vertical}.v65-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.v65-modal-actions button{border:1px solid #CBDCE3;background:#fff;color:#46616D;border-radius:8px;padding:8px 11px;font:800 10.5px inherit;cursor:pointer}.v65-modal-actions button.primary{background:#007FA4;color:#fff;border-color:#007FA4}
-@media(max-width:760px){.v65-row{grid-template-columns:1fr}.v65-actions{justify-content:flex-start}#v65Modal .v65-grid{grid-template-columns:1fr}#lp-tuesday-work{padding:10px}}
-</style>
-<div aria-hidden="true" id="v65Modal"><div class="v65-modal"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:11px"><div><div class="v65-kicker" id="v65ModalKicker">Tuesday update</div><div id="v65ModalTitle" style="font-size:16px;font-weight:900;color:#071B37"></div><div id="v65ModalMeta" style="font-size:10.5px;color:#687D89;margin-top:3px"></div></div><button onclick="v65CloseModal()" style="border:0;background:none;font-size:22px;cursor:pointer;color:#7D9099" type="button">×</button></div><div id="v65FileFields"><div style="font-size:10.5px;color:#45606D;background:#F4FAFC;border:1px solid #D8E8EE;border-radius:8px;padding:8px 9px;line-height:1.5;margin-bottom:10px"><strong>Tuesday standard:</strong> ACTIVE CONTRACTS ONLY for buyer-agent outreach. Call/update the buyer first, then the buyer agent. After the file update, use the live conversation to ask: <strong>“Do you have any showings coming up? Anything else you’re working on where we can help?”</strong> If there is no active contract, the Realtor relationship lane belongs to RM.</div><div class="v65-grid"><div><label>Buyer agent</label><select id="v65BuyerOutcome"><option value="Not worked">Not worked yet</option><option value="Reached">Reached / talked</option><option value="Text Conversation">Text conversation</option><option value="VM + Text">Voicemail + follow-up text</option><option value="Text Update">Text update sent</option><option value="No Buyer Agent">No buyer agent / unrepresented — don't show agent call again</option></select></div><div><label>Client</label><select id="v65ClientOutcome"><option value="Not worked">Not worked yet</option><option value="Reached">Reached / talked</option><option value="Text Conversation">Text conversation</option><option value="VM + Text">Voicemail + follow-up text</option><option value="Text Update">Text update sent</option></select></div><div><label>Move-the-needle result</label><select id="v65FileResult"><option value="On track">On track / no action needed</option><option value="Buyer action">Buyer action needed</option><option value="Agent action">Buyer-agent action needed</option><option value="LP action">LP follow-up needed</option><option value="Escalation">Needs help / escalation</option></select></div><div><label>Next follow-up</label><input id="v65FileFollow" type="date"/></div><div style="grid-column:1/-1"><label>Go-To conversation · required when you connect live</label><select id="v65GoToResult"><option value="Not reached / not applicable">Not reached / not applicable</option><option value="Asked — no showings right now">Asked — no showings right now</option><option value="Asked — showings coming up">Asked — showings coming up</option><option value="Opportunity identified">Asked — opportunity identified / next move created</option></select><div style="font-size:10px;color:#637987;line-height:1.4;margin-top:4px">Always ask what else they are working on and whether they have showings coming up. This is the Go-To conversation inside the active-contract buyer-agent touch.</div></div></div><label style="display:flex!important;align-items:flex-start;gap:8px;margin-top:10px;padding:9px 10px;border:1px solid #D8E8EE;border-radius:8px;background:#F8FBFD;text-transform:none!important;letter-spacing:0!important;font-size:11px!important;font-weight:700!important;color:#365365!important;cursor:pointer"><input id="v65FsboNoListing" style="width:auto!important;margin-top:2px" type="checkbox"/> <span><strong>FSBO / no listing agent</strong><br/><span style="font-weight:500;color:#637987">Listing side only. Use this when the seller is not represented. This permanently removes Amanda's listing-agent Tuesday call for this transaction, including future weekly uploads. It does not complete the LP buyer/client update.</span></span></label><div style="margin-top:9px"><label>Quick note</label><textarea id="v65FileNote" placeholder="What did you update them on? What is the next move?"></textarea></div></div><div id="v65PipelineFields" style="display:none"><div style="font-size:10.5px;color:#45606D;background:#F4FAFC;border:1px solid #D8E8EE;border-radius:8px;padding:8px 9px;line-height:1.5;margin-bottom:10px"><strong>Pipeline review:</strong> this is buyer/client movement, not a non-contract Realtor call list. Review the actual buyers in your loan system. If you uncover an agent relationship opportunity without an active contract, send it to RM rather than starting a separate LP relationship cadence.</div><div class="v65-grid"><div><label>Result</label><select id="v65PipeResult"><option value="Reviewed / no action">Reviewed / no action needed</option><option value="RM handoff">RM handoff — agent opportunity / no active contract</option><option value="Client contacted">Contacted client</option><option value="Moved forward">Moved buyer forward</option><option value="Follow-up needed">Follow-up needed</option></select></div><div><label>Next follow-up</label><input id="v65PipeFollow" type="date"/></div></div><div style="margin-top:9px"><label>What did you find / do?</label><textarea id="v65PipeNote" placeholder="Example: Reviewed 3 active prequals. Smith buyer needs an updated price point before weekend showings; client follow-up set. Agent opportunity sent to RM because there is no active contract."></textarea></div></div><div id="v65Err" style="display:none;color:#A33C35;font-size:10px;margin-top:7px"></div><div class="v65-modal-actions"><button onclick="v65CloseModal()" type="button">Cancel</button><button class="primary" id="v65SaveBtn" onclick="v65Save()" type="button">Save Tuesday work</button></div></div></div>
-<script id="v65-tuesday-work-js">
-(function(){
-  const norm=s=>String(s||'').trim().toLowerCase(), esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  function shortLp(v){
-    const s=norm(v);
-    if(!s)return'';
-    if(s.includes('de la riva')||s==='karen')return'Karen';
-    if(s.includes('mcmahon')||s==='osgood')return'Osgood';
-    if(s.includes('johnston')||s==='jordan')return'Jordan';
-    if(s.includes('saleh')||s==='said')return'Said';
-    if(s.includes('dill')||s==='gavin')return'Gavin';
-    if(s.includes('isaak'))return'Isaak';
-    return String(v||'').trim();
-  }
-  const meta=(notes,k)=>{const m=String(notes||'').match(new RegExp('\\['+k+':([^\\]]*)\\]','i'));return m?m[1].trim():''};
-  const key=s=>{try{return typeof ctAgentNameKey==='function'?ctAgentNameKey(s):norm(s)}catch(e){return norm(s)}};
-  const todayS=()=>{try{return localDateStr(new Date())}catch(e){return new Date().toISOString().slice(0,10)}};
-  function recentTuesday(){const d=new Date();d.setHours(12,0,0,0);const back=(d.getDay()+5)%7;d.setDate(d.getDate()-back);return d.toISOString().slice(0,10)}
-  function cutoff(days){const d=new Date();d.setDate(d.getDate()-days);return d.toISOString().slice(0,10)}
-  // Contract-stage logic must live in THIS workflow scope. A prior build defined this
-  // inside the upload module only, which caused v65LoadTuesday() to throw a ReferenceError
-  // after every successful Encompass upload and made the cards look empty.
-  function isActiveContractStage(milestone,group,hasContractTrigger){
-    if(hasContractTrigger)return true;
-    const s=String(milestone||'').trim().toLowerCase(),g=String(group||'').trim().toLowerCase();
-    if(!s)return false;
-    if(/^(started|pre[- ]?approval|pre[- ]?approved|application)$/i.test(s)||/prequal|pre-qual/.test(s))return false;
-    if(/approval|approved|ready for pack|pack out|processing|underwrit|condition|submitt|resubmitt|appraisal|docs? signing|docs? out|docs? drawn|rec.?d by closer|received by closer|closer|clear to close|\bctc\b|closing|funding|disclos/.test(s))return true;
-    return ['processing','underwriting','appraisal','closing','disclosures'].includes(g);
-  }
-  function txnId(r){return meta(r.notes,'TXN_ID')||[key(r.agent_name),meta(r.notes,'TXN_CLIENT'),meta(r.notes,'TXN_PROPERTY')].join('|')}
-  function role(r){return meta(r.notes,'TXN_ROLE')||'Agent'}
-  function encodeRmMeta(notes,lp){try{const obj={owner:'LP:'+lp,focus:'LP Tuesday',attendees:lp,rmAttendees:[],lpAttendees:[lp],nextStepOwner:lp};const b64=btoa(unescape(encodeURIComponent(JSON.stringify(obj))));let bits='';for(let i=0;i<b64.length;i++)bits+=b64.charCodeAt(i).toString(2).padStart(8,'0');const zw=bits.replace(/0/g,'\u200B').replace(/1/g,'\u200C');return String(notes||'')+'\n\u2063\u2063\u2063'+zw+'\u2064\u2064\u2064'}catch(e){return notes}}
-  function ensure(){if(document.getElementById('lp-tuesday-work'))return;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return;const c=document.createElement('div');c.id='lp-tuesday-work';c.innerHTML='<div class="v65-head"><div><div class="v65-kicker">WEEKLY EXECUTION</div><div class="v65-title">Active-contract buyer updates + buyer movement</div><div class="v65-sub">LP2 Realtor outreach belongs here only when the buyer agent has an ACTIVE CONTRACT with us. Tuesday sequence: buyer first → buyer agent → Go-To conversation. Active partners without an active contract stay RM-owned.</div></div><span class="v65-summary" id="v65Summary">Loading…</span></div><div class="v65-section"><div class="v65-section-head">Under-contract files</div><div id="v65FileList" class="v65-list"><div class="v65-empty">Loading contract work…</div></div></div><div class="v65-section"><div class="v65-section-head">Preapproval / prequal movement</div><div id="v65PipelineList" class="v65-list"><div class="v65-empty">Loading pipeline…</div></div></div>';anchor.appendChild(c)}
-  let state={lp:'',files:new Map(),pipes:new Map()};let current=null;
-  async function load(lp,force){lp=shortLp(lp||currentUser||'');if(!lp||lp==='Snapshot')return;ensure();const card=document.getElementById('lp-tuesday-work');if(!card)return;card.style.display='block';state.lp=lp;const fileHost=document.getElementById('v65FileList'),pipeHost=document.getElementById('v65PipelineList'),sum=document.getElementById('v65Summary');if(force){fileHost.innerHTML='<div class="v65-empty">Refreshing shared transaction data…</div>';pipeHost.innerHTML='<div class="v65-empty">Refreshing pipeline…</div>'}const tue=recentTuesday();
-    try{
-      const rs=await Promise.all([
-        sbFetch('GET','amanda_activities?act_date=gte.'+cutoff(120)+'&act_type=in.(New Contract,Clear to Close,Transaction Snapshot,LP Tuesday File Update,LP Tuesday Pipeline Review,Transaction Contact Override)&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=act_date.desc&limit=6000').catch(()=>[]),
-        sbFetch('GET','agent_assignments?select=agent_name,lp,rm&limit=5000').catch(()=>[])
-      ]);
-      const acts=rs[0]||[],assign=rs[1]||[],am={},ovMap={};assign.forEach(a=>am[key(a.agent_name)]=a);acts.filter(a=>a.act_type==='Transaction Contact Override').sort((a,b)=>String(b.created_at||b.act_date).localeCompare(String(a.created_at||a.act_date))).forEach(o=>{const id=meta(o.notes,'TXN_ID');if(id&&!ovMap[id])ovMap[id]=o});
-      let snapshots=acts.filter(a=>a.act_type==='Transaction Snapshot'&&/\[TXN_SNAPSHOT\]/i.test(String(a.notes||'')));
-      let latestBatch=snapshots.reduce((m,a)=>{const b=meta(a.notes,'TXN_BATCH');return b>m?b:m},'');
-      let activeSnap=latestBatch?snapshots.filter(a=>meta(a.notes,'TXN_BATCH')===latestBatch):[];
-      // Immediate same-browser fallback: if the just-uploaded batch is newer than the server read,
-      // use the cached payload so the LP cards populate instead of looking empty. Shared Supabase
-      // remains the cross-tracker source once its write is available.
-      try{const local=window.ctGetLocalTxnSnapshot&&window.ctGetLocalTxnSnapshot();if(local&&local.batch&&local.batch>=latestBatch&&Array.isArray(local.payload)){latestBatch=local.batch;activeSnap=local.payload.map((r,i)=>({id:'local-'+i,agent_name:r.agent_name,act_type:r.act_type,act_date:r.act_date,outcome:r.outcome,notes:r.notes,follow_up_date:r.follow_up_date,created_at:local.savedAt||r.act_date}));}}catch(e){console.warn('local snapshot fallback skipped',e)}
-      const trig=activeSnap;
-      const groups=new Map();trig.forEach(r=>{const id=txnId(r);if(!groups.has(id))groups.set(id,[]);groups.get(id).push(r)});
-      const files=[];state.files=new Map();groups.forEach((arr,id)=>{arr.sort((a,b)=>String(b.created_at||b.act_date).localeCompare(String(a.created_at||a.act_date)));const t=arr[0];if(String(t.act_date)<cutoff(75))return;const isSnap=t.act_type==='Transaction Snapshot';const ovn=(ovMap[id]&&ovMap[id].notes)||'';const rawBuyer=String(isSnap?(meta(t.notes,'TXN_BUYER_AGENT')||''):t.agent_name||'').trim();const buyerOv=meta(ovn,'BUYER_AGENT_OVERRIDE'),buyerNoAgent=meta(ovn,'BUYER_AGENT_NA')==='Y'||buyerOv==='__NONE__';const buyerAgent=buyerNoAgent?'':(buyerOv||rawBuyer);const listingOv=meta(ovn,'LISTING_AGENT_OVERRIDE'),fsboNoListing=meta(ovn,'LISTING_AGENT_NA')==='Y'||listingOv==='__NONE__';const a=am[key(buyerAgent)]||{},txnLp=shortLp(isSnap?(meta(t.notes,'TXN_LP')||a.lp||''):(a.lp||''));if(txnLp!==lp)return;const closeDate=meta(t.notes,'TXN_CLOSE_DATE');if(closeDate&&closeDate<cutoff(2))return;const client=meta(t.notes,'TXN_CLIENT'),property=meta(t.notes,'TXN_PROPERTY'),milestone=meta(t.notes,'TXN_MILESTONE'),milestoneGroup=meta(t.notes,'TXN_MILESTONE_GROUP')||'File status';const triggerRows=acts.filter(x=>(x.act_type==='New Contract'||x.act_type==='Clear to Close')&&/\[TXN_TRIGGER\]/i.test(String(x.notes||''))&&txnId(x)===id&&norm(role(x))==='buyer').sort((a,b)=>String(b.act_date).localeCompare(String(a.act_date)));const trigRow=triggerRows[0]||null;if(!isActiveContractStage(milestone,milestoneGroup,!!trigRow))return;const updates=acts.filter(x=>x.act_type==='LP Tuesday File Update'&&txnId(x)===id&&String(x.act_date)>=tue);const buyerDone=buyerNoAgent||!buyerAgent||updates.some(x=>meta(x.notes,'BUYER_AGENT_DONE')==='Y'),clientDone=!client||updates.some(x=>meta(x.notes,'CLIENT_DONE')==='Y');const item={id,agent:buyerNoAgent?'No buyer agent / unrepresented':(buyerAgent||'Buyer agent missing in Encompass'),buyerAgent,client,property,stage:(trigRow?trigRow.act_type:'Active Transaction'),triggerDate:(trigRow?trigRow.act_date:t.act_date),closeDate,milestone,milestoneGroup,buyerDone,clientDone,updates,lp:txnLp,buyerPhone:meta(t.notes,'TXN_BUYER_PHONE'),buyerEmail:meta(t.notes,'TXN_BUYER_EMAIL'),contactIssue:!buyerAgent&&!buyerNoAgent,buyerNoAgent,fsboNoListing};files.push(item);state.files.set(id,item)});
-      files.sort((a,b)=>(a.buyerDone&&a.clientDone)-(b.buyerDone&&b.clientDone)||String(a.closeDate||a.triggerDate).localeCompare(String(b.closeDate||b.triggerDate)));
-      const dueFiles=files.filter(f=>!(f.buyerDone&&f.clientDone));fileHost.innerHTML=dueFiles.length?dueFiles.map(f=>{const done=[];if(f.buyerNoAgent)done.push('no buyer agent ✓');else if(f.buyerDone&&!f.contactIssue)done.push('buyer agent ✓');if(f.clientDone)done.push('client ✓');const stage=f.stage==='Clear to Close'?'CTC':'Active contract';const metaLine=[f.client,f.property,f.closeDate?'close '+f.closeDate:''].filter(Boolean).join(' · ')||'Shared active transaction';const quality=f.contactIssue?'<span class="v65-pill hot">Contact data issue</span>':'';const fsboBadge=f.fsboNoListing?'<span class="v65-pill">FSBO / no listing agent ✓</span>':'';const status=f.contactIssue?'Buyer agent: N/A in Encompass · client '+(f.clientDone?'✓':'due'):(done.length?done.join(' · '):'buyer agent + client both due');const edit=f.contactIssue?'<button type="button" onclick="lpV1OpenContactManager();setTimeout(function(){const q=document.querySelector(\'#lpV1ContactManager input[type=search],#lpV1ContactManager input[placeholder*=Search]\');if(q){q.value='+JSON.stringify(f.client||f.property||'')+';q.dispatchEvent(new Event(\'input\',{bubbles:true}))}},150)">Fix contact</button>':'';return '<div class="v65-row"><div><div class="v65-name">'+esc(f.agent)+'</div><div class="v65-meta">'+esc(metaLine)+'</div><div class="v65-badges"><span class="v65-pill '+(f.stage==='Clear to Close'?'hot':'')+'">'+stage+'</span>'+(f.milestone?'<span class="v65-pill">'+esc(f.milestone)+'</span>':'')+quality+fsboBadge+'</div></div><div class="v65-state"><strong>Tuesday status:</strong> '+status+(f.contactIssue?'<br><strong>Coach:</strong> LP should correct the agent contact in Encompass so future uploads are clean.':'')+(f.stage==='Clear to Close'?'<br><strong>Milestone:</strong> CTC update should be handled promptly, even if it is not Tuesday.':'')+'</div><div class="v65-actions">'+edit+'<button class="primary" type="button" onclick="v65OpenFile(\''+encodeURIComponent(f.id)+'\')">Log update</button></div></div>'}).join(''):'<div class="v65-empty"><strong>Active-file updates complete.</strong><br>No additional under-contract buyer/client updates are due from this week’s shared Encompass snapshot.</div>';
-      // Pipeline is agent-level because the shared Power BI snapshot provides counts, not borrower PII.
-      const snap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null,by=(snap&&snap.by_agent)||{},reviewed=new Set(acts.filter(a=>a.act_type==='LP Tuesday Pipeline Review'&&String(a.act_date)>=tue&&shortLp(meta(a.notes,'LP'))===lp).map(a=>key(meta(a.notes,'PIPELINE_AGENT')||a.agent_name)));const pipes=[];state.pipes=new Map();Object.keys(by||{}).forEach(k=>{const r=by[k]||{},name=r.name||k,a=am[key(name)]||{};if(shortLp(a.lp)!==lp)return;const pre=Number(r.active_prequals||0),pipe=Number(r.active_pipeline||0);if(pre<=0)return;const item={name,pre,pipe,level:r.level||'',done:reviewed.has(key(name))};pipes.push(item);state.pipes.set(key(name),item)});pipes.sort((a,b)=>a.done-b.done||b.pre-a.pre||a.name.localeCompare(b.name));const duePipes=pipes.filter(p=>!p.done);pipeHost.innerHTML=duePipes.length?duePipes.map(p=>'<div class="v65-row"><div><div class="v65-name">'+esc(p.name)+'</div><div class="v65-meta">Review the actual buyers in Encompass/loan system before you call.</div><div class="v65-badges"><span class="v65-pill hot">'+p.pre+' active prequal'+(p.pre===1?'':'s')+'</span>'+(p.pipe?'<span class="v65-pill">'+p.pipe+' in process</span>':'')+(p.level?'<span class="v65-pill">'+esc(p.level)+' tier</span>':'')+'</div></div><div class="v65-state"><strong>Move-the-needle prompt:</strong> review the buyer/client. Do not create a separate LP Realtor relationship call without an active contract; hand that opportunity to RM.</div><div class="v65-actions"><button class="primary" type="button" onclick="v65OpenPipeline(\''+encodeURIComponent(key(p.name))+'\')">Review + log</button></div></div>').join(''):'<div class="v65-empty"><strong>Prequal review complete.</strong><br>No additional active prequals require Tuesday action.</div>';
-      if(sum)sum.textContent=(dueFiles.length+duePipes.length)+' open · '+(files.length-dueFiles.length+pipes.length-duePipes.length)+' handled · week of '+tue+(latestBatch?' · Encompass snapshot '+latestBatch.slice(4,6)+'/'+latestBatch.slice(6,8):' · no weekly upload yet');
-    }catch(e){console.warn('v65 Tuesday workflow',e);if(sum)sum.textContent='Could not load';const hint='<br><span style="font-size:9px;color:#7b8d97">Open Weekly Data Hub and confirm the latest Encompass snapshot is saved.</span>';fileHost.innerHTML='<div class="v65-empty">Could not load active-file work.'+hint+'</div>';pipeHost.innerHTML='<div class="v65-empty">Could not load prequal review.'+hint+'</div>'}
-  }
-  window.v65OpenFile=function(encId){const f=state.files.get(decodeURIComponent(encId||''));if(!f)return;current={mode:'file',item:f};const m=document.getElementById('v65Modal');m.classList.add('open');m.setAttribute('aria-hidden','false');document.getElementById('v65ModalKicker').textContent='Tuesday buyer + client update';document.getElementById('v65ModalTitle').textContent=f.agent;document.getElementById('v65ModalMeta').textContent=[f.client,f.property,f.closeDate?'Close '+f.closeDate:''].filter(Boolean).join(' · ');document.getElementById('v65FileFields').style.display='block';document.getElementById('v65PipelineFields').style.display='none';document.getElementById('v65BuyerOutcome').value=f.buyerNoAgent?'No Buyer Agent':(f.buyerDone?'Reached':'Not worked');document.getElementById('v65ClientOutcome').value=f.clientDone?'Reached':'Not worked';const fs=document.getElementById('v65FsboNoListing');if(fs)fs.checked=!!f.fsboNoListing;document.getElementById('v65FileResult').value='On track';document.getElementById('v65FileFollow').value='';document.getElementById('v65FileNote').value='';const g=document.getElementById('v65GoToResult');if(g)g.value='Not reached / not applicable';document.getElementById('v65Err').style.display='none'};
-  window.v65OpenPipeline=function(encKey){const p=state.pipes.get(decodeURIComponent(encKey||''));if(!p)return;current={mode:'pipeline',item:p};const m=document.getElementById('v65Modal');m.classList.add('open');m.setAttribute('aria-hidden','false');document.getElementById('v65ModalKicker').textContent='Tuesday prequal / preapproval review';document.getElementById('v65ModalTitle').textContent=p.name;document.getElementById('v65ModalMeta').textContent=p.pre+' active prequal'+(p.pre===1?'':'s')+(p.pipe?' · '+p.pipe+' in process':'');document.getElementById('v65FileFields').style.display='none';document.getElementById('v65PipelineFields').style.display='block';document.getElementById('v65PipeResult').value='Reviewed / no action';document.getElementById('v65PipeFollow').value='';document.getElementById('v65PipeNote').value='';document.getElementById('v65Err').style.display='none'};
-  window.v65CloseModal=function(){current=null;const m=document.getElementById('v65Modal');if(m){m.classList.remove('open');m.setAttribute('aria-hidden','true')}};
-  window.v65Save=async function(){if(!current)return;const err=document.getElementById('v65Err'),btn=document.getElementById('v65SaveBtn');let body=null;if(current.mode==='file'){const f=current.item,b=document.getElementById('v65BuyerOutcome').value,c=document.getElementById('v65ClientOutcome').value,result=document.getElementById('v65FileResult').value,note=(document.getElementById('v65FileNote').value||'').trim(),fu=document.getElementById('v65FileFollow').value||null,fsbo=!!(document.getElementById('v65FsboNoListing')&&document.getElementById('v65FsboNoListing').checked),noBuyer=b==='No Buyer Agent',goEl=document.getElementById('v65GoToResult'),goTo=goEl?goEl.value:'Not reached / not applicable';if(b==='Not worked'&&c==='Not worked'){err.textContent=fsbo?'FSBO clears Amanda’s listing-agent side only. Update the buyer agent/client, or choose “No buyer agent / unrepresented” if that is also true.':'Work the buyer agent, the client, or both before saving.';err.style.display='block';return}if((b==='Reached'||b==='Text Conversation')&&goTo==='Not reached / not applicable'){err.textContent='Before saving a live buyer-agent conversation, log the Go-To ask: showings coming up / what else are they working on?';err.style.display='block';return}if(note.split(/\s+/).filter(Boolean).length<3&&!noBuyer&&!fsbo){err.textContent='Add a short note with the update or next move.';err.style.display='block';return}if((noBuyer||fsbo)&&note.split(/\s+/).filter(Boolean).length<3){document.getElementById('v65FileNote').value=noBuyer&&fsbo?'No buyer agent and FSBO confirmed.':(noBuyer?'No buyer agent confirmed.':'FSBO / no listing agent confirmed.')}const finalNote=(document.getElementById('v65FileNote').value||'').trim();let notes='[LP_TUESDAY][LP:'+state.lp+'][TXN_ID:'+f.id+'][TXN_ROLE:Buyer][TXN_CLIENT:'+String(f.client||'').replace(/\]/g,'')+'][TXN_PROPERTY:'+String(f.property||'').replace(/\]/g,'')+'][BUYER_AGENT_DONE:'+(b==='Not worked'?'N':'Y')+'][CLIENT_DONE:'+(c==='Not worked'?'N':'Y')+'][BUYER_OUTCOME:'+b+'][CLIENT_OUTCOME:'+c+'][GOTO:'+String(goTo||'').replace(/\]/g,'')+'][SHOWINGS_ASK:'+(goTo==='Not reached / not applicable'?'N':'Y')+'][RESULT:'+result+'] '+finalNote;notes=encodeRmMeta(notes,state.lp);body={agent_name:f.agent,act_type:'LP Tuesday File Update',act_date:todayS(),outcome:result,notes,follow_up_date:fu}}else{const p=current.item,result=document.getElementById('v65PipeResult').value,note=(document.getElementById('v65PipeNote').value||'').trim(),fu=document.getElementById('v65PipeFollow').value||null;if(note.split(/\s+/).filter(Boolean).length<3){err.textContent='Add a short note about what you reviewed or did.';err.style.display='block';return}let notes='[LP_TUESDAY_PIPELINE][LP:'+state.lp+'][PIPELINE_AGENT:'+p.name+'][PREQUALS:'+p.pre+'][PIPELINE:'+p.pipe+'][RESULT:'+result+'] '+note;notes=encodeRmMeta(notes,state.lp);body={agent_name:p.name,act_type:'LP Tuesday Pipeline Review',act_date:todayS(),outcome:result,notes,follow_up_date:fu}}btn.disabled=true;btn.textContent='Saving…';try{if(current.mode==='file'){const f=current.item,b=document.getElementById('v65BuyerOutcome').value,fsbo=!!(document.getElementById('v65FsboNoListing')&&document.getElementById('v65FsboNoListing').checked),noBuyer=b==='No Buyer Agent';if(noBuyer||fsbo){let ov='[TXN_CONTACT_OVERRIDE][TXN_ID:'+f.id+']';if(noBuyer)ov+='[BUYER_AGENT_NA:Y][BUYER_AGENT_OVERRIDE:__NONE__]';if(fsbo)ov+='[LISTING_AGENT_NA:Y][LISTING_AGENT_OVERRIDE:__NONE__]';ov+=' Permanent transaction exception confirmed by '+state.lp+'.';await sbFetch('POST','amanda_activities',{agent_name:f.client||f.property||'Active transaction',act_type:'Transaction Contact Override',act_date:todayS(),outcome:'Updated',notes:ov,follow_up_date:null});}}await sbFetch('POST','amanda_activities',body);if(typeof ctShowToast==='function')ctShowToast('Tuesday work saved ✓');v65CloseModal();await load(state.lp,true)}catch(e){console.warn(e);err.textContent='Could not save. Try again.';err.style.display='block'}finally{btn.disabled=false;btn.textContent='Save Tuesday work'}};
-  window.v65LoadTuesday=(lp,force)=>load(lp,!!force);
-  window.v65RefreshTuesday=()=>load(state.lp||currentUser,true);
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensure,{once:true});else ensure();
-})();
-</script>
 <style id="lp-v1-aligned-css">
 .btn.lp-v1-upload-btn,.lp-v1-upload-btn{background:#071B37!important;color:#fff!important;border-color:#071B37!important;font-weight:700!important;text-shadow:none!important;-webkit-text-fill-color:#fff!important}.lp-v1-upload-status{font-size:10px;color:#596F7D;line-height:1.45;background:#F4FAFC;border:1px solid #D8E8EE;border-radius:8px;padding:7px 9px;margin-bottom:10px}
 
@@ -11131,8 +11055,6 @@ window.CT_SHARED_FACETIME_RULES_VERSION="20260828-v63";
       const st=document.getElementById('lpV1UploadStatus');if(st)st.textContent='Shared Encompass snapshot saved just now · '+payload.length+' active file'+(payload.length===1?'':'s')+' · 60-day closing window · RM + Core Team aligned';
       const teamSt=document.getElementById('lpV1TeamUploadStatus');if(teamSt)teamSt.textContent='Shared snapshot saved ✓ · '+payload.length+' active file'+(payload.length===1?'':'s')+' · refreshing Tuesday queues…';
       // Refresh in the background so a slow follow-up read never leaves the Save button spinning.
-      if(typeof window.v65LoadTuesday==='function'&&window.currentUser)Promise.resolve(window.v65LoadTuesday(window.currentUser,true)).catch(e=>console.warn('weekly transaction refresh',e));
-      if(typeof window.v65RefreshTuesday==='function')Promise.resolve(window.v65RefreshTuesday()).catch(e=>console.warn('Tuesday LP refresh',e));
       if(typeof ctShowToast==='function')ctShowToast('Tuesday snapshot saved ✓');
       // Optional non-blocking verification. The POST itself is a single atomic batch.
       sbFetch('GET','amanda_activities?act_date=eq.'+td+'&act_type=eq.Transaction%20Snapshot&select=id,notes,created_at&order=created_at.desc&limit=5000').then(v=>{const n=(v||[]).filter(x=>metaTag(x.notes,'TXN_BATCH')===batch).length;if(n!==payload.length){console.warn('Tuesday snapshot verification count',n,'expected',payload.length);if(msg){msg.style.color='#8A5B12';msg.textContent='Saved locally and loaded here. Shared sync verified '+n+' of '+payload.length+' files; refresh once if RM does not update immediately.'}}}).catch(e=>console.warn('Tuesday snapshot verification unavailable',e));
@@ -11140,37 +11062,16 @@ window.CT_SHARED_FACETIME_RULES_VERSION="20260828-v63";
     }catch(e){console.warn('Tuesday snapshot save',e);if(msg){msg.style.color='#A33C35';msg.textContent='Save failed. Nothing was confirmed. '+(e&&e.message?e.message:'Refresh and retry.')}}finally{btn.disabled=false;btn.textContent='Save shared snapshot'}
   };
   function metaTag(notes,k){const m=String(notes||'').match(new RegExp('\\['+k+':([^\\]]*)\\]','i'));return m?m[1].trim():''}
-  function ensureHome(){ensure();return document.getElementById('lp-tuesday-work')}
-  function place(){ensure()}
-  function badge(){const b=document.getElementById('lpV1TuesdayBadge'),s=document.getElementById('v65Summary');if(!b)return;const m=String(s&&s.textContent||'').match(/(\d+)\s+open/i);b.textContent=m?m[1]:'—'}
   window.lpV1SwitchWorkTab=function(){return;};
-  async function lpV1IsMackTuesdayWorkbook(file){
-    try{
-      if(!file||!/\.xlsx?$/.test(String(file.name||'').toLowerCase()))return false;
-      const X=await ensureXlsx(),buf=await file.arrayBuffer(),book=X.read(buf,{type:'array',cellDates:true});
-      const names=(book.SheetNames||[]).map(x=>String(x||'').trim().toUpperCase());
-      return names.includes('RM LISTING AGENT CALLS')&&names.includes('AGENT WITH NO ACTIVE CONTRACTS');
-    }catch(e){return false}
-  }
   function boot(){const f=document.getElementById('lpV1UploadFile');if(f&&!f.__v1){f.__v1=true;f.addEventListener('change',async function(e){
     const file=e.target.files&&e.target.files[0];if(!file)return;
     document.getElementById('lpV1UploadFileName').textContent=file.name;
     const msg=document.getElementById('lpV1UploadMsg');msg.style.color='#637987';msg.textContent='Reading '+file.name+'…';
     try{
-      if(await lpV1IsMackTuesdayWorkbook(file)){
-        rows=[];render();
-        msg.style.color='#167AA5';
-        msg.textContent='Mack Tuesday Call Plan detected. Routing this workbook to the Tuesday Call Plan importer…';
-        if(typeof window.v300ImportTuesdayFile!=='function')throw new Error('Tuesday Call Plan importer is not ready. Close this window and use “Upload Mack RM TUESDAY CALLS.xlsx” below.');
-        await window.v300ImportTuesdayFile(file);
-        setTimeout(function(){window.lpV1CloseTuesdayUpload();const st=document.getElementById('v300PlanStatus');if(st)st.scrollIntoView({behavior:'smooth',block:'center'})},450);
-        e.target.value='';
-        return;
-      }
       const p=await parseFile(file);rows=p.rows;msg.style.color='#1F4E79';msg.textContent='Smart read: '+rows.length+' active transaction'+(rows.length===1?'':'s')+' closing through '+p.windowEnd+(p.longDatedCount?' · '+p.longDatedCount+' long-dated file'+(p.longDatedCount===1?'':'s')+' excluded':'')+(p.pastCount?' · '+p.pastCount+' past closing date'+(p.pastCount===1?'':'s')+' excluded':'')+(p.missingCloseCount?' · '+p.missingCloseCount+' missing closing date'+(p.missingCloseCount===1?'':'s')+' excluded':'')+(p.rawCount!==p.mergedCount?' · duplicate source rows merged':'')+'. Loan numbers are ignored. Review, then save.';render()
     }catch(err){rows=[];render();msg.style.color='#A33C35';msg.textContent=err.message||String(err)}
-  })}setTimeout(function(){ensureHome();place();badge();const s=document.getElementById('v65Summary');if(s)new MutationObserver(badge).observe(s,{childList:true,subtree:true,characterData:true})},250)}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();document.addEventListener('visibilitychange',function(){if(!document.hidden){ensureHome();badge();}});
+  })}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
 <style id="txn-contact-manager-css">
@@ -11188,7 +11089,7 @@ window.CT_SHARED_FACETIME_RULES_VERSION="20260828-v63";
  window.lpV1CloseContactManager=function(){const m=document.getElementById('lpV1ContactManager');m.classList.remove('open');m.setAttribute('aria-hidden','true')};
  window.lpV1EditSnapshotContact=function(i){editing=curRows[i];if(!editing)return;const n=editing.notes||'',ed=document.getElementById('lpV1ContactEditor'),list=document.getElementById('lpV1ContactManagerList');list.style.display='none';ed.style.display='block';ed.innerHTML='<button class="txncm-edit" type="button" onclick="lpV1ContactBack()">← Back</button><div style="font-size:16px;font-weight:800;color:#17324D;margin-top:10px">'+esc(none(meta(n,'TXN_CLIENT')))+' · '+esc(none(meta(n,'TXN_PROPERTY')))+'</div><div class="txncm-form"><div class="txncm-side"><h4>Buyer agent</h4><label>Name</label><input id="txncmBn" value="'+esc(meta(n,'TXN_BUYER_AGENT'))+'"><label>Phone</label><input id="txncmBp" value="'+esc(meta(n,'TXN_BUYER_PHONE'))+'"><label>Email</label><input id="txncmBe" value="'+esc(meta(n,'TXN_BUYER_EMAIL'))+'"></div><div class="txncm-side"><h4>Listing agent</h4><label>Name</label><input id="txncmLn" value="'+esc(meta(n,'TXN_LISTING_AGENT'))+'"><label>Phone</label><input id="txncmLp" value="'+esc(meta(n,'TXN_LISTING_PHONE'))+'"><label>Email</label><input id="txncmLe" value="'+esc(meta(n,'TXN_LISTING_EMAIL'))+'"></div></div><div class="txncm-note" style="margin-top:10px">Leave a field blank only when the correct value is truly unavailable; the tracker will display N/A.</div><div id="txncmErr" style="color:#A33C35;font-size:10px;margin-top:8px"></div><div class="txncm-actions"><button type="button" onclick="lpV1ContactBack()">Cancel</button><button class="primary" id="txncmSave" type="button" onclick="lpV1SaveSnapshotContact()">Save corrections</button></div>'};
  window.lpV1ContactBack=function(){editing=null;document.getElementById('lpV1ContactEditor').style.display='none';document.getElementById('lpV1ContactManagerList').style.display='block'};
- window.lpV1SaveSnapshotContact=async function(){if(!editing)return;const g=id=>clean(document.getElementById(id).value),vals={bn:g('txncmBn'),bp:g('txncmBp'),be:g('txncmBe'),ln:g('txncmLn'),lp:g('txncmLp'),le:g('txncmLe')},btn=document.getElementById('txncmSave'),err=document.getElementById('txncmErr');btn.disabled=true;btn.textContent='Saving…';try{let notes=editing.notes||'';[['TXN_BUYER_AGENT','bn'],['TXN_BUYER_PHONE','bp'],['TXN_BUYER_EMAIL','be'],['TXN_LISTING_AGENT','ln'],['TXN_LISTING_PHONE','lp'],['TXN_LISTING_EMAIL','le']].forEach(x=>notes=replaceTag(notes,x[0],vals[x[1]]));const agent=vals.ln||vals.bn||meta(notes,'TXN_CLIENT')||'Active transaction';await sbFetch('PATCH','amanda_activities?id=eq.'+encodeURIComponent(editing.id),{notes:notes,agent_name:agent});const tx=meta(notes,'TXN_ID'),today=(typeof localDateStr==='function'?localDateStr(new Date()):new Date().toISOString().slice(0,10)),ovnotes='[TXN_CONTACT_OVERRIDE][TXN_ID:'+tx+']'+ov('BUYER_AGENT_OVERRIDE',vals.bn)+ov('BUYER_PHONE_OVERRIDE',vals.bp)+ov('BUYER_EMAIL_OVERRIDE',vals.be)+ov('LISTING_AGENT_OVERRIDE',vals.ln)+ov('LISTING_PHONE_OVERRIDE',vals.lp)+ov('LISTING_EMAIL_OVERRIDE',vals.le)+' Contact correction saved from Core Team transaction upload.';await sbFetch('POST','amanda_activities',{agent_name:agent,act_type:'Transaction Contact Override',act_date:today,outcome:'Updated',notes:ovnotes,follow_up_date:null});if(typeof ctShowToast==='function')ctShowToast('Transaction contacts updated ✓');editing=null;await load();document.getElementById('lpV1ContactEditor').style.display='none';document.getElementById('lpV1ContactManagerList').style.display='block';if(typeof window.v65LoadTuesday==='function'&&window.currentUser)window.v65LoadTuesday(window.currentUser,true)}catch(e){console.warn(e);err.textContent='Could not save contact corrections. Try again.'}finally{btn.disabled=false;btn.textContent='Save corrections'}};
+ window.lpV1SaveSnapshotContact=async function(){if(!editing)return;const g=id=>clean(document.getElementById(id).value),vals={bn:g('txncmBn'),bp:g('txncmBp'),be:g('txncmBe'),ln:g('txncmLn'),lp:g('txncmLp'),le:g('txncmLe')},btn=document.getElementById('txncmSave'),err=document.getElementById('txncmErr');btn.disabled=true;btn.textContent='Saving…';try{let notes=editing.notes||'';[['TXN_BUYER_AGENT','bn'],['TXN_BUYER_PHONE','bp'],['TXN_BUYER_EMAIL','be'],['TXN_LISTING_AGENT','ln'],['TXN_LISTING_PHONE','lp'],['TXN_LISTING_EMAIL','le']].forEach(x=>notes=replaceTag(notes,x[0],vals[x[1]]));const agent=vals.ln||vals.bn||meta(notes,'TXN_CLIENT')||'Active transaction';await sbFetch('PATCH','amanda_activities?id=eq.'+encodeURIComponent(editing.id),{notes:notes,agent_name:agent});const tx=meta(notes,'TXN_ID'),today=(typeof localDateStr==='function'?localDateStr(new Date()):new Date().toISOString().slice(0,10)),ovnotes='[TXN_CONTACT_OVERRIDE][TXN_ID:'+tx+']'+ov('BUYER_AGENT_OVERRIDE',vals.bn)+ov('BUYER_PHONE_OVERRIDE',vals.bp)+ov('BUYER_EMAIL_OVERRIDE',vals.be)+ov('LISTING_AGENT_OVERRIDE',vals.ln)+ov('LISTING_PHONE_OVERRIDE',vals.lp)+ov('LISTING_EMAIL_OVERRIDE',vals.le)+' Contact correction saved from Core Team transaction upload.';await sbFetch('POST','amanda_activities',{agent_name:agent,act_type:'Transaction Contact Override',act_date:today,outcome:'Updated',notes:ovnotes,follow_up_date:null});if(typeof ctShowToast==='function')ctShowToast('Transaction contacts updated ✓');editing=null;await load();document.getElementById('lpV1ContactEditor').style.display='none';document.getElementById('lpV1ContactManagerList').style.display='block';if(typeof window.v310LoadPlan==='function'&&window.currentUser)window.v310LoadPlan(window.currentUser,true)}catch(e){console.warn(e);err.textContent='Could not save contact corrections. Try again.'}finally{btn.disabled=false;btn.textContent='Save corrections'}};
 })();
 </script>
 <style id="file-integrity-v1-css">
@@ -11427,7 +11328,7 @@ function openOperatingStandardView(btn){
 .ct-accuracy-banner b{color:#0B789E}
 </style>
 <style id="ct-final-playbook-data-governance-css">
-.ct-source-grid{display:grid;grid-template-columns:repeat(4,minmax(145px,1fr));gap:8px}.ct-source-fresh{border:1px solid #DCE6EB;border-radius:10px;padding:10px 11px;background:#fff}.ct-source-fresh b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#4D6572}.ct-source-fresh span{display:block;font-size:12px;font-weight:800;color:#17324D;margin-top:3px}.ct-source-fresh small{display:block;font-size:9.5px;line-height:1.35;color:#768892;margin-top:4px}.ct-source-fresh.good{border-left:4px solid #2E8B57}.ct-source-fresh.warn{border-left:4px solid #C18B22}.ct-source-fresh.stale{border-left:4px solid #B44A42}.ct-cadence-note{margin-top:9px;padding:9px 11px;border-radius:9px;background:#F5F9FB;border:1px solid #DCE8ED;color:#46616E;font-size:10.5px;line-height:1.5}.ct-goal-grid{margin-top:8px}#v65GoToResult{background:#FFFDF7!important;border-color:#DCCB9D!important}@media(max-width:800px){.ct-source-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.ct-source-grid{grid-template-columns:1fr}}
+.ct-source-grid{display:grid;grid-template-columns:repeat(4,minmax(145px,1fr));gap:8px}.ct-source-fresh{border:1px solid #DCE6EB;border-radius:10px;padding:10px 11px;background:#fff}.ct-source-fresh b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#4D6572}.ct-source-fresh span{display:block;font-size:12px;font-weight:800;color:#17324D;margin-top:3px}.ct-source-fresh small{display:block;font-size:9.5px;line-height:1.35;color:#768892;margin-top:4px}.ct-source-fresh.good{border-left:4px solid #2E8B57}.ct-source-fresh.warn{border-left:4px solid #C18B22}.ct-source-fresh.stale{border-left:4px solid #B44A42}.ct-cadence-note{margin-top:9px;padding:9px 11px;border-radius:9px;background:#F5F9FB;border:1px solid #DCE8ED;color:#46616E;font-size:10.5px;line-height:1.5}.ct-goal-grid{margin-top:8px}@media(max-width:800px){.ct-source-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.ct-source-grid{grid-template-columns:1fr}}
 </style><script id="ct-final-playbook-data-governance">(function(){
 'use strict';
 const CT_LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
@@ -12015,28 +11916,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 
 <!-- LP/RM TRANSACTION OWNERSHIP ALIGNMENT v9 -->
-<style id="lp-rm-txn-v9-css">
-#lp-tuesday-work .ct-role-split-v9{font-size:10.5px;line-height:1.45;color:#405B68;background:#F8FBFC;border:1px solid #D7E6EC;border-radius:8px;padding:8px 10px;margin:0 0 9px}
-</style>
-<script id="lp-rm-txn-v9-js">
-(function(){
-'use strict';
-function align(){
-  const host=document.getElementById('lp-tuesday-work');if(!host)return;
-  let n=host.querySelector('.ct-role-split-v9');
-  if(!n){n=document.createElement('div');n.className='ct-role-split-v9';const sec=host.querySelector('.v65-section');host.insertBefore(n,sec||host.firstChild)}
-  n.innerHTML='<b>Transaction ownership:</b> Amanda handles the initial New Contract calls to <b>both buyer agent + listing agent</b>. After that, LP2 owns buyer/client + buyer-agent Tuesday file updates. Amanda continues listing-agent communication through funding. At <b>CTC</b>, Amanda calls both agents again; LP2 still owns the buyer/client side.';
-  const sub=host.querySelector('.v65-sub');
-  if(sub)sub.textContent='LP2 buyer-agent transaction work starts after Amanda’s New Contract calls. Tuesday sequence: buyer/client update → buyer agent → Go-To conversation. Amanda owns listing-agent updates through funding and calls both agents again at CTC.';
-}
-window.ctAlignTxnOwnershipV9=align;
-const old=window.v65Load||window.v65LoadTuesday;
-if(typeof old==='function'&&!old.__txnV9){const w=async function(){const r=await old.apply(this,arguments);align();return r};w.__txnV9=true;if(window.v65Load)window.v65Load=w;else window.v65LoadTuesday=w}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(align,900),{once:true});else setTimeout(align,450);
-})();
-</script>
-
-
 <!-- LP SCRIPTS + TRAINING HARDENING v10 -->
 <style id="lp-scripts-hardening-v10-css">
 #scriptsModal{z-index:20000!important;pointer-events:auto!important}
@@ -12183,16 +12062,14 @@ window.ctV42OpenContact=function(btn){const tr=btn&&btn.closest('tr[data-health-
 window.ctV42Save=async function(btn){const tr=btn&&btn.closest('tr[data-health-agent]'),name=tr&&tr.dataset.healthAgent;if(!tr||!name)return false;const rmSel=tr.querySelector('[data-owner-role="rm"]'),lpSel=tr.querySelector('[data-owner-role="lp"]'),st=tr.querySelector('.ct-owner-status'),rmVal=rmSel&&rmSel.value!=='Unassigned'?rmSel.value:null,lpVal=lpSel?lpSel.value:'Unassigned';btn.disabled=true;btn.textContent='Saving…';try{const existing=await db('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(name)+'&select=*&limit=5').catch(()=>[]),ar=(existing||[]).find(r=>key(r.agent_name)===key(name))||(existing||[])[0]||{},row=(window.__CT_HEALTH_ROWS||[]).find(r=>key(r.name)===key(name))||{},payload={agent_name:ar.agent_name||name,lp:lpVal||'Unassigned',rm:rmVal,priority:ar.priority!==undefined?!!ar.priority:false,added:ar.added!==undefined?!!ar.added:false,level:ar.level||row.tier||'C'};if(ar.closed_past_year!==undefined)payload.closed_past_year=ar.closed_past_year;await db('POST','agent_assignments?on_conflict=agent_name',payload);row.rm=rmVal||'Unassigned';row.lp=lpVal||'Unassigned';if(st){st.textContent='Saved ✓';st.className='ct-owner-status ok'}btn.textContent='Saved';setTimeout(()=>{btn.disabled=false;btn.textContent='Save';if(st)st.textContent=''},1200)}catch(err){console.error(err);btn.disabled=false;btn.textContent='Retry';if(st){st.textContent='Save failed';st.className='ct-owner-status err'}alert('Assignment did not save. Please retry.')}return false};
 window.ctV42Delete=async function(btn){const tr=btn&&btn.closest('tr[data-health-agent]'),name=tr&&tr.dataset.healthAgent;if(!tr||!name)return false;if(!confirm('Delete '+name+' from the active roster everywhere? You can restore it later from Removed Agents.'))return false;const row=(window.__CT_HEALTH_ROWS||[]).find(r=>key(r.name)===key(name))||{};btn.disabled=true;btn.textContent='Deleting…';try{const prof=await db('GET','agent_profiles?agent_name=ilike.'+encodeURIComponent(name)+'&select=agent_name&limit=5').catch(()=>[]),pr=(prof||[]).find(r=>key(r.agent_name)===key(name))||(prof||[])[0],canonical=(pr&&pr.agent_name)||name;if(pr&&pr.agent_name)await db('PATCH','agent_profiles?agent_name=eq.'+encodeURIComponent(canonical),{display_name:DELETE_MARKER,relationship_status:'inactive'});else await db('POST','agent_profiles?on_conflict=agent_name',{agent_name:canonical,display_name:DELETE_MARKER,relationship_status:'inactive'});const ex=await db('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(canonical)+'&select=*&limit=5').catch(()=>[]),ar=(ex||[])[0]||{};try{localStorage.setItem('ct_deleted_owner_'+key(canonical),JSON.stringify({rm:row.rm||'Unassigned',lp:row.lp||'Unassigned'}))}catch(e){}await db('POST','agent_assignments?on_conflict=agent_name',{agent_name:ar.agent_name||canonical,lp:'__REMOVED__',rm:null,priority:false,added:false,level:ar.level||row.tier||'C'});try{if(typeof clearAgentFromRmWorkflows==='function')await clearAgentFromRmWorkflows(canonical)}catch(e){}await refresh()}catch(err){console.error(err);btn.disabled=false;btn.textContent='Delete Everywhere';alert('Delete did not save. Nothing was removed.')}return false};
 window.ctV42Restore=async function(name,btn){if(!name)return false;if(btn){btn.disabled=true;btn.textContent='Restoring…'}try{const prof=await db('GET','agent_profiles?agent_name=ilike.'+encodeURIComponent(name)+'&select=agent_name,display_name&limit=5').catch(()=>[]),pr=(prof||[]).find(r=>key(r.agent_name)===key(name))||(prof||[])[0],canonical=(pr&&pr.agent_name)||name;if(pr&&pr.agent_name)await db('PATCH','agent_profiles?agent_name=eq.'+encodeURIComponent(canonical),{display_name:canonical,relationship_status:'active'});else await db('POST','agent_profiles?on_conflict=agent_name',{agent_name:canonical,display_name:canonical,relationship_status:'active'});let prev={rm:'Unassigned',lp:'Unassigned'};try{prev=JSON.parse(localStorage.getItem('ct_deleted_owner_'+key(canonical))||'null')||prev}catch(e){}const ex=await db('GET','agent_assignments?agent_name=ilike.'+encodeURIComponent(canonical)+'&select=*&limit=5').catch(()=>[]),ar=(ex||[])[0]||{},pb=powerBiRows().find(r=>key(r.name)===key(canonical))||{};await db('POST','agent_assignments?on_conflict=agent_name',{agent_name:ar.agent_name||canonical,lp:prev.lp&&prev.lp!=='Unassigned'?prev.lp:'Unassigned',rm:prev.rm&&prev.rm!=='Unassigned'?prev.rm:null,priority:false,added:false,level:ar.level||level(pb.level)||'C'});try{localStorage.removeItem('ct_deleted_owner_'+key(canonical))}catch(e){}await refresh()}catch(err){console.error(err);if(btn){btn.disabled=false;btn.textContent='Restore'}alert('Restore failed. Please retry.')}return false};
-async function autoRestoreShayne(){const name='Shayne Boyd';try{const rows=await db('GET','agent_profiles?agent_name=ilike.'+encodeURIComponent(name)+'&select=agent_name,display_name&limit=5').catch(()=>[]),r=(rows||[]).find(x=>key(x.agent_name)===key(name));if(r&&DELETE_MARKERS.has(String(r.display_name||'').trim())){await window.ctV42Restore(r.agent_name,null);try{sessionStorage.setItem('ct_shayne_restored_v42','1')}catch(e){}}}catch(e){console.warn('Shayne Boyd auto-restore',e)}}
 window.ctV42Export=function(){const rows=(window.__CT_HEALTH_ROWS||[]).slice().sort((a,b)=>String(a.lp).localeCompare(String(b.lp))||String(a.name).localeCompare(String(b.name))),cols=['Agent','Email','Phone','Tier','RM Owner','LP Owner','Relationship Health','Active Prequals','Active Pipeline','Last Lead','Last Close'],q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"',data=[cols].concat(rows.map(r=>[r.name,r.email,r.phone,r.tier,r.rm,r.lp,r.health,r.pre,r.pipe,fmt(r.last)==='—'?'':fmt(r.last),fmt(r.lastClose)==='—'?'':fmt(r.lastClose)])),blob=new Blob([data.map(row=>row.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download='Active-Agent-Ownership-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);return false};window.ctExportActiveAgentOwnership=window.ctV42Export;
 function openHealth(btn){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));const view=document.getElementById('view-agent-health');if(view)view.classList.add('active');document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active'));if(btn&&btn.classList)btn.classList.add('active');refresh();window.scrollTo(0,0)}window.lpv3OpenAgentHealth=openHealth;const priorRoute=window.lpv2Route;window.lpv2Route=function(route,btn){if(route==='agent-health'){openHealth(btn);return}return priorRoute?priorRoute(route,btn):undefined};
-async function boot(){const title=document.querySelector('#view-agent-health .ct-page-title');if(title){const old=document.getElementById('ctHealthBuildBadge');if(old)old.remove();title.insertAdjacentHTML('beforeend',' <span id="ctHealthBuildBadge">Agent Health v42</span>')}const sub=document.querySelector('#view-agent-health .ct-page-sub');if(sub)sub.textContent='Current Power BI Active Agents. Delete is reversible: use Removed Agents below to restore anyone accidentally removed.';const exp=document.getElementById('ctExportActiveOwnershipBtn');if(exp){exp.setAttribute('onclick','return ctV42Export()');exp.onclick=window.ctV42Export}['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=render;el.onchange=render}});await autoRestoreShayne();if(document.getElementById('view-agent-health')?.classList.contains('active'))await refresh()}
+async function boot(){const title=document.querySelector('#view-agent-health .ct-page-title');if(title){const old=document.getElementById('ctHealthBuildBadge');if(old)old.remove();title.insertAdjacentHTML('beforeend',' <span id="ctHealthBuildBadge">Agent Health v42</span>')}const sub=document.querySelector('#view-agent-health .ct-page-sub');if(sub)sub.textContent='Current Power BI Active Agents. Delete is reversible: use Removed Agents below to restore anyone accidentally removed.';const exp=document.getElementById('ctExportActiveOwnershipBtn');if(exp){exp.setAttribute('onclick','return ctV42Export()');exp.onclick=window.ctV42Export}['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=render;el.onchange=render}});if(document.getElementById('view-agent-health')?.classList.contains('active'))await refresh()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,50),{once:true});else setTimeout(boot,50);
 })();
 </script>
 
 
-<!-- MACK WEEKLY TUESDAY CALL PLAN v300 -->
 
 <!-- TUESDAY SOURCE SPLIT v310 -->
 <style id="v310-tuesday-split-css">
@@ -12218,7 +12095,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script id="v310-tuesday-split-js">
 (function(){
 'use strict';
-const SNAP='Tuesday Call Plan Snapshot', LOG_TXN='LP Tuesday File Update', LOG_GOTO='LP Go-To Conversation';
+const SNAP='Tuesday Call Plan Snapshot', LOG_TXN='LP Tuesday File Update';
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const norm=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
 const clean=s=>String(s==null?'':s).trim();
@@ -12239,7 +12116,7 @@ async function replaceWeekRows(planDate,lane){
     await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&outcome=eq.LP%20Transaction').catch(()=>{});
     await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&agent_name=eq.'+encodeURIComponent('__LP_TUESDAY_PLAN__')).catch(()=>{});
   }else if(lane==='RM'){
-    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&outcome=in.(RM%20Listing,Go-To)').catch(()=>{});
+    await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&outcome=eq.RM%20Listing').catch(()=>{});
     await sbFetch('DELETE','amanda_activities?act_type=eq.'+encodeURIComponent(SNAP)+'&act_date=eq.'+planDate+'&agent_name=eq.'+encodeURIComponent('__RM_TUESDAY_PLAN__')).catch(()=>{});
   }
 }
@@ -12249,9 +12126,9 @@ function installHub(){
   const grid=document.querySelector('#view-data-hub .ct-data-grid');if(!grid)return;
   const old=document.getElementById('v300PlanSource');if(old)old.remove();
   let wrap=document.getElementById('v310TuesdaySources');
-  if(!wrap){wrap=document.createElement('section');wrap.id='v310TuesdaySources';wrap.innerHTML='<div class="v310-source-grid">'+
+  if(!wrap){wrap=document.createElement('section');wrap.id='v310TuesdaySources';wrap.innerHTML='<div class="v310-source-grid"><div class="v310-source" style="grid-column:1/-1;border-left:4px solid #132B50"><div class="v310-kicker" style="color:#132B50">MANAGEMENT REPORTING</div><h3>Tuesday Completion Report</h3><p>Export one management workbook with a team summary, all-call detail, and a separate tab for Amanda and each LP showing exactly who they were assigned, completed, and still have open.</p><button class="v310-btn" type="button" onclick="v312ExportTuesdayCompletion()">Export Tuesday Completion Report</button><div class="v310-status" id="v312ExportStatus">Uses the latest weekly LP + RM Tuesday plans and the actual logged completion activity.</div></div>'+
     '<div class="v310-source lp"><div class="v310-kicker">LP ACTIVE-CONTRACT CALLS</div><h3>1. Upload TUESDAY UPDATE CALLS LP2.xlsx</h3><p>Uses the <b>ACTIVE CONTRACTS</b> master sheet and splits each row by Loan Partner 2. This drives each LP’s buyer/client + buyer-agent Tuesday file updates.</p><button class="v310-btn" type="button" onclick="v310PickLP()">Upload LP Tuesday Calls</button><input id="v310LPFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="v310-status" id="v310LPStatus">No LP Tuesday workbook uploaded yet.</div></div>'+
-    '<div class="v310-source rm"><div class="v310-kicker">RM + GO-TO CALLS</div><h3>2. Upload RM TUESDAY CALLS.xlsx</h3><p>This upload feeds the RM tracker only. <b>RM LISTING AGENT CALLS</b> goes to Amanda/RM. It does not add work to the LP Tuesday lane.</p><button class="v310-btn" type="button" onclick="v310PickRM()">Upload RM + Go-To Calls</button><input id="v310RMFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="v310-status" id="v310RMStatus">No RM/Go-To workbook uploaded yet.</div></div>'+
+    '<div class="v310-source rm"><div class="v310-kicker">RM LISTING-AGENT CALLS</div><h3>2. Upload RM TUESDAY CALLS.xlsx</h3><p>This upload feeds Amanda’s RM Tuesday listing-agent queue only. The <b>RM LISTING AGENT CALLS</b> sheet is the source. It does not add work to the LP Tuesday lane.</p><button class="v310-btn" type="button" onclick="v310PickRM()">Upload RM + Go-To Calls</button><input id="v310RMFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="v310-status" id="v310RMStatus">No RM/Go-To workbook uploaded yet.</div></div>'+
     '</div>';grid.appendChild(wrap);document.getElementById('v310LPFile').addEventListener('change',e=>importLP(e.target));document.getElementById('v310RMFile').addEventListener('change',e=>importRM(e.target))}
 }
 window.v310PickLP=()=>document.getElementById('v310LPFile')?.click();
@@ -12283,24 +12160,20 @@ async function importRM(input){
   const file=input.files&&input.files[0],st=document.getElementById('v310RMStatus');if(!file)return;
   st.className='v310-status';st.textContent='Reading '+file.name+'…';
   try{
-    const X=await xlsx(),book=X.read(await file.arrayBuffer(),{type:'array',cellDates:true}),rws=book.Sheets['RM LISTING AGENT CALLS'],gws=book.Sheets['AGENT WITH NO ACTIVE CONTRACTS'];
-    if(!rws||!gws)throw new Error('This is not RM TUESDAY CALLS.xlsx. Expected both RM LISTING AGENT CALLS and AGENT WITH NO ACTIVE CONTRACTS.');
-    const rr=X.utils.sheet_to_json(rws,{header:1,defval:null,raw:true}),gr=X.utils.sheet_to_json(gws,{header:1,defval:null,raw:true}),rhi=findHeader(rr,['borrower name','sellers agent contact name']),ghi=findHeader(gr,['agent','lp owner','rm owner']);
-    if(rhi<0||ghi<0)throw new Error('Could not find the expected RM/Go-To headers.');
-    const rh=normalizeHeaders(rr[rhi]),gh=(gr[ghi]||[]).map(x=>String(x||'').trim()),planDate=dt((rr[0]||[])[0])||new Date().toISOString().slice(0,10),batch='RM-TUE-'+planDate.replace(/-/g,'')+'-'+Date.now(),payload=[];let rmCount=0,goCount=0;
+    const X=await xlsx(),book=X.read(await file.arrayBuffer(),{type:'array',cellDates:true}),rws=book.Sheets['RM LISTING AGENT CALLS'];
+    if(!rws)throw new Error('This is not RM TUESDAY CALLS.xlsx. Expected the RM LISTING AGENT CALLS sheet.');
+    const rr=X.utils.sheet_to_json(rws,{header:1,defval:null,raw:true}),rhi=findHeader(rr,['borrower name','sellers agent contact name']);
+    if(rhi<0)throw new Error('Could not find the expected RM listing-agent headers.');
+    const rh=normalizeHeaders(rr[rhi]),planDate=dt((rr[0]||[])[0])||new Date().toISOString().slice(0,10),batch='RM-TUE-'+planDate.replace(/-/g,'')+'-'+Date.now(),payload=[];let rmCount=0;
     rr.slice(rhi+1).forEach(row=>{if(!row.some(v=>v!==null&&v!==''))return;const r=mapRow(rh,row);if(norm(r['Loan Purpose'])!=='purchase')return;const lp=lpShort(r['Loan Team Member Name - Loan Partner 2']),borrower=clean(r['Borrower Name']),seller=clean(r['Sellers Agent Contact Name']),builder=clean(r['Builder Contact Name']);let contact='',role='';
       if(validContact(seller)){contact=seller;role='Listing Agent'}else if(validContact(builder)){contact=builder;role='Builder Contact'}else if(norm(seller)==='fsbo'){contact='FSBO';role='FSBO'}else{contact='Listing contact missing';role='Missing'}
       const k=key(['RM_LIST',borrower,dt(r['Est Closing Date']),contact]),notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',planDate)+tag('TUE_PLAN_LANE','RM_LISTING')+tag('TUE_PLAN_KEY',k)+tag('LP_OWNER',lp)+tag('TUE_CONTACT_ROLE',role)+tag('TUE_CONTACT_NAME',contact)+tag('TUE_PHONE',clean(r['Sellers Agent Phone'])||clean(r['Builder Phone']))+tag('TUE_EMAIL',clean(r['Sellers Agent Email'])||clean(r['Builder Email']))+tag('TXN_CLIENT',borrower)+tag('TXN_CLOSE_DATE',dt(r['Est Closing Date']))+tag('TXN_MILESTONE',clean(r['Last Finished Milestone']))+' RM listing-side Tuesday call plan. No loan number stored.';
       payload.push({agent_name:contact,act_type:SNAP,act_date:planDate,outcome:'RM Listing',notes,follow_up_date:planDate});rmCount++;
     });
-    gr.slice(ghi+1).forEach(row=>{if(!row.some(v=>v!==null&&v!==''))return;const r=mapRow(gh,row),agent=clean(r['Agent']),lp=lpShort(r['LP Owner']);if(!agent||!lp)return;const due=friOf(planDate),k=key(['GOTO',agent,lp,planDate]),notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',planDate)+tag('TUE_PLAN_LANE','GOTO')+tag('TUE_PLAN_KEY',k)+tag('LP_OWNER',lp)+tag('RM_OWNER',clean(r['RM Owner']))+tag('TIER',clean(r['Tier']))+tag('TUE_PHONE',clean(r['Phone']))+tag('TUE_EMAIL',clean(r['Email']))+tag('REL_HEALTH',clean(r['Relationship Health']))+tag('ACTIVE_PREQUALS',clean(r['Active Prequals']))+tag('ACTIVE_PIPELINE',clean(r['Active Pipeline']))+tag('TUE_DUE',due)+' LP Go-To Conversation plan for an active partner with no active contract.';
-      payload.push({agent_name:agent,act_type:SNAP,act_date:planDate,outcome:'Go-To',notes,follow_up_date:due});goCount++;
-    });
-    payload.push({agent_name:'__RM_TUESDAY_PLAN__',act_type:SNAP,act_date:planDate,outcome:'Batch',notes:'[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',planDate)+tag('TUE_PLAN_LANE','RM_HEADER')+tag('RM_COUNT',rmCount)+tag('GOTO_COUNT',goCount),follow_up_date:null});
+    payload.push({agent_name:'__RM_TUESDAY_PLAN__',act_type:SNAP,act_date:planDate,outcome:'Batch',notes:'[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',planDate)+tag('TUE_PLAN_LANE','RM_HEADER')+tag('RM_COUNT',rmCount),follow_up_date:null});
     await replaceWeekRows(planDate,'RM');
     for(let i=0;i<payload.length;i+=50)await sbFetch('POST','amanda_activities',payload.slice(i,i+50));
-    st.className='v310-status ok';st.textContent='Loaded '+rmCount+' Amanda/RM listing calls + '+goCount+' LP Go-To calls ✓';
-    if(window.currentUser)await loadPlan(window.currentUser,true);
+    st.className='v310-status ok';st.textContent='Loaded '+rmCount+' Amanda/RM listing-agent calls ✓';
   }catch(e){console.error(e);st.className='v310-status err';st.textContent=e.message||String(e)}finally{input.value=''}
 }
 
@@ -12308,15 +12181,15 @@ let S={lp:'',lpBatch:'',rmBatch:'',rows:[],logs:[]},current=null;
 async function fetchPlan(){
   const cut=new Date();cut.setDate(cut.getDate()-21);const since=cut.toISOString().slice(0,10);
   const acts=await sbFetch('GET','amanda_activities?act_date=gte.'+since+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=5000').catch(()=>[]);
-  const snaps=(acts||[]).filter(a=>a.act_type===SNAP&&/\[TUE_SPLIT_V310\]/i.test(String(a.notes||''))),latest={LP_HEADER:null,RM_HEADER:null};
-  snaps.filter(a=>['LP_HEADER','RM_HEADER'].includes(meta(a.notes,'TUE_PLAN_LANE'))).forEach(a=>{const lane=meta(a.notes,'TUE_PLAN_LANE'),ms=Date.parse(a.created_at||a.act_date||0)||0;if(!latest[lane]||ms>latest[lane].ms)latest[lane]={ms,batch:meta(a.notes,'TUE_PLAN_BATCH')}});
-  const lpBatch=latest.LP_HEADER?.batch||'',rmBatch=latest.RM_HEADER?.batch||'';
+  const snaps=(acts||[]).filter(a=>a.act_type===SNAP&&/\[TUE_SPLIT_V310\]/i.test(String(a.notes||''))),latest={LP_HEADER:null};
+  snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_HEADER').forEach(a=>{const lane=meta(a.notes,'TUE_PLAN_LANE'),ms=Date.parse(a.created_at||a.act_date||0)||0;if(!latest[lane]||ms>latest[lane].ms)latest[lane]={ms,batch:meta(a.notes,'TUE_PLAN_BATCH')}});
+  const lpBatch=latest.LP_HEADER?.batch||'';
   const rows=snaps.filter(a=>{const lane=meta(a.notes,'TUE_PLAN_LANE'),b=meta(a.notes,'TUE_PLAN_BATCH');return lane==='LP_TXN'&&b===lpBatch});
   const logs=(acts||[]).filter(a=>{
     const t=String(a.act_type||'');
     return t===LOG_TXN;
   });
-  return{lpBatch,rmBatch,rows,logs}
+  return{lpBatch,rows,logs}
 }
 function done(row,lane){
   const k=meta(row.notes,'TUE_PLAN_KEY'),planDate=meta(row.notes,'TUE_PLAN_DATE'),lp=lpShort(meta(row.notes,'LP_OWNER'));
@@ -12338,14 +12211,310 @@ async function loadPlan(lp){
   document.getElementById('v310Summary').textContent=td+' transaction update'+(td===1?'':'s')+' due';
   document.getElementById('v310Txn').innerHTML=txn.length?txn.map(r=>{const k=meta(r.notes,'TUE_PLAN_KEY'),isDone=done(r,'LP_TXN'),buyer=meta(r.notes,'BUYER_AGENT'),client=meta(r.notes,'TXN_CLIENT'),close=meta(r.notes,'TXN_CLOSE_DATE'),mile=meta(r.notes,'TXN_MILESTONE'),ph=meta(r.notes,'BUYER_PHONE'),em=meta(r.notes,'BUYER_EMAIL');return '<div class="v310-row"><div><div class="v310-name">'+esc(client)+'</div><div class="v310-meta">Buyer agent: '+esc(buyer)+(close?' · close '+esc(close):'')+(mile?' · '+esc(mile):'')+'</div></div><div class="v310-contact">'+esc(ph||'No phone')+'<br>'+esc(em||'No email')+'</div><div class="v310-state '+(isDone?'done':'')+'">'+(isDone?'Completed ✓':'Due Tuesday')+'</div><div><button class="v310-call" type="button" onclick="v310Open(\''+encodeURIComponent(k)+'\',\'LP_TXN\')">'+(isDone?'Add note':'Log update')+'</button></div></div>'}).join(''):'<div class="v310-empty">No LP active-contract Tuesday rows loaded for '+esc(lp)+'.</div>';
 }
-window.v310LoadPlan=loadPlan;window.v65LoadTuesday=loadPlan;window.v65Load=loadPlan;
+window.v310LoadPlan=loadPlan;
 function modal(){if(document.getElementById('v310Modal'))return;const m=document.createElement('div');m.id='v310Modal';m.innerHTML='<div class="v310-modal-card"><div class="v310-modal-head"><div><h3 id="v310ModalTitle">Log Tuesday call</h3><div class="v310-meta" id="v310ModalMeta"></div></div><button class="v310-close" type="button" onclick="v310Close()">×</button></div><div class="v310-fields"><div class="v310-field"><label>Outcome</label><select id="v310Outcome"><option>Connected / meaningful conversation</option><option>Left voicemail + text sent</option><option>No answer + text sent</option><option>Follow-up needed</option><option>Meeting scheduled</option></select></div><div class="v310-field"><label>Follow-up</label><input id="v310Follow" type="date"></div><div class="v310-field full"><label>Notes</label><textarea id="v310Notes" placeholder="What did you communicate or learn?"></textarea></div></div><div class="v310-error" id="v310Err"></div><div class="v310-actions"><button class="v310-btn" type="button" onclick="v310Close()">Cancel</button><button class="v310-call" id="v310Save" type="button" onclick="v310Save()">Save call</button></div></div>';document.body.appendChild(m)}
 window.v310Open=function(encoded,lane){const k=decodeURIComponent(encoded),r=S.rows.find(x=>meta(x.notes,'TUE_PLAN_KEY')===k);if(!r)return;current={row:r,lane,key:k};modal();document.getElementById('v310ModalTitle').textContent='LP Tuesday file update';document.getElementById('v310ModalMeta').textContent=meta(r.notes,'TXN_CLIENT')+' · '+S.lp;document.getElementById('v310Notes').value='';document.getElementById('v310Follow').value='';document.getElementById('v310Err').style.display='none';document.getElementById('v310Modal').classList.add('show')};
 window.v310Close=()=>{document.getElementById('v310Modal')?.classList.remove('show');current=null};
 window.v310Save=async function(){if(!current)return;const notes=clean(document.getElementById('v310Notes').value),out=document.getElementById('v310Outcome').value,fu=document.getElementById('v310Follow').value||null,err=document.getElementById('v310Err'),btn=document.getElementById('v310Save');if(notes.split(/\s+/).filter(Boolean).length<3){err.textContent='Add a short note about what happened.';err.style.display='block';return}btn.disabled=true;btn.textContent='Saving…';try{const r=current.row,l='LP_TXN',body={agent_name:meta(r.notes,'BUYER_AGENT'),act_type:LOG_TXN,act_date:new Date().toISOString().slice(0,10),outcome:out,notes:'[TUE_SPLIT_V310_WORK]'+tag('TUE_PLAN_KEY',current.key)+tag('TUE_PLAN_LANE',l)+tag('LP_OWNER',S.lp)+' '+notes,follow_up_date:fu};await sbFetch('POST','amanda_activities',body);v310Close();await loadPlan(S.lp)}catch(e){console.error(e);err.textContent='Could not save. Try again.';err.style.display='block'}finally{btn.disabled=false;btn.textContent='Save call'}};
-function boot(){installHub();modal();const old=document.getElementById('lp-tuesday-work');if(old)old.style.display='none'}
+function boot(){installHub();modal()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,100),{once:true});else setTimeout(boot,100);
 })();
+</script>
+
+
+<!-- TUESDAY MANAGEMENT EXPORT v312 -->
+<script id="v312-tuesday-management-export-js">
+(function(){
+'use strict';
+
+const escCsv=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+const norm=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
+const meta=(notes,k)=>{const m=String(notes||'').match(new RegExp('\\['+k+':([^\\]]*)\\]','i'));return m?m[1].trim():''};
+const lpShort=v=>{
+  const s=norm(v);
+  if(s.includes('dill')||s==='gavin')return'Gavin';
+  if(s.includes('de la riva')||s==='karen')return'Karen';
+  if(s.includes('mcmahon')||s==='osgood')return'Osgood';
+  if(s.includes('johnston')||s==='jordan')return'Jordan';
+  if(s.includes('saleh')||s==='said')return'Said';
+  if(s.includes('isaak'))return'Isaak';
+  return String(v||'').trim();
+};
+function setStatus(msg,kind){
+  const el=document.getElementById('v312ExportStatus');if(!el)return;
+  el.textContent=msg;el.className='v310-status'+(kind?' '+kind:'');
+}
+function fmtDate(v){return String(v||'').slice(0,10)}
+function latestHeaders(snaps,lane){
+  return snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')===lane)
+    .sort((a,b)=>(Date.parse(b.created_at||b.act_date||0)||0)-(Date.parse(a.created_at||a.act_date||0)||0));
+}
+function findCompletion(plan,acts,type){
+  const k=meta(plan.notes,'TUE_PLAN_KEY'),planDate=meta(plan.notes,'TUE_PLAN_DATE');
+  const client=norm(meta(plan.notes,'TXN_CLIENT')),agent=norm(plan.agent_name);
+  const owner=lpShort(meta(plan.notes,'LP_OWNER'));
+  let matches=(acts||[]).filter(a=>{
+    if(String(a.act_date||'')<String(planDate||''))return false;
+    if(type==='LP'){
+      if(a.act_type!=='LP Tuesday File Update')return false;
+      const ak=meta(a.notes,'TUE_PLAN_KEY');
+      if(ak&&ak===k)return true;
+      const al=lpShort(meta(a.notes,'LP')||meta(a.notes,'LP_OWNER'));
+      if(al&&owner&&al!==owner)return false;
+      return client&&norm(meta(a.notes,'TXN_CLIENT'))===client;
+    }else{
+      if(a.act_type!=='Listing Agent Update'||/\[TXN_TRIGGER\]/i.test(String(a.notes||'')))return false;
+      const ak=meta(a.notes,'TUE_PLAN_KEY');
+      if(ak&&ak===k)return true;
+      return agent&&norm(a.agent_name)===agent;
+    }
+  });
+  matches.sort((a,b)=>String(b.created_at||b.act_date||'').localeCompare(String(a.created_at||a.act_date||'')));
+  return matches[0]||null;
+}
+
+window.v312ExportTuesdayCompletion=async function(){
+  setStatus('Building Tuesday completion report…');
+  try{
+    const cut=new Date();cut.setDate(cut.getDate()-45);
+    const since=cut.toISOString().slice(0,10);
+    const acts=await sbFetch('GET','amanda_activities?act_date=gte.'+since+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=10000').catch(()=>[]);
+    if(!Array.isArray(acts))throw new Error('Could not load Tuesday activity.');
+
+    // Support both the current v310 plan format and the earlier v300 shared-plan format.
+    const v310=acts.filter(a=>a.act_type==='Tuesday Call Plan Snapshot'&&/\[TUE_SPLIT_V310\]/i.test(String(a.notes||'')));
+    const v300=acts.filter(a=>a.act_type==='Tuesday Call Plan Snapshot'&&/\[TUESDAY_PLAN_SNAPSHOT\]/i.test(String(a.notes||'')));
+
+    function newestBatch(rows,headerLanes){
+      const hs=rows.filter(a=>headerLanes.includes(meta(a.notes,'TUE_PLAN_LANE')))
+        .sort((a,b)=>(Date.parse(b.created_at||b.act_date||0)||0)-(Date.parse(a.created_at||a.act_date||0)||0));
+      return hs[0]?{
+        batch:meta(hs[0].notes,'TUE_PLAN_BATCH'),
+        date:meta(hs[0].notes,'TUE_PLAN_DATE'),
+        source:hs[0]
+      }:null;
+    }
+
+    const lpHead=newestBatch(v310,['LP_HEADER']);
+    const rm310Head=newestBatch(v310,['RM_HEADER']);
+    const rm300Head=newestBatch(v300,['HEADER']);
+
+    const lpBatch=lpHead?lpHead.batch:'';
+    const lpDate=lpHead?lpHead.date:'';
+
+    // Prefer current v310 RM plan. If it doesn't exist, fall back to the earlier v300 plan.
+    let rmFormat='',rmBatch='',rmDate='',rmPlanRows=[];
+    if(rm310Head){
+      rmFormat='v310';rmBatch=rm310Head.batch;rmDate=rm310Head.date;
+      rmPlanRows=v310.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='RM_LISTING'&&meta(a.notes,'TUE_PLAN_BATCH')===rmBatch);
+    }else if(rm300Head){
+      rmFormat='v300';rmBatch=rm300Head.batch;rmDate=rm300Head.date;
+      rmPlanRows=v300.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LISTING'&&meta(a.notes,'TUE_PLAN_BATCH')===rmBatch);
+    }else{
+      // Last-resort: use the newest dated RM listing-plan rows even if an old upload omitted a header row.
+      const candidates=v310.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='RM_LISTING')
+        .concat(v300.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LISTING'))
+        .sort((a,b)=>(Date.parse(b.created_at||b.act_date||0)||0)-(Date.parse(a.created_at||a.act_date||0)||0));
+      if(candidates.length){
+        const first=candidates[0];
+        rmBatch=meta(first.notes,'TUE_PLAN_BATCH');
+        rmDate=meta(first.notes,'TUE_PLAN_DATE')||String(first.act_date||'').slice(0,10);
+        rmFormat=/\[TUE_SPLIT_V310\]/i.test(String(first.notes||''))?'v310':'v300';
+        rmPlanRows=candidates.filter(a=>meta(a.notes,'TUE_PLAN_BATCH')===rmBatch);
+      }
+    }
+
+    if(!lpBatch&&!rmPlanRows.length)throw new Error('No current Tuesday plans are loaded yet.');
+
+    const detail=[];
+
+    // LP active-contract Tuesday calls — current v310 source.
+    v310.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_TXN'&&meta(a.notes,'TUE_PLAN_BATCH')===lpBatch).forEach(p=>{
+      const done=findCompletion(p,acts,'LP');
+      detail.push({
+        person:lpShort(meta(p.notes,'LP_OWNER'))||'Unassigned',
+        role:'LP',
+        workType:'Active-contract Tuesday update',
+        planDate:meta(p.notes,'TUE_PLAN_DATE')||lpDate,
+        client:meta(p.notes,'TXN_CLIENT'),
+        agent:meta(p.notes,'BUYER_AGENT')||p.agent_name,
+        closeDate:meta(p.notes,'TXN_CLOSE_DATE'),
+        milestone:meta(p.notes,'TXN_MILESTONE'),
+        status:done?'Completed':'Open',
+        completionDate:done?fmtDate(done.act_date):'',
+        outcome:done?String(done.outcome||''):'',
+        notes:done?String(done.notes||'').replace(/\[[A-Z0-9_]+:[^\]]*\]/g,'').replace(/\[TUE_SPLIT_V310_WORK\]/g,'').trim():''
+      });
+    });
+
+    // Amanda / RM listing-agent Tuesday calls — current v310 OR legacy v300.
+    rmPlanRows.forEach(p=>{
+      const role=meta(p.notes,'TUE_CONTACT_ROLE')||meta(p.notes,'TUE_CONTACT_ROLE')||String(p.outcome||'');
+      const contactName=meta(p.notes,'TUE_CONTACT_NAME')||p.agent_name;
+      const excluded=/^FSBO$/i.test(role)||/^Missing$/i.test(role)||/contact issue/i.test(role);
+      const planKey=meta(p.notes,'TUE_PLAN_KEY');
+      const planDate=meta(p.notes,'TUE_PLAN_DATE')||rmDate||String(p.act_date||'').slice(0,10);
+
+      // Match any actual Amanda listing-agent update from this plan/week.
+      const done=(acts||[]).filter(a=>{
+        if(a.act_type!=='Listing Agent Update'||/\[TXN_TRIGGER\]/i.test(String(a.notes||'')))return false;
+        if(String(a.act_date||'')<String(planDate||''))return false;
+        const ak=meta(a.notes,'TUE_PLAN_KEY');
+        if(planKey&&ak&&ak===planKey)return true;
+        return contactName&&norm(a.agent_name)===norm(contactName);
+      }).sort((a,b)=>String(b.created_at||b.act_date||'').localeCompare(String(a.created_at||a.act_date||'')))[0]||null;
+
+      detail.push({
+        person:'Amanda',
+        role:'RM',
+        workType:'Listing-agent Tuesday update',
+        planDate,
+        client:meta(p.notes,'TXN_CLIENT'),
+        agent:contactName,
+        closeDate:meta(p.notes,'TXN_CLOSE_DATE'),
+        milestone:meta(p.notes,'TXN_MILESTONE'),
+        status:excluded?(/FSBO/i.test(role)?'Excluded - FSBO':'Excluded - Contact issue'):(done?'Completed':'Open'),
+        completionDate:done?fmtDate(done.act_date):'',
+        outcome:done?String(done.outcome||''):'',
+        notes:done?String(done.notes||'').replace(/\[[A-Z0-9_]+:[^\]]*\]/g,'').replace(/\[TUESDAY_LISTING\]/g,'').trim():''
+      });
+    });
+
+    const people=['Amanda','Gavin','Karen','Osgood','Jordan','Said','Isaak'];
+    const summary=people.map(person=>{
+      const rows=detail.filter(r=>r.person===person);
+      if(!rows.length)return null;
+      const required=rows.filter(r=>!String(r.status).startsWith('Excluded'));
+      const completed=required.filter(r=>r.status==='Completed').length;
+      const open=required.filter(r=>r.status==='Open').length;
+      const excluded=rows.length-required.length;
+      return {
+        person,
+        assigned:required.length,
+        completed,
+        open,
+        completionPct:required.length?Math.round(completed/required.length*100):100,
+        excluded
+      };
+    }).filter(Boolean);
+
+    const totalAssigned=summary.reduce((n,r)=>n+r.assigned,0);
+    const totalCompleted=summary.reduce((n,r)=>n+r.completed,0);
+    const totalOpen=summary.reduce((n,r)=>n+r.open,0);
+    const totalExcluded=summary.reduce((n,r)=>n+r.excluded,0);
+    summary.push({
+      person:'TOTAL TEAM',
+      assigned:totalAssigned,
+      completed:totalCompleted,
+      open:totalOpen,
+      completionPct:totalAssigned?Math.round(totalCompleted/totalAssigned*100):100,
+      excluded:totalExcluded
+    });
+
+    async function ensureXlsx(){
+      if(window.XLSX)return window.XLSX;
+      return new Promise((resolve,reject)=>{
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        s.onload=()=>resolve(window.XLSX);
+        s.onerror=()=>reject(new Error('Excel export library could not load'));
+        document.head.appendChild(s);
+      });
+    }
+
+    try{
+      const X=await ensureXlsx();
+      const wb=X.utils.book_new();
+      const summaryRows=summary.map(r=>({
+        'Team Member':r.person,
+        'Required Tuesday Calls':r.assigned,
+        'Completed':r.completed,
+        'Still Open':r.open,
+        'Completion %':r.completionPct+'%',
+        'Excluded FSBO / Contact Issues':r.excluded
+      }));
+      const detailRows=detail.map(r=>({
+        'Team Member':r.person,
+        'Role':r.role,
+        'Work Type':r.workType,
+        'Plan Date':r.planDate,
+        'Client / Borrower':r.client,
+        'Agent':r.agent,
+        'Close Date':r.closeDate,
+        'Milestone':r.milestone,
+        'Status':r.status,
+        'Completion Date':r.completionDate,
+        'Outcome':r.outcome,
+        'Completion Notes':r.notes
+      }));
+
+      const ws1=X.utils.json_to_sheet(summaryRows);
+      ws1['!cols']=[{wch:18},{wch:22},{wch:12},{wch:12},{wch:14},{wch:26}];
+      X.utils.book_append_sheet(wb,ws1,'Management Summary');
+
+      const personOrder={'Amanda':0,'Gavin':1,'Karen':2,'Osgood':3,'Jordan':4,'Said':5,'Isaak':6};
+      const statusOrder={'Open':0,'Completed':1,'Excluded - FSBO':2,'Excluded - Contact issue':3};
+      const allSorted=detailRows.slice().sort((a,b)=>{
+        const pa=personOrder[a['Team Member']]??99,pb=personOrder[b['Team Member']]??99;
+        if(pa!==pb)return pa-pb;
+        const sa=statusOrder[a['Status']]??9,sb=statusOrder[b['Status']]??9;
+        if(sa!==sb)return sa-sb;
+        return String(a['Client / Borrower']||'').localeCompare(String(b['Client / Borrower']||''));
+      });
+      const ws2=X.utils.json_to_sheet(allSorted);
+      ws2['!cols']=[{wch:16},{wch:8},{wch:28},{wch:12},{wch:24},{wch:24},{wch:12},{wch:20},{wch:22},{wch:16},{wch:28},{wch:50}];
+      X.utils.book_append_sheet(wb,ws2,'All Call Detail');
+
+      const peopleTabs=['Amanda','Gavin','Karen','Osgood','Jordan','Said','Isaak'];
+      peopleTabs.forEach(person=>{
+        const rows=detailRows.filter(r=>r['Team Member']===person).sort((a,b)=>{
+          const sa=statusOrder[a['Status']]??9,sb=statusOrder[b['Status']]??9;
+          if(sa!==sb)return sa-sb;
+          return String(a['Client / Borrower']||'').localeCompare(String(b['Client / Borrower']||''));
+        });
+        if(!rows.length)return;
+        const personSummary=summaryRows.find(r=>r['Team Member']===person);
+        const top=[
+          {'Metric':'Required Tuesday Calls','Value':personSummary?personSummary['Required Tuesday Calls']:0},
+          {'Metric':'Completed','Value':personSummary?personSummary['Completed']:0},
+          {'Metric':'Still Open','Value':personSummary?personSummary['Still Open']:0},
+          {'Metric':'Completion %','Value':personSummary?personSummary['Completion %']:'0%'},
+          {'Metric':'Excluded FSBO / Contact Issues','Value':personSummary?personSummary['Excluded FSBO / Contact Issues']:0}
+        ];
+        const ws=X.utils.json_to_sheet(top);
+        X.utils.sheet_add_json(ws,rows,{origin:'A8'});
+        ws['!cols']=[{wch:20},{wch:12},{wch:28},{wch:12},{wch:24},{wch:24},{wch:12},{wch:20},{wch:22},{wch:16},{wch:28},{wch:50}];
+        X.utils.book_append_sheet(wb,ws,person);
+      });
+
+      // Add source diagnostics so management/user can verify what plan was used.
+      const diag=[
+        {'Source':'LP Tuesday Plan','Format':'v310','Plan Date':lpDate||'','Rows':detail.filter(r=>r.role==='LP').length},
+        {'Source':'Amanda RM Tuesday Plan','Format':rmFormat||'none','Plan Date':rmDate||'','Rows':detail.filter(r=>r.person==='Amanda').length}
+      ];
+      const ws3=X.utils.json_to_sheet(diag);
+      ws3['!cols']=[{wch:26},{wch:14},{wch:14},{wch:10}];
+      X.utils.book_append_sheet(wb,ws3,'Report Sources');
+
+      const reportDate=(lpDate||rmDate||new Date().toISOString().slice(0,10));
+      X.writeFile(wb,'Tuesday-Completion-Report-'+reportDate+'.xlsx');
+      setStatus('Exported management workbook ✓ Amanda rows: '+detail.filter(r=>r.person==='Amanda').length,'ok');
+    }catch(xerr){
+      const cols=['Team Member','Role','Work Type','Plan Date','Client / Borrower','Agent','Close Date','Milestone','Status','Completion Date','Outcome','Completion Notes'];
+      const lines=[cols.map(escCsv).join(',')].concat(detail.map(r=>[
+        r.person,r.role,r.workType,r.planDate,r.client,r.agent,r.closeDate,r.milestone,r.status,r.completionDate,r.outcome,r.notes
+      ].map(escCsv).join(',')));
+      const blob=new Blob([lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+      const a=document.createElement('a'),u=URL.createObjectURL(blob);
+      a.href=u;a.download='Tuesday-Completion-Report-'+(lpDate||rmDate||new Date().toISOString().slice(0,10))+'.csv';
+      document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+      setStatus('Excel library unavailable; exported detail CSV. Amanda rows: '+detail.filter(r=>r.person==='Amanda').length,'ok');
+    }
+  }catch(e){
+    console.error('Tuesday management export',e);
+    setStatus('Could not export: '+(e.message||String(e)),'err');
+  }
+}})();
 </script>
 
 </body>
