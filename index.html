@@ -853,7 +853,16 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </style>
 <style id="ct-v5-health-tier-style">
 .ct-health-summary small{display:block;margin-top:4px;font-size:10px;color:#6b7788;line-height:1.35}.ct-health-action-banner{padding:10px 12px;border:1px solid #c9d9e3;background:#f4f9fc;border-radius:9px;margin:0 0 10px;font-size:11.5px;color:#315a73}.ct-health-action-banner.yellow{background:#fff8e8;border-color:#ead18d;color:#7c5a13}.ct-health-action-banner.red{background:#fff0ef;border-color:#efb5b0;color:#9a352f}.ct-health-table td small{display:block;margin-top:3px;font-size:10px;color:#6b7788}.ct-health-scroll{overflow:auto}.ct-tier-grid{display:grid;grid-template-columns:repeat(4,minmax(155px,1fr));gap:10px;margin-top:14px}.ct-tier-click,.ct-tier-development{appearance:none;text-align:left;background:#fff;border:1px solid #d9e2e8;border-radius:12px;padding:14px;color:#102640;font:inherit}.ct-tier-click{cursor:pointer}.ct-tier-click:hover{border-color:#71abc8;background:#f7fbfd}.ct-tier-big{font-size:26px;font-weight:800;margin:5px 0}.ct-tier-big span,.ct-tier-score span{font-size:13px;color:#6b7788}.ct-tier-bar{height:6px;background:#edf1f3;border-radius:999px;overflow:hidden;margin:8px 0}.ct-tier-bar i{display:block;height:100%;background:#2d7fa6;border-radius:999px}.ct-tier-score{font-size:26px;font-weight:800}.ct-tier-name-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}.ct-tier-name{border:1px solid #d9e2e8;background:#fff;border-radius:9px;padding:10px 12px;text-align:left;cursor:pointer;font:inherit}.ct-tier-name:hover{background:#f5fafc}@media(max-width:900px){.ct-tier-grid{grid-template-columns:repeat(2,minmax(145px,1fr))}}@media(max-width:520px){.ct-tier-grid{grid-template-columns:1fr}}
-</style></head>
+</style>
+<style id="ct-amanda-visible-top-css">
+#ct-amanda-snapshot{margin:0 0 14px!important;padding:14px 16px!important;border:1px solid #b9dfe9!important;border-radius:12px!important;background:#f7fcfe!important;box-shadow:none!important}
+#ct-amanda-snapshot .ct-amanda-title{font-size:14px!important;font-weight:850!important;color:#071b37!important}
+#ct-amanda-snapshot .ct-amanda-sub{font-size:11px!important;color:#607789!important;margin-top:2px!important}
+#ct-amanda-snapshot .ct-amanda-grid{display:grid!important;grid-template-columns:repeat(5,minmax(125px,1fr))!important;gap:8px!important;margin-top:10px!important}
+#ct-amanda-snapshot .ct-amanda-metric{background:#fff!important;border:1px solid #dce7ed!important;border-radius:9px!important;padding:10px 11px!important}
+@media(max-width:1000px){#ct-amanda-snapshot .ct-amanda-grid{grid-template-columns:repeat(2,minmax(140px,1fr))!important}}
+</style>
+</head>
 <body>
 <div id="lpBuildBadge" style="display:none"></div>
 <div class="app">
@@ -1321,19 +1330,19 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="view" id="view-operating-standard">
 <div class="operating standard-standard">
 <div class="pbs-hero"><div class="pbs-kicker">CORE TEAM OPERATING STANDARD</div><h1>Produce. Convert. Execute. Grow.</h1><p>The tracker should make ownership visible, catch execution gaps early, and keep the team working the same operating system from lead through funding and relationship growth.</p></div>
-<div class="pbs-live" id="pbs-live-team-progress"><div class="pbs-live-head"><div><b>Live team position</b><span>Current scorecard data compared with the required gates.</span></div><button onclick="pbsLoadLiveProgress(true)" type="button">Refresh</button></div><div class="pbs-live-grid" id="pbs-live-grid"><div class="pbs-live-loading">Loading current measurements…</div></div></div>
+<div class="pbs-live" id="pbs-live-team-progress"><div class="pbs-live-head"><div><b>Live team position</b><span>Current scorecard data compared with the performance targets.</span></div><button onclick="pbsLoadLiveProgress(true)" type="button">Refresh</button></div><div class="pbs-live-grid" id="pbs-live-grid"><div class="pbs-live-loading">Loading current measurements…</div></div></div>
 <div class="pbs-grid">
 <div class="pbs-card" onclick="lpv3OpenStandardDetail('production')" role="button" tabindex="0"><div class="pbs-weight">60%<span>Production</span></div><h3>What it measures</h3><p>Funded results, current-month pace and sustained rolling production. Strong production matters most, but it cannot erase a fundamental execution failure.</p></div>
 <div class="pbs-card" onclick="lpv3OpenStandardDetail('conversion')" role="button" tabindex="0"><div class="pbs-weight">25%<span>Conversion</span></div><h3>What it measures</h3><p>Effectiveness across the buyer funnel: Lead → 1003 → Pre-Approval → Contract → Funding.</p></div>
 <div class="pbs-card" onclick="lpv3OpenStandardDetail('execution')" role="button" tabindex="0"><div class="pbs-weight">15%<span>Execution</span></div><h3>What it measures</h3><p>Documented compliance with CORE standards that protect conversion, client experience and partner confidence.</p></div>
 </div>
-<div class="pbs-card" style="margin-top:12px"><h3>Non-negotiable conversion gates</h3><div class="pbs-gates"><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('funded')"><b>400</b><span>Funded units target</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('lead1003')"><b>60%</b><span>Lead → 1003</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('1003pre')"><b>85%</b><span>1003 → Pre-Approval</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('precontract')"><b>55%</b><span>Pre-Approval → Contract</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('contractfunded')"><b>87%</b><span>Contract → Funded</span></div></div></div>
+<div class="pbs-card" style="margin-top:12px"><h3>Core conversion targets</h3><div class="pbs-gates"><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('funded')"><b>400</b><span>Funded units target</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('lead1003')"><b>60%</b><span>Lead → 1003</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('1003pre')"><b>85%</b><span>1003 → Pre-Approval</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('precontract')"><b>55%</b><span>Pre-Approval → Contract</span></div><div class="pbs-gate" onclick="lpv3OpenSnapshotDrill('contractfunded')"><b>87%</b><span>Contract → Funded</span></div></div></div>
 <div class="pbs-grid" style="margin-top:12px">
 <div class="pbs-card"><h3>Clear ownership lanes</h3><ul><li><b>RM:</b> partner portfolio health, relationship rhythm, retention and growth.</li><li><b>LP2:</b> client + transaction experience and buyer/buyer-agent execution.</li><li><b>LP1:</b> conversion/front-end support and early buyer movement.</li><li><b>Production leadership:</b> visibility, coaching and accountability.</li></ul></div>
 <div class="pbs-card"><h3>Weekly operating rhythm</h3><ul><li><b>Monday:</b> set up the week and review production plan.</li><li><b>Tuesday–Thursday:</b> execute, communicate and move files/buyers.</li><li><b>Friday:</b> inspect WIP, unresolved gaps and next actions.</li><li>Use early-warning status: Green = current, Yellow = correctable miss, Red = repeated/material miss.</li></ul></div>
-<div class="pbs-card"><h3>Execution gates</h3><ul><li>Required leads entered into CRM.</li><li>Required under-contract buyer-agent/client updates completed from each LP’s own worklist.</li><li>Mandatory conversion steps executed and documented.</li><li>File Integrity starts at Ready for Pack Out; respond quickly to daily Processing/LOA asks.</li></ul></div>
+<div class="pbs-card"><h3>Execution standards</h3><ul><li>Required leads entered into CRM.</li><li>Required under-contract buyer-agent/client updates completed from each LP’s own worklist.</li><li>Mandatory conversion steps executed and documented.</li><li>File Integrity starts at Ready for Pack Out; respond quickly to daily Processing/LOA asks.</li></ul></div>
 </div>
-<div class="pbs-strip"><b>Operating rule:</b> a zero-tolerance designation creates an accountability event; it is not averaged away by production elsewhere. The tracker should show the missed gate, owner, corrective action and next result.</div>
+<div class="pbs-strip"><b>Operating rule:</b> a zero-tolerance designation creates an accountability event; it is not averaged away by production elsewhere. The tracker should show the missed standard, owner, corrective action and next result.</div>
 </div>
 </div>
 <div class="view" id="view-scorecards">
@@ -1341,7 +1350,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="lp-hero-name" style="color:var(--text);font-size:18px">Scorecards</div>
 <button class="btn btn-sm" onclick="selectUser(null,'Welcome')">← Back</button>
 </div>
-<div class="operating standard-score-model"><div style="font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#0B789E">LP2 PERFORMANCE SCORECARD</div><div style="font-size:12px;font-weight:800;color:#102A43;margin-top:3px">Weighted performance model</div><div class="weights"><div class="w"><b>60%</b><span>Production · funded results and pace</span></div><div class="w"><b>25%</b><span>Conversion · Lead → 1003 → Pre-Approval → Contract → Funding</span></div><div class="w"><b>15%</b><span>Execution · documented CORE standards and partner/client experience</span></div></div><div style="font-size:10.5px;color:#627786;margin-top:8px">Conversion reference gates: 60% Lead→1003 · 85% 1003→Pre-Approval · 55% Pre-Approval→Contract · 87% Contract→Funded.</div></div><div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px">
+<div class="operating standard-score-model"><div style="font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#0B789E">LP2 PERFORMANCE SCORECARD</div><div style="font-size:12px;font-weight:800;color:#102A43;margin-top:3px">Weighted performance model</div><div class="weights"><div class="w"><b>60%</b><span>Production · funded results and pace</span></div><div class="w"><b>25%</b><span>Conversion · Lead → 1003 → Pre-Approval → Contract → Funding</span></div><div class="w"><b>15%</b><span>Execution · documented CORE standards and partner/client experience</span></div></div><div style="font-size:10.5px;color:#627786;margin-top:8px">Conversion targets: 60% Lead→1003 · 85% 1003→Pre-Approval · 55% Pre-Approval→Contract · 87% Contract→Funded.</div></div><div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px">
 <div style="background:#1F4E79;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
 <span style="color:#fff;font-size:13px;font-weight:600">Core team goal</span>
 <div style="display:flex;gap:6px">
@@ -1414,8 +1423,8 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <div class="view" id="view-snapshot"><div class="ct-snapshot-page">
 <div class="ct-page-head"><div><div class="ct-eyebrow">TEAM ACCOUNTABILITY</div><h1>Team Snapshot</h1><div class="ct-page-sub">Current team production, conversion and execution.</div></div><div class="ct-snapshot-actions"><span class="ct-muted" id="snapshot-time"></span><button class="ct-link-btn" id="snapshot-live-refresh" onclick="refreshSnapshotFresh(this)" type="button">Refresh live data</button></div></div><div class="ct-sync-line" id="snapshot-live-status">Syncing current team data…</div>
-<section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>Current position vs. required gates</h2></div><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div><div id="lp-v2-team-gates"><div class="ct-loading">Loading conversion gates…</div></div></section>
-<section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">THIS WEEK</div><h2>Loan Partner scorecard</h2></div></div><div id="lp-v2-team-roster"><div class="ct-loading">Loading team scorecard…</div></div></section>
+<section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>Current position vs. performance targets</h2></div><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div><div id="lp-v2-team-gates"><div class="ct-loading">Loading performance targets…</div></div></section>
+<section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">THIS WEEK</div><h2>Loan Partner scorecard</h2></div></div><div id="lp-v2-team-roster"><div class="ct-loading">Loading team scorecard…</div></div><div id="ct-amanda-snapshot-anchor" class="ct-amanda-anchor"></div></section>
 <section class="ct-card ct-standard-strip"><div><div class="ct-kicker">OPERATING STANDARD</div><h2>Produce. Convert. Execute. Grow.</h2><p>LP2 owns client + transaction execution and buyer/buyer-agent work on active contracts. LP1 supports front-end conversion. RM owns partner portfolio health, retention, growth and the listing-agent relationship lane.</p></div><button class="ct-primary-btn" onclick="lpv2Route('standard',this)" type="button">Open Operating Standard</button></section>
 <div class="ct-legacy-state" id="d-snapshot-body"></div></div></div>
 <div class="view" id="view-ownership">
@@ -11185,7 +11194,7 @@ function openOperatingStandardView(btn){
     return {leads,apps,pre,contracts,funded,hasFunded}
   }
   const rate=(a,b)=>b?Math.round(a/b*100):null;
-  function gate(label,val,target){const cls=statusClass(val,target),shown=val===null?'—':val+'%';return '<div class="ct-mini-gate '+cls+'"><b>'+shown+'</b><span>'+label+' · gate '+target+'%</span></div>'}
+  function gate(label,val,target){const cls=statusClass(val,target),shown=val===null?'—':val+'%';return '<div class="ct-mini-gate '+cls+'"><b>'+shown+'</b><span>'+label+' · target '+target+'%</span></div>'}
   async function lpv2RenderLpScorecard(lp){
     const host=document.getElementById('lp-v2-scorecard');if(!host)return;
     host.innerHTML='<div class="ct-loading">Loading scorecard…</div>';
@@ -11219,7 +11228,7 @@ function openOperatingStandardView(btn){
     const y=new Date().getFullYear()+'-01-01';
     try{return await sbFetch('GET','lp_scorecards?person=in.(Gavin,Karen,Osgood,Jordan,Said,Isaak)&week_key=gte.'+y+'&select=person,week_key,data&order=week_key.asc&limit=10000')}catch(e){console.warn(e);return []}
   }
-  function bigGate(label,val,target,sub,key){const p=val===null?0:Math.max(0,Math.min(100,Math.round(val/target*100))),cls=statusClass(val,target);return '<div class="ct-gate '+cls+'" data-snap-gate="'+esc(key||label)+'" onclick="lpv3OpenSnapshotDrill(this.dataset.snapGate)"><div class="label">'+esc(label)+'</div><div class="value">'+(val===null?'—':val+'%')+'</div><div class="target">'+esc(sub||('Required gate '+target+'%'))+'</div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div></div>'}
+  function bigGate(label,val,target,sub,key){const p=val===null?0:Math.max(0,Math.min(100,Math.round(val/target*100))),cls=statusClass(val,target);return '<div class="ct-gate '+cls+'" data-snap-gate="'+esc(key||label)+'" onclick="lpv3OpenSnapshotDrill(this.dataset.snapGate)"><div class="label">'+esc(label)+'</div><div class="value">'+(val===null?'—':val+'%')+'</div><div class="target">'+esc(sub||('Target '+target+'%'))+'</div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div></div>'}
   async function lpv2RenderSnapshot(){
     const gates=document.getElementById('lp-v2-team-gates'), roster=document.getElementById('lp-v2-team-roster');if(!gates||!roster)return;
     const rows=await teamRows(), agg=aggregate(rows), wk=mondayKey(new Date()); window.__LPV3_SNAPSHOT_ROWS=rows; window.__LPV3_SNAPSHOT_WK=wk;
@@ -11227,7 +11236,7 @@ function openOperatingStandardView(btn){
     const fundedProgress=agg.hasFunded?Math.min(100,Math.round(agg.funded/400*100)):0;
     gates.innerHTML='<div class="ct-gate-grid">'+
       '<div class="ct-gate '+(agg.hasFunded&&fundedProgress>=100?'good':agg.hasFunded&&fundedProgress>=75?'warn':'')+'" onclick="lpv3OpenSnapshotDrill(\'funded\')"><div class="label">Funded units</div><div class="value">'+(agg.hasFunded?agg.funded:'—')+'</div><div class="target">Team target 400'+(!agg.hasFunded?' · funded result not in scorecard feed':'')+'</div><div class="bar"><div class="fill" style="width:'+fundedProgress+'%"></div></div></div>'+
-      bigGate('Lead → 1003',rate(agg.apps,agg.leads),60,null,'lead1003')+bigGate('1003 → Pre-Approval',rate(agg.pre,agg.apps),85,null,'1003pre')+bigGate('Pre-Approval → Contract',rate(agg.contracts,agg.pre),55,null,'precontract')+bigGate('Contract → Funded',fundedPct,87,agg.hasFunded?'Required gate 87%':'Funded result not in scorecard feed','contractfunded')+'</div>';
+      bigGate('Lead → 1003',rate(agg.apps,agg.leads),60,null,'lead1003')+bigGate('1003 → Pre-Approval',rate(agg.pre,agg.apps),85,null,'1003pre')+bigGate('Pre-Approval → Contract',rate(agg.contracts,agg.pre),55,null,'precontract')+bigGate('Contract → Funded',fundedPct,87,agg.hasFunded?'Target 87%':'Funded result not in scorecard feed','contractfunded')+'</div>';
     const body=LPS2.map(lp=>{const rr=rows.filter(r=>r.person===lp&&r.week_key===wk),a=aggregate(rr),role=lp==='Isaak'?'LP1':'LP2';return '<tr><td>'+esc(lp)+'<span class="ct-role-small">'+role+'</span></td><td class="'+(!a.leads?'ct-metric-zero':'')+'">'+a.leads+'</td><td class="'+(!a.apps?'ct-metric-zero':'')+'">'+a.apps+'</td><td class="'+(!a.pre?'ct-metric-zero':'')+'">'+a.pre+'</td><td class="'+(!a.contracts?'ct-metric-zero':'')+'">'+a.contracts+'</td><td><button class="ct-link-btn" type="button" data-lp-open="'+esc(lp)+'">Open</button></td></tr>'}).join('');
     roster.innerHTML='<div style="overflow:auto"><table class="ct-team-table"><thead><tr><th>Loan Partner</th><th>Leads</th><th>1003s</th><th>Pre-Approvals</th><th>Contracts</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>';
     roster.querySelectorAll('[data-lp-open]').forEach(b=>b.addEventListener('click',()=>{const lp=b.dataset.lpOpen,nav=[...document.querySelectorAll('.ct-nav-btn[data-lp]')].find(x=>x.dataset.lp===lp);if(nav)lpv2Route('lp',nav)}));
@@ -11372,7 +11381,7 @@ async function scoreRows(){try{return await sbFetch('GET','lp_scorecards?week_ke
 function scoreBy(rows){const b={};(rows||[]).forEach(r=>b[r.person]=r.data||{});return b}
 function metricTotal(by,m){const names=m.scope==='LP2'?CT_LP2:CT_LPS;return names.reduce((s,n)=>s+total(by[n]||{},m.key),0)}
 function goalCard(m,by){const v=metricTotal(by,m),g=TEAM_GOALS[m.key],p=g?Math.min(100,Math.round(v/g*100)):0,cls=p>=100?'good':p>=75?'warn':'';return '<div class="ct-gate '+cls+'"><div class="label">'+esc(m.label)+'</div><div class="value">'+v+' <span style="font-size:16px;color:#6C7F8B">/ '+g+'</span></div><div class="target">Weekly team goal · '+esc(m.scope==='LP2'?'5 LP2s':'all LPs')+'</div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div><div class="ct-source-note">'+esc(m.source)+'</div></div>'}
-function gate(label,val,target,detail,key){const p=val==null?0:Math.max(0,Math.min(100,Math.round(val/target*100))),cls=val==null?'':(val>=target?'good':val>=target*.75?'warn':'');return '<div class="ct-gate '+cls+'" data-snap-gate="'+esc(key)+'" onclick="lpv3OpenSnapshotDrill(this.dataset.snapGate)"><div class="label">'+esc(label)+'</div><div class="value">'+(val==null?'—':val+'%')+'</div><div class="target">Required gate '+target+'%</div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div><div class="ct-source-note">'+esc(detail)+'</div></div>'}
+function gate(label,val,target,detail,key){const p=val==null?0:Math.max(0,Math.min(100,Math.round(val/target*100))),cls=val==null?'':(val>=target?'good':val>=target*.75?'warn':'');return '<div class="ct-gate '+cls+'" data-snap-gate="'+esc(key)+'" onclick="lpv3OpenSnapshotDrill(this.dataset.snapGate)"><div class="label">'+esc(label)+'</div><div class="value">'+(val==null?'—':val+'%')+'</div><div class="target">Target '+target+'%</div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div><div class="ct-source-note">'+esc(detail)+'</div></div>'}
 async function freshness(){
  const safe=(p)=>Promise.resolve(p).catch(()=>[]);
  let pbLocal=null;try{pbLocal=window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')}catch(e){}
@@ -11398,7 +11407,7 @@ async function renderSnapshot(force){const gates=document.getElementById('lp-v2-
 window.lpv2RenderSnapshot=function(){return renderSnapshot(false)};
 const oldRefresh=window.refreshSnapshotFresh;if(typeof oldRefresh==='function'&&!oldRefresh.__ctFinal){const w=async function(btn){try{await oldRefresh.apply(this,arguments)}catch(e){}return renderSnapshot(true)};w.__ctFinal=true;window.refreshSnapshotFresh=w}
 window.pbsLoadLiveProgress=async function(force){const host=document.getElementById('pbs-live-grid');if(!host)return;host.innerHTML='<div class="pbs-live-loading">Loading current measurements…</div>';const a=agg(await vel(!!force));const vals=[['Funded units','—','Needs authoritative total-production feed',0,true],['Lead → 1003',pct(a.apps,a.leads),a.apps+' / '+a.leads+' · Velocify YTD',60,false],['1003 → Pre-Approval',pct(a.pre,a.apps),a.pre+' / '+a.apps+' · Velocify YTD',85,false],['Pre-Approval → Contract',pct(a.contracts,a.pre),a.contracts+' / '+a.pre+' · Velocify YTD',55,false],['Contract → Funded',pct(a.funded,a.contracts),a.funded+' / '+a.contracts+' · Velocify YTD',87,false]];host.innerHTML=vals.map(v=>{const q=v[1]==='—'?0:(v[1]==null?0:Math.min(100,v[1]/v[3]*100)),cls=v[4]?'':(q>=100?'met':q>=75?'warn':'');return '<div class="pbs-live-metric '+cls+'"><div class="m-label">'+v[0]+'</div><div class="m-value">'+(typeof v[1]==='number'?v[1]+'%':v[1]||'—')+'</div><div class="m-target">'+v[2]+'</div><div class="m-bar"><div class="m-fill" style="width:'+q+'%"></div></div></div>'}).join('')};
-window.lpv3OpenSnapshotDrill=async function(metric){const modal=document.getElementById('lpv3-snapshot-drill'),title=document.getElementById('lpv3-drill-title'),sub=document.getElementById('lpv3-drill-sub'),body=document.getElementById('lpv3-drill-body');if(!modal||!title||!sub||!body)return;if(metric==='funded'){title.textContent='Funded units';sub.textContent='Team target: 400.';body.innerHTML='<div class="ct-accuracy-banner"><b>Not populated until an authoritative production feed exists.</b> This prevents referral-lead fundings, Realtor closings, or manual scorecard entries from being mistaken for total team funded units.</div>';modal.classList.add('open');return}const cfg={lead1003:['Lead → 1003','apps','leads',60],'1003pre':['1003 → Pre-Approval','pre','apps',85],precontract:['Pre-Approval → Contract','contracts','pre',55],contractfunded:['Contract → Funded','funded','contracts',87]}[metric];if(!cfg)return;const rows=await vel(false),a=agg(rows),n=a[cfg[1]],d=a[cfg[2]],v=pct(n,d);title.textContent=cfg[0];sub.textContent='Velocify YTD cohort · '+n+' / '+d+' = '+(v==null?'N/A':v+'%')+' · gate '+cfg[3]+'%.';body.innerHTML='<div class="ct-accuracy-banner"><b>Why this is trustworthy:</b> one lead cohort, each lead counted once at its latest synced stage. Weekly scorecard entries do not create this conversion rate.</div>'+CT_LPS.map(lp=>{const x=agg(rows.filter(r=>lpName(r.lp_user)===lp)),nn=x[cfg[1]],dd=x[cfg[2]],vv=pct(nn,dd);return '<div class="ct-card" style="margin-bottom:7px"><b>'+lp+'</b><span style="float:right;font-weight:800;color:#0B789E">'+(vv==null?'—':vv+'%')+'</span><div style="font-size:10.5px;color:#6B7E8A;margin-top:3px">'+nn+' / '+dd+'</div></div>'}).join('');modal.classList.add('open')};
+window.lpv3OpenSnapshotDrill=async function(metric){const modal=document.getElementById('lpv3-snapshot-drill'),title=document.getElementById('lpv3-drill-title'),sub=document.getElementById('lpv3-drill-sub'),body=document.getElementById('lpv3-drill-body');if(!modal||!title||!sub||!body)return;if(metric==='funded'){title.textContent='Funded units';sub.textContent='Team target: 400.';body.innerHTML='<div class="ct-accuracy-banner"><b>Not populated until an authoritative production feed exists.</b> This prevents referral-lead fundings, Realtor closings, or manual scorecard entries from being mistaken for total team funded units.</div>';modal.classList.add('open');return}const cfg={lead1003:['Lead → 1003','apps','leads',60],'1003pre':['1003 → Pre-Approval','pre','apps',85],precontract:['Pre-Approval → Contract','contracts','pre',55],contractfunded:['Contract → Funded','funded','contracts',87]}[metric];if(!cfg)return;const rows=await vel(false),a=agg(rows),n=a[cfg[1]],d=a[cfg[2]],v=pct(n,d);title.textContent=cfg[0];sub.textContent='Velocify YTD cohort · '+n+' / '+d+' = '+(v==null?'N/A':v+'%')+' · target '+cfg[3]+'%.';body.innerHTML='<div class="ct-accuracy-banner"><b>Why this is trustworthy:</b> one lead cohort, each lead counted once at its latest synced stage. Weekly scorecard entries do not create this conversion rate.</div>'+CT_LPS.map(lp=>{const x=agg(rows.filter(r=>lpName(r.lp_user)===lp)),nn=x[cfg[1]],dd=x[cfg[2]],vv=pct(nn,dd);return '<div class="ct-card" style="margin-bottom:7px"><b>'+lp+'</b><span style="float:right;font-weight:800;color:#0B789E">'+(vv==null?'—':vv+'%')+'</span><div style="font-size:10.5px;color:#6B7E8A;margin-top:3px">'+nn+' / '+dd+'</div></div>'}).join('');modal.classList.add('open')};
 // Scorecard page: make team totals use the approved weekly goals and correct role scope.
 window.lpscRenderTeamTotals=function(){const body=document.getElementById('lpsc-team-body');if(!body)return;if(!lpscTeamCache){body.innerHTML='<div style="padding:20px;text-align:center;color:#888">Loading team totals…</div>';return}const period=lpscTeamCurrentPeriod||'daily',now=new Date(),todayWk=typeof lpscAmWeekKeyOf==='function'?lpscAmWeekKeyOf(localDateStr(now)):weekKey(),monthStart=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01',day=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][now.getDay()];let rows=lpscTeamCache||[];if(period==='daily')rows=rows.filter(r=>r.week_key===todayWk);else if(period==='mtd')rows=rows.filter(r=>r.week_key>=monthStart);const by={};rows.forEach(r=>{if(!by[r.person])by[r.person]=[];by[r.person].push(r.data||{})});function val(lp,key){return (by[lp]||[]).reduce((s,d)=>s+(period==='daily'?(Number(d[key+'_'+day]||0)||0):total(d,key)),0)}function teamVal(m){return (m.scope==='LP2'?CT_LP2:CT_LPS).reduce((s,lp)=>s+val(lp,m.key),0)}const periodFactor=period==='daily'?1/5:period==='mtd'?4.3:52;body.innerHTML='<div class="ct-accuracy-banner"><b>Team goal vs. logged:</b> daily/MTD/YTD views scale from the weekly team standard; raw entries remain visible by LP below.</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px">'+METRICS.map(m=>{const g=Math.round(TEAM_GOALS[m.key]*periodFactor),v=teamVal(m),p=g?Math.min(100,Math.round(v/g*100)):0;return '<div style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:12px"><div style="font-size:20px;font-weight:800;color:#17324D">'+v+' <span style="font-size:12px;color:#83929B">/ '+g+'</span></div><div style="font-size:10px;font-weight:800;color:#526775;text-transform:uppercase;margin-top:3px">'+esc(m.label)+'</div><div style="height:4px;background:#EDF1F3;border-radius:9px;margin-top:7px"><div style="height:4px;width:'+p+'%;background:#1686A8;border-radius:9px"></div></div></div>'}).join('')+'</div>'};
 // Data Hub source-health block; no extra polling. Refreshes on entry and explicit uploads.
@@ -11466,14 +11475,14 @@ async function render(){
   '<div class="ct-accuracy-banner"><b>Live scorecard logic:</b> use each source only for what it can actually prove. Velocify proves lead → application. LP scorecards prove this week’s execution against team goals. Power BI provides the latest uploaded partner/pipeline snapshot. Encompass drives active-contract Tuesday work.</div>'+
   '<div class="ct-live-grid">'+
    card('2026 funded-unit goal','400','Year-end goal · by Dec 31. Current funded actual stays separate until a true Core Team production feed is connected.',0,'info')+
-   card('Lead → 1003',leadPct==null?'No data':leadPct+'%','<span class="ct-source-mini">Velocify YTD</span> · '+d.apps+' Started-or-later / '+d.leads+' leads · required gate 60%',leadProgress,leadPct!==null&&leadPct>=60?'good':'')+
+   card('Lead → 1003',leadPct==null?'No data':leadPct+'%','<span class="ct-source-mini">Velocify YTD</span> · '+d.apps+' Started-or-later / '+d.leads+' leads · target 60%',leadProgress,leadPct!==null&&leadPct>=60?'good':'')+
    card('Pre-approvals logged',d.pre+' / 25','<span class="ct-source-mini">LP scorecards · this week</span> · execution pace, not a fake cohort conversion rate',preProgress,d.pre>=25?'good':'')+
    card('Contracts logged',d.contracts+' / 14','<span class="ct-source-mini">LP scorecards · this week</span> · execution pace, not a fake cohort conversion rate',conProgress,d.contracts>=14?'good':'')+
    card('Active prequals',preq,'<span class="ct-source-mini">Power BI snapshot</span> · current buyers attached to active partners',preq?100:0,'info')+
    card('Active in pipeline',pipe,'<span class="ct-source-mini">Power BI snapshot</span> · current pipeline attached to active partners',pipe?100:0,'info')+
    card('Scorecards entered',d.scoreCount+' / 6','<span class="ct-source-mini">This week</span> · missing entries stay visible instead of becoming zero performance',scoreProgress,d.scoreCount===6?'good':d.scoreCount>=3?'warn':'')+
   '</div>'+
-  '<div class="ct-live-rules"><b>Daniel’s conversion gates are still the standard:</b> 60% Lead→1003 · 85% 1003→Pre-Approval · 55% Pre-Approval→Contract · 87% Contract→Funded. <b>Only Lead→1003 has a trustworthy cohort feed in this tracker today.</b> The later-stage percentages are no longer shown as 1% / 0% just because Velocify is not receiving every Encompass milestone. The 400 funded-unit number is the 2026 year-end goal, not a current-period target. Until a true loan-level milestone/production feed is connected, the tracker shows weekly pre-approval and contract execution plus Power BI pipeline instead of inventing a conversion rate.</div>';
+  '';
  try{if(typeof window.__ctRenderFreshnessPublic==='function')window.__ctRenderFreshnessPublic('ct-snapshot-freshness');else{const el=document.getElementById('ct-snapshot-freshness');if(el)el.innerHTML='';}}catch(e){}
 }
 window.__ctRenderAccurateLiveSnapshot=render;
@@ -11485,6 +11494,187 @@ window.refreshSnapshotFresh=async function(btn){try{if(typeof prev==='function')
 window.pbsLoadLiveProgress=async function(){const host=document.getElementById('pbs-live-grid');if(!host)return;const d=await data(),leadPct=pct(d.apps,d.leads),s=d.snap||{},preq=Number(s.active_prequals_total||0),pipe=Number(s.active_pipeline_total||0);const vals=[['2026 funded-unit goal','400','Year-end goal · current actual requires production feed'],['Lead → 1003',leadPct==null?'—':leadPct+'%',d.apps+' / '+d.leads+' · Velocify YTD'],['Pre-approvals this week',d.pre+' / 25','LP scorecards'],['Contracts this week',d.contracts+' / 14','LP scorecards'],['Active prequals',preq,'Power BI'],['Active pipeline',pipe,'Power BI']];host.innerHTML=vals.map(v=>'<div class="pbs-live-metric"><div class="m-label">'+esc(v[0])+'</div><div class="m-value">'+esc(v[1])+'</div><div class="m-target">'+esc(v[2])+'</div></div>').join('')};
 const boot=()=>{const v=document.getElementById('view-snapshot');if(v&&v.classList.contains('active'))render()};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,350),{once:true});else setTimeout(boot,350);
+})();
+</script>
+
+<style id="ct-nav-health-repair-css">
+#view-agent-health .ct-health-loading{padding:28px;text-align:center;color:#607887;font-size:12px}
+#view-agent-health .ct-health-error{padding:14px;border:1px solid #efc9c5;background:#fff7f6;color:#9d3731;border-radius:9px;font-size:12px;line-height:1.5}
+#view-data-hub .ct-hub-live-note{margin:0 0 12px;padding:9px 11px;background:#f4fafc;border:1px solid #d4e7ee;border-radius:9px;font-size:11px;color:#496573;line-height:1.45}
+</style>
+<script id="ct-nav-health-repair-js">
+(function(){
+'use strict';
+const CT_DAY=86400000;
+const ctKey=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
+const ctEsc=v=>String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const ctDate=v=>{if(!v)return null;const d=new Date(String(v).slice(0,10)+'T12:00:00');return isNaN(d)?null:d};
+const ctAge=v=>{const d=ctDate(v);return d?Math.max(0,Math.floor((Date.now()-d.getTime())/CT_DAY)):null};
+const ctFmt=v=>{const d=ctDate(v);return d?(String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+'/'+d.getFullYear()):'—'};
+function ctActivate(viewId,btn){
+  try{if(typeof rmStopPolling==='function')rmStopPolling()}catch(e){}
+  try{if(typeof lpStopPolling==='function')lpStopPolling()}catch(e){}
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const view=document.getElementById(viewId); if(view)view.classList.add('active');
+  document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active'));
+  const target=btn&&btn.classList?btn:document.querySelector('.ct-nav-btn[data-route="'+String((btn&&btn.dataset&&btn.dataset.route)||'')+'"]');
+  if(target&&target.classList)target.classList.add('active');
+  window.scrollTo(0,0);
+  return view;
+}
+function ctOpenScripts(btn){
+  document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active')); if(btn&&btn.classList)btn.classList.add('active');
+  const m=document.getElementById('scriptsModal');
+  if(!m)return;
+  m.classList.add('open');m.style.display='flex';
+  const box=m.querySelector('.contact-modal-box');if(box)box.scrollTop=0;
+}
+// Make closing reliable even if an older modal function was shadowed.
+window.closeScriptsModal=function(){const m=document.getElementById('scriptsModal');if(m){m.classList.remove('open');m.style.display='none'}};
+
+async function ctLoadAgentHealthFresh(){
+  const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');
+  if(!host)return;
+  host.innerHTML='<div class="ct-health-loading">Loading latest Power BI-backed roster…</div>';
+  try{
+    const [profiles,assignments]=await Promise.all([
+      sbFetch('GET','agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,latest_lead_date,latest_close_date,closes_past_year,total_leads_past_year&limit=5000').catch(()=>[]),
+      sbFetch('GET','agent_assignments?select=agent_name,lp,rm&limit=5000').catch(()=>[])
+    ]);
+    let latestMs=0;
+    (profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(Number.isFinite(ms)&&ms>latestMs)latestMs=ms});
+    let snap=null;try{snap=window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')}catch(e){}
+    const pbAll=(snap&&((snap.all_by_agent&&Object.keys(snap.all_by_agent).length&&snap.all_by_agent)||snap.by_agent))||{};
+    const amap={};(assignments||[]).forEach(a=>amap[ctKey(a.agent_name)]=a);
+    const legacy={};
+    try{(window.agents||[]).forEach(a=>{if(a&&a[0])legacy[ctKey(a[0])]=a})}catch(e){}
+    let current=(profiles||[]).filter(p=>{
+      const ms=Date.parse(p&&p.powerbi_last_seen_at||'');
+      return latestMs&&Number.isFinite(ms)&&Math.abs(ms-latestMs)<120000 && p.do_not_contact!==true && String(p.relationship_status||'active').toLowerCase()!=='inactive';
+    });
+    // If the server has not retained a Power BI stamp, fall back to the latest browser snapshot instead of showing a false zero.
+    if(!current.length && Object.keys(pbAll).length){
+      current=Object.values(pbAll).map(r=>({agent_name:r.name,powerbi_level:r.level,retained:r.official_active!==false,latest_lead_date:r.latest_lead||null,latest_close_date:r.latest_close||null}));
+    }
+    const rows=current.map(p=>{
+      const k=ctKey(p.agent_name),pb=pbAll[k]||{},a=legacy[k]||[],asn=amap[k]||{};
+      const latestLead=p.latest_lead_date||pb.latest_lead||a[3]||null;
+      const latestClose=p.latest_close_date||pb.latest_close||a[6]||null;
+      const latestStart=pb.latest_started||a[4]||null;
+      const latestContract=pb.latest_contract||a[5]||null;
+      const ld=ctAge(latestLead),cd=ctAge(latestClose);
+      const active=p.retained===true || (ld!==null&&ld<=90)||(cd!==null&&cd<=90);
+      let health='archive',action='Outside Active Partner definition',why='No lead or close in last 90 days';
+      if(active){if(ld!==null&&ld<=30){health='green';action='Current';why=ld+'d since last lead'}else if(ld!==null&&ld<=60){health='yellow';action='Call / review';why=ld+'d since last lead'}else{health='red';action='Call today';why=(ld===null?'No lead on record':ld+'d since last lead')+(cd!==null&&cd<=90?' · active from recent close':'')}}
+      return {name:p.agent_name,tier:p.powerbi_level||p.tier||pb.level||'—',lp:asn.lp||'Unassigned',pre:Number(pb.active_prequals||0),pipe:Number(pb.active_pipeline||0),last:latestLead,lastStart:latestStart,lastContract:latestContract,lastClose:latestClose,daysLead:ld,health,archive:!active,action,why};
+    });
+    window.__CT_HEALTH_ROWS=rows;
+    ctRenderHealthRows();
+  }catch(e){
+    console.error('Agent Health load failed',e);
+    host.innerHTML='<div class="ct-health-error"><b>Agent Health could not load.</b><br>'+ctEsc(e&&e.message||'Unknown data error')+'</div>';
+    if(sum)sum.innerHTML='';
+  }
+}
+function ctRenderHealthRows(){
+  const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');if(!host)return;
+  let all=(window.__CT_HEALTH_ROWS||[]).slice();
+  const q=ctKey((document.getElementById('lpv3-health-q')||{}).value),hf=(document.getElementById('lpv3-health-filter')||{}).value||'',lf=(document.getElementById('lpv3-health-lp')||{}).value||'';
+  const current=all.filter(r=>!r.archive),archive=all.filter(r=>r.archive);
+  let show=hf==='archive'?archive.slice():current.slice();
+  if(hf==='action')show=show.filter(r=>r.health==='red'||r.health==='yellow'); else if(hf&&hf!=='all'&&hf!=='archive')show=show.filter(r=>r.health===hf);
+  if(q)show=show.filter(r=>ctKey(r.name).includes(q));if(lf)show=show.filter(r=>r.lp===lf);
+  const rank={red:0,yellow:1,green:2,archive:3};show.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??999)-(a.daysLead??999))||String(a.name).localeCompare(String(b.name)));
+  const cnt=h=>current.filter(r=>r.health===h).length,pre=current.reduce((n,r)=>n+r.pre,0),pipe=current.reduce((n,r)=>n+r.pipe,0),follow=cnt('red')+cnt('yellow');
+  if(sum)sum.innerHTML='<div class="ct-health-summary-grid"><button class="ct-health-summary" type="button" onclick="document.getElementById(\'lpv3-health-filter\').value=\'all\';ctRenderHealthRows()"><b>'+current.length+'</b><span>Active Partners</span><small>Latest Power BI population + 90-day business signal</small></button><div class="ct-health-summary"><b>'+pre+'</b><span>Current Prequal Buyers</span><small>Latest uploaded Power BI</small></div><div class="ct-health-summary"><b>'+pipe+'</b><span>Current Buyers in Pipeline</span><small>Latest uploaded Power BI</small></div><button class="ct-health-summary" type="button" onclick="document.getElementById(\'lpv3-health-filter\').value=\'action\';ctRenderHealthRows()"><b>'+follow+'</b><span>Need Follow-Up</span><small>Yellow + red lead-gap calls</small></button></div><div class="ct-health-chip-row"><span class="ct-health-chip green">Green · lead ≤30d · '+cnt('green')+'</span><span class="ct-health-chip yellow">Yellow · no lead 31–60d · '+cnt('yellow')+'</span><span class="ct-health-chip red">Red · no lead 61+d / 90d gap · '+cnt('red')+'</span></div>';
+  const rowHtml=show.map(r=>'<tr><td><span class="ct-health-dot '+r.health+'"></span><b>'+ctEsc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+ctEsc(r.action)+'</small></td><td><b>'+ctEsc(r.name)+'</b><small>'+ctEsc(r.why)+'</small></td><td>'+ctEsc(r.tier)+'</td><td>'+ctEsc(r.lp)+'</td><td>'+r.pre+'</td><td>'+r.pipe+'</td><td>'+ctFmt(r.last)+'</td><td>'+ctFmt(r.lastStart)+'</td><td>'+ctFmt(r.lastContract)+'</td><td>'+ctFmt(r.lastClose)+'</td></tr>').join('');
+  const archivedCount=archive.length;
+  host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>LP</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead><tbody>'+(rowHtml||'<tr><td colspan="10" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+'</tbody></table></div>'+(hf==='archive'?'':'<button type="button" class="ct-archive-row" onclick="document.getElementById(\'lpv3-health-filter\').value=\'archive\';ctRenderHealthRows()">▸ Outside Active Partner definition · '+archivedCount+' agents</button>');
+}
+window.ctRenderHealthRows=ctRenderHealthRows;
+window.lpv3RenderAgentHealth=ctRenderHealthRows;
+window.lpv3OpenAgentHealth=function(btn){ctActivate('view-agent-health',btn||document.querySelector('.ct-nav-btn[data-route="agent-health"]'));ctLoadAgentHealthFresh()};
+window.lpv3OpenDataHub=function(btn){
+  ctActivate('view-data-hub',btn||document.querySelector('.ct-nav-btn[data-route="data-hub"]'));
+  const wrap=document.querySelector('#view-data-hub .ct-page-wrap');
+  if(wrap&&!document.getElementById('ct-hub-live-note')){const n=document.createElement('div');n.id='ct-hub-live-note';n.className='ct-hub-live-note';n.innerHTML='<b>Upload center:</b> Power BI refreshes Agent Health / Roster and pipeline intelligence. Encompass refreshes Tuesday active-contract work. Velocify remains the daily lead source.';wrap.insertBefore(n,wrap.firstChild)}
+};
+
+// Final, dependency-light navigation. Each menu item can open even if a legacy helper is missing.
+window.lpv2Route=function(route,btn){
+  try{
+    if(route==='snapshot'){ctActivate('view-snapshot',btn);if(typeof lpv2RenderSnapshot==='function')Promise.resolve(lpv2RenderSnapshot()).catch(()=>{});return}
+    if(route==='lp'){const lp=btn&&btn.dataset&&btn.dataset.lp;if(typeof selectUser==='function'&&lp){selectUser(btn,lp);return}ctActivate('view-lp',btn);if(lp&&typeof lpv2PrimeLp==='function')lpv2PrimeLp(lp);return}
+    if(route==='data-hub'||route==='upload'){window.lpv3OpenDataHub(btn);return}
+    if(route==='agent-health'){window.lpv3OpenAgentHealth(btn);return}
+    if(route==='scripts'){ctOpenScripts(btn);return}
+    if(route==='standard'){ctActivate('view-operating-standard',btn);if(typeof pbsLoadLiveProgress==='function')setTimeout(()=>Promise.resolve(pbsLoadLiveProgress(true)).catch(()=>{}),20);return}
+    if(route==='income'){ctActivate('view-income-standard',btn);return}
+    if(route==='file-integrity'){ctActivate('view-file-integrity',btn);try{if(typeof loadFileIntegrity==='function')loadFileIntegrity()}catch(e){}return}
+    if(route==='leads'){ctActivate('view-leads',btn);try{if(typeof loadReferralLeadsDirect==='function')loadReferralLeadsDirect()}catch(e){}return}
+    if(route==='facetime'){if(typeof selectUser==='function'){selectUser(btn,'FaceTime');return}ctActivate('view-facetime',btn);return}
+    if(route==='admin'){ctActivate('view-admin',btn);try{if(typeof renderAdmin==='function')renderAdmin()}catch(e){}return}
+    if(route==='contacts'){if(typeof lpV1OpenContactManager==='function')lpV1OpenContactManager();return}
+    console.warn('Unknown route',route);
+  }catch(e){console.error('Navigation error',route,e);try{if(typeof ctShowToast==='function')ctShowToast('Could not open '+route+'.')}catch(_){} }
+};
+
+// Keep health controls wired to the fresh hydrated rows.
+['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=ctRenderHealthRows;el.onchange=ctRenderHealthRows}});
+})();
+</script>
+
+<style id="ct-amanda-snapshot-css">
+.ct-amanda-anchor{margin-top:18px}
+.ct-amanda-divider{display:flex;align-items:center;gap:10px;margin:18px 0 10px;padding-top:14px;border-top:2px solid #E7EDF2}
+.ct-amanda-divider .tag{display:inline-flex;align-items:center;gap:6px;background:#EEF7FB;color:#0B6780;border:1px solid #CFE7EF;border-radius:999px;padding:5px 11px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.ct-amanda-divider .line-title{font-size:15px;font-weight:850;color:#102A43}
+.ct-amanda-divider .line-sub{font-size:11px;color:#6F8290}
+.ct-amanda-snapshot{margin-top:0;padding:16px 16px 14px;border:1px solid #CFE3EA;border-left:6px solid #1787A7;border-radius:14px;background:linear-gradient(180deg,#F8FCFE 0%,#F2F9FC 100%);box-shadow:0 2px 10px rgba(16,42,67,.04)}
+.ct-amanda-head{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:-2px 0 12px;flex-wrap:wrap}
+.ct-amanda-title{font-size:17px;font-weight:850;color:#102A43}.ct-amanda-sub{font-size:11px;color:#607887;margin-top:4px;max-width:760px;line-height:1.45}
+.ct-amanda-grid{display:grid;grid-template-columns:repeat(5,minmax(125px,1fr));gap:9px}
+.ct-amanda-metric{border:1px solid #D7E7ED;border-radius:11px;padding:11px 12px;background:#fff}
+.ct-amanda-metric.good{border-color:#8CCADD;background:#F5FCFE}.ct-amanda-metric.warn{border-color:#E1C983;background:#FFFDF7}
+.ct-amanda-metric .k{font-size:9.5px;font-weight:850;letter-spacing:.045em;text-transform:uppercase;color:#617785}
+.ct-amanda-metric .v{font-size:22px;font-weight:850;color:#102A43;margin-top:6px}.ct-amanda-metric .v span{font-size:11px;color:#80909A}
+.ct-amanda-metric .bar{height:4px;background:#EAF0F3;border-radius:99px;margin-top:7px;overflow:hidden}.ct-amanda-metric .fill{height:100%;background:#1787A7;border-radius:99px}
+@media(max-width:1000px){.ct-amanda-grid{grid-template-columns:repeat(3,minmax(125px,1fr))}}@media(max-width:620px){.ct-amanda-grid{grid-template-columns:1fr 1fr}}
+</style>
+<script id="ct-amanda-snapshot-scorecard">
+(function(){
+'use strict';
+const GOALS=[
+ {type:'New Realtor Meeting',label:'New partner meetings',goal:3},
+ {type:'__existingmeeting__',label:'Existing partner meetings',goal:5},
+ {type:'Cold Calls',label:'Cold calls',goal:125},
+ {type:'Talk-to\'s',label:'Talk-to\'s',goal:100},
+ {type:'Buddy Intro Received',label:'Buddy intros received',goal:3}
+];
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function localDay(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function monday(){const d=new Date();d.setHours(0,0,0,0);const n=d.getDay();d.setDate(d.getDate()-(n===0?6:n-1));return localDay(d)}
+function sunday(){const d=new Date(monday()+'T12:00:00');d.setDate(d.getDate()+6);return localDay(d)}
+function ownerIsAmanda(a){try{if(typeof ctRmOwnerFromNotes==='function')return ctRmOwnerFromNotes(a.notes)==='Amanda'}catch(e){}const n=String(a&&a.notes||'');return /\[RM_OWNER\s*:\s*Amanda\]/i.test(n)||!/\[RM_OWNER\s*:/i.test(n)}
+function isExisting(a){try{if(typeof ctIsExistingRmMeeting==='function')return !!ctIsExistingRmMeeting(a.act_type)}catch(e){}return ['Partner Meeting','Strategic Partner Meeting','Channel Meeting','Retention Meeting','Break Breads'].includes(String(a.act_type||''))}
+function talkCount(acts){try{if(typeof amCntTalkTo==='function')return amCntTalkTo(acts||[])}catch(e){}const types=['Agent Talk-to','Active Agent Talk-to','Active Agent Check-in','Reconnect Outreach','CTC Call','Under Contract Call','Birthday Outreach','Holiday Outreach','Agent Appreciation','Market Update','Market Update Call','Sent Market Report','Sent Referral','Co-Marketing Discussion','New Agent Follow-up','Closed Deal Thank You'];return (acts||[]).filter(a=>types.includes(a.act_type)).length}
+function count(acts,g){if(g.type==='__existingmeeting__')return acts.filter(isExisting).length;if(g.type==="Talk-to's")return talkCount(acts);return acts.filter(a=>a.act_type===g.type).length}
+async function loadActs(){try{let rows=await sbFetch('GET','amanda_activities?act_date=gte.'+monday()+'&act_date=lte.'+sunday()+'&select=act_type,act_date,notes&order=act_date.desc&limit=5000');return (Array.isArray(rows)?rows:[]).filter(ownerIsAmanda)}catch(e){console.warn('Amanda snapshot scorecard',e);return []}}
+async function renderAmanda(){
+ const anchor=document.getElementById('ct-amanda-snapshot-anchor');if(!anchor)return;
+ let box=document.getElementById('ct-amanda-snapshot');
+ if(!box){box=document.createElement('div');box.id='ct-amanda-snapshot';box.className='ct-amanda-snapshot';}
+ if(box.parentNode!==anchor)anchor.appendChild(box);
+ box.innerHTML='<div class="ct-amanda-divider"><span class="tag">RM scorecard</span><div><div class="line-title">Amanda · Relationship Manager</div><div class="line-sub">From RM Tracker</div></div></div><div class="ct-amanda-head"><div></div><button class="ct-link-btn" type="button" id="ct-amanda-open-rm">Open RM Tracker</button></div><div class="ct-loading">Loading Amanda’s execution…</div>';
+ const acts=await loadActs();
+ box.innerHTML='<div class="ct-amanda-divider"><span class="tag">RM scorecard</span><div><div class="line-title">Amanda · Relationship Manager</div><div class="line-sub">From RM Tracker</div></div></div><div class="ct-amanda-head"><div></div><button class="ct-link-btn" type="button" id="ct-amanda-open-rm">Open RM Tracker</button></div><div class="ct-amanda-grid">'+GOALS.map(g=>{const v=count(acts,g),p=g.goal?Math.min(100,Math.round(v/g.goal*100)):0,cls=p>=100?'good':p>=75?'warn':'';return '<div class="ct-amanda-metric '+cls+'"><div class="k">'+esc(g.label)+'</div><div class="v">'+v+' <span>/ '+g.goal+'</span></div><div class="bar"><div class="fill" style="width:'+p+'%"></div></div></div>'}).join('')+'</div>';
+ const b=document.getElementById('ct-amanda-open-rm');if(b){b.setAttribute('aria-label','Open Amanda RM Tracker');b.onclick=function(){window.open('https://pwang318.github.io/amanda-tracker/','_blank','noopener,noreferrer')}};
+}
+window.ctRenderAmandaSnapshot=renderAmanda;
+const old=window.lpv2RenderSnapshot;if(typeof old==='function'&&!old.__amanda){const w=async function(){const r=await old.apply(this,arguments);await renderAmanda();return r};w.__amanda=true;window.lpv2RenderSnapshot=w}
+const oldRef=window.refreshSnapshotFresh;if(typeof oldRef==='function'&&!oldRef.__amanda){const w=async function(){const r=await oldRef.apply(this,arguments);setTimeout(renderAmanda,30);return r};w.__amanda=true;window.refreshSnapshotFresh=w}
+function boot(){const v=document.getElementById('view-snapshot');if(v&&v.classList.contains('active'))setTimeout(renderAmanda,250)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
 </body>
