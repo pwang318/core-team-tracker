@@ -1,4 +1,4 @@
- 
+  
 <!DOCTYPE html>
 
 <html lang="en">
@@ -12163,7 +12163,7 @@ function installHub(){
   let wrap=document.getElementById('v310TuesdaySources');
   if(!wrap){wrap=document.createElement('section');wrap.id='v310TuesdaySources';wrap.innerHTML='<div class="v310-source-grid"><div class="v310-source" style="grid-column:1/-1;border-left:4px solid #132B50"><div class="v310-kicker" style="color:#132B50">MANAGEMENT REPORTING</div><h3>Tuesday Completion Report</h3><p>Export one management workbook with a team summary, all-call detail, and a separate tab for Amanda and each LP showing exactly who they were assigned, completed, and still have open.</p><button class="v310-btn" type="button" onclick="v312ExportTuesdayCompletion()">Export Tuesday Completion Report</button><div class="v310-status" id="v312ExportStatus">Uses the latest weekly LP + RM Tuesday plans and the actual logged completion activity.</div></div>'+
     '<div class="v310-source lp"><div class="v310-kicker">LP ACTIVE-CONTRACT CALLS</div><h3>1. Upload TUESDAY UPDATE CALLS LP2.xlsx</h3><p>Uses the <b>ACTIVE CONTRACTS</b> master sheet and splits each row by Loan Partner 2. This drives each LP’s buyer/client + buyer-agent Tuesday file updates. Re-uploading the same week replaces the weekly plan; completed calls stay intact.</p><button class="v310-btn" type="button" onclick="v310PickLP()">Upload LP Tuesday Calls</button><input id="v310LPFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="v310-status" id="v310LPStatus">No LP Tuesday workbook uploaded yet.</div></div>'+
-    '<div class="v310-source rm"><div class="v310-kicker">RM LISTING-AGENT CALLS</div><h3>2. Upload RM TUESDAY CALLS.xlsx</h3><p>This upload feeds Amanda’s RM Tuesday listing-agent queue only. The <b>RM LISTING AGENT CALLS</b> sheet is the source. It does not add work to the LP Tuesday lane.</p><button class="v310-btn" type="button" onclick="v310PickRM()">Upload RM + Go-To Calls</button><input id="v310RMFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="v310-status" id="v310RMStatus">No RM/Go-To workbook uploaded yet.</div></div>'+
+    '<div class="v310-source rm"><div class="v310-kicker">RM LISTING-AGENT CALLS</div><h3>2. Upload RM TUESDAY CALLS.xlsx</h3><p>This upload feeds Amanda’s RM Tuesday listing-agent queue only. The <b>RM LISTING AGENT CALLS</b> sheet is the source. Go-To agents without active contracts are calculated automatically inside Amanda’s RM Tracker.</p><button class="v310-btn" type="button" onclick="v310PickRM()">Upload RM Listing-Agent Calls</button><input id="v310RMFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="v310-status" id="v310RMStatus">No RM listing-agent workbook uploaded yet.</div></div>'+
     '</div>';grid.appendChild(wrap);document.getElementById('v310LPFile').addEventListener('change',e=>importLP(e.target));document.getElementById('v310RMFile').addEventListener('change',e=>importRM(e.target))}
 }
 window.v310PickLP=()=>document.getElementById('v310LPFile')?.click();
@@ -12199,16 +12199,16 @@ async function importRM(input){
     if(!rws)throw new Error('This is not RM TUESDAY CALLS.xlsx. Expected the RM LISTING AGENT CALLS sheet.');
     const rr=X.utils.sheet_to_json(rws,{header:1,defval:null,raw:true}),rhi=findHeader(rr,['borrower name','sellers agent contact name']);
     if(rhi<0)throw new Error('Could not find the expected RM listing-agent headers.');
-    const rh=normalizeHeaders(rr[rhi]),planDate=dt((rr[0]||[])[0])||new Date().toISOString().slice(0,10),batch='RM-TUE-'+planDate.replace(/-/g,'')+'-'+Date.now(),payload=[];let rmCount=0;
-    rr.slice(rhi+1).forEach(row=>{if(!row.some(v=>v!==null&&v!==''))return;const r=mapRow(rh,row);if(norm(r['Loan Purpose'])!=='purchase')return;const lp=lpShort(r['Loan Team Member Name - Loan Partner 2']),borrower=clean(r['Borrower Name']),seller=clean(r['Sellers Agent Contact Name']),builder=clean(r['Builder Contact Name']);let contact='',role='';
-      if(validContact(seller)){contact=seller;role='Listing Agent'}else if(validContact(builder)){contact=builder;role='Builder Contact'}else if(norm(seller)==='fsbo'){contact='FSBO';role='FSBO'}else{contact='Listing contact missing';role='Missing'}
-      const k=key(['RM_LIST',borrower,dt(r['Est Closing Date']),contact]),notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',planDate)+tag('TUE_PLAN_LANE','RM_LISTING')+tag('TUE_PLAN_KEY',k)+tag('LP_OWNER',lp)+tag('TUE_CONTACT_ROLE',role)+tag('TUE_CONTACT_NAME',contact)+tag('TUE_PHONE',clean(r['Sellers Agent Phone'])||clean(r['Builder Phone']))+tag('TUE_EMAIL',clean(r['Sellers Agent Email'])||clean(r['Builder Email']))+tag('TXN_CLIENT',borrower)+tag('TXN_CLOSE_DATE',dt(r['Est Closing Date']))+tag('TXN_MILESTONE',clean(r['Last Finished Milestone']))+' RM listing-side Tuesday call plan. No loan number stored.';
+    const rh=normalizeHeaders(rr[rhi]),planDate=dt((rr[0]||[])[0])||new Date().toISOString().slice(0,10),batch='RM-TUE-'+planDate.replace(/-/g,'')+'-'+Date.now(),payload=[];let rmCount=0,excludedNewBuild=0,excludedFsbo=0;
+    rr.slice(rhi+1).forEach(row=>{if(!row.some(v=>v!==null&&v!==''))return;const r=mapRow(rh,row);if(norm(r['Loan Purpose'])!=='purchase')return;const lp=lpShort(r['Loan Team Member Name - Loan Partner 2']),borrower=clean(r['Borrower Name']),seller=clean(r['Sellers Agent Contact Name']),builder=clean(r['Builder Contact Name']),rowText=norm(row.map(v=>clean(v)).join(' ')),isFsbo=norm(seller)==='fsbo'||/\bfsbo\b/.test(rowText),isNewBuild=validContact(builder)||/\brockford(?: homes)?\b/.test(rowText);let contact='',role='';
+      if(isFsbo){contact='FSBO';role='FSBO';excludedFsbo++}else if(isNewBuild){contact=builder||'New build / builder-side';role='NEW_BUILD';excludedNewBuild++}else if(validContact(seller)){contact=seller;role='Listing Agent'}else{contact='Listing contact missing';role='Missing'}
+      const k=key(['RM_LIST',borrower,dt(r['Est Closing Date']),contact]),notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',planDate)+tag('TUE_PLAN_LANE','RM_LISTING')+tag('TUE_PLAN_KEY',k)+tag('LP_OWNER',lp)+tag('TUE_CONTACT_ROLE',role)+tag('TUE_CONTACT_NAME',contact)+tag('TUE_BUILDER_NAME',builder)+tag('TUE_PHONE',role==='Listing Agent'?clean(r['Sellers Agent Phone']):clean(r['Builder Phone']))+tag('TUE_EMAIL',role==='Listing Agent'?clean(r['Sellers Agent Email']):clean(r['Builder Email']))+tag('TXN_CLIENT',borrower)+tag('TXN_CLOSE_DATE',dt(r['Est Closing Date']))+tag('TXN_MILESTONE',clean(r['Last Finished Milestone']))+' RM listing-side Tuesday call plan. No loan number stored.';
       payload.push({agent_name:contact,act_type:SNAP,act_date:planDate,outcome:'RM Listing',notes,follow_up_date:planDate});rmCount++;
     });
     payload.push({agent_name:'__RM_TUESDAY_PLAN__',act_type:SNAP,act_date:planDate,outcome:'Batch',notes:'[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',planDate)+tag('TUE_PLAN_LANE','RM_HEADER')+tag('RM_COUNT',rmCount),follow_up_date:null});
     await replaceWeekRows(planDate,'RM');
     for(let i=0;i<payload.length;i+=50)await sbFetch('POST','amanda_activities',payload.slice(i,i+50));
-    st.className='v310-status ok';st.textContent='Loaded '+rmCount+' Amanda/RM listing-agent calls ✓';
+    st.className='v310-status ok';st.textContent='Loaded '+rmCount+' RM rows · '+excludedNewBuild+' new build and '+excludedFsbo+' FSBO automatically excluded ✓';
   }catch(e){console.error(e);st.className='v310-status err';st.textContent=e.message||String(e)}finally{input.value=''}
 }
 
@@ -12393,7 +12393,7 @@ window.v312ExportTuesdayCompletion=async function(){
       const planKey=meta(p.notes,'TUE_PLAN_KEY');
       const override=rmOverrides[planKey],overrideReason=override?meta(override.notes,'TUE_EXCLUDE_REASON'):'';
       const excludedByOverride=override&&meta(override.notes,'LISTING_AGENT_NA')==='Y';
-      const excluded=excludedByOverride||/^FSBO$/i.test(role)||/^Missing$/i.test(role)||/contact issue/i.test(role);
+      const excluded=excludedByOverride||/^FSBO$/i.test(role)||/^NEW_BUILD$/i.test(role)||/^Builder Contact$/i.test(role)||/^Missing$/i.test(role)||/contact issue/i.test(role);
       const planDate=meta(p.notes,'TUE_PLAN_DATE')||rmDate||String(p.act_date||'').slice(0,10);
 
       // Match any actual Amanda listing-agent update from this plan/week.
@@ -12414,7 +12414,7 @@ window.v312ExportTuesdayCompletion=async function(){
         agent:contactName,
         closeDate:meta(p.notes,'TXN_CLOSE_DATE'),
         milestone:meta(p.notes,'TXN_MILESTONE'),
-        status:excluded?(overrideReason==='NEW_BUILD'?'Excluded - New Build':((overrideReason==='FSBO'||/FSBO/i.test(role))?'Excluded - FSBO':'Excluded - Contact issue')):(done?'Completed':'Open'),
+        status:excluded?((overrideReason==='NEW_BUILD'||/NEW_BUILD|Builder Contact/i.test(role))?'Excluded - New Build':((overrideReason==='FSBO'||/FSBO/i.test(role))?'Excluded - FSBO':'Excluded - Contact issue')):(done?'Completed':'Open'),
         completionDate:done?fmtDate(done.act_date):'',
         outcome:done?String(done.outcome||''):'',
         notes:done?String(done.notes||'').replace(/\[[A-Z0-9_]+:[^\]]*\]/g,'').replace(/\[TUESDAY_LISTING\]/g,'').trim():''
