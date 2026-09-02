@@ -12714,8 +12714,20 @@ const prior=window.lpv2Route;window.lpv2Route=function(route,btn){if(route==='pr
     const isCallOrUpdate=r=>/call|update|conversation|talk[- ]?to|outreach|partner meeting|realtor meeting|face time|break bread/i.test(String(r.activity||''));
     const summary=people.map(person=>{const mine=person==='RM Team'?rows.filter(r=>r.team==='RM Team'):rows.filter(r=>r.person===person),completed=mine.filter(r=>r.status==='Completed').length,open=mine.filter(r=>r.status==='Open').length;return {'Person / Team':person,'Total records':mine.length,'Completed':completed,'Open':open,'Calls / updates':mine.filter(isCallOrUpdate).length}}).filter(r=>r['Total records']);
     summary.push({'Person / Team':'ALL TEAM','Total records':rows.length,'Completed':rows.filter(r=>r.status==='Completed').length,'Open':rows.filter(r=>r.status==='Open').length,'Calls / updates':rows.length});
-    const detail=rows.map(r=>({'Date':r.date,'Person / Team':r.person,'Team':r.team,'LP Owner':r.lp,'Activity':r.activity,'Agent / Partner':r.agent,'Status':r.status,'Outcome':r.outcome,'Notes':r.notes}));
-    try{const X=await ensureXlsx(),wb=X.utils.book_new(),ws1=X.utils.json_to_sheet(summary),ws2=X.utils.json_to_sheet(detail);ws1['!cols']=[{wch:18},{wch:14},{wch:12},{wch:10},{wch:16}];ws2['!cols']=[{wch:12},{wch:16},{wch:12},{wch:14},{wch:34},{wch:28},{wch:12},{wch:24},{wch:60}];X.utils.book_append_sheet(wb,ws1,'Team Summary');X.utils.book_append_sheet(wb,ws2,'All Calls + Updates');X.writeFile(wb,'Daniel-Team-All-Calls-'+new Date().toISOString().slice(0,10)+'.xlsx')}catch(e){const cols=['Date','Person / Team','Team','LP Owner','Activity','Agent / Partner','Status','Outcome','Notes'],csv=[cols].concat(detail.map(r=>cols.map(c=>r[c]))).map(row=>row.map(escCsv).join(',')).join('\r\n'),a=document.createElement('a'),u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download='Daniel-Team-All-Calls-'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+    const toDetail=r=>({'Date':r.date,'Person / Team':r.person,'Team':r.team,'LP Owner':r.lp,'Call / Update Type':r.activity,'Agent / Partner':r.agent,'Status':r.status,'Outcome':r.outcome,'Notes':r.notes});
+    const detail=rows.map(toDetail);
+    try{
+      const X=await ensureXlsx(),wb=X.utils.book_new(),ws1=X.utils.json_to_sheet(summary),ws2=X.utils.json_to_sheet(detail),detailCols=[{wch:12},{wch:16},{wch:12},{wch:14},{wch:34},{wch:28},{wch:12},{wch:24},{wch:60}];
+      ws1['!cols']=[{wch:18},{wch:14},{wch:12},{wch:10},{wch:16}];ws1['!autofilter']={ref:'A1:E1'};
+      X.utils.book_append_sheet(wb,ws1,'Team Summary');
+      people.forEach(person=>{
+        const mine=(person==='RM Team'?rows.filter(r=>r.team==='RM Team'):rows.filter(r=>r.person===person)).map(toDetail);
+        const ws=X.utils.json_to_sheet(mine.length?mine:[{'Date':'','Person / Team':person,'Team':'','LP Owner':'','Call / Update Type':'No records','Agent / Partner':'','Status':'','Outcome':'','Notes':''}]);
+        ws['!cols']=detailCols;ws['!autofilter']={ref:'A1:I1'};X.utils.book_append_sheet(wb,ws,person);
+      });
+      ws2['!cols']=detailCols;ws2['!autofilter']={ref:'A1:I1'};X.utils.book_append_sheet(wb,ws2,'All Calls + Updates');
+      X.writeFile(wb,'Daniel-Team-All-Calls-'+new Date().toISOString().slice(0,10)+'.xlsx')
+    }catch(e){const cols=['Date','Person / Team','Team','LP Owner','Call / Update Type','Agent / Partner','Status','Outcome','Notes'],csv=[cols].concat(detail.map(r=>cols.map(c=>r[c]))).map(row=>row.map(escCsv).join(',')).join('\r\n'),a=document.createElement('a'),u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download='Daniel-Team-All-Calls-'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
   }
   window.ctExportAllCalls=exportAll;
   
