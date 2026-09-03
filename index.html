@@ -1660,7 +1660,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <h1>Partner Growth</h1>
 <div class="ct-page-sub">Use this page for agent growth: tier progress and which partners are producing business. Relationship call priorities stay in Agent Health / Roster.</div>
 </div>
-</div><div class="section-head">Tier growth scoreboard</div><div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div><div aria-hidden="true" id="d-churn-risk-section" style="display:none!important"></div><div class="section-head">Lead-producing partners</div><div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading...</div></div><div class="section-head">All-time partner leaderboard</div><div id="leaderboard"></div></div></div>
+</div><div class="section-head">Tier growth scoreboard</div><div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div><div class="section-head">All agents · next-tier opportunities</div><div id="ct-tier-opportunities" class="ct-tier-opportunities"><div class="no-data">Loading every current Power BI agent…</div></div><div aria-hidden="true" id="d-churn-risk-section" style="display:none!important"></div><div class="section-head">Lead-producing partners</div><div class="vel-board" id="velocify-leaderboard"><div class="no-data" style="padding:1.5rem;text-align:center;color:var(--text-3)">Loading...</div></div><div class="section-head">All-time partner leaderboard</div><div id="leaderboard"></div></div></div>
 <div id="lead-drilldown-overlay" onclick="if(event.target===this)closeDrilldown()" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;align-items:center;justify-content:center;padding:16px">
 <div style="background:var(--surface);border-radius:12px;width:100%;max-width:560px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border)">
 <div id="drilldown-header" style="background:#1F4E79;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
@@ -5259,10 +5259,10 @@ function handleUpload(input){
         var rawName=(row["Agent"]||"").toString().trim();
         var lv=(row["Level"]||"").toString().trim();
         if(lv==="A"||lv==="B"||lv==="C"){pbSnapshot.levels[lv]++;pbSnapshot.tier_agents[lv].push(rawName);}else if(!lv){pbSnapshot.levels.Blank++;pbSnapshot.tier_agents.Blank.push(rawName);}else{pbSnapshot.levels.Other++;pbSnapshot.tier_agents.Other.push(rawName);}
-        var preq=parseInt(row["Active Prequals"])||0,pipe=parseInt(row["Active In Pipeline"])||0,closed12=parseInt(row["Closed Past Year"])||0;
+        var preq=parseInt(row["Active Prequals"])||0,pipe=parseInt(row["Active In Pipeline"])||0,closed12=parseInt(row["Closed Past Year"])||0,totalLeads12=parseInt(row["Total Leads Past Year"])||0;
         pbSnapshot.active_prequals_total+=preq;pbSnapshot.active_pipeline_total+=pipe;pbSnapshot.closed_12mo_total+=closed12;
         if(preq>0)pbSnapshot.active_prequals_agents++;if(pipe>0)pbSnapshot.active_pipeline_agents++;if(closed12>0)pbSnapshot.closed_12mo_agents++;if(closed12>=10){pbSnapshot.levels.Channel++;pbSnapshot.tier_agents.Channel.push(rawName);}
-        pbSnapshot.by_agent[rawName.toLowerCase()]={name:rawName,level:lv||null,active_prequals:preq,active_pipeline:pipe,closed_12mo:closed12};
+        pbSnapshot.by_agent[rawName.toLowerCase()]={name:rawName,level:lv||null,active_prequals:preq,active_pipeline:pipe,closed_12mo:closed12,total_leads_12mo:totalLeads12};
       });
       pbSnapshot.active_partner_rows=Number(pbSnapshot.levels.A||0)+Number(pbSnapshot.levels.B||0)+Number(pbSnapshot.levels.C||0);
       try{localStorage.setItem("ct_powerbi_snapshot_v1",JSON.stringify(pbSnapshot));window.CT_POWERBI_SNAPSHOT=pbSnapshot;}catch(snapshotErr){window.CT_POWERBI_SNAPSHOT=pbSnapshot;}
@@ -5384,6 +5384,9 @@ function handleUpload(input){
       if(coMktPartners.length&&typeof renderDirectorView==="function"&&currentUser==="Director")renderDirectorView();
       // If Portfolio Review is already open, refresh it from the newly stamped profiles now.
       if(document.getElementById("pfr-body")){try{await window.pfrLoad();}catch(pfrErr){console.warn("Portfolio refresh failed:",pfrErr.message);}}
+      if(document.getElementById("view-partner-growth")&&document.getElementById("view-partner-growth").classList.contains("active")&&typeof ctRenderTierOpportunities==="function"){
+        try{await ctRenderTierOpportunities();}catch(tierErr){console.warn("Next-tier opportunities refresh failed:",tierErr.message);}
+      }
 
       res.style.color="#43A047";
       var pbActiveImported=Number(pbSnapshot.levels.A||0)+Number(pbSnapshot.levels.B||0)+Number(pbSnapshot.levels.C||0);
@@ -11338,6 +11341,95 @@ function openOperatingStandardView(btn){
  const old=window.switchLeadsTab;if(typeof old==='function'&&!old.__ctTierLive){const w=function(name,btn){const r=old.apply(this,arguments);if(name==='roster'||name==='growth')setTimeout(()=>renderGrowthScoreboard(),60);return r};w.__ctTierLive=true;window.switchLeadsTab=w}
 })();
 </script>
+<style id="ct-tier-opportunities-css">
+.ct-tier-opportunities{background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.ct-tier-opp-head{padding:14px 16px;border-bottom:1px solid var(--border);background:#fff}
+.ct-tier-opp-head h2{font-size:16px;margin:0 0 4px}.ct-tier-opp-head p{font-size:11px;color:var(--text-3);margin:0}
+.ct-tier-opp-head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.ct-tier-opp-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.ct-tier-opp-actions button{white-space:nowrap}
+.ct-tier-opp-controls{display:grid;grid-template-columns:minmax(210px,1fr) repeat(3,minmax(145px,190px));gap:8px;padding:10px 16px;background:#f8fbfc;border-bottom:1px solid var(--border)}
+.ct-tier-opp-controls input,.ct-tier-opp-controls select{width:100%;min-height:36px;border:1px solid #cfe0e8;border-radius:8px;background:#fff;padding:7px 9px;font:11px Calibri,Arial,sans-serif;color:#10233f}
+.ct-tier-opp-summary{padding:9px 16px;font-size:11px;color:#4b6474;border-bottom:1px solid var(--border)}
+.ct-tier-opp-scroll{max-height:560px;overflow:auto}.ct-tier-opp-table{width:100%;border-collapse:collapse;font-size:11px}
+.ct-tier-opp-table th{position:sticky;top:0;z-index:1;background:#edf5f8;color:#35566a;text-align:left;text-transform:uppercase;font-size:9px;letter-spacing:.04em;padding:9px 8px;border-bottom:1px solid #cfe0e8;white-space:nowrap}
+.ct-tier-opp-table td{padding:9px 8px;border-bottom:1px solid #e7eef2;vertical-align:middle}.ct-tier-opp-table tr:hover td{background:#f8fbfc}
+.ct-tier-opp-name{font-weight:700;color:#10233f}.ct-tier-pill{display:inline-flex;border-radius:999px;padding:3px 7px;font-weight:700;font-size:9px;background:#eef3f6;color:#35566a}
+.ct-tier-pill.Channel{background:#dff3ea;color:#176b4a}.ct-tier-pill.A{background:#e5f4ec;color:#23704f}.ct-tier-pill.B{background:#edf0fb;color:#435691}.ct-tier-pill.C{background:#f1f4f7;color:#536979}
+.ct-tier-gap{font-weight:700;color:#ad5b12}.ct-tier-gap.ready{color:#176b4a}.ct-tier-next{font-weight:700;color:#10233f}.ct-tier-focus{min-width:260px;color:#4b6474;line-height:1.35}
+@media(max-width:900px){.ct-tier-opp-controls{grid-template-columns:1fr 1fr}.ct-tier-opp-scroll{max-height:500px}}
+@media(max-width:720px){.ct-tier-opp-head-row{display:block}.ct-tier-opp-actions{justify-content:flex-start;margin-top:10px}}
+</style>
+<script id="ct-tier-opportunities-v1">
+(function(){
+ const n=v=>Number(v)||0, key=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' '), esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const pretty=v=>String(v||'').toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase());
+ function growth(r){
+   const closed=n(r.closed),leads=n(r.leads);
+   if(closed>=10)return{tier:'Channel',next:'Channel',gap:0};
+   if(closed>=4)return{tier:'A',next:'Channel',gap:10-closed};
+   if(closed>=2)return{tier:'B',next:'A',gap:4-closed};
+   if(closed>=1||leads>=1)return{tier:'C',next:'B',gap:2-closed};
+   return{tier:'No tier',next:'C',gap:1};
+ }
+ function owner(name){
+   const a=(typeof agents!=='undefined'?agents:[]).find(x=>key(x&&x[0])===key(name));
+   return a&&a[2]||'Unassigned';
+ }
+ function focus(r,g){
+   const buyers=n(r.preq)+n(r.pipe),activity=buyers?buyers+' active buyer'+(buyers===1?'':'s'):n(r.leads)+' lead'+(n(r.leads)===1?'':'s')+' in 12 months';
+   if(g.tier==='Channel')return'Channel achieved · protect the relationship and keep referrals moving.';
+   if(g.gap===1)return'1 more closing to '+g.next+' · prioritize '+activity+'.';
+   return g.gap+' more closings to '+g.next+' · work '+activity+' and identify the next conversion.';
+ }
+ async function rows(){
+   const snap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null,by=snap&&snap.by_agent||{};let map={};
+   Object.keys(by).forEach(k=>{const x=by[k]||{};map[key(x.name||k)]={name:x.name||k,powerLevel:x.level||'',closed:n(x.closed_12mo),leads:n(x.total_leads_12mo),preq:n(x.active_prequals),pipe:n(x.active_pipeline)};});
+   try{
+     const profiles=await sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status&order=powerbi_last_seen_at.desc&limit=3000');
+     let latest=null;(profiles||[]).forEach(p=>{if(p.powerbi_last_seen_at&&(!latest||new Date(p.powerbi_last_seen_at)>new Date(latest)))latest=p.powerbi_last_seen_at;});
+     const current=(profiles||[]).filter(p=>latest&&p.powerbi_last_seen_at&&Math.abs(new Date(p.powerbi_last_seen_at)-new Date(latest))<120000);
+     if(current.length){const fresh={};current.forEach(p=>{const k=key(p.agent_name),old=map[k]||{};fresh[k]={name:p.agent_name,powerLevel:p.powerbi_level||'',closed:n(p.closes_past_year),leads:n(p.total_leads_past_year),preq:n(old.preq),pipe:n(old.pipe),inactive:p.relationship_status==='inactive'};});map=fresh;}
+   }catch(e){console.warn('Next-tier roster used local Power BI data:',e.message);}
+   return Object.values(map).map(r=>Object.assign(r,growth(r),{owner:owner(r.name)}));
+ }
+ function renderBody(){
+   const host=document.getElementById('ct-tier-opportunities');if(!host||!window.__CT_TIER_OPP_ROWS)return;
+   const q=key(document.getElementById('ct-tier-opp-q')?.value),tier=document.getElementById('ct-tier-opp-tier')?.value||'all',ready=document.getElementById('ct-tier-opp-ready')?.value||'all',sort=document.getElementById('ct-tier-opp-sort')?.value||'gap';
+   let data=window.__CT_TIER_OPP_ROWS.filter(r=>(!q||key(r.name).includes(q)||key(r.owner).includes(q))&&(tier==='all'||r.tier===tier)&&(ready==='all'||(ready==='one'&&r.gap===1&&r.tier!=='No tier')||(ready==='two'&&r.gap<=2&&r.tier!=='Channel'&&r.tier!=='No tier')||(ready==='achieved'&&r.tier==='Channel')));
+   data.sort((a,b)=>sort==='buyers'?(n(b.preq)+n(b.pipe))-(n(a.preq)+n(a.pipe))||a.gap-b.gap:sort==='leads'?b.leads-a.leads||a.gap-b.gap:sort==='closed'?b.closed-a.closed||a.gap-b.gap:sort==='name'?String(a.name).localeCompare(String(b.name)):a.gap-b.gap||((n(b.preq)+n(b.pipe))-(n(a.preq)+n(a.pipe)))||b.leads-a.leads);
+   const one=window.__CT_TIER_OPP_ROWS.filter(r=>r.gap===1&&r.tier!=='No tier').length;
+   document.getElementById('ct-tier-opp-summary').innerHTML='<b>'+data.length+'</b> shown · <b>'+one+'</b> agents are exactly one closing from their next tier. Power BI Level is shown separately from the closing-based growth tier.';
+   document.getElementById('ct-tier-opp-body').innerHTML=data.map(r=>{const g={tier:r.tier,next:r.next,gap:r.gap};return'<tr><td><span class="ct-tier-opp-name">'+esc(pretty(r.name))+'</span></td><td>'+esc(r.owner)+'</td><td><span class="ct-tier-pill '+esc(r.powerLevel)+'">'+esc(r.powerLevel||'No level')+'</span></td><td><span class="ct-tier-pill '+esc(r.tier)+'">'+esc(r.tier)+'</span></td><td>'+r.closed+'</td><td>'+r.leads+'</td><td>'+r.preq+'</td><td>'+r.pipe+'</td><td><span class="ct-tier-next">'+esc(r.next)+'</span></td><td><span class="ct-tier-gap '+(r.gap===0?'ready':'')+'">'+(r.gap===0?'Achieved':r.gap+' closing'+(r.gap===1?'':'s'))+'</span></td><td class="ct-tier-focus">'+esc(focus(r,g))+'</td></tr>'}).join('')||'<tr><td colspan="11" class="no-data">No agents match these filters.</td></tr>';
+ }
+ function sourceDate(){const s=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;return s&&s.imported_at?new Date(s.imported_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'latest upload';}
+ function copyText(text){
+   if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(text);
+   const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();return Promise.resolve();
+ }
+ window.ctCopyTierTeamUpdate=async function(){
+   const all=window.__CT_TIER_OPP_ROWS||[];
+   const channel=all.filter(r=>r.tier==='Channel').length,a=all.filter(r=>r.powerLevel==='A').length,b=all.filter(r=>r.powerLevel==='B').length,c=all.filter(r=>r.powerLevel==='C').length;
+   const aTo=all.filter(r=>r.tier==='A'&&r.gap===1).sort((x,y)=>String(x.name).localeCompare(String(y.name))),bTo=all.filter(r=>r.tier==='B'&&r.gap===1).sort((x,y)=>String(x.name).localeCompare(String(y.name))),cTo=all.filter(r=>r.tier==='C'&&r.gap===1).sort((x,y)=>String(x.name).localeCompare(String(y.name))),near=[...aTo,...bTo,...cTo];
+   const list=rows=>rows.length?rows.map(r=>pretty(r.name)).join(', '):'None right now';
+   const msg='Hi, Team! Quick Partner Growth update — '+sourceDate()+'\n\n• Current Power BI: '+channel+' Channel | '+a+' A | '+b+' B | '+c+' C\n• '+near.length+' partners are only one closing from their next tier\n\nA → Channel ('+aTo.length+')\n'+list(aTo)+'\n\nB → A ('+bTo.length+')\n'+list(bTo)+'\n\nC → B ('+cTo.length+')\n'+list(cTo)+'\n\nEvery lead, preapproval and contract gives us another opportunity to grow these relationships. Let’s keep the momentum going!';
+   try{await copyText(msg);if(typeof ctShowToast==='function')ctShowToast('Team growth update copied.');else alert('Team growth update copied.');}catch(e){alert(msg);}
+ };
+ window.ctExportTierGrowthCsv=function(){
+   const all=(window.__CT_TIER_OPP_ROWS||[]).slice().sort((a,b)=>a.gap-b.gap||b.closed-a.closed||String(a.name).localeCompare(String(b.name)));
+   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+   const lines=[['Source Date','Agent','LP Owner','Power BI Level','Growth Tier','Closed Past Year','Total Leads Past Year','Active Prequals','Active Pipeline','Next Tier','Closings Needed','Recommended Focus'].map(q).join(',')];
+   all.forEach(r=>lines.push([sourceDate(),pretty(r.name),r.owner,r.powerLevel||'No level',r.tier,r.closed,r.leads,r.preq,r.pipe,r.next,r.gap,focus(r,{tier:r.tier,next:r.next,gap:r.gap})].map(q).join(',')));
+   const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Partner-Growth-Next-Tier-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+   if(typeof ctShowToast==='function')ctShowToast('Partner Growth list exported.');
+ };
+ window.ctRenderTierOpportunities=async function(){
+   const host=document.getElementById('ct-tier-opportunities');if(!host)return;
+   host.innerHTML='<div class="no-data" style="padding:18px">Loading every current Power BI agent…</div>';
+   window.__CT_TIER_OPP_ROWS=await rows();
+   host.innerHTML='<div class="ct-tier-opp-head"><div class="ct-tier-opp-head-row"><div><h2>Every agent and the path to the next tier</h2><p>Use the filters to see everyone, agents one closing away, or a specific tier. Active buyers help you decide where to focus first.</p></div><div class="ct-tier-opp-actions"><button class="ct-primary-btn" type="button" onclick="ctCopyTierTeamUpdate()">Copy Team Update</button><button class="ct-link-btn" type="button" onclick="ctExportTierGrowthCsv()">Export Growth List</button></div></div></div><div class="ct-tier-opp-controls"><input id="ct-tier-opp-q" placeholder="Search agent or LP…"><select id="ct-tier-opp-tier"><option value="all">All growth tiers</option><option>Channel</option><option>A</option><option>B</option><option>C</option><option>No tier</option></select><select id="ct-tier-opp-ready"><option value="all">All distances</option><option value="one">Exactly 1 closing away</option><option value="two">Within 2 closings</option><option value="achieved">Channel achieved</option></select><select id="ct-tier-opp-sort"><option value="gap">Sort: closest first</option><option value="buyers">Sort: active buyers</option><option value="leads">Sort: most leads</option><option value="closed">Sort: most closings</option><option value="name">Sort: agent name</option></select></div><div id="ct-tier-opp-summary" class="ct-tier-opp-summary"></div><div class="ct-tier-opp-scroll"><table class="ct-tier-opp-table"><thead><tr><th>Agent</th><th>LP</th><th>Power BI level</th><th>Growth tier</th><th>12-mo closes</th><th>12-mo leads</th><th>Prequals</th><th>Pipeline</th><th>Next tier</th><th>Gap</th><th>What moves the needle</th></tr></thead><tbody id="ct-tier-opp-body"></tbody></table></div>';
+   ['ct-tier-opp-q','ct-tier-opp-tier','ct-tier-opp-ready','ct-tier-opp-sort'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=renderBody;el.onchange=renderBody;}});renderBody();
+ };
+})();
+</script>
 <style id="ct-accuracy-v1-css">
 .ct-source-note{font-size:10px;color:#718391;margin-top:5px;line-height:1.35}
 .ct-gate .ct-source-note{font-weight:600}
@@ -11697,6 +11789,7 @@ window.lpv2Route=function(route,btn){
         try{
           if(typeof ctHydrateSharedPowerBiSnapshot==='function')await ctHydrateSharedPowerBiSnapshot();
           if(typeof renderGrowthScoreboard==='function')renderGrowthScoreboard();
+          if(typeof ctRenderTierOpportunities==='function')await ctRenderTierOpportunities();
           if(typeof renderVelocifyLeaderboard==='function')renderVelocifyLeaderboard();
           if(typeof renderLeaderboard==='function')renderLeaderboard();
           if(typeof renderChurnRisk==='function')renderChurnRisk();
