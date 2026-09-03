@@ -4669,8 +4669,12 @@ function amCntTalkTo(src){
   // Keep this shared snapshot counter aligned with the RM Tracker's current logger.
   // The UI label changed over time, so historical and current labels all receive
   // the same Talk-To credit instead of silently dropping valid Amanda activity.
-  var TALKTO_TYPES=["Agent Talk-to","Agent Partner conversation","Partner conversation","Talk-to (text/call)","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Under Contract Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Market Update","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Closed Deal Thank You","Recruiting Conversation"];
-  return (src||[]).filter(function(a){return TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length;
+  var TALKTO_TYPES=["Agent Talk-to","Agent Partner conversation","Partner conversation","Talk-to (text/call)","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Under Contract Call","Listing Agent Update","Birthday Outreach","Holiday Outreach","Agent Appreciation","Market Update","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Closed Deal Thank You","Recruiting Conversation"];
+  return (src||[]).filter(function(a){
+    if(TALKTO_TYPES.indexOf((a.act_type||"").trim())<0)return false;
+    var o=String(a.outcome||'').trim().toLowerCase();
+    return !!o&&!/left voicemail|left vm|no answer|attempted|no response|remove \/ no further contact|not interested|do not contact/.test(o);
+  }).length;
 }
 
 
@@ -11657,23 +11661,27 @@ window.lpv2Route=function(route,btn){
 .ct-amanda-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
 .ct-amanda-title{font-size:13px;font-weight:850;color:#102A43}
 .ct-amanda-sub{font-size:10.5px;color:#6B7E8A;margin-top:2px}
-.ct-amanda-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-.ct-amanda-metric{background:#FAFCFD;border:1px solid #DCE7ED;border-radius:9px;padding:10px 11px}
-.ct-amanda-metric .k{font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#607582}
-.ct-amanda-metric .v{font-size:19px;font-weight:850;color:#102A43;margin-top:3px}
-.ct-amanda-metric .v span{font-size:10px;color:#81939E}
-.ct-amanda-metric .bar{height:3px;background:#E8EFF3;border-radius:999px;overflow:hidden;margin-top:6px}
+.ct-amanda-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.ct-amanda-metric{background:#FFFEFF;border:1px solid #DCE7ED;border-radius:12px;padding:12px 13px;box-shadow:0 2px 7px rgba(30,66,82,.035)}
+.ct-amanda-metric .k{font-size:11px;font-weight:750;color:#526B78}
+.ct-amanda-metric .v{font-size:21px;font-weight:800;color:#102A43;margin-top:5px}
+.ct-amanda-metric .v span{font-size:11px;color:#81939E}
+.ct-amanda-metric .note{font-size:10px;line-height:1.3;color:#71858F;margin-top:5px;min-height:26px}
+.ct-amanda-metric .bar{height:4px;background:#E8EFF3;border-radius:999px;overflow:hidden;margin-top:8px}
 .ct-amanda-metric .fill{height:100%;background:#2B86A6}
 @media(max-width:1000px){.ct-amanda-grid{grid-template-columns:repeat(2,minmax(140px,1fr))}}
 </style>
 <script id="ct-amanda-recovered-snapshot">
 (function(){
  const GOALS=[
-  {label:"New partner meetings",type:"New Realtor Meeting",goal:3},
-  {label:"Existing partner meetings",type:"__existingmeeting__",goal:5},
-  {label:"Cold calls",type:"Cold Calls",goal:125},
-  {label:"Talk-to's",type:"__talkto__",goal:100},
-  {label:"Buddy referral asks",type:"Realtor Buddy Referral Ask",goal:3}
+  {label:"Call attempts",type:"__allcalls__",goal:null,note:"Includes voicemail and no-answer attempts"},
+  {label:"Live conversations",type:"__talkto__",goal:35,note:"Actual two-way connections"},
+  {label:"No connection",type:"__noconnect__",goal:null,note:"Voicemail, no answer or attempted"},
+  {label:"Text follow-ups",type:"__textsent__",goal:null,note:"Only texts explicitly logged as sent"},
+  {label:"New partner meetings",type:"New Realtor Meeting",goal:3,note:"Meetings held this week"},
+  {label:"Existing partner meetings",type:"__existingmeeting__",goal:5,note:"Relationship meetings held"},
+  {label:"New Realtor calls",type:"Cold Calls",goal:125,note:"Prospecting attempts"},
+  {label:"Buddy referral asks",type:"Realtor Buddy Referral Ask",goal:3,note:"Introductions requested"}
  ];
  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  function monday(){
@@ -11713,13 +11721,20 @@ window.lpv2Route=function(route,btn){
  }
  function talks(acts){
    try{if(typeof amCntTalkTo==='function')return amCntTalkTo(acts||[])}catch(e){}
-   const t=['Agent Talk-to','Agent Partner conversation','Partner conversation','Talk-to (text/call)','Active Agent Talk-to','Active Agent Check-in','Reconnect Outreach','CTC Call','Under Contract Call','Birthday Outreach','Holiday Outreach','Agent Appreciation','Market Update','Market Update Call','Sent Market Report','Sent Referral','Co-Marketing Discussion','New Agent Follow-up','Closed Deal Thank You'];
+   const t=['Agent Talk-to','Agent Partner conversation','Partner conversation','Talk-to (text/call)','Active Agent Talk-to','Active Agent Check-in','Reconnect Outreach','CTC Call','Under Contract Call','Listing Agent Update','Birthday Outreach','Holiday Outreach','Agent Appreciation','Market Update','Market Update Call','Sent Market Report','Sent Referral','Co-Marketing Discussion','New Agent Follow-up','Closed Deal Thank You'];
    return (acts||[]).filter(a=>t.includes(a.act_type)).length;
  }
- function count(acts,g){if(g.type==='__existingmeeting__')return acts.filter(existing).length;if(g.type==='__talkto__')return talks(acts);return acts.filter(a=>a.act_type===g.type).length}
+ function allCalls(acts){
+   const t=['Cold Calls','Agent Talk-to','Agent Partner conversation','Partner conversation','Talk-to (text/call)','Active Agent Talk-to','Active Agent Check-in','Reconnect Outreach','CTC Call','Under Contract Call','Listing Agent Update','Market Update Call','New Agent Follow-up','Recruiting Conversation'];
+   return (acts||[]).filter(a=>t.includes(String(a.act_type||'').trim())).length;
+ }
+ function evidence(a){return String((a?.outcome||'')+' '+(a?.notes||'')).toLowerCase()}
+ function noConnect(acts){return (acts||[]).filter(a=>/voicemail|left vm|no answer|attempted|no response|left message|could not reach|didn.t connect/.test(evidence(a))&&allCalls([a])===1).length}
+ function textSent(acts){return (acts||[]).filter(a=>/\btext sent\b|sent (?:a )?text|follow[- ]?up text|lm\s*(?:and|\+)\s*text|voicemail\s*(?:and|\+)\s*text|\[text_sent\]/.test(evidence(a))).length}
+ function count(acts,g){if(g.type==='__existingmeeting__')return acts.filter(existing).length;if(g.type==='__talkto__')return talks(acts);if(g.type==='__allcalls__')return allCalls(acts);if(g.type==='__noconnect__')return noConnect(acts);if(g.type==='__textsent__')return textSent(acts);return acts.filter(a=>a.act_type===g.type).length}
  async function loadActs(){
    try{
-     const rows=await sbFetch('GET','amanda_activities?act_date=gte.'+monday()+'&act_date=lte.'+sunday()+'&select=act_type,act_date,notes&order=act_date.desc&limit=5000');
+     const rows=await sbFetch('GET','amanda_activities?act_date=gte.'+monday()+'&act_date=lte.'+sunday()+'&select=agent_name,act_type,act_date,outcome,notes&order=act_date.desc&limit=5000');
      return (Array.isArray(rows)?rows:[]).filter(ownerIsAmanda);
    }catch(e){console.warn('Amanda Snapshot load',e);return[]}
  }
@@ -11729,8 +11744,8 @@ window.lpv2Route=function(route,btn){
    if(!box){box=document.createElement('div');box.id='ct-amanda-snapshot';roster.appendChild(box)}
    else if(box.parentElement!==roster)roster.appendChild(box);
    box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · supporting RM execution pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-loading">Loading Amanda’s execution…</div>';
-   const acts=await loadActs();
-   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · supporting RM execution pulled directly from RM Tracker activity</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-amanda-grid">'+GOALS.map(g=>{const v=count(acts,g),pct=Math.min(100,Math.round(v/g.goal*100));return '<div class="ct-amanda-metric"><div class="k">'+esc(g.label)+'</div><div class="v">'+v+' <span>/ '+g.goal+'</span></div><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div></div>'}).join('')+'</div>';
+   const acts=await loadActs();window.ctAmandaMetricActs=acts;
+   box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda · Relationship Manager</div><div class="ct-amanda-sub">This week · effort and actual connections are reported separately</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-amanda-grid">'+GOALS.map(g=>{const v=count(acts,g),pct=g.goal?Math.min(100,Math.round(v/g.goal*100)):0;return '<div class="ct-amanda-metric"><div class="k">'+esc(g.label)+'</div><div class="v">'+v+(g.goal?' <span>/ '+g.goal+'</span>':'')+'</div><div class="note">'+esc(g.note||'')+'</div>'+(g.goal?'<div class="bar"><div class="fill" style="width:'+pct+'%"></div></div>':'')+'</div>'}).join('')+'</div>';
    const btn=document.getElementById('ct-amanda-open-rm');
    if(btn)btn.onclick=function(){
      try{
@@ -12875,6 +12890,27 @@ const prior=window.lpv2Route;window.lpv2Route=function(route,btn){if(route==='pr
   }
   window.ctExportAllCalls=exportAll;
   
+})();
+</script>
+<style id="ct-amanda-readable-metrics-v7">
+#ct-amanda-snapshot .ct-amanda-grid{grid-template-columns:repeat(4,minmax(145px,1fr))!important;gap:9px!important}
+#ct-amanda-snapshot .ct-amanda-grid:before{content:"Amanda weekly activity · attempts and connections shown separately"!important;grid-column:1/-1;font-size:12px!important;font-weight:700!important;color:#526B78!important;margin:3px 0 2px!important}
+#ct-amanda-snapshot .ct-amanda-metric{border-radius:12px!important;padding:12px 13px!important;background:#FFFEFF!important}
+#ct-amanda-snapshot .ct-amanda-metric{cursor:pointer!important}#ct-amanda-snapshot .ct-amanda-metric:hover{border-color:#78A9BC!important;box-shadow:0 5px 14px rgba(22,83,107,.09)!important}#ctAmandaMetricDetail{margin-top:10px;border:1px solid #DCE7ED;border-radius:12px;background:#fff;padding:12px}#ctAmandaMetricDetail .ct-detail-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}#ctAmandaMetricDetail h4{font-size:13px;margin:0;color:#102A43}.ct-amanda-detail-row{display:grid;grid-template-columns:minmax(140px,1fr) minmax(120px,.8fr) minmax(140px,1fr) minmax(200px,2fr);gap:9px;padding:8px 3px;border-top:1px solid #E8EFF3;font-size:11px;line-height:1.4}.ct-amanda-detail-row span{color:#607582}
+#ctAmandaMetricDetail{position:fixed!important;z-index:25000!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(1050px,calc(100vw - 34px))!important;max-height:82vh!important;overflow:auto!important;margin:0!important;padding:18px!important;box-shadow:0 0 0 9999px rgba(17,36,45,.48),0 18px 46px rgba(17,36,45,.26)!important}#ctAmandaMetricDetail .ct-detail-head{position:sticky;top:-18px;background:#fff;padding:5px 0 10px;z-index:1}
+#ct-amanda-snapshot .ct-amanda-metric .k{font-size:11px!important;letter-spacing:0!important;text-transform:none!important}
+#ct-amanda-snapshot .ct-amanda-metric .v{font-size:21px!important}
+#ct-amanda-snapshot .ct-amanda-metric .note{font-size:10px!important;line-height:1.35!important;color:#71858F!important;margin-top:5px!important}
+@media(max-width:1000px){#ct-amanda-snapshot .ct-amanda-grid{grid-template-columns:repeat(2,minmax(145px,1fr))!important}}
+@media(max-width:620px){#ct-amanda-snapshot .ct-amanda-grid{grid-template-columns:1fr!important}}
+</style>
+<script id="ct-amanda-metric-detail-v7">
+(function(){
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const ev=a=>String((a?.outcome||'')+' '+(a?.notes||'')).toLowerCase(),callTypes=/^(cold calls?|agent talk-to|agent partner conversation|partner conversation|talk-to \(text\/call\)|active agent talk-to|active agent check-in|reconnect outreach|ctc call|under contract call|listing agent update|market update call|new agent follow-up|recruiting conversation)$/i;
+ const call=a=>callTypes.test(String(a?.act_type||'').trim()),no=a=>call(a)&&/voicemail|left vm|no answer|attempted|no response|left message|could not reach|didn.t connect/.test(ev(a)),txt=a=>/\btext sent\b|sent (?:a )?text|follow[- ]?up text|lm\s*(?:and|\+)\s*text|voicemail\s*(?:and|\+)\s*text|\[text_sent\]/.test(ev(a));
+ function rows(label,all){if(/Call attempts/i.test(label))return all.filter(call);if(/Live conversations/i.test(label))return all.filter(a=>typeof amCntTalkTo==='function'?amCntTalkTo([a])>0:(call(a)&&!no(a)&&String(a.outcome||'').trim()));if(/No connection/i.test(label))return all.filter(no);if(/Text follow-ups/i.test(label))return all.filter(txt);if(/New partner meetings/i.test(label))return all.filter(a=>a.act_type==='New Realtor Meeting');if(/Existing partner meetings/i.test(label))return all.filter(a=>['Partner Meeting','Strategic Partner Meeting','Channel Meeting','Retention Meeting','Break Breads'].includes(a.act_type));if(/New Realtor calls/i.test(label))return all.filter(a=>a.act_type==='Cold Calls');if(/Buddy referral asks/i.test(label))return all.filter(a=>a.act_type==='Realtor Buddy Referral Ask');return[]}
+ document.addEventListener('click',e=>{const card=e.target.closest&&e.target.closest('#ct-amanda-snapshot .ct-amanda-metric');if(!card)return;const box=document.getElementById('ct-amanda-snapshot'),label=card.querySelector('.k')?.textContent||'Activity',list=rows(label,window.ctAmandaMetricActs||[]);let d=document.getElementById('ctAmandaMetricDetail');if(!d){d=document.createElement('div');d.id='ctAmandaMetricDetail';box.appendChild(d)}d.innerHTML='<div class="ct-detail-head"><h4>'+esc(label)+' · '+list.length+'</h4><button type="button" class="ct-link-btn" onclick="this.closest(\'#ctAmandaMetricDetail\').remove()">Close</button></div>'+(list.length?list.map(a=>'<div class="ct-amanda-detail-row"><b>'+esc(a.agent_name||'No agent recorded')+'</b><span>'+esc(a.act_type||'Activity')+'</span><span>'+esc(a.outcome||'Outcome not recorded')+'</span><span>'+esc(String(a.notes||'').replace(/\[[^\]]+\]/g,'').trim()||'No notes recorded')+'</span></div>').join(''):'<div class="ct-amanda-sub">No matching records for this week.</div>');d.scrollIntoView({behavior:'smooth',block:'nearest'})});
 })();
 </script>
 </html>
