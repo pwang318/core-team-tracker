@@ -11692,7 +11692,7 @@ window.lpv2Route=function(route,btn){
  }
  function talks(acts){
    try{if(typeof amCntTalkTo==='function')return amCntTalkTo(acts||[])}catch(e){}
-   const t=['Agent Talk-to','Active Agent Talk-to','Active Agent Check-in','Reconnect Outreach','CTC Call','Under Contract Call','Birthday Outreach','Holiday Outreach','Agent Appreciation','Market Update','Market Update Call','Sent Market Report','Sent Referral','Co-Marketing Discussion','New Agent Follow-up','Closed Deal Thank You'];
+   const t=['Agent Talk-to','Agent Partner conversation','Partner conversation','Talk-to (text/call)','Active Agent Talk-to','Active Agent Check-in','Reconnect Outreach','CTC Call','Under Contract Call','Birthday Outreach','Holiday Outreach','Agent Appreciation','Market Update','Market Update Call','Sent Market Report','Sent Referral','Co-Marketing Discussion','New Agent Follow-up','Closed Deal Thank You'];
    return (acts||[]).filter(a=>t.includes(a.act_type)).length;
  }
  function count(acts,g){if(g.type==='__existingmeeting__')return acts.filter(existing).length;if(g.type==='__talkto__')return talks(acts);return acts.filter(a=>a.act_type===g.type).length}
