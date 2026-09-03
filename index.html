@@ -5254,14 +5254,14 @@ function handleUpload(input){
       // without cluttering the working LP screens. This is also a fallback if optional shared DB
       // columns are not available yet.
       var validPbRows=rows.filter(function(row){var n=(row["Agent"]||"").toString().trim();return n&&n.toUpperCase()!=="AGENT"&&n.toUpperCase()!=="NAN";});
-      var pbSnapshot={imported_at:new Date().toISOString(),raw_rows:validPbRows.length,levels:{A:0,B:0,C:0,Blank:0,Other:0},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,closed_12mo_total:0,closed_12mo_agents:0,by_agent:{}};
+      var pbSnapshot={imported_at:new Date().toISOString(),raw_rows:validPbRows.length,levels:{Channel:0,A:0,B:0,C:0,Blank:0,Other:0},tier_agents:{Channel:[],A:[],B:[],C:[],Blank:[],Other:[]},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,closed_12mo_total:0,closed_12mo_agents:0,by_agent:{}};
       validPbRows.forEach(function(row){
         var rawName=(row["Agent"]||"").toString().trim();
         var lv=(row["Level"]||"").toString().trim();
-        if(lv==="A"||lv==="B"||lv==="C")pbSnapshot.levels[lv]++;else if(!lv)pbSnapshot.levels.Blank++;else pbSnapshot.levels.Other++;
+        if(lv==="A"||lv==="B"||lv==="C"){pbSnapshot.levels[lv]++;pbSnapshot.tier_agents[lv].push(rawName);}else if(!lv){pbSnapshot.levels.Blank++;pbSnapshot.tier_agents.Blank.push(rawName);}else{pbSnapshot.levels.Other++;pbSnapshot.tier_agents.Other.push(rawName);}
         var preq=parseInt(row["Active Prequals"])||0,pipe=parseInt(row["Active In Pipeline"])||0,closed12=parseInt(row["Closed Past Year"])||0;
         pbSnapshot.active_prequals_total+=preq;pbSnapshot.active_pipeline_total+=pipe;pbSnapshot.closed_12mo_total+=closed12;
-        if(preq>0)pbSnapshot.active_prequals_agents++;if(pipe>0)pbSnapshot.active_pipeline_agents++;if(closed12>0)pbSnapshot.closed_12mo_agents++;
+        if(preq>0)pbSnapshot.active_prequals_agents++;if(pipe>0)pbSnapshot.active_pipeline_agents++;if(closed12>0)pbSnapshot.closed_12mo_agents++;if(closed12>=10){pbSnapshot.levels.Channel++;pbSnapshot.tier_agents.Channel.push(rawName);}
         pbSnapshot.by_agent[rawName.toLowerCase()]={name:rawName,level:lv||null,active_prequals:preq,active_pipeline:pipe,closed_12mo:closed12};
       });
       try{localStorage.setItem("ct_powerbi_snapshot_v1",JSON.stringify(pbSnapshot));window.CT_POWERBI_SNAPSHOT=pbSnapshot;}catch(snapshotErr){window.CT_POWERBI_SNAPSHOT=pbSnapshot;}
@@ -9598,13 +9598,13 @@ var CT_DEFAULT_POWERBI_SNAPSHOT={"imported_at":"2026-08-19T19:39:00.000Z","raw_r
 function ctParsePowerBiSummaryFromSourceApp(sourceApp,importedAt){
   var s=String(sourceApp||"");
   if(s.indexOf("core-team-tracker")!==0)return null;
-  var out={imported_at:importedAt||null,raw_rows:0,levels:{A:0,B:0,C:0,Blank:0,Other:0},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,closed_12mo_total:0,closed_12mo_agents:0,by_agent:null};
-  s.split(";").slice(1).forEach(function(part){var p=part.split("=");if(p.length<2)return;var k=p[0],v=Number(p.slice(1).join("="))||0;if(k==="raw")out.raw_rows=v;else if(k==="A")out.levels.A=v;else if(k==="B")out.levels.B=v;else if(k==="C")out.levels.C=v;else if(k==="blank")out.levels.Blank=v;else if(k==="other")out.levels.Other=v;else if(k==="preq")out.active_prequals_total=v;else if(k==="preqAgents")out.active_prequals_agents=v;else if(k==="pipe")out.active_pipeline_total=v;else if(k==="pipeAgents")out.active_pipeline_agents=v;else if(k==="closed")out.closed_12mo_total=v;else if(k==="closedAgents")out.closed_12mo_agents=v;});
+  var out={imported_at:importedAt||null,raw_rows:0,levels:{Channel:0,A:0,B:0,C:0,Blank:0,Other:0},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,closed_12mo_total:0,closed_12mo_agents:0,by_agent:null};
+  s.split(";").slice(1).forEach(function(part){var p=part.split("=");if(p.length<2)return;var k=p[0],v=Number(p.slice(1).join("="))||0;if(k==="raw")out.raw_rows=v;else if(k==="Channel")out.levels.Channel=v;else if(k==="A")out.levels.A=v;else if(k==="B")out.levels.B=v;else if(k==="C")out.levels.C=v;else if(k==="blank")out.levels.Blank=v;else if(k==="other")out.levels.Other=v;else if(k==="preq")out.active_prequals_total=v;else if(k==="preqAgents")out.active_prequals_agents=v;else if(k==="pipe")out.active_pipeline_total=v;else if(k==="pipeAgents")out.active_pipeline_agents=v;else if(k==="closed")out.closed_12mo_total=v;else if(k==="closedAgents")out.closed_12mo_agents=v;});
   return out.raw_rows?out:null;
 }
 function ctPowerBiSummarySourceApp(snapshot){
   var s=snapshot||{};var l=s.levels||{};
-  return "core-team-tracker;raw="+(Number(s.raw_rows)||0)+";A="+(Number(l.A)||0)+";B="+(Number(l.B)||0)+";C="+(Number(l.C)||0)+";blank="+(Number(l.Blank)||0)+";other="+(Number(l.Other)||0)+";preq="+(Number(s.active_prequals_total)||0)+";preqAgents="+(Number(s.active_prequals_agents)||0)+";pipe="+(Number(s.active_pipeline_total)||0)+";pipeAgents="+(Number(s.active_pipeline_agents)||0)+";closed="+(Number(s.closed_12mo_total)||0)+";closedAgents="+(Number(s.closed_12mo_agents)||0);
+  return "core-team-tracker;raw="+(Number(s.raw_rows)||0)+";Channel="+(Number(l.Channel)||0)+";A="+(Number(l.A)||0)+";B="+(Number(l.B)||0)+";C="+(Number(l.C)||0)+";blank="+(Number(l.Blank)||0)+";other="+(Number(l.Other)||0)+";preq="+(Number(s.active_prequals_total)||0)+";preqAgents="+(Number(s.active_prequals_agents)||0)+";pipe="+(Number(s.active_pipeline_total)||0)+";pipeAgents="+(Number(s.active_pipeline_agents)||0)+";closed="+(Number(s.closed_12mo_total)||0)+";closedAgents="+(Number(s.closed_12mo_agents)||0);
 }
 
 async function pfrLoad(){
@@ -11313,7 +11313,7 @@ function openOperatingStandardView(btn){
 <script id="ct-v5-live-tier-growth">
 (function(){
  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])),TARGETS={Channel:2,A:14,B:21};
- function s(){try{return window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')}catch(e){return null}}
+ function s(){try{const x=window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null');if(!x)return null;const rows=Object.values(x.by_agent||{}),channel=rows.filter(r=>(+r.closed_12mo||0)>=10).map(r=>r.name).filter(Boolean);x.levels=x.levels||{};x.tier_agents=x.tier_agents||{};if(rows.length){x.levels.Channel=channel.length;x.tier_agents.Channel=channel;['A','B','C'].forEach(t=>{x.tier_agents[t]=rows.filter(r=>String(r.level||'').trim()===t).map(r=>r.name).filter(Boolean)})}else{x.levels.Channel=+x.levels.Channel||0;x.tier_agents.Channel=x.tier_agents.Channel||[]}return x}catch(e){return null}}
  const pts=(a,t,w)=>t?Math.min(w,(+a||0)/t*w):0;
  window.ctOpenTierDrill=function(t){const x=s(),names=(x?.tier_agents?.[t]||[]).slice().sort();let m=document.getElementById('ct-tier-drill');if(!m){m=document.createElement('div');m.id='ct-tier-drill';m.className='ct-snapshot-drill';m.innerHTML="<div class='ct-snapshot-drill-card'><div style='display:flex;justify-content:space-between'><div><div class='ct-kicker'>CURRENT POWER BI</div><h2 id='ct-tier-drill-title'></h2></div><button class='ct-link-btn' id='ct-tier-drill-close' type='button'>Close</button></div><div id='ct-tier-drill-body' style='margin-top:14px'></div></div>";document.body.appendChild(m);m.querySelector('#ct-tier-drill-close').addEventListener('click',()=>m.classList.remove('show'))}document.getElementById('ct-tier-drill-title').textContent=t+' Tier · '+names.length+' agents';document.getElementById('ct-tier-drill-body').innerHTML=names.length?'<div class="ct-tier-name-grid">'+names.map(n=>'<button type="button" class="ct-tier-name" data-agent="'+esc(n)+'">'+esc(n.toLowerCase().replace(/\\b[a-z]/g,z=>z.toUpperCase()))+'</button>').join('')+'</div>':'<div class="no-data">No agents in this tier.</div>';m.classList.add('show');m.querySelectorAll('[data-agent]').forEach(b=>b.addEventListener('click',()=>{if(typeof openAgentSearch==='function')openAgentSearch(b.dataset.agent)}))};
  window.renderGrowthScoreboard=async function(){const x=s();if(!x)return;const c={Channel:+x.levels?.Channel||0,A:+x.levels?.A||0,B:+x.levels?.B||0,C:+x.levels?.C||0},pCh=pts(c.Channel,2,15),pA=pts(c.A,14,15),pB=pts(c.B,21,20),score=pCh+pA+pB;const card=(t,a,target,w,p)=>'<button type="button" class="ct-tier-click" data-tier="'+t+'"><div class="ct-kicker">'+t+'</div><div class="ct-tier-big">'+a+' <span>/ '+target+'</span></div><div class="ct-tier-bar"><i style="width:'+Math.min(100,Math.round(a/target*100))+'%"></i></div><small>'+p.toFixed(1)+' / '+w+' pts · click to see agents</small></button>';const html='<div class="ct-live-tier-card"><div class="ct-section-head"><div><div class="ct-kicker">GROWTH SCORECARD</div><h2>Tier Growth · 50% of Scorecard</h2><div class="ct-page-sub">A/B counts use the latest Power BI Level. Channel uses the 10+ closings standard. Click any tier to see who is counted.</div></div><div class="ct-tier-score">'+score.toFixed(1)+' <span>/ 50</span></div></div><div class="ct-tier-grid">'+card('Channel',c.Channel,2,15,pCh)+card('A',c.A,14,15,pA)+card('B',c.B,21,20,pB)+'<div class="ct-tier-development"><div class="ct-kicker">C · DEVELOPMENT</div><div class="ct-tier-big">'+c.C+'</div><small>Current Power BI Level C</small></div></div><div class="ct-data-note">Latest Power BI tier counts: A '+c.A+' · B '+c.B+'.</div></div>';['d-growth-scoreboard','d-growth-scoreboard-tab'].forEach(id=>{const el=document.getElementById(id);if(el){el.innerHTML=html;el.querySelectorAll('[data-tier]').forEach(b=>b.addEventListener('click',()=>ctOpenTierDrill(b.dataset.tier)))}})};
@@ -12703,28 +12703,36 @@ const prior=window.lpv2Route;window.lpv2Route=function(route,btn){if(route==='pr
       const people=rms.length?rms:['Amanda'];
       people.forEach(person=>add({date:r.act_date,agent:r.agent_name,outcome:r.outcome,notes:cleanNotes(r.notes)},person,'RM Team',lpName,type,'Completed'));
     });
+    const rockfordListingReps=new Set(['erika wehner','michelle erickson','jordan holibaugh','deron bender','katie summers','katie sumer','troy borden','lindsey pinna','lindsay pinna','robin blake','aimee whitlatch','colin burnheimer','angie bronkowski','angie bronowski','dan manley','mark boyd'].map(norm));
     const snap=(plans||[]).filter(r=>meta(r.notes,'TUE_PLAN_LANE')==='LP_TXN'||meta(r.notes,'TUE_PLAN_LANE')==='RM_LISTING');
     snap.forEach(p=>{
       const lane=meta(p.notes,'TUE_PLAN_LANE'),person=lane==='LP_TXN'?(shortLp(meta(p.notes,'LP_OWNER'))||'Unassigned'):'Amanda',lpName=lane==='LP_TXN'?person:'',agent=meta(p.notes,'BUYER_AGENT')||meta(p.notes,'TUE_CONTACT_NAME')||p.agent_name,client=meta(p.notes,'TXN_CLIENT'),type=lane==='LP_TXN'?'Tuesday update · active contract':'Tuesday update · listing agent';
       const done=(rm||[]).some(a=>lane==='LP_TXN'?a.act_type==='LP Tuesday File Update'&&meta(a.notes,'TUE_PLAN_KEY')===meta(p.notes,'TUE_PLAN_KEY'):a.act_type==='Listing Agent Update'&&meta(a.notes,'TUE_PLAN_KEY')===meta(p.notes,'TUE_PLAN_KEY'));
-      if(!done)add({date:meta(p.notes,'TUE_PLAN_DATE')||p.act_date,agent:agent,outcome:'',notes:[client,meta(p.notes,'TXN_MILESTONE')].filter(Boolean).join(' · ')},person,lane==='LP_TXN'?'LP':'RM Team',lpName,type,'Open');
+      const role=meta(p.notes,'TUE_CONTACT_ROLE'),builder=meta(p.notes,'TUE_BUILDER_NAME'),check=norm([role,agent,builder,p.notes].join(' '));let excluded='';
+      if(lane==='RM_LISTING'){
+        if(role==='FSBO'||/\bfsbo\b/.test(check))excluded='FSBO — no listing-agent call required';
+        else if(role==='Missing'||/listing (contact|agent) missing|contact missing/.test(check))excluded='Listing contact missing — source data needs correction';
+        else if(role==='NEW_BUILD'||builder||rockfordListingReps.has(norm(agent))||/\brockfor(?:d|m)(?: homes)?\b|new build|builder-side/.test(check))excluded='Rockford / new build — no Amanda listing-agent call required';
+      }
+      if(!done)add({date:meta(p.notes,'TUE_PLAN_DATE')||p.act_date,agent:agent,outcome:excluded,notes:[client,meta(p.notes,'TXN_MILESTONE')].filter(Boolean).join(' · ')},person,lane==='LP_TXN'?'LP':'RM Team',lpName,excluded?'Tuesday exception · no outreach required':type,excluded?'Excluded':'Open');
     });
     rows.sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.person).localeCompare(String(b.person)));
     const people=['Gavin','Karen','Osgood','Jordan','Said','Isaak','Amanda','Nyny','RM Team'];
-    const isCallOrUpdate=r=>/call|update|conversation|talk[- ]?to|outreach|partner meeting|realtor meeting|face time|break bread/i.test(String(r.activity||''));
-    const summary=people.map(person=>{const mine=person==='RM Team'?rows.filter(r=>r.team==='RM Team'):rows.filter(r=>r.person===person),completed=mine.filter(r=>r.status==='Completed').length,open=mine.filter(r=>r.status==='Open').length;return {'Person / Team':person,'Total records':mine.length,'Completed':completed,'Open':open,'Calls / updates':mine.filter(isCallOrUpdate).length}}).filter(r=>r['Total records']);
-    summary.push({'Person / Team':'ALL TEAM','Total records':rows.length,'Completed':rows.filter(r=>r.status==='Completed').length,'Open':rows.filter(r=>r.status==='Open').length,'Calls / updates':rows.length});
+    const isCallOrUpdate=r=>r.status!=='Excluded'&&/call|update|conversation|talk[- ]?to|outreach|partner meeting|realtor meeting|face time|break bread/i.test(String(r.activity||''));
+    const summary=people.map(person=>{const mine=person==='RM Team'?rows.filter(r=>r.team==='RM Team'):rows.filter(r=>r.person===person),work=mine.filter(r=>r.status!=='Excluded'),completed=work.filter(r=>r.status==='Completed').length,open=work.filter(r=>r.status==='Open').length,excluded=mine.filter(r=>r.status==='Excluded').length;return {'Person / Team':person,'Required records':work.length,'Completed':completed,'Open':open,'Excluded / data exceptions':excluded,'Calls / updates':work.filter(isCallOrUpdate).length}}).filter(r=>r['Required records']||r['Excluded / data exceptions']);
+    const allWork=rows.filter(r=>r.status!=='Excluded');summary.push({'Person / Team':'ALL TEAM','Required records':allWork.length,'Completed':allWork.filter(r=>r.status==='Completed').length,'Open':allWork.filter(r=>r.status==='Open').length,'Excluded / data exceptions':rows.filter(r=>r.status==='Excluded').length,'Calls / updates':allWork.filter(isCallOrUpdate).length});
     const toDetail=r=>({'Date':r.date,'Person / Team':r.person,'Team':r.team,'LP Owner':r.lp,'Call / Update Type':r.activity,'Agent / Partner':r.agent,'Status':r.status,'Outcome':r.outcome,'Notes':r.notes});
     const detail=rows.map(toDetail);
     try{
       const X=await ensureXlsx(),wb=X.utils.book_new(),ws1=X.utils.json_to_sheet(summary),ws2=X.utils.json_to_sheet(detail),detailCols=[{wch:12},{wch:16},{wch:12},{wch:14},{wch:34},{wch:28},{wch:12},{wch:24},{wch:60}];
-      ws1['!cols']=[{wch:18},{wch:14},{wch:12},{wch:10},{wch:16}];ws1['!autofilter']={ref:'A1:E1'};
+      ws1['!cols']=[{wch:18},{wch:16},{wch:12},{wch:10},{wch:27},{wch:16}];ws1['!autofilter']={ref:'A1:F1'};
       X.utils.book_append_sheet(wb,ws1,'Team Summary');
       people.forEach(person=>{
-        const mine=(person==='RM Team'?rows.filter(r=>r.team==='RM Team'):rows.filter(r=>r.person===person)).map(toDetail);
+        const order={Open:0,Completed:1,Excluded:2},mine=(person==='RM Team'?rows.filter(r=>r.team==='RM Team'):rows.filter(r=>r.person===person)).slice().sort((a,b)=>(order[a.status]??9)-(order[b.status]??9)||String(b.date).localeCompare(String(a.date))).map(toDetail);
         const ws=X.utils.json_to_sheet(mine.length?mine:[{'Date':'','Person / Team':person,'Team':'','LP Owner':'','Call / Update Type':'No records','Agent / Partner':'','Status':'','Outcome':'','Notes':''}]);
         ws['!cols']=detailCols;ws['!autofilter']={ref:'A1:I1'};X.utils.book_append_sheet(wb,ws,person);
       });
+      const exceptions=rows.filter(r=>r.status==='Excluded').map(toDetail),wsx=X.utils.json_to_sheet(exceptions.length?exceptions:[{'Date':'','Person / Team':'','Team':'','LP Owner':'','Call / Update Type':'No data exceptions','Agent / Partner':'','Status':'','Outcome':'','Notes':''}]);wsx['!cols']=detailCols;wsx['!autofilter']={ref:'A1:I1'};X.utils.book_append_sheet(wb,wsx,'Data Exceptions');
       ws2['!cols']=detailCols;ws2['!autofilter']={ref:'A1:I1'};X.utils.book_append_sheet(wb,ws2,'All Calls + Updates');
       X.writeFile(wb,'Daniel-Team-All-Calls-'+new Date().toISOString().slice(0,10)+'.xlsx')
     }catch(e){const cols=['Date','Person / Team','Team','LP Owner','Call / Update Type','Agent / Partner','Status','Outcome','Notes'],csv=[cols].concat(detail.map(r=>cols.map(c=>r[c]))).map(row=>row.map(escCsv).join(',')).join('\r\n'),a=document.createElement('a'),u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download='Daniel-Team-All-Calls-'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
