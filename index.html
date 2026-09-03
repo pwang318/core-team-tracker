@@ -4666,7 +4666,10 @@ function amCnt(src,type){
   return (src||[]).filter(function(a){return (a.act_type||"").trim()===type;}).length;
 }
 function amCntTalkTo(src){
-  var TALKTO_TYPES=["Agent Talk-to","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Market Update","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Closed Deal Thank You","Recruiting Conversation"];
+  // Keep this shared snapshot counter aligned with the RM Tracker's current logger.
+  // The UI label changed over time, so historical and current labels all receive
+  // the same Talk-To credit instead of silently dropping valid Amanda activity.
+  var TALKTO_TYPES=["Agent Talk-to","Agent Partner conversation","Partner conversation","Talk-to (text/call)","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Under Contract Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Market Update","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Closed Deal Thank You","Recruiting Conversation"];
   return (src||[]).filter(function(a){return TALKTO_TYPES.indexOf((a.act_type||"").trim())>=0;}).length;
 }
 
