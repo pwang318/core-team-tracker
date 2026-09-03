@@ -1,5 +1,4 @@
- 
- 
+  
 <!DOCTYPE html>
 
 <html lang="en">
@@ -11687,8 +11686,26 @@ window.lpv2Route=function(route,btn){
    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
  }
  function ownerIsAmanda(a){
-   const n=String(a?.notes||''); const o=(n.match(/\[ACTIVITY_OWNER:([^\]]+)\]/i)||[])[1];
-   return !o||/amanda/i.test(o);
+   const n=String(a?.notes||'');
+   const visible=(n.match(/\[ACTIVITY_OWNER:([^\]]+)\]/i)||[])[1];
+   if(visible)return /amanda/i.test(visible);
+   // Current RM records store the owner/attendees in encoded zero-width metadata.
+   // Decode it so Nyny's Director calls never inflate Amanda's scorecard.
+   const start='\u2063\u2063\u2063',end='\u2064\u2064\u2064',at=n.lastIndexOf(start);
+   if(at>=0){
+     const stop=n.indexOf(end,at+start.length);
+     if(stop>=0){
+       try{
+         const bits=n.slice(at+start.length,stop).replace(/[^\u200b\u200c]/g,'').split('').map(c=>c==='\u200c'?'1':'0').join(''),bytes=[];
+         for(let i=0;i+7<bits.length;i+=8)bytes.push(parseInt(bits.slice(i,i+8),2));
+         const meta=JSON.parse(decodeURIComponent(escape(atob(String.fromCharCode(...bytes)))))||{};
+         const rms=Array.isArray(meta.rmAttendees)?meta.rmAttendees:[meta.owner];
+         return rms.includes('Amanda');
+       }catch(e){}
+     }
+   }
+   // Historical rows predate owner metadata and belong to Amanda by design.
+   return true;
  }
  function existing(a){
    try{if(typeof ctIsExistingRmMeeting==='function')return ctIsExistingRmMeeting(a.act_type)}catch(e){}
