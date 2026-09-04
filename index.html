@@ -11484,39 +11484,64 @@ function openOperatingStandardView(btn){
    const chNames=channels.length?channels.map(r=>pretty(r.name)).join('  •  '):'None in this snapshot';
    const chLines=ctCanvasWrap(ctx,chNames,900,2);chLines.forEach((t,i)=>ctx.fillText(t,82,chY+111+i*24));
 
-   ctx.fillStyle=ink;ctx.font='800 31px Calibri, Arial, sans-serif';ctx.fillText('Top 10 Partners',58,408);
-   ctx.fillStyle=muted;ctx.font='500 17px Calibri, Arial, sans-serif';ctx.fillText('Ranked by 12-month closings',58,438);
+   // Benchmark pace — live tier counts against Daniel-approved monthly milestones.
+   const counts={Channel:channels.length,A:all.filter(r=>r.tier==='A').length,B:all.filter(r=>r.tier==='B').length};
+   const milestones=[
+     {label:'9/30',Channel:2,A:14,B:21},
+     {label:'10/31',Channel:2,A:16,B:24},
+     {label:'11/30',Channel:3,A:18,B:27},
+     {label:'12/31',Channel:4,A:20,B:30}
+   ];
+   const snap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;
+   const benchmarkDate=snap&&snap.imported_at?new Date(snap.imported_at):new Date();
+   const month=benchmarkDate.getMonth()+1;
+   const currentMilestone=month<=9?milestones[0]:month===10?milestones[1]:month===11?milestones[2]:milestones[3];
+   const benchY=378;ctCanvasRoundRect(ctx,58,benchY,964,178,18,white,line);
+   ctx.fillStyle=ink;ctx.font='800 26px Calibri, Arial, sans-serif';ctx.fillText('Benchmark Pace',82,benchY+36);
+   ctx.fillStyle=muted;ctx.font='600 15px Calibri, Arial, sans-serif';ctx.fillText('Current net tier counts vs '+currentMilestone.label+' target',82,benchY+61);
+   const bx=[82,340,598],labels=['Channel','A','B'];
+   labels.forEach((name,i)=>{
+     const target=currentMilestone[name],value=counts[name],gap=Math.max(0,target-value);
+     ctx.fillStyle=name==='Channel'?green:navy;ctx.font='800 28px Calibri, Arial, sans-serif';ctx.fillText(value+' / '+target,bx[i],benchY+101);
+     ctx.fillStyle=muted;ctx.font='700 13px Calibri, Arial, sans-serif';ctx.fillText(name.toUpperCase(),bx[i],benchY+121);
+     ctx.fillStyle=gap===0?green:orange;ctx.font='700 13px Calibri, Arial, sans-serif';ctx.fillText(gap===0?'TARGET MET':gap+' TO GO',bx[i],benchY+143);
+   });
+   ctx.fillStyle='#718391';ctx.font='600 13px Calibri, Arial, sans-serif';
+   ctx.fillText('10/31  2 Channel • 16 A • 24 B     11/30  3 • 18 • 27     12/31  4 • 20 • 30',82,benchY+166);
+
+   ctx.fillStyle=ink;ctx.font='800 31px Calibri, Arial, sans-serif';ctx.fillText('Top 10 Partners',58,598);
+   ctx.fillStyle=muted;ctx.font='500 17px Calibri, Arial, sans-serif';ctx.fillText('Ranked by 12-month closings',58,628);
 
    // Compact mobile cards: name/path first, then four easy-to-scan metrics.
-   const y0=468,rowH=126,rowGap=10,left=58,rowW=964;
+   const y0=652,rowH=112,rowGap=7,left=58,rowW=964;
    ranked.forEach((r,i)=>{
      const y=y0+i*(rowH+rowGap);
      ctCanvasRoundRect(ctx,left,y,rowW,rowH,16,white,line);
      ctCanvasRoundRect(ctx,left,y,64,rowH,16,navy,null);
-     ctx.fillStyle=white;ctx.font='800 31px Calibri, Arial, sans-serif';ctx.textAlign='center';ctx.fillText(String(i+1),left+32,y+71);ctx.textAlign='left';
+     ctx.fillStyle=white;ctx.font='800 31px Calibri, Arial, sans-serif';ctx.textAlign='center';ctx.fillText(String(i+1),left+32,y+63);ctx.textAlign='left';
 
      const contentX=left+82;
-     ctx.fillStyle=ink;ctCanvasFitText(ctx,pretty(r.name),320,24,17,800);ctx.fillText(pretty(r.name),contentX,y+31);
-     ctx.fillStyle=muted;ctx.font='600 15px Calibri, Arial, sans-serif';ctx.fillText('LP: '+pretty(r.owner||'Unassigned'),contentX,y+55);
+     ctx.fillStyle=ink;ctCanvasFitText(ctx,pretty(r.name),320,24,17,800);ctx.fillText(pretty(r.name),contentX,y+27);
+     ctx.fillStyle=muted;ctx.font='600 15px Calibri, Arial, sans-serif';ctx.fillText('LP: '+pretty(r.owner||'Unassigned'),contentX,y+48);
      ctx.fillStyle=(r.tier==='Channel'?green:navy);ctx.font='700 16px Calibri, Arial, sans-serif';
      const path=r.tier==='Channel'?'CHANNEL • ACHIEVED':r.tier+' → '+r.next+' • '+r.gap+' TO GO';
-     ctx.fillText(path,contentX,y+79);
+     ctx.fillText(path,contentX,y+69);
 
      // Metric strip aligned next to agent info, with readable labels.
      const metricStart=455, metricW=132;
      const metric=(x,val,label,accent)=>{
-       ctx.fillStyle=accent;ctx.font='800 27px Calibri, Arial, sans-serif';ctx.fillText(String(val),x,y+38);
-       ctx.fillStyle=muted;ctx.font='700 12px Calibri, Arial, sans-serif';ctx.fillText(label,x,y+60);
+       ctx.fillStyle=accent;ctx.font='800 27px Calibri, Arial, sans-serif';ctx.fillText(String(val),x,y+31);
+       ctx.fillStyle=muted;ctx.font='700 12px Calibri, Arial, sans-serif';ctx.fillText(label,x,y+51);
      };
      metric(metricStart,n(r.closed),'CLOSINGS',navy);
      metric(metricStart+metricW,n(r.preq),'PREQUALS',green);
      metric(metricStart+metricW*2,n(r.pipe),'PREAPPROVED',teal);
      metric(metricStart+metricW*3,n(r.leads),'LEADS WITH US',orange);
 
-     ctx.strokeStyle='#E8EFF3';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(metricStart-18,y+78);ctx.lineTo(left+rowW-20,y+78);ctx.stroke();
+     ctx.strokeStyle='#E8EFF3';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(metricStart-18,y+66);ctx.lineTo(left+rowW-20,y+66);ctx.stroke();
      ctx.fillStyle=muted;ctx.font='600 14px Calibri, Arial, sans-serif';
      const nextText=r.tier==='Channel'?'Focus: protect the relationship + keep referrals moving':'Next: '+r.gap+' more closing'+(r.gap===1?'':'s')+' to '+r.next;
-     ctx.fillText(nextText,metricStart,y+103);
+     ctx.fillText(nextText,metricStart,y+91);
    });
 
    // Small footer only. No extra summary blocks competing with the Top 10.
