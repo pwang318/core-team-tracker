@@ -11428,11 +11428,115 @@ function openOperatingStandardView(btn){
    const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Partner-Growth-Next-Tier-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
    if(typeof ctShowToast==='function')ctShowToast('Partner Growth list exported.');
  };
+
+ function ctShareWeekLabel(){
+   const snap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;
+   const d=snap&&snap.imported_at?new Date(snap.imported_at):new Date();
+   const day=(d.getDay()+6)%7,start=new Date(d);start.setHours(12,0,0,0);start.setDate(start.getDate()-day);
+   const end=new Date(start);end.setDate(start.getDate()+6);
+   const f=x=>x.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+   return 'Week of '+f(start)+' – '+f(end);
+ }
+ function ctCanvasRoundRect(ctx,x,y,w,h,r,fill,stroke){
+   r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+   if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
+ }
+ function ctCanvasFitText(ctx,text,maxWidth,startSize,minSize,weight){
+   let size=startSize;ctx.font=(weight||700)+' '+size+'px Calibri, Arial, sans-serif';
+   while(size>minSize&&ctx.measureText(text).width>maxWidth){size-=1;ctx.font=(weight||700)+' '+size+'px Calibri, Arial, sans-serif';}
+   return size;
+ }
+ function ctCanvasWrap(ctx,text,maxWidth,maxLines){
+   const words=String(text||'').split(/\s+/),lines=[];let line='';
+   for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width<=maxWidth){line=test;}else{if(line)lines.push(line);line=word;if(lines.length===maxLines-1)break;}}
+   if(line&&lines.length<maxLines)lines.push(line);
+   const used=lines.join(' ').split(/\s+/).length;
+   if(used<words.length&&lines.length){let last=lines[lines.length-1];while(ctx.measureText(last+'…').width>maxWidth&&last.length)last=last.slice(0,-1);lines[lines.length-1]=last.replace(/[ ,.;:-]+$/,'')+'…';}
+   return lines;
+ }
+ window.ctExportTierGrowthGraphic=async function(){
+   const all=(window.__CT_TIER_OPP_ROWS||[]).slice();
+   if(!all.length){if(typeof ctShowToast==='function')ctShowToast('Partner Growth is still loading.');return;}
+
+   // Top 10 = highest 12-month closings, matching the Partner Growth "most closings" view.
+   // Channel partners stay in the ranking; ties break by leads, prequals, active pipeline, then name.
+   const ranked=all.filter(r=>r.tier!=='No tier').sort((a,b)=>
+     n(b.closed)-n(a.closed)||n(b.leads)-n(a.leads)||n(b.preq)-n(a.preq)||n(b.pipe)-n(a.pipe)||String(a.name).localeCompare(String(b.name))
+   ).slice(0,10);
+   const channels=all.filter(r=>r.tier==='Channel').sort((a,b)=>n(b.closed)-n(a.closed)||String(a.name).localeCompare(String(b.name)));
+
+   const W=1080,H=2400,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
+   const navy='#102A4A',navy2='#0B2340',teal='#12B8D9',green='#19714F',mint='#E5F4EC',orange='#B85C12',ink='#10233F',muted='#587083',line='#DCE7ED',soft='#F6FAFC',white='#FFFFFF';
+   ctx.fillStyle=soft;ctx.fillRect(0,0,W,H);
+
+   // Header
+   ctx.fillStyle=navy2;ctx.fillRect(0,0,W,230);ctx.fillStyle=teal;ctx.fillRect(0,226,W,4);
+   ctx.fillStyle=white;ctx.font='800 56px Calibri, Arial, sans-serif';ctx.fillText('Partner Growth Snapshot',62,84);
+   ctx.fillStyle='#B8C9D8';ctx.font='700 25px Calibri, Arial, sans-serif';ctx.fillText('Top 10 Partners by 12-Month Closings',64,130);
+   ctCanvasRoundRect(ctx,732,49,286,62,31,'#183757','#55718A');ctx.fillStyle=white;ctx.font='700 21px Calibri, Arial, sans-serif';ctx.textAlign='center';ctx.fillText(ctShareWeekLabel(),875,89);ctx.textAlign='left';
+   ctx.fillStyle='#B8C9D8';ctx.font='500 18px Calibri, Arial, sans-serif';ctx.fillText('Source: '+sourceDate(),64,178);
+
+   // Only one top summary: Channel accounts + names.
+   const chY=260,chH=170;ctCanvasRoundRect(ctx,62,chY,956,chH,20,white,line);
+   ctx.fillStyle=green;ctx.font='800 46px Calibri, Arial, sans-serif';ctx.fillText(String(channels.length),88,chY+62);
+   ctx.fillStyle=ink;ctx.font='800 28px Calibri, Arial, sans-serif';ctx.fillText('CHANNEL ACCOUNTS',165,chY+54);
+   ctx.fillStyle=muted;ctx.font='600 19px Calibri, Arial, sans-serif';ctx.fillText('Protect + retain these relationships',165,chY+84);
+   ctx.fillStyle=ink;ctx.font='600 20px Calibri, Arial, sans-serif';
+   const chNames=channels.length?channels.map(r=>pretty(r.name)).join('  •  '):'None in this snapshot';
+   const chLines=ctCanvasWrap(ctx,chNames,900,3);chLines.forEach((t,i)=>ctx.fillText(t,88,chY+116+i*25));
+
+   // Top 10 section
+   ctx.fillStyle=ink;ctx.font='800 36px Calibri, Arial, sans-serif';ctx.fillText('Top 10',62,490);
+   ctx.fillStyle=muted;ctx.font='500 19px Calibri, Arial, sans-serif';ctx.fillText('Highest 12-month closing count • live Partner Growth data',62,523);
+
+   const y0=555,rowH=145,rowGap=10,left=62,right=1018,rowW=right-left;
+   ranked.forEach((r,i)=>{
+     const y=y0+i*(rowH+rowGap);
+     ctCanvasRoundRect(ctx,left,y,rowW,rowH,17,white,line);
+     ctCanvasRoundRect(ctx,left,y,76,rowH,17,navy,null);
+     ctx.fillStyle=white;ctx.font='800 38px Calibri, Arial, sans-serif';ctx.textAlign='center';ctx.fillText(String(i+1),left+38,y+82);ctx.textAlign='left';
+
+     // Agent + owner / path
+     ctx.fillStyle=ink;ctCanvasFitText(ctx,pretty(r.name),300,25,17,800);ctx.fillText(pretty(r.name),left+96,y+38);
+     ctx.fillStyle=muted;ctx.font='600 17px Calibri, Arial, sans-serif';ctx.fillText('LP: '+pretty(r.owner||'Unassigned'),left+96,y+66);
+     ctx.fillStyle=(r.tier==='Channel'?green:navy);ctx.font='700 17px Calibri, Arial, sans-serif';
+     const path=r.tier==='Channel'?'Channel • Achieved':r.tier+' → '+r.next+' • '+r.gap+' closing'+(r.gap===1?'':'s')+' needed';
+     ctx.fillText(path,left+96,y+94);
+
+     // Metrics grid — exactly what the share graphic needs.
+     const mx=left+430, col=125;
+     const metric=(x,value,label,accent)=>{ctx.fillStyle=accent;ctx.font='800 29px Calibri, Arial, sans-serif';ctx.fillText(String(value),x,y+43);ctx.fillStyle=muted;ctx.font='700 13px Calibri, Arial, sans-serif';ctx.fillText(label,x,y+68);};
+     metric(mx,n(r.closed),'CLOSINGS',navy);
+     metric(mx+col,n(r.preq),'PREQUALS',green);
+     metric(mx+col*2,n(r.pipe),'PREAPPROVED',teal);
+     metric(mx+col*3,n(r.leads),'LEADS WITH US',orange);
+
+     // Short next-tier callout along the bottom right of each row.
+     ctx.fillStyle=muted;ctx.font='600 16px Calibri, Arial, sans-serif';
+     const nextText=r.tier==='Channel'?'Next: protect + retain Channel':'Next: '+r.next+' • '+r.gap+' more closing'+(r.gap===1?'':'s');
+     ctx.fillText(nextText,mx,y+111);
+   });
+
+   // Footer legend / data note
+   const fy=2145;ctx.fillStyle=navy2;ctx.fillRect(0,fy,W,H-fy);
+   ctx.fillStyle=white;ctx.font='800 25px Calibri, Arial, sans-serif';ctx.fillText('HOW TO READ THIS',62,fy+52);
+   ctx.fillStyle='#C4D3DF';ctx.font='500 18px Calibri, Arial, sans-serif';
+   ctx.fillText('Closings = closed past year   •   Prequals = active prequals   •   Preapproved = active pipeline   •   Leads with us = total leads past year',62,fy+90);
+   ctx.fillStyle='#8FA8BA';ctx.font='500 17px Calibri, Arial, sans-serif';ctx.fillText('Channel accounts are shown above by name so leadership can see both growth priorities and relationships to protect.',62,fy+128);
+
+   const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png',1));if(!blob)throw new Error('Could not create share graphic.');
+   const fileName='Partner-Growth-Top-10-'+new Date().toISOString().slice(0,10)+'.png';
+   try{
+     if(navigator.share&&navigator.canShare){const file=new File([blob],fileName,{type:'image/png'});if(navigator.canShare({files:[file]})){await navigator.share({title:'Partner Growth Top 10',text:ctShareWeekLabel(),files:[file]});if(typeof ctShowToast==='function')ctShowToast('Partner Growth Top 10 ready to share.');return;}}
+   }catch(e){if(e&&e.name==='AbortError')return;console.warn('Native share unavailable, downloading PNG instead:',e.message);}
+   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+   if(typeof ctShowToast==='function')ctShowToast('Top 10 share graphic downloaded.');
+ };
  window.ctRenderTierOpportunities=async function(){
    const host=document.getElementById('ct-tier-opportunities');if(!host)return;
    host.innerHTML='<div class="no-data" style="padding:18px">Loading every current Power BI agent…</div>';
    window.__CT_TIER_OPP_ROWS=await rows();
-   host.innerHTML='<div class="ct-tier-opp-head"><div class="ct-tier-opp-head-row"><div><h2>Every agent and the path to the next tier</h2><p>Use the filters to see everyone, agents one closing away, or a specific tier. Active buyers help you decide where to focus first.</p></div><div class="ct-tier-opp-actions"><button class="ct-primary-btn" type="button" onclick="ctCopyTierTeamUpdate()">Copy Team Update</button><button class="ct-link-btn" type="button" onclick="ctExportTierGrowthCsv()">Export Growth List</button></div></div></div><div class="ct-tier-opp-controls"><input id="ct-tier-opp-q" placeholder="Search agent or LP…"><select id="ct-tier-opp-tier"><option value="all">All growth tiers</option><option>Channel</option><option>A</option><option>B</option><option>C</option><option>No tier</option></select><select id="ct-tier-opp-ready"><option value="all">All distances</option><option value="one">Exactly 1 closing away</option><option value="two">Within 2 closings</option><option value="achieved">Channel achieved</option></select><select id="ct-tier-opp-sort"><option value="gap">Sort: closest first</option><option value="buyers">Sort: active buyers</option><option value="leads">Sort: most leads</option><option value="closed">Sort: most closings</option><option value="name">Sort: agent name</option></select></div><div id="ct-tier-opp-summary" class="ct-tier-opp-summary"></div><div class="ct-tier-opp-scroll"><table class="ct-tier-opp-table"><thead><tr><th>Agent</th><th>LP</th><th>Power BI level</th><th>Growth tier</th><th>12-mo closes</th><th>12-mo leads</th><th>Prequals</th><th>Pipeline</th><th>Next tier</th><th>Gap</th><th>What moves the needle</th></tr></thead><tbody id="ct-tier-opp-body"></tbody></table></div>';
+   host.innerHTML='<div class="ct-tier-opp-head"><div class="ct-tier-opp-head-row"><div><h2>Every agent and the path to the next tier</h2><p>Use the filters to see everyone, agents one closing away, or a specific tier. Active buyers help you decide where to focus first.</p></div><div class="ct-tier-opp-actions"><button class="ct-primary-btn" type="button" onclick="ctExportTierGrowthGraphic()">Share Top 10 Graphic</button><button class="ct-link-btn" type="button" onclick="ctCopyTierTeamUpdate()">Copy Team Update</button><button class="ct-link-btn" type="button" onclick="ctExportTierGrowthCsv()">Export Growth List</button></div></div></div><div class="ct-tier-opp-controls"><input id="ct-tier-opp-q" placeholder="Search agent or LP…"><select id="ct-tier-opp-tier"><option value="all">All growth tiers</option><option>Channel</option><option>A</option><option>B</option><option>C</option><option>No tier</option></select><select id="ct-tier-opp-ready"><option value="all">All distances</option><option value="one">Exactly 1 closing away</option><option value="two">Within 2 closings</option><option value="achieved">Channel achieved</option></select><select id="ct-tier-opp-sort"><option value="gap">Sort: closest first</option><option value="buyers">Sort: active buyers</option><option value="leads">Sort: most leads</option><option value="closed">Sort: most closings</option><option value="name">Sort: agent name</option></select></div><div id="ct-tier-opp-summary" class="ct-tier-opp-summary"></div><div class="ct-tier-opp-scroll"><table class="ct-tier-opp-table"><thead><tr><th>Agent</th><th>LP</th><th>Power BI level</th><th>Growth tier</th><th>12-mo closes</th><th>12-mo leads</th><th>Prequals</th><th>Pipeline</th><th>Next tier</th><th>Gap</th><th>What moves the needle</th></tr></thead><tbody id="ct-tier-opp-body"></tbody></table></div>';
    ['ct-tier-opp-q','ct-tier-opp-tier','ct-tier-opp-ready','ct-tier-opp-sort'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=renderBody;el.onchange=renderBody;}});renderBody();
  };
 })();
