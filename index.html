@@ -11485,14 +11485,23 @@ function openOperatingStandardView(btn){
    const chLines=ctCanvasWrap(ctx,chNames,900,2);chLines.forEach((t,i)=>ctx.fillText(t,82,chY+111+i*24));
 
    // Benchmark pace — live tier counts against Daniel-approved monthly milestones.
-   const counts={Channel:channels.length,A:all.filter(r=>r.tier==='A').length,B:all.filter(r=>r.tier==='B').length};
+   // IMPORTANT: benchmark counts must match the Tier Growth Scoreboard exactly.
+   // A/B come from the latest Power BI Level; Channel is calculated from 10+ 12-month closings.
+   const liveSnap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;
+   const liveRows=liveSnap&&liveSnap.by_agent?Object.values(liveSnap.by_agent):[];
+   const liveChannel=liveRows.length?liveRows.filter(x=>n(x&&x.closed_12mo)>=10).length:channels.length;
+   const counts={
+     Channel:liveChannel,
+     A:liveRows.length?liveRows.filter(x=>String(x&&x.level||'').trim()==='A').length:n(liveSnap&&liveSnap.levels&&liveSnap.levels.A),
+     B:liveRows.length?liveRows.filter(x=>String(x&&x.level||'').trim()==='B').length:n(liveSnap&&liveSnap.levels&&liveSnap.levels.B)
+   };
    const milestones=[
      {label:'9/30',Channel:2,A:14,B:21},
      {label:'10/31',Channel:2,A:16,B:24},
      {label:'11/30',Channel:3,A:18,B:27},
      {label:'12/31',Channel:4,A:20,B:30}
    ];
-   const snap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;
+   const snap=liveSnap;
    const benchmarkDate=snap&&snap.imported_at?new Date(snap.imported_at):new Date();
    const month=benchmarkDate.getMonth()+1;
    const currentMilestone=month<=9?milestones[0]:month===10?milestones[1]:month===11?milestones[2]:milestones[3];
@@ -11504,7 +11513,9 @@ function openOperatingStandardView(btn){
      const target=currentMilestone[name],value=counts[name],gap=Math.max(0,target-value);
      ctx.fillStyle=name==='Channel'?green:navy;ctx.font='800 28px Calibri, Arial, sans-serif';ctx.fillText(value+' / '+target,bx[i],benchY+101);
      ctx.fillStyle=muted;ctx.font='700 13px Calibri, Arial, sans-serif';ctx.fillText(name.toUpperCase(),bx[i],benchY+121);
-     ctx.fillStyle=gap===0?green:orange;ctx.font='700 13px Calibri, Arial, sans-serif';ctx.fillText(gap===0?'TARGET MET':gap+' TO GO',bx[i],benchY+143);
+     const ahead=Math.max(0,value-target);
+     ctx.fillStyle=gap===0?green:orange;ctx.font='700 13px Calibri, Arial, sans-serif';
+     ctx.fillText(gap>0?gap+' TO GO':(ahead>0?ahead+' AHEAD':'TARGET MET'),bx[i],benchY+143);
    });
    ctx.fillStyle='#718391';ctx.font='600 13px Calibri, Arial, sans-serif';
    ctx.fillText('10/31  2 Channel • 16 A • 24 B     11/30  3 • 18 • 27     12/31  4 • 20 • 30',82,benchY+166);
