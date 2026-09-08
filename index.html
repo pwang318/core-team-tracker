@@ -12543,20 +12543,35 @@ async function importRmTuesday(input){
     const X=await xlsx(),wb=X.read(await file.arrayBuffer(),{type:'array',cellDates:true}),ws=v62Sheet(wb,['RM LISTING AGENT CALLS','RM TUESDAY CALLS','RM CALLS','LISTING AGENT CALLS']);
     if(!ws)throw new Error('No worksheet found in the RM Tuesday workbook.');
     const raw=X.utils.sheet_to_json(ws,{header:1,defval:null,raw:true}),hi=v62Header(raw,[['Borrower Name','Borrower','Client Name']]);if(hi<0)throw new Error('Could not find Borrower Name in the RM list.');
-    const h=(raw[hi]||[]).map(x=>String(x||'').trim()),w=weekStart(),batch='RM-TUE-'+w.replace(/-/g,'')+'-'+Date.now(),payload=[],seen=new Set();let count=0,missing=0,dupes=0;
+    const h=(raw[hi]||[]).map(x=>String(x||'').trim()),w=weekStart(),batch='RM-TUE-'+w.replace(/-/g,'')+'-'+Date.now(),candidates=[];let sourceRows=0;
     for(const rr of raw.slice(hi+1)){
-      if(!rr.some(v=>v!==null&&v!==''))continue;const r=mapRow(h,rr),purpose=norm(v62Get(r,['Loan Purpose','Purpose']));if(purpose&&purpose!=='purchase')continue;
-      const borrower=clean(v62Get(r,['Borrower Name','Borrower','Client Name']),180);if(!borrower)continue;
-      const loan=clean(v62Get(r,['Loan Number','Loan #','Loan No']),80),property=clean(v62Get(r,['Subject Property Address','Property Address','Address']),220),close=dateText(v62Get(r,['Est Closing Date','Estimated Closing Date','Closing Date','Close Date'])),mile=clean(v62Get(r,['Last Finished Milestone','Milestone','Current Milestone']),100),lp=lpShort(v62Get(r,['Loan Team Member Name - Loan Partner 2','Loan Partner 2','LP2','Loan Partner','LP Owner']))||lpShort(v62Get(r,['Loan Team Member Name - Loan Partner 1','Loan Partner 1','LP1']))||'';
+      if(!rr.some(v=>v!==null&&v!==''))continue;
+      const r=mapRow(h,rr),purpose=norm(v62Get(r,['Loan Purpose','Purpose']));if(purpose&&purpose!=='purchase')continue;
+      const borrower=clean(v62Get(r,['Borrower Name','Borrower','Client Name']),180);if(!borrower||norm(borrower)==='borrower name')continue;
+      const property=clean(v62Get(r,['Subject Property Address','Property Address','Address']),220),close=dateText(v62Get(r,['Est Closing Date','Estimated Closing Date','Closing Date','Close Date'])),mile=clean(v62Get(r,['Last Finished Milestone','Milestone','Current Milestone']),100),lp=lpShort(v62Get(r,['Loan Team Member Name - Loan Partner 2','Loan Partner 2','LP2','Loan Partner','LP Owner']))||lpShort(v62Get(r,['Loan Team Member Name - Loan Partner 1','Loan Partner 1','LP1']))||'';
       const sellerRaw=clean(v62Get(r,['Sellers Agent Contact Name','Seller Agent Contact Name','Listing Agent Contact Name','Sellers Agent Name','Listing Agent Name','Listing Agent']),180),builder=clean(v62Get(r,['Builder Contact Name','Builder Name']),180),roleRaw=norm(v62Get(r,['Contact Role','Role','Listing Type','Status']));let contact='',role='';
-      if(/fsbo/.test(roleRaw)||/^fsbo\b/i.test(sellerRaw)){contact='FSBO';role='FSBO'}else if(/new build|builder/.test(roleRaw)&&!usableAgent(sellerRaw)){contact=builder||'New build / builder';role='NEW_BUILD'}else if(usableAgent(sellerRaw)){contact=sellerRaw;role='Listing Agent'}else if(usableAgent(builder)){contact=builder;role='Builder Contact'}else{contact='Listing contact missing';role='Missing';missing++}
-      const tx=loan?await txnHash(loan):v62Stable(['RM',borrower,property,close,contact].join('|'));if(seen.has(tx)){dupes++;continue}seen.add(tx);
-      const notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','RM_LISTING')+tag('TUE_PLAN_KEY','LISTING-'+tx)+tag('TXN_KEY',tx)+tag('LP_OWNER',lp)+tag('TUE_CONTACT_ROLE',role)+tag('TUE_CONTACT_NAME',role==='FSBO'?'':(contact==='Listing contact missing'?'':contact))+tag('TUE_BUILDER_NAME',builder)+tag('TUE_PHONE',phone(v62Get(r,['Sellers Agent Phone','Seller Agent Phone','Listing Agent Phone','Builder Phone'])))+tag('TUE_EMAIL',email(v62Get(r,['Sellers Agent Email','Seller Agent Email','Listing Agent Email','Builder Email'])))+tag('TXN_CLIENT',borrower)+tag('TXN_PROPERTY',property)+tag('TXN_CLOSE_DATE',close)+tag('TXN_MILESTONE',mile)+(role==='FSBO'?tag('AUTO_CLASS','FSBO'):'')+(role==='NEW_BUILD'?tag('AUTO_CLASS','NEW_BUILD'):'')+' RM Tuesday plan from Mack-sorted RM workbook.';
-      payload.push({agent_name:contact,act_type:SNAP,act_date:w,outcome:'RM Listing',notes,follow_up_date:w});count++;
+      if(/fsbo/.test(roleRaw)||/^fsbo\b/i.test(sellerRaw)){contact='FSBO';role='FSBO'}else if(/new build|builder/.test(roleRaw)&&!usableAgent(sellerRaw)){contact=builder||'New build / builder';role='NEW_BUILD'}else if(usableAgent(sellerRaw)){contact=sellerRaw;role='Listing Agent'}else if(usableAgent(builder)){contact=builder;role='Builder Contact'}else{contact='Listing contact missing';role='Missing'}
+      const ph=phone(v62Get(r,['Sellers Agent Phone','Seller Agent Phone','Listing Agent Phone','Builder Phone'])),em=email(v62Get(r,['Sellers Agent Email','Seller Agent Email','Listing Agent Email','Builder Email']));
+      /* One real-estate transaction can have a 1st + 2nd mortgage. RM makes one listing-agent call. */
+      const txnSeed=['RM_TXN',norm(borrower),norm(property),String(close||'').slice(0,10),norm(lp)].join('|');
+      const groupKey=v62Stable(txnSeed),score=(usableAgent(contact)?12:0)+(ph?3:0)+(em?3:0)+(property?2:0)+(close?2:0)+(mile?1:0)+(role==='Listing Agent'?2:0);
+      candidates.push({borrower,property,close,mile,lp,contact,role,builder,ph,em,groupKey,score});sourceRows++;
     }
-    payload.push({agent_name:'__RM_TUESDAY_PLAN__',act_type:SNAP,act_date:w,outcome:'Batch',notes:'[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','RM_HEADER')+tag('ROW_COUNT',count)+tag('SOURCE_FILE',file.name),follow_up_date:null});
-    await deletePlanLane(w,'RM');for(let i=0;i<payload.length;i+=75)await sbFetch('POST','amanda_activities',payload.slice(i,i+75));
-    if(st){st.className='ct-v56-status ok';st.textContent='Loaded '+count+' RM Tuesday rows for week of '+w+(missing?' · '+missing+' listing contacts need review':'')+(dupes?' · '+dupes+' duplicates ignored':'')+' ✓'}
+    if(!candidates.length)throw new Error('No purchase rows were found in Mack\'s RM workbook. The existing RM Tuesday plan was left unchanged.');
+    const merged=new Map();let mergedRows=0;
+    for(const c of candidates){const prev=merged.get(c.groupKey);if(prev){mergedRows++;if(c.score>prev.score)merged.set(c.groupKey,c)}else merged.set(c.groupKey,c)}
+    const rows=[...merged.values()],payload=[];let missing=0;
+    rows.forEach(c=>{
+      if(c.role==='Missing')missing++;
+      const tx=c.groupKey,notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','RM_LISTING')+tag('TUE_PLAN_KEY','LISTING-'+tx)+tag('TXN_KEY',tx)+tag('LP_OWNER',c.lp)+tag('TUE_CONTACT_ROLE',c.role)+tag('TUE_CONTACT_NAME',c.role==='FSBO'?'':(c.contact==='Listing contact missing'?'':c.contact))+tag('TUE_BUILDER_NAME',c.builder)+tag('TUE_PHONE',c.ph)+tag('TUE_EMAIL',c.em)+tag('TXN_CLIENT',c.borrower)+tag('TXN_PROPERTY',c.property)+tag('TXN_CLOSE_DATE',c.close)+tag('TXN_MILESTONE',c.mile)+(c.role==='FSBO'?tag('AUTO_CLASS','FSBO'):'')+(c.role==='NEW_BUILD'?tag('AUTO_CLASS','NEW_BUILD'):'')+' RM Tuesday plan from Mack-sorted RM workbook.';
+      payload.push({agent_name:c.contact,act_type:SNAP,act_date:w,outcome:'RM Listing',notes,follow_up_date:w});
+    });
+    const headerNotes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','RM_HEADER')+tag('ROW_COUNT',rows.length)+tag('SOURCE_FILE',file.name)+tag('MERGED_ROWS',mergedRows);
+    /* Safe replace: save the complete new batch first; old RM batch stays authoritative until header succeeds. */
+    for(let i=0;i<payload.length;i+=75)await sbFetch('POST','amanda_activities',payload.slice(i,i+75));
+    await sbFetch('POST','amanda_activities',{agent_name:'__RM_TUESDAY_PLAN__',act_type:SNAP,act_date:w,outcome:'Batch',notes:headerNotes,follow_up_date:null});
+    await v64DeleteOldPlanLane(w,'RM',batch);
+    if(st){st.className='ct-v56-status ok';st.textContent='Loaded '+rows.length+' RM Tuesday calls'+(mergedRows?' · '+mergedRows+' duplicate/1st+2nd rows merged':'')+(missing?' · '+missing+' listing contacts need review':'')+' ✓'}
     await v63RefreshHubStatuses();if(typeof window.ctV56RefreshManagementStatus==='function')window.ctV56RefreshManagementStatus();
   }catch(e){console.error(e);if(st){st.className='ct-v56-status err';st.textContent='RM upload not applied: '+(e.message||e)}}finally{input.value=''}
 }
@@ -12570,7 +12585,7 @@ async function v63RefreshHubStatuses(){
     const headers=(rows||[]).filter(r=>/\[TUE_SPLIT_V310\]/.test(String(r.notes||''))&&['LP_HEADER','RM_HEADER'].includes(meta(r.notes,'TUE_PLAN_LANE')));
     const latest=lane=>headers.filter(r=>meta(r.notes,'TUE_PLAN_LANE')===lane).sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0))[0]||null;
     const lp=latest('LP_HEADER'),rm=latest('RM_HEADER');
-    const paint=(el,row,label)=>{if(!el)return;if(!row){el.className='ct-v56-status';el.textContent='No '+label+' Tuesday workbook uploaded for this week yet.';return}const n=meta(row.notes,'ROW_COUNT')||'0',f=meta(row.notes,'SOURCE_FILE')||label+' workbook';let extra='';if(label==='LP'){const cs=LPS.map(x=>x+' '+(meta(row.notes,'LP_'+x.toUpperCase())||'0')).join(' · '),m=Number(meta(row.notes,'MERGED_ROWS')||0);extra=' · '+cs+(m?' · '+m+' duplicate/1st+2nd rows merged':'')}el.className='ct-v56-status ok';el.textContent='Loaded '+n+' '+label+' Tuesday rows · '+f+extra+' · week of '+w+' ✓'};
+    const paint=(el,row,label)=>{if(!el)return;if(!row){el.className='ct-v56-status';el.textContent='No '+label+' Tuesday workbook uploaded for this week yet.';return}const n=meta(row.notes,'ROW_COUNT')||'0',f=meta(row.notes,'SOURCE_FILE')||label+' workbook';let extra='';if(label==='LP'){const cs=LPS.map(x=>x+' '+(meta(row.notes,'LP_'+x.toUpperCase())||'0')).join(' · '),m=Number(meta(row.notes,'MERGED_ROWS')||0);extra=' · '+cs+(m?' · '+m+' duplicate/1st+2nd rows merged':'')}else if(label==='RM'){const m=Number(meta(row.notes,'MERGED_ROWS')||0);if(m)extra=' · '+m+' duplicate/1st+2nd rows merged'}el.className='ct-v56-status ok';el.textContent='Loaded '+n+' '+label+' Tuesday rows · '+f+extra+' · week of '+w+' ✓'};
     paint(lpSt,lp,'LP');paint(rmSt,rm,'RM');
     if(mg){mg.className='ct-v56-status'+(lp||rm?' ok':'');mg.textContent=(lp?'LP list loaded':'LP list missing')+' · '+(rm?'RM list loaded':'RM list missing')+' · week of '+w;}
   }catch(e){console.warn('Weekly Hub status refresh failed',e);if(mg){mg.className='ct-v56-status err';mg.textContent='Could not verify weekly upload status. Refresh and retry.'}}
