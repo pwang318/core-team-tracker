@@ -12448,28 +12448,91 @@ function v62Sheet(wb,names){for(const n of names){if(wb.Sheets[n])return wb.Shee
 function v62Header(rows,groups){for(let i=0;i<Math.min(rows.length,20);i++){const z=(rows[i]||[]).map(x=>norm(x));if(groups.every(g=>g.some(a=>z.includes(norm(a)))))return i}return-1}
 function v62Get(r,aliases){for(const a of aliases){if(Object.prototype.hasOwnProperty.call(r,a)&&String(r[a]??'').trim()!=='')return r[a]}const entries=Object.entries(r);for(const a of aliases){const want=norm(a);const hit=entries.find(([k,v])=>norm(k)===want&&String(v??'').trim()!=='');if(hit)return hit[1]}return''}
 function v62Stable(seed){return legacyKey(String(seed||'').toLowerCase().replace(/\s+/g,' ').trim())}
+/* v64: transaction-safe LP import + display de-duplication. One home transaction = one Tuesday call,
+   even when Mack's workbook contains a 1st + 2nd loan row or the same row appears on a master + LP tab. */
+function v64TxnSignatureParts(borrower,property,close,lp,buyer,loan){
+  const b=norm(borrower),p=norm(property),c=String(close||'').slice(0,10),l=norm(lp),a=norm(buyer);
+  if(b&&(p||c))return ['txn',b,p,c,l,a].join('|');
+  if(b&&a)return ['txn',b,c,l,a].join('|');
+  if(loan)return 'loan|'+norm(loan);
+  return ['fallback',b,p,c,l,a].join('|');
+}
+function v64PlanGroupKey(r){
+  if(!r)return'';
+  const b=meta(r.notes,'TXN_CLIENT'),p=meta(r.notes,'TXN_PROPERTY'),c=meta(r.notes,'TXN_CLOSE_DATE'),l=lpShort(meta(r.notes,'LP_OWNER')),a=meta(r.notes,'BUYER_AGENT'),tx=rowClassKey(r);
+  const sig=v64TxnSignatureParts(b,p,c,l,a,'');
+  return (norm(b)&&(norm(p)||c||norm(a)))?v62Stable(sig):(tx||v62Stable(sig));
+}
+function v64PlanRowScore(r){
+  if(!r)return 0;let n=0;
+  if(usableAgent(meta(r.notes,'BUYER_AGENT')))n+=8;
+  if(phone(meta(r.notes,'BUYER_PHONE')))n+=3;
+  if(email(meta(r.notes,'BUYER_EMAIL')))n+=3;
+  if(meta(r.notes,'TXN_PROPERTY'))n+=2;
+  if(meta(r.notes,'TXN_CLOSE_DATE'))n+=2;
+  if(meta(r.notes,'TXN_MILESTONE'))n+=1;
+  return n;
+}
+function v64DedupePlanRows(rows){
+  const m=new Map();
+  (rows||[]).forEach(r=>{const k=v64PlanGroupKey(r)||rowClassKey(r)||('id-'+String(r.id||Math.random()));const prev=m.get(k);if(!prev||v64PlanRowScore(r)>v64PlanRowScore(prev))m.set(k,r)});
+  return Array.from(m.values());
+}
+function v64SheetCandidates(wb){
+  const out=[],seen=new Set(),add=(name)=>{const ws=wb&&wb.Sheets&&wb.Sheets[name];if(ws&&!seen.has(name)){seen.add(name);out.push({name,ws})}};
+  ['ACTIVE CONTRACTS','LP TUESDAY CALLS','TUESDAY UPDATE CALLS LP2','LP CALLS'].forEach(add);
+  LPS.forEach(lp=>{Object.keys((wb&&wb.Sheets)||{}).forEach(n=>{if(norm(n)===norm(lp))add(n)})});
+  if(!out.length&&wb&&wb.SheetNames&&wb.SheetNames.length)add(wb.SheetNames[0]);
+  return out;
+}
+async function v64DeleteOldPlanLane(w,lane,keepBatch){
+  const we=weekEnd(w),rows=await sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Call%20Plan%20Snapshot&act_date=gte.'+w+'&act_date=lte.'+we+'&select=id,notes&limit=8000').catch(()=>[]);
+  const wanted=lane==='LP'?new Set(['LP_HEADER','LP_TXN']):new Set(['RM_HEADER','RM_LISTING']);
+  const ids=(rows||[]).filter(r=>wanted.has(meta(r.notes,'TUE_PLAN_LANE'))&&meta(r.notes,'TUE_PLAN_BATCH')!==keepBatch).map(r=>r.id).filter(Boolean);
+  for(let i=0;i<ids.length;i+=100)await sbFetch('DELETE','amanda_activities?id=in.('+ids.slice(i,i+100).map(encodeURIComponent).join(',')+')').catch(()=>{});
+}
 async function importLpTuesday(input){
   const file=input.files&&input.files[0],st=document.getElementById('v62LPStatus');if(!file)return;
   if(st){st.className='ct-v56-status';st.textContent='Reading '+file.name+'…'}
   try{
-    const X=await xlsx(),wb=X.read(await file.arrayBuffer(),{type:'array',cellDates:true}),ws=v62Sheet(wb,['ACTIVE CONTRACTS','LP TUESDAY CALLS','TUESDAY UPDATE CALLS LP2','LP CALLS']);
-    if(!ws)throw new Error('No worksheet found in the LP Tuesday workbook.');
-    const raw=X.utils.sheet_to_json(ws,{header:1,defval:null,raw:true}),hi=v62Header(raw,[['Borrower Name','Borrower','Client Name'],['Loan Team Member Name - Loan Partner 2','Loan Partner 2','LP2','Loan Partner','LP Owner']]);
-    if(hi<0)throw new Error('Could not find Borrower Name and Loan Partner columns in the LP list.');
-    const h=(raw[hi]||[]).map(x=>String(x||'').trim()),w=weekStart(),batch='LP-TUE-'+w.replace(/-/g,'')+'-'+Date.now(),payload=[],seen=new Set();let count=0,unassigned=0,missingBuyer=0,dupes=0;
-    for(const rr of raw.slice(hi+1)){
-      if(!rr.some(v=>v!==null&&v!==''))continue;const r=mapRow(h,rr),purpose=norm(v62Get(r,['Loan Purpose','Purpose']));if(purpose&&purpose!=='purchase')continue;
-      const borrower=clean(v62Get(r,['Borrower Name','Borrower','Client Name']),180);if(!borrower)continue;
-      const lp=lpShort(v62Get(r,['Loan Team Member Name - Loan Partner 2','Loan Partner 2','LP2','Loan Partner','LP Owner']))||lpShort(v62Get(r,['Loan Team Member Name - Loan Partner 1','Loan Partner 1','LP1']))||'Unassigned';if(lp==='Unassigned')unassigned++;
-      const loan=clean(v62Get(r,['Loan Number','Loan #','Loan No']),80),property=clean(v62Get(r,['Subject Property Address','Property Address','Address']),220),close=dateText(v62Get(r,['Est Closing Date','Estimated Closing Date','Closing Date','Close Date'])),mile=clean(v62Get(r,['Last Finished Milestone','Milestone','Current Milestone']),100);
-      const buyerRaw=clean(v62Get(r,['Buyers Agent Contact Name','Buyer Agent Contact Name','Buyer Agent Name','Buyers Agent Name','Buyer Agent','Referral Source Name']),180),buyer=usableAgent(buyerRaw)?buyerRaw:'';if(!buyer)missingBuyer++;
-      const tx=loan?await txnHash(loan):v62Stable(['LP',borrower,property,close,lp,buyerRaw].join('|'));if(seen.has(tx)){dupes++;continue}seen.add(tx);
-      const notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','LP_TXN')+tag('TUE_PLAN_KEY','BUYER-'+tx)+tag('TXN_KEY',tx)+tag('LP_OWNER',lp)+tag('TXN_CLIENT',borrower)+tag('TXN_PROPERTY',property)+tag('BUYER_AGENT',buyer)+tag('BUYER_PHONE',phone(v62Get(r,['Buyers Agent Phone','Buyer Agent Phone','Buyer Phone'])))+tag('BUYER_EMAIL',email(v62Get(r,['Buyers Agent Email','Buyer Agent Email','Buyer Email'])))+tag('TXN_CLOSE_DATE',close)+tag('TXN_MILESTONE',mile)+' LP Tuesday plan from Mack-sorted LP workbook.';
-      payload.push({agent_name:buyer||'Buyer agent missing',act_type:SNAP,act_date:w,outcome:'LP Transaction',notes,follow_up_date:w});count++;
+    const X=await xlsx(),wb=X.read(await file.arrayBuffer(),{type:'array',cellDates:true}),sources=v64SheetCandidates(wb);
+    if(!sources.length)throw new Error('No usable worksheet found in the LP Tuesday workbook.');
+    const w=weekStart(),batch='LP-TUE-'+w.replace(/-/g,'')+'-'+Date.now(),candidates=[],sourceSeen=new Set();let rawRows=0,unassigned=0,missingBuyer=0;
+    for(const source of sources){
+      const raw=X.utils.sheet_to_json(source.ws,{header:1,defval:null,raw:true}),hi=v62Header(raw,[['Borrower Name','Borrower','Client Name']]);
+      if(hi<0)continue;
+      const h=(raw[hi]||[]).map(x=>String(x||'').trim()),sheetLp=LPS.find(x=>norm(x)===norm(source.name))||'';
+      for(const rr of raw.slice(hi+1)){
+        if(!rr.some(v=>v!==null&&v!==''))continue;
+        const r=mapRow(h,rr),purpose=norm(v62Get(r,['Loan Purpose','Purpose']));if(purpose&&purpose!=='purchase')continue;
+        const borrower=clean(v62Get(r,['Borrower Name','Borrower','Client Name']),180);if(!borrower||norm(borrower)==='borrower name')continue;
+        const lp=lpShort(v62Get(r,['Loan Team Member Name - Loan Partner 2','Loan Partner 2','LP2','Loan Partner','LP Owner']))||lpShort(v62Get(r,['Loan Team Member Name - Loan Partner 1','Loan Partner 1','LP1']))||sheetLp||'Unassigned';
+        const loan=clean(v62Get(r,['Loan Number','Loan #','Loan No']),80),property=clean(v62Get(r,['Subject Property Address','Property Address','Address']),220),close=dateText(v62Get(r,['Est Closing Date','Estimated Closing Date','Closing Date','Close Date'])),mile=clean(v62Get(r,['Last Finished Milestone','Milestone','Current Milestone']),100);
+        const buyerRaw=clean(v62Get(r,['Buyers Agent Contact Name','Buyer Agent Contact Name','Buyer Agent Name','Buyers Agent Name','Buyer Agent','Referral Source Name']),180),buyer=usableAgent(buyerRaw)?buyerRaw:'';
+        const ph=phone(v62Get(r,['Buyers Agent Phone','Buyer Agent Phone','Buyer Phone'])),em=email(v62Get(r,['Buyers Agent Email','Buyer Agent Email','Buyer Email']));
+        const signature=v64TxnSignatureParts(borrower,property,close,lp,buyerRaw,loan),sourceKey=[norm(source.name),norm(loan),norm(borrower),norm(property),close,norm(lp)].join('|');
+        if(sourceSeen.has(sourceKey))continue;sourceSeen.add(sourceKey);rawRows++;
+        candidates.push({borrower,lp,loan,property,close,mile,buyerRaw,buyer,ph,em,signature,source:source.name});
+      }
     }
-    payload.push({agent_name:'__LP_TUESDAY_PLAN__',act_type:SNAP,act_date:w,outcome:'Batch',notes:'[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','LP_HEADER')+tag('ROW_COUNT',count)+tag('SOURCE_FILE',file.name),follow_up_date:null});
-    await deletePlanLane(w,'LP');for(let i=0;i<payload.length;i+=75)await sbFetch('POST','amanda_activities',payload.slice(i,i+75));
-    if(st){st.className='ct-v56-status ok';st.textContent='Loaded '+count+' LP Tuesday rows for week of '+w+(missingBuyer?' · '+missingBuyer+' buyer contacts need review':'')+(unassigned?' · '+unassigned+' LP unassigned':'')+(dupes?' · '+dupes+' duplicates ignored':'')+' ✓'}
+    if(!candidates.length)throw new Error('No purchase rows were found in Mack\'s LP workbook. The existing LP Tuesday plan was left unchanged.');
+    const merged=new Map();let mergedRows=0;
+    const score=x=>(x.buyer?8:0)+(x.ph?3:0)+(x.em?3:0)+(x.property?2:0)+(x.close?2:0)+(x.mile?1:0)+(norm(x.source)==='active contracts'?1:0);
+    for(const c of candidates){const k=v62Stable(c.signature);const prev=merged.get(k);if(prev){mergedRows++;if(score(c)>score(prev))merged.set(k,c)}else merged.set(k,c)}
+    const rows=[...merged.values()],counts=Object.fromEntries(LPS.map(x=>[x,0]));
+    rows.forEach(c=>{if(c.lp==='Unassigned')unassigned++;else if(Object.prototype.hasOwnProperty.call(counts,c.lp))counts[c.lp]++;if(!c.buyer)missingBuyer++});
+    const payload=[];
+    for(const c of rows){
+      const tx=v62Stable(c.signature),notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','LP_TXN')+tag('TUE_PLAN_KEY','BUYER-'+tx)+tag('TXN_KEY',tx)+tag('LP_OWNER',c.lp)+tag('TXN_CLIENT',c.borrower)+tag('TXN_PROPERTY',c.property)+tag('BUYER_AGENT',c.buyer)+tag('BUYER_PHONE',c.ph)+tag('BUYER_EMAIL',c.em)+tag('TXN_CLOSE_DATE',c.close)+tag('TXN_MILESTONE',c.mile)+tag('SOURCE_SHEET',c.source)+' LP Tuesday plan from Mack-sorted LP workbook.';
+      payload.push({agent_name:c.buyer||'Buyer agent missing',act_type:SNAP,act_date:w,outcome:'LP Transaction',notes,follow_up_date:w});
+    }
+    const headerNotes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','LP_HEADER')+tag('ROW_COUNT',rows.length)+tag('SOURCE_FILE',file.name)+LPS.map(lp=>tag('LP_'+lp.toUpperCase(),counts[lp]||0)).join('')+tag('MERGED_ROWS',mergedRows);
+    /* Safe replace: rows first, header last. Until the header saves, the previous batch remains authoritative. */
+    for(let i=0;i<payload.length;i+=75)await sbFetch('POST','amanda_activities',payload.slice(i,i+75));
+    await sbFetch('POST','amanda_activities',{agent_name:'__LP_TUESDAY_PLAN__',act_type:SNAP,act_date:w,outcome:'Batch',notes:headerNotes,follow_up_date:null});
+    await v64DeleteOldPlanLane(w,'LP',batch);
+    const countText=LPS.map(lp=>lp+' '+(counts[lp]||0)).join(' · ');
+    if(st){st.className='ct-v56-status ok';st.textContent='Loaded '+rows.length+' LP Tuesday calls · '+countText+(mergedRows?' · '+mergedRows+' duplicate/1st+2nd rows merged':'')+(missingBuyer?' · '+missingBuyer+' buyer contacts need review':'')+(unassigned?' · '+unassigned+' LP unassigned':'')+' ✓'}
     await v63RefreshHubStatuses();if(window.currentUser)await loadLp(window.currentUser);if(typeof window.rmRefreshActiveContractBuyerAgents==='function')window.rmRefreshActiveContractBuyerAgents(true).catch(()=>{});if(typeof window.ctV56RefreshManagementStatus==='function')window.ctV56RefreshManagementStatus();
   }catch(e){console.error(e);if(st){st.className='ct-v56-status err';st.textContent='LP upload not applied: '+(e.message||e)}}finally{input.value=''}
 }
@@ -12507,7 +12570,7 @@ async function v63RefreshHubStatuses(){
     const headers=(rows||[]).filter(r=>/\[TUE_SPLIT_V310\]/.test(String(r.notes||''))&&['LP_HEADER','RM_HEADER'].includes(meta(r.notes,'TUE_PLAN_LANE')));
     const latest=lane=>headers.filter(r=>meta(r.notes,'TUE_PLAN_LANE')===lane).sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0))[0]||null;
     const lp=latest('LP_HEADER'),rm=latest('RM_HEADER');
-    const paint=(el,row,label)=>{if(!el)return;if(!row){el.className='ct-v56-status';el.textContent='No '+label+' Tuesday workbook uploaded for this week yet.';return}const n=meta(row.notes,'ROW_COUNT')||'0',f=meta(row.notes,'SOURCE_FILE')||label+' workbook';el.className='ct-v56-status ok';el.textContent='Loaded '+n+' '+label+' Tuesday rows · '+f+' · week of '+w+' ✓'};
+    const paint=(el,row,label)=>{if(!el)return;if(!row){el.className='ct-v56-status';el.textContent='No '+label+' Tuesday workbook uploaded for this week yet.';return}const n=meta(row.notes,'ROW_COUNT')||'0',f=meta(row.notes,'SOURCE_FILE')||label+' workbook';let extra='';if(label==='LP'){const cs=LPS.map(x=>x+' '+(meta(row.notes,'LP_'+x.toUpperCase())||'0')).join(' · '),m=Number(meta(row.notes,'MERGED_ROWS')||0);extra=' · '+cs+(m?' · '+m+' duplicate/1st+2nd rows merged':'')}el.className='ct-v56-status ok';el.textContent='Loaded '+n+' '+label+' Tuesday rows · '+f+extra+' · week of '+w+' ✓'};
     paint(lpSt,lp,'LP');paint(rmSt,rm,'RM');
     if(mg){mg.className='ct-v56-status'+(lp||rm?' ok':'');mg.textContent=(lp?'LP list loaded':'LP list missing')+' · '+(rm?'RM list loaded':'RM list missing')+' · week of '+w;}
   }catch(e){console.warn('Weekly Hub status refresh failed',e);if(mg){mg.className='ct-v56-status err';mg.textContent='Could not verify weekly upload status. Refresh and retry.'}}
@@ -12527,8 +12590,27 @@ window.v63RefreshHubStatuses=v63RefreshHubStatuses;
 window.v62PickLP=()=>document.getElementById('v62LPFile')?.click();window.v62PickRM=()=>document.getElementById('v62RMFile')?.click();window.v310PickLP=window.v62PickLP;window.v310PickRM=window.v62PickRM;
 
 function ensureExec(){let host=document.getElementById('v56Execution');if(host)return host;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;host=document.createElement('section');host.id='v56Execution';host.innerHTML='<div class="v56-exec-head"><div><h3>Tuesday Updates</h3><p>Active contracts return every new week until they fall off Encompass. A saved FSBO / new-build / no-agent classification stays with that loan; a completed call does not.</p></div><div id="v56Summary" class="v56-summary">Loading…</div></div><div id="v56Rows"></div>';anchor.appendChild(host);return host}
-async function planState(lp){const w=weekStart(),we=weekEnd(w);const [weekActs,classes]=await Promise.all([sbFetch('GET','amanda_activities?act_date=gte.'+w+'&act_date=lte.'+we+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=8000').catch(()=>[]),sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Contact%20Classification&select=id,agent_name,act_type,act_date,outcome,notes,created_at&order=created_at.desc&limit=5000').catch(()=>[])]);const snaps=weekActs.filter(a=>a.act_type===SNAP&&/\[TUE_SPLIT_V310\]/.test(String(a.notes||''))),headers=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_HEADER'&&weekStart(meta(a.notes,'TUE_PLAN_DATE')||a.act_date)===w).sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0)),batch=headers[0]?meta(headers[0].notes,'TUE_PLAN_BATCH'):'';const rows=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_TXN'&&meta(a.notes,'TUE_PLAN_BATCH')===batch&&lpShort(meta(a.notes,'LP_OWNER'))===lp);const cm={};classes.forEach(a=>{if(meta(a.notes,'TUE_SIDE')!=='BUYER')return;const v=meta(a.notes,'TUE_CLASS'),k=classRecordKey(a),mk=classRecordMatchKey(a);if(k&&!cm[k])cm[k]=v;if(mk&&!cm[mk])cm[mk]=v});return{w,batch,rows,logs:weekActs.filter(a=>a.act_type===LOG),classes:cm}}
-function done(row,s){const tx=meta(row.notes,'TXN_KEY'),pk=meta(row.notes,'TUE_PLAN_KEY');return s.logs.some(a=>weekStart(a.act_date)===s.w&&((tx&&meta(a.notes,'TXN_KEY')===tx)||(pk&&meta(a.notes,'TUE_PLAN_KEY')===pk)))}
+async function planState(lp){
+  const w=weekStart(),we=weekEnd(w);const [weekActs,classes]=await Promise.all([
+    sbFetch('GET','amanda_activities?act_date=gte.'+w+'&act_date=lte.'+we+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=8000').catch(()=>[]),
+    sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Contact%20Classification&select=id,agent_name,act_type,act_date,outcome,notes,created_at&order=created_at.desc&limit=5000').catch(()=>[])
+  ]);
+  const snaps=weekActs.filter(a=>a.act_type===SNAP&&/\[TUE_SPLIT_V310\]/.test(String(a.notes||''))),headers=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_HEADER'&&weekStart(meta(a.notes,'TUE_PLAN_DATE')||a.act_date)===w).sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0)),batch=headers[0]?meta(headers[0].notes,'TUE_PLAN_BATCH'):'';
+  const rawRows=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_TXN'&&meta(a.notes,'TUE_PLAN_BATCH')===batch&&lpShort(meta(a.notes,'LP_OWNER'))===lp),rows=v64DedupePlanRows(rawRows);
+  const cm={};classes.forEach(a=>{if(meta(a.notes,'TUE_SIDE')!=='BUYER')return;const v=meta(a.notes,'TUE_CLASS'),k=classRecordKey(a),mk=classRecordMatchKey(a);if(k&&!cm[k])cm[k]=v;if(mk&&!cm[mk])cm[mk]=v});
+  return{w,batch,rows,rawCount:rawRows.length,hiddenDupes:Math.max(0,rawRows.length-rows.length),logs:weekActs.filter(a=>a.act_type===LOG),classes:cm}
+}
+function done(row,s){
+  const tx=meta(row.notes,'TXN_KEY'),pk=meta(row.notes,'TUE_PLAN_KEY'),mk=rowMatchKey(row),client=norm(meta(row.notes,'TXN_CLIENT')),lp=lpShort(meta(row.notes,'LP_OWNER'));
+  return s.logs.some(a=>{
+    if(weekStart(a.act_date)!==s.w)return false;
+    const al=lpShort(meta(a.notes,'LP_OWNER')||meta(a.notes,'LP'));if(al&&lp&&al!==lp)return false;
+    if(tx&&meta(a.notes,'TXN_KEY')===tx)return true;
+    if(pk&&meta(a.notes,'TUE_PLAN_KEY')===pk)return true;
+    if(mk&&meta(a.notes,'MATCH_KEY')===mk)return true;
+    return client&&norm(meta(a.notes,'TXN_CLIENT'))===client;
+  })
+}
 function classSelect(tx,value){const o=[['CALL_REQUIRED','Call required'],['FSBO','FSBO'],['NEW_BUILD','New build / builder'],['NO_BUYER_AGENT','No buyer agent'],['CONTACT_ISSUE','Contact issue']];return '<select class="v56-class" data-tx="'+esc(tx)+'" onchange="v57BuyerClassDirty(this)">'+o.map(x=>'<option value="'+x[0]+'"'+(x[0]===value?' selected':'')+'>'+x[1]+'</option>').join('')+'</select>'}
 let state={lp:'',data:null,current:null};
 function renderLpState(s,lp){
@@ -12573,7 +12655,7 @@ window.v56ClassifyBuyer=function(enc,value,el){if(el){el.value=value;window.v57B
 function ensureModal(){if(document.getElementById('v56Modal'))return;const m=document.createElement('div');m.id='v56Modal';m.innerHTML='<div class="v56-modal"><div class="v56-modal-head"><div><h3>LP Tuesday update</h3><div id="v56ModalMeta" class="v56-meta"></div></div><button class="v56-close" onclick="v56CloseLp()">×</button></div><div class="v56-fields"><div class="v56-field"><label>Outcome</label><select id="v56Outcome"><option>Connected / meaningful conversation</option><option>Left voicemail + text sent</option><option>No answer + text sent</option><option>Follow-up needed</option><option>Meeting scheduled</option></select></div><div class="v56-field"><label>Next follow-up</label><input id="v56Follow" type="date"></div><div class="v56-field full"><label>What did you communicate / learn?</label><textarea id="v56Notes" placeholder="Short, useful file update and what happened."></textarea></div></div><div id="v56Err" class="v56-error"></div><div class="v56-modal-actions"><button class="ct-v56-btn secondary" onclick="v56CloseLp()">Cancel</button><button id="v56Save" class="ct-v56-btn" onclick="v56SaveLp()">Save update</button></div></div>';document.body.appendChild(m)}
 window.v56OpenLp=function(enc){const tx=decodeURIComponent(enc||''),r=state.data&&state.data.rows.find(x=>rowClassKey(x)===tx);if(!r)return;state.current=r;ensureModal();document.getElementById('v56ModalMeta').textContent=[meta(r.notes,'TXN_CLIENT'),meta(r.notes,'BUYER_AGENT'),meta(r.notes,'TXN_PROPERTY')].filter(Boolean).join(' · ');document.getElementById('v56Notes').value='';document.getElementById('v56Follow').value='';document.getElementById('v56Err').style.display='none';document.getElementById('v56Modal').classList.add('show')};
 window.v56CloseLp=()=>{document.getElementById('v56Modal')?.classList.remove('show');state.current=null};
-window.v56SaveLp=async function(){const r=state.current;if(!r)return;const n=clean(document.getElementById('v56Notes').value,800),out=document.getElementById('v56Outcome').value,fu=document.getElementById('v56Follow').value||null,err=document.getElementById('v56Err'),btn=document.getElementById('v56Save');if(n.split(/\s+/).filter(Boolean).length<3){err.textContent='Add a short note about the update.';err.style.display='block';return}btn.disabled=true;btn.textContent='Saving…';try{await sbFetch('POST','amanda_activities',{agent_name:meta(r.notes,'BUYER_AGENT')||meta(r.notes,'TXN_CLIENT'),act_type:LOG,act_date:new Date().toISOString().slice(0,10),outcome:out,notes:'[TUE_SPLIT_V310_WORK]'+tag('TXN_KEY',meta(r.notes,'TXN_KEY'))+tag('TUE_PLAN_KEY',meta(r.notes,'TUE_PLAN_KEY'))+tag('TUE_PLAN_DATE',state.data.w)+tag('TUE_PLAN_LANE','LP_TXN')+tag('LP_OWNER',state.lp)+tag('TXN_CLIENT',meta(r.notes,'TXN_CLIENT'))+' '+n,follow_up_date:fu});v56CloseLp();await loadLp(state.lp)}catch(e){console.error(e);err.textContent='Could not save. Please retry.';err.style.display='block'}finally{btn.disabled=false;btn.textContent='Save update'}};
+window.v56SaveLp=async function(){const r=state.current;if(!r)return;const n=clean(document.getElementById('v56Notes').value,800),out=document.getElementById('v56Outcome').value,fu=document.getElementById('v56Follow').value||null,err=document.getElementById('v56Err'),btn=document.getElementById('v56Save');if(n.split(/\s+/).filter(Boolean).length<3){err.textContent='Add a short note about the update.';err.style.display='block';return}btn.disabled=true;btn.textContent='Saving…';try{await sbFetch('POST','amanda_activities',{agent_name:meta(r.notes,'BUYER_AGENT')||meta(r.notes,'TXN_CLIENT'),act_type:LOG,act_date:new Date().toISOString().slice(0,10),outcome:out,notes:'[TUE_SPLIT_V310_WORK]'+tag('TXN_KEY',meta(r.notes,'TXN_KEY'))+tag('TUE_PLAN_KEY',meta(r.notes,'TUE_PLAN_KEY'))+tag('TUE_PLAN_DATE',state.data.w)+tag('TUE_PLAN_LANE','LP_TXN')+tag('LP_OWNER',state.lp)+tag('TXN_CLIENT',meta(r.notes,'TXN_CLIENT'))+tag('MATCH_KEY',rowMatchKey(r))+' '+n,follow_up_date:fu});v56CloseLp();await loadLp(state.lp)}catch(e){console.error(e);err.textContent='Could not save. Please retry.';err.style.display='block'}finally{btn.disabled=false;btn.textContent='Save update'}};
 
 /* Current Power BI only — never fall back to a baked historical baseline. */
 window.ctGetCurrentPowerBiSnapshot=function(){let s=window.CT_POWERBI_SNAPSHOT||null;if(!s){try{s=JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null')}catch(e){s=null}}return s||null};
