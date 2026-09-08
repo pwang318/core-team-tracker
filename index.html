@@ -1,4 +1,4 @@
-
+ 
 <!DOCTYPE html>
 
 <html lang="en">
@@ -12470,7 +12470,7 @@ async function importLpTuesday(input){
     payload.push({agent_name:'__LP_TUESDAY_PLAN__',act_type:SNAP,act_date:w,outcome:'Batch',notes:'[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','LP_HEADER')+tag('ROW_COUNT',count)+tag('SOURCE_FILE',file.name),follow_up_date:null});
     await deletePlanLane(w,'LP');for(let i=0;i<payload.length;i+=75)await sbFetch('POST','amanda_activities',payload.slice(i,i+75));
     if(st){st.className='ct-v56-status ok';st.textContent='Loaded '+count+' LP Tuesday rows for week of '+w+(missingBuyer?' · '+missingBuyer+' buyer contacts need review':'')+(unassigned?' · '+unassigned+' LP unassigned':'')+(dupes?' · '+dupes+' duplicates ignored':'')+' ✓'}
-    if(window.currentUser)await loadLp(window.currentUser);if(typeof window.rmRefreshActiveContractBuyerAgents==='function')window.rmRefreshActiveContractBuyerAgents(true).catch(()=>{});if(typeof window.ctV56RefreshManagementStatus==='function')window.ctV56RefreshManagementStatus();
+    await v63RefreshHubStatuses();if(window.currentUser)await loadLp(window.currentUser);if(typeof window.rmRefreshActiveContractBuyerAgents==='function')window.rmRefreshActiveContractBuyerAgents(true).catch(()=>{});if(typeof window.ctV56RefreshManagementStatus==='function')window.ctV56RefreshManagementStatus();
   }catch(e){console.error(e);if(st){st.className='ct-v56-status err';st.textContent='LP upload not applied: '+(e.message||e)}}finally{input.value=''}
 }
 async function importRmTuesday(input){
@@ -12494,18 +12494,36 @@ async function importRmTuesday(input){
     payload.push({agent_name:'__RM_TUESDAY_PLAN__',act_type:SNAP,act_date:w,outcome:'Batch',notes:'[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','RM_HEADER')+tag('ROW_COUNT',count)+tag('SOURCE_FILE',file.name),follow_up_date:null});
     await deletePlanLane(w,'RM');for(let i=0;i<payload.length;i+=75)await sbFetch('POST','amanda_activities',payload.slice(i,i+75));
     if(st){st.className='ct-v56-status ok';st.textContent='Loaded '+count+' RM Tuesday rows for week of '+w+(missing?' · '+missing+' listing contacts need review':'')+(dupes?' · '+dupes+' duplicates ignored':'')+' ✓'}
-    if(typeof window.ctV56RefreshManagementStatus==='function')window.ctV56RefreshManagementStatus();
+    await v63RefreshHubStatuses();if(typeof window.ctV56RefreshManagementStatus==='function')window.ctV56RefreshManagementStatus();
   }catch(e){console.error(e);if(st){st.className='ct-v56-status err';st.textContent='RM upload not applied: '+(e.message||e)}}finally{input.value=''}
 }
 
-function installHub(){
-  const grid=document.querySelector('#view-data-hub .ct-data-grid');if(!grid)return;['v300PlanSource','v310TuesdaySources','ctWeeklyOpsHub'].forEach(id=>document.getElementById(id)?.remove());
-  const s=document.createElement('section');s.id='ctWeeklyOpsHub';s.innerHTML='<div class="ct-v56-hubgrid">'+
-    '<div class="ct-v56-hubcard management" style="grid-column:1/-1"><div class="ct-v56-kicker">MANAGEMENT REPORTING</div><h3>Weekly exports</h3><p>Export calls, Tuesday completion status, and current contract status from the latest uploaded plans and logged activity.</p><button class="ct-v56-btn" type="button" onclick="ctExportAllCalls()">Export All Calls + Updates</button> <button class="ct-v56-btn secondary" type="button" onclick="ctExportContractStatusManagement()">Export Contract Status for Management</button><div id="v56MgmtStatus" class="ct-v56-status">Ready after the weekly lists are loaded.</div></div>'+
-    '<div class="ct-v56-hubcard"><div class="ct-v56-kicker">1 · LP TUESDAY LIST</div><h3>Upload Mack\'s LP Excel</h3><p>This file controls LP buyer/client + buyer-agent Tuesday updates. Re-uploading replaces only the LP plan for this week; RM work is untouched.</p><button class="ct-v56-btn" type="button" onclick="v62PickLP()">Upload LP Tuesday List</button><input id="v62LPFile" type="file" accept=".xlsx,.xls" style="display:none"><div id="v62LPStatus" class="ct-v56-status">No LP Tuesday workbook uploaded for this week yet.</div></div>'+
-    '<div class="ct-v56-hubcard"><div class="ct-v56-kicker">2 · RM TUESDAY LIST</div><h3>Upload Mack\'s RM Excel</h3><p>This file controls RM listing-agent Tuesday calls only. Re-uploading replaces only the RM plan for this week; LP work is untouched.</p><button class="ct-v56-btn" type="button" onclick="v62PickRM()">Upload RM Tuesday List</button><input id="v62RMFile" type="file" accept=".xlsx,.xls" style="display:none"><div id="v62RMStatus" class="ct-v56-status">No RM Tuesday workbook uploaded for this week yet.</div></div>'+
-    '</div>';grid.appendChild(s);document.getElementById('v62LPFile').addEventListener('change',e=>importLpTuesday(e.target));document.getElementById('v62RMFile').addEventListener('change',e=>importRmTuesday(e.target));
+async function v63RefreshHubStatuses(){
+  const lpSt=document.getElementById('v62LPStatus'),rmSt=document.getElementById('v62RMStatus'),mg=document.getElementById('v56MgmtStatus');
+  if(!lpSt&&!rmSt&&!mg)return;
+  const w=weekStart(),we=weekEnd(w);
+  try{
+    const rows=await sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Call%20Plan%20Snapshot&act_date=gte.'+w+'&act_date=lte.'+we+'&select=agent_name,act_date,notes,created_at&order=created_at.desc&limit=6000').catch(()=>[]);
+    const headers=(rows||[]).filter(r=>/\[TUE_SPLIT_V310\]/.test(String(r.notes||''))&&['LP_HEADER','RM_HEADER'].includes(meta(r.notes,'TUE_PLAN_LANE')));
+    const latest=lane=>headers.filter(r=>meta(r.notes,'TUE_PLAN_LANE')===lane).sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0))[0]||null;
+    const lp=latest('LP_HEADER'),rm=latest('RM_HEADER');
+    const paint=(el,row,label)=>{if(!el)return;if(!row){el.className='ct-v56-status';el.textContent='No '+label+' Tuesday workbook uploaded for this week yet.';return}const n=meta(row.notes,'ROW_COUNT')||'0',f=meta(row.notes,'SOURCE_FILE')||label+' workbook';el.className='ct-v56-status ok';el.textContent='Loaded '+n+' '+label+' Tuesday rows · '+f+' · week of '+w+' ✓'};
+    paint(lpSt,lp,'LP');paint(rmSt,rm,'RM');
+    if(mg){mg.className='ct-v56-status'+(lp||rm?' ok':'');mg.textContent=(lp?'LP list loaded':'LP list missing')+' · '+(rm?'RM list loaded':'RM list missing')+' · week of '+w;}
+  }catch(e){console.warn('Weekly Hub status refresh failed',e);if(mg){mg.className='ct-v56-status err';mg.textContent='Could not verify weekly upload status. Refresh and retry.'}}
 }
+function installHub(){
+  const grid=document.querySelector('#view-data-hub .ct-data-grid');if(!grid)return null;
+  ['v300PlanSource','v310TuesdaySources'].forEach(id=>document.getElementById(id)?.remove());
+  let s=document.getElementById('ctWeeklyOpsHub');
+  if(s){v63RefreshHubStatuses();return s;}
+  s=document.createElement('section');s.id='ctWeeklyOpsHub';s.innerHTML='<div class="ct-v56-hubgrid">'+
+    '<div class="ct-v56-hubcard management" style="grid-column:1/-1"><div class="ct-v56-kicker">MANAGEMENT REPORTING</div><h3>Weekly exports</h3><p>Export calls, Tuesday completion status, and current contract status from the latest uploaded plans and logged activity.</p><button class="ct-v56-btn" type="button" onclick="ctExportAllCalls()">Export All Calls + Updates</button> <button class="ct-v56-btn secondary" type="button" onclick="ctExportContractStatusManagement()">Export Contract Status for Management</button><div id="v56MgmtStatus" class="ct-v56-status">Checking this week\'s saved lists…</div></div>'+
+    '<div class="ct-v56-hubcard"><div class="ct-v56-kicker">1 · LP TUESDAY LIST</div><h3>Upload Mack\'s LP Excel</h3><p>This file controls LP buyer/client + buyer-agent Tuesday updates. Re-uploading replaces only the LP plan for this week; RM work is untouched.</p><button class="ct-v56-btn" type="button" onclick="v62PickLP()">Upload LP Tuesday List</button><input id="v62LPFile" type="file" accept=".xlsx,.xls" style="display:none"><div id="v62LPStatus" class="ct-v56-status">Checking this week\'s LP list…</div></div>'+
+    '<div class="ct-v56-hubcard"><div class="ct-v56-kicker">2 · RM TUESDAY LIST</div><h3>Upload Mack\'s RM Excel</h3><p>This file controls RM listing-agent Tuesday calls only. Re-uploading replaces only the RM plan for this week; LP work is untouched.</p><button class="ct-v56-btn" type="button" onclick="v62PickRM()">Upload RM Tuesday List</button><input id="v62RMFile" type="file" accept=".xlsx,.xls" style="display:none"><div id="v62RMStatus" class="ct-v56-status">Checking this week\'s RM list…</div></div>'+
+    '</div>';grid.appendChild(s);document.getElementById('v62LPFile').addEventListener('change',e=>importLpTuesday(e.target));document.getElementById('v62RMFile').addEventListener('change',e=>importRmTuesday(e.target));v63RefreshHubStatuses();return s;
+}
+window.v63RefreshHubStatuses=v63RefreshHubStatuses;
 window.v62PickLP=()=>document.getElementById('v62LPFile')?.click();window.v62PickRM=()=>document.getElementById('v62RMFile')?.click();window.v310PickLP=window.v62PickLP;window.v310PickRM=window.v62PickRM;
 
 function ensureExec(){let host=document.getElementById('v56Execution');if(host)return host;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;host=document.createElement('section');host.id='v56Execution';host.innerHTML='<div class="v56-exec-head"><div><h3>Tuesday Updates</h3><p>Active contracts return every new week until they fall off Encompass. A saved FSBO / new-build / no-agent classification stays with that loan; a completed call does not.</p></div><div id="v56Summary" class="v56-summary">Loading…</div></div><div id="v56Rows"></div>';anchor.appendChild(host);return host}
@@ -12533,7 +12551,7 @@ function renderLpState(s,lp){
   if(sumEl)sumEl.textContent=due+' due · '+complete+' done · '+cleared+' cleared · '+issues+' review';
 }
 async function loadLp(lp){
-  lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;installHub();if(!ensureExec())return;state.lp=lp;const s=await planState(lp);renderLpState(s,lp)
+  lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();if(!ensureExec())return;state.lp=lp;const s=await planState(lp);renderLpState(s,lp)
 }
 window.v310LoadPlan=loadLp;window.ctV56LoadLpTuesday=loadLp;
 window.v57BuyerClassDirty=function(sel){const wrap=sel&&sel.closest('.v56-actions'),btn=wrap&&wrap.querySelector('.v57-save-class');if(btn){btn.classList.remove('saved');btn.disabled=false;btn.textContent='Save status'}};
