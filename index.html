@@ -1,5 +1,6 @@
  
 <!DOCTYPE html>
+<!-- v67: live Power BI server hydration + outcome alignment. Active-agent/tier outcome cards now read the latest shared Supabase-stamped Power BI roster instead of relying on browser-local snapshot state. -->
 
 <html lang="en">
 <head>
@@ -3160,6 +3161,37 @@ function ctPowerBiActiveCount(snapshot){
   var s=snapshot||ctGetCurrentPowerBiSnapshot()||{},l=s.levels||{};
   return Number(l.A||0)+Number(l.B||0)+Number(l.C||0);
 }
+
+// v67 — server-backed Power BI roster summary. Browser localStorage is useful for detailed
+// prequal/pipeline drilldowns, but it must never be the authority for current Active Agent
+// or Relationship Tier counts. Rebuild those counts from the latest shared profile stamp.
+var CT_LIVE_PB_CACHE={at:0,data:null,promise:null};
+function ctCurrentRelationshipMilestone(){
+  var m=new Date().getMonth()+1;
+  if(m<=9)return{label:'9/30 Target',Channel:2,A:14,B:21};
+  if(m===10)return{label:'10/31 Target',Channel:2,A:16,B:24};
+  if(m===11)return{label:'11/30 Target',Channel:3,A:18,B:27};
+  return{label:'12/31 Goal',Channel:4,A:20,B:30};
+}
+function ctRelTierFromProduction(p){var c=Number(p&&p.closes_past_year||0)||0,l=Number(p&&p.total_leads_past_year||0)||0;return c>=10?'Channel':c>=4?'A':c>=2?'B':(c>=1||l>=1)?'C':null}
+async function ctGetLivePowerBiSummary(force){
+  if(!force&&CT_LIVE_PB_CACHE.data&&Date.now()-CT_LIVE_PB_CACHE.at<45000)return CT_LIVE_PB_CACHE.data;
+  if(CT_LIVE_PB_CACHE.promise)return CT_LIVE_PB_CACHE.promise;
+  CT_LIVE_PB_CACHE.promise=(async function(){
+    var rows=await sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,do_not_contact&powerbi_last_seen_at=not.is.null&limit=5000').catch(function(){return[];});
+    var latestMs=0,stamp=null;(rows||[]).forEach(function(p){var ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(Number.isFinite(ms)&&ms>latestMs){latestMs=ms;stamp=p.powerbi_last_seen_at;}});
+    var source={A:0,B:0,C:0},rel={Channel:0,A:0,B:0,C:0},by=new Map();
+    if(latestMs)(rows||[]).forEach(function(p){var ms=Date.parse(p&&p.powerbi_last_seen_at||''),lv=String(p&&p.powerbi_level||'').trim().toUpperCase();if(!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000||!['A','B','C'].includes(lv))return;var k=String(p.agent_name||'').trim().toLowerCase();if(k&&!by.has(k))by.set(k,p);});
+    var current=Array.from(by.values());current.forEach(function(p){var lv=String(p.powerbi_level||'').trim().toUpperCase();if(source[lv]!==undefined)source[lv]++;});
+    var managed=current.filter(function(p){return p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive';});
+    managed.forEach(function(p){var t=ctRelTierFromProduction(p);if(t&&rel[t]!==undefined)rel[t]++;});
+    var data={active_partner_rows:current.length,managed_active_rows:managed.length,levels:rel,source_levels:source,stamp:stamp,imported_at:stamp,source:'shared Power BI server'};
+    CT_LIVE_PB_CACHE.data=data;CT_LIVE_PB_CACHE.at=Date.now();return data;
+  })().finally(function(){CT_LIVE_PB_CACHE.promise=null;});
+  return CT_LIVE_PB_CACHE.promise;
+}
+window.ctGetLivePowerBiSummary=ctGetLivePowerBiSummary;
+window.ctInvalidateLivePowerBi=function(){CT_LIVE_PB_CACHE.at=0;CT_LIVE_PB_CACHE.data=null;};
 function ctGetPbAgentSnapshot(name){
   var snap=ctGetCurrentPowerBiSnapshot();
   if(!snap||!snap.by_agent)return null;
@@ -3771,16 +3803,17 @@ function renderAlerts(){
   }).join("");
 }
 
-function renderGrowthScoreboard(){
+async function renderGrowthScoreboard(){
   var el=document.getElementById("d-growth-scoreboard");
   if(!el)return;
-  var managedAgents=agents.filter(isActive);
-  var pbSnap=ctGetCurrentPowerBiSnapshot();
-  var pbLevels=(pbSnap&&pbSnap.levels)||{};
-  var total=ctPowerBiActiveCount(pbSnap)||managedAgents.length;
-  var aTier=Number(pbLevels.A||0),bTier=Number(pbLevels.B||0),cTier=Number(pbLevels.C||0);
-  if(!ctPowerBiActiveCount(pbSnap)){aTier=managedAgents.filter(function(a){return a[1]==="A";}).length;bTier=managedAgents.filter(function(a){return a[1]==="B";}).length;cTier=managedAgents.filter(function(a){return a[1]==="C";}).length;}
-  var GOAL_TOTAL=200,GOAL_A=25,GOAL_B=35;
+  var managedAgents=agents.filter(isActive),live=null;
+  try{live=await ctGetLivePowerBiSummary(false);}catch(e){console.warn('Live Power BI summary unavailable',e)}
+  var pbSnap=ctGetCurrentPowerBiSnapshot(),pbLevels=(pbSnap&&pbSnap.levels)||{},milestone=ctCurrentRelationshipMilestone();
+  var total=live?Number(live.active_partner_rows||0):(ctPowerBiActiveCount(pbSnap)||managedAgents.length);
+  var channelTier=live?Number(live.levels.Channel||0):Number(pbLevels.Channel||0);
+  var aTier=live?Number(live.levels.A||0):Number(pbLevels.A||0),bTier=live?Number(live.levels.B||0):Number(pbLevels.B||0),cTier=live?Number(live.levels.C||0):Number(pbLevels.C||0);
+  if(!live&&!ctPowerBiActiveCount(pbSnap)){channelTier=managedAgents.filter(function(a){return a[1]==="Channel";}).length;aTier=managedAgents.filter(function(a){return a[1]==="A";}).length;bTier=managedAgents.filter(function(a){return a[1]==="B";}).length;cTier=managedAgents.filter(function(a){return a[1]==="C";}).length;}
+  var GOAL_TOTAL=200,GOAL_CHANNEL=milestone.Channel,GOAL_A=milestone.A,GOAL_B=milestone.B;
 
   function bar(val,goal,color){
     var pct=Math.min(val/goal,1);
@@ -3811,23 +3844,28 @@ function renderGrowthScoreboard(){
       +'<div style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-.02em">'+total+'</div>'
       +bar(total,GOAL_TOTAL,"#1F4E79")
     +'</div>'
+    +'<div style="background:#fff8e8;border-radius:8px;padding:14px;border:1px solid #ecd9a8">'
+      +'<div style="font-size:11px;font-weight:700;color:#84651e;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Relationship Channel</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#84651e;letter-spacing:-.02em">'+channelTier+'</div>'
+      +bar(channelTier,GOAL_CHANNEL,"#84651e")
+    +'</div>'
     +'<div style="background:#f0fdf4;border-radius:8px;padding:14px;border:1px solid #bbf7d0">'
-      +'<div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Power BI A</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Relationship A</div>'
       +'<div style="font-size:28px;font-weight:800;color:#15803d;letter-spacing:-.02em">'+aTier+'</div>'
       +bar(aTier,GOAL_A,"#15803d")
     +'</div>'
     +'<div style="background:#eff6ff;border-radius:8px;padding:14px;border:1px solid #bfdbfe">'
-      +'<div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Power BI B</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Relationship B</div>'
       +'<div style="font-size:28px;font-weight:800;color:#1d4ed8;letter-spacing:-.02em">'+bTier+'</div>'
       +bar(bTier,GOAL_B,"#1d4ed8")
     +'</div>'
     +'<div style="background:#f8fafc;border-radius:8px;padding:14px;border:1px solid var(--border)">'
-      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Power BI C</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Relationship C</div>'
       +'<div style="font-size:28px;font-weight:800;color:#64748b;letter-spacing:-.02em">'+cTier+'</div>'
       +'<div style="font-size:10px;color:#94a3b8;margin-top:8px">Development pool</div>'
     +'</div>'
   +'</div>'
-  +'<div style="font-size:10.5px;color:var(--text-3);margin:-6px 0 12px">Power BI Active Agents = A + B + C from the latest upload. Rows below are the managed tracker roster by LP, so they will not equal the Power BI total.</div>'
+  +'<div style="font-size:10.5px;color:var(--text-3);margin:-6px 0 12px"><b>Live source:</b> '+(live&&live.stamp?new Date(live.stamp).toLocaleString():"No shared Power BI stamp")+' · Power BI Active Agents is the exact latest A/B/C source population. Relationship Channel/A/B/C is recalculated from production using the RM definition. Current milestone: '+milestone.label+'.</div>'
   +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:8px">Managed roster by LP</div>'
   +lpRows;
 }
@@ -5389,6 +5427,8 @@ function handleUpload(input){
       // finishes, because it writes powerbi_last_seen_at / powerbi_level as well as production,
       // tier and 90-day Active Partner status.
       await window.lpSyncAgentProfilesFromUpload(rows);
+      if(typeof window.ctInvalidateLivePowerBi==='function')window.ctInvalidateLivePowerBi();
+      try{if(typeof window.ctGetLivePowerBiSummary==='function')await window.ctGetLivePowerBiSummary(true);}catch(livePbErr){console.warn("Live Power BI roster refresh failed (non-critical):",livePbErr.message);}
 
       // Health snapshots must run AFTER the profile sync, not race it.
       try{await window.lpWriteHealthSnapshots();}
@@ -12112,7 +12152,7 @@ async function render(){
   const grid=box.querySelector('.ct-amanda-grid');if(!grid)return;
   let host=box.querySelector('.ct-rm-v6-outcome');
   if(!host){host=document.createElement('div');host.className='ct-rm-v6-outcome';grid.before(host)}
-  const p=pb(),t=milestone(),pts=(a,b,w)=>b?Math.min(w,n(a)/b*w):0;
+  const live=await window.ctGetLivePowerBiSummary(false),p={active:n(live&&live.active_partner_rows),managed:n(live&&live.managed_active_rows),levels:Object.assign({Channel:0,A:0,B:0,C:0},live&&live.levels||{}),source:'shared Power BI server',stamp:live&&live.stamp},t=milestone(),pts=(a,b,w)=>b?Math.min(w,n(a)/b*w):0;
   const tier=pts(p.levels.Channel,t.Channel,15)+pts(p.levels.A,t.A,15)+pts(p.levels.B,t.B,20);
   const now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),1),iso=d=>d.toISOString().slice(0,10);
   let currentLeads=[],priorLeads=[];
@@ -12128,7 +12168,7 @@ async function render(){
     '<div class="ct-rm-v6-grid">'+
     '<div class="ct-rm-v6-m"><b>Tier Growth · 50%</b><strong>'+tier.toFixed(1)+' / 50</strong><small>'+p.levels.Channel+' Channel · '+p.levels.A+' A · '+p.levels.B+' B · '+t.label+'</small></div>'+
     '<div class="ct-rm-v6-m"><b>Agent-to-Lead · 30%</b><strong>'+ratioPts.toFixed(1)+' / 30</strong><small>Last completed month: '+priorActual+' leads ÷ '+p.active+' Active Partners = '+ratio.toFixed(2)+' · current month pace '+currentPace.toFixed(2)+'</small></div>'+
-    '<div class="ct-rm-v6-m"><b>Active Partner Count · 20%</b><strong>'+countPts.toFixed(1)+' / 20</strong><small>'+p.active+' / 200 · current Power BI active population</small></div>'+
+    '<div class="ct-rm-v6-m"><b>Active Partner Count · 20%</b><strong>'+countPts.toFixed(1)+' / 20</strong><small>'+p.active+' / 200 · exact Power BI active population'+(p.managed!==p.active?' · '+p.managed+' managed after inactive/DNC cleanup':'')+'</small></div>'+
     '</div>';
 }
 window.ctRenderAmandaOutcomeV6=render;
@@ -12473,10 +12513,24 @@ function v64PlanRowScore(r){
   if(meta(r.notes,'TXN_MILESTONE'))n+=1;
   return n;
 }
+function v66PlanOrder(r){
+  if(!r)return Number.MAX_SAFE_INTEGER;
+  if(Number.isFinite(Number(r._v66Order)))return Number(r._v66Order);
+  const tagged=Number(meta(r.notes,'TUE_ORDER'));
+  if(Number.isFinite(tagged)&&tagged>0)return tagged;
+  const created=Date.parse(r.created_at||'');
+  return Number.isFinite(created)&&created>0?created:Number.MAX_SAFE_INTEGER;
+}
 function v64DedupePlanRows(rows){
   const m=new Map();
-  (rows||[]).forEach(r=>{const k=v64PlanGroupKey(r)||rowClassKey(r)||('id-'+String(r.id||Math.random()));const prev=m.get(k);if(!prev||v64PlanRowScore(r)>v64PlanRowScore(prev))m.set(k,r)});
-  return Array.from(m.values());
+  (rows||[]).forEach(r=>{
+    const k=v64PlanGroupKey(r)||rowClassKey(r)||('id-'+String(r.id||Math.random())),prev=m.get(k);
+    if(!prev){r._v66Order=v66PlanOrder(r);m.set(k,r);return}
+    const firstOrder=Math.min(v66PlanOrder(prev),v66PlanOrder(r));
+    const best=v64PlanRowScore(r)>v64PlanRowScore(prev)?r:prev;
+    best._v66Order=firstOrder;m.set(k,best);
+  });
+  return Array.from(m.values()).sort((a,b)=>v66PlanOrder(a)-v66PlanOrder(b));
 }
 function v64SheetCandidates(wb){
   const out=[],seen=new Set(),add=(name)=>{const ws=wb&&wb.Sheets&&wb.Sheets[name];if(ws&&!seen.has(name)){seen.add(name);out.push({name,ws})}};
@@ -12497,12 +12551,12 @@ async function importLpTuesday(input){
   try{
     const X=await xlsx(),wb=X.read(await file.arrayBuffer(),{type:'array',cellDates:true}),sources=v64SheetCandidates(wb);
     if(!sources.length)throw new Error('No usable worksheet found in the LP Tuesday workbook.');
-    const w=weekStart(),batch='LP-TUE-'+w.replace(/-/g,'')+'-'+Date.now(),candidates=[],sourceSeen=new Set();let rawRows=0,unassigned=0,missingBuyer=0;
+    const w=weekStart(),batch='LP-TUE-'+w.replace(/-/g,'')+'-'+Date.now(),candidates=[],sourceSeen=new Set();let rawRows=0,unassigned=0,missingBuyer=0,sourceOrdinal=0;
     for(const source of sources){
       const raw=X.utils.sheet_to_json(source.ws,{header:1,defval:null,raw:true}),hi=v62Header(raw,[['Borrower Name','Borrower','Client Name']]);
-      if(hi<0)continue;
-      const h=(raw[hi]||[]).map(x=>String(x||'').trim()),sheetLp=LPS.find(x=>norm(x)===norm(source.name))||'';
-      for(const rr of raw.slice(hi+1)){
+      if(hi<0){sourceOrdinal++;continue}
+      const h=(raw[hi]||[]).map(x=>String(x||'').trim()),sheetLp=LPS.find(x=>norm(x)===norm(source.name))||'',sourceBase=sourceOrdinal*100000;
+      for(const [rowOffset,rr] of raw.slice(hi+1).entries()){
         if(!rr.some(v=>v!==null&&v!==''))continue;
         const r=mapRow(h,rr),purpose=norm(v62Get(r,['Loan Purpose','Purpose']));if(purpose&&purpose!=='purchase')continue;
         const borrower=clean(v62Get(r,['Borrower Name','Borrower','Client Name']),180);if(!borrower||norm(borrower)==='borrower name')continue;
@@ -12512,18 +12566,19 @@ async function importLpTuesday(input){
         const ph=phone(v62Get(r,['Buyers Agent Phone','Buyer Agent Phone','Buyer Phone'])),em=email(v62Get(r,['Buyers Agent Email','Buyer Agent Email','Buyer Email']));
         const signature=v64TxnSignatureParts(borrower,property,close,lp,buyerRaw,loan),sourceKey=[norm(source.name),norm(loan),norm(borrower),norm(property),close,norm(lp)].join('|');
         if(sourceSeen.has(sourceKey))continue;sourceSeen.add(sourceKey);rawRows++;
-        candidates.push({borrower,lp,loan,property,close,mile,buyerRaw,buyer,ph,em,signature,source:source.name});
+        candidates.push({borrower,lp,loan,property,close,mile,buyerRaw,buyer,ph,em,signature,source:source.name,order:sourceBase+rowOffset+1});
       }
+      sourceOrdinal++;
     }
     if(!candidates.length)throw new Error('No purchase rows were found in Mack\'s LP workbook. The existing LP Tuesday plan was left unchanged.');
     const merged=new Map();let mergedRows=0;
     const score=x=>(x.buyer?8:0)+(x.ph?3:0)+(x.em?3:0)+(x.property?2:0)+(x.close?2:0)+(x.mile?1:0)+(norm(x.source)==='active contracts'?1:0);
-    for(const c of candidates){const k=v62Stable(c.signature);const prev=merged.get(k);if(prev){mergedRows++;if(score(c)>score(prev))merged.set(k,c)}else merged.set(k,c)}
-    const rows=[...merged.values()],counts=Object.fromEntries(LPS.map(x=>[x,0]));
+    for(const c of candidates){const k=v62Stable(c.signature),prev=merged.get(k);if(prev){mergedRows++;const firstOrder=Math.min(prev.order,c.order);if(score(c)>score(prev))merged.set(k,Object.assign({},c,{order:firstOrder}));else prev.order=firstOrder}else merged.set(k,c)}
+    const rows=[...merged.values()].sort((a,b)=>a.order-b.order);rows.forEach((c,i)=>c.displayOrder=i+1);const counts=Object.fromEntries(LPS.map(x=>[x,0]));
     rows.forEach(c=>{if(c.lp==='Unassigned')unassigned++;else if(Object.prototype.hasOwnProperty.call(counts,c.lp))counts[c.lp]++;if(!c.buyer)missingBuyer++});
     const payload=[];
     for(const c of rows){
-      const tx=v62Stable(c.signature),notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','LP_TXN')+tag('TUE_PLAN_KEY','BUYER-'+tx)+tag('TXN_KEY',tx)+tag('LP_OWNER',c.lp)+tag('TXN_CLIENT',c.borrower)+tag('TXN_PROPERTY',c.property)+tag('BUYER_AGENT',c.buyer)+tag('BUYER_PHONE',c.ph)+tag('BUYER_EMAIL',c.em)+tag('TXN_CLOSE_DATE',c.close)+tag('TXN_MILESTONE',c.mile)+tag('SOURCE_SHEET',c.source)+' LP Tuesday plan from Mack-sorted LP workbook.';
+      const tx=v62Stable(c.signature),notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','LP_TXN')+tag('TUE_PLAN_KEY','BUYER-'+tx)+tag('TXN_KEY',tx)+tag('LP_OWNER',c.lp)+tag('TXN_CLIENT',c.borrower)+tag('TXN_PROPERTY',c.property)+tag('BUYER_AGENT',c.buyer)+tag('BUYER_PHONE',c.ph)+tag('BUYER_EMAIL',c.em)+tag('TXN_CLOSE_DATE',c.close)+tag('TXN_MILESTONE',c.mile)+tag('SOURCE_SHEET',c.source)+tag('TUE_ORDER',String(c.displayOrder))+' LP Tuesday plan from Mack-sorted LP workbook.';
       payload.push({agent_name:c.buyer||'Buyer agent missing',act_type:SNAP,act_date:w,outcome:'LP Transaction',notes,follow_up_date:w});
     }
     const headerNotes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','LP_HEADER')+tag('ROW_COUNT',rows.length)+tag('SOURCE_FILE',file.name)+LPS.map(lp=>tag('LP_'+lp.toUpperCase(),counts[lp]||0)).join('')+tag('MERGED_ROWS',mergedRows);
@@ -12544,7 +12599,7 @@ async function importRmTuesday(input){
     if(!ws)throw new Error('No worksheet found in the RM Tuesday workbook.');
     const raw=X.utils.sheet_to_json(ws,{header:1,defval:null,raw:true}),hi=v62Header(raw,[['Borrower Name','Borrower','Client Name']]);if(hi<0)throw new Error('Could not find Borrower Name in the RM list.');
     const h=(raw[hi]||[]).map(x=>String(x||'').trim()),w=weekStart(),batch='RM-TUE-'+w.replace(/-/g,'')+'-'+Date.now(),candidates=[];let sourceRows=0;
-    for(const rr of raw.slice(hi+1)){
+    for(const [rowOffset,rr] of raw.slice(hi+1).entries()){
       if(!rr.some(v=>v!==null&&v!==''))continue;
       const r=mapRow(h,rr),purpose=norm(v62Get(r,['Loan Purpose','Purpose']));if(purpose&&purpose!=='purchase')continue;
       const borrower=clean(v62Get(r,['Borrower Name','Borrower','Client Name']),180);if(!borrower||norm(borrower)==='borrower name')continue;
@@ -12555,15 +12610,15 @@ async function importRmTuesday(input){
       /* One real-estate transaction can have a 1st + 2nd mortgage. RM makes one listing-agent call. */
       const txnSeed=['RM_TXN',norm(borrower),norm(property),String(close||'').slice(0,10),norm(lp)].join('|');
       const groupKey=v62Stable(txnSeed),score=(usableAgent(contact)?12:0)+(ph?3:0)+(em?3:0)+(property?2:0)+(close?2:0)+(mile?1:0)+(role==='Listing Agent'?2:0);
-      candidates.push({borrower,property,close,mile,lp,contact,role,builder,ph,em,groupKey,score});sourceRows++;
+      candidates.push({borrower,property,close,mile,lp,contact,role,builder,ph,em,groupKey,score,order:rowOffset+1});sourceRows++;
     }
     if(!candidates.length)throw new Error('No purchase rows were found in Mack\'s RM workbook. The existing RM Tuesday plan was left unchanged.');
     const merged=new Map();let mergedRows=0;
-    for(const c of candidates){const prev=merged.get(c.groupKey);if(prev){mergedRows++;if(c.score>prev.score)merged.set(c.groupKey,c)}else merged.set(c.groupKey,c)}
-    const rows=[...merged.values()],payload=[];let missing=0;
+    for(const c of candidates){const prev=merged.get(c.groupKey);if(prev){mergedRows++;const firstOrder=Math.min(prev.order,c.order);if(c.score>prev.score)merged.set(c.groupKey,Object.assign({},c,{order:firstOrder}));else prev.order=firstOrder}else merged.set(c.groupKey,c)}
+    const rows=[...merged.values()].sort((a,b)=>a.order-b.order);rows.forEach((c,i)=>c.displayOrder=i+1);const payload=[];let missing=0;
     rows.forEach(c=>{
       if(c.role==='Missing')missing++;
-      const tx=c.groupKey,notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','RM_LISTING')+tag('TUE_PLAN_KEY','LISTING-'+tx)+tag('TXN_KEY',tx)+tag('LP_OWNER',c.lp)+tag('TUE_CONTACT_ROLE',c.role)+tag('TUE_CONTACT_NAME',c.role==='FSBO'?'':(c.contact==='Listing contact missing'?'':c.contact))+tag('TUE_BUILDER_NAME',c.builder)+tag('TUE_PHONE',c.ph)+tag('TUE_EMAIL',c.em)+tag('TXN_CLIENT',c.borrower)+tag('TXN_PROPERTY',c.property)+tag('TXN_CLOSE_DATE',c.close)+tag('TXN_MILESTONE',c.mile)+(c.role==='FSBO'?tag('AUTO_CLASS','FSBO'):'')+(c.role==='NEW_BUILD'?tag('AUTO_CLASS','NEW_BUILD'):'')+' RM Tuesday plan from Mack-sorted RM workbook.';
+      const tx=c.groupKey,notes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','RM_LISTING')+tag('TUE_PLAN_KEY','LISTING-'+tx)+tag('TXN_KEY',tx)+tag('LP_OWNER',c.lp)+tag('TUE_CONTACT_ROLE',c.role)+tag('TUE_CONTACT_NAME',c.role==='FSBO'?'':(c.contact==='Listing contact missing'?'':c.contact))+tag('TUE_BUILDER_NAME',c.builder)+tag('TUE_PHONE',c.ph)+tag('TUE_EMAIL',c.em)+tag('TXN_CLIENT',c.borrower)+tag('TXN_PROPERTY',c.property)+tag('TXN_CLOSE_DATE',c.close)+tag('TXN_MILESTONE',c.mile)+tag('TUE_ORDER',String(c.displayOrder))+(c.role==='FSBO'?tag('AUTO_CLASS','FSBO'):'')+(c.role==='NEW_BUILD'?tag('AUTO_CLASS','NEW_BUILD'):'')+' RM Tuesday plan from Mack-sorted RM workbook.';
       payload.push({agent_name:c.contact,act_type:SNAP,act_date:w,outcome:'RM Listing',notes,follow_up_date:w});
     });
     const headerNotes='[TUE_SPLIT_V310]'+tag('TUE_PLAN_BATCH',batch)+tag('TUE_PLAN_DATE',w)+tag('TUE_PLAN_LANE','RM_HEADER')+tag('ROW_COUNT',rows.length)+tag('SOURCE_FILE',file.name)+tag('MERGED_ROWS',mergedRows);
@@ -12702,7 +12757,13 @@ function removeOldHealthExport(){document.getElementById('ctExportMgmtContractBt
 function boot(){removeOldHealthExport();installFundedUpload();installHub();ensureModal();setTimeout(()=>refreshTeam(),250);setTimeout(()=>{if(window.currentUser)loadLp(window.currentUser)},350);setTimeout(()=>window.ctV56RefreshManagementStatus(),450);fundedData(true).then(d=>{const st=document.getElementById('ctFundedStatus');if(st&&d)st.textContent=d.total+' unique funded units loaded through '+d.asOf+'. Shared snapshot loaded.'})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
-</script></body>
+</script>\n<script id="ct-v67-live-pbi-focus-refresh">
+(function(){
+  var last=0;async function refreshLive(){if(Date.now()-last<30000)return;last=Date.now();try{if(window.ctInvalidateLivePowerBi)window.ctInvalidateLivePowerBi();if(window.ctGetLivePowerBiSummary)await window.ctGetLivePowerBiSummary(true);if(typeof window.renderGrowthScoreboard==='function'&&document.getElementById('d-growth-scoreboard'))window.renderGrowthScoreboard();if(typeof window.ctRenderAmandaOutcomeV6==='function'&&document.getElementById('ct-amanda-snapshot'))window.ctRenderAmandaOutcomeV6();}catch(e){console.warn('Power BI focus refresh',e&&e.message)}}
+  window.addEventListener('focus',refreshLive);document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshLive()});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(refreshLive,900)},{once:true});else setTimeout(refreshLive,500);
+})();
+</script>\n</body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
@@ -12827,3 +12888,5 @@ window.ctOpenScoreDetail=async function(metric){if(metric==='funded')return wind
 })();
 </script>
 </html>
+
+<!-- v66: preserve Mack Excel row order for LP + RM Tuesday plans using TUE_ORDER; legacy batches fall back to created_at ascending. -->
