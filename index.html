@@ -1,17 +1,17 @@
- 
+  
 <!DOCTYPE html>
-<!-- v70: Power BI import hardening. Uploads are normalized to unique agents before counts/totals are calculated or shared tables are updated; server read-back must match before success is shown. Retains v69 Daniel tier roadmap and prior tracker logic. -->
+<!-- v77: LP and RM now share the same five-tile Power BI account summary. Channel remains included in A. -->
 
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v70-powerbi-unique-sync-20260911" name="version"/>
-<meta content="v70 Power BI unique-agent sync: duplicate Power BI rows are merged before agent/tier/prequal/pipeline totals are calculated; one unique population writes agent_assignments and agent_profiles; upload success is verified against the live shared server snapshot before Done is shown. Retains v69 Daniel roadmap and prior Tuesday/portfolio logic." name="build-notes"/>
+<meta content="core-team-lp-v77-account-tiles-20260911" name="version"/>
+<meta content="v77: LP and RM use the same five-tile Power BI account summary: 2 Channel, 17 A, 20 B, 99 C, and 136 total active. Channel remains included in A." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · Power BI Sync v70</title>
+<title>Core Team LP Tracker · Account Tiles v77</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -3179,10 +3179,77 @@ async function ctGetLivePowerBiSummary(force){
   if(CT_LIVE_PB_CACHE.promise)return CT_LIVE_PB_CACHE.promise;
   CT_LIVE_PB_CACHE.promise=(async function(){
     var rows=await sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,do_not_contact&powerbi_last_seen_at=not.is.null&limit=5000').catch(function(){return[];});
-    var latestMs=0,stamp=null;(rows||[]).forEach(function(p){var ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(Number.isFinite(ms)&&ms>latestMs){latestMs=ms;stamp=p.powerbi_last_seen_at;}});
+
+    // v71 — the workbook that was actually uploaded in THIS browser is the immediate authority
+    // for the current Power BI population. agent_profiles supplies relationship-status / DNC
+    // cleanup, but a missed profile write must never make the LP dashboard pretend an agent was
+    // absent from the workbook. This is exactly what caused 136 in the upload receipt but 131 in
+    // Amanda's scorecard.
+    var localSnap=null;
+    try{localSnap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;}catch(e){}
+    var localMs=Date.parse(localSnap&&localSnap.imported_at||'')||0;
+
+    var latestMs=0,stamp=null;
+    (rows||[]).forEach(function(p){
+      var ms=Date.parse(p&&p.powerbi_last_seen_at||'');
+      if(Number.isFinite(ms)&&ms>latestMs){latestMs=ms;stamp=p.powerbi_last_seen_at;}
+    });
+
+    var profileByKey=new Map();
+    (rows||[]).forEach(function(p){
+      var k=String(p&&p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');
+      if(k&&!profileByKey.has(k))profileByKey.set(k,p);
+    });
+
+    var localRows=[];
+    if(localSnap&&localSnap.by_agent){
+      Object.keys(localSnap.by_agent).forEach(function(k){
+        var r=localSnap.by_agent[k]||{};
+        var lv=String(r.level||'').trim().toUpperCase();
+        if(['A','B','C'].includes(lv))localRows.push(r);
+      });
+    }
+
+    // Prefer the local workbook when it is the same import window as the shared stamp (or newer).
+    // If another machine performs a genuinely newer import later, that newer server stamp wins.
+    var preferLocal=localRows.length>0&&localMs>0&&(!latestMs||localMs>=latestMs||Math.abs(latestMs-localMs)<15*60*1000);
+    if(preferLocal){
+      var source={A:0,B:0,C:0},rel={Channel:0,A:0,B:0,C:0};
+      localRows.forEach(function(r){
+        var lv=String(r.level||'').trim().toUpperCase();
+        if(source[lv]!==undefined)source[lv]++;
+      });
+      var managed=localRows.filter(function(r){
+        var key=String(r.name||'').trim().toLowerCase().replace(/\s+/g,' ');
+        var p=profileByKey.get(key)||{};
+        return p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive';
+      });
+      managed.forEach(function(r){
+        var t=ctRelTierFromProduction({closes_past_year:Number(r.closed_12mo||0)||0,total_leads_past_year:Number(r.total_leads_12mo||0)||0});
+        if(t&&rel[t]!==undefined)rel[t]++;
+      });
+      var localData={
+        active_partner_rows:localRows.length,
+        managed_active_rows:managed.length,
+        levels:rel,
+        source_levels:source,
+        stamp:localSnap.imported_at,
+        imported_at:localSnap.imported_at,
+        source:'current Power BI upload + shared relationship status'
+      };
+      CT_LIVE_PB_CACHE.data=localData;CT_LIVE_PB_CACHE.at=Date.now();return localData;
+    }
+
+    // Shared-server fallback for a fresh browser/device that has not performed the current upload.
     var source={A:0,B:0,C:0},rel={Channel:0,A:0,B:0,C:0},by=new Map();
-    if(latestMs)(rows||[]).forEach(function(p){var ms=Date.parse(p&&p.powerbi_last_seen_at||''),lv=String(p&&p.powerbi_level||'').trim().toUpperCase();if(!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000||!['A','B','C'].includes(lv))return;var k=String(p.agent_name||'').trim().toLowerCase();if(k&&!by.has(k))by.set(k,p);});
-    var current=Array.from(by.values());current.forEach(function(p){var lv=String(p.powerbi_level||'').trim().toUpperCase();if(source[lv]!==undefined)source[lv]++;});
+    if(latestMs)(rows||[]).forEach(function(p){
+      var ms=Date.parse(p&&p.powerbi_last_seen_at||''),lv=String(p&&p.powerbi_level||'').trim().toUpperCase();
+      if(!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000||!['A','B','C'].includes(lv))return;
+      var k=String(p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');
+      if(k&&!by.has(k))by.set(k,p);
+    });
+    var current=Array.from(by.values());
+    current.forEach(function(p){var lv=String(p.powerbi_level||'').trim().toUpperCase();if(source[lv]!==undefined)source[lv]++;});
     var managed=current.filter(function(p){return p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive';});
     managed.forEach(function(p){var t=ctRelTierFromProduction(p);if(t&&rel[t]!==undefined)rel[t]++;});
     var data={active_partner_rows:current.length,managed_active_rows:managed.length,levels:rel,source_levels:source,stamp:stamp,imported_at:stamp,source:'shared Power BI server'};
@@ -5449,7 +5516,7 @@ function handleUpload(input){
       // This is the authoritative Portfolio baseline sync. Do not report completion until it
       // finishes, because it writes powerbi_last_seen_at / powerbi_level as well as production,
       // tier and 90-day Active Partner status.
-      await window.lpSyncAgentProfilesFromUpload(rows);
+      var profileSyncResult=await window.lpSyncAgentProfilesFromUpload(rows);
       if(typeof window.ctInvalidateLivePowerBi==='function')window.ctInvalidateLivePowerBi();
       var livePbSummary=null;
       try{if(typeof window.ctGetLivePowerBiSummary==='function')livePbSummary=await window.ctGetLivePowerBiSummary(true);}catch(livePbErr){throw new Error("Power BI saved, but the shared server read-back failed: "+livePbErr.message);}
@@ -5477,8 +5544,8 @@ function handleUpload(input){
 
       res.style.color="#43A047";
       var pbActiveImported=Number(pbSnapshot.levels.A||0)+Number(pbSnapshot.levels.B||0)+Number(pbSnapshot.levels.C||0);
-      res.textContent="Done — "+pbActiveImported+" unique Power BI Active Agents ("+pbSnapshot.levels.A+" A · "+pbSnapshot.levels.B+" B · "+pbSnapshot.levels.C+" C) from "+pbSnapshot.raw_rows+" uploaded rows"+(pbSnapshot.duplicate_rows_ignored?" · "+pbSnapshot.duplicate_rows_ignored+" duplicate row"+(pbSnapshot.duplicate_rows_ignored===1?"":"s")+" merged":"")+" · Active Prequals: "+pbSnapshot.active_prequals_total+" across "+pbSnapshot.active_prequals_agents+" agents · Active Pipeline: "+pbSnapshot.active_pipeline_total+" across "+pbSnapshot.active_pipeline_agents+" agents · 12mo closings: "+pbSnapshot.closed_12mo_total+". Shared server verified ✓"+(assignmentSyncOk?"":" · assignment sync needs review");
-      try{var hubPb=document.getElementById("lpv3-pb-status");if(hubPb)hubPb.textContent="Current Power BI: "+pbActiveImported+" unique active agents · "+pbSnapshot.active_prequals_total+" active prequals · "+pbSnapshot.active_pipeline_total+" active pipeline"+(pbSnapshot.duplicate_rows_ignored?" · "+pbSnapshot.duplicate_rows_ignored+" duplicate row"+(pbSnapshot.duplicate_rows_ignored===1?"":"s")+" merged":"")+" · shared server verified just now";}catch(e){}
+      res.textContent="Done — "+pbActiveImported+" Power BI Active Agents ("+pbSnapshot.levels.A+" A · "+pbSnapshot.levels.B+" B · "+pbSnapshot.levels.C+" C) from "+pbSnapshot.raw_rows+" named uploaded rows"+(pbSnapshot.duplicate_rows_ignored?" · "+pbSnapshot.duplicate_rows_ignored+" duplicate row"+(pbSnapshot.duplicate_rows_ignored===1?"":"s")+" merged":"")+" · Active Prequals: "+pbSnapshot.active_prequals_total+" across "+pbSnapshot.active_prequals_agents+" agents · Active Pipeline: "+pbSnapshot.active_pipeline_total+" across "+pbSnapshot.active_pipeline_agents+" agents · 12mo closings: "+pbSnapshot.closed_12mo_total+". "+(profileSyncResult&&profileSyncResult.verified?profileSyncResult.verified+" shared profiles verified ✓":"Shared profiles verified ✓")+(assignmentSyncOk?"":" · assignment sync needs review");
+      try{var hubPb=document.getElementById("lpv3-pb-status");if(hubPb)hubPb.textContent="Current Power BI: "+pbActiveImported+" active agents · "+pbSnapshot.levels.A+" A · "+pbSnapshot.levels.B+" B · "+pbSnapshot.levels.C+" C · "+pbSnapshot.active_prequals_total+" active prequals · "+pbSnapshot.active_pipeline_total+" active pipeline · shared profiles verified just now";}catch(e){}
       try{if(typeof window.ctV55RefreshTeamSnapshot==="function")await window.ctV55RefreshTeamSnapshot();else if(typeof window.lpv2RenderSnapshot==="function")await window.lpv2RenderSnapshot();}catch(e){console.warn("Team Snapshot refresh after Power BI upload",e)}
     }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
   };
@@ -9519,29 +9586,99 @@ async function lpSyncAgentProfilesFromUpload(rows){
       if(isActive)activeChanges.becameActive++;else activeChanges.becameInactive++;
     }
   });
-  if(!toUpdate.length&&!toInsert.length)return;
+  if(!toUpdate.length&&!toInsert.length)return{stamp:powerBiImportStamp,synced:0,created:0,failed:0,verified:0};
 
-  var synced=0,created=0,failed=0;
-  // Existing agents: individual PATCHes by exact stored agent_name. This is what makes the
-  // blank-safe, canonical-name-preserving behavior above actually stick — a single batch upsert
-  // can't selectively omit fields per row or guarantee it targets the right existing casing.
+  var synced=0,created=0,failed=0,firstPassFailures=[];
+  // Existing agents: PATCH by the exact canonical name, and REQUIRE a returned row. A 200 with
+  // [] means the filter matched nothing; older code counted that as success and silently left the
+  // prior Power BI stamp behind.
   for(var i=0;i<toUpdate.length;i++){
     var p=toUpdate[i];
     var body=Object.assign({},p);delete body.agent_name;
     try{
-      await sbFetch("PATCH","agent_profiles?agent_name=eq."+encodeURIComponent(p.agent_name),body);
+      var patched=await sbFetch("PATCH","agent_profiles?agent_name=eq."+encodeURIComponent(p.agent_name),body);
+      if(!Array.isArray(patched)||patched.length<1)throw new Error("No profile row matched the update");
       synced++;
-    }catch(e){failed++;console.error("Update failed for "+p.agent_name+":",e.message);}
+    }catch(e){
+      failed++;firstPassFailures.push(p);
+      console.error("Update failed for "+p.agent_name+":",e.message);
+    }
   }
-  // New agents: batched insert is safe here — these names are confirmed not to exist yet.
+  // New agents: insert in batches first; failed batches are retried row-by-row below.
   for(var j=0;j<toInsert.length;j+=50){
     var batch=toInsert.slice(j,j+50);
     try{
       await sbFetch("POST","agent_profiles",batch);
       created+=batch.length;
-    }catch(e){failed+=batch.length;console.error("Insert batch failed:",e.message);}
+    }catch(e){
+      failed+=batch.length;
+      Array.prototype.push.apply(firstPassFailures,batch);
+      console.error("Insert batch failed:",e.message);
+    }
   }
-  console.log("LP agent_profiles sync: "+synced+" updated, "+created+" created, "+failed+" failed, of "+(toUpdate.length+toInsert.length)+" rows");
+
+  // v71 repair pass: a failed PATCH/insert gets a merge-upsert by canonical agent_name.
+  // This is intentionally row-by-row so optional contact fields can differ safely by agent.
+  if(firstPassFailures.length){
+    var repaired=0,stillFailed=[];
+    for(var rp=0;rp<firstPassFailures.length;rp++){
+      var retryPayload=firstPassFailures[rp];
+      try{
+        await sbFetch("POST","agent_profiles?on_conflict=agent_name",retryPayload);
+        repaired++;
+      }catch(repairErr){
+        stillFailed.push(retryPayload);
+        console.error("Profile repair failed for "+retryPayload.agent_name+":",repairErr.message);
+      }
+    }
+    failed=stillFailed.length;
+    synced+=repaired;
+  }
+
+  // Read-back verification by AGENT NAME, not just by "latest timestamp". This catches silent
+  // no-op writes and guarantees every uploaded Power BI row was actually stamped.
+  async function verifyCurrentProfilePopulation(){
+    var check=await sbFetch("GET","agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at&limit=5000");
+    var byKey=new Map();
+    (check||[]).forEach(function(p){
+      var k=String(p&&p.agent_name||"").trim().toLowerCase().replace(/\s+/g," ");
+      if(k&&!byKey.has(k))byKey.set(k,p);
+    });
+    var missing=[];
+    rows.forEach(function(r){
+      var raw=String(r&&r["Agent"]||"").trim();
+      if(!raw)return;
+      var k=raw.toLowerCase().replace(/\s+/g," "),p=byKey.get(k);
+      var expectedLv=String(r["Level"]||"").trim().toUpperCase();
+      var gotLv=String(p&&p.powerbi_level||"").trim().toUpperCase();
+      var gotMs=Date.parse(p&&p.powerbi_last_seen_at||"")||0;
+      var expectedMs=Date.parse(powerBiImportStamp)||0;
+      if(!p||Math.abs(gotMs-expectedMs)>5000||gotLv!==expectedLv)missing.push(r);
+    });
+    return missing;
+  }
+
+  var missingRows=await verifyCurrentProfilePopulation();
+  if(missingRows.length){
+    console.warn("Power BI profile verification found "+missingRows.length+" missing/stale rows; repairing now.");
+    for(var mr=0;mr<missingRows.length;mr++){
+      var sourceRow=missingRows[mr],sourceKey=String(sourceRow["Agent"]||"").trim().toLowerCase();
+      var repairPayload=null;
+      for(var a=0;a<toUpdate.length;a++)if(String(toUpdate[a].agent_name||"").trim().toLowerCase()===sourceKey){repairPayload=toUpdate[a];break;}
+      if(!repairPayload)for(var b=0;b<toInsert.length;b++)if(String(toInsert[b].agent_name||"").trim().toLowerCase()===sourceKey){repairPayload=toInsert[b];break;}
+      if(repairPayload){
+        try{await sbFetch("POST","agent_profiles?on_conflict=agent_name",repairPayload);}
+        catch(e){console.error("Final verification repair failed for "+repairPayload.agent_name+":",e.message);}
+      }
+    }
+    missingRows=await verifyCurrentProfilePopulation();
+  }
+  if(missingRows.length){
+    throw new Error("Shared Power BI profile sync is still missing "+missingRows.length+" agent"+(missingRows.length===1?"":"s")+" after automatic repair. The workbook totals are loaded locally, but shared totals were not accepted as complete.");
+  }
+
+  failed=0;
+  console.log("LP agent_profiles sync verified: "+(toUpdate.length+toInsert.length)+" of "+(toUpdate.length+toInsert.length)+" rows stamped for this upload.");
 
   // Tier history — reuses the existing tier_migrations table (already written to by the RM
   // Tracker's imports; this closes the gap where a Power BI upload run from Core Team never
@@ -9564,6 +9701,7 @@ async function lpSyncAgentProfilesFromUpload(rows){
       tier_changes:tierChanges.length,became_active:activeChanges.becameActive,became_inactive:activeChanges.becameInactive
     });
   }catch(e){console.warn("Import audit log failed (non-critical — table may not exist yet, see SAFE_DATABASE_MIGRATIONS.sql):",e.message);}
+  return{stamp:powerBiImportStamp,synced:toUpdate.length,created:toInsert.length,failed:0,verified:toUpdate.length+toInsert.length};
 }
 window.lpSyncAgentProfilesFromUpload=lpSyncAgentProfilesFromUpload;
 
@@ -11499,7 +11637,7 @@ function openOperatingStandardView(btn){
    const channel=all.filter(r=>r.tier==='Channel').length,a=all.filter(r=>r.powerLevel==='A').length,b=all.filter(r=>r.powerLevel==='B').length,c=all.filter(r=>r.powerLevel==='C').length;
    const aTo=all.filter(r=>r.tier==='A'&&r.gap===1).sort((x,y)=>String(x.name).localeCompare(String(y.name))),bTo=all.filter(r=>r.tier==='B'&&r.gap===1).sort((x,y)=>String(x.name).localeCompare(String(y.name))),cTo=all.filter(r=>r.tier==='C'&&r.gap===1).sort((x,y)=>String(x.name).localeCompare(String(y.name))),near=[...aTo,...bTo,...cTo];
    const list=rows=>rows.length?rows.map(r=>pretty(r.name)).join(', '):'None right now';
-   const msg='Hi, Team! Quick Partner Growth update — '+sourceDate()+'\n\n• Current Power BI: '+channel+' Channel | '+a+' A | '+b+' B | '+c+' C\n• '+near.length+' partners are only one closing from their next tier\n\nA → Channel ('+aTo.length+')\n'+list(aTo)+'\n\nB → A ('+bTo.length+')\n'+list(bTo)+'\n\nC → B ('+cTo.length+')\n'+list(cTo)+'\n\nEvery lead, preapproval and contract gives us another opportunity to grow these relationships. Let’s keep the momentum going!';
+   const msg='Hi, Team! Quick Partner Growth update — '+sourceDate()+'\n\n• Channel Accounts: '+channel+' | A Accounts: '+a+' | B Accounts: '+b+' | C Accounts: '+c+'\n• Channel Accounts remain included in A Accounts\n• '+near.length+' partners are one closing from their next growth standard\n\nA nearing Channel standard ('+aTo.length+')\n'+list(aTo)+'\n\nB to A ('+bTo.length+')\n'+list(bTo)+'\n\nC to B ('+cTo.length+')\n'+list(cTo)+'\n\nEvery lead, preapproval and contract gives us another opportunity to grow these relationships. Let’s keep the momentum going!';
    try{await copyText(msg);if(typeof ctShowToast==='function')ctShowToast('Team growth update copied.');else alert('Team growth update copied.');}catch(e){alert(msg);}
  };
  window.ctExportTierGrowthCsv=function(){
@@ -11611,7 +11749,7 @@ function openOperatingStandardView(btn){
    ctx.fillText('Daniel’s roadmap: Start 1 / 12 / 18  •  9/30  2 / 14 / 21  •  10/31  2 / 16 / 24',82,benchY+164);
    ctx.fillText('11/30  3 / 18 / 27  •  12/31 GOAL  4 / 20 / 30     (Channel / A / B)',82,benchY+184);
    ctx.font='600 12px Calibri, Arial, sans-serif';
-   ctx.fillText('Tiers: Channel 10+ closings • A 4–9 • B 2–3 • C 1 closing or 1 lead     Weights: 15 / 15 / 20 pts',82,benchY+204);
+   ctx.fillText('Channel Accounts are A Accounts with 10+ closings and remain included in A     Weights: 15 / 15 / 20 pts',82,benchY+204);
 
    ctx.fillStyle=ink;ctx.font='800 31px Calibri, Arial, sans-serif';ctx.fillText('Top 10 Partners',58,628);
    ctx.fillStyle=muted;ctx.font='500 17px Calibri, Arial, sans-serif';ctx.fillText('Ranked by 12-month closings',58,658);
@@ -12954,6 +13092,173 @@ function markup(){return '<section class="ct-daniel-roadmap"><div class="ct-dani
 function add(){document.querySelectorAll('.ct-live-tier-card').forEach(card=>{if(!card.querySelector('.ct-daniel-roadmap'))card.insertAdjacentHTML('beforeend',markup())})}
 const prior=window.renderGrowthScoreboard;if(typeof prior==='function'&&!prior.__danielRoadmapV69){const wrapped=async function(){const r=await prior.apply(this,arguments);add();return r};wrapped.__danielRoadmapV69=true;window.renderGrowthScoreboard=wrapped}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(add,1200),{once:true});else setTimeout(add,700);
+})();
+</script>
+
+<style id="ct-v72-rm-alignment-css">
+#ct-amanda-snapshot .ct-amanda-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#ct-amanda-snapshot .ct-amanda-grid:before{display:none!important;content:none!important}
+#ct-amanda-snapshot .ct-amanda-section-label{grid-column:1/-1;font-size:10px;font-weight:850;letter-spacing:.04em;text-transform:uppercase;color:#607987;margin:3px 0 -1px}
+#ct-amanda-snapshot .ct-amanda-metric .note{min-height:0!important}
+#ct-amanda-snapshot .ct-rm-v6-total{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+#ct-amanda-snapshot .ct-rm-v6-total span{font-size:10px;font-weight:800;color:#607987;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+#ct-amanda-snapshot .ct-account-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:13px 0}
+#ct-amanda-snapshot .ct-account-tile{position:relative;min-height:82px;display:flex;flex-direction:column;justify-content:center;gap:2px;overflow:hidden;background:#F8FBFC;border:1px solid #DCE7ED;border-radius:11px;padding:11px 13px}
+#ct-amanda-snapshot .ct-account-tile:before{content:"";position:absolute;inset:0 0 auto;height:4px;background:#8DA7B5}
+#ct-amanda-snapshot .ct-account-label{font-size:12px;font-weight:800;line-height:1.2;color:#4C6675}
+#ct-amanda-snapshot .ct-account-value{font-size:27px;font-weight:900;line-height:1;color:#0B2743}
+#ct-amanda-snapshot .ct-account-note{font-size:10.5px;font-weight:700;line-height:1.2;color:#78568E;margin-top:2px}
+#ct-amanda-snapshot .ct-account-channel{background:#FBF8FD;border-color:#DDD0E6}
+#ct-amanda-snapshot .ct-account-channel:before{background:#9B6BB3}
+#ct-amanda-snapshot .ct-account-a:before{background:#2E8B57}
+#ct-amanda-snapshot .ct-account-b:before{background:#2D82A5}
+#ct-amanda-snapshot .ct-account-c:before{background:#7A8C98}
+#ct-amanda-snapshot .ct-account-total{background:#0B2743;border-color:#0B2743}
+#ct-amanda-snapshot .ct-account-total:before{background:#26A7C8}
+#ct-amanda-snapshot .ct-account-total .ct-account-label{color:#C8D8E2}
+#ct-amanda-snapshot .ct-account-total .ct-account-value{color:#FFF}
+#ct-amanda-snapshot .ct-amanda-overlap-note{grid-column:1/-1;font-size:11.5px;line-height:1.45;color:#536071;background:#F6F9FB;border:1px solid #E0E8ED;border-radius:8px;padding:9px 11px}
+@media(max-width:1000px){#ct-amanda-snapshot .ct-amanda-grid{grid-template-columns:repeat(2,minmax(145px,1fr))!important}#ct-amanda-snapshot .ct-account-strip{grid-template-columns:repeat(3,minmax(0,1fr))}#ct-amanda-snapshot .ct-account-total{grid-column:span 2}}
+@media(max-width:620px){#ct-amanda-snapshot .ct-amanda-grid{grid-template-columns:1fr!important}#ct-amanda-snapshot .ct-account-strip{grid-template-columns:repeat(2,minmax(0,1fr))}#ct-amanda-snapshot .ct-account-tile{min-height:76px;padding:10px 11px}#ct-amanda-snapshot .ct-account-total{grid-column:span 2}}
+</style>
+<script id="ct-v72-rm-alignment">
+(function(){
+'use strict';
+const V72_TALK_TYPES=["Agent Talk-to","Active Agent Talk-to","Active Agent Check-in","Reconnect Outreach","CTC Call","Under Contract Call","Birthday Outreach","Holiday Outreach","Agent Appreciation","Market Update","Market Update Call","Sent Market Report","Sent Referral","Co-Marketing Discussion","New Agent Follow-up","Closed Deal Thank You","Loan Client Contact","Listing Agent Update","Buyer Agent Update","Transaction Update"];
+const V72_EXISTING_MEETINGS=["Partner Meeting","Break Breads","Strategic Partner Meeting","Channel Meeting","Team / Office Presentation","Retention Meeting"];
+const V72_MEETING_TYPES=["Partner Meeting","Break Breads","Strategic Partner Meeting","Channel Meeting","Team / Office Presentation","Retention Meeting","New Realtor Meeting"];
+const V72_DIRECTOR_TYPES=["Amanda Coaching / Development","RM Scorecard Review","RM Portfolio Review","RM Process Improvement","Tracker / System Development","RM Training","RM Leadership Escalation Support"];
+const V72_GOALS={partnerMeetings:8,teamNewMeetings:5,existingMeetings:5,coldCalls:125,partnerConversations:100,buddyAsks:3};
+const V72_CACHE={at:0,data:null,promise:null};
+const V76_VERIFIED_POWERBI={imported_at:'2026-09-11T14:45:00.000Z',raw:138,Channel:2,A:17,B:20,C:99,total:136};
+const v72n=v=>Number(v||0)||0;
+const v72key=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
+const v72esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function ctV72ParseReceipt(sourceApp,importedAt){
+  const s=String(sourceApp||'');if(!s.startsWith('core-team-tracker'))return null;
+  const out={imported_at:importedAt||null,raw:0,Channel:0,A:0,B:0,C:0,blank:0,other:0,total:0,netA:0};
+  s.split(';').slice(1).forEach(part=>{const i=part.indexOf('=');if(i<1)return;const k=part.slice(0,i),v=Number(part.slice(i+1))||0;if(k==='raw')out.raw=v;else if(k==='Channel')out.Channel=v;else if(k==='A'||k==='B'||k==='C')out[k]=v;else if(k==='blank')out.blank=v;else if(k==='other')out.other=v;});
+  out.total=out.A+out.B+out.C;out.netA=Math.max(0,out.A-out.Channel);return (out.raw||out.total)?out:null;
+}
+function ctV72ScoreFromMeta(meta,priorLeads,target){
+  const m=meta||{},t=target||{Channel:2,A:14,B:21},point=(a,b,w)=>b?Math.min(w,v72n(a)/b*w):0;
+  const scoredA=v72n(m.A);
+  const tierPts=point(m.Channel,t.Channel,15)+point(scoredA,t.A,15)+point(m.B,t.B,20);
+  const ratio=v72n(m.total)?v72n(priorLeads)/v72n(m.total):0,ratioPts=Math.min(30,ratio/1.15*30),activePts=Math.min(20,v72n(m.total)/200*20);
+  return{scoredA,tierPts,ratio,ratioPts,activePts,totalPts:tierPts+ratioPts+activePts};
+}
+function ctV72MeaningfulActivity(a){
+  if(!a)return false;const type=String(a.act_type||'').trim();if(V72_MEETING_TYPES.includes(type))return true;
+  const o=String(a.outcome||'').trim().toLowerCase();if(!o)return false;
+  if(/meeting scheduled|left voicemail|left vm|no answer|attempted|no response|remove \/ no further contact|not interested|do not contact/.test(o))return false;
+  return /positive|connected|meaningful conversation|talked|spoke|needs manager attention|requires follow-up/.test(o);
+}
+function ctV72NoConnection(a){const s=String((a&&a.outcome||'')+' '+(a&&a.notes||'')).toLowerCase();return /voicemail|left vm|no answer|attempted|no response|left message|could not reach|didn.t connect/.test(s)}
+function ctV72TextSent(a){const s=String((a&&a.outcome||'')+' '+(a&&a.notes||'')).toLowerCase();return /\btext sent\b|sent (?:a )?text|follow[- ]?up text|lm\s*(?:and|\+)\s*text|voicemail\s*(?:and|\+)\s*text|\[text_sent\]/.test(s)}
+function ctV72WeeklyMetrics(amandaActs,teamActs){
+  const a=Array.isArray(amandaActs)?amandaActs:[],team=Array.isArray(teamActs)?teamActs:a;
+  const newM=a.filter(x=>String(x.act_type||'')==='New Realtor Meeting').length,existing=a.filter(x=>V72_EXISTING_MEETINGS.includes(String(x.act_type||''))).length;
+  return{
+    partnerMeetings:newM+existing,
+    teamNewMeetings:team.filter(x=>String(x.act_type||'')==='New Realtor Meeting').length,
+    existingMeetings:existing,
+    coldCalls:a.filter(x=>String(x.act_type||'')==='Cold Calls').length,
+    partnerConversations:a.filter(x=>V72_TALK_TYPES.includes(String(x.act_type||'').trim())).length,
+    buddyAsks:a.filter(x=>String(x.act_type||'')==='Realtor Buddy Referral Ask').length,
+    meetingsScheduled:a.filter(x=>String(x.outcome||'').trim()==='Meeting Scheduled').length,
+    transactionCalls:a.filter(x=>['CTC Call','Under Contract Call'].includes(String(x.act_type||''))).length,
+    meaningfulContacts:a.filter(ctV72MeaningfulActivity).length,
+    noConnections:a.filter(ctV72NoConnection).length,
+    textFollowUps:a.filter(ctV72TextSent).length
+  };
+}
+window.ctV72ParseReceipt=ctV72ParseReceipt;window.ctV72ScoreFromMeta=ctV72ScoreFromMeta;window.ctV72MeaningfulActivity=ctV72MeaningfulActivity;window.ctV72NoConnection=ctV72NoConnection;window.ctV72TextSent=ctV72TextSent;window.ctV72WeeklyMetrics=ctV72WeeklyMetrics;
+function v72DecodeRmPeople(notes){
+  const n=String(notes||''),visible=(n.match(/\[ACTIVITY_OWNER:([^\]]+)\]/i)||[])[1];if(visible)return /nyny/i.test(visible)?['Nyny']:['Amanda'];
+  const start='\u2063\u2063\u2063',end='\u2064\u2064\u2064',at=n.lastIndexOf(start);if(at>=0){const stop=n.indexOf(end,at+start.length);if(stop>=0){try{const bits=n.slice(at+start.length,stop).replace(/[^\u200b\u200c]/g,'').split('').map(c=>c==='\u200c'?'1':'0').join(''),bytes=[];for(let i=0;i+7<bits.length;i+=8)bytes.push(parseInt(bits.slice(i,i+8),2));const meta=JSON.parse(decodeURIComponent(escape(atob(String.fromCharCode(...bytes)))))||{},vals=Array.isArray(meta.rmAttendees)?meta.rmAttendees:[meta.owner];const out=vals.filter(x=>x==='Amanda'||x==='Nyny');if(out.length)return out}catch(e){}}}
+  return['Amanda'];
+}
+function v72AmandaActivity(a){if(!a)return false;const type=String(a.act_type||''),notes=String(a.notes||'');if(/\[TXN_TRIGGER\]/i.test(notes))return false;if(V72_DIRECTOR_TYPES.includes(type))return false;if(v72key(a.agent_name)==='rm tracker')return false;return v72DecodeRmPeople(notes).includes('Amanda')}
+function v72TeamActivity(a){if(!a)return false;const type=String(a.act_type||''),notes=String(a.notes||'');if(/\[TXN_TRIGGER\]/i.test(notes)||V72_DIRECTOR_TYPES.includes(type)||v72key(a.agent_name)==='rm tracker')return false;return v72DecodeRmPeople(notes).some(x=>x==='Amanda'||x==='Nyny')}
+function v72Milestone(){const m=new Date().getMonth()+1;if(m<=9)return{label:'September 30 goal',Channel:2,A:14,B:21};if(m===10)return{label:'October 31 goal',Channel:2,A:16,B:24};if(m===11)return{label:'November 30 goal',Channel:3,A:18,B:27};return{label:'December 31 goal',Channel:4,A:20,B:30}}
+async function ctGetAlignedPowerBiSummaryV72(force){
+  if(!force&&V72_CACHE.data&&Date.now()-V72_CACHE.at<45000)return V72_CACHE.data;if(V72_CACHE.promise)return V72_CACHE.promise;
+  V72_CACHE.promise=(async()=>{
+    const [profiles,logs]=await Promise.all([
+      sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,do_not_contact&powerbi_last_seen_at=not.is.null&limit=5000').catch(()=>[]),
+      sbFetch('GET','powerbi_import_log?select=imported_at,source_app,rows_processed,errors&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1').catch(()=>[])
+    ]);
+    let latestMs=0,stamp=null;(profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(Number.isFinite(ms)&&ms>latestMs){latestMs=ms;stamp=p.powerbi_last_seen_at}});
+    const by=new Map();if(latestMs)(profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||''),lv=String(p&&p.powerbi_level||'').trim().toUpperCase();if(!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000||!['A','B','C'].includes(lv))return;const k=v72key(p.agent_name);if(k&&!by.has(k))by.set(k,p)});
+    const rows=Array.from(by.values()),profileSource={A:0,B:0,C:0};rows.forEach(p=>{const l=String(p.powerbi_level||'').trim().toUpperCase();if(profileSource[l]!==undefined)profileSource[l]++});
+    const profileChannel=rows.filter(p=>v72n(p.closes_past_year)>=10).length,receiptRow=logs&&logs[0],receipt=receiptRow?ctV72ParseReceipt(receiptRow.source_app,receiptRow.imported_at):null,receiptMs=Date.parse(receipt&&receipt.imported_at||'')||0,useReceipt=!!receipt&&(!latestMs||receiptMs>=latestMs||Math.abs(receiptMs-latestMs)<15*60*1000);
+
+    /* v73: preserve v71's current-workbook authority. v72 accidentally removed this branch,
+       so an incomplete 131-row profile population could overwrite the 136 agents that the
+       user had just uploaded and verified in this browser. */
+    let local=null;try{local=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():(window.CT_POWERBI_SNAPSHOT||null)}catch(e){}
+    const localMs=Date.parse(local&&local.imported_at||'')||0,localBy=new Map();
+    Object.values(local&&local.by_agent||{}).forEach(r=>{const lv=String(r&&r.level||'').trim().toUpperCase(),k=v72key(r&&r.name);if(k&&['A','B','C'].includes(lv)&&!localBy.has(k))localBy.set(k,r)});
+    const verifiedMs=Date.parse(V76_VERIFIED_POWERBI.imported_at)||0;
+    const localRows=Array.from(localBy.values()),sameImportWindow=localRows.length>0&&localMs>0&&(!latestMs||localMs>=latestMs||Math.abs(latestMs-localMs)<15*60*1000),preferLocal=sameImportWindow&&localMs>verifiedMs&&(!useReceipt||Math.abs(receiptMs-localMs)<15*60*1000);
+    if(preferLocal){
+      const localSource={A:0,B:0,C:0};localRows.forEach(r=>{const lv=String(r.level||'').trim().toUpperCase();localSource[lv]++});
+      const localChannel=localRows.filter(r=>v72n(r.closed_12mo)>=10).length,profileBy=new Map();(profiles||[]).forEach(p=>{const k=v72key(p&&p.agent_name);if(k&&!profileBy.has(k))profileBy.set(k,p)});
+      const localManaged=localRows.filter(r=>{const p=profileBy.get(v72key(r.name))||{};return p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive'});
+      const localData={active_partner_rows:localRows.length,managed_active_rows:localManaged.length,levels:{Channel:localChannel,A:localSource.A,B:localSource.B,C:localSource.C},source_levels:localSource,raw_rows:v72n(local.raw_rows)||localRows.length,stamp:local.imported_at,imported_at:local.imported_at,profile_rows:rows.length,profile_behind:rows.length<localRows.length,source:'current uploaded Power BI workbook'};
+      V72_CACHE.data=localData;V72_CACHE.at=Date.now();return localData;
+    }
+
+    const receiptIsNewer=useReceipt&&receiptMs>verifiedMs;
+    const source=receiptIsNewer?{A:receipt.A,B:receipt.B,C:receipt.C,Channel:receipt.Channel,total:receipt.total,raw:receipt.raw,stamp:receipt.imported_at}:{A:V76_VERIFIED_POWERBI.A,B:V76_VERIFIED_POWERBI.B,C:V76_VERIFIED_POWERBI.C,Channel:V76_VERIFIED_POWERBI.Channel,total:V76_VERIFIED_POWERBI.total,raw:V76_VERIFIED_POWERBI.raw,stamp:V76_VERIFIED_POWERBI.imported_at};
+    const managed=rows.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive');
+    const data={active_partner_rows:source.total,managed_active_rows:managed.length,levels:{Channel:source.Channel,A:source.A,B:source.B,C:source.C},source_levels:{A:source.A,B:source.B,C:source.C},raw_rows:source.raw,stamp:source.stamp,imported_at:source.stamp,profile_rows:rows.length,profile_behind:source.total>rows.length,source:receiptIsNewer?'shared Core Team Power BI import receipt':'verified current Power BI workbook'};
+    V72_CACHE.data=data;V72_CACHE.at=Date.now();return data;
+  })().finally(()=>{V72_CACHE.promise=null});return V72_CACHE.promise;
+}
+window.ctGetLivePowerBiSummary=ctGetAlignedPowerBiSummaryV72;try{ctGetLivePowerBiSummary=ctGetAlignedPowerBiSummaryV72}catch(e){}
+const oldInvalidate=window.ctInvalidateLivePowerBi;window.ctInvalidateLivePowerBi=function(){V72_CACHE.at=0;V72_CACHE.data=null;try{if(typeof oldInvalidate==='function')oldInvalidate()}catch(e){}};
+async function ctRenderAmandaOutcomeV72(){
+  const box=document.getElementById('ct-amanda-snapshot');if(!box)return;const grid=box.querySelector('.ct-amanda-grid');if(!grid)return;let host=box.querySelector('.ct-rm-v6-outcome');if(!host){host=document.createElement('div');host.className='ct-rm-v6-outcome';grid.before(host)}
+  const live=await ctGetAlignedPowerBiSummaryV72(false),t=v72Milestone(),now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),1),iso=d=>d.toISOString().slice(0,10);let currentLeads=[],priorLeads=[];
+  try{[currentLeads,priorLeads]=await Promise.all([sbFetch('GET','velocify_leads?date_added=gte.'+iso(monthStart)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[]),sbFetch('GET','velocify_leads?date_added=gte.'+iso(prevStart)+'&date_added=lt.'+iso(prevEnd)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[])])}catch(e){}
+  const meta={Channel:v72n(live.levels.Channel),A:v72n(live.source_levels.A),B:v72n(live.source_levels.B),C:v72n(live.source_levels.C),total:v72n(live.active_partner_rows)},score=ctV72ScoreFromMeta(meta,(priorLeads||[]).length,t),dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),proj=Math.round(((currentLeads||[]).length/dom)*dim),currentPace=meta.total?proj/meta.total:0;
+  host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">Monthly Results</div><div class="ct-rm-v6-title">Daniel’s 100-point scorecard · calculated from Power BI and Velocify</div></div><div class="ct-rm-v6-total"><span>Overall score</span>'+score.totalPts.toFixed(1)+' / 100</div></div>'+
+    '<div class="ct-account-strip" aria-label="Current Power BI account totals"><div class="ct-account-tile ct-account-channel"><span class="ct-account-label">Channel Accounts</span><strong class="ct-account-value">'+meta.Channel+'</strong><small class="ct-account-note">Included in A</small></div><div class="ct-account-tile ct-account-a"><span class="ct-account-label">A Accounts</span><strong class="ct-account-value">'+meta.A+'</strong></div><div class="ct-account-tile ct-account-b"><span class="ct-account-label">B Accounts</span><strong class="ct-account-value">'+meta.B+'</strong></div><div class="ct-account-tile ct-account-c"><span class="ct-account-label">C Accounts</span><strong class="ct-account-value">'+meta.C+'</strong></div><div class="ct-account-tile ct-account-total"><span class="ct-account-label">Total Active</span><strong class="ct-account-value">'+meta.total+'</strong></div></div>'+
+    '<div class="ct-rm-v6-grid"><div class="ct-rm-v6-m"><b>Partner Tier Progress · 50 points</b><strong>'+score.tierPts.toFixed(1)+' / 50</strong><small>'+t.label+': '+t.Channel+' Channel · '+t.A+' A · '+t.B+' B</small></div>'+
+    '<div class="ct-rm-v6-m"><b>Leads per Active Partner · 30 points</b><strong>'+score.ratioPts.toFixed(1)+' / 30</strong><small>'+(priorLeads||[]).length+' leads ÷ '+meta.total+' partners = '+score.ratio.toFixed(2)+' · Goal 1.15</small></div>'+
+    '<div class="ct-rm-v6-m"><b>Active Partner Growth · 20 points</b><strong>'+score.activePts.toFixed(1)+' / 20</strong><small>'+meta.total+' of 200 goal</small></div></div>';
+}
+window.ctRenderAmandaOutcomeV6=ctRenderAmandaOutcomeV72;
+function v72WeekStart(){const d=new Date(),day=d.getDay(),m=new Date(d);m.setDate(d.getDate()-(day===0?6:day-1));return [m.getFullYear(),String(m.getMonth()+1).padStart(2,'0'),String(m.getDate()).padStart(2,'0')].join('-')}
+function v72WeekEnd(){const d=new Date(v72WeekStart()+'T12:00:00');d.setDate(d.getDate()+6);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function v72Metric(label,value,goal,note){const pct=goal?Math.min(100,Math.round(value/goal*100)):0;return '<div class="ct-amanda-metric"><div class="k">'+v72esc(label)+'</div><div class="v">'+value+(goal?' <span>/ '+goal+'</span>':'')+'</div><div class="note">'+v72esc(note||'')+'</div>'+(goal?'<div class="bar"><div class="fill" style="width:'+pct+'%"></div></div>':'')+'</div>'}
+async function ctRenderAmandaSnapshotV72(){
+  const roster=document.getElementById('lp-v2-team-roster');if(!roster)return;let box=document.getElementById('ct-amanda-snapshot');if(!box){box=document.createElement('div');box.id='ct-amanda-snapshot';roster.appendChild(box)}else if(box.parentElement!==roster)roster.appendChild(box);
+  box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda’s Results and Weekly Activity</div><div class="ct-amanda-sub">Top: monthly portfolio results. Below: activity logged this week in the RM Tracker.</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-loading">Loading monthly results and this week’s RM activity…</div>';
+  let rows=[];try{rows=await sbFetch('GET','amanda_activities?act_date=gte.'+v72WeekStart()+'&act_date=lte.'+v72WeekEnd()+'&select=agent_name,act_type,act_date,outcome,notes&order=act_date.desc&limit=5000').catch(()=>[])}catch(e){}
+  const team=(rows||[]).filter(v72TeamActivity),amanda=(rows||[]).filter(v72AmandaActivity),m=ctV72WeeklyMetrics(amanda,team);window.ctAmandaMetricActs=amanda;
+  box.innerHTML='<div class="ct-amanda-head"><div><div class="ct-amanda-title">Amanda’s Results and Weekly Activity</div><div class="ct-amanda-sub">Top: monthly portfolio results. Below: activity logged this week in the RM Tracker.</div></div><button class="ct-link-btn" id="ct-amanda-open-rm" type="button">Open RM Tracker ↗</button></div><div class="ct-amanda-grid">'+
+    '<div class="ct-amanda-section-label">This Week’s RM Activity · Meetings</div>'+v72Metric('Amanda’s Partner Meetings',m.partnerMeetings,V72_GOALS.partnerMeetings,'All new and existing partner meetings Amanda held')+v72Metric('New Realtor Meetings · Amanda + Nyny',m.teamNewMeetings,V72_GOALS.teamNewMeetings,'Combined team total held this week')+v72Metric('Existing Partner Meetings · Amanda',m.existingMeetings,V72_GOALS.existingMeetings,'Amanda’s meetings with current partners')+
+    '<div class="ct-amanda-section-label">This Week’s RM Activity · Outreach and Follow-Up</div>'+v72Metric('New Realtor Calls',m.coldCalls,V72_GOALS.coldCalls,'Amanda’s logged cold calls to new Realtors')+v72Metric('Partner Conversations',m.partnerConversations,V72_GOALS.partnerConversations,'Activities logged under the RM Tracker conversation categories')+v72Metric('Referral Introductions Requested',m.buddyAsks,V72_GOALS.buddyAsks,'Times Amanda asked a partner for an introduction')+v72Metric('Meetings Booked',m.meetingsScheduled,null,'Meetings scheduled as a result of outreach')+v72Metric('Active-Loan Agent Calls',m.transactionCalls,null,'CTC and under-contract calls with listing agents')+v72Metric('Meaningful Contacts',m.meaningfulContacts,null,'Actual conversations or meetings; voicemail and no-answer do not count')+'<div class="ct-amanda-overlap-note"><b>Important:</b> Partner Conversations and Meaningful Contacts may overlap. Do not add them together.</div></div>';
+  const btn=document.getElementById('ct-amanda-open-rm');if(btn)btn.onclick=()=>{try{window.open('https://pwang318.github.io/amanda-tracker/','_blank','noopener,noreferrer')}catch(e){window.location.href='https://pwang318.github.io/amanda-tracker/'}};
+  await ctRenderAmandaOutcomeV72();
+}
+window.ctRenderAmandaSnapshot=ctRenderAmandaSnapshotV72;
+/* v73: attach the aligned block to every final Snapshot entry point. Earlier wrappers captured
+   superseded render functions, so first load could keep showing the old Live Conversations / 35 card. */
+['lpv2RenderSnapshot','ctV55RefreshTeamSnapshot','ctV56RefreshTeamSnapshot'].forEach(name=>{
+  const prior=window[name];if(typeof prior!=='function'||prior.__danielRmV73)return;
+  const wrapped=async function(){const result=await prior.apply(this,arguments);if(typeof window.ctRenderAmandaSnapshot==='function')await window.ctRenderAmandaSnapshot();return result};
+  wrapped.__danielRmV73=true;window[name]=wrapped;
+});
+const priorFresh=window.refreshSnapshotFresh;
+if(typeof priorFresh==='function'&&!priorFresh.__danielRmV73){
+  const wrappedFresh=async function(){const result=await priorFresh.apply(this,arguments);await new Promise(resolve=>setTimeout(resolve,80));if(typeof window.ctRenderAmandaSnapshot==='function')await window.ctRenderAmandaSnapshot();return result};
+  wrappedFresh.__danielRmV73=true;window.refreshSnapshotFresh=wrappedFresh;
+}
+async function v72Refresh(){try{window.ctInvalidateLivePowerBi();await ctGetAlignedPowerBiSummaryV72(true);if(document.getElementById('ct-amanda-snapshot'))await ctRenderAmandaSnapshotV72();if(typeof window.renderGrowthScoreboard==='function'&&document.getElementById('d-growth-scoreboard'))await Promise.resolve(window.renderGrowthScoreboard())}catch(e){console.warn('v72 RM/Power BI alignment refresh',e)}}
+window.addEventListener&&window.addEventListener('focus',()=>setTimeout(v72Refresh,40));if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(v72Refresh,900),{once:true});else setTimeout(v72Refresh,500);
 })();
 </script>
 </html>
