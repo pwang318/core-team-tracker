@@ -1,17 +1,17 @@
  
 <!DOCTYPE html>
-<!-- v67: live Power BI server hydration + outcome alignment. Active-agent/tier outcome cards now read the latest shared Supabase-stamped Power BI roster instead of relying on browser-local snapshot state. -->
+<!-- v70: Power BI import hardening. Uploads are normalized to unique agents before counts/totals are calculated or shared tables are updated; server read-back must match before success is shown. Retains v69 Daniel tier roadmap and prior tracker logic. -->
 
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="aligned-v1-core-team" name="version"/>
-<meta content="v59 always-visible status-save build: one Encompass Active Contracts upload drives LP + RM Tuesday plans; current-week completion only; persistent per-loan classifications; saved no-call classifications immediately recalculate the queue and display Cleared; current Power BI/funded snapshots; management export centralized in Weekly Data Hub." name="build-notes"/>
+<meta content="core-team-lp-v70-powerbi-unique-sync-20260911" name="version"/>
+<meta content="v70 Power BI unique-agent sync: duplicate Power BI rows are merged before agent/tier/prequal/pipeline totals are calculated; one unique population writes agent_assignments and agent_profiles; upload success is verified against the live shared server snapshot before Done is shown. Retains v69 Daniel roadmap and prior Tuesday/portfolio logic." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team Tracker · Version 1</title>
+<title>Core Team LP Tracker · Power BI Sync v70</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -5301,12 +5301,35 @@ function handleUpload(input){
   reader.onload=async function(e){
     try{
       var wb=XLSX.read(new Uint8Array(e.target.result),{type:"array",cellDates:true});
-      var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null});
-      // Raw Power BI snapshot: keeps Level distribution + Active Prequal/Pipeline totals visible
-      // without cluttering the working LP screens. This is also a fallback if optional shared DB
-      // columns are not available yet.
-      var validPbRows=rows.filter(function(row){var n=(row["Agent"]||"").toString().trim();return n&&n.toUpperCase()!=="AGENT"&&n.toUpperCase()!=="NAN";});
-      var pbSnapshot={imported_at:new Date().toISOString(),active_partner_definition:"POWER_BI_LEVEL_POPULATION",raw_rows:validPbRows.length,active_partner_rows:0,levels:{Channel:0,A:0,B:0,C:0,Blank:0,Other:0},tier_agents:{Channel:[],A:[],B:[],C:[],Blank:[],Other:[]},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,closed_12mo_total:0,closed_12mo_agents:0,by_agent:{}};
+      var rawRows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null});
+
+      // v70 — normalize Power BI to ONE row per agent before doing anything else.
+      // The old importer counted raw spreadsheet rows as agents. A duplicated agent therefore
+      // inflated Active Partner, tier, prequal and pipeline totals and could disagree with the
+      // server-backed RM scorecard, which already dedupes by agent name.
+      function pbAgentKey(row){return String(row&&row["Agent"]||"").trim().toLowerCase().replace(/\s+/g," ");}
+      function pbNum(v){if(v instanceof Date)return Number((v.getTime()/86400000)+25569)||0;var n=parseFloat(String(v==null?"":v).replace(/[$,%]/g,"").replace(/,/g,""));return Number.isFinite(n)?n:0;}
+      function pbDateMs(v){if(v===null||v===undefined||v==="")return 0;try{var d;if(v instanceof Date)d=v;else if(typeof v==="number"&&v>1)d=new Date(Math.round((v-25569)*86400*1000));else d=new Date(v);return Number.isFinite(d.getTime())?d.getTime():0;}catch(e){return 0;}}
+      function pbMergeRows(base,next){
+        var out=Object.assign({},base||{}),levelRank={A:3,B:2,C:1};
+        var oldLv=String(out["Level"]||"").trim().toUpperCase(),newLv=String(next&&next["Level"]||"").trim().toUpperCase();
+        if((levelRank[newLv]||0)>(levelRank[oldLv]||0))out["Level"]=next["Level"];
+        ["Active Prequals","Active In Pipeline","Closed Past Year","Total Leads Past Year","Closed Past Year Vol"].forEach(function(c){
+          if(pbNum(next&&next[c])>pbNum(out[c]))out[c]=next[c];
+        });
+        ["Latest Lead (In Velocify)","Latest File Started","Latest Contract","Latest Close"].forEach(function(c){
+          if(pbDateMs(next&&next[c])>pbDateMs(out[c]))out[c]=next[c];
+        });
+        ["Email","Phone Number","Address","Birthday"].forEach(function(c){if((out[c]===null||out[c]===undefined||String(out[c]).trim()==="")&&next&&next[c]!==null&&next[c]!==undefined&&String(next[c]).trim()!=="")out[c]=next[c];});
+        return out;
+      }
+      var rawValidPbRows=rawRows.filter(function(row){var n=(row["Agent"]||"").toString().trim();return n&&n.toUpperCase()!=="AGENT"&&n.toUpperCase()!=="NAN";});
+      var uniquePbMap=new Map();
+      rawValidPbRows.forEach(function(row){var k=pbAgentKey(row);if(!k)return;uniquePbMap.set(k,uniquePbMap.has(k)?pbMergeRows(uniquePbMap.get(k),row):Object.assign({},row));});
+      var rows=Array.from(uniquePbMap.values());
+      var validPbRows=rows;
+      var duplicateRows=Math.max(0,rawValidPbRows.length-validPbRows.length);
+      var pbSnapshot={imported_at:new Date().toISOString(),active_partner_definition:"POWER_BI_LEVEL_POPULATION",raw_rows:rawValidPbRows.length,unique_rows:validPbRows.length,duplicate_rows_ignored:duplicateRows,active_partner_rows:0,levels:{Channel:0,A:0,B:0,C:0,Blank:0,Other:0},tier_agents:{Channel:[],A:[],B:[],C:[],Blank:[],Other:[]},active_prequals_total:0,active_prequals_agents:0,active_pipeline_total:0,active_pipeline_agents:0,closed_12mo_total:0,closed_12mo_agents:0,by_agent:{}};
       validPbRows.forEach(function(row){
         var rawName=(row["Agent"]||"").toString().trim();
         var lv=(row["Level"]||"").toString().trim();
@@ -5428,7 +5451,17 @@ function handleUpload(input){
       // tier and 90-day Active Partner status.
       await window.lpSyncAgentProfilesFromUpload(rows);
       if(typeof window.ctInvalidateLivePowerBi==='function')window.ctInvalidateLivePowerBi();
-      try{if(typeof window.ctGetLivePowerBiSummary==='function')await window.ctGetLivePowerBiSummary(true);}catch(livePbErr){console.warn("Live Power BI roster refresh failed (non-critical):",livePbErr.message);}
+      var livePbSummary=null;
+      try{if(typeof window.ctGetLivePowerBiSummary==='function')livePbSummary=await window.ctGetLivePowerBiSummary(true);}catch(livePbErr){throw new Error("Power BI saved, but the shared server read-back failed: "+livePbErr.message);}
+      // v70 — success is only real when the authoritative shared server snapshot matches this upload.
+      var expectedActive=Number(pbSnapshot.levels.A||0)+Number(pbSnapshot.levels.B||0)+Number(pbSnapshot.levels.C||0);
+      if(livePbSummary){
+        var serverActive=Number(livePbSummary.active_partner_rows||0),src=livePbSummary.source_levels||{};
+        var sourceMatches=Number(src.A||0)===Number(pbSnapshot.levels.A||0)&&Number(src.B||0)===Number(pbSnapshot.levels.B||0)&&Number(src.C||0)===Number(pbSnapshot.levels.C||0);
+        if(serverActive!==expectedActive||!sourceMatches){
+          throw new Error("Power BI did not fully sync. Upload has "+expectedActive+" unique A/B/C agents ("+pbSnapshot.levels.A+" A · "+pbSnapshot.levels.B+" B · "+pbSnapshot.levels.C+" C), but the shared server has "+serverActive+". Please retry the upload before using tracker totals.");
+        }
+      }
 
       // Health snapshots must run AFTER the profile sync, not race it.
       try{await window.lpWriteHealthSnapshots();}
@@ -5444,8 +5477,8 @@ function handleUpload(input){
 
       res.style.color="#43A047";
       var pbActiveImported=Number(pbSnapshot.levels.A||0)+Number(pbSnapshot.levels.B||0)+Number(pbSnapshot.levels.C||0);
-      res.textContent="Done — "+pbActiveImported+" Power BI Active Agents ("+pbSnapshot.levels.A+" A · "+pbSnapshot.levels.B+" B · "+pbSnapshot.levels.C+" C) from "+pbSnapshot.raw_rows+" uploaded rows · Active Prequals: "+pbSnapshot.active_prequals_total+" across "+pbSnapshot.active_prequals_agents+" agents · Active Pipeline: "+pbSnapshot.active_pipeline_total+" across "+pbSnapshot.active_pipeline_agents+" agents · 12mo closings: "+pbSnapshot.closed_12mo_total+". "+updated+" roster agents updated, "+added+" new. Portfolio refreshed ✓"+(assignmentSyncOk?"":" (agent assignment sync needs review)");
-      try{var hubPb=document.getElementById("lpv3-pb-status");if(hubPb)hubPb.textContent="Current Power BI: "+pbActiveImported+" active agents · "+pbSnapshot.active_prequals_total+" active prequals · "+pbSnapshot.active_pipeline_total+" active pipeline · uploaded just now";}catch(e){}
+      res.textContent="Done — "+pbActiveImported+" unique Power BI Active Agents ("+pbSnapshot.levels.A+" A · "+pbSnapshot.levels.B+" B · "+pbSnapshot.levels.C+" C) from "+pbSnapshot.raw_rows+" uploaded rows"+(pbSnapshot.duplicate_rows_ignored?" · "+pbSnapshot.duplicate_rows_ignored+" duplicate row"+(pbSnapshot.duplicate_rows_ignored===1?"":"s")+" merged":"")+" · Active Prequals: "+pbSnapshot.active_prequals_total+" across "+pbSnapshot.active_prequals_agents+" agents · Active Pipeline: "+pbSnapshot.active_pipeline_total+" across "+pbSnapshot.active_pipeline_agents+" agents · 12mo closings: "+pbSnapshot.closed_12mo_total+". Shared server verified ✓"+(assignmentSyncOk?"":" · assignment sync needs review");
+      try{var hubPb=document.getElementById("lpv3-pb-status");if(hubPb)hubPb.textContent="Current Power BI: "+pbActiveImported+" unique active agents · "+pbSnapshot.active_prequals_total+" active prequals · "+pbSnapshot.active_pipeline_total+" active pipeline"+(pbSnapshot.duplicate_rows_ignored?" · "+pbSnapshot.duplicate_rows_ignored+" duplicate row"+(pbSnapshot.duplicate_rows_ignored===1?"":"s")+" merged":"")+" · shared server verified just now";}catch(e){}
       try{if(typeof window.ctV55RefreshTeamSnapshot==="function")await window.ctV55RefreshTeamSnapshot();else if(typeof window.lpv2RenderSnapshot==="function")await window.lpv2RenderSnapshot();}catch(e){console.warn("Team Snapshot refresh after Power BI upload",e)}
     }catch(err){res.style.color="#E53935";res.textContent="Error: "+err.message;}
   };
@@ -11512,6 +11545,20 @@ function openOperatingStandardView(btn){
      n(b.closed)-n(a.closed)||n(b.leads)-n(a.leads)||n(b.preq)-n(a.preq)||n(b.pipe)-n(a.pipe)||String(a.name).localeCompare(String(b.name))
    ).slice(0,10);
    const channels=all.filter(r=>r.tier==='Channel').sort((a,b)=>n(b.closed)-n(a.closed)||String(a.name).localeCompare(String(b.name)));
+   // Use the same authoritative shared snapshot as the on-screen scoreboard.
+   // The prior mobile export read a device-local snapshot, which could lag after a new upload.
+   let liveSummary=null;
+   try{liveSummary=typeof ctGetLivePowerBiSummary==='function'?await ctGetLivePowerBiSummary(false):null}catch(e){}
+   const localSnap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;
+   const localRows=localSnap&&localSnap.by_agent?Object.values(localSnap.by_agent):[];
+   const localLevels=localSnap&&localSnap.levels||{};
+   const serverLevels=liveSummary&&liveSummary.levels||{};
+   const exactCounts={
+     Channel:n(serverLevels.Channel)||(localRows.length?localRows.filter(x=>n(x&&x.closed_12mo)>=10).length:n(localLevels.Channel)),
+     A:n(serverLevels.A)||(localRows.length?localRows.filter(x=>String(x&&x.level||'').trim().toUpperCase()==='A').length:n(localLevels.A)),
+     B:n(serverLevels.B)||(localRows.length?localRows.filter(x=>String(x&&x.level||'').trim().toUpperCase()==='B').length:n(localLevels.B)),
+     C:n(serverLevels.C)||(localRows.length?localRows.filter(x=>String(x&&x.level||'').trim().toUpperCase()==='C').length:n(localLevels.C))
+   };
 
    // 9:16 phone-first graphic for WhatsApp / text sharing.
    const W=1080,H=1920,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
@@ -11527,7 +11574,7 @@ function openOperatingStandardView(btn){
 
    // Channel summary only: count + exactly who they are.
    const chY=218;ctCanvasRoundRect(ctx,58,chY,964,138,18,white,line);
-   ctx.fillStyle=green;ctx.font='800 34px Calibri, Arial, sans-serif';ctx.fillText(String(channels.length)+' CHANNEL ACCOUNT'+(channels.length===1?'':'S'),82,chY+48);
+   ctx.fillStyle=green;ctx.font='800 34px Calibri, Arial, sans-serif';ctx.fillText(String(exactCounts.Channel)+' CHANNEL ACCOUNT'+(exactCounts.Channel===1?'':'S'),82,chY+48);
    ctx.fillStyle=muted;ctx.font='600 18px Calibri, Arial, sans-serif';ctx.fillText('Protect + retain',82,chY+78);
    ctx.fillStyle=ink;ctx.font='700 21px Calibri, Arial, sans-serif';
    const chNames=channels.length?channels.map(r=>pretty(r.name)).join('  •  '):'None in this snapshot';
@@ -11536,27 +11583,21 @@ function openOperatingStandardView(btn){
    // Benchmark pace — live tier counts against Daniel-approved monthly milestones.
    // IMPORTANT: benchmark counts must match the Tier Growth Scoreboard exactly.
    // A/B come from the latest Power BI Level; Channel is calculated from 10+ 12-month closings.
-   const liveSnap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;
-   const liveRows=liveSnap&&liveSnap.by_agent?Object.values(liveSnap.by_agent):[];
-   const liveChannel=liveRows.length?liveRows.filter(x=>n(x&&x.closed_12mo)>=10).length:channels.length;
-   const counts={
-     Channel:liveChannel,
-     A:liveRows.length?liveRows.filter(x=>String(x&&x.level||'').trim()==='A').length:n(liveSnap&&liveSnap.levels&&liveSnap.levels.A),
-     B:liveRows.length?liveRows.filter(x=>String(x&&x.level||'').trim()==='B').length:n(liveSnap&&liveSnap.levels&&liveSnap.levels.B)
-   };
+   const counts=exactCounts;
    const milestones=[
      {label:'9/30',Channel:2,A:14,B:21},
      {label:'10/31',Channel:2,A:16,B:24},
      {label:'11/30',Channel:3,A:18,B:27},
      {label:'12/31',Channel:4,A:20,B:30}
    ];
-   const snap=liveSnap;
-   const benchmarkDate=snap&&snap.imported_at?new Date(snap.imported_at):new Date();
+   const snap=liveSummary||localSnap;
+   const benchmarkStamp=snap&&(snap.stamp||snap.imported_at);
+   const benchmarkDate=benchmarkStamp?new Date(benchmarkStamp):new Date();
    const month=benchmarkDate.getMonth()+1;
    const currentMilestone=month<=9?milestones[0]:month===10?milestones[1]:month===11?milestones[2]:milestones[3];
-   const benchY=378;ctCanvasRoundRect(ctx,58,benchY,964,178,18,white,line);
+   const benchY=378;ctCanvasRoundRect(ctx,58,benchY,964,218,18,white,line);
    ctx.fillStyle=ink;ctx.font='800 26px Calibri, Arial, sans-serif';ctx.fillText('Benchmark Pace',82,benchY+36);
-   ctx.fillStyle=muted;ctx.font='600 15px Calibri, Arial, sans-serif';ctx.fillText('Current net tier counts vs '+currentMilestone.label+' target',82,benchY+61);
+   ctx.fillStyle=muted;ctx.font='600 15px Calibri, Arial, sans-serif';ctx.fillText('Current Power BI: '+counts.Channel+' Channel • '+counts.A+' A • '+counts.B+' B • '+counts.C+' C  |  '+currentMilestone.label+' target',82,benchY+61);
    const bx=[82,340,598],labels=['Channel','A','B'];
    labels.forEach((name,i)=>{
      const target=currentMilestone[name],value=counts[name],gap=Math.max(0,target-value);
@@ -11566,14 +11607,17 @@ function openOperatingStandardView(btn){
      ctx.fillStyle=gap===0?green:orange;ctx.font='700 13px Calibri, Arial, sans-serif';
      ctx.fillText(gap>0?gap+' TO GO':(ahead>0?ahead+' AHEAD':'TARGET MET'),bx[i],benchY+143);
    });
-   ctx.fillStyle='#718391';ctx.font='600 13px Calibri, Arial, sans-serif';
-   ctx.fillText('10/31  2 Channel • 16 A • 24 B     11/30  3 • 18 • 27     12/31  4 • 20 • 30',82,benchY+166);
+   ctx.fillStyle='#718391';ctx.font='700 13px Calibri, Arial, sans-serif';
+   ctx.fillText('Daniel’s roadmap: Start 1 / 12 / 18  •  9/30  2 / 14 / 21  •  10/31  2 / 16 / 24',82,benchY+164);
+   ctx.fillText('11/30  3 / 18 / 27  •  12/31 GOAL  4 / 20 / 30     (Channel / A / B)',82,benchY+184);
+   ctx.font='600 12px Calibri, Arial, sans-serif';
+   ctx.fillText('Tiers: Channel 10+ closings • A 4–9 • B 2–3 • C 1 closing or 1 lead     Weights: 15 / 15 / 20 pts',82,benchY+204);
 
-   ctx.fillStyle=ink;ctx.font='800 31px Calibri, Arial, sans-serif';ctx.fillText('Top 10 Partners',58,598);
-   ctx.fillStyle=muted;ctx.font='500 17px Calibri, Arial, sans-serif';ctx.fillText('Ranked by 12-month closings',58,628);
+   ctx.fillStyle=ink;ctx.font='800 31px Calibri, Arial, sans-serif';ctx.fillText('Top 10 Partners',58,628);
+   ctx.fillStyle=muted;ctx.font='500 17px Calibri, Arial, sans-serif';ctx.fillText('Ranked by 12-month closings',58,658);
 
    // Compact mobile cards: name/path first, then four easy-to-scan metrics.
-   const y0=652,rowH=112,rowGap=7,left=58,rowW=964;
+   const y0=680,rowH=109,rowGap=5,left=58,rowW=964;
    ranked.forEach((r,i)=>{
      const y=y0+i*(rowH+rowGap);
      ctCanvasRoundRect(ctx,left,y,rowW,rowH,16,white,line);
@@ -12885,6 +12929,31 @@ async function lpBuyers(lp,key,label,count){const x=modal();x.t.textContent=lp+'
 async function leadRecords(){let rows=[];try{rows=await sbFetch('GET','velocify_leads?date_added=gte.'+new Date().getFullYear()+'-01-01&select=*&order=date_added.desc&limit=20000')}catch(e){}const converted=r=>{try{return typeof ctIsLeadAppConverted==='function'?ctIsLeadAppConverted(r):/started|approval|pre-approval|preapproval|contract|processing|underwrit|clear to close|funded|closed/i.test(String(r.status||''))}catch(e){return false}},apps=rows.filter(converted);show('Lead → 1003',apps.length+' Started-or-later from '+rows.length+' YTD leads','Velocify YTD lead cohort; each displayed record is an actual supporting lead.',['Buyer','Referral partner / agent','Loan Partner','Status / date'],apps.map(r=>[r.buyer_name||r.borrower_name||r.customer_name||'Buyer name unavailable',r.referral_partner_name||r.agent_name||r.realtor_name||'Agent not recorded',lpName(r.lp_user||r.lp||r.owner),String(r.status||'Status not recorded')+' · '+String(r.last_update||r.date_added||'Date unavailable').slice(0,10)]))}
 async function entered(){const rows=await scores(),set=new Set(rows.map(r=>r.person));show('Scorecards entered',set.size+' of 6 submitted · current week','LP scorecard records for the current week. Select an LP to open the complete scorecard.',['Loan Partner','Status','Week','Next step'],LPS.map(lp=>[lp,set.has(lp)?'Submitted':'Missing',week(),set.has(lp)?'Click to open scorecard':'Click to complete scorecard']));const x=modal();[...x.b.querySelectorAll('.ct-detail-row:not(.head)')].forEach((el,i)=>{const lp=LPS[i];el.classList.add('ct-agent-drill');el.setAttribute('role','button');el.setAttribute('tabindex','0');el.onclick=()=>{window.lpv3CloseSnapshotDrill&&window.lpv3CloseSnapshotDrill();if(typeof pmOpenScorecard==='function')pmOpenScorecard(lp)};el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click()}}})}
 window.ctOpenScoreDetail=async function(metric){if(metric==='funded')return window.lpv3OpenSnapshotDrill&&window.lpv3OpenSnapshotDrill('funded');if(metric==='lead1003_records')return leadRecords();if(metric==='active_prequals'||metric==='active_pipeline')return powerRows(metric);if(metric==='scorecards_entered')return entered();if(metric.startsWith('weekly_')){const key=metric.slice(7),labels={referred_leads:'Referred leads',apps_1003:'1003s',pre_approvals:'Pre-approvals',contracts:'Contracts'};return weekly(key,labels[key]||key.replace(/_/g,' '))}};
+})();
+</script>
+<style id="ct-v69-daniel-roadmap-css">
+.ct-daniel-roadmap{margin-top:14px;padding:14px;border:1px solid #cfe0e8;border-radius:12px;background:#f7fbfd}
+.ct-daniel-roadmap-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+.ct-daniel-roadmap-head h3{margin:0;color:#102a4a;font-size:16px}.ct-daniel-roadmap-head span{color:#587083;font-size:12px;font-weight:700}
+.ct-daniel-roadmap-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.ct-daniel-step{background:#fff;border:1px solid #dce7ed;border-radius:10px;padding:10px;min-width:0}
+.ct-daniel-step.current-goal{border-color:#12b8d9;box-shadow:inset 0 3px 0 #12b8d9}.ct-daniel-step.final-goal{background:#102a4a;border-color:#102a4a;color:#fff}
+.ct-daniel-step small{display:block;color:#587083;font-size:11px;font-weight:800;margin-bottom:7px}.ct-daniel-step.final-goal small{color:#c6d5e1}
+.ct-daniel-values{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}.ct-daniel-values b{font-size:18px;color:#102a4a}.ct-daniel-step.final-goal .ct-daniel-values b{color:#fff}
+.ct-daniel-values em{display:block;font-size:10px;color:#6b7e8a;font-style:normal;font-weight:700}.ct-daniel-step.final-goal .ct-daniel-values em{color:#c6d5e1}
+.ct-daniel-rules{display:grid;grid-template-columns:1.25fr 1fr;gap:8px;margin-top:8px}
+.ct-daniel-rule{background:#fff;border:1px solid #dce7ed;border-radius:9px;padding:10px;color:#35566a;font-size:12px;line-height:1.55}.ct-daniel-rule b{color:#102a4a}
+@media(max-width:900px){.ct-daniel-roadmap-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ct-daniel-step.final-goal{grid-column:1/-1}.ct-daniel-rules{grid-template-columns:1fr}}
+@media(max-width:560px){.ct-daniel-roadmap{padding:11px}.ct-daniel-roadmap-head{display:block}.ct-daniel-roadmap-head span{display:block;margin-top:4px}.ct-daniel-roadmap-grid{grid-template-columns:1fr}.ct-daniel-step.final-goal{grid-column:auto}.ct-daniel-values b{font-size:20px}}
+</style>
+<script id="ct-v69-daniel-roadmap-js">
+(function(){
+'use strict';
+const steps=[['Starting point',1,12,18,''],['9/30 Target',2,14,21,'current-goal'],['10/31 Target',2,16,24,''],['11/30 Target',3,18,27,''],['12/31 Goal',4,20,30,'final-goal']];
+function markup(){return '<section class="ct-daniel-roadmap"><div class="ct-daniel-roadmap-head"><h3>Daniel’s Tier Growth Roadmap</h3><span>Where we are going by year-end</span></div><div class="ct-daniel-roadmap-grid">'+steps.map(s=>'<div class="ct-daniel-step '+s[4]+'"><small>'+s[0]+'</small><div class="ct-daniel-values"><div><b>'+s[1]+'</b><em>CHANNEL</em></div><div><b>'+s[2]+'</b><em>A</em></div><div><b>'+s[3]+'</b><em>B</em></div></div></div>').join('')+'</div><div class="ct-daniel-rules"><div class="ct-daniel-rule"><b>Tier definitions:</b> Channel = 10+ closings · A = 4–9 closings · B = 2–3 closings · C = 1 closing or 1 lead</div><div class="ct-daniel-rule"><b>50-point score:</b> Channel 15 pts · A 15 pts · B 20 pts</div></div></section>'}
+function add(){document.querySelectorAll('.ct-live-tier-card').forEach(card=>{if(!card.querySelector('.ct-daniel-roadmap'))card.insertAdjacentHTML('beforeend',markup())})}
+const prior=window.renderGrowthScoreboard;if(typeof prior==='function'&&!prior.__danielRoadmapV69){const wrapped=async function(){const r=await prior.apply(this,arguments);add();return r};wrapped.__danielRoadmapV69=true;window.renderGrowthScoreboard=wrapped}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(add,1200),{once:true});else setTimeout(add,700);
 })();
 </script>
 </html>
