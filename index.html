@@ -2846,8 +2846,33 @@ function ctOwnershipIsHidden(a){
   var shown=String(displayName(a[0])||"").trim().toLowerCase();
   return raw==="__hidden__"||shown==="__hidden__";
 }
+/* v91: Ownership is a roster-management workspace, so its population must match the
+   latest Power BI active A/B/C roster. It must NOT use the narrower tracker-managed /
+   90-day relationship population. The Sep 24 workbook is 17 A + 20 B + 93 C = 130. */
+var ctOwnershipPowerBiKeys=new Set();
+async function ctOwnershipLoadPowerBiRoster(){
+  var rows=await sbFetch("GET","agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,relationship_status,do_not_contact&powerbi_last_seen_at=not.is.null&limit=5000").catch(function(){return[];});
+  var latestMs=0;
+  (rows||[]).forEach(function(p){var ms=Date.parse(p&&p.powerbi_last_seen_at||"");if(Number.isFinite(ms)&&ms>latestMs)latestMs=ms;});
+  var latestByKey=new Map();
+  (rows||[]).forEach(function(p){
+    var ms=Date.parse(p&&p.powerbi_last_seen_at||""),lv=String(p&&p.powerbi_level||"").trim().toUpperCase();
+    if(!latestMs||!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000||!["A","B","C"].includes(lv))return;
+    var key=assignmentKey(p.agent_name);if(key&&!latestByKey.has(key))latestByKey.set(key,p);
+  });
+  ctOwnershipPowerBiKeys=new Set(latestByKey.keys());
+  latestByKey.forEach(function(p,key){
+    var a=(agents||[]).find(function(x){return assignmentKey(x[0])===key;});
+    if(a){a[1]=String(p.powerbi_level||a[1]||"C").toUpperCase();}
+    else{agents.push([p.agent_name,String(p.powerbi_level||"C").toUpperCase(),"Unassigned",null,null,null,null,false,0]);}
+  });
+  return latestByKey.size;
+}
 function ctOwnershipBaseRows(){
-  return (agents||[]).filter(function(a){return isActive(a)&&!ctRosterRemoved(a[0])&&!ctOwnershipIsHidden(a);});
+  return (agents||[]).filter(function(a){
+    var key=assignmentKey(a&&a[0]);
+    return ctOwnershipPowerBiKeys.has(key)&&!ctOwnershipIsHidden(a);
+  });
 }
 function ctOwnershipHiddenRows(){
   return (agents||[]).filter(function(a){return isActive(a)&&ctOwnershipIsHidden(a);});
@@ -2860,11 +2885,11 @@ function openOwnershipView(btn){
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
   var view=document.getElementById("view-ownership");if(view)view.classList.add("active");
   var body=document.getElementById("ownership-body");if(body)body.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">Loading ownership...</div>';
-  Promise.all([loadAgentAssignments(),loadInactiveRosterNames()]).then(function(){renderOwnershipSummary();renderOwnershipRows();}).catch(function(){renderOwnershipRows();});
+  Promise.all([loadAgentAssignments(),loadInactiveRosterNames(),ctOwnershipLoadPowerBiRoster()]).then(function(){renderOwnershipSummary();renderOwnershipRows();}).catch(function(){renderOwnershipRows();});
 }
 function refreshOwnershipView(){
   var body=document.getElementById("ownership-body");if(body)body.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-3)">Refreshing...</div>';
-  return Promise.all([loadAgentAssignments(),loadInactiveRosterNames()]).then(function(){renderOwnershipSummary();renderOwnershipRows();setSyncStatus("live");}).catch(function(err){lpHandleSyncError(err);console.error("Ownership load failed:",err);renderOwnershipRows();});
+  return Promise.all([loadAgentAssignments(),loadInactiveRosterNames(),ctOwnershipLoadPowerBiRoster()]).then(function(){renderOwnershipSummary();renderOwnershipRows();setSyncStatus("live");}).catch(function(err){lpHandleSyncError(err);console.error("Ownership load failed:",err);renderOwnershipRows();});
 }
 function renderOwnershipSummary(){
   var host=document.getElementById("ownership-summary");if(!host)return;
