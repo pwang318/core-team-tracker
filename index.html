@@ -1844,7 +1844,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="lp-portfolio-tabs" id="lpPortfolioTabs">
 <button class="active" onclick="lpPortfolioTab('overview',this)">Overview</button>
 <button onclick="lpPortfolioTab('tier',this)">Tier Growth</button>
-<button onclick="lpPortfolioTab('health',this)">Health</button>
+
 <button onclick="lpPortfolioTab('ownership',this)">Ownership</button>
 </div>
 <div class="lp-portfolio-panel active" id="lp-portfolio-overview">
@@ -1857,9 +1857,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="lp-portfolio-panel" id="lp-portfolio-tier">
 <div id="lp-portfolio-tier-body"><div class="no-data">Open Tier Growth to load the current score.</div></div>
 </div>
-<div class="lp-portfolio-panel" id="lp-portfolio-health">
-<div id="lp-portfolio-health-body"><div class="no-data">Open Health to load relationship priorities.</div></div>
-</div>
+
 <div class="lp-portfolio-panel" id="lp-portfolio-ownership">
 <div id="lp-portfolio-ownership-mount"></div>
 </div>
@@ -10383,6 +10381,8 @@ function pfrCompactOverview(body){
   cards.forEach(function(card,i){
     var heading=(card.firstElementChild&&card.firstElementChild.textContent||'').trim();
     var entry=i===0?{label:'Meeting brief',group:'Start here'}:titles.find(function(t){return heading.indexOf(t.find)===0;})||{label:heading.slice(0,50)||'More detail',group:'activity'};
+    // v90: Health scoring is temporarily removed from Portfolio until its source logic is rebuilt.
+    if(entry.label==='Partner health'){ card.style.display='none'; return; }
     var tile=document.createElement('button');tile.type='button';tile.className='lp-portfolio-topic-tile';tile.dataset.portfolioTopic=String(i);tile.setAttribute('aria-expanded','false');
     var source=sourceByLabel[entry.label]||sourceByGroup[entry.group]||'Power BI + tracker';
     tile.innerHTML='<strong>'+escHtml(entry.label)+'</strong><span>'+escHtml(source)+(source.indexOf('Power BI')>=0&&body.dataset.powerBiStamp?' · '+escHtml(body.dataset.powerBiStamp):'')+' · Open →</span>';
