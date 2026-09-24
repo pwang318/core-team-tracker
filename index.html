@@ -1,6 +1,10 @@
 <!DOCTYPE html>
+<!-- v85 2026-09-24: Portfolio Meeting adds live pipeline snapshot (Leads MTD, active contracts, preapproved buyers, active partners) and uses the latest 78-lead Velocify MTD checkpoint until shared Zapier data catches up. -->
 <!-- v82 2026-09-24: Power BI shared-profile sync hardened: canonical name matching, duplicate workbook rows, and read-back verification now use one normalized key; failed verification reports exact agents. -->
 <!-- v83 2026-09-24: fixes Power BI durable receipt scope error (ctPowerBiSummarySourceApp not defined); preserves v82 shared-profile sync, Top 10 Portfolio Meeting, and ownership authority. -->
+<!-- v87 2026-09-24: Tier Growth Top 10 focuses on loan/pipeline numbers; removes last-touch detail while preserving ownership and opportunity context. -->
+<!-- v86 2026-09-24: Tier Growth Top 10 now includes MTD referrals, active pipeline, preapprovals/prequals, last meaningful touch, RM/LP owner, and a specific opportunity. -->
+<!-- v88 2026-09-24: Tier Growth Top 10 focuses only on loan/business numbers and opportunities; RM/LP ownership removed from meeting rows. -->
 <!-- v81 2026-09-24: Portfolio meeting lists show Top 10 tier-growth candidates, current referrers, and relationship-risk agents; ownership authority preserved. -->
 <!-- v79 2026-09-24: preserves authoritative RM ownership and improves the 30-minute team portfolio meeting view. -->
 
@@ -9921,13 +9925,13 @@ function pfrBuildMeetingAgenda(input){
   return {sections:[
     {key:'tier',minutes:8,title:'Tier growth',result:i.tierPoints.toFixed(1)+'/50 points. Channel '+i.channel+'/'+i.milestone.Channel+', A '+i.a+'/'+i.milestone.A+', B '+i.b+'/'+i.milestone.B+'.',
       context:'These are candidates based on the current Power BI profiles, not confirmed tier changes.',people:i.nearNames.length?i.nearNames:['No near-tier candidates identified in the current profiles.'],
-      talkingPoints:['Who is genuinely closest to moving up, and what specifically gets them there?','Which partners are one closing away versus needing stronger referral consistency?','Are there A/B/Channel relationships producing below what we would expect for their tier?','Which one or two partners need a buyer introduction, business-planning meeting, event invite, or another concrete value add this week?'],
-      question:'Choose up to three tier-growth actions. Record the partner, exact opportunity, owner and due date.'},
-    {key:'referrals',minutes:10,title:'Referrals and active partners',result:i.referralPoints.toFixed(1)+'/30 referral points. '+i.priorLabel+': '+i.priorMonthLeads+' leads / '+i.powerBiActiveCount+' current active partners = '+(i.powerBiActiveCount?i.priorMonthLeads/i.powerBiActiveCount:0).toFixed(2)+' (goal 1.15). Active partner growth: '+i.activePoints.toFixed(1)+'/20; '+i.powerBiActiveCount+'/200.',
-      context:'This month: '+i.currentMonthLeads+' leads through '+leadDate+'. The '+i.totalActive+' tracker-managed relationships and the Power BI active roster are different populations. Confirm the completed-month roster before using today’s denominator for a historical comparison.',
+      talkingPoints:['Review the pipeline and opportunity shown for each candidate.','Choose the 2–3 relationships with the clearest path to the next funded closing.','Confirm the exact next move, one accountable owner, and a due date.'],
+      question:'Choose the 2–3 highest-opportunity tier-growth relationships. Record the exact next move, owner and due date.'},
+    {key:'referrals',minutes:10,title:'Portfolio & pipeline',result:i.currentMonthLeads+' leads MTD · '+i.activeContracts+' active contracts · '+i.preapprovedBuyers+' preapproved buyers · '+i.powerBiActiveCount+' active partners.',
+      context:'Referral score: '+i.referralPoints.toFixed(1)+'/30. '+i.priorLabel+': '+i.priorMonthLeads+' leads / '+i.powerBiActiveCount+' active partners = '+(i.powerBiActiveCount?i.priorMonthLeads/i.powerBiActiveCount:0).toFixed(2)+' (goal 1.15). Active partner growth: '+i.activePoints.toFixed(1)+'/20; '+i.powerBiActiveCount+'/200. '+(i.velocifyCheckpointNote||'Velocify MTD is current through '+leadDate+'.'),
       people:i.topReferrers.length?i.topReferrers.map(function(r){return r.name+' — '+r.count+' '+new Date(i.latestLeadDate+'T12:00:00').toLocaleDateString('en-US',{month:'long'})+' referrals';}):['No current-month referrers in the synced lead data.'],
-      talkingPoints:['Who is sending us business right now, and are we responding with the right level of attention?','Who has referred before but is quiet this month and needs a purposeful reconnect?','Which active partners have room to send more based on their relationship tier or production?','What can we offer this week: buyer strategy, listing payment options, co-marketing, business planning, event support, or a client scenario review?'],
-      question:'Choose up to three referral-growth actions. Record the partner, value we will bring, owner and due date.'},
+      talkingPoints:['What is converting right now: leads → preapprovals → active contracts?','Which preapproved buyers need an agent introduction, property strategy, or another push toward contract?','Who is sending us business right now, and which active partners have room to send more?','Where do we have pipeline sitting without movement, and what is blocking the next step?','Which 2–3 relationships or buyer opportunities can we move this week, and what specific value will we bring?'],
+      question:'Choose up to three portfolio or pipeline actions. Record the partner or opportunity, specific next move, owner and due date.'},
     {key:'health',minutes:9,title:'Relationship health',result:i.redCount+' red; '+i.yellowCount+' yellow; '+i.missingNextMove+' managed relationships have no documented next move.',
       context:i.redNoTouch+' red relationships have no meaningful touch in the loaded history. Check history before assigning recovery; red and missing-next-move counts can overlap.',
       people:i.riskNames.length?i.riskNames:['Open Health to select relationships from the shared profiles.'],
@@ -10059,6 +10063,13 @@ async function pfrLoad(){
 
     var leadsThisPeriod=periodLeads.length;
     var leadsMTD=monthLeads.length;
+    // Sep 24 manual checkpoint from the latest Velocify tracker. Zapier/shared rows may lag until ~8 PM.
+    // It only raises the headline total while shared Velocify is behind; once shared data reaches 78+ (or October begins), live data wins automatically.
+    var velocifyCheckpoint=(now.getFullYear()===2026&&now.getMonth()===8)?78:0;
+    var meetingLeadsMTD=Math.max(leadsMTD,velocifyCheckpoint);
+    var velocifyCheckpointNote=meetingLeadsMTD>leadsMTD
+      ?('Latest Velocify tracker: '+meetingLeadsMTD+' leads MTD; '+leadsMTD+' individual lead records are currently synced, so the Top 10 referrer detail will catch up after the nightly Zapier refresh.')
+      :('Velocify MTD is current through '+(monthLeads.reduce(function(latest,lead){var day=String(lead.date_added||'').slice(0,10);return day>latest?day:latest;},'')||'the latest sync')+'.');
     var dayOfMonth=Math.max(1,now.getDate());
     var daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
     var projectedMonthLeads=Math.round((leadsMTD/dayOfMonth)*daysInMonth);
@@ -10174,7 +10185,24 @@ async function pfrLoad(){
       var n=Number(a.closes_past_year||0),t=a._growth_level;
       return (t==='C'&&n===1)||(t==='B'&&n===3)||(t==='A'&&n===9);
     }).slice(0,10);
-    var nearNames=nearTier.map(function(a){var next=(a._growth_level==='C'?'B':a._growth_level==='B'?'A':'Channel');return pfrProperCase(a.agent_name)+' — '+a._growth_level+' → '+next+' · '+Number(a.closes_past_year||0)+' closings in 12 months · 1 closing from next tier';});
+    var nearNames=nearTier.map(function(a){
+      var name=String(a.agent_name||'').trim(), key=name.toLowerCase(), matchKey=ctAgentNameKey(name);
+      var next=(a._growth_level==='C'?'B':a._growth_level==='B'?'A':'Channel');
+      var pbRow=(pbSnapshot&&pbSnapshot.by_agent)?(pbSnapshot.by_agent[matchKey]||pbSnapshot.by_agent[key]||Object.values(pbSnapshot.by_agent).find(function(r){return ctAgentNameKey(r&&r.name||'')===matchKey;})):null;
+      var preq=Number(pbRow&&pbRow.active_prequals||0), pipe=Number(pbRow&&pbRow.active_pipeline||0);
+      var mtdRefs=monthLeads.filter(function(l){return (ctAgentNameKey(l.referral_partner_name||'')||String(l.referral_partner_name||'').trim().toLowerCase())===matchKey;}).length;
+      var lastRM=lastSeenRM[key]||lastSeenRM[matchKey]||null, lastLP=lastSeenLP[key]||lastSeenLP[matchKey]||null;
+      var lastTouch=[lastRM,lastLP].filter(Boolean).sort().pop()||null;
+      var touchText=lastTouch?new Date(lastTouch+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'none in loaded history';
+      var rm=(typeof agentRmOwners!=='undefined'&&(agentRmOwners[matchKey]||agentRmOwners[key]))||a.rm_owner||a.rm||'Unassigned';
+      var lp=a.lp_owner||a.lp||'Unassigned';
+      var opportunity='Get the next funded closing needed for '+next+'.';
+      if(pipe>0)opportunity='Review '+pipe+' active pipeline buyer'+(pipe===1?'':'s')+' for the fastest path to the next closing.';
+      else if(preq>0)opportunity='Move '+preq+' active prequal'+(preq===1?'':'s')+' toward contract and the next closing.';
+      else if(mtdRefs>0)opportunity='Convert '+mtdRefs+' MTD referral'+(mtdRefs===1?'':'s')+' into the next closing.';
+      else opportunity='No current buyer pipeline shown; create a specific referral or buyer opportunity.';
+      return pfrProperCase(name)+' — '+a._growth_level+' → '+next+' | '+Number(a.closes_past_year||0)+' closes / 12 mo | 1 from '+next+' | '+mtdRefs+' referrals MTD | '+pipe+' active pipeline | '+preq+' preapproved/prequal | Opportunity: '+opportunity;
+    });
     var referrerCounts={};
     monthLeads.forEach(function(lead){
       var name=String(lead.referral_partner_name||'').trim(),key=ctAgentNameKey(name)||name.toLowerCase();
@@ -10186,12 +10214,13 @@ async function pfrLoad(){
     var latestLeadDate=monthLeads.reduce(function(latest,lead){var day=String(lead.date_added||'').slice(0,10);return day>latest?day:latest;},'');
     var riskNames=top10AtRisk.filter(function(row){return row.name&&row.name.indexOf('__')<0;}).slice(0,10).map(function(row){return pfrProperCase(row.name)+' — '+(row.daysSinceLead===null?'last lead date missing':row.daysSinceLead+' days since last lead')+(row.health?' · '+row.health:'');});
     var agenda=pfrBuildMeetingAgenda({tierPoints:tierPoints,channel:officialCounts.Channel,a:officialCounts.A,b:officialCounts.B,milestone:milestone,nearNames:nearNames,
-      referralPoints:referralPoints,priorLabel:priorLabel,priorMonthLeads:priorMonthLeads,currentMonthLeads:leadsMTD,latestLeadDate:latestLeadDate,topReferrers:topReferrers,
+      referralPoints:referralPoints,priorLabel:priorLabel,priorMonthLeads:priorMonthLeads,currentMonthLeads:meetingLeadsMTD,latestLeadDate:latestLeadDate,topReferrers:topReferrers,
+      activeContracts:pbSnapshot?Number(pbPipeline.pipelineTotal||0):'Unavailable',preapprovedBuyers:pbSnapshot?Number(pbPipeline.prequalsTotal||0):'Unavailable',velocifyCheckpointNote:velocifyCheckpointNote,
       activePoints:activePoints,powerBiActiveCount:powerBiActiveCount,totalActive:totalActive,redCount:redRows.length,yellowCount:healthCounts.Yellow,redNoTouch:redNoTouch,
       missingNextMove:missingNextMove,riskNames:riskNames}).sections;
-    var meetingExportData={date:localDateStr(now),source:'Power BI '+sourceDate+' · Velocify through '+(latestLeadDate||'latest sync')+' · tracker relationship history',score:(tierPoints+referralPoints+activePoints).toFixed(1)+' / 100',note:pbSource.syncNote||'',sections:agenda};
+    var meetingExportData={date:localDateStr(now),source:'Power BI '+sourceDate+' · Velocify '+meetingLeadsMTD+' leads MTD'+(meetingLeadsMTD>leadsMTD?' (latest tracker checkpoint; individual rows pending nightly sync)':' through '+(latestLeadDate||'latest sync'))+' · tracker relationship history',score:(tierPoints+referralPoints+activePoints).toFixed(1)+' / 100',note:pbSource.syncNote||'',sections:agenda};
     var html=`<div class="lp-portfolio-meeting-brief" style="background:#F5FAFB;border:1px solid #B9D8E1;border-radius:12px;padding:18px;margin-bottom:14px">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div style="font-size:10px;font-weight:800;color:#35657C;letter-spacing:.09em">30-MINUTE TEAM PORTFOLIO MEETING</div><div style="font-size:19px;font-weight:800;color:#071B37;margin-top:3px">The results, the people, the decisions</div><div style="font-size:11px;color:#536B78;margin-top:4px">Power BI ${escHtml(sourceDate)} · Velocify leads through ${escHtml(latestLeadDate||'latest sync')} · tracker relationship history</div></div><button class="btn btn-sm" type="button" onclick="pfrExportMeetingBrief(this)">Download Word meeting record</button></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div style="font-size:10px;font-weight:800;color:#35657C;letter-spacing:.09em">30-MINUTE TEAM PORTFOLIO MEETING</div><div style="font-size:19px;font-weight:800;color:#071B37;margin-top:3px">The results, the people, the decisions</div><div style="font-size:11px;color:#536B78;margin-top:4px">Power BI ${escHtml(sourceDate)} · Velocify ${meetingLeadsMTD} leads MTD${meetingLeadsMTD>leadsMTD?' · latest tracker checkpoint':' · through '+escHtml(latestLeadDate||'latest sync')} · tracker relationship history</div></div><button class="btn btn-sm" type="button" onclick="pfrExportMeetingBrief(this)">Download Word meeting record</button></div>
       ${pbSource.syncNote?'<p style="background:#fff7e7;padding:10px;border-radius:8px">'+escHtml(pbSource.syncNote)+'</p>':''}
       <div style="background:#fff;border:1px solid #DCE7EC;border-radius:10px;padding:13px;margin-top:14px"><b>Weighted result: ${(tierPoints+referralPoints+activePoints).toFixed(1)} / 100</b><div style="font-size:12px;color:#526575;margin-top:4px">Outcome measures: partner tiers /50 · completed-month referrals /30 · active partners /20. Activities guide the work; they do not add points by themselves.</div></div>
       ${agenda.map(function(section,i){return `<section style="background:#fff;border:1px solid #DCE7EC;border-radius:10px;padding:14px;margin-top:10px"><h3 style="font-size:14px;margin:0 0 6px">${i+1}. ${escHtml(section.title)} <span style="font-weight:400;color:#536B78">· ${section.minutes} min</span></h3>${section.result?'<div style="font-weight:700;font-size:12px">'+escHtml(section.result)+'</div>':''}<p style="font-size:12px;line-height:1.5;margin:7px 0">${escHtml(section.context)}</p>${section.people.length?`<div style="font-size:11px;font-weight:700;margin:10px 0 4px">Partners to review</div><ul style="margin:0 0 9px;padding-left:19px;font-size:12px;line-height:1.65">${section.people.map(function(person){return `<li>${escHtml(person)}</li>`;}).join('')}</ul>`:''}${section.talkingPoints.length?`<div style="font-size:11px;font-weight:700;margin:8px 0 4px">Talk through</div><ol style="margin:0 0 9px;padding-left:19px;font-size:12px;line-height:1.65">${section.talkingPoints.map(function(point){return `<li>${escHtml(point)}</li>`;}).join('')}</ol>`:''}<p style="font-size:12px;line-height:1.5;margin:6px 0"><b>Decide:</b> ${escHtml(section.question)}</p><label style="display:block;font-size:11px;font-weight:700;margin-top:9px">Decision · owner · due date</label><textarea data-portfolio-decision="${section.key}" oninput="pfrSaveMeetingDecisions()" rows="2" placeholder="Record the action, owner and due date" style="display:block;width:100%;box-sizing:border-box;border:1px solid #CBD8E3;border-radius:8px;padding:9px;font:inherit;margin-top:4px"></textarea></section>`;}).join('')}
