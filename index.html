@@ -10072,9 +10072,9 @@ async function pfrLoad(){
       :('Velocify MTD is current through '+(monthLeads.reduce(function(latest,lead){var day=String(lead.date_added||'').slice(0,10);return day>latest?day:latest;},'')||'the latest sync')+'.');
     var dayOfMonth=Math.max(1,now.getDate());
     var daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
-    var projectedMonthLeads=Math.round((leadsMTD/dayOfMonth)*daysInMonth);
+    var projectedMonthLeads=Math.round((meetingLeadsMTD/dayOfMonth)*daysInMonth);
     var ratioDenominator=powerBiActiveCount;
-    var ratioMTD=ratioDenominator>0?(leadsMTD/ratioDenominator):0;
+    var ratioMTD=ratioDenominator>0?(meetingLeadsMTD/ratioDenominator):0;
     var projectedRatio=ratioDenominator>0?(projectedMonthLeads/ratioDenominator):0;
     var ratioLabel=projectedRatio>=1.30?"Elite pace":projectedRatio>=1.15?"On-target pace":projectedRatio>=0.90?"Acceptable pace":"Below minimum pace";
     var ratioColor=projectedRatio>=1.15?"#3E8E5A":projectedRatio>=0.90?"#B8842B":"#B54B42";
@@ -10136,7 +10136,7 @@ async function pfrLoad(){
       rmActivePartners:rmActivePartners,
       managedActivePartners:active,
       monthLeads:monthLeads,
-      leadsMTD:leadsMTD,
+      leadsMTD:meetingLeadsMTD,
       projectedMonthLeads:projectedMonthLeads,
       ratioMTD:ratioMTD,
       projectedRatio:projectedRatio,
@@ -10265,7 +10265,7 @@ async function pfrLoad(){
 
     html+='<div onclick="pfrOpenDrill(\'ratio\')" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Active Agent-to-Lead Ratio · Monthly <span style="font-size:10px;font-weight:600;color:var(--text-3)">· click for source data</span></div>'
-      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+leadsMTD+' Velocify leads MTD &divide; '+ratioDenominator+' Power BI Active Agents = <strong>'+ratioMTD.toFixed(2)+'</strong></div>'
+      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+meetingLeadsMTD+' Velocify leads MTD &divide; '+ratioDenominator+' Power BI Active Agents = <strong>'+ratioMTD.toFixed(2)+'</strong></div>'
       +'<div style="font-size:24px;font-weight:800;color:'+ratioColor+'">'+projectedRatio.toFixed(2)+'<span style="font-size:13px;font-weight:600;margin-left:8px">'+ratioLabel+'</span></div>'
       +'<div style="font-size:10.5px;color:var(--text-3);margin-top:2px">Projected month-end pace: '+projectedMonthLeads+' leads. Min 0.90 &middot; Target 1.15+ &middot; Elite 1.30+</div>'
     +'</div>';
