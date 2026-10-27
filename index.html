@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v97-lp-tuesday-report-and-call-notes-20261027" name="version"/>
+<meta content="core-team-lp-v98-lp-report-export-and-visible-notes-20261027" name="version"/>
 <meta content="v92: Display the verified MTD lead checkpoint on the scorecard with the Velocify synced and pending-sync split; the projection uses that full MTD count." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -13249,7 +13249,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   async function exportLpTuesdayReport(){
     const today=new Date();today.setHours(12,0,0,0);const start=new Date(today);start.setDate(start.getDate()+(start.getDay()===0?-6:1-start.getDay()));const week=start.toISOString().slice(0,10),end=new Date(start);end.setDate(end.getDate()+6);const through=end.toISOString().slice(0,10);
-    const status=document.getElementById('v56MgmtStatus');if(status)status.textContent='Building this week\\'s LP Tuesday status workbook…';
+    const status=document.getElementById('v56MgmtStatus');if(status)status.textContent='Building this week\'s LP Tuesday status workbook…';
     try{
       const [acts,classes]=await Promise.all([
         sbFetch('GET','amanda_activities?act_date=gte.'+week+'&act_date=lte.'+through+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=12000').catch(()=>[]),
@@ -13262,7 +13262,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       const rows=[],summary=Object.fromEntries(LPS.map(lp=>[lp,{assigned:0,completed:0,open:0,review:0,cleared:0}]));
       plan.forEach(p=>{
         const lp=lpShort(meta(p.notes,'LP_OWNER'))||'Unassigned',key=meta(p.notes,'TUE_PLAN_KEY'),tx=meta(p.notes,'TXN_KEY'),mk=meta(p.notes,'MATCH_KEY'),client=meta(p.notes,'TXN_CLIENT'),buyer=meta(p.notes,'BUYER_AGENT');
-        const classification=classMap[tx]||classMap[mk]||(!usableAgent(buyer)?'CONTACT_ISSUE':'CALL_REQUIRED');
+        const classification=classMap[tx]||classMap[mk]||(String(buyer||'').trim()?'CALL_REQUIRED':'CONTACT_ISSUE');
         const noCall=['FSBO','NEW_BUILD','NO_BUYER_AGENT'].includes(classification),needsReview=classification==='CONTACT_ISSUE';
         const log=logs.find(a=>(key&&meta(a.notes,'TUE_PLAN_KEY')===key)||(!key&&client&&norm(meta(a.notes,'TXN_CLIENT'))===norm(client)&&lpShort(meta(a.notes,'LP_OWNER'))===lp));
         const result=noCall?'Cleared · no call required':needsReview?'Needs review':log?'Completed':'Open';
@@ -13277,7 +13277,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         wsSummary['!cols']=sumCols;wsSummary['!autofilter']={ref:'A1:G'+(summaryRows.length+1)};wsDetail['!cols']=detailCols;wsDetail['!autofilter']={ref:'A1:M'+(fallback.length+1)};
         X.utils.book_append_sheet(wb,wsSummary,'LP Summary');X.utils.book_append_sheet(wb,wsDetail,'Tuesday Update Details');X.writeFile(wb,'LP-Tuesday-Update-Status-'+week+'.xlsx');
       }catch(e){
-        const cols=Object.keys(fallback[0]),data=[...summaryRows,...fallback],csv=[cols].concat(data.map(r=>cols.map(c=>r[c]))).map(row=>row.map(escCsv).join(',')).join('\r\n'),a=document.createElement('a'),u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download='LP-Tuesday-Update-Status-'+week+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);
+        const cols=['Section',...new Set([...Object.keys(summaryRows[0]||{}),...Object.keys(fallback[0]||{})])],data=summaryRows.map(r=>['LP Summary',...cols.slice(1).map(c=>r[c]??'')]).concat(fallback.map(r=>['Tuesday Update Details',...cols.slice(1).map(c=>r[c]??'')])),csv=[cols].concat(data).map(row=>row.map(escCsv).join(',')).join('\r\n'),a=document.createElement('a'),u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download='LP-Tuesday-Update-Status-'+week+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);
       }
       if(status){status.className='ct-v56-status ok';status.textContent='Exported LP Tuesday status for '+rows.length+' updates · week of '+week+'.'}
     }catch(e){console.error('LP Tuesday status export failed',e);if(status){status.className='ct-v56-status err';status.textContent='Export failed: '+(e.message||e)}}
