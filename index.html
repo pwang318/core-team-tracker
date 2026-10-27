@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v108-correct-agent-counts-20261027" name="version"/>
-<meta content="v108: LP Portfolio Growth Plans excludes deleted roster markers from agent names, missing totals, and coverage." name="build-notes"/>
+<meta content="core-team-lp-v109-correct-agent-counts-20261027" name="version"/>
+<meta content="v109: LP Portfolio Growth Plans excludes deleted roster markers from agent names, missing totals, and coverage." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -13220,12 +13220,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var summaryNodes=cardWithRemoval.querySelectorAll('div'),missingEl=null,coverageEl=null;
       Array.prototype.forEach.call(summaryNodes,function(el){
         var txt=String(el.textContent||'').trim();
-        if(/^\\d+ of \\d+ Power BI active agents are missing a documented growth plan$/.test(txt))missingEl=el;
+        if(/^[0-9]+ of [0-9]+ Power BI active agents are missing a documented growth plan$/.test(txt))missingEl=el;
         if(/^\\d+% of Power BI active agents have a documented next growth opportunity$/.test(txt))coverageEl=el;
       });
       var total=0,missing=0;
       if(missingEl){
-        var match=String(missingEl.textContent||'').trim().match(/^(\\d+) of (\\d+) Power BI active agents are missing a documented growth plan$/);
+        var match=String(missingEl.textContent||'').trim().match(/^([0-9]+) of ([0-9]+) Power BI active agents are missing a documented growth plan$/);
         if(match){missing=Math.max(0,Number(match[1])-removed);total=Number(match[2]);missingEl.textContent=missing+' of '+total+' Power BI active agents are missing a documented growth plan';}
       }
       if(coverageEl&&total>0)coverageEl.textContent=Math.round(((total-missing)/total)*100)+'% of Power BI active agents have a documented next growth opportunity';
