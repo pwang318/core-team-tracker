@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v90-scorecard-alignment-20261027" name="version"/>
-<meta content="v90: LP and RM share the verified A/B/C agent base; repeat and C-tier leads count. Tier Growth uses production-based net Channel/A/B counts; Active Partner Count uses the separate 90-day retained population." name="build-notes"/>
+<meta content="core-team-lp-v91-powerbi-active-agent-scorecard-20261027" name="version"/>
+<meta content="v91: LP and RM score Active Agent Count from the current Power BI A/B/C roster toward 200; repeat and C-tier leads count in the lead ratio." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -13368,11 +13368,11 @@ function ctV72ParseReceipt(sourceApp,importedAt){
   s.split(';').slice(1).forEach(part=>{const i=part.indexOf('=');if(i<1)return;const k=part.slice(0,i),v=Number(part.slice(i+1))||0;if(k==='raw')out.raw=v;else if(k==='Channel')out.Channel=v;else if(k==='A'||k==='B'||k==='C')out[k]=v;else if(k==='blank')out.blank=v;else if(k==='other')out.other=v;});
   out.total=out.A+out.B+out.C;out.netA=Math.max(0,out.A-out.Channel);return (out.raw||out.total)?out:null;
 }
-function ctV72ScoreFromMeta(meta,projectedLeads,activePartnerCount,target){
+function ctV72ScoreFromMeta(meta,projectedLeads,activeAgentCount,target){
   const m=meta||{},t=target||{Channel:2,A:14,B:21},point=(a,b,w)=>b?Math.min(w,v72n(a)/b*w):0;
   const scoredA=v72n(m.A);
   const tierPts=point(m.Channel,t.Channel,15)+point(scoredA,t.A,15)+point(m.B,t.B,20);
-  const ratio=v72n(m.total)?v72n(projectedLeads)/v72n(m.total):0,ratioPts=Math.min(30,ratio/1.15*30),activePts=Math.min(20,v72n(activePartnerCount)/200*20);
+  const ratio=v72n(m.total)?v72n(projectedLeads)/v72n(m.total):0,ratioPts=Math.min(30,ratio/1.15*30),activePts=Math.min(20,v72n(activeAgentCount)/200*20);
   return{scoredA,tierPts,ratio,ratioPts,activePts,totalPts:tierPts+ratioPts+activePts};
 }
 function ctV72MeaningfulActivity(a){
@@ -13458,13 +13458,13 @@ async function ctRenderAmandaOutcomeV72(){
   const scoredCurrentLeads=(currentLeads||[]).filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)}),scoredPriorLeads=(priorLeads||[]).filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)});
   // Verified October 2026 MTD checkpoint remains until the Velocify rows catch up; expires next month.
   const verifiedLeadCheckpoint=now.getFullYear()===2026&&now.getMonth()===9?85:0,monthlyLeadCount=Math.max(scoredCurrentLeads.length,verifiedLeadCheckpoint);
-  const meta={Channel:v72n(live.score_levels.Channel),A:v72n(live.score_levels.A),B:v72n(live.score_levels.B),C:v72n(live.score_levels.C),total:v72n(live.active_partner_rows)},dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),projectedLeads=Math.round((monthlyLeadCount/dom)*dim),activePartnerCount=v72n(live.score_partner_rows),score=ctV72ScoreFromMeta(meta,projectedLeads,activePartnerCount,t),currentPace=meta.total?projectedLeads/meta.total:0;
-  window.ctV72MonthlyDetail={live,meta,score,target:t,priorLeads:scoredPriorLeads,currentLeads:scoredCurrentLeads,monthlyLeadCount,projectedLeads,activePartnerCount};
+  const meta={Channel:v72n(live.score_levels.Channel),A:v72n(live.score_levels.A),B:v72n(live.score_levels.B),C:v72n(live.score_levels.C),total:v72n(live.active_partner_rows)},dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),projectedLeads=Math.round((monthlyLeadCount/dom)*dim),activeAgentCount=meta.total,score=ctV72ScoreFromMeta(meta,projectedLeads,activeAgentCount,t),currentPace=meta.total?projectedLeads/meta.total:0;
+  window.ctV72MonthlyDetail={live,meta,score,target:t,priorLeads:scoredPriorLeads,currentLeads:scoredCurrentLeads,monthlyLeadCount,projectedLeads,activeAgentCount};
   host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">Monthly Results</div><div class="ct-rm-v6-title">Team 100-point scorecard · calculated from Power BI and Velocify</div></div><div class="ct-rm-v6-total" data-v72-month="overall" role="button" tabindex="0"><span>Overall score</span>'+score.totalPts.toFixed(1)+' / 100</div></div>'+
     '<div class="ct-account-strip" aria-label="Current disjoint production tiers and Power BI active-agent total"><div class="ct-account-tile ct-account-channel" data-v72-month="Channel" role="button" tabindex="0"><span class="ct-account-label">Channel · 10+ closings</span><strong class="ct-account-value">'+meta.Channel+'</strong><small class="ct-account-note">Scored separately from A</small></div><div class="ct-account-tile ct-account-a" data-v72-month="A" role="button" tabindex="0"><span class="ct-account-label">A · 4–9 closings</span><strong class="ct-account-value">'+meta.A+'</strong></div><div class="ct-account-tile ct-account-b" data-v72-month="B" role="button" tabindex="0"><span class="ct-account-label">B · 2–3 closings</span><strong class="ct-account-value">'+meta.B+'</strong></div><div class="ct-account-tile ct-account-c" data-v72-month="C" role="button" tabindex="0"><span class="ct-account-label">C · 1 closing or 1 lead</span><strong class="ct-account-value">'+meta.C+'</strong></div><div class="ct-account-tile ct-account-total" data-v72-month="Power BI Active Agents" role="button" tabindex="0"><span class="ct-account-label">Power BI Active Agents</span><strong class="ct-account-value">'+meta.total+'</strong></div></div>'+
     '<div class="ct-rm-v6-grid"><div class="ct-rm-v6-m" data-v72-month="tier" role="button" tabindex="0"><b>Tier Growth · net Channel/A/B counts · 50 points</b><strong>'+score.tierPts.toFixed(1)+' / 50</strong><small>'+t.label+': '+t.Channel+' Channel · '+t.A+' A · '+t.B+' B</small></div>'+
     '<div class="ct-rm-v6-m" data-v72-month="ratio" role="button" tabindex="0"><b>Referral Leads per Active Agent · 30 points</b><strong>'+score.ratioPts.toFixed(1)+' / 30</strong><small>'+scoredCurrentLeads.length+' active-agent leads MTD · '+projectedLeads+' projected ÷ '+meta.total+' Power BI A/B/C agents = '+score.ratio.toFixed(2)+' · Target 1.15; repeat and C-tier leads count</small></div>'+
-    '<div class="ct-rm-v6-m" data-v72-month="active" role="button" tabindex="0"><b>Active Partner Count · 20 points</b><strong>'+score.activePts.toFixed(1)+' / 20</strong><small>'+activePartnerCount+' partners with a lead or closing in 90 days of 200 goal · '+meta.total+' Power BI active agents are the ratio denominator</small></div></div>';
+    '<div class="ct-rm-v6-m" data-v72-month="active" role="button" tabindex="0"><b>Active Agent Count · 20 points</b><strong>'+score.activePts.toFixed(1)+' / 20</strong><small>'+activeAgentCount+' active Power BI agents / 200 year-end target</small></div></div>';
 }
 window.ctRenderAmandaOutcomeV6=ctRenderAmandaOutcomeV72;
 function v72WeekStart(){const d=new Date(),day=d.getDay(),m=new Date(d);m.setDate(d.getDate()-(day===0?6:day-1));return [m.getFullYear(),String(m.getMonth()+1).padStart(2,'0'),String(m.getDate()).padStart(2,'0')].join('-')}
@@ -13517,8 +13517,8 @@ window.ctV72OpenMonthlyMetric=async function(key){
     ctV72DetailModal('Referral Leads per Active Agent · '+score.ratioPts.toFixed(1)+' / 30',mtd+' active-agent referral leads MTD'+(pending?' ('+synced+' currently in Velocify; '+pending+' awaiting sync)':'')+' projected to '+projected+' for the month ÷ '+meta.total+' Power BI A/B/C agents = '+score.ratio.toFixed(2)+'; target 1.15. Each lead counts, including repeats and C-tier agents.',current.map(x=>({name:x.referral_partner_name||'Partner not recorded',type:'Referral lead',outcome:'Counted as one lead',detail:x.date_added||''})));return;
   }
   if(['overall','tier','active'].includes(key)){
-    const title={overall:'Overall score · '+score.totalPts.toFixed(1)+' / 100',tier:'Tier Growth · '+score.tierPts.toFixed(1)+' / 50',active:'Active Partner Growth · '+score.activePts.toFixed(1)+' / 20'}[key];
-    const facts=[{name:'Channel',type:meta.Channel+' / '+target.Channel,outcome:'15-point component',detail:'10+ closings'}, {name:'A',type:meta.A+' / '+target.A,outcome:'15-point component',detail:'4–9 closings'}, {name:'B',type:meta.B+' / '+target.B,outcome:'20-point component',detail:'2–3 closings'}, {name:'Projected referrals / active agent',type:(d.projectedLeads||0)+' / '+meta.total,outcome:score.ratioPts.toFixed(1)+' / 30 points',detail:'Target 1.15; every active-agent lead counts'}, {name:'Active partners',type:(d.activePartnerCount||0)+' / 200',outcome:score.activePts.toFixed(1)+' / 20 points',detail:'One lead or closing in the last 90 days'}];
+    const title={overall:'Overall score · '+score.totalPts.toFixed(1)+' / 100',tier:'Tier Growth · '+score.tierPts.toFixed(1)+' / 50',active:'Active Agent Count · '+score.activePts.toFixed(1)+' / 20'}[key];
+    const facts=[{name:'Channel',type:meta.Channel+' / '+target.Channel,outcome:'15-point component',detail:'10+ closings'}, {name:'A',type:meta.A+' / '+target.A,outcome:'15-point component',detail:'4–9 closings'}, {name:'B',type:meta.B+' / '+target.B,outcome:'20-point component',detail:'2–3 closings'}, {name:'Projected referrals / active agent',type:(d.projectedLeads||0)+' / '+meta.total,outcome:score.ratioPts.toFixed(1)+' / 30 points',detail:'Target 1.15; every active-agent lead counts'}, {name:'Active agents',type:(d.activeAgentCount||0)+' / 200',outcome:score.activePts.toFixed(1)+' / 20 points',detail:'Current Power BI A/B/C roster'}];
     ctV72DetailModal(title,'Source: '+(live.source||'current Power BI summary')+' · '+(live.imported_at||'date unavailable')+'. Components are capped at their point maximum.',key==='overall'?facts:key==='tier'?facts.slice(0,3):facts.slice(-1));return;
   }
   const names=[];let source='Latest Power BI summary: '+(live.source||'unknown source')+' · '+(live.imported_at||'date unavailable')+'.';
