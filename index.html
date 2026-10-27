@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v98-lp-report-export-and-visible-notes-20261027" name="version"/>
+<meta content="core-team-lp-v99-lp-export-scope-fix-20261027" name="version"/>
 <meta content="v92: Display the verified MTD lead checkpoint on the scorecard with the Velocify synced and pending-sync split; the projection uses that full MTD count." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -13248,6 +13248,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }catch(e){const cols=['Date','Person / Team','Team','LP Owner','Call / Update Type','Agent / Partner','Status','Outcome','Notes'],csv=[cols].concat(detail.map(r=>cols.map(c=>r[c]))).map(row=>row.map(escCsv).join(',')).join('\r\n'),a=document.createElement('a'),u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download='Daniel-Team-All-Calls-'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
   }
   async function exportLpTuesdayReport(){
+    const lpShort=shortLp;
     const today=new Date();today.setHours(12,0,0,0);const start=new Date(today);start.setDate(start.getDate()+(start.getDay()===0?-6:1-start.getDay()));const week=start.toISOString().slice(0,10),end=new Date(start);end.setDate(end.getDate()+6);const through=end.toISOString().slice(0,10);
     const status=document.getElementById('v56MgmtStatus');if(status)status.textContent='Building this week\'s LP Tuesday status workbook…';
     try{
