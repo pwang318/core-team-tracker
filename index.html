@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v104-growth-plan-render-guard-20261027" name="version"/>
-<meta content="v104: LP Portfolio Growth Plans filters deletion markers at the final list-render step and counts them as missing without displaying them as agents." name="build-notes"/>
+<meta content="core-team-lp-v105-hide-deleted-agent-rows-20261027" name="version"/>
+<meta content="v105: LP Portfolio Growth Plans suppresses deleted roster marker names in the shared row renderer." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -9866,6 +9866,7 @@ function pfrHealthTile(label,count,color,onclick){
     +'<div style="font-size:10.5px;color:var(--text-3);margin-top:2px">'+label+'</div></div>';
 }
 function pfrListRow(rank,name,detail){
+  if(/^__Roster_delete_/i.test(String(name||'').trim()))return '';
   // Never let a missing optional detail render as the literal word "undefined".
   detail=(detail===undefined||detail===null||detail==="")?"—":detail;
   return '<div style="padding:8px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px">'
