@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v107-correct-marker-match-20261027" name="version"/>
-<meta content="v107: LP Portfolio Growth Plans removes deleted roster marker rows from the rendered Growth Plans card with a corrected marker match." name="build-notes"/>
+<meta content="core-team-lp-v108-correct-agent-counts-20261027" name="version"/>
+<meta content="v108: LP Portfolio Growth Plans excludes deleted roster markers from agent names, missing totals, and coverage." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -13216,12 +13216,22 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       if(!card||!String(card.textContent||'').includes('Growth Plans')||!String(card.textContent||'').includes('Power BI active agents are missing a documented growth plan'))return;
       row.remove();removed++;cardWithRemoval=card;
     });
-    if(removed&&cardWithRemoval&&!cardWithRemoval.querySelector('[data-growth-plan-cleanup-note]')){
-      var note=document.createElement('div');
-      note.setAttribute('data-growth-plan-cleanup-note','true');
-      note.style.cssText='font-size:10.5px;color:var(--text-3);margin-top:8px';
-      note.textContent=removed+' deleted roster markers are hidden from this list and remain included in the missing total.';
-      cardWithRemoval.appendChild(note);
+    if(removed&&cardWithRemoval){
+      var summaryNodes=cardWithRemoval.querySelectorAll('div'),missingEl=null,coverageEl=null;
+      Array.prototype.forEach.call(summaryNodes,function(el){
+        var txt=String(el.textContent||'').trim();
+        if(/^\\d+ of \\d+ Power BI active agents are missing a documented growth plan$/.test(txt))missingEl=el;
+        if(/^\\d+% of Power BI active agents have a documented next growth opportunity$/.test(txt))coverageEl=el;
+      });
+      var total=0,missing=0;
+      if(missingEl){
+        var match=String(missingEl.textContent||'').trim().match(/^(\\d+) of (\\d+) Power BI active agents are missing a documented growth plan$/);
+        if(match){missing=Math.max(0,Number(match[1])-removed);total=Number(match[2]);missingEl.textContent=missing+' of '+total+' Power BI active agents are missing a documented growth plan';}
+      }
+      if(coverageEl&&total>0)coverageEl.textContent=Math.round(((total-missing)/total)*100)+'% of Power BI active agents have a documented next growth opportunity';
+      var note=cardWithRemoval.querySelector('[data-growth-plan-cleanup-note]');
+      if(!note){note=document.createElement('div');note.setAttribute('data-growth-plan-cleanup-note','true');note.style.cssText='font-size:10.5px;color:var(--text-3);margin-top:8px';cardWithRemoval.appendChild(note);}
+      note.textContent=removed+' deleted roster markers excluded from the active-agent missing count and hidden from the list.';
     }
   }
   var view=document.getElementById('view-portfolio');
