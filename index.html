@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v106-clean-growth-plan-card-20261027" name="version"/>
-<meta content="v106: LP Portfolio Growth Plans removes deleted roster marker rows from the rendered Growth Plans card." name="build-notes"/>
+<meta content="core-team-lp-v107-correct-marker-match-20261027" name="version"/>
+<meta content="v107: LP Portfolio Growth Plans removes deleted roster marker rows from the rendered Growth Plans card with a corrected marker match." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -13208,7 +13208,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if(!view)return;
     var removed=0,cardWithRemoval=null;
     Array.prototype.forEach.call(view.querySelectorAll('div'),function(el){
-      if(el.children.length||!/^__Roster_delete_v\\d+__$/i.test(String(el.textContent||'').trim()))return;
+      if(el.children.length||!/^__Roster_delete_v[0-9]+__$/i.test(String(el.textContent||'').trim()))return;
       var row=el.parentElement;
       if(!row||!/No next growth opportunity documented/.test(String(row.textContent||'')))return;
       var card=row;
