@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v101-powerbi-growth-plan-roster-20261027" name="version"/>
-<meta content="v101: LP Portfolio Growth Plans uses the Power BI A/B/C roster and lists active agents without a documented next growth opportunity; unsynced profile names are counted and flagged." name="build-notes"/>
+<meta content="core-team-lp-v102-clean-growth-plan-roster-20261027" name="version"/>
+<meta content="v102: LP Portfolio Growth Plans uses the Power BI A/B/C roster, filters deletion markers, and flags active agents without usable names." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -10125,11 +10125,13 @@ async function pfrLoad(){
 
     var growthPlanProfileByName={};
     currentPowerBiAgents.forEach(function(a){var k=String(a.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');if(k&&!growthPlanProfileByName[k])growthPlanProfileByName[k]=a;});
-    var powerBiDetailRows=pbSource.detail&&pbSource.detail.by_agent?Object.values(pbSource.detail.by_agent).filter(function(a){return ['A','B','C'].includes(String(a.level||'').trim().toUpperCase());}):[];
+    var powerBiDetailRowsRaw=pbSource.detail&&pbSource.detail.by_agent?Object.values(pbSource.detail.by_agent).filter(function(a){return ['A','B','C'].includes(String(a.level||'').trim().toUpperCase());}):[];
+    var growthPlanInvalidNameRows=powerBiDetailRowsRaw.filter(function(a){var name=String(a.name||'').trim();return !name||/^__Roster_delete_/i.test(name);}).length;
+    var powerBiDetailRows=powerBiDetailRowsRaw.filter(function(a){var name=String(a.name||'').trim();return !!name&&!/^__Roster_delete_/i.test(name);});
     var growthPlanRows=powerBiDetailRows.length?powerBiDetailRows.map(function(a){
       var name=String(a.name||'').trim(),profile=growthPlanProfileByName[name.toLowerCase().replace(/\s+/g,' ')]||{},level=String(a.level||profile.powerbi_level||'').trim().toUpperCase();
       return Object.assign({},profile,{agent_name:name||profile.agent_name,powerbi_level:level,tier:profile.tier||(Number(a.closed_12mo||profile.closes_past_year||0)>=10?'Channel':level),next_growth_opportunity:profile.next_growth_opportunity||''});
-    }):currentPowerBiAgents.filter(function(a){return !!String(a.powerbi_level||'').trim();});
+    }):currentPowerBiAgents.filter(function(a){return !!String(a.powerbi_level||'').trim()&&!!String(a.agent_name||'').trim()&&!/^__Roster_delete_/i.test(String(a.agent_name||''));});
     var growthPlanTotal=Number(pbSource.total)||growthPlanRows.length;
     var growthPlanUnlisted=Math.max(0,growthPlanTotal-growthPlanRows.length);
     var missingGrowthPlans=growthPlanRows.filter(function(a){return !String(a.next_growth_opportunity||'').trim();}).sort(function(a,b){var order={Channel:0,A:1,B:2,C:3},ta=order[a.tier]===undefined?4:order[a.tier],tb=order[b.tier]===undefined?4:order[b.tier];return ta-tb||pfrProperCase(a.agent_name).localeCompare(pfrProperCase(b.agent_name));});
@@ -10355,7 +10357,7 @@ async function pfrLoad(){
       +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Growth Plans</div>'
       +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+growthOppPct+'% of Power BI active agents have a documented next growth opportunity</div>'
       +'<div style="font-size:11px;color:var(--text-2);margin-bottom:8px">'+growthPlanMissingCount+' of '+growthPlanTotal+' Power BI active agents are missing a documented growth plan</div>'
-      +(missingGrowthPlans.length?'<div style="max-height:360px;overflow:auto;border-top:1px solid var(--border-light)">'+missingGrowthPlans.map(function(a){return pfrListRow(null,a.agent_name,escHtml(pfrTierLabel(a.tier))+' · No next growth opportunity documented');}).join('')+'</div>':'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">All listed Power BI active agents have a documented next growth opportunity.</div>')+(growthPlanUnlisted?'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">'+growthPlanUnlisted+' active Power BI agent names are not in the synced profile list; they are counted as missing but cannot be named here yet.</div>':'')
+      +(missingGrowthPlans.length?'<div style="max-height:360px;overflow:auto;border-top:1px solid var(--border-light)">'+missingGrowthPlans.map(function(a){return pfrListRow(null,a.agent_name,escHtml(pfrTierLabel(a.tier))+' · No next growth opportunity documented');}).join('')+'</div>':'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">All listed Power BI active agents have a documented next growth opportunity.</div>')+(growthPlanUnlisted?'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">'+growthPlanUnlisted+' Power BI active agents have no usable name in the detail feed/profile data and are counted as missing but cannot be named here yet.'+(growthPlanInvalidNameRows?' This includes '+growthPlanInvalidNameRows+' roster deletion markers.':'')+'</div>':'')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
