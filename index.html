@@ -17,7 +17,7 @@
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · Account Tiles v77</title>
+<title>Core Team LP Tracker · Account Tiles v90</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -12538,64 +12538,7 @@ button,.btn,.btn-sm,.ct-link-btn,.ct-primary-btn,.who-btn{
 #ct-amanda-snapshot .ct-amanda-grid:before{content:"Amanda weekly execution · supporting metrics";grid-column:1/-1;font-size:10px;font-weight:700;color:#607582;margin:2px 0 0}
 @media(max-width:760px){#ct-amanda-snapshot .ct-rm-v6-grid{grid-template-columns:1fr}}
 </style>
-<script id="lp-amanda-aligned-v6-js">
-(function(){
-'use strict';
-const VERIFIED={active:138,levels:{Channel:2,A:17,B:15,C:106},stamp:'2026-09-01T12:00:00'};
-const n=v=>Number(v||0)||0;
-function pb(){
-  try{
-    const s=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():(window.CT_POWERBI_SNAPSHOT||JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null'));
-    if(s&&n(s.active_partner_rows)>0){
-      const l=s.levels||{};
-      return{active:n(s.active_partner_rows),levels:{Channel:n(l.Channel),A:n(l.A),B:n(l.B),C:n(l.C)},source:'latest Power BI'};
-    }
-  }catch(e){}
-  return{active:VERIFIED.active,levels:Object.assign({},VERIFIED.levels),source:'verified 9/1 Power BI baseline'};
-}
-function milestone(){
-  const m=new Date().getMonth()+1;
-  if(m<=9)return{label:'9/30 Target',Channel:2,A:14,B:21};
-  if(m===10)return{label:'10/31 Target',Channel:2,A:16,B:24};
-  if(m===11)return{label:'11/30 Target',Channel:3,A:18,B:27};
-  return{label:'12/31 Goal',Channel:4,A:20,B:30};
-}
-async function render(){
-  const box=document.getElementById('ct-amanda-snapshot');if(!box)return;
-  const grid=box.querySelector('.ct-amanda-grid');if(!grid)return;
-  let host=box.querySelector('.ct-rm-v6-outcome');
-  if(!host){host=document.createElement('div');host.className='ct-rm-v6-outcome';grid.before(host)}
-  const live=await window.ctGetLivePowerBiSummary(false),p={active:n(live&&live.active_partner_rows),managed:n(live&&live.managed_active_rows),levels:Object.assign({Channel:0,A:0,B:0,C:0},live&&live.levels||{}),source:'shared Power BI server',stamp:live&&live.stamp},t=milestone(),pts=(a,b,w)=>b?Math.min(w,n(a)/b*w):0;
-  const tier=pts(p.levels.Channel,t.Channel,15)+pts(p.levels.A,t.A,15)+pts(p.levels.B,t.B,20);
-  const now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),1),iso=d=>d.toISOString().slice(0,10);
-  let currentLeads=[],priorLeads=[];
-  try{[currentLeads,priorLeads]=await Promise.all([
-    sbFetch('GET','velocify_leads?date_added=gte.'+iso(monthStart)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[]),
-    sbFetch('GET','velocify_leads?date_added=gte.'+iso(prevStart)+'&date_added=lt.'+iso(prevEnd)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[])
-  ])}catch(e){}
-  const dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
-  const mtd=(currentLeads||[]).length,proj=Math.round((mtd/dom)*dim),priorActual=(priorLeads||[]).length;
-  const ratio=p.active?priorActual/p.active:0,currentPace=p.active?proj/p.active:0;
-  const ratioPts=Math.min(30,ratio/1.15*30),countPts=Math.min(20,p.active/200*20),total=tier+ratioPts+countPts;
-  host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">RM outcome scorecard · shared portfolio</div><div class="ct-rm-v6-title">50% Tier Growth · 30% Agent-to-Lead · 20% Active Partner Count</div></div><div class="ct-rm-v6-total">'+total.toFixed(1)+' / 100</div></div>'+
-    '<div class="ct-rm-v6-grid">'+
-    '<div class="ct-rm-v6-m"><b>Tier Growth · 50%</b><strong>'+tier.toFixed(1)+' / 50</strong><small>'+p.levels.Channel+' Channel · '+p.levels.A+' A · '+p.levels.B+' B · '+t.label+'</small></div>'+
-    '<div class="ct-rm-v6-m"><b>Agent-to-Lead · 30%</b><strong>'+ratioPts.toFixed(1)+' / 30</strong><small>Last completed month: '+priorActual+' leads ÷ '+p.active+' Active Partners = '+ratio.toFixed(2)+' · current month pace '+currentPace.toFixed(2)+'</small></div>'+
-    '<div class="ct-rm-v6-m"><b>Active Partner Count · 20%</b><strong>'+countPts.toFixed(1)+' / 20</strong><small>'+p.active+' / 200 · exact Power BI active population'+(p.managed!==p.active?' · '+p.managed+' managed after inactive/DNC cleanup':'')+'</small></div>'+
-    '</div>';
-}
-window.ctRenderAmandaOutcomeV6=render;
-const prev=window.ctRenderAmandaSnapshot;
-if(typeof prev==='function'&&!prev.__alignedV6){
-  const w=async function(){const r=await prev.apply(this,arguments);await render();return r};w.__alignedV6=true;window.ctRenderAmandaSnapshot=w;
-}
-const snap=window.lpv2RenderSnapshot;
-if(typeof snap==='function'&&!snap.__amandaAlignedV6){
-  const w=async function(){const r=await snap.apply(this,arguments);setTimeout(render,50);return r};w.__amandaAlignedV6=true;window.lpv2RenderSnapshot=w;
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(render,700)},{once:true});else setTimeout(render,350);
-})();
-</script>
+<script id="lp-amanda-aligned-v6-js">/* superseded by the aligned V72 scorecard renderer below */</script>
 <!-- LP/RM TRANSACTION OWNERSHIP ALIGNMENT v9 -->
 <!-- LP SCRIPTS + TRAINING HARDENING v10 -->
 <style id="lp-scripts-hardening-v10-css">
@@ -13413,8 +13356,10 @@ const V72_MEETING_TYPES=["Partner Meeting","Break Breads","Strategic Partner Mee
 const V72_DIRECTOR_TYPES=["Amanda Coaching / Development","RM Scorecard Review","RM Portfolio Review","RM Process Improvement","Tracker / System Development","RM Training","RM Leadership Escalation Support"];
 const V72_GOALS={partnerMeetings:8,teamNewMeetings:5,existingMeetings:5,coldCalls:125,partnerConversations:100,buddyAsks:3};
 const V72_CACHE={at:0,data:null,promise:null};
-const V76_VERIFIED_POWERBI={imported_at:'2026-09-11T14:45:00.000Z',raw:138,Channel:2,A:17,B:20,C:99,total:136};
+const V76_VERIFIED_POWERBI={imported_at:'',raw:133,Channel:0,A:19,B:17,C:96,total:132};
 const v72n=v=>Number(v||0)||0;
+function v72RecentWithin90(value,now){const ms=Date.parse(String(value||''));return Number.isFinite(ms)&&ms<=now.getTime()+86400000&&ms>=now.getTime()-90*86400000}
+function v72IsActivePartner(record,profile,now){const p=profile||{},r=record||{};if(p.do_not_contact===true||String(p.relationship_status||'active').toLowerCase()==='inactive'||String(p.relationship_type||'realtor').toLowerCase()==='strategic_partner')return false;if(p.retained===true)return true;return v72RecentWithin90(r.latest_lead||r.latest_lead_date||p.latest_lead_date,now)||v72RecentWithin90(r.latest_close||r.latest_close_date||p.latest_close_date,now)}
 const v72key=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
 const v72esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function ctV72ParseReceipt(sourceApp,importedAt){
@@ -13468,7 +13413,7 @@ async function ctGetAlignedPowerBiSummaryV72(force){
   if(!force&&V72_CACHE.data&&Date.now()-V72_CACHE.at<45000)return V72_CACHE.data;if(V72_CACHE.promise)return V72_CACHE.promise;
   V72_CACHE.promise=(async()=>{
     const [profiles,logs]=await Promise.all([
-      sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,relationship_type,do_not_contact&powerbi_last_seen_at=not.is.null&limit=5000').catch(()=>[]),
+      sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,relationship_type,do_not_contact,retained,latest_lead_date,latest_close_date&powerbi_last_seen_at=not.is.null&limit=5000').catch(()=>[]),
       sbFetch('GET','powerbi_import_log?select=imported_at,source_app,rows_processed,errors&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1').catch(()=>[])
     ]);
     let latestMs=0,stamp=null;(profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(Number.isFinite(ms)&&ms>latestMs){latestMs=ms;stamp=p.powerbi_last_seen_at}});
@@ -13489,14 +13434,16 @@ async function ctGetAlignedPowerBiSummaryV72(force){
       const localChannel=localRows.filter(r=>v72n(r.closed_12mo)>=10).length,profileBy=new Map();(profiles||[]).forEach(p=>{const k=v72key(p&&p.agent_name);if(k&&!profileBy.has(k))profileBy.set(k,p)});
       const localManaged=localRows.filter(r=>{const p=profileBy.get(v72key(r.name))||{};return p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive'}),localTierCounts={Channel:0,A:0,B:0,C:0},localTiered=[];
       localRows.forEach(r=>{const p=profileBy.get(v72key(r.name))||{};if(p.do_not_contact===true||String(p.relationship_status||'active').toLowerCase()==='inactive'||String(p.relationship_type||'realtor').toLowerCase()==='strategic_partner')return;const tier=ctRelTierFromProduction({closes_past_year:r.closed_12mo,total_leads_past_year:r.total_leads_12mo});if(tier&&localTierCounts[tier]!==undefined){localTierCounts[tier]++;localTiered.push(r)}});
-      const localData={active_partner_rows:localRows.length,score_partner_rows:localTiered.length,score_levels:localTierCounts,managed_active_rows:localManaged.length,levels:{Channel:localChannel,A:localSource.A,B:localSource.B,C:localSource.C},source_levels:localSource,raw_rows:v72n(local.raw_rows)||localRows.length,stamp:local.imported_at,imported_at:local.imported_at,profile_rows:rows.length,profile_behind:rows.length<localRows.length,source:'current uploaded Power BI workbook'};
+      const localActivePartnerCount=localRows.filter(r=>v72IsActivePartner(r,profileBy.get(v72key(r.name)),new Date())).length;
+      const localData={active_partner_rows:localRows.length,score_partner_rows:localActivePartnerCount,score_levels:localTierCounts,managed_active_rows:localManaged.length,levels:localTierCounts,source_levels:localSource,active_names:localRows.map(r=>r.name).filter(Boolean),raw_rows:v72n(local.raw_rows)||localRows.length,stamp:local.imported_at,imported_at:local.imported_at,profile_rows:rows.length,profile_behind:rows.length<localRows.length,source:'current uploaded Power BI workbook'};
       V72_CACHE.data=localData;V72_CACHE.at=Date.now();return localData;
     }
 
     const receiptIsNewer=useReceipt&&receiptMs>verifiedMs;
     const source=receiptIsNewer?{A:receipt.A,B:receipt.B,C:receipt.C,Channel:receipt.Channel,total:receipt.total,raw:receipt.raw,stamp:receipt.imported_at}:{A:V76_VERIFIED_POWERBI.A,B:V76_VERIFIED_POWERBI.B,C:V76_VERIFIED_POWERBI.C,Channel:V76_VERIFIED_POWERBI.Channel,total:V76_VERIFIED_POWERBI.total,raw:V76_VERIFIED_POWERBI.raw,stamp:V76_VERIFIED_POWERBI.imported_at};
     const managed=rows.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive'),scoreLevels={Channel:0,A:0,B:0,C:0},scorePartners=rows.filter(p=>{if(p.do_not_contact===true||String(p.relationship_status||'active').toLowerCase()==='inactive'||String(p.relationship_type||'realtor').toLowerCase()==='strategic_partner')return false;const tier=ctRelTierFromProduction(p);if(!tier||scoreLevels[tier]===undefined)return false;scoreLevels[tier]++;return true;}).length;
-    const data={active_partner_rows:source.total,score_partner_rows:scorePartners,score_levels:scoreLevels,managed_active_rows:managed.length,levels:{Channel:source.Channel,A:source.A,B:source.B,C:source.C},source_levels:{A:source.A,B:source.B,C:source.C},raw_rows:source.raw,stamp:source.stamp,imported_at:source.stamp,profile_rows:rows.length,profile_behind:source.total>rows.length,source:receiptIsNewer?'shared Core Team Power BI import receipt':'verified current Power BI workbook'};
+    const activePartnerCount=rows.filter(p=>v72IsActivePartner(p,p,new Date())).length;
+    const data={active_partner_rows:source.total,score_partner_rows:activePartnerCount,score_levels:scoreLevels,managed_active_rows:managed.length,levels:scoreLevels,source_levels:{A:source.A,B:source.B,C:source.C},active_names:rows.map(p=>p.agent_name).filter(Boolean),raw_rows:source.raw,stamp:source.stamp,imported_at:source.stamp,profile_rows:rows.length,profile_behind:source.total>rows.length,source:receiptIsNewer?'shared Core Team Power BI import receipt':'verified current Power BI workbook'};
     V72_CACHE.data=data;V72_CACHE.at=Date.now();return data;
   })().finally(()=>{V72_CACHE.promise=null});return V72_CACHE.promise;
 }
@@ -13506,13 +13453,15 @@ async function ctRenderAmandaOutcomeV72(){
   const box=document.getElementById('ct-amanda-snapshot');if(!box)return;const grid=box.querySelector('.ct-amanda-grid');if(!grid)return;let host=box.querySelector('.ct-rm-v6-outcome');if(!host){host=document.createElement('div');host.className='ct-rm-v6-outcome';grid.before(host)}
   const live=await ctGetAlignedPowerBiSummaryV72(false),t=v72Milestone(),now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),1),iso=d=>d.toISOString().slice(0,10);let currentLeads=[],priorLeads=[];
   try{[currentLeads,priorLeads]=await Promise.all([sbFetch('GET','velocify_leads?date_added=gte.'+iso(monthStart)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[]),sbFetch('GET','velocify_leads?date_added=gte.'+iso(prevStart)+'&date_added=lt.'+iso(prevEnd)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[])])}catch(e){}
-  const meta={Channel:v72n(live.score_levels.Channel),A:v72n(live.score_levels.A),B:v72n(live.score_levels.B),C:v72n(live.score_levels.C),total:v72n(live.active_partner_rows)},dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),proj=Math.round(((currentLeads||[]).length/dom)*dim),activePartnerCount=v72n(live.score_partner_rows),score=ctV72ScoreFromMeta(meta,proj,activePartnerCount,t),currentPace=meta.total?proj/meta.total:0;
-  window.ctV72MonthlyDetail={live,meta,score,target:t,priorLeads,currentLeads};
+  const activeKeys=new Set((live.active_names||[]).map(v72key).filter(Boolean));
+  const scoredCurrentLeads=(currentLeads||[]).filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)}),scoredPriorLeads=(priorLeads||[]).filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)});
+  const meta={Channel:v72n(live.score_levels.Channel),A:v72n(live.score_levels.A),B:v72n(live.score_levels.B),C:v72n(live.score_levels.C),total:v72n(live.active_partner_rows)},dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),projectedLeads=Math.round((scoredCurrentLeads.length/dom)*dim),activePartnerCount=v72n(live.score_partner_rows),score=ctV72ScoreFromMeta(meta,projectedLeads,activePartnerCount,t),currentPace=meta.total?projectedLeads/meta.total:0;
+  window.ctV72MonthlyDetail={live,meta,score,target:t,priorLeads:scoredPriorLeads,currentLeads:scoredCurrentLeads,projectedLeads,activePartnerCount};
   host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">Monthly Results</div><div class="ct-rm-v6-title">Team 100-point scorecard · calculated from Power BI and Velocify</div></div><div class="ct-rm-v6-total" data-v72-month="overall" role="button" tabindex="0"><span>Overall score</span>'+score.totalPts.toFixed(1)+' / 100</div></div>'+
-    '<div class="ct-account-strip" aria-label="Current Power BI account totals"><div class="ct-account-tile ct-account-channel" data-v72-month="Channel" role="button" tabindex="0"><span class="ct-account-label">Channel · 10+ closings</span><strong class="ct-account-value">'+meta.Channel+'</strong><small class="ct-account-note">Scored separately from A</small></div><div class="ct-account-tile ct-account-a" data-v72-month="A" role="button" tabindex="0"><span class="ct-account-label">A · 4–9 closings</span><strong class="ct-account-value">'+meta.A+'</strong></div><div class="ct-account-tile ct-account-b" data-v72-month="B" role="button" tabindex="0"><span class="ct-account-label">B · 2–3 closings</span><strong class="ct-account-value">'+meta.B+'</strong></div><div class="ct-account-tile ct-account-c" data-v72-month="C" role="button" tabindex="0"><span class="ct-account-label">C · 1 closing or 1 lead</span><strong class="ct-account-value">'+meta.C+'</strong></div><div class="ct-account-tile ct-account-total" data-v72-month="Power BI Active Agents" role="button" tabindex="0"><span class="ct-account-label">Power BI Active Agents</span><strong class="ct-account-value">'+meta.total+'</strong></div></div>'+
-    '<div class="ct-rm-v6-grid"><div class="ct-rm-v6-m" data-v72-month="tier" role="button" tabindex="0"><b>Partner Tier Progress · 50 points</b><strong>'+score.tierPts.toFixed(1)+' / 50</strong><small>'+t.label+': '+t.Channel+' Channel · '+t.A+' A · '+t.B+' B</small></div>'+
-    '<div class="ct-rm-v6-m" data-v72-month="ratio" role="button" tabindex="0"><b>Projected Leads per Power BI Active Agent · 30 points</b><strong>'+score.ratioPts.toFixed(1)+' / 30</strong><small>'+(currentLeads||[]).length+' MTD leads · '+proj+' projected ÷ '+meta.total+' Power BI active agents = '+score.ratio.toFixed(2)+' · Goal 1.15</small></div>'+
-    '<div class="ct-rm-v6-m" data-v72-month="active" role="button" tabindex="0"><b>Active Partner Growth · 20 points</b><strong>'+score.activePts.toFixed(1)+' / 20</strong><small>'+activePartnerCount+' qualifying partners of 200 goal</small></div></div>';
+    '<div class="ct-account-strip" aria-label="Current disjoint production tiers and Power BI active-agent total"><div class="ct-account-tile ct-account-channel" data-v72-month="Channel" role="button" tabindex="0"><span class="ct-account-label">Channel · 10+ closings</span><strong class="ct-account-value">'+meta.Channel+'</strong><small class="ct-account-note">Scored separately from A</small></div><div class="ct-account-tile ct-account-a" data-v72-month="A" role="button" tabindex="0"><span class="ct-account-label">A · 4–9 closings</span><strong class="ct-account-value">'+meta.A+'</strong></div><div class="ct-account-tile ct-account-b" data-v72-month="B" role="button" tabindex="0"><span class="ct-account-label">B · 2–3 closings</span><strong class="ct-account-value">'+meta.B+'</strong></div><div class="ct-account-tile ct-account-c" data-v72-month="C" role="button" tabindex="0"><span class="ct-account-label">C · 1 closing or 1 lead</span><strong class="ct-account-value">'+meta.C+'</strong></div><div class="ct-account-tile ct-account-total" data-v72-month="Power BI Active Agents" role="button" tabindex="0"><span class="ct-account-label">Power BI Active Agents</span><strong class="ct-account-value">'+meta.total+'</strong></div></div>'+
+    '<div class="ct-rm-v6-grid"><div class="ct-rm-v6-m" data-v72-month="tier" role="button" tabindex="0"><b>Tier Growth · net Channel/A/B counts · 50 points</b><strong>'+score.tierPts.toFixed(1)+' / 50</strong><small>'+t.label+': '+t.Channel+' Channel · '+t.A+' A · '+t.B+' B</small></div>'+
+    '<div class="ct-rm-v6-m" data-v72-month="ratio" role="button" tabindex="0"><b>Referral Leads per Active Agent · 30 points</b><strong>'+score.ratioPts.toFixed(1)+' / 30</strong><small>'+scoredCurrentLeads.length+' active-agent leads MTD · '+projectedLeads+' projected ÷ '+meta.total+' Power BI A/B/C agents = '+score.ratio.toFixed(2)+' · Target 1.15; repeat and C-tier leads count</small></div>'+
+    '<div class="ct-rm-v6-m" data-v72-month="active" role="button" tabindex="0"><b>Active Partner Count · 20 points</b><strong>'+score.activePts.toFixed(1)+' / 20</strong><small>'+activePartnerCount+' partners with a lead or closing in 90 days of 200 goal · '+meta.total+' Power BI active agents are the ratio denominator</small></div></div>';
 }
 window.ctRenderAmandaOutcomeV6=ctRenderAmandaOutcomeV72;
 function v72WeekStart(){const d=new Date(),day=d.getDay(),m=new Date(d);m.setDate(d.getDate()-(day===0?6:day-1));return [m.getFullYear(),String(m.getMonth()+1).padStart(2,'0'),String(m.getDate()).padStart(2,'0')].join('-')}
@@ -13559,13 +13508,14 @@ window.ctV72OpenWeeklyMetric=function(key,card){
 };
 window.ctV72OpenMonthlyMetric=async function(key){
   const d=window.ctV72MonthlyDetail;if(!d){ctV72DetailModal('Monthly results','Refresh Team Snapshot to load source data.',[]);return}
-  const {live,meta,score,target,priorLeads}=d;
+  const {live,meta,score,target,priorLeads,currentLeads}=d;
   if(key==='ratio'){
-    ctV72DetailModal('Leads per Active Partner · '+score.ratioPts.toFixed(1)+' / 30',priorLeads.length+' prior-month Velocify referrals ÷ '+meta.total+' current Power BI active partners = '+score.ratio.toFixed(2)+'; goal 1.15. The score uses the prior completed month.',priorLeads.map(x=>({name:x.referral_partner_name||'Partner not recorded',type:'Referral lead',outcome:'',detail:x.date_added||''})));return;
+    const current=currentLeads||[],mtd=current.length,projected=d.projectedLeads||0;
+    ctV72DetailModal('Referral Leads per Active Agent · '+score.ratioPts.toFixed(1)+' / 30',mtd+' active-agent referral leads MTD projected to '+projected+' for the month ÷ '+meta.total+' Power BI A/B/C agents = '+score.ratio.toFixed(2)+'; target 1.15. Each lead counts, including repeats and C-tier agents.',current.map(x=>({name:x.referral_partner_name||'Partner not recorded',type:'Referral lead',outcome:'Counted as one lead',detail:x.date_added||''})));return;
   }
   if(['overall','tier','active'].includes(key)){
     const title={overall:'Overall score · '+score.totalPts.toFixed(1)+' / 100',tier:'Tier Growth · '+score.tierPts.toFixed(1)+' / 50',active:'Active Partner Growth · '+score.activePts.toFixed(1)+' / 20'}[key];
-    const facts=[{name:'Channel',type:meta.Channel+' / '+target.Channel,outcome:'15-point component',detail:'10+ closings'}, {name:'A',type:meta.A+' / '+target.A,outcome:'15-point component',detail:'Power BI Level A'}, {name:'B',type:meta.B+' / '+target.B,outcome:'20-point component',detail:'Power BI Level B'}, {name:'Referrals / active partner',type:priorLeads.length+' / '+meta.total,outcome:score.ratioPts.toFixed(1)+' / 30 points',detail:'Prior completed month'}, {name:'Active partners',type:meta.total+' / 200',outcome:score.activePts.toFixed(1)+' / 20 points',detail:'Latest Power BI upload'}];
+    const facts=[{name:'Channel',type:meta.Channel+' / '+target.Channel,outcome:'15-point component',detail:'10+ closings'}, {name:'A',type:meta.A+' / '+target.A,outcome:'15-point component',detail:'4–9 closings'}, {name:'B',type:meta.B+' / '+target.B,outcome:'20-point component',detail:'2–3 closings'}, {name:'Projected referrals / active agent',type:(d.projectedLeads||0)+' / '+meta.total,outcome:score.ratioPts.toFixed(1)+' / 30 points',detail:'Target 1.15; every active-agent lead counts'}, {name:'Active partners',type:(d.activePartnerCount||0)+' / 200',outcome:score.activePts.toFixed(1)+' / 20 points',detail:'One lead or closing in the last 90 days'}];
     ctV72DetailModal(title,'Source: '+(live.source||'current Power BI summary')+' · '+(live.imported_at||'date unavailable')+'. Components are capped at their point maximum.',key==='overall'?facts:key==='tier'?facts.slice(0,3):facts.slice(-1));return;
   }
   const names=[];let source='Latest Power BI summary: '+(live.source||'unknown source')+' · '+(live.imported_at||'date unavailable')+'.';
