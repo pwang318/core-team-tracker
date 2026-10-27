@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v82-powerbi-sync-repair-20260924" name="version"/>
-<meta content="v77: LP and RM use the same five-tile Power BI account summary: 2 Channel, 17 A, 20 B, 99 C, and 136 total active. Channel remains included in A." name="build-notes"/>
+<meta content="core-team-lp-v90-scorecard-alignment-20261027" name="version"/>
+<meta content="v90: LP and RM share the verified A/B/C agent base; repeat and C-tier leads count. Tier Growth uses production-based net Channel/A/B counts; Active Partner Count uses the separate 90-day retained population." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -13433,7 +13433,7 @@ async function ctGetAlignedPowerBiSummaryV72(force){
       const localSource={A:0,B:0,C:0};localRows.forEach(r=>{const lv=String(r.level||'').trim().toUpperCase();localSource[lv]++});
       const localChannel=localRows.filter(r=>v72n(r.closed_12mo)>=10).length,profileBy=new Map();(profiles||[]).forEach(p=>{const k=v72key(p&&p.agent_name);if(k&&!profileBy.has(k))profileBy.set(k,p)});
       const localManaged=localRows.filter(r=>{const p=profileBy.get(v72key(r.name))||{};return p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive'}),localTierCounts={Channel:0,A:0,B:0,C:0},localTiered=[];
-      localRows.forEach(r=>{const p=profileBy.get(v72key(r.name))||{};if(p.do_not_contact===true||String(p.relationship_status||'active').toLowerCase()==='inactive'||String(p.relationship_type||'realtor').toLowerCase()==='strategic_partner')return;const tier=ctRelTierFromProduction({closes_past_year:r.closed_12mo,total_leads_past_year:r.total_leads_12mo});if(tier&&localTierCounts[tier]!==undefined){localTierCounts[tier]++;localTiered.push(r)}});
+      localRows.forEach(r=>{const tier=ctRelTierFromProduction({closes_past_year:r.closed_12mo,total_leads_past_year:r.total_leads_12mo});if(tier&&localTierCounts[tier]!==undefined){localTierCounts[tier]++;localTiered.push(r)}});
       const localActivePartnerCount=localRows.filter(r=>v72IsActivePartner(r,profileBy.get(v72key(r.name)),new Date())).length;
       const localData={active_partner_rows:localRows.length,score_partner_rows:localActivePartnerCount,score_levels:localTierCounts,managed_active_rows:localManaged.length,levels:localTierCounts,source_levels:localSource,active_names:localRows.map(r=>r.name).filter(Boolean),raw_rows:v72n(local.raw_rows)||localRows.length,stamp:local.imported_at,imported_at:local.imported_at,profile_rows:rows.length,profile_behind:rows.length<localRows.length,source:'current uploaded Power BI workbook'};
       V72_CACHE.data=localData;V72_CACHE.at=Date.now();return localData;
@@ -13441,7 +13441,8 @@ async function ctGetAlignedPowerBiSummaryV72(force){
 
     const receiptIsNewer=useReceipt&&receiptMs>verifiedMs;
     const source=receiptIsNewer?{A:receipt.A,B:receipt.B,C:receipt.C,Channel:receipt.Channel,total:receipt.total,raw:receipt.raw,stamp:receipt.imported_at}:{A:V76_VERIFIED_POWERBI.A,B:V76_VERIFIED_POWERBI.B,C:V76_VERIFIED_POWERBI.C,Channel:V76_VERIFIED_POWERBI.Channel,total:V76_VERIFIED_POWERBI.total,raw:V76_VERIFIED_POWERBI.raw,stamp:V76_VERIFIED_POWERBI.imported_at};
-    const managed=rows.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive'),scoreLevels={Channel:0,A:0,B:0,C:0},scorePartners=rows.filter(p=>{if(p.do_not_contact===true||String(p.relationship_status||'active').toLowerCase()==='inactive'||String(p.relationship_type||'realtor').toLowerCase()==='strategic_partner')return false;const tier=ctRelTierFromProduction(p);if(!tier||scoreLevels[tier]===undefined)return false;scoreLevels[tier]++;return true;}).length;
+    const managed=rows.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive'),scoreLevels={Channel:0,A:0,B:0,C:0};
+    rows.forEach(p=>{const tier=ctRelTierFromProduction(p);if(tier&&scoreLevels[tier]!==undefined)scoreLevels[tier]++});
     const activePartnerCount=rows.filter(p=>v72IsActivePartner(p,p,new Date())).length;
     const data={active_partner_rows:source.total,score_partner_rows:activePartnerCount,score_levels:scoreLevels,managed_active_rows:managed.length,levels:scoreLevels,source_levels:{A:source.A,B:source.B,C:source.C},active_names:rows.map(p=>p.agent_name).filter(Boolean),raw_rows:source.raw,stamp:source.stamp,imported_at:source.stamp,profile_rows:rows.length,profile_behind:source.total>rows.length,source:receiptIsNewer?'shared Core Team Power BI import receipt':'verified current Power BI workbook'};
     V72_CACHE.data=data;V72_CACHE.at=Date.now();return data;
