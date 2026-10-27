@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v109-correct-agent-counts-20261027" name="version"/>
-<meta content="v109: LP Portfolio Growth Plans excludes deleted roster markers from agent names, missing totals, and coverage." name="build-notes"/>
+<meta content="core-team-lp-v110-coverage-count-match-20261027" name="version"/>
+<meta content="v110: LP Portfolio Growth Plans excludes deleted roster markers from agent names, missing totals, and coverage." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -13221,7 +13221,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       Array.prototype.forEach.call(summaryNodes,function(el){
         var txt=String(el.textContent||'').trim();
         if(/^[0-9]+ of [0-9]+ Power BI active agents are missing a documented growth plan$/.test(txt))missingEl=el;
-        if(/^\\d+% of Power BI active agents have a documented next growth opportunity$/.test(txt))coverageEl=el;
+        if(/^[0-9]+% of Power BI active agents have a documented next growth opportunity$/.test(txt))coverageEl=el;
       });
       var total=0,missing=0;
       if(missingEl){
