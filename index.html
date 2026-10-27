@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v99-lp-export-scope-fix-20261027" name="version"/>
-<meta content="v92: Display the verified MTD lead checkpoint on the scorecard with the Velocify synced and pending-sync split; the projection uses that full MTD count." name="build-notes"/>
+<meta content="core-team-lp-v100-growth-plan-list-20261027" name="version"/>
+<meta content="v100: LP Portfolio Growth Plans shows all active agents with no documented next growth opportunity. The LP Tuesday export resolves its LP name helper within the exporter." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -10123,7 +10123,8 @@ async function pfrLoad(){
     var proactiveWatch=rows.filter(function(r){return r.health==="Green"&&r.daysUntilYellow!==null&&r.daysUntilYellow<=PROACTIVE_WINDOW;})
       .sort(function(a,b){return a.daysUntilYellow-b.daysUntilYellow;});
 
-    var growthOppPct=totalActive>0?Math.round(((totalActive-active.filter(function(a){return!a.next_growth_opportunity;}).length)/totalActive)*100):0;
+    var missingGrowthPlans=active.filter(function(a){return !String(a.next_growth_opportunity||'').trim();}).sort(function(a,b){var order={Channel:0,A:1,B:2,C:3},ta=order[a.tier]===undefined?4:order[a.tier],tb=order[b.tier]===undefined?4:order[b.tier];return ta-tb||pfrProperCase(a.agent_name).localeCompare(pfrProperCase(b.agent_name));});
+    var growthOppPct=totalActive>0?Math.round(((totalActive-missingGrowthPlans.length)/totalActive)*100):0;
     var top10GrowthOpp=active.filter(function(a){return a.next_growth_opportunity;}).sort(function(a,b){
       var order={Channel:0,A:1,B:2,C:3};
       return(order[a.tier]!==undefined?order[a.tier]:4)-(order[b.tier]!==undefined?order[b.tier]:4);
@@ -10341,8 +10342,10 @@ async function pfrLoad(){
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Growth Opportunity Coverage</div>'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Growth Plans</div>'
       +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+growthOppPct+'% of active agents have a documented next growth opportunity</div>'
+      +'<div style="font-size:11px;color:var(--text-2);margin-bottom:8px">'+missingGrowthPlans.length+' active agents are missing a documented growth plan</div>'
+      +(missingGrowthPlans.length?'<div style="max-height:360px;overflow:auto;border-top:1px solid var(--border-light)">'+missingGrowthPlans.map(function(a){return pfrListRow(null,a.agent_name,escHtml(pfrTierLabel(a.tier))+' · No next growth opportunity documented');}).join('')+'</div>':'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">All active agents have a documented next growth opportunity.</div>')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
@@ -10399,7 +10402,7 @@ function pfrCompactOverview(body){
     {label:'Partner health',find:'Partner Health',group:'relationships'},
     {label:'Partner satisfaction',find:'Partner Satisfaction',group:'relationships'},
     {label:'High-potential partners',find:'High-Potential Agents',group:'relationships'},
-    {label:'Growth opportunity coverage',find:'Growth Opportunity Coverage',group:'relationships'},
+    {label:'Growth plans',find:'Growth Opportunity Coverage',group:'relationships'},
     {label:'Meeting cadence',find:'Meeting Cadence Compliance',group:'relationships'},
     {label:'Growth next steps',find:'Top 10 Growth Opportunities',group:'activity'},
     {label:'Service recovery',find:'Service Recovery Themes',group:'activity'},
@@ -10407,7 +10410,7 @@ function pfrCompactOverview(body){
     {label:'Leadership escalations',find:'Required Leadership Escalations',group:'activity'}
   ];
   var sourceByGroup={numbers:'Power BI / Velocify',relationships:'Tracker + Velocify',activity:'Tracker logs'};
-  var sourceByLabel={'Power BI reconciliation':'Power BI','Pipeline signals':'Power BI','Managed relationship tiers':'Power BI + tracker','Referral pace':'Velocify + Power BI','Tier movement':'Power BI + tracker','Partner health':'Tracker + Velocify'};
+  var sourceByLabel={'Power BI reconciliation':'Power BI','Pipeline signals':'Power BI','Managed relationship tiers':'Power BI + tracker','Referral pace':'Velocify + Power BI','Tier movement':'Power BI + tracker','Partner health':'Tracker + Velocify','Growth plans':'Agent profiles'};
   var nav=document.createElement('div');nav.className='lp-portfolio-dashboard-grid';
   var detail=document.createElement('section');detail.className='lp-portfolio-active-detail';
   cards.forEach(function(card,i){
