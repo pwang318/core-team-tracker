@@ -10127,8 +10127,8 @@ async function pfrLoad(){
     var growthPlanProfileByName={};
     currentPowerBiAgents.forEach(function(a){var k=String(a.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');if(k&&!growthPlanProfileByName[k])growthPlanProfileByName[k]=a;});
     var powerBiDetailRowsRaw=pbSource.detail&&pbSource.detail.by_agent?Object.values(pbSource.detail.by_agent).filter(function(a){return ['A','B','C'].includes(String(a.level||'').trim().toUpperCase());}):[];
-    var growthPlanInvalidNameRows=powerBiDetailRowsRaw.filter(function(a){var name=String(a.name||'').trim();return !name||/^__Roster_delete_/i.test(name);}).length;
-    var powerBiDetailRows=powerBiDetailRowsRaw.filter(function(a){var name=String(a.name||'').trim();return !!name&&!/^__Roster_delete_/i.test(name);});
+    var growthPlanInvalidNameRows=powerBiDetailRowsRaw.filter(function(a){var name=String(a.name||'').trim();return !name||/^__Roster_delete_/i.test(name)||/^__Hidden__$/i.test(name);}).length;
+    var powerBiDetailRows=powerBiDetailRowsRaw.filter(function(a){var name=String(a.name||'').trim();return !!name&&!/^__Roster_delete_/i.test(name)&&!/^__Hidden__$/i.test(name);});
     var growthPlanRows=powerBiDetailRows.length?powerBiDetailRows.map(function(a){
       var name=String(a.name||'').trim(),profile=growthPlanProfileByName[name.toLowerCase().replace(/\s+/g,' ')]||{},level=String(a.level||profile.powerbi_level||'').trim().toUpperCase();
       return Object.assign({},profile,{agent_name:name||profile.agent_name,powerbi_level:level,tier:profile.tier||(Number(a.closed_12mo||profile.closes_past_year||0)>=10?'Channel':level),next_growth_opportunity:profile.next_growth_opportunity||''});
