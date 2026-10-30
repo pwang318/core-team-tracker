@@ -13264,13 +13264,15 @@ function removeOldHealthExport(){document.getElementById('ctExportMgmtContractBt
 function boot(){removeOldHealthExport();installFundedUpload();installHub();ensureModal();setTimeout(()=>refreshTeam(),250);setTimeout(()=>{if(window.currentUser)loadLp(window.currentUser)},350);setTimeout(()=>window.ctV56RefreshManagementStatus(),450);fundedData(true).then(d=>{const st=document.getElementById('ctFundedStatus');if(st&&d)st.textContent=d.total+' unique funded units loaded through '+d.asOf+'. Shared snapshot loaded.'})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
-</script>\n<script id="ct-v67-live-pbi-focus-refresh">
+</script>
+<script id="ct-v67-live-pbi-focus-refresh">
 (function(){
   var last=0;async function refreshLive(){if(Date.now()-last<30000)return;last=Date.now();try{if(window.ctInvalidateLivePowerBi)window.ctInvalidateLivePowerBi();if(window.ctGetLivePowerBiSummary)await window.ctGetLivePowerBiSummary(true);if(typeof window.renderGrowthScoreboard==='function'&&document.getElementById('d-growth-scoreboard'))window.renderGrowthScoreboard();if(typeof window.ctRenderAmandaOutcomeV6==='function'&&document.getElementById('ct-amanda-snapshot'))window.ctRenderAmandaOutcomeV6();}catch(e){console.warn('Power BI focus refresh',e&&e.message)}}
   window.addEventListener('focus',refreshLive);document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshLive()});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(refreshLive,900)},{once:true});else setTimeout(refreshLive,500);
 })();
-</script>\n
+</script>
+
 <script id="lp-ownership-authoritative-fix-20260924">
 /* 2026-09-24: RM ownership is independent of tier. Every ownership save writes all normalized
    duplicates, reads the authoritative value back, and reloads ownership before repainting. */
