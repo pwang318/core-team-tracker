@@ -911,7 +911,22 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 #v56Execution{margin-top:14px;background:#fff;border:1px solid #d8e5ed;border-radius:14px;overflow:hidden}.v56-exec-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:14px 16px;background:#f7fbfd;border-bottom:1px solid #e1ebf0}.v56-exec-head h3{margin:0;color:#0b2b50;font-size:16px}.v56-exec-head p{margin:4px 0 0;color:#647a89;font-size:10.5px;line-height:1.45}.v56-summary{white-space:nowrap;border:1px solid #c7dbe6;border-radius:999px;padding:7px 10px;font-size:10px;font-weight:800;color:#235d79;background:#fff}.v56-row{display:grid;grid-template-columns:minmax(260px,1.8fr) minmax(145px,.9fr) 120px minmax(230px,1.25fr);gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid #e8eef2}.v56-row:last-child{border-bottom:0}.v56-row.no-call,.v56-row.cleared{background:#f3faf6}.v56-row.issue{background:#fffaf2}.v56-name{font-size:12px;font-weight:850;color:#102e51}.v56-meta,.v56-contact{font-size:9.8px;color:#62798a;line-height:1.45}.v56-state{font-size:10px;font-weight:800;color:#8a5d14}.v56-state.done,.v56-state.cleared{color:#277345}.v56-state.nocall{color:#65717a}.v56-actions{display:flex;gap:7px;justify-content:flex-end;align-items:center;flex-wrap:wrap}.v56-class{max-width:145px;border:1px solid #cbdbe6;border-radius:7px;background:#fff;color:#193750;padding:7px 8px;font-size:9.5px;font-family:inherit}.v57-save-class{display:inline-block;border:1px solid #2c80aa;background:#fff;color:#216b90;border-radius:8px;padding:7px 9px;font-size:9.5px;font-weight:850;cursor:pointer}.v57-save-class.saved{border-color:#9bc9ab;background:#f3faf6;color:#277345}.v57-save-class:disabled{opacity:.62;cursor:wait}.v57-save-class.saved:disabled{opacity:1;cursor:default}.v56-log{border:0;background:#2c80aa;color:#fff;border-radius:8px;padding:8px 10px;font-size:10px;font-weight:800;cursor:pointer}.v56-empty{padding:16px;color:#718391;font-size:11px}
 #v56Modal{display:none;position:fixed;inset:0;background:rgba(10,29,49,.36);z-index:9999;align-items:center;justify-content:center;padding:18px}#v56Modal.show{display:flex}.v56-modal{width:min(560px,96vw);background:#fff;border-radius:14px;box-shadow:0 24px 70px rgba(5,30,55,.28);padding:18px}.v56-modal-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:12px}.v56-modal-head h3{font-size:16px;color:#123255;margin:0}.v56-close{border:0;background:transparent;font-size:20px;color:#64798a;cursor:pointer}.v56-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v56-field.full{grid-column:1/-1}.v56-field label{display:block;font-size:9px;font-weight:850;color:#627080;text-transform:uppercase;margin-bottom:4px}.v56-field input,.v56-field select,.v56-field textarea{width:100%;box-sizing:border-box;border:1px solid #cfdae2;border-radius:8px;padding:9px 10px;font:inherit;font-size:11px}.v56-field textarea{min-height:90px;resize:vertical}.v56-error{display:none;color:#a5342a;font-size:10px;margin-top:8px}.v56-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 @media(max-width:850px){.ct-v56-hubgrid{grid-template-columns:1fr}.ct-v56-hubcard.management{grid-column:auto}.v56-row{grid-template-columns:1fr}.v56-actions{justify-content:flex-start}.v56-fields{grid-template-columns:1fr}.v56-field.full{grid-column:auto}}
-.v56-log-summary{margin-top:4px;font-size:9px;font-weight:500;line-height:1.4;color:#536c7c;white-space:normal}.v56-log-summary b{font-weight:800;color:#1f647e}</style></head>
+.v56-log-summary{margin-top:4px;font-size:9px;font-weight:500;line-height:1.4;color:#536c7c;white-space:normal}.v56-log-summary b{font-weight:800;color:#1f647e}
+/* LP scorecard mobile entry: no horizontal scrolling or clipped days */
+.lpsc-mobile-cards{display:none}
+@media(max-width:700px){
+ #lpsc-edit-body{overflow-x:hidden!important;padding:12px!important}
+ .lpsc-desktop-editor{display:none!important}
+ .lpsc-mobile-cards{display:grid;gap:12px}
+ .lpsc-mobile-metric{border:1px solid #d5e0e8;border-radius:12px;padding:12px;background:#fff}
+ .lpsc-mobile-metric-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;color:#16344d;font-size:14px}
+ .lpsc-mobile-metric-head span{white-space:nowrap;font-weight:800}
+ .lpsc-mobile-days{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+ .lpsc-mobile-days label{display:flex;flex-direction:column;gap:4px;text-align:center;color:#52677c;font-size:11px}
+ .lpsc-mobile-days input{width:100%;min-width:0;min-height:42px;padding:5px;text-align:center;border:1px solid #cbdbe5;border-radius:9px;font:inherit;font-size:16px;color:#102b46;background:white}
+ .lpsc-mobile-days input:focus{outline:2px solid #8265c5}
+}
+</style></head>
 <body>
 <div id="lpBuildBadge" style="display:none"></div>
 <div class="app">
@@ -1288,7 +1303,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="welcome"><div class="welcome-logo">CORE TEAM</div><h2>Intelligence Platform</h2><p>Select your name to see current execution work, Tuesday active-contract updates, and scorecard progress. Shared updates sync across the team.</p></div>
 </div><div class="view" id="view-lp"><div class="ct-lp-page">
 <div class="ct-page-head"><div><div class="ct-eyebrow">LOAN PARTNER</div><h1 id="lp-hero-name">Weekly Execution</h1><div class="ct-page-sub" id="lp-hero-sub">Loading current work…</div></div><div class="ct-role-pill" id="lp-v2-role-pill">LP2 · Client + transaction execution</div></div>
-<section class="ct-card ct-scorecard-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>My current position</h2></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="ct-link-btn" onclick="lpv4OpenMyScorecard(currentUser)" type="button">Update my scorecard</button><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div></div><div id="lp-v2-scorecard"><div class="ct-loading">Loading scorecard…</div></div></section>
+<section class="ct-card ct-scorecard-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>My current position</h2></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="ct-link-btn" onclick="lpv4OpenMyScorecard(currentUser)" type="button">Update my scorecard</button><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div></div><div class="ct-velocify-notice" style="padding:11px 13px;border:1px solid #d4dce6;border-radius:10px;background:#f4f7fa;color:#27445c;font-size:12px;line-height:1.5;margin:10px 0"><strong>Referral lead data notice:</strong> Referral lead data updates daily and may not reflect the most recent activity. <strong>Check Velocify for the most up-to-date lead information, status, and activity.</strong></div><div id="lp-v2-scorecard"><div class="ct-loading">Loading scorecard…</div></div></section>
 <section class="ct-card ct-focus-card"><div class="ct-section-head"><div><div class="ct-kicker">RELATIONSHIP MOMENT</div><h2>Face Time priorities</h2></div><button class="ct-link-btn" onclick="lpv2Route('facetime',this)" type="button">Open Face Time</button></div><div class="ct-embedded-block" id="lp-facetime-focus"><div class="ct-loading">Loading Face Time priorities…</div></div></section>
 <section class="ct-card ct-execution-card"><div class="ct-section-head"><div><div class="ct-kicker">EXECUTION</div><h2>Active contracts + buyer movement</h2></div></div><div class="ct-helper">Work under-contract buyer/client updates first. Then review preapprovals and prequals for the next meaningful move. Routine listing-agent relationship work belongs to RM.</div><div class="ct-stall-explainer"><strong>What “Stalled” means:</strong> the buyer has stayed in the same unresolved stage for 5+ days without a meaningful status update. Open the buyer, choose the reason they are stuck, document what changed, and set the next action/owner. Updating the record resets the stall clock.</div><div id="lp-weekly-execution-host"></div></section>
 <section class="ct-card ct-handoff-card"><div class="ct-section-head"><div><div class="ct-kicker">TEAM HANDOFFS</div><h2>RM → LP actions</h2></div></div>
@@ -6546,7 +6561,32 @@ function lpscRenderEditTable(){
   });
   html+='<td id="lpsc-edit-grandtotal" style="padding:9px 10px;text-align:center;border-top:2px solid #1F4E79">'+lpscEditTotalCell(goalSum)+'</td></tr>';
   html+="</tbody></table>";
-  body.innerHTML=html;
+
+  // Mobile view uses the SAME inputs, data keys and save handler as the desktop table.
+  var mobile='<div class="lpsc-mobile-cards">';
+  metrics.forEach(function(m){
+    var total=lpscGetTotal(m.key,lpscEditData);
+    mobile+='<div class="lpsc-mobile-metric"><div class="lpsc-mobile-metric-head"><strong>'+m.label+'</strong><span id="lpsc-mobile-total-'+m.key+'">'+total+' / '+m.goal+'</span></div><div class="lpsc-mobile-days">';
+    LPSC_DAYS.forEach(function(day){
+      var val=lpscEditData[m.key+'_'+day];
+      mobile+='<label><span>'+day+'</span><input aria-label="'+m.label+' '+day+'" type="number" min="0" inputmode="numeric" value="'+(val===undefined||val===null?'':val)+'" data-key="'+m.key+'" data-day="'+day+'" oninput="lpscMobileEditInput(this)"></label>';
+    });
+    mobile+='</div></div>';
+  });
+  mobile+='</div>';
+  body.innerHTML='<div class="lpsc-desktop-editor">'+html+'</div>'+mobile;
+
+}
+
+function lpscMobileEditInput(input){
+  var key=input.getAttribute('data-key'),day=input.getAttribute('data-day');
+  var field=key+'_'+day;
+  if(input.value==='')delete lpscEditData[field]; else lpscEditData[field]=Math.max(0,Number(input.value)||0);
+  var metric=(LPSC_METRICS_MAP[lpscCurrentLP]||[]).find(function(m){return m.key===key});
+  var total=lpscGetTotal(key,lpscEditData);
+  var el=document.getElementById('lpsc-mobile-total-'+key);
+  if(el)el.textContent=total+' / '+(metric?metric.goal:0);
+  var msg=document.getElementById('lpsc-save-msg');if(msg)msg.textContent='Unsaved changes';
 }
 
 function lpscEditTotalCell(goalSum){
@@ -11720,7 +11760,7 @@ function openOperatingStandardView(btn){
         ctFunnelCard('1003 → Pre-Approval',funnel.pre,funnel.apps,85,'Velocify YTD')+
         ctFunnelCard('Pre-Approval → Contract',funnel.contracts,funnel.pre,55,'Velocify YTD')+
         ctFunnelCard('Contract → Funded',funnel.funded,funnel.contracts,87,'Velocify YTD')
-      : '<div class="ct-mini-gate"><b>—</b><span>Conversion data</span><small style="display:block;margin-top:4px;color:#718391;font-size:9px">Velocify YTD source not loaded</small></div>';
+      : '<div class="ct-mini-gate"><b>—</b><span>Conversion data</span><small style="display:block;margin-top:4px;color:#718391;font-size:9px">Velocify YTD source not loaded — check Velocify for the latest conversion data. Unavailable is not zero.</small></div>';
 
     host.innerHTML=
       '<div class="ct-score-grid">'+metrics.map(m=>'<div class="ct-score-metric"><div class="num">'+m[1]+'</div><div class="lbl">'+esc(m[0])+' · this week</div></div>').join('')+'</div>'+
