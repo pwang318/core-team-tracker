@@ -12878,7 +12878,7 @@ function pmCoachingContent(stats,velRows){
  const label=state.coachingPeriod.toUpperCase();
  const scoreRows=(state.coachingSource&&state.coachingSource.scoreRows)||[];
  const periodRows=velRows.filter(r=>String(r.date_added||'').slice(0,10)>=start);
- const periodScores=scoreRows.filter(r=>r.week_key>=start || (state.coachingPeriod==='mtd'&&r.week_key>=monday()&&monday().slice(0,7)===yr+'-'+mo));
+ const periodScores=scoreRows.filter(r=>r.week_key>=start);
  const cards=LPS.map(function(lp){
   const localPeriod=state.coachingByLp[lp]||state.coachingPeriod;
   const localStart=localPeriod==='ytd'?yr+'-01-01':localPeriod==='mtd'?yr+'-'+mo+'-01':monday();
@@ -12889,14 +12889,14 @@ function pmCoachingContent(stats,velRows){
   const pct=n?Math.round(done/n*100):null;
   const appPct=leads?Math.round(apps/leads*100):null;
   const observations=[],wins=[],actions=[];
-  if(!x.scoreEntered){observations.push('Current-week scorecard has not been submitted.');actions.push('Confirm this week\'s activity and complete the scorecard.');}
+  if(!x.scoreEntered){observations.push('Current-week scorecard has not been submitted; values are missing, not confirmed zero.');actions.push('Confirm this week\'s activity and complete the scorecard.');}
   else wins.push('This week\'s scorecard is submitted.');
   if(n>0&&open>0){observations.push(open+' of '+n+' assigned Tuesday updates are still open ('+pct+'% completed).');actions.push('Discuss which buyer agents still need an update, what prevented completion, and agree on a specific next contact date. Verify outcomes and notes.');}
-  else if(n>0)wins.push('All '+n+' assigned Tuesday buyer-agent updates have been completed.');
+  else if(n>0)wins.push('All '+n+' assigned Tuesday buyer-agent updates have been completed (100%).');
   if(x.urgent>0){observations.push(x.urgent+' open Tuesday updates involve approaching or past closing deadlines.');actions.unshift('Prioritize closing-related agent communication and confirm file status.');}
   if(x.stalled>0){observations.push(x.stalled+' recent Velocify lead records have no documented update for at least five days, based on the daily extract.');actions.push('Verify these leads in Velocify and review whether follow-up has actually occurred before coaching.');}
   if(!n)observations.push('No assigned Tuesday updates found in the latest available plan; this does not prove none were required.');
-  if(leads)wins.push('Daily Velocify extract shows '+leads+' '+localLabel+' leads and '+apps+' records at an application-or-later status ('+appPct+'% provisional stage indicator).');
+  if(leads)wins.push('Daily Velocify extract shows '+leads+' '+localLabel+' leads and '+apps+' records at an application-or-later status ('+appPct+'% provisional stage indicator; recent leads may still be in progress).');
   else observations.push('No attributable '+localLabel+' Velocify leads available for conversion analysis.');
   if(!observations.length)observations.push('No outstanding exceptions found in the currently loaded tracker data.');
   if(!actions.length)actions.push('Recognize consistent execution. Review two recent lead-to-application journeys together, identify what worked, and agree on one repeatable practice.');
@@ -12908,7 +12908,7 @@ function pmCoachingContent(stats,velRows){
  LPS.forEach(function(lp){const x=stats[lp]||{};window.pmCoachingText[lp]='LP coaching review — '+lp+' ('+label+') ' +'\\nTuesday completed: '+(x.tueDone||0)+' / '+(x.tueAssigned||0)+'; scorecard: '+(x.scoreEntered?'submitted':'not submitted')+'; overdue leads (daily source): '+(x.stalled||0)+'; closing-sensitive updates: '+(x.urgent||0)+'.\\nReview outstanding buyer-agent updates, verify current Velocify data, discuss what is going well and agree on one specific next action. Do not treat missing or stale data as confirmed poor performance.';
  });
  window.pmCopyCoaching=function(lp){const t=window.pmCoachingText[lp];if(!t)return;navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(t).then(()=>{if(typeof ctShowToast==='function')ctShowToast('Coaching brief copied');}).catch(()=>window.prompt('Copy coaching brief:',t)):window.prompt('Copy coaching brief:',t)};
- return '<section class="pm-coach-section" aria-label="Automated LP coaching"><div class="pm-hub-head"><div><h2>Automated LP Coaching · Every Loan Partner</h2><p>Choose a reporting period for each LP. Latest Tuesday plan remains labeled separately.</p></div><div class="pm-coach-period" role="group" aria-label="Coaching period">'+['wtd','mtd','ytd'].map(p=>'<button type="button" class="'+(state.coachingPeriod===p?'active':'')+'" onclick="pmSetCoachingPeriod(\''+p+'\')">'+p.toUpperCase()+'</button>').join('')+'</div></div><p class="pm-source-note"><b>Source caution:</b> Velocify data syncs once daily. Check Velocify for the latest records. *Application-or-later status is a provisional indicator, not a cohort-adjusted conversion rate. Lead receipt-to-entry time, contact speed, notes compliance, pre-approval and contract conversion require verified source events and are not guessed here.</p><div class="pm-coach-grid">'+cards.join('')+'</div></section>';
+ return '<section class="pm-coach-section" aria-label="Automated LP coaching"><div class="pm-hub-head"><div><h2>Automated LP Coaching · Every Loan Partner</h2><p>Choose a reporting period for each LP. Latest Tuesday plan remains labeled separately.</p></div><div class="pm-coach-period" role="group" aria-label="Coaching period">'+['wtd','mtd','ytd'].map(p=>'<button type="button" class="'+(state.coachingPeriod===p?'active':'')+'" onclick="pmSetCoachingPeriod(\''+p+'\')">'+p.toUpperCase()+'</button>').join('')+'</div></div><p class="pm-source-note"><b>Calculation note:</b> Tuesday completion is based on matched saved updates / assigned buyer-agent calls from the latest plan; it is not a WTD, MTD or YTD aggregate. <b>Source caution:</b> Velocify data syncs once daily. Check Velocify for the latest records. *Application-or-later status is a provisional indicator, not a cohort-adjusted conversion rate. Lead receipt-to-entry time, contact speed, notes compliance, pre-approval and contract conversion require verified source events and are not guessed here.</p><div class="pm-coach-grid">'+cards.join('')+'</div></section>';
 }
 function render(data){const host=document.getElementById('pm-dashboard');if(!host)return;const {stats,open,stalled,allPlan,complete,scoreRows,velRows,planDate}=data;const totalOpen=open.length,totalDone=complete.length,totalAssigned=allPlan.length,pct=totalAssigned?Math.round(totalDone/totalAssigned*100):100,urgent=open.filter(x=>x.urgentType).length,missing=LPS.filter(lp=>!stats[lp].scoreEntered).length;
 state.stats=stats;
