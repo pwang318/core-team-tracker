@@ -13338,7 +13338,7 @@ function installHub(){
 window.v63RefreshHubStatuses=v63RefreshHubStatuses;
 window.v62PickLP=()=>document.getElementById('v62LPFile')?.click();window.v62PickRM=()=>document.getElementById('v62RMFile')?.click();window.v310PickLP=window.v62PickLP;window.v310PickRM=window.v62PickRM;
 
-function ensureExec(){let host=document.getElementById('v56Execution');if(host)return host;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;host=document.createElement('section');host.id='v56Execution';host.innerHTML='<div class="v56-exec-head"><div><h3>Tuesday Updates</h3><p>This section shows this week’s plan and last week’s unfinished updates. Builder check-ins are scheduled every 14 days from the last logged touch; closing soon or a milestone change brings them forward.</p></div><div id="v56Summary" class="v56-summary">Loading…</div></div><div id="v56Rows"></div>';anchor.appendChild(host);return host}
+function ensureExec(){let host=document.getElementById('v56Execution');if(host)return host;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;host=document.createElement('section');host.id='v56Execution';host.innerHTML='<div class="v56-exec-head"><div><h3>Tuesday Updates</h3><p>Only outstanding updates and due builder checks stay here. Logged updates disappear; builder check-ins follow the 14-day cadence and can come forward for a closing or milestone change.</p></div><div id="v56Summary" class="v56-summary">Loading…</div></div><div id="v56Rows"></div>';anchor.appendChild(host);return host}
 async function planState(lp){
   const w=weekStart(),lastWeekDate=new Date(w+'T12:00:00');lastWeekDate.setDate(lastWeekDate.getDate()-7);const lastWeek=lastWeekDate.toISOString().slice(0,10),historyCutoff=new Date();historyCutoff.setDate(historyCutoff.getDate()-365);const historySince=historyCutoff.toISOString().slice(0,10);
   const [snapshotRows,classes,allLogs,buildTouchLogs]=await Promise.all([
@@ -13375,7 +13375,13 @@ async function planState(lp){
     if(!isCurrent&&cls!=='NEW_BUILD'&&doneRecord(r,matchState))return;
     carry.push(Object.assign({},r,{_carryoverWeek:isCurrent?'':pw,_builderScheduled:scheduled,_builderNextDue:nextDue,_builderMilestoneChanged:milestoneChanged}));
   });
-  const rows=carry,buildReviews=[],seenBuildReviewKeys=new Set();
+  // Keep the LP queue actionable: completed Tuesday updates and future builder
+  // check-ins are not outstanding work. A new-build row remains only while its
+  // separate builder check-in is due, even if this week's Tuesday update is done.
+  const rows=carry.filter(r=>{
+    if(r._builderScheduled)return false;
+    return classFor(r)==='NEW_BUILD'||!doneRecord(r,matchState);
+  }),buildReviews=[],seenBuildReviewKeys=new Set();
   const addDays=(value,n)=>{const d=new Date(String(value||'')+'T12:00:00');if(isNaN(d))return'';d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
   rows.forEach(r=>{
     const key=rowClassKey(r),cls=classMap[key]||classMap[rowMatchKey(r)]||'';if(cls!=='NEW_BUILD'||!key||seenBuildReviewKeys.has(key))return;seenBuildReviewKeys.add(key);
@@ -13432,7 +13438,7 @@ function renderLpState(s,lp){
   const buildReviewMarkup=buildReviews.length?'<section class="v143-build-review"><div class="v143-build-review-head"><div><h4>New-build buyer follow-up</h4><p>Full strategy consultation at 45 days to closing, then a client check-in every week through closing.</p></div><span>'+buildDue+' due · '+buildScheduled+' scheduled</span></div>'+buildReviews.map(x=>{const closeLabel=x.close?new Date(x.close+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Not set',agent=meta(x.row.notes,'BUYER_AGENT')||'Buyer agent not listed',label=x.kind==='consult'?'45-day full consultation':x.kind==='weekly'?'Weekly buyer check-in':'Closing date needed',button=x.kind==='missing'?'<div class="v143-build-note">Add a projected closing date to the source record so the consultation can be scheduled.</div>':x.due?'<button type="button" onclick="v143OpenBuildTouch(\''+encodeURIComponent(x.key)+'\',\''+x.event+'\')">'+(x.event==='CONSULT'?'Log full consultation':'Log weekly client check-in')+'</button>':'<span class="v143-build-next">Next touch '+esc(x.dueDate)+'</span>';return'<div class="v143-build-row '+(x.due?'due':'scheduled')+'"><div><b>'+esc(x.client||'Unnamed borrower')+'</b><small>'+esc(agent)+' · Close '+esc(closeLabel)+'</small></div><div><b>'+esc(label)+'</b><small>'+esc(x.status)+'</small></div><div>'+button+'</div></div>'}).join('')+'</section>':'';
   const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');
   if(rowsEl)rowsEl.innerHTML=(html||'<div class="v56-empty">No open Tuesday updates assigned to '+esc(lp)+'.</div>')+buildReviewMarkup;
-  if(sumEl)sumEl.textContent=open+' open · '+scheduled+' builder check-ins scheduled · '+complete+' done · '+classified+' classified within open · '+issues+' review';
+  if(sumEl)sumEl.textContent=open+' outstanding · '+classified+' classified · '+issues+' review';
 }
 async function loadLp(lp){
   lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();if(!ensureExec())return;state.lp=lp;try{const s=await planState(lp);renderLpState(s,lp)}catch(e){console.error('LP Tuesday plan history could not be loaded',e);const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');if(sumEl)sumEl.textContent='Tuesday data unavailable';if(rowsEl)rowsEl.innerHTML='<div class="v56-empty">Tuesday update history could not be loaded. Refresh the tracker or try again shortly; no zero status has been assumed.</div>'}
