@@ -8310,12 +8310,13 @@ function loadVelocifyLeadsCsv(input){
       var dbRows=[],dates=[],skipped=0;
       rawRows.forEach(function(r){
         var name=(r["Referral Partner Name"]||"").trim();
+        var buyer=[(r["First Name"]||"").trim(),(r["Last Name"]||"").trim()].filter(Boolean).join(" ");
         var iso=csvDateToISO(r["Date Added"]);
-        if(!name||!iso){skipped++;return;}
+        if((!name&&!buyer)||!iso){skipped++;return;}
         dates.push(iso);
         dbRows.push({
           referral_partner_name:name,
-          buyer_name:[(r["First Name"]||"").trim(),(r["Last Name"]||"").trim()].filter(Boolean).join(" "),
+          buyer_name:buyer,
           date_added:iso,
           last_update:csvDateToISO(r["Last Action Date"]),
           lp_user:(r["User"]||"").trim(),
@@ -8327,7 +8328,7 @@ function loadVelocifyLeadsCsv(input){
       if(!dbRows.length){if(res){res.style.color="#E53935";res.textContent="No usable rows found in "+file.name+".";}return;}
       dates.sort();
       var minDate=dates[0],maxDate=dates[dates.length-1];
-      var msg="This will DELETE all velocify_leads rows dated "+minDate+" through "+maxDate+", then re-insert the "+dbRows.length+" leads from "+file.name+" ("+skipped+" rows skipped for missing name/date).\n\nThis updates the shared database for everyone, not just this session. Continue?";
+      var msg="This will DELETE all velocify_leads rows dated "+minDate+" through "+maxDate+", then re-insert the "+dbRows.length+" leads from "+file.name+" ("+skipped+" rows skipped for missing borrower/partner name or date).\n\nThis updates the shared database for everyone, not just this session. Continue?";
       if(!confirm(msg)){if(res){res.textContent="Cancelled.";}input.value="";return;}
       if(res){res.style.color="";res.textContent="Deleting "+minDate+" – "+maxDate+" and inserting "+dbRows.length+" leads...";}
       sbFetch("DELETE","velocify_leads?date_added=gte."+minDate+"&date_added=lte."+maxDate)
