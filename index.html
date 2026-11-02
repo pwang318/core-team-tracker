@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v125-tuesday-carryover-both-views-20261102" name="version"/>
-<meta content="v125: carries incomplete Tuesday items into both LP and manager views, without crediting prior-week calls to a new plan." name="build-notes"/>
+<meta content="core-team-lp-v126-tuesday-history-load-20261102" name="version"/>
+<meta content="v126: limits Tuesday history reads to a practical date window and surfaces load failures instead of showing false zeroes." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v125 Tuesday Carryover</title>
+<title>Core Team LP Tracker · v126 Tuesday History Load</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13015,12 +13015,12 @@ async function load(force){
  if(btn){btn.disabled=true;btn.textContent='Refreshing…'}
  host.innerHTML='<div class="pm-loading">Loading current LP production data…</div>';
  try{
-  const now=new Date(),ytd=now.getFullYear()+'-01-01',wk=monday();
+  const now=new Date(),ytd=now.getFullYear()+'-01-01',wk=monday(),historyCutoff=new Date(now);historyCutoff.setDate(historyCutoff.getDate()-365);const historySince=historyCutoff.toISOString().slice(0,10);
   const [scores,vel,snapshotRows,updateLogs]=await Promise.all([
    sbFetch('GET','lp_scorecards?person=in.(Gavin,Karen,Osgood,Jordan,Said,Isaak)&week_key=gte.'+wk+'&select=person,week_key,data&limit=1000').catch(()=>[]),
    sbFetch('GET','velocify_leads?date_added=gte.'+ytd+'&select=*&order=date_added.desc&limit=20000').catch(()=>[]),
-   sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Call%20Plan%20Snapshot&select=id,agent_name,act_type,act_date,notes,created_at&order=created_at.desc&limit=50000'),
-   sbFetch('GET','amanda_activities?act_type=eq.LP%20Tuesday%20File%20Update&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=50000')
+   sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Call%20Plan%20Snapshot&act_date=gte.'+historySince+'&select=id,agent_name,act_type,act_date,notes,created_at&order=created_at.desc&limit=10000'),
+   sbFetch('GET','amanda_activities?act_type=eq.LP%20Tuesday%20File%20Update&act_date=gte.'+historySince+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=10000')
   ]);
   const snaps=snapshotRows.filter(a=>/\[TUE_SPLIT_V310\]/i.test(String(a.notes||'')));
   const headers=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_HEADER');
@@ -13284,11 +13284,11 @@ window.v62PickLP=()=>document.getElementById('v62LPFile')?.click();window.v62Pic
 
 function ensureExec(){let host=document.getElementById('v56Execution');if(host)return host;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;host=document.createElement('section');host.id='v56Execution';host.innerHTML='<div class="v56-exec-head"><div><h3>Tuesday Updates</h3><p>Active contracts return each week until they fall off Encompass. Unfinished Tuesday updates carry forward until a matching update is logged; saved FSBO / new-build / no-agent classifications stay with that loan.</p></div><div id="v56Summary" class="v56-summary">Loading…</div></div><div id="v56Rows"></div>';anchor.appendChild(host);return host}
 async function planState(lp){
-  const w=weekStart();
+  const w=weekStart(),historyCutoff=new Date();historyCutoff.setDate(historyCutoff.getDate()-365);const historySince=historyCutoff.toISOString().slice(0,10);
   const [snapshotRows,classes,allLogs]=await Promise.all([
-    sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Call%20Plan%20Snapshot&select=id,agent_name,act_type,act_date,notes,created_at&order=created_at.desc&limit=50000').catch(()=>[]),
+    sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Call%20Plan%20Snapshot&act_date=gte.'+historySince+'&select=id,agent_name,act_type,act_date,notes,created_at&order=created_at.desc&limit=10000'),
     sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Contact%20Classification&select=id,agent_name,act_type,act_date,outcome,notes,created_at&order=created_at.desc&limit=5000').catch(()=>[]),
-    sbFetch('GET','amanda_activities?act_type=eq.LP%20Tuesday%20File%20Update&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=50000').catch(()=>[])
+    sbFetch('GET','amanda_activities?act_type=eq.LP%20Tuesday%20File%20Update&act_date=gte.'+historySince+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=10000')
   ]);
   const snaps=snapshotRows.filter(a=>/\[TUE_SPLIT_V310\]/i.test(String(a.notes||''))),headers=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_HEADER'),latestByWeek=new Map();
   headers.forEach(h=>{const pw=weekStart(meta(h.notes,'TUE_PLAN_DATE')||h.act_date),prior=latestByWeek.get(pw);if(pw&&(!prior||(Date.parse(h.created_at||h.act_date||0)||0)>(Date.parse(prior.created_at||prior.act_date||0)||0)))latestByWeek.set(pw,h)});
@@ -13337,7 +13337,7 @@ function renderLpState(s,lp){
   if(sumEl)sumEl.textContent=due+' due · '+complete+' done · '+cleared+' cleared · '+issues+' review';
 }
 async function loadLp(lp){
-  lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();if(!ensureExec())return;state.lp=lp;const s=await planState(lp);renderLpState(s,lp)
+  lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();if(!ensureExec())return;state.lp=lp;try{const s=await planState(lp);renderLpState(s,lp)}catch(e){console.error('LP Tuesday plan history could not be loaded',e);const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');if(sumEl)sumEl.textContent='Tuesday data unavailable';if(rowsEl)rowsEl.innerHTML='<div class="v56-empty">Tuesday update history could not be loaded. Refresh the tracker or try again shortly; no zero status has been assumed.</div>'}
 }
 window.v310LoadPlan=loadLp;window.ctV56LoadLpTuesday=loadLp;
 window.v57BuyerClassDirty=function(sel){const wrap=sel&&sel.closest('.v56-actions'),btn=wrap&&wrap.querySelector('.v57-save-class');if(btn){btn.classList.remove('saved');btn.disabled=false;btn.textContent='Save status'}};
