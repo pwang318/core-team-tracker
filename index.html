@@ -17,7 +17,7 @@
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v112 Relationship Snapshot</title>
+<title>Core Team LP Tracker · v113 Coaching + RM Snapshot</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -12906,6 +12906,7 @@ function pmCoachingContent(stats,velRows){
   const localPeriod=state.coachingByLp[lp]||state.coachingPeriod;
   const localStart=localPeriod==='ytd'?yr+'-01-01':localPeriod==='mtd'?yr+'-'+mo+'-01':monday();
   const localLabel=localPeriod.toUpperCase();
+  const isLP1=lp==='Isaak',roleLabel=isLP1?'LP1 · Front-end conversion support':'LP2 · Client + transaction execution';
   const lpPeriodRows=velRows.filter(r=>String(r.date_added||'').slice(0,10)>=localStart);
   const localScores=scoreRows.filter(r=>r.week_key>=localStart);
   const x=stats[lp]||{},n=Number(x.tueAssigned)||0,done=Number(x.tueDone)||0,open=Number(x.tueOpen)||0,urgent=Number(x.urgent)||0,stalled=Number(x.stalled)||0;
@@ -12920,41 +12921,47 @@ function pmCoachingContent(stats,velRows){
   else if(n>0)evidence.push('All '+n+' assigned Tuesday buyer-agent updates in the latest plan are complete.');
   if(urgent>0)observations.push(urgent+' open Tuesday updates have approaching or past closing deadlines.');
   if(stalled>0)observations.push(stalled+' recent Velocify lead records have no documented update for at least five days in the daily extract; verify before coaching.');
-  if(!n)observations.push('No assigned Tuesday updates were found in the latest available plan; this does not confirm that no updates were required.');
+  if(!isLP1&&!n)observations.push('No assigned Tuesday updates were found in the latest available plan; this does not confirm that no updates were required.');
+  if(isLP1&&n>0&&open>0)observations.push('Tuesday transaction updates appear in the LP1 queue; confirm ownership or handoff with LP2 before treating them as an LP1 performance gap.');
   if(leads)evidence.push('The '+localLabel+' Velocify extract has '+leads+' attributable leads and '+apps+' at application-or-later status ('+appPct+'% provisional; recent leads may still be in progress).');
   else observations.push('No attributable '+localLabel+' Velocify leads are available for conversion analysis.');
   if(!evidence.length)evidence.push('No verified win is available in the current extract.');
   if(!observations.length)observations.push('No outstanding exceptions were found in the currently loaded tracker data.');
   let focus='',prompt='',nextAction='',status='',statusClass='';
   if(urgent>0){
-    focus=urgent+' closing-sensitive update'+(urgent===1?'':'s')+' need attention first';
-    prompt='Which closing-sensitive update is most urgent, and what does the buyer agent need to know today?';
-    nextAction='Review all '+urgent+' deadline-sensitive updates today; document each outcome or the next contact date. Recheck '+checkIn+'.';
-    status='Deadline first';statusClass='yellow';
+    focus=urgent+' closing-sensitive update'+(urgent===1?' needs':'s need')+' attention first';
+    prompt=isLP1?'Who owns these deadline-sensitive updates, and if any are assigned to you, what has the buyer agent been told today?':'Which closing-sensitive update is most urgent, and what does the buyer agent need to know today?';
+    nextAction=isLP1?'Confirm LP2 ownership or complete any updates explicitly assigned to you; record each handoff or outcome today. Recheck '+checkIn+'.':'Review all '+urgent+' deadline-sensitive updates today; document each outcome or the next contact date. Recheck '+checkIn+'.';
+    status=isLP1?'Confirm owner':'Deadline first';statusClass='yellow';
   }else if(open>0){
-    focus=open+' Tuesday update'+(open===1?' remains':'s remain')+' open';
-    prompt='Which open buyer-agent updates can be completed today, and which need a call, voicemail, or text?';
-    nextAction='Complete or log an attempt for '+open+' open Tuesday updates, with outcomes and next contact dates, by '+checkIn+'.';
-    status='Updates open';statusClass='yellow';
+    focus=isLP1?open+' Tuesday update'+(open===1?' needs':'s need')+' an ownership check':open+' Tuesday update'+(open===1?' remains':'s remain')+' open';
+    prompt=isLP1?'Are these transaction updates explicitly assigned to LP1, or should they be handed to LP2?':'Which open buyer-agent updates can be completed today, and which need a call, voicemail, or text?';
+    nextAction=isLP1?'Confirm ownership for '+open+' open Tuesday updates; document the LP2 handoff or your assigned outcome by '+checkIn+'.':'Complete or log an attempt for '+open+' open Tuesday updates, with outcomes and next contact dates, by '+checkIn+'.';
+    status=isLP1?'Confirm owner':'Updates open';statusClass='yellow';
   }else if(!latestPlanScoreSubmitted){
     focus='Current-week LP scorecard is not submitted';
-    prompt='What blocked this week’s scorecard entry, and what needs to be verified before submitting it?';
-    nextAction='Verify activity totals against LP records and submit this week’s scorecard by '+checkIn+'.';
+    prompt=isLP1?'What blocked this week’s scorecard entry, and have lead, application, and pre-approval counts been verified?':'What blocked this week’s scorecard entry, and have Tuesday updates and active-contract activity been verified?';
+    nextAction=isLP1?'Verify lead, application, pre-approval, and contract totals against LP1 records; submit this week’s scorecard by '+checkIn+'.':'Verify Tuesday-update and active-contract activity against LP2 records; submit this week’s scorecard by '+checkIn+'.';
     status='Scorecard';statusClass='red';
   }else if(stalled>0){
     focus=stalled+' leads need a follow-up data check';
-    prompt='Which flagged Velocify records already received follow-up, and what is the next documented touch for each remaining one?';
-    nextAction='Verify '+stalled+' flagged records in Velocify; log the actual last outcome and next touch by '+checkIn+'.';
+    prompt=isLP1?'Which flagged leads still need a borrower next step toward application or pre-approval, and what has already been documented?':'Which flagged Velocify records already received follow-up, and what is the next documented touch for each remaining one?';
+    nextAction=isLP1?'Verify '+stalled+' flagged records in Velocify; log the actual borrower-contact outcome and next application or pre-approval step by '+checkIn+'.':'Verify '+stalled+' flagged records in Velocify; log the actual last outcome and next touch by '+checkIn+'.';
     status='Verify leads';statusClass='yellow';
-  }else if(!n){
+  }else if(!n&&!isLP1){
     focus='Tuesday plan availability needs confirmation';
     prompt='Was a Tuesday plan expected for this LP? If so, where is it; if not, confirm no updates were assigned.';
     nextAction='Confirm whether Tuesday updates were assigned and correct the plan record if needed by '+checkIn+'.';
     status='Check plan';statusClass='yellow';
+  }else if(isLP1&&leads>0){
+    focus='Review front-end lead progression';
+    prompt='Which recent leads are waiting on a borrower response, application, or pre-approval, and what would move each one forward?';
+    nextAction='Review '+leads+' attributable leads; verify each current stage and document one next borrower step for any still in progress by '+checkIn+'.';
+    status='LP1 focus';statusClass='green';
   }else{
     focus='Execution is on track in the available data';
-    prompt='Which recent buyer-agent update or lead follow-up is worth repeating, and what made it effective?';
-    nextAction='Bring one verified example of effective follow-up to the '+checkIn+' check-in and identify the behavior to repeat.';
+    prompt=isLP1?'Which recent lead progressed toward application or pre-approval, and what LP1 action helped move it forward?':'Which recent buyer-agent update or lead follow-up is worth repeating, and what made it effective?';
+    nextAction=isLP1?'Bring one verified lead-progression example to the '+checkIn+' check-in and identify the front-end step to repeat.':'Bring one verified example of effective follow-up to the '+checkIn+' check-in and identify the behavior to repeat.';
     status='On track';statusClass='green';
   }
   const periodCardCount=scorecardsInPeriod?scorecardsInPeriod+' scorecard entr'+(scorecardsInPeriod===1?'y':'ies')+' in '+localLabel:'No scorecard entries in '+localLabel;
@@ -12963,7 +12970,7 @@ function pmCoachingContent(stats,velRows){
   const periodButtons=['wtd','mtd','ytd'].map(function(p){return '<button type="button" class="'+(localPeriod===p?'active':'')+'" onclick="pmSetLpCoachingPeriod(\''+lp+'\',\''+p+'\')">'+p.toUpperCase()+'</button>'}).join('');
   const tueValue=n?done+' / '+n+' · '+pct+'%':'No plan found';
   const appValue=appPct===null?'No attributable data':appPct+'%*';
-  return '<details class="pm-coach-card"><summary class="pm-coach-summary"><div class="pm-coach-top"><h3>'+esc(lp)+'</h3><span class="pm-status '+statusClass+'">'+status+'</span></div><div class="pm-coach-quick-metrics"><span><small>Tuesday · latest plan</small><b>'+tueValue+'</b></span><span><small>Current-week scorecard</small><b>'+(latestPlanScoreSubmitted?'Submitted':'Not submitted')+'</b></span><span><small>Lead → app-status</small><b>'+appValue+'</b></span></div><p class="pm-coach-focus"><b>Focus</b> · '+esc(focus)+'</p><p class="pm-coach-action-preview"><b>Next</b> · '+esc(nextAction)+'</p><span class="pm-coach-expand-hint">Expand for evidence and coaching prompt</span></summary><div class="pm-coach-expanded"><div class="pm-coach-individual-period"><b>Coaching period · '+localLabel+'</b><div class="pm-coach-period-buttons">'+periodButtons+'</div></div><div class="pm-coach-evidence"><strong>Verified wins</strong><ul>'+item(evidence)+'</ul><strong>Watch-outs and data checks</strong><ul>'+item(observations)+'</ul></div><div class="pm-coach-guidance"><strong>Conversation prompt</strong><p>'+esc(prompt)+'</p><strong>One measurable next step</strong><p>'+esc(nextAction)+'</p><small>Suggested check-in: '+esc(checkIn)+' · Confirm the source record before drawing performance conclusions.</small></div><div class="pm-coach-actions"><button type="button" onclick="pmOpenLpDetail(\''+lp+'\')">Review LP records</button><button type="button" onclick="pmCopyCoaching(\''+lp+'\')">Copy coaching brief</button></div></div></details>';
+  return '<details class="pm-coach-card"><summary class="pm-coach-summary"><div class="pm-coach-top"><div><h3>'+esc(lp)+'</h3><span class="pm-coach-role">'+esc(roleLabel)+'</span></div><span class="pm-status '+statusClass+'">'+status+'</span></div><div class="pm-coach-quick-metrics"><span><small>Tuesday · latest plan</small><b>'+tueValue+'</b></span><span><small>Current-week scorecard</small><b>'+(latestPlanScoreSubmitted?'Submitted':'Not submitted')+'</b></span><span><small>Lead → app-status</small><b>'+appValue+'</b></span></div><p class="pm-coach-focus"><b>Focus</b> · '+esc(focus)+'</p><p class="pm-coach-action-preview"><b>Next</b> · '+esc(nextAction)+'</p><span class="pm-coach-expand-hint">Expand for evidence and coaching prompt</span></summary><div class="pm-coach-expanded"><div class="pm-coach-individual-period"><b>Coaching period · '+localLabel+'</b><div class="pm-coach-period-buttons">'+periodButtons+'</div></div><div class="pm-coach-evidence"><strong>Verified wins</strong><ul>'+item(evidence)+'</ul><strong>Watch-outs and data checks</strong><ul>'+item(observations)+'</ul></div><div class="pm-coach-guidance"><strong>Conversation prompt</strong><p>'+esc(prompt)+'</p><strong>One measurable next step</strong><p>'+esc(nextAction)+'</p><small>Suggested check-in: '+esc(checkIn)+' · Confirm the source record before drawing performance conclusions.</small></div><div class="pm-coach-actions"><button type="button" onclick="pmOpenLpDetail(\''+lp+'\')">Review LP records</button><button type="button" onclick="pmCopyCoaching(\''+lp+'\')">Copy coaching brief</button></div></div></details>';
  });
  const summary='<div class="pm-coach-overview" aria-label="LP coaching overview"><div><small>LPs needing follow-up</small><b>'+tally.review+'</b></div><div><small>Open Tuesday updates</small><b>'+tally.open+'</b></div><div><small>Closing-sensitive updates</small><b>'+tally.urgent+'</b></div><div><small>Current-week scorecards missing</small><b>'+tally.missing+'</b></div></div>';
  return '<section class="pm-coach-section" aria-label="Automated LP coaching"><div class="pm-hub-head"><div><h2>LP Coaching · Every Loan Partner</h2><p>Priority-ranked coaching. Tuesday completion stays tied to the latest plan.</p></div><div class="pm-coach-period" role="group" aria-label="Coaching period">'+['wtd','mtd','ytd'].map(function(p){return '<button type="button" class="'+(state.coachingPeriod===p?'active':'')+'" onclick="pmSetCoachingPeriod(\''+p+'\')">'+p.toUpperCase()+'</button>'}).join('')+'</div></div><details class="pm-source-note"><summary>Data sources and calculation notes</summary>Tuesday completion uses the latest assigned Tuesday plan; it does not change with WTD, MTD or YTD. Velocify syncs daily; check Velocify for current lead data. Application-or-later is a preliminary status indicator rather than a cohort-adjusted conversion rate. Missing scorecards are not treated as zero.</details>'+summary+'<div class="pm-coach-grid">'+cards.join('')+'</div></section>';
@@ -13473,7 +13480,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         if(typeof window.ctGetLivePowerBiSummary==='function')await window.ctGetLivePowerBiSummary(true);
         if(typeof window.ctRenderAmandaOutcomeV6==='function')await window.ctRenderAmandaOutcomeV6();
         var d=window.ctV72MonthlyDetail;
-        if(!d||!d.meta){host.innerHTML='<div class="ct-kicker">RM RELATIONSHIP SNAPSHOT</div><h2>Relationship snapshot unavailable</h2><p>Refresh Team Snapshot after the Power BI roster loads. LP scorecards remain available independently.</p>';return}
+        if(!d||!d.meta){host.innerHTML='<div class="ct-kicker">RM RELATIONSHIP SNAPSHOT</div><h2>Waiting for the current Power BI upload</h2><p>RM relationship health uses the latest Power BI file uploaded through the LP tracker. Upload the current roster to populate active-agent coverage and the RM goal. Amanda’s weekly activity above remains visible.</p>';return}
         var agents=Number(d.activeAgentCount||d.meta.total)||0,monthly=Number(d.monthlyLeadCount||0),projected=Number(d.projectedLeads||0),dynamic=Math.max(100,Math.ceil(agents*1.15)),monthLabel=new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(new Date());
         var source=d.live||{},stamp=source.imported_at?new Date(source.imported_at).toLocaleString():'Import timestamp unavailable';
         var currentRows=Array.isArray(d.currentLeads)?d.currentLeads.length:0,pending=Math.max(0,monthly-currentRows);
@@ -13534,7 +13541,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .pm-rm-relationship{margin-top:12px}
 @media(max-width:850px){.pm-coach-grid{grid-template-columns:1fr}.pm-coach-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.pm-coach-evidence{grid-template-columns:1fr}}
 @media(max-width:480px){.pm-coach-quick-metrics{grid-template-columns:1fr 1fr}.pm-coach-summary{padding:11px}}
-</style>
+</style><style id="ct-lp-v113-role-css">.pm-coach-role{display:block;margin-top:2px;color:#52677a;font-size:9.5px;font-weight:700;letter-spacing:.01em}.pm-coach-top>div{min-width:0}</style>
 </body>
 <script id="v313-all-call-export">
 (function(){
