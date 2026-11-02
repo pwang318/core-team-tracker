@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v143-newbuild-buyer-consultations-20261102" name="version"/>
-<meta content="v143: add a 45-day full buyer strategy consultation, weekly client follow-ups thereafter, and a distinct Production Manager queue while preserving biweekly builder-rep checks." name="build-notes"/>
+<meta content="core-team-lp-v144-newbuild-manager-worklist-20261102" name="version"/>
+<meta content="v144: make the Production Manager new-build summary open a dedicated due and upcoming worklist." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v143 New-Build Buyer Consultations</title>
+<title>Core Team LP Tracker · v144 New-Build Manager Worklist</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -12855,7 +12855,14 @@ window.pmOpenPulseDetail=function(kind){
   modal.classList.add('show');
 };
 window.pmOpenAccountability=function(){const d=document.getElementById('pm-accountability-panel');if(d)d.open=true;setTimeout(()=>d?.scrollIntoView({behavior:'smooth',block:'start'}),20)};
-window.pmOpenNewBuildSection=function(){document.getElementById('pm-newbuild-tracking')?.scrollIntoView({behavior:'smooth',block:'start'})};
+window.pmOpenNewBuildSection=function(){
+  const modal=ensurePmDetailModal(),title=document.getElementById('pm-detail-title'),sub=document.getElementById('pm-detail-sub'),body=document.getElementById('pm-detail-body'),actions=document.querySelector('#pm-lp-detail-modal .pm-detail-actions');
+  const due=state.newBuildDue||[],upcoming=state.newBuildUpcoming||[];
+  title.textContent='New-build tracking';sub.textContent='Buyer consultations and weekly client follow-ups are separate from builder-rep status checks.';if(actions)actions.style.display='none';
+  const rows=(items,empty)=>items.length?items.map(x=>'<div class="pm-detail-row"><div><div class="pm-detail-row-title">'+esc(x.client||'Unnamed borrower')+'</div><div class="pm-detail-row-sub">'+esc([x.agent?'Buyer agent: '+x.agent:'',x.builder?'Builder: '+x.builder:''].filter(Boolean).join(' · ')||'Contact details not listed')+'</div></div><div><div class="pm-detail-reason">'+esc(x.task)+'</div><div class="pm-detail-row-sub">Closing '+esc(fmtDate(x.close))+' · '+esc(x.status||'Scheduled')+'</div></div><div class="pm-detail-date">'+esc(fmtDate(x.dueDate))+'<div class="pm-detail-row-sub">'+(items===due?'Due now':'Next touch')+'</div>'+(LPS.includes(x.lp)?'<button class="pm-open-btn" type="button" onclick="pmCloseLpDetail();pmOpenLp(\''+esc(x.lp)+'\')">Open '+esc(x.lp)+'</button>':'<span class="pm-status red">Unassigned</span>')+'</div></div>').join(''):'<div class="pm-empty">'+empty+'</div>';
+  body.innerHTML='<div class="pm-detail-metrics"><div class="pm-detail-metric"><b>'+due.length+'</b><span>Due now</span></div><div class="pm-detail-metric"><b>'+upcoming.length+'</b><span>Upcoming</span></div></div><div class="pm-detail-section-title">Due now · '+due.length+'</div>'+rows(due,'No new-build actions are due right now.')+'<div class="pm-detail-section-title">Upcoming scheduled work · '+upcoming.length+'</div>'+rows(upcoming,'No future new-build touches are scheduled.');
+  modal.classList.add('show');
+};
 function filterQueue(kind){state.filter=kind||'all';const d=document.getElementById('pm-work-panel');if(d)d.open=true;const type=document.getElementById('pm-type-filter');if(type)type.value=state.filter;renderQueue();setTimeout(()=>d?.scrollIntoView({behavior:'smooth',block:'start'}),20)}
 window.pmFilterQueue=filterQueue;
 window.pmSetQueue=function(){state.q=(document.getElementById('pm-q')?.value||'').trim().toLowerCase();state.lp=document.getElementById('pm-lp-filter')?.value||'';state.filter=document.getElementById('pm-type-filter')?.value||'all';renderQueue()};
@@ -13001,10 +13008,11 @@ function pmCoachingContent(stats,velRows){
 }
 function pmNewBuildTrackingMarkup(buildReviewDue,buildReviewScheduled,builderDue,scheduledBuilders){
  const labelFor=x=>x.event==='CONSULT'?'45-day full buyer consultation':x.event==='WEEKLY'?'Weekly buyer check-in':x.event==='MISSING_DATE'?'Projected closing date missing':'Builder-rep status check-in';
- const normalizeClient=x=>({client:x.client,agent:x.agent,lp:x.lp,close:x.close,dueDate:x.dueDate,status:x.status,task:labelFor(x),row:x.row});
- const normalizeBuilder=x=>({client:x.client,agent:x.agent,lp:x.lp,close:x.close,dueDate:x.builderDueDate,status:x.milestoneChanged?'Milestone changed · check in now':x.urgentType==='past'?'Closing date passed · check in now':x.urgentType==='soon'?'Closing within 7 days · check in now':'14-day builder check-in due',task:'Builder-rep status check-in',row:x.row});
+ const normalizeClient=x=>({client:x.client,agent:x.agent,lp:x.lp,close:x.close,dueDate:x.dueDate,status:x.status,task:labelFor(x),builder:x.row?meta(x.row.notes,'TUE_BUILDER_NAME'):'',row:x.row});
+ const normalizeBuilder=x=>({client:x.client,agent:x.agent,lp:x.lp,close:x.close,dueDate:x.builderDueDate,status:x.milestoneChanged?'Milestone changed · check in now':x.urgentType==='past'?'Closing date passed · check in now':x.urgentType==='soon'?'Closing within 7 days · check in now':'14-day builder check-in due',task:'Builder-rep status check-in',builder:x.row?meta(x.row.notes,'TUE_BUILDER_NAME'):'',row:x.row});
  const due=[...buildReviewDue.map(normalizeClient),...builderDue.map(normalizeBuilder)].sort((a,b)=>{const ad=a.dueDate||'9999-12-31',bd=b.dueDate||'9999-12-31';return ad.localeCompare(bd)||String(a.client||'').localeCompare(String(b.client||''))});
  const upcoming=[...buildReviewScheduled.map(normalizeClient),...scheduledBuilders.map(normalizeBuilder)].sort((a,b)=>String(a.dueDate||'9999').localeCompare(String(b.dueDate||'9999')));
+ state.newBuildDue=due;state.newBuildUpcoming=upcoming;
  const buyerAgent=x=>x.agent?'Buyer agent: '+x.agent:'';
  const builderName=x=>x.row?meta(x.row.notes,'TUE_BUILDER_NAME'):'';
  const details=x=>[buyerAgent(x),builderName(x)?'Builder: '+builderName(x):''].filter(Boolean).join(' · ')||'Contact details not listed';
