@@ -17,7 +17,7 @@
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v134 Tuesday Carryover</title>
+<title>Core Team LP Tracker · v135 Last Week Tuesday Queue</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -2468,7 +2468,7 @@ function effectiveDays(a){
   var log=callLogs[a[0]];
   if(log&&log.call_date&&lpHasLiveConnectionLog(log))logDate=new Date(log.call_date+'T12:00:00');
   var hist=agentLastCall[a[0]]||null;
-  // agent_call_summary is legacy and can include attempts. If it equals this week's known non-live
+  // agent_call_summary is legacy and can include attempts. If it equals this week’s known non-live
   // attempt date, ignore it so a VM/text cannot falsely make the relationship look freshly connected.
   if(hist&&!(log&&log.call_date===hist&&!lpHasLiveConnectionLog(log)))histDate=new Date(hist+'T12:00:00');
   var act=mostRecent(a);
@@ -2510,10 +2510,10 @@ function getRotation(lp){
   // Sort not-due by closest to being due next
   notDue.sort(function(a,b){return daysOverdue(b)-daysOverdue(a);});
 
-  // CARRYOVER: pin last week's missed agents to the top so they can't be skipped again
+  // CARRYOVER: pin last week’s missed agents to the top so they can't be skipped again
   var missedLastWeek=getLpMissedLastWeek(lp).filter(function(a){return isActive(a)&&(calledThisWeek(a[0])||!lpRmCoordinationHold(a));});
 
-  // Priority first, then last week's misses, then overdue, then fill with closest-to-due
+  // Priority first, then last week’s misses, then overdue, then fill with closest-to-due
   var combined=priority.concat(missedLastWeek).concat(overdue).concat(notDue);
   var seen={},res=[];
   for(var j=0;j<combined.length;j++){if(!seen[combined[j][0]]){seen[combined[j][0]]=true;res.push(combined[j]);}}
@@ -8740,7 +8740,7 @@ function callNextAgent(){
   if(!currentUser || typeof getRotation!=="function") return;
   var rot=getRotation(currentUser).filter(function(a){ return !calledThisWeek(a[0]); });
   if(!rot.length){
-    alert("You completed this week's call list.");
+    alert("You completed this week’s call list.");
     return;
   }
   var name=rot[0][0];
@@ -12877,7 +12877,7 @@ function pmClarifyLabels(host){
   set('.pm-pulse-card:nth-child(4) .pm-pulse-label','Current-week scorecards missing');
   set('.pm-brief b','Manager focus:');
   const cards=[...host.querySelectorAll(':scope > section.ct-card')];
-  if(cards[0]){const h=cards[0].querySelector('h2');if(h)h.textContent='LP performance overview';const sub=cards[0].querySelector('.ct-page-sub');if(sub)sub.textContent='Current weekly scorecards, Tuesday completion, recent lead follow-up and conversion.';const th=[...cards[0].querySelectorAll('th')];if(th[2])th[2].textContent='Tuesday open · current + last week';if(th[3])th[3].textContent='Closing files';if(th[4])th[4].textContent='Leads overdue';const note=cards[0].querySelector('.pm-source-note');if(note)note.textContent='Tuesday completion shows the current plan. Tuesday open shows this week's plan plus last week's unfinished updates. Earlier plans stay in history; items shown here stay open until a matching update is logged. Red marks an open closing file, 3+ Tuesday updates, or 4+ overdue lead follow-ups.'}
+  if(cards[0]){const h=cards[0].querySelector('h2');if(h)h.textContent='LP performance overview';const sub=cards[0].querySelector('.ct-page-sub');if(sub)sub.textContent='Current weekly scorecards, Tuesday completion, recent lead follow-up and conversion.';const th=[...cards[0].querySelectorAll('th')];if(th[2])th[2].textContent='Tuesday open · current + last week';if(th[3])th[3].textContent='Closing files';if(th[4])th[4].textContent='Leads overdue';const note=cards[0].querySelector('.pm-source-note');if(note)note.textContent='Tuesday completion shows the current plan. Tuesday open shows this week’s plan plus last week’s unfinished updates. Earlier plans stay in history; items shown here stay open until a matching update is logged. Red marks an open closing file, 3+ Tuesday updates, or 4+ overdue lead follow-ups.'}
   if(cards[1]){const h=cards[1].querySelector('h2');if(h)h.textContent='Current production exceptions';const sub=cards[1].querySelector('.ct-page-sub');if(sub)sub.textContent='Open items from the latest Tuesday plan and recent Velocify leads requiring follow-up.';const urgentOpt=cards[1].querySelector('option[value="urgent"]'),leadOpt=cards[1].querySelector('option[value="stalled"]');if(urgentOpt)urgentOpt.textContent='Closing date passed or within 7 days';if(leadOpt)leadOpt.textContent='Recent lead follow-up overdue'}
 }
 function pmEnhanceHub(host,counts){
@@ -12885,7 +12885,7 @@ function pmEnhanceHub(host,counts){
   const hub=document.createElement('section');hub.className='pm-hub';
   hub.innerHTML='<div class="pm-hub-head"><div><div class="ct-kicker">MANAGEMENT HUB</div><h2>Loan Partner tools</h2><p>Open the supporting LP workflows and weekly scorecards.</p></div><span class="ct-role-pill">Production Manager View</span></div><div class="pm-tool-grid"><button class="pm-tool" onclick="pmOpenScorecard()" type="button"><b>LP Scorecards</b><span>Open weekly scorecards and switch LPs in the scorecard view.</span></button><button class="pm-tool" onclick="pmFilterQueue(&quot;tuesday&quot;)" type="button"><b>Tuesday Execution</b><span>Current active-contract update completion.</span></button><button class="pm-tool" onclick="pmFilterQueue(&quot;stalled&quot;)" type="button"><b>Lead Follow-Up</b><span>Recent Velocify leads overdue for an update.</span></button><button class="pm-tool" onclick="pmGo(&quot;lp-conversion&quot;)" type="button"><b>LP Conversion</b><span>Lead-to-application performance.</span></button></div>';
   const firstCard=host.querySelector('section.ct-card');host.insertBefore(hub,firstCard||null);
-  const cards=[...host.querySelectorAll(':scope > section.ct-card')];cards.forEach((card,i)=>{const details=document.createElement('details');details.className='pm-expand';details.id=i===0?'pm-accountability-panel':'pm-work-panel';const badge=i===0?LPS.length+' LPs':counts.open+' Tuesday open · '+(counts.carryover||0)+' carried over · '+counts.stalled+' leads overdue';details.innerHTML='<summary><div><div class="pm-expand-title">'+(i===0?'LP scorecards and accountability':'Current production exceptions')+'</div><div class="pm-expand-sub">'+(i===0?'Weekly scorecards, Tuesday completion and conversion':'This week's Tuesday plan, last week's unfinished updates and recent Velocify lead follow-up')+'</div></div><div class="pm-expand-right"><span class="pm-expand-badge">'+badge+'</span><span class="pm-expand-arrow">⌄</span></div></summary>';card.parentNode.insertBefore(details,card);details.appendChild(card)});
+  const cards=[...host.querySelectorAll(':scope > section.ct-card')];cards.forEach((card,i)=>{const details=document.createElement('details');details.className='pm-expand';details.id=i===0?'pm-accountability-panel':'pm-work-panel';const badge=i===0?LPS.length+' LPs':counts.open+' Tuesday open · '+(counts.carryover||0)+' carried over · '+counts.stalled+' leads overdue';details.innerHTML='<summary><div><div class="pm-expand-title">'+(i===0?'LP scorecards and accountability':'Current production exceptions')+'</div><div class="pm-expand-sub">'+(i===0?'Weekly scorecards, Tuesday completion and conversion':'This week's Tuesday plan, last week’s unfinished updates and recent Velocify lead follow-up')+'</div></div><div class="pm-expand-right"><span class="pm-expand-badge">'+badge+'</span><span class="pm-expand-arrow">⌄</span></div></summary>';card.parentNode.insertBefore(details,card);details.appendChild(card)});
 }
 
 document.addEventListener('click',function(e){
@@ -13282,7 +13282,7 @@ function installHub(){
 window.v63RefreshHubStatuses=v63RefreshHubStatuses;
 window.v62PickLP=()=>document.getElementById('v62LPFile')?.click();window.v62PickRM=()=>document.getElementById('v62RMFile')?.click();window.v310PickLP=window.v62PickLP;window.v310PickRM=window.v62PickRM;
 
-function ensureExec(){let host=document.getElementById('v56Execution');if(host)return host;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;host=document.createElement('section');host.id='v56Execution';host.innerHTML='<div class="v56-exec-head"><div><h3>Tuesday Updates</h3><p>Active contracts return each week until they fall off Encompass. This section shows this week's plan and last week's unfinished Tuesday updates. Earlier plans remain in history; each displayed item stays open until a matching update is logged, including classified loans.</p></div><div id="v56Summary" class="v56-summary">Loading…</div></div><div id="v56Rows"></div>';anchor.appendChild(host);return host}
+function ensureExec(){let host=document.getElementById('v56Execution');if(host)return host;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;host=document.createElement('section');host.id='v56Execution';host.innerHTML='<div class="v56-exec-head"><div><h3>Tuesday Updates</h3><p>Active contracts return each week until they fall off Encompass. This section shows this week’s plan and last week’s unfinished Tuesday updates. Earlier plans remain in history; each displayed item stays open until a matching update is logged, including classified loans.</p></div><div id="v56Summary" class="v56-summary">Loading…</div></div><div id="v56Rows"></div>';anchor.appendChild(host);return host}
 async function planState(lp){
   const w=weekStart(),lastWeekDate=new Date(w+'T12:00:00');lastWeekDate.setDate(lastWeekDate.getDate()-7);const lastWeek=lastWeekDate.toISOString().slice(0,10),historyCutoff=new Date();historyCutoff.setDate(historyCutoff.getDate()-365);const historySince=historyCutoff.toISOString().slice(0,10);
   const [snapshotRows,classes,allLogs]=await Promise.all([
