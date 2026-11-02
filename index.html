@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v116-rm-summary-loader-fix-20261102" name="version"/>
-<meta content="v116: fixes the RM summary loader syntax; coaching and RM cards are clickable; background polling no longer repaints Production Manager." name="build-notes"/>
+<meta content="core-team-lp-v117-stable-background-poll-20261102" name="version"/>
+<meta content="v117: fixes the RM summary loader, keeps cards clickable, and prevents background polling from repainting active views; realtime and manual refresh remain." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v116 RM Summary Fix</title>
+<title>Core Team LP Tracker · v117 Stable Live Refresh</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -6305,13 +6305,13 @@ async function refreshLpSharedData(source){
         ]);
       }
       var snapshotView=document.getElementById("view-snapshot");
-      if(snapshotView&&snapshotView.classList.contains("active")&&typeof window.lpLoadSnapshotFresh==="function"){
+      if(!poll&&snapshotView&&snapshotView.classList.contains("active")&&typeof window.lpLoadSnapshotFresh==="function"){
         await window.lpLoadSnapshotFresh({force:true}).catch(function(){});
-      }else if(["Gavin","Karen","Osgood","Jordan","Said","Isaak"].indexOf(currentUser)>=0&&Object.keys(pendingNote).length===0){
+      }else if(!poll&&["Gavin","Karen","Osgood","Jordan","Said","Isaak"].indexOf(currentUser)>=0&&Object.keys(pendingNote).length===0){
         renderLP(currentUser);
       }
       var pfr=document.getElementById("view-portfolio");
-      if(pfr&&pfr.classList.contains("active")&&typeof window.pfrLoad==="function")window.pfrLoad().catch(function(){});
+      if(!poll&&pfr&&pfr.classList.contains("active")&&typeof window.pfrLoad==="function")window.pfrLoad().catch(function(){});
       var pm=document.getElementById("view-production-manager");
       if(pm&&pm.classList.contains("active")&&typeof window.pmLoad==="function"&&!poll)window.pmLoad(true).catch(function(){});
       if((source==="lp_flags"||source==="rm_lp_flags"||source==="call_logs"||poll)&&typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
