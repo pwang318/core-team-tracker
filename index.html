@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v140-tuesday-update-types-20261102" name="version"/>
-<meta content="v140: add explicit FSBO and builder completion outcomes to LP Tuesday logging and show logged builder cadence with its next due date." name="build-notes"/>
+<meta content="core-team-lp-v141-integrity-cleanup-20261102" name="version"/>
+<meta content="v141: add FSBO and builder completion outcomes, show the next builder due date, and validate current tracker views without obsolete global checks." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v140 Tuesday Update Types</title>
+<title>Core Team LP Tracker · v141 Tracker Integrity Cleanup</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -10976,7 +10976,7 @@ if(typeof refreshLpSharedData==="function"){
 
 
 // v17 — makeover layer + v16 load recovery; all operational logic preserved.
-function runLpUiIntegrityCheck(){const requiredViews=["snapshot","portfolio","ownership","leads","lp","rm","director","facetime","admin"];const missingViews=requiredViews.filter(n=>!document.getElementById("view-"+n));const requiredFns=["openSnapshotView","openPortfolioReviewView","openOwnershipView","openLeadsView","selectUser","openRmView","openDirectorView","loadAgents","loadCallLogs","buildSnapshot"];const missingFns=requiredFns.filter(n=>typeof window[n]!=="function");if(missingViews.length||missingFns.length)console.error("LP Tracker UI integrity issue",{missingViews,missingFns});else console.log("LP Tracker UI integrity check passed");}
+function runLpUiIntegrityCheck(){const requiredViews=["welcome","lp","rm","file-integrity","operating-standard","scorecards","snapshot","ownership","data-hub","agent-health","income-standard","leads","lp-conversion","partner-growth","admin","facetime","co-marketing","agent-search","portfolio","production-manager"];const missingViews=requiredViews.filter(n=>!document.getElementById("view-"+n));if(missingViews.length)console.error("LP Tracker UI integrity issue",{missingViews});else console.log("LP Tracker UI integrity check passed",{checkedViews:requiredViews.length});}
 setTimeout(runLpUiIntegrityCheck,0);
 // v45 watchdog: a slow request is shown as slow, not falsely reported as disconnected.
 // Successful Supabase traffic automatically restores Live through lpMarkServerReachable().
