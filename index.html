@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v126-tuesday-history-load-20261102" name="version"/>
-<meta content="v126: limits Tuesday history reads to a practical date window and surfaces load failures instead of showing false zeroes." name="build-notes"/>
+<meta content="core-team-lp-v127-manager-history-runtime-20261102" name="version"/>
+<meta content="v127: fixes a manager-loader reference error while preserving Tuesday carryover and history load safeguards." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v126 Tuesday History Load</title>
+<title>Core Team LP Tracker · v127 Manager History Runtime</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13033,7 +13033,7 @@ async function load(force){
   historicalPlan.forEach(p=>{const done=completion(p,logs),item=itemFor(p),isCurrent=item.planWeek===wk;if(done){if(isCurrent)complete.push(item)}else open.push(item)});
   const stalled=vel.filter(r=>isStalled(r)&&LPS.includes(lpFromLead(r))),stats={};
   LPS.forEach(lp=>{
-   const sr=scores.filter(r=>r.person===lp&&r.week_key===wk),sd=sr.reduce((a,r)=>Object.assign(a,r.data||{}),{}),minePlan=plan.filter(p=>shortLp(meta(p.notes,'LP_OWNER'))===lp),mineDone=minePlan.filter(p=>completion(p,logs)),mineOpen=open.filter(r=>r.lp===lp),mineCurrentOpen=currentOpen.filter(p=>shortLp(meta(p.notes,'LP_OWNER'))===lp),mineCarryover=mineOpen.filter(r=>r.planWeek<wk),mineVel=vel.filter(r=>lpFromLead(r)===lp),mineStall=stalled.filter(r=>lpFromLead(r)===lp);
+   const sr=scores.filter(r=>r.person===lp&&r.week_key===wk),sd=sr.reduce((a,r)=>Object.assign(a,r.data||{}),{}),minePlan=plan.filter(p=>shortLp(meta(p.notes,'LP_OWNER'))===lp),mineDone=minePlan.filter(p=>completion(p,logs)),mineOpen=open.filter(r=>r.lp===lp),mineCarryover=mineOpen.filter(r=>r.planWeek<wk),mineVel=vel.filter(r=>lpFromLead(r)===lp),mineStall=stalled.filter(r=>lpFromLead(r)===lp);
    stats[lp]={tueAssigned:minePlan.length,tueDone:mineDone.length,tueOpen:minePlan.length-mineDone.length,tueCarryover:mineCarryover.length,urgent:mineOpen.filter(r=>r.urgentType).length,stalled:mineStall.length,scoreEntered:sr.length>0,weekLeads:total(sd,'referred_leads'),weekApps:total(sd,'apps_1003'),weekPre:total(sd,'pre_approvals'),weekContracts:total(sd,'contracts'),ytdLeads:mineVel.length,ytdApps:mineVel.filter(r=>stage(r).app).length};
   });
   state.loadedAt=Date.now();
