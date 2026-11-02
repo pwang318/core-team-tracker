@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v138-local-manager-matching-20261102" name="version"/>
-<meta content="v138: keep the matching helpers local to the manager module and align builder classification and last-touch dates across views." name="build-notes"/>
+<meta content="core-team-lp-v139-builder-due-labels-20261102" name="version"/>
+<meta content="v139: label due builder cadence explicitly in LP rows and include the calculated next-touch date." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v138 Builder Check-in Fix</title>
+<title>Core Team LP Tracker · v139 Builder Check-in Due Dates</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13344,7 +13344,7 @@ async function planState(lp){
     const prior=isCurrent?priorByTx.get(tx):null,oldMilestone=prior?norm(meta(prior.notes,'TXN_MILESTONE')):'',newMilestone=norm(meta(r.notes,'TXN_MILESTONE')),milestoneChanged=!!(cls==='NEW_BUILD'&&oldMilestone&&newMilestone&&oldMilestone!==newMilestone);
     const close=meta(r.notes,'TXN_CLOSE_DATE'),closeDays=close?Math.ceil((new Date(close+'T12:00:00')-today)/86400000):null,urgent=closeDays!==null&&closeDays<=7,nextDue=cls==='NEW_BUILD'?nextBuilderDue(r):'',scheduled=cls==='NEW_BUILD'&&!urgent&&!milestoneChanged&&!!nextDue&&nextDue>todayIso;
     if(!isCurrent&&cls!=='NEW_BUILD'&&doneRecord(r,matchState))return;
-    carry.push(Object.assign({},r,{_carryoverWeek:isCurrent?'':pw,_builderScheduled:scheduled,_builderNextDue:scheduled?nextDue:'',_builderMilestoneChanged:milestoneChanged}));
+    carry.push(Object.assign({},r,{_carryoverWeek:isCurrent?'':pw,_builderScheduled:scheduled,_builderNextDue:nextDue,_builderMilestoneChanged:milestoneChanged}));
   });
   const rows=carry;
   return{w,rows,currentRows,carryoverCount:rows.filter(r=>r._carryoverWeek).length,rawCount:currentRows.length,hiddenDupes:0,logs:logRows,classes:classMap,classDates,header:currentHeader};
@@ -13369,6 +13369,7 @@ function renderLpState(s,lp){
     const tx=rowClassKey(r),buyer=meta(r.notes,'BUYER_AGENT'),client=meta(r.notes,'TXN_CLIENT'),property=meta(r.notes,'TXN_PROPERTY'),close=meta(r.notes,'TXN_CLOSE_DATE'),mile=meta(r.notes,'TXN_MILESTONE'),ph=meta(r.notes,'BUYER_PHONE'),em=meta(r.notes,'BUYER_EMAIL'),explicit=s.classes[tx]||s.classes[rowMatchKey(r)]||'',cls=explicit||(!usableAgent(buyer)?'CONTACT_ISSUE':'CALL_REQUIRED'),log=doneRecord(r,s),finished=!!log,nocall=classNoCall(cls),issue=cls==='CONTACT_ISSUE'||(cls==='CALL_REQUIRED'&&!usableAgent(buyer));
     let status='';
     if(r._builderScheduled){scheduled++;const dueLabel=new Date(r._builderNextDue+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});status='Biweekly builder check-in · due '+dueLabel}
+    else if(cls==='NEW_BUILD'){open++;const dueLabel=r._builderNextDue?new Date(r._builderNextDue+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';status='Builder check-in due'+(r._builderMilestoneChanged?' · milestone changed':close&&Math.ceil((new Date(close+'T12:00:00')-new Date())/86400000)<=7?' · closing soon':'')+(dueLabel?' · '+dueLabel:'')}
     else if(finished){complete++;status='Completed this week ✓'}
     else{open++;if(nocall){classified++;status='Open · classified '+classLabel(cls)+' · update not logged'}else if(issue){issues++;status='Needs review'}else status=r._carryoverWeek?'Open since week of '+r._carryoverWeek:'Due Tuesday'}
     const rowClass=r._builderScheduled?'scheduled':nocall?'classified':issue?'issue':r._carryoverWeek?'carryover':'';
