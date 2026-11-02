@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v112-rm-snapshot-20261102" name="version"/>
-<meta content="v113: organizes role-based LP coaching and moves RM relationship health to Team Snapshot; LP leads and RM scoring remain unchanged." name="build-notes"/>
+<meta content="core-team-lp-v114-coaching-click-refresh-20261102" name="version"/>
+<meta content="v114: makes LP coaching cards clickable and stops production-manager repaints on the background poll; realtime and manual refresh remain." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v113 Coaching + RM Snapshot</title>
+<title>Core Team LP Tracker · v114 Coaching + RM Snapshot</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -6313,7 +6313,7 @@ async function refreshLpSharedData(source){
       var pfr=document.getElementById("view-portfolio");
       if(pfr&&pfr.classList.contains("active")&&typeof window.pfrLoad==="function")window.pfrLoad().catch(function(){});
       var pm=document.getElementById("view-production-manager");
-      if(pm&&pm.classList.contains("active")&&typeof window.pmLoad==="function")window.pmLoad(true).catch(function(){});
+      if(pm&&pm.classList.contains("active")&&typeof window.pmLoad==="function"&&!poll)window.pmLoad(true).catch(function(){});
       if((source==="lp_flags"||source==="rm_lp_flags"||source==="call_logs"||poll)&&typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
     }catch(e){console.warn("Cross-tracker shared-data refresh failed:",e);}
   },180);
@@ -12878,6 +12878,11 @@ function pmEnhanceHub(host,stats,counts){
   const cards=[...host.querySelectorAll(':scope > section.ct-card')];cards.forEach((card,i)=>{const details=document.createElement('details');details.className='pm-expand';details.id=i===0?'pm-accountability-panel':'pm-work-panel';const badge=i===0?'6 LPs':counts.open+' Tuesday open · '+counts.stalled+' leads overdue';details.innerHTML='<summary><div><div class="pm-expand-title">'+(i===0?'LP scorecards and accountability':'Current production exceptions')+'</div><div class="pm-expand-sub">'+(i===0?'Weekly scorecards, Tuesday completion and conversion':'Latest Tuesday plan and recent Velocify lead follow-up')+'</div></div><div class="pm-expand-right"><span class="pm-expand-badge">'+badge+'</span><span class="pm-expand-arrow">⌄</span></div></summary>';card.parentNode.insertBefore(details,card);details.appendChild(card)});
   const fourth=host.querySelector('.pm-pulse-card:nth-child(4)');if(fourth)fourth.onclick=()=>window.pmOpenPulseDetail('missing');
 }
+document.addEventListener('click',function(e){
+ const card=e.target.closest&&e.target.closest('#view-production-manager details.pm-coach-card');
+ if(!card||e.target.closest('.pm-coach-summary,button,a,input,select,textarea,[role="button"],[contenteditable="true"]'))return;
+ card.open=!card.open;
+});
 function pmCoachingContent(stats,velRows){
  const today=new Date(),yr=today.getFullYear(),mo=String(today.getMonth()+1).padStart(2,'0');
  const label=state.coachingPeriod.toUpperCase();
@@ -13445,7 +13450,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .ct-nav-more-content .ct-nav-section{min-width:180px;flex:1 1 200px;margin:0;padding:8px;border:1px solid #edf1f4;border-radius:8px}
 .ct-nav-more-content .ct-nav-btn{width:100%!important}
 .lp-lead-goal-note{margin-top:10px;padding:9px 11px;border:1px solid #e4deef;border-radius:9px;background:#faf8fd;color:#5c5370;font-size:11px;line-height:1.45}
-.pm-rm-relationship{background:#fff;border:1px solid #d9e5ec;border-radius:14px;padding:16px;margin:0 0 14px;box-shadow:0 3px 14px rgba(35,63,81,.045)}
+.pm-rm-relationship{background:#fff;border:1px solid #d9e5ec;border-radius:14px;padding:16px;margin:0 0 14px;box-shadow:0 3px 14px rgba(35,63,81,.045);transition:border-color .15s ease,box-shadow .15s ease}.pm-rm-relationship:hover{border-color:#9bb4c7;box-shadow:0 4px 16px rgba(16,39,70,.10)}.pm-rm-card-link{display:block;color:inherit;text-decoration:none}.pm-rm-card-link:focus-visible{outline:3px solid #8b7bcb;outline-offset:3px;border-radius:10px}.pm-rm-card-cta{display:inline-flex;margin-top:10px;padding:8px 10px;border-radius:8px;background:#eef4f8;color:#174968;font-size:11px;font-weight:750}
 .pm-rm-relationship h2{font-size:17px;color:#102a43;margin:2px 0 5px}
 .pm-rm-relationship p{font-size:11px;color:#617789;line-height:1.45;margin:0 0 10px}
 .pm-rm-metrics{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:8px}
@@ -13487,14 +13492,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         if(typeof window.ctGetLivePowerBiSummary==='function')await window.ctGetLivePowerBiSummary(true);
         if(typeof window.ctRenderAmandaOutcomeV6==='function')await window.ctRenderAmandaOutcomeV6();
         var d=window.ctV72MonthlyDetail;
-        if(!d||!d.meta){host.innerHTML='<div class="ct-kicker">RM RELATIONSHIP SNAPSHOT</div><h2>Waiting for the current Power BI upload</h2><p>RM relationship health uses the latest Power BI file uploaded through the LP tracker. Upload the current roster to populate active-agent coverage and the RM goal. Amanda’s weekly activity above remains visible.</p>';return}
+        if(!d||!d.meta){host.innerHTML='<a class="pm-rm-card-link" href="https://pwang318.github.io/amanda-tracker/" target="_blank" rel="noopener noreferrer"><div class="ct-kicker">RM RELATIONSHIP SNAPSHOT</div><h2>Waiting for the current Power BI upload</h2><p>RM relationship health uses the latest Power BI file uploaded through the LP tracker. Upload the current roster to populate active-agent coverage and the RM goal. Amanda’s weekly activity above remains visible.</p><span class="pm-rm-card-cta">Open RM Tracker ↗</span></a>';return}
         var agents=Number(d.activeAgentCount||d.meta.total)||0,monthly=Number(d.monthlyLeadCount||0),projected=Number(d.projectedLeads||0),dynamic=Math.max(100,Math.ceil(agents*1.15)),monthLabel=new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(new Date());
         var source=d.live||{},stamp=source.imported_at?new Date(source.imported_at).toLocaleString():'Import timestamp unavailable';
         var currentRows=Array.isArray(d.currentLeads)?d.currentLeads.length:0,pending=Math.max(0,monthly-currentRows);
         var weeklyNote=document.getElementById('ct-amanda-snapshot')?'Weekly RM activity appears in Amanda’s results above.':'Weekly RM activity will appear above when its feed loads.';
-        host.innerHTML='<div class="ct-kicker">RM RELATIONSHIP SNAPSHOT</div><h2>Partner coverage and referral pace · '+esc(monthLabel)+'</h2><p>RM minimum: 100 monthly referrals. Dynamic goal: the larger of 100 or 1.15 × current active agents. LP Leads scorecards remain separately owned.</p><div class="pm-rm-metrics"><div class="pm-rm-metric"><span>Power BI active agents</span><b>'+agents+'</b><div class="pm-rm-detail">Current A/B/C roster used by RM calculation</div></div><div class="pm-rm-metric"><span>RM referrals MTD</span><b>'+monthly+'</b><div class="pm-rm-detail">'+(pending?currentRows+' in Velocify; '+pending+' pending sync':'Velocify current-month rows')+'</div></div><div class="pm-rm-metric"><span>Minimum monthly floor</span><b>100</b><div class="pm-rm-detail">RM floor target</div></div><div class="pm-rm-metric"><span>Dynamic RM goal</span><b>'+dynamic+'</b><div class="pm-rm-detail">'+agents+' active agents × 1.15, with 100 minimum</div></div><div class="pm-rm-metric"><span>Projected monthly pace</span><b>'+projected+'</b><div class="pm-rm-detail">'+Number(d.score&&d.score.ratio||0).toFixed(2)+' referrals per active agent</div></div></div><div class="pm-rm-detail">'+esc(weeklyNote)+'</div><div class="pm-rm-source">Power BI roster/import: '+esc(stamp)+' · '+esc(source.source||'Source label unavailable')+'. Velocify lead activity updates on its daily schedule; compare its row count with the RM total before coaching. Shared changes refresh by realtime push when enabled, with a 60-second fallback.</div><div class="pm-rm-actions"><button type="button" id="pm-rm-open-rm">Open RM Tracker</button></div>';
-        var rm=document.getElementById('pm-rm-open-rm');if(rm)rm.onclick=function(){window.open('https://pwang318.github.io/amanda-tracker/','_blank','noopener,noreferrer')};
-      }catch(e){host.innerHTML='<div class="ct-kicker">RM RELATIONSHIP SNAPSHOT</div><h2>Relationship snapshot unavailable</h2><p>Power BI or Velocify data did not load. Use Refresh live data and check the source status before drawing conclusions.</p>'}
+        host.innerHTML='<a class="pm-rm-card-link" href="https://pwang318.github.io/amanda-tracker/" target="_blank" rel="noopener noreferrer"><div class="ct-kicker">RM RELATIONSHIP SNAPSHOT</div><h2>Partner coverage and referral pace · '+esc(monthLabel)+'</h2><p>RM minimum: 100 monthly referrals. Dynamic goal: the larger of 100 or 1.15 × current active agents. LP Leads scorecards remain separately owned.</p><div class="pm-rm-metrics"><div class="pm-rm-metric"><span>Power BI active agents</span><b>'+agents+'</b><div class="pm-rm-detail">Current A/B/C roster used by RM calculation</div></div><div class="pm-rm-metric"><span>RM referrals MTD</span><b>'+monthly+'</b><div class="pm-rm-detail">'+(pending?currentRows+' in Velocify; '+pending+' pending sync':'Velocify current-month rows')+'</div></div><div class="pm-rm-metric"><span>Minimum monthly floor</span><b>100</b><div class="pm-rm-detail">RM floor target</div></div><div class="pm-rm-metric"><span>Dynamic RM goal</span><b>'+dynamic+'</b><div class="pm-rm-detail">'+agents+' active agents × 1.15, with 100 minimum</div></div><div class="pm-rm-metric"><span>Projected monthly pace</span><b>'+projected+'</b><div class="pm-rm-detail">'+Number(d.score&&d.score.ratio||0).toFixed(2)+' referrals per active agent</div></div></div><div class="pm-rm-detail">'+esc(weeklyNote)+'</div><div class="pm-rm-source">Power BI roster/import: '+esc(stamp)+' · '+esc(source.source||'Source label unavailable')+'. Velocify lead activity updates on its daily schedule; compare its row count with the RM total before coaching. Shared changes refresh by realtime push when enabled, with a 60-second fallback.</div><span class="pm-rm-card-cta">Open RM Tracker ↗</span></a>';
+      }catch(e){host.innerHTML='<a class="pm-rm-card-link" href="https://pwang318.github.io/amanda-tracker/" target="_blank" rel="noopener noreferrer"><div class="ct-kicker">RM RELATIONSHIP SNAPSHOT</div><h2>Relationship snapshot unavailable</h2><p>Power BI or Velocify data did not load. Use Refresh live data and check the source status before drawing conclusions.</p><span class="pm-rm-card-cta">Open RM Tracker ↗</span></a>'}
       finally{window.__pmRmPanelBusy=false}
     })();
   }
@@ -13520,7 +13524,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 <style id="ct-lp-v113-coaching-css">
 .pm-coach-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
-.pm-coach-card{display:block;overflow:hidden;padding:0;border:1px solid #dce5ed;background:#fbfcfe;border-radius:12px;font-size:12px;line-height:1.45}
+.pm-coach-card{display:block;overflow:hidden;padding:0;border:1px solid #dce5ed;background:#fbfcfe;border-radius:12px;font-size:12px;line-height:1.45;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease}.pm-coach-card:hover{border-color:#9bb4c7;box-shadow:0 2px 8px rgba(16,39,70,.08)}.pm-coach-card>.pm-coach-summary{width:100%;box-sizing:border-box}
 .pm-coach-summary{display:block;list-style:none;cursor:pointer;padding:13px 14px}
 .pm-coach-summary::-webkit-details-marker{display:none}
 .pm-coach-summary:after{content:"＋ Expand";display:block;margin-top:8px;color:#2d6383;font-size:10px;font-weight:750}
