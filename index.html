@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v122-priority-readout-20261102" name="version"/>
-<meta content="v122: replaces the repeated exception-count readout with a concise manager priority cue." name="build-notes"/>
+<meta content="core-team-lp-v123-manager-scrub-20261102" name="version"/>
+<meta content="v123: removes duplicated Production Manager rollups and counts a qualified blank-Level lead as C in the Power BI roster." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v122 Manager Priorities</title>
+<title>Core Team LP Tracker · v123 Manager Review</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -3250,7 +3250,8 @@ async function ctGetLivePowerBiSummary(force){
       Object.keys(localSnap.by_agent).forEach(function(k){
         var r=localSnap.by_agent[k]||{};
         var lv=String(r.level||'').trim().toUpperCase();
-        if(['A','B','C'].includes(lv))localRows.push(r);
+        if(!['A','B','C'].includes(lv)){var inferred=ctRelTierFromProduction({closes_past_year:Number(r.closed_12mo||0)||0,total_leads_past_year:Number(r.total_leads_12mo||0)||0});lv=inferred==='Channel'?'A':inferred||'';}
+        if(['A','B','C'].includes(lv))localRows.push(Object.assign({},r,{level:lv}));
       });
     }
 
@@ -3288,9 +3289,11 @@ async function ctGetLivePowerBiSummary(force){
     var source={A:0,B:0,C:0},rel={Channel:0,A:0,B:0,C:0},by=new Map();
     if(latestMs)(rows||[]).forEach(function(p){
       var ms=Date.parse(p&&p.powerbi_last_seen_at||''),lv=String(p&&p.powerbi_level||'').trim().toUpperCase();
-      if(!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000||!['A','B','C'].includes(lv))return;
+      if(!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000)return;
+      if(!['A','B','C'].includes(lv)){var inferred=ctRelTierFromProduction(p);lv=inferred==='Channel'?'A':inferred||'';}
+      if(!['A','B','C'].includes(lv))return;
       var k=String(p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');
-      if(k&&!by.has(k))by.set(k,p);
+      if(k&&!by.has(k))by.set(k,Object.assign({},p,{powerbi_level:lv}));
     });
     var current=Array.from(by.values());
     current.forEach(function(p){var lv=String(p.powerbi_level||'').trim().toUpperCase();if(source[lv]!==undefined)source[lv]++;});
@@ -5450,12 +5453,14 @@ async function handleUpload(input){
       function pbIsoDate(v){var ms=pbDateMs(v);return ms?new Date(ms).toISOString().slice(0,10):null;}
       validPbRows.forEach(function(row){
         var rawName=(row["Agent"]||"").toString().trim();
-        var lv=(row["Level"]||"").toString().trim();
-        if(lv==="A"||lv==="B"||lv==="C"){pbSnapshot.levels[lv]++;pbSnapshot.tier_agents[lv].push(rawName);}else if(!lv){pbSnapshot.levels.Blank++;pbSnapshot.tier_agents.Blank.push(rawName);}else{pbSnapshot.levels.Other++;pbSnapshot.tier_agents.Other.push(rawName);}
+        var sourceLevel=(row["Level"]||"").toString().trim().toUpperCase();
         var preq=parseInt(row["Active Prequals"])||0,pipe=parseInt(row["Active In Pipeline"])||0,closed12=parseInt(row["Closed Past Year"])||0,totalLeads12=parseInt(row["Total Leads Past Year"])||0;
+        // A blank Power BI Level can still be a qualified C partner when the export records at least one lead.
+        var lv=(sourceLevel==="A"||sourceLevel==="B"||sourceLevel==="C")?sourceLevel:(!sourceLevel?(closed12>=4?"A":closed12>=2?"B":(closed12>=1||totalLeads12>=1)?"C":""):sourceLevel);
+        if(lv==="A"||lv==="B"||lv==="C"){row["Level"]=lv;pbSnapshot.levels[lv]++;pbSnapshot.tier_agents[lv].push(rawName);}else if(!lv){pbSnapshot.levels.Blank++;pbSnapshot.tier_agents.Blank.push(rawName);}else{pbSnapshot.levels.Other++;pbSnapshot.tier_agents.Other.push(rawName);}
         pbSnapshot.active_prequals_total+=preq;pbSnapshot.active_pipeline_total+=pipe;pbSnapshot.closed_12mo_total+=closed12;
         if(preq>0)pbSnapshot.active_prequals_agents++;if(pipe>0)pbSnapshot.active_pipeline_agents++;if(closed12>0)pbSnapshot.closed_12mo_agents++;if(closed12>=10){pbSnapshot.levels.Channel++;pbSnapshot.tier_agents.Channel.push(rawName);}
-        pbSnapshot.by_agent[rawName.toLowerCase()]={name:rawName,level:lv||null,active_prequals:preq,active_pipeline:pipe,closed_12mo:closed12,total_leads_12mo:totalLeads12,latest_lead:pbIsoDate(row["Latest Lead (In Velocify)"]),latest_started:pbIsoDate(row["Latest File Started"]),latest_contract:pbIsoDate(row["Latest Contract"]),latest_close:pbIsoDate(row["Latest Close"]),email:String(row["Email"]||"").trim(),phone:String(row["Phone Number"]||"").trim()};
+        pbSnapshot.by_agent[rawName.toLowerCase()]={name:rawName,level:(lv==="A"||lv==="B"||lv==="C")?lv:null,source_level:sourceLevel||null,active_prequals:preq,active_pipeline:pipe,closed_12mo:closed12,total_leads_12mo:totalLeads12,latest_lead:pbIsoDate(row["Latest Lead (In Velocify)"]),latest_started:pbIsoDate(row["Latest File Started"]),latest_contract:pbIsoDate(row["Latest Contract"]),latest_close:pbIsoDate(row["Latest Close"]),email:String(row["Email"]||"").trim(),phone:String(row["Phone Number"]||"").trim()};
       });
       pbSnapshot.active_partner_rows=Number(pbSnapshot.levels.A||0)+Number(pbSnapshot.levels.B||0)+Number(pbSnapshot.levels.C||0);
       try{localStorage.setItem("ct_powerbi_snapshot_v1",JSON.stringify(pbSnapshot));window.CT_POWERBI_SNAPSHOT=pbSnapshot;}catch(snapshotErr){window.CT_POWERBI_SNAPSHOT=pbSnapshot;}
@@ -9645,8 +9650,10 @@ async function lpSyncAgentProfilesFromUpload(rows){
     // changes relationship_status or LP/RM ownership, so an import cannot resurrect them.
     var rosterInactive=existingRelationshipStatusByKey[key]==="inactive"||ctInactiveRosterNames.has(key);
 
+    var rawPowerBiLevel=(row["Level"]||"").toString().trim().toUpperCase();
+    var effectivePowerBiLevel=(rawPowerBiLevel==="A"||rawPowerBiLevel==="B"||rawPowerBiLevel==="C")?rawPowerBiLevel:(tier==="Channel"?"A":tier);
     var payload={agent_name:canonicalName,tier:tier,closes_past_year:closes,total_leads_past_year:leads,retained:isActive,
-      powerbi_last_seen_at:powerBiImportStamp,powerbi_level:(row["Level"]||"").toString().trim()||null};
+      powerbi_last_seen_at:powerBiImportStamp,powerbi_level:effectivePowerBiLevel||null};
     if(rosterInactive)payload.relationship_status="inactive"; // normalize legacy __REMOVED__ markers without reactivating anyone
     if(latestLead)payload.latest_lead_date=latestLead;
     if(latestClose)payload.latest_close_date=latestClose;
@@ -13799,7 +13806,7 @@ const V72_MEETING_TYPES=["Partner Meeting","Break Breads","Strategic Partner Mee
 const V72_DIRECTOR_TYPES=["Amanda Coaching / Development","RM Scorecard Review","RM Portfolio Review","RM Process Improvement","Tracker / System Development","RM Training","RM Leadership Escalation Support"];
 const V72_GOALS={partnerMeetings:8,teamNewMeetings:5,existingMeetings:5,coldCalls:125,partnerConversations:100,buddyAsks:3};
 const V72_CACHE={at:0,data:null,promise:null};
-const V76_VERIFIED_POWERBI={imported_at:'',raw:133,Channel:0,A:19,B:17,C:96,total:132};
+const V76_VERIFIED_POWERBI={imported_at:'2026-11-02T16:40:00.000Z',raw:132,Channel:2,A:18,B:20,C:94,total:132};
 const v72n=v=>Number(v||0)||0;
 function v72RecentWithin90(value,now){const ms=Date.parse(String(value||''));return Number.isFinite(ms)&&ms<=now.getTime()+86400000&&ms>=now.getTime()-90*86400000}
 function v72IsActivePartner(record,profile,now){const p=profile||{},r=record||{};if(p.do_not_contact===true||String(p.relationship_status||'active').toLowerCase()==='inactive'||String(p.relationship_type||'realtor').toLowerCase()==='strategic_partner')return false;if(p.retained===true)return true;return v72RecentWithin90(r.latest_lead||r.latest_lead_date||p.latest_lead_date,now)||v72RecentWithin90(r.latest_close||r.latest_close_date||p.latest_close_date,now)}
@@ -13862,7 +13869,7 @@ async function ctGetAlignedPowerBiSummaryV72(force){
       sbFetch('GET','powerbi_import_log?select=imported_at,source_app,rows_processed,errors&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1').catch(()=>[])
     ]);
     let latestMs=0,stamp=null;(profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(Number.isFinite(ms)&&ms>latestMs){latestMs=ms;stamp=p.powerbi_last_seen_at}});
-    const by=new Map();if(latestMs)(profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||''),lv=String(p&&p.powerbi_level||'').trim().toUpperCase();if(!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000||!['A','B','C'].includes(lv))return;const k=v72key(p.agent_name);if(k&&!by.has(k))by.set(k,p)});
+    const by=new Map();if(latestMs)(profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000)return;let lv=String(p&&p.powerbi_level||'').trim().toUpperCase();if(!['A','B','C'].includes(lv)){const inferred=ctRelTierFromProduction(p);lv=inferred==='Channel'?'A':inferred||'';}if(!['A','B','C'].includes(lv))return;const k=v72key(p.agent_name);if(k&&!by.has(k))by.set(k,Object.assign({},p,{powerbi_level:lv}))});
     const rows=Array.from(by.values()),profileSource={A:0,B:0,C:0};rows.forEach(p=>{const l=String(p.powerbi_level||'').trim().toUpperCase();if(profileSource[l]!==undefined)profileSource[l]++});
     const profileChannel=rows.filter(p=>v72n(p.closes_past_year)>=10).length,receiptRow=logs&&logs[0],receipt=receiptRow?ctV72ParseReceipt(receiptRow.source_app,receiptRow.imported_at):null,receiptMs=Date.parse(receipt&&receipt.imported_at||'')||0,useReceipt=!!receipt&&(!latestMs||receiptMs>=latestMs||Math.abs(receiptMs-latestMs)<15*60*1000);
 
@@ -13871,7 +13878,7 @@ async function ctGetAlignedPowerBiSummaryV72(force){
        user had just uploaded and verified in this browser. */
     let local=null;try{local=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():(window.CT_POWERBI_SNAPSHOT||null)}catch(e){}
     const localMs=Date.parse(local&&local.imported_at||'')||0,localBy=new Map();
-    Object.values(local&&local.by_agent||{}).forEach(r=>{const lv=String(r&&r.level||'').trim().toUpperCase(),k=v72key(r&&r.name);if(k&&['A','B','C'].includes(lv)&&!localBy.has(k))localBy.set(k,r)});
+    Object.values(local&&local.by_agent||{}).forEach(r=>{let lv=String(r&&r.level||'').trim().toUpperCase();if(!['A','B','C'].includes(lv)){const inferred=ctRelTierFromProduction({closes_past_year:r&&r.closed_12mo,total_leads_past_year:r&&r.total_leads_12mo});lv=inferred==='Channel'?'A':inferred||'';}const k=v72key(r&&r.name);if(k&&['A','B','C'].includes(lv)&&!localBy.has(k))localBy.set(k,Object.assign({},r,{level:lv}))});
     const verifiedMs=Date.parse(V76_VERIFIED_POWERBI.imported_at)||0;
     const localRows=Array.from(localBy.values()),sameImportWindow=localRows.length>0&&localMs>0&&(!latestMs||localMs>=latestMs||Math.abs(latestMs-localMs)<15*60*1000),preferLocal=sameImportWindow&&localMs>verifiedMs&&(!useReceipt||Math.abs(receiptMs-localMs)<15*60*1000);
     if(preferLocal){
