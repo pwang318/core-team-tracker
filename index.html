@@ -13375,15 +13375,12 @@ async function planState(lp){
     if(!isCurrent&&cls!=='NEW_BUILD'&&doneRecord(r,matchState))return;
     carry.push(Object.assign({},r,{_carryoverWeek:isCurrent?'':pw,_builderScheduled:scheduled,_builderNextDue:nextDue,_builderMilestoneChanged:milestoneChanged}));
   });
-  // Keep the LP queue actionable: completed Tuesday updates and future builder
-  // check-ins are not outstanding work. A new-build row remains only while its
-  // separate builder check-in is due, even if this week's Tuesday update is done.
-  const rows=carry.filter(r=>{
-    if(r._builderScheduled)return false;
-    return classFor(r)==='NEW_BUILD'||!doneRecord(r,matchState);
-  }),buildReviews=[],seenBuildReviewKeys=new Set();
+  // Keep the LP queue actionable: logged Tuesday updates and future builder
+  // check-ins are not outstanding work. The buyer consultation queue below is
+  // independent and continues to surface until its own task is completed.
+  const rows=carry.filter(r=>!r._builderScheduled&&!doneRecord(r,matchState)),buildReviews=[],seenBuildReviewKeys=new Set();
   const addDays=(value,n)=>{const d=new Date(String(value||'')+'T12:00:00');if(isNaN(d))return'';d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
-  rows.forEach(r=>{
+  carry.forEach(r=>{
     const key=rowClassKey(r),cls=classMap[key]||classMap[rowMatchKey(r)]||'';if(cls!=='NEW_BUILD'||!key||seenBuildReviewKeys.has(key))return;seenBuildReviewKeys.add(key);
     const close=meta(r.notes,'TXN_CLOSE_DATE'),closeDays=close?Math.ceil((new Date(close+'T12:00:00')-new Date(todayIso+'T12:00:00'))/86400000):null;
     const touches=(buildTouchLogs||[]).filter(a=>meta(a.notes,'BUILD_KEY')===key).sort((a,b)=>(Date.parse(b.act_date||b.created_at||0)||0)-(Date.parse(a.act_date||a.created_at||0)||0));
