@@ -2567,6 +2567,20 @@ function lpDropBodyColumn(body,col){
 // not the same thing as being offline, and any HTTP response proves the server was reached.
 function sbFetch(method,path,body,_schemaRetry){
   var retry=Number(_schemaRetry||0);
+  if(method==="GET"&&retry===0&&String(path||"").indexOf("velocify_leads?")===0){
+    var query=String(path).split("?")[1]||"",params=new URLSearchParams(query),requested=Number(params.get("limit")||0);
+    if(requested>1000){
+      var resource=String(path).split("?")[0];params.delete("limit");params.delete("offset");var allRows=[];
+      function readLeadPage(offset){
+        var pageParams=new URLSearchParams(params),pageLimit=Math.min(1000,requested-offset);pageParams.set("limit",String(pageLimit));pageParams.set("offset",String(offset));
+        return sbFetch("GET",resource+"?"+pageParams.toString(),undefined,1).then(function(rows){
+          rows=Array.isArray(rows)?rows:[];allRows=allRows.concat(rows);
+          return rows.length===pageLimit&&offset+rows.length<requested?readLeadPage(offset+rows.length):allRows;
+        });
+      }
+      return readLeadPage(0);
+    }
+  }
   var controller=new AbortController();
   var timer=setTimeout(function(){controller.abort();},20000);
   var opts={method:method,signal:controller.signal,cache:"no-store",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=representation"}};
