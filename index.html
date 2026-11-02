@@ -9370,8 +9370,6 @@ if(typeof window.buildSnapshot==="function"){
    ══════════════════════════════════════════════════════════ */
 (function(){
 
-var CT_MONTHLY_LEAD_GOAL = 152;
-
 function ctRenderLeadGoalPace(){
   var el=document.getElementById("ref-mtd-goal-pace");
   var valEl=document.getElementById("ref-mtd-leads-v2");
@@ -9379,14 +9377,20 @@ function ctRenderLeadGoalPace(){
   var mtd=parseInt(valEl.textContent, 10);
   if(isNaN(mtd)) return;
 
+  var d=window.ctV72MonthlyDetail||{};
+  var activeAgents=Number(d.activeAgentCount||(d.meta&&d.meta.total)||0);
+  var goal=Math.max(100,Math.ceil(activeAgents*1.15));
   var now=new Date();
   var daysInMonth=new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
   var dayOfMonth=now.getDate();
   var projected=Math.round((mtd/dayOfMonth)*daysInMonth);
-  var onTrack = projected >= CT_MONTHLY_LEAD_GOAL;
+  var onTrack = projected >= goal;
   var color = onTrack ? "#3E8E5A" : "#B8842B";
+  var goalText=activeAgents
+    ? 'RM target: '+goal+'/mo ('+activeAgents+' active agents × 1.15; 100 minimum)'
+    : 'RM minimum: 100/mo · dynamic target updates when Power BI roster loads';
 
-  el.innerHTML = 'Goal: '+CT_MONTHLY_LEAD_GOAL+'/mo · <span style="color:'+color+';font-weight:700">projecting '+projected+'</span>'
+  el.innerHTML = goalText+' · <span style="color:'+color+';font-weight:700">projecting '+projected+'</span>'
     + (onTrack ? ' ✓ on track' : ' — pace it up');
 }
 
