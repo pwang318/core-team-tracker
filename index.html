@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v141-integrity-cleanup-20261102" name="version"/>
-<meta content="v141: add FSBO and builder completion outcomes, show the next builder due date, and validate current tracker views without obsolete global checks." name="build-notes"/>
+<meta content="core-team-lp-v142-integrity-check-timing-20261102" name="version"/>
+<meta content="v142: defer the current-view integrity check until the page is ready and report any missing view IDs directly." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v141 Tracker Integrity Cleanup</title>
+<title>Core Team LP Tracker · v142 Integrity Check Timing</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -10976,8 +10976,8 @@ if(typeof refreshLpSharedData==="function"){
 
 
 // v17 — makeover layer + v16 load recovery; all operational logic preserved.
-function runLpUiIntegrityCheck(){const requiredViews=["welcome","lp","rm","file-integrity","operating-standard","scorecards","snapshot","ownership","data-hub","agent-health","income-standard","leads","lp-conversion","partner-growth","admin","facetime","co-marketing","agent-search","portfolio","production-manager"];const missingViews=requiredViews.filter(n=>!document.getElementById("view-"+n));if(missingViews.length)console.error("LP Tracker UI integrity issue",{missingViews});else console.log("LP Tracker UI integrity check passed",{checkedViews:requiredViews.length});}
-setTimeout(runLpUiIntegrityCheck,0);
+function runLpUiIntegrityCheck(){const check=()=>{const requiredViews=["welcome","lp","rm","file-integrity","operating-standard","scorecards","snapshot","ownership","data-hub","agent-health","income-standard","leads","lp-conversion","partner-growth","admin","facetime","co-marketing","agent-search","portfolio","production-manager"];const missingViews=requiredViews.filter(n=>!document.getElementById("view-"+n));if(missingViews.length)console.error("LP Tracker UI integrity issue: missing "+missingViews.join(", "));else console.log("LP Tracker UI integrity check passed ("+requiredViews.length+" views)");};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",check,{once:true});else setTimeout(check,0);}
+runLpUiIntegrityCheck();
 // v45 watchdog: a slow request is shown as slow, not falsely reported as disconnected.
 // Successful Supabase traffic automatically restores Live through lpMarkServerReachable().
 setTimeout(function(){
