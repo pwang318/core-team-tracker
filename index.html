@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v133-align-log-owner-20261102" name="version"/>
-<meta content="v129: trace why LP Tuesday history differs from manager queue." name="build-notes"/>
+<meta content="core-team-lp-v134-classified-carryover-20261102" name="version"/>
+<meta content="v134: keep classified Tuesday carryovers visible and open until their matching update is logged." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v133 Tuesday Owner Match</title>
+<title>Core Team LP Tracker · v134 Tuesday Carryover</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13299,7 +13299,7 @@ async function planState(lp){
   const currentHeader=latestByWeek.get(w)||null,currentRows=currentHeader?planForHeader(currentHeader):[],historyRows=Array.from(latestByWeek.entries()).filter(([pw])=>pw<w).flatMap(([,h])=>planForHeader(h)),logRows=allLogs.filter(a=>a.act_type===LOG),classMap={};
   (classes||[]).forEach(a=>{if(meta(a.notes,'TUE_SIDE')!=='BUYER')return;const v=meta(a.notes,'TUE_CLASS'),k=classRecordKey(a),mk=classRecordMatchKey(a);if(k&&!classMap[k])classMap[k]=v;if(mk&&!classMap[mk])classMap[mk]=v});
   const carry=[],matchState={w,logs:logRows};
-  historyRows.forEach(r=>{const key=rowClassKey(r),pw=weekStart(meta(r.notes,'TUE_PLAN_DATE')||r.act_date),cls=classMap[key]||classMap[rowMatchKey(r)]||'';if(classNoCall(cls)||doneRecord(r,matchState))return;carry.push(Object.assign({},r,{_carryoverWeek:pw}))});
+  historyRows.forEach(r=>{const pw=weekStart(meta(r.notes,'TUE_PLAN_DATE')||r.act_date);if(doneRecord(r,matchState))return;carry.push(Object.assign({},r,{_carryoverWeek:pw}))});
   const rows=currentRows.concat(carry);
   return{w,rows,currentRows,carryoverCount:carry.size,rawCount:currentRows.length,hiddenDupes:0,logs:logRows,classes:classMap,header:currentHeader};
 }
@@ -13318,25 +13318,23 @@ function classSelect(tx,value){const o=[['CALL_REQUIRED','Call required'],['FSBO
 let state={lp:'',data:null,current:null};
 function renderLpState(s,lp){
   state.data=s;
-  let due=0,complete=0,cleared=0,issues=0;
+  let open=0,complete=0,classified=0,issues=0;
   const html=s.rows.map(r=>{
     const tx=rowClassKey(r),buyer=meta(r.notes,'BUYER_AGENT'),client=meta(r.notes,'TXN_CLIENT'),property=meta(r.notes,'TXN_PROPERTY'),close=meta(r.notes,'TXN_CLOSE_DATE'),mile=meta(r.notes,'TXN_MILESTONE'),ph=meta(r.notes,'BUYER_PHONE'),em=meta(r.notes,'BUYER_EMAIL'),explicit=s.classes[tx]||s.classes[rowMatchKey(r)]||'',cls=explicit||(!usableAgent(buyer)?'CONTACT_ISSUE':'CALL_REQUIRED'),log=doneRecord(r,s),finished=!!log,nocall=classNoCall(cls),issue=cls==='CONTACT_ISSUE'||(cls==='CALL_REQUIRED'&&!usableAgent(buyer));
     let status='';
-    if(nocall){cleared++;status='Cleared ✓ · '+classLabel(cls)}
-    else if(issue){issues++;status='Needs review'}
-    else if(finished){complete++;status='Completed this week ✓'}
-    else{due++;status=r._carryoverWeek?'Open since week of '+r._carryoverWeek:'Due Tuesday'}
-    const rowClass=nocall?'cleared':issue?'issue':r._carryoverWeek?'carryover':'';
-    const stateClass=finished&&!nocall&&!issue?'done':nocall?'cleared':'';
+    if(finished){complete++;status='Completed this week ✓'}
+    else{open++;if(nocall){classified++;status='Open · classified '+classLabel(cls)+' · update not logged'}else if(issue){issues++;status='Needs review'}else status=r._carryoverWeek?'Open since week of '+r._carryoverWeek:'Due Tuesday'}
+    const rowClass=nocall?'classified':issue?'issue':r._carryoverWeek?'carryover':'';
+    const stateClass=finished?'done':nocall?'classified':'';
     const logNote=finished?String(log.notes||'').replace(/^\[TUE_SPLIT_V310_WORK\]/,'').replace(/\[[A-Z0-9_ ]+:[^\]]*\]/gi,'').trim():'';
     const loggedAt=finished&&log.created_at?new Date(log.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
     const logDetails=finished?'<div class="v56-log-summary"><b>'+esc(log.outcome||'Update logged')+'</b>'+(logNote?'<br>'+esc(logNote):'')+(log.follow_up_date?'<br>Next follow-up: '+esc(log.follow_up_date):'')+(loggedAt?'<br>Logged: '+esc(loggedAt):'')+'</div>':'';
     const saved=!!explicit,saveButton='<button class="v57-save-class'+(saved?' saved':'')+'" type="button" '+(saved?'disabled ':'')+'onclick="v57SaveBuyerClass(\''+encodeURIComponent(tx)+'\',this)">'+(saved?'Saved ✓':'Save status')+'</button>';
-    return '<div class="v56-row '+rowClass+'"><div><div class="v56-name">'+esc(client)+'</div><div class="v56-meta">Buyer agent: '+esc(buyer||'Missing')+(r._carryoverWeek?' · carried from week of '+esc(r._carryoverWeek):'')+(property?' · '+esc(property):'')+(close?' · close '+esc(close):'')+(mile?' · '+esc(mile):'')+'</div></div><div class="v56-contact">'+esc(ph||'No phone')+'<br>'+esc(em||'No email')+'</div><div class="v56-state '+stateClass+'">'+esc(status)+logDetails+'</div><div class="v56-actions">'+classSelect(tx,cls)+saveButton+(!nocall&&!issue?'<button class="v56-log" type="button" onclick="v56OpenLp(\''+encodeURIComponent(tx)+'\')">'+(finished?'Add note':'Log update')+'</button>':'')+'</div></div>'
+    return '<div class="v56-row '+rowClass+'"><div><div class="v56-name">'+esc(client)+'</div><div class="v56-meta">Buyer agent: '+esc(buyer||'Missing')+(r._carryoverWeek?' · carried from week of '+esc(r._carryoverWeek):'')+(property?' · '+esc(property):'')+(close?' · close '+esc(close):'')+(mile?' · '+esc(mile):'')+'</div></div><div class="v56-contact">'+esc(ph||'No phone')+'<br>'+esc(em||'No email')+'</div><div class="v56-state '+stateClass+'">'+esc(status)+logDetails+'</div><div class="v56-actions">'+classSelect(tx,cls)+saveButton+(finished?'<button class="v56-log" type="button" onclick="v56OpenLp(\''+encodeURIComponent(tx)+'\')">Add note</button>':'<button class="v56-log" type="button" onclick="v56OpenLp(\''+encodeURIComponent(tx)+'\')">Log update</button>')+'</div></div>'
   }).join('');
   const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');
   if(rowsEl)rowsEl.innerHTML=html||'<div class="v56-empty">No open Tuesday updates assigned to '+esc(lp)+'.</div>';
-  if(sumEl)sumEl.textContent=due+' due · '+complete+' done · '+cleared+' cleared · '+issues+' review';
+  if(sumEl)sumEl.textContent=open+' open · '+complete+' done · '+classified+' classified · '+issues+' review';
 }
 async function loadLp(lp){
   lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();if(!ensureExec())return;state.lp=lp;try{const s=await planState(lp);renderLpState(s,lp)}catch(e){console.error('LP Tuesday plan history could not be loaded',e);const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');if(sumEl)sumEl.textContent='Tuesday data unavailable';if(rowsEl)rowsEl.innerHTML='<div class="v56-empty">Tuesday update history could not be loaded. Refresh the tracker or try again shortly; no zero status has been assumed.</div>'}
