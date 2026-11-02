@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v137-align-builder-classification-20261102" name="version"/>
-<meta content="v137: align builder classification and last-touch date matching across LP and Production Manager views while retaining the 14-day cadence." name="build-notes"/>
+<meta content="core-team-lp-v138-local-manager-matching-20261102" name="version"/>
+<meta content="v138: keep the matching helpers local to the manager module and align builder classification and last-touch dates across views." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v137 Builder Check-in Alignment</title>
+<title>Core Team LP Tracker · v138 Builder Check-in Fix</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13033,6 +13033,9 @@ async function load(force){
   const logs=updateLogs.filter(a=>a.act_type===LOG),complete=[],open=[],builderDue=[],scheduledBuilders=[];
   const classMap={},classDates={};
   (classRows||[]).forEach(a=>{if(meta(a.notes,'TUE_SIDE')!=='BUYER')return;const tx=meta(a.notes,'TXN_KEY')||meta(a.notes,'CLASS_KEY'),mk=meta(a.notes,'MATCH_KEY'),value=meta(a.notes,'TUE_CLASS'),date=String(a.act_date||a.created_at||'').slice(0,10);if(tx&&!classMap[tx]){classMap[tx]=value;classDates[tx]=date}if(mk&&!classMap[mk]){classMap[mk]=value;classDates[mk]=date}});
+  const legacyKey=v=>{let h=2166136261;for(const ch of String(v||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return'legacy-'+(h>>>0).toString(16)};
+  const rowClassKey=p=>{if(!p)return'';const tx=meta(p.notes,'TXN_KEY');if(tx)return tx;const pk=meta(p.notes,'TUE_PLAN_KEY');if(pk){const m=pk.match(/^(?:BUYER|LISTING)-(.+)$/i);return m?m[1]:pk}const seed=[meta(p.notes,'TXN_CLIENT'),meta(p.notes,'TXN_PROPERTY'),meta(p.notes,'TXN_CLOSE_DATE')].map(norm).filter(Boolean).join('|');return seed?legacyKey(seed):''};
+  const rowMatchKey=p=>{if(!p)return'';const client=norm(meta(p.notes,'TXN_CLIENT')),property=norm(meta(p.notes,'TXN_PROPERTY')),seed=client+'|'+property;return(client||property)?legacyKey(seed):''};
   const classFor=p=>classMap[meta(p.notes,'TXN_KEY')]||classMap[meta(p.notes,'MATCH_KEY')]||classMap[rowClassKey(p)]||classMap[rowMatchKey(p)]||'';
   const priorPlan=latestByWeek.get(priorWeek),priorByTx=new Map((priorPlan?planForHeader(priorPlan):[]).map(p=>[meta(p.notes,'TXN_KEY'),p]));
   const itemFor=p=>{const planDate=meta(p.notes,'TUE_PLAN_DATE')||p.act_date,planWeek=weekOf(planDate),close=meta(p.notes,'TXN_CLOSE_DATE'),closeDays=close?Math.ceil((new Date(close+'T12:00:00')-new Date())/86400000):null;return{row:p,lp:shortLp(meta(p.notes,'LP_OWNER'))||'Unassigned',client:meta(p.notes,'TXN_CLIENT'),agent:meta(p.notes,'BUYER_AGENT'),close,milestone:meta(p.notes,'TXN_MILESTONE'),planDate,planWeek,urgentType:closeDays===null?'':closeDays<0?'past':closeDays<=7?'soon':''}};
