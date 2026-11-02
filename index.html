@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v127-manager-history-runtime-20261102" name="version"/>
-<meta content="v127: fixes a manager-loader reference error while preserving Tuesday carryover and history load safeguards." name="build-notes"/>
+<meta content="core-team-lp-v128-lp-tuesday-carryover-20261102" name="version"/>
+<meta content="v128: align LP Tuesday carryover rows with manager history records." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v127 Manager History Runtime</title>
+<title>Core Team LP Tracker · v128 LP Tuesday Carryover</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13292,7 +13292,10 @@ async function planState(lp){
   ]);
   const snaps=snapshotRows.filter(a=>/\[TUE_SPLIT_V310\]/i.test(String(a.notes||''))),headers=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_HEADER'),latestByWeek=new Map();
   headers.forEach(h=>{const pw=weekStart(meta(h.notes,'TUE_PLAN_DATE')||h.act_date),prior=latestByWeek.get(pw);if(pw&&(!prior||(Date.parse(h.created_at||h.act_date||0)||0)>(Date.parse(prior.created_at||prior.act_date||0)||0)))latestByWeek.set(pw,h)});
-  const planForHeader=h=>{const pw=weekStart(meta(h.notes,'TUE_PLAN_DATE')||h.act_date),batch=meta(h.notes,'TUE_PLAN_BATCH');return v64DedupePlanRows(snaps.filter(r=>meta(r.notes,'TUE_PLAN_LANE')==='LP_TXN'&&meta(r.notes,'TUE_PLAN_BATCH')===batch&&weekStart(meta(r.notes,'TUE_PLAN_DATE')||r.act_date)===pw&&lpShort(meta(r.notes,'LP_OWNER'))===lp))};
+  // Use the same raw snapshot rows as Production Manager. The LP-specific
+  // deduper can discard historical rows that the shared manager queue still
+  // considers open, which made the two views disagree.
+  const planForHeader=h=>{const pw=weekStart(meta(h.notes,'TUE_PLAN_DATE')||h.act_date),batch=meta(h.notes,'TUE_PLAN_BATCH');return snaps.filter(r=>meta(r.notes,'TUE_PLAN_LANE')==='LP_TXN'&&meta(r.notes,'TUE_PLAN_BATCH')===batch&&weekStart(meta(r.notes,'TUE_PLAN_DATE')||r.act_date)===pw&&lpShort(meta(r.notes,'LP_OWNER'))===lp)};
   const currentHeader=latestByWeek.get(w)||null,currentRows=currentHeader?planForHeader(currentHeader):[],historyRows=Array.from(latestByWeek.entries()).filter(([pw])=>pw<w).flatMap(([,h])=>planForHeader(h)),logRows=allLogs.filter(a=>a.act_type===LOG),classMap={};
   (classes||[]).forEach(a=>{if(meta(a.notes,'TUE_SIDE')!=='BUYER')return;const v=meta(a.notes,'TUE_CLASS'),k=classRecordKey(a),mk=classRecordMatchKey(a);if(k&&!classMap[k])classMap[k]=v;if(mk&&!classMap[mk])classMap[mk]=v});
   const currentByKey=new Map(currentRows.map(r=>[rowClassKey(r),r]).filter(([key])=>!!key)),carry=new Map(),matchState={w,logs:logRows};
