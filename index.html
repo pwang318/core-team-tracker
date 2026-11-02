@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v130-lp-carryover-diagnostics-20261102" name="version"/>
+<meta content="core-team-lp-v131-exact-tuesday-completion-20261102" name="version"/>
 <meta content="v129: trace why LP Tuesday history differs from manager queue." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · v130 LP Carryover Diagnostics</title>
+<title>Core Team LP Tracker · v131 Tuesday Completion Match</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13297,7 +13297,6 @@ async function planState(lp){
   // considers open, which made the two views disagree.
   const planForHeader=h=>{const pw=weekStart(meta(h.notes,'TUE_PLAN_DATE')||h.act_date),batch=meta(h.notes,'TUE_PLAN_BATCH');return snaps.filter(r=>meta(r.notes,'TUE_PLAN_LANE')==='LP_TXN'&&meta(r.notes,'TUE_PLAN_BATCH')===batch&&weekStart(meta(r.notes,'TUE_PLAN_DATE')||r.act_date)===pw&&lpShort(meta(r.notes,'LP_OWNER'))===lp)};
   const currentHeader=latestByWeek.get(w)||null,currentRows=currentHeader?planForHeader(currentHeader):[],historyRows=Array.from(latestByWeek.entries()).filter(([pw])=>pw<w).flatMap(([,h])=>planForHeader(h)),logRows=allLogs.filter(a=>a.act_type===LOG),classMap={};
-  console.info('[LP Tuesday carryover diagnostics] '+JSON.stringify({lp,snapshots:snapshotRows.length,tagged:snaps.length,headers:headers.length,historyHeaders:historyRows.length?Array.from(latestByWeek.keys()).filter(pw=>pw<w).length:0,ownerRows:snaps.filter(r=>meta(r.notes,'TUE_PLAN_LANE')==='LP_TXN'&&lpShort(meta(r.notes,'LP_OWNER'))===lp).length,historyRows:historyRows.length,keyedRows:historyRows.filter(rowClassKey).length,week:w}));
   (classes||[]).forEach(a=>{if(meta(a.notes,'TUE_SIDE')!=='BUYER')return;const v=meta(a.notes,'TUE_CLASS'),k=classRecordKey(a),mk=classRecordMatchKey(a);if(k&&!classMap[k])classMap[k]=v;if(mk&&!classMap[mk])classMap[mk]=v});
   const currentByKey=new Map(currentRows.map(r=>[rowClassKey(r),r]).filter(([key])=>!!key)),carry=new Map(),matchState={w,logs:logRows};
   historyRows.forEach(r=>{const key=rowClassKey(r),pw=weekStart(meta(r.notes,'TUE_PLAN_DATE')||r.act_date),cls=classMap[key]||classMap[rowMatchKey(r)]||'';if(!key||classNoCall(cls)||doneRecord(r,matchState))return;const current=currentByKey.get(key);if(current){if(!current._carryoverWeek||pw<current._carryoverWeek)current._carryoverWeek=pw;return}const prior=carry.get(key);if(!prior||pw<prior._carryoverWeek)carry.set(key,Object.assign({},r,{_carryoverWeek:pw}))});
@@ -13305,13 +13304,12 @@ async function planState(lp){
   return{w,rows,currentRows,carryoverCount:carry.size,rawCount:currentRows.length,hiddenDupes:0,logs:logRows,classes:classMap,header:currentHeader};
 }
 function doneRecord(row,s){
-  const tx=meta(row.notes,'TXN_KEY'),pk=meta(row.notes,'TUE_PLAN_KEY'),mk=rowMatchKey(row),client=norm(meta(row.notes,'TXN_CLIENT')),lp=lpShort(meta(row.notes,'LP_OWNER')),planWeek=weekStart(meta(row.notes,'TUE_PLAN_DATE')||row.act_date);
+  const k=meta(row.notes,'TUE_PLAN_KEY'),lp=lpShort(meta(row.notes,'LP_OWNER')),client=norm(meta(row.notes,'TXN_CLIENT')),planAt=Date.parse(row.created_at||row.act_date||0)||0;
   return(s.logs||[]).find(a=>{
-    const logWeek=weekStart(a.act_date||a.created_at);if(planWeek&&logWeek&&logWeek<planWeek)return false;
-    const al=lpShort(meta(a.notes,'LP_OWNER')||meta(a.notes,'LP'));if(al&&lp&&al!==lp)return false;
-    const akey=meta(a.notes,'TUE_PLAN_KEY');if(pk&&akey&&pk===akey)return true;
-    if(tx&&meta(a.notes,'TXN_KEY')===tx)return true;
-    if(mk&&meta(a.notes,'MATCH_KEY')===mk)return true;
+    const al=lpShort(meta(a.notes,'LP')||meta(a.notes,'LP_OWNER'));if(al&&lp&&al!==lp)return false;
+    const planWeek=weekStart(meta(row.notes,'TUE_PLAN_DATE')||row.act_date),logWeek=weekStart(a.act_date||a.created_at);if(planWeek&&logWeek&&logWeek<planWeek)return false;
+    const ak=meta(a.notes,'TUE_PLAN_KEY');if(ak&&k)return ak===k;
+    const logAt=Date.parse(a.created_at||a.act_date||0)||0;if(planAt&&logAt&&logAt<planAt)return false;
     return client&&norm(meta(a.notes,'TXN_CLIENT'))===client;
   })||null;
 }
