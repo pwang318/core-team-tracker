@@ -12,12 +12,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v111-verified-lead-count-20261028" name="version"/>
-<meta content="v110: LP Portfolio Growth Plans excludes deleted roster markers from agent names, missing totals, and coverage." name="build-notes"/>
+<meta content="core-team-lp-v112-rm-snapshot-20261102" name="version"/>
+<meta content="v112: preserves LP scorecard leads, adds the RM relationship overview, and syncs shared RM/LP/Director data." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Core Team LP Tracker · Account Tiles v90</title>
+<title>Core Team LP Tracker · v112 Relationship Snapshot</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1523,7 +1523,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-page-wrap">
 <input accept=".xlsx,.xls" id="fileInput" onchange="handleUpload(this)" style="display:none" type="file"/><div id="upload-result" style="margin:0 0 10px;font-size:12px"></div><div class="ct-page-head"><div><div class="ct-eyebrow">WEEKLY DATA</div><h1>Weekly Data Hub</h1><div class="ct-page-sub">The only upload location. Upload funded units and active-contract data from Encompass; Power BI drives active-partner health, roster and co-marketing data.</div></div></div>
 <div class="ct-data-grid">
-<section class="ct-card ct-data-source"><div class="ct-kicker">AGENT HEALTH</div><h2>Power BI Agent Portfolio</h2><p>Upload the current Power BI export to refresh active prequals, active pipeline, recent production and the relationship-health view.</p><div class="ct-data-actions"><button class="ct-primary-btn" onclick="loadXLSX()" type="button">Upload Power BI</button><button class="ct-link-btn" onclick="lpv3OpenAgentHealth()" type="button">Open Agent Health / Roster</button></div><div class="ct-data-note" id="lpv3-pb-status">No Power BI file loaded yet.</div></section>
+<section class="ct-card ct-data-source"><div class="ct-kicker">AGENT HEALTH</div><h2>Power BI Agent Portfolio</h2><p>Upload the current Power BI export to refresh active prequals, active pipeline, recent production and the relationship-health view.</p><div class="ct-data-actions"><button class="ct-primary-btn" onclick="loadXLSX()" type="button">Upload Power BI</button><button class="ct-link-btn" onclick="lpv3OpenAgentHealth()" type="button">Open Agent Health / Roster</button></div><div class="ct-data-note" id="lpv3-pb-status">No Power BI file loaded yet.</div><div class="ct-data-note" style="margin-top:8px">Power BI is uploaded here in the LP Tracker. A verified upload updates the shared agent profile and import record used by the RM and Director views; those views refresh from the same shared source.</div></section>
 </div>
 <section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">WHAT EACH FILE CONTROLS</div><h2>Keep the sources clean</h2></div></div><div class="ct-source-map"><div><b>Encompass</b><span>Active contracts, buyer/listing agent contacts, LP assignment, milestone, closing date.</span></div><div><b>Power BI + lead activity</b><span>Active prequals, active pipeline, production, last lead, latest file/contract/close and agent health.</span></div></div></section>
 </div>
@@ -6278,22 +6278,24 @@ document.addEventListener("focusout",function(e){if(e.target.tagName==="TEXTAREA
 document.addEventListener("visibilitychange",function(){
   if(!document.hidden&&!userTyping&&!editingLpContact)contactCache={};
 });
-// ── Cross-tracker realtime sync ────────────────────────────────────────────────────────────
-// LPs create signals here; the RM executes follow-up in the RM Tracker. Both trackers share the
-// same Supabase tables. Push subscriptions below refresh the LP view as soon as RM work lands.
-// A 30-second polling fallback remains in place if Realtime is unavailable.
-var _sharedRealtimeTimer=null;
-function refreshLpSharedData(source){
+// ── Shared RM/LP/DIRECTOR data refresh ──────────────────────────────────────────────────────
+// LP uploads the authoritative Power BI profile snapshot. All trackers read the same shared
+// Supabase tables. Realtime pushes refresh immediately when publication is enabled; a 60-second
+// shared-table poll covers missed events and environments where a table is not in the publication.
+var _sharedRealtimeTimer=null,_sharedPollTimer=null;
+async function refreshLpSharedData(source){
   if(userTyping||editingLpContact)return;
   clearTimeout(_sharedRealtimeTimer);
   _sharedRealtimeTimer=setTimeout(async function(){
     try{
-      if(source==="agent_profiles")contactCache={};
-      if(source==="agent_assignments")await loadAgentAssignments().catch(function(){});
-
-      // Shared activity/flag data. Reload these together so a flag can disappear and the RM touch
-      // can appear on the same repaint instead of briefly showing conflicting states.
-      if(["call_logs","lp_flags","amanda_activities","rm_followups","break_breads"].indexOf(source)>=0){
+      var poll=source==="poll",allActivity=poll||["call_logs","lp_flags","amanda_activities","rm_lp_flags","rm_followups","break_breads"].indexOf(source)>=0;
+      if(source==="agent_profiles"||poll){
+        contactCache={};loadAgents();
+        if(typeof window.ctInvalidateLivePowerBi==="function")window.ctInvalidateLivePowerBi();
+        if(typeof window.ctHydrateSharedPowerBiSnapshot==="function")await window.ctHydrateSharedPowerBiSnapshot().catch(function(){});
+      }
+      if(source==="agent_assignments"||poll)await loadAgentAssignments().catch(function(){});
+      if(allActivity){
         await Promise.all([
           loadCallLogs().catch(function(){}),
           loadRmActivity().catch(function(){}),
@@ -6302,46 +6304,45 @@ function refreshLpSharedData(source){
           loadFaceTime().catch(function(){})
         ]);
       }
-
-      if(currentUser==="Snapshot"){
-        buildSnapshot();
+      var snapshotView=document.getElementById("view-snapshot");
+      if(snapshotView&&snapshotView.classList.contains("active")&&typeof window.lpLoadSnapshotFresh==="function"){
+        await window.lpLoadSnapshotFresh({force:true}).catch(function(){});
       }else if(["Gavin","Karen","Osgood","Jordan","Said","Isaak"].indexOf(currentUser)>=0&&Object.keys(pendingNote).length===0){
         renderLP(currentUser);
       }
-
-      // Portfolio/leadership views read profile, tier, health, meeting and break-bread data.
       var pfr=document.getElementById("view-portfolio");
-      if(pfr&&pfr.classList.contains("active")&&typeof window.pfrLoad==="function"){
-        window.pfrLoad().catch(function(){});
-      }
-
-      // LP notification bell should immediately reflect a resolved/new RM flag.
-      if((source==="lp_flags"||source==="rm_lp_flags"||source==="call_logs")&&typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
-    }catch(e){console.warn("Cross-tracker realtime refresh failed:",e);}
+      if(pfr&&pfr.classList.contains("active")&&typeof window.pfrLoad==="function")window.pfrLoad().catch(function(){});
+      var pm=document.getElementById("view-production-manager");
+      if(pm&&pm.classList.contains("active")&&typeof window.pmLoad==="function")window.pmLoad(true).catch(function(){});
+      if((source==="lp_flags"||source==="rm_lp_flags"||source==="call_logs"||poll)&&typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
+    }catch(e){console.warn("Cross-tracker shared-data refresh failed:",e);}
   },180);
 }
-
+function startSharedDataPolling(){
+  if(_sharedPollTimer)return;
+  _sharedPollTimer=setInterval(function(){if(!document.hidden)refreshLpSharedData("poll")},60000);
+}
 function initRealtimeSync(){
   if(typeof window.supabase==="undefined"||!window.supabase.createClient){
     initRealtimeSync._tries=(initRealtimeSync._tries||0)+1;
-    if(initRealtimeSync._tries<10){setTimeout(initRealtimeSync,500);}
-    else console.warn("Realtime: Supabase SDK didn't load in time — continuing on polling only.");
-    return;
+    if(initRealtimeSync._tries<30){setTimeout(initRealtimeSync,500);return;}
+    console.warn("Realtime: Supabase SDK did not load; shared-data polling remains active.");return;
   }
   try{
-    var rtClient=window.supabase.createClient(SB_URL,SB_KEY);
-    var ch=rtClient.channel("core-team-shared-changes");
-    ["agent_profiles","agent_assignments","lp_flags","rm_lp_flags","call_logs","amanda_activities","rm_followups","break_breads","tier_migrations","health_snapshots"].forEach(function(table){
+    var rtClient=window.supabase.createClient(SB_URL,SB_KEY),ch=rtClient.channel("core-team-shared-changes");
+    ["agent_profiles","agent_assignments","lp_flags","rm_lp_flags","call_logs","amanda_activities","rm_followups","break_breads","tier_migrations","health_snapshots","lp_scorecards","powerbi_import_log"].forEach(function(table){
       ch=ch.on("postgres_changes",{event:"*",schema:"public",table:table},function(){refreshLpSharedData(table);});
     });
     ch.subscribe(function(status){
-      if(status==="SUBSCRIBED")console.log("Realtime: LP tracker subscribed to shared RM/LP tables.");
-      else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("Realtime: shared-table subscription unavailable ("+status+") — falling back to polling.");
+      if(status==="SUBSCRIBED"){window._coreTeamRealtimeSubscribed=true;console.log("Realtime: LP tracker connected to shared RM/LP/Director tables.");}
+      else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"||status==="CLOSED"){window._coreTeamRealtimeSubscribed=false;console.warn("Realtime: shared-table push unavailable ("+status+"); 60-second polling remains active.");}
     });
-    window._coreTeamRealtimeClient=rtClient;
-    window._coreTeamRealtimeChannel=ch;
-  }catch(e){console.warn("Realtime setup failed (non-critical — falling back to polling):",e.message);}
+    window._coreTeamRealtimeClient=rtClient;window._coreTeamRealtimeChannel=ch;
+  }catch(e){window._coreTeamRealtimeSubscribed=false;console.warn("Realtime setup failed; shared-data polling remains active:",e.message);}
 }
+startSharedDataPolling();
+initRealtimeSync();
+document.addEventListener("visibilitychange",function(){if(!document.hidden)refreshLpSharedData("poll")});
 /* realtime dashboard auto-repaint retired for stability */
 loadAgents();
 // Ownership is useful, but it no longer competes with the first connection/data paint.
@@ -13363,6 +13364,79 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   if(view){new MutationObserver(cleanGrowthPlanDeletionRows).observe(view,{childList:true,subtree:true});cleanGrowthPlanDeletionRows();}
 })();
 </script>
+<style id="ct-lp-v112-review-css">
+.ct-nav-more{flex:1 1 100%;min-width:220px;background:#fff;border:1px solid #e1e8ee;border-radius:10px;padding:0 10px;margin:3px 0}
+.ct-nav-more>summary{cursor:pointer;list-style:none;padding:9px 2px;color:#405563;font-size:12px;font-weight:700}
+.ct-nav-more>summary::-webkit-details-marker{display:none}
+.ct-nav-more>summary:after{content:"＋";float:right;color:#708494}
+.ct-nav-more[open]>summary:after{content:"−"}
+.ct-nav-more-content{display:flex;flex-wrap:wrap;gap:8px;padding:0 0 8px}
+.ct-nav-more-content .ct-nav-section{min-width:180px;flex:1 1 200px;margin:0;padding:8px;border:1px solid #edf1f4;border-radius:8px}
+.ct-nav-more-content .ct-nav-btn{width:100%!important}
+.lp-lead-goal-note{margin-top:10px;padding:9px 11px;border:1px solid #e4deef;border-radius:9px;background:#faf8fd;color:#5c5370;font-size:11px;line-height:1.45}
+.pm-rm-relationship{background:#fff;border:1px solid #d9e5ec;border-radius:14px;padding:16px;margin:0 0 14px;box-shadow:0 3px 14px rgba(35,63,81,.045)}
+.pm-rm-relationship h2{font-size:17px;color:#102a43;margin:2px 0 5px}
+.pm-rm-relationship p{font-size:11px;color:#617789;line-height:1.45;margin:0 0 10px}
+.pm-rm-metrics{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:8px}
+.pm-rm-metric{border:1px solid #e0e8ed;border-radius:9px;padding:10px;background:#f9fbfc;min-width:0}
+.pm-rm-metric span{display:block;font-size:10px;font-weight:700;color:#617789;line-height:1.3}
+.pm-rm-metric b{display:block;font-size:21px;color:#112f4a;margin-top:3px}
+.pm-rm-detail{font-size:10px;color:#657b8e;line-height:1.4;margin-top:4px}
+.pm-rm-weekly{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pm-rm-weekly span{border-radius:8px;background:#f1f5f8;padding:7px 9px;font-size:10px;color:#536b7d}
+.pm-rm-source{margin-top:10px;padding:9px 11px;background:#f5f8fa;border-radius:8px;color:#607789;font-size:10px;line-height:1.5}
+.pm-rm-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pm-rm-actions button{border:1px solid #cbdbe4;border-radius:7px;padding:7px 10px;background:#fff;color:#174968;cursor:pointer;font-size:11px;font-weight:700}
+@media(max-width:900px){.pm-rm-metrics{grid-template-columns:repeat(3,minmax(120px,1fr))}}
+@media(max-width:620px){.pm-rm-metrics{grid-template-columns:repeat(2,minmax(110px,1fr))}.ct-nav-more-content .ct-nav-section{min-width:100%;flex-basis:100%}}
+</style>
+<script id="ct-lp-v112-review-js">
+(function(){
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])})}
+  function navSetup(){
+    var nav=document.querySelector('.who-bar');if(!nav)return;
+    var old=nav.querySelector('#ctMoreTools');if(old)return;
+    var sections=Array.prototype.filter.call(nav.children,function(n){return n.classList&&n.classList.contains('ct-nav-section')});
+    if(sections.length<4)return;
+    var details=document.createElement('details');details.id='ctMoreTools';details.className='ct-nav-more';
+    details.innerHTML='<summary>More tools</summary><div class="ct-nav-more-content"></div>';
+    var content=details.querySelector('.ct-nav-more-content');
+    sections.slice(2).forEach(function(section){content.appendChild(section)});
+    nav.appendChild(details);
+  }
+  function updateRelationshipSnapshot(){
+    var view=document.getElementById('view-production-manager');if(!view)return;
+    var host=document.getElementById('pm-rm-relationship');
+    if(!host){host=document.createElement('section');host.id='pm-rm-relationship';host.className='pm-rm-relationship';host.setAttribute('aria-label','RM relationship health');var dash=document.getElementById('pm-dashboard');if(dash&&dash.parentNode)dash.parentNode.insertBefore(host,dash)}
+    if(window.__pmRmPanelBusy)return;window.__pmRmPanelBusy=true;
+    (async function(){
+      try{
+        if(!window.ctV72MonthlyDetail&&typeof window.ctRenderAmandaSnapshot==='function')await window.ctRenderAmandaSnapshot();
+        if(typeof window.ctGetLivePowerBiSummary==='function')await window.ctGetLivePowerBiSummary(true);
+        if(typeof window.ctRenderAmandaOutcomeV6==='function')await window.ctRenderAmandaOutcomeV6();
+        var d=window.ctV72MonthlyDetail;
+        if(!d||!d.meta){host.innerHTML='<div class="ct-kicker">RM RELATIONSHIP HEALTH</div><h2>Relationship snapshot unavailable</h2><p>Refresh the Team Snapshot after the Power BI roster loads. The LP scorecard remains available independently.</p>';return}
+        var agents=Number(d.activeAgentCount||d.meta.total)||0,monthly=Number(d.monthlyLeadCount||0),projected=Number(d.projectedLeads||0),dynamic=Math.max(100,Math.ceil(agents*1.15)),monthLabel=new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(new Date());
+        var source=d.live||{},stamp=source.imported_at?new Date(source.imported_at).toLocaleString():'Import timestamp unavailable';
+        var weekly=window.ctV72WeeklyDetail&&typeof window.ctV72WeeklyMetrics==='function'?window.ctV72WeeklyMetrics(window.ctV72WeeklyDetail.amanda||[],window.ctV72WeeklyDetail.team||[]):null;
+        var currentRows=Array.isArray(d.currentLeads)?d.currentLeads.length:0,pending=Math.max(0,monthly-currentRows);
+        var teamWeek=weekly?'<div class="pm-rm-weekly"><span>RM partner meetings: <b>'+weekly.partnerMeetings+'</b></span><span>Retained meetings: <b>'+weekly.retentionMeetings+'</b></span><span>Break breads: <b>'+weekly.breakBreads+'</b></span><span>Cold calls: <b>'+weekly.coldCalls+'</b></span><span>Live partner conversations: <b>'+weekly.partnerConversations+'</b></span><span>Buddy asks: <b>'+weekly.buddyAsks+'</b></span><span>Active-loan agent calls: <b>'+weekly.transactionCalls+'</b></span></div><div class="pm-rm-detail">Weekly RM activity comes from shared RM Tracker records. Some activity categories can overlap; use their individual counts.</div>':'<div class="pm-rm-weekly"><span>Weekly RM activity is available on Team Snapshot after its activity feed loads.</span></div>';
+        host.innerHTML='<div class="ct-kicker">RM RELATIONSHIP HEALTH</div><h2>Partner coverage and referral pace · '+esc(monthLabel)+'</h2><p>RM minimum: 100 monthly referrals. Dynamic goal: the larger of 100 or 1.15 × current active agents. This does not change the LP’s separately entered leads goal.</p><div class="pm-rm-metrics"><div class="pm-rm-metric"><span>Power BI active agents</span><b>'+agents+'</b><div class="pm-rm-detail">Current A/B/C roster used by RM calculation</div></div><div class="pm-rm-metric"><span>RM active-agent referrals MTD</span><b>'+monthly+'</b><div class="pm-rm-detail">'+(pending?currentRows+' in Velocify; '+pending+' pending sync':'Velocify current-month rows')+'</div></div><div class="pm-rm-metric"><span>Minimum monthly floor</span><b>100</b><div class="pm-rm-detail">RM floor target</div></div><div class="pm-rm-metric"><span>Dynamic RM goal</span><b>'+dynamic+'</b><div class="pm-rm-detail">'+agents+' active agents × 1.15, with 100 minimum</div></div><div class="pm-rm-metric"><span>Projected monthly pace</span><b>'+projected+'</b><div class="pm-rm-detail">'+Number(d.score&&d.score.ratio||0).toFixed(2)+' referrals per active agent</div></div></div>'+teamWeek+'<div class="pm-rm-source">Power BI roster/import: '+esc(stamp)+' · '+esc(source.source||'Source label unavailable')+'. Velocify lead activity updates on its daily schedule; compare its row count with the RM total before coaching. Shared RM/LP/Director changes update by Realtime push when enabled, with a 60-second refresh fallback.</div><div class="pm-rm-actions"><button type="button" id="pm-rm-open-snapshot">Open full Team Snapshot</button><button type="button" id="pm-rm-open-rm">Open RM Tracker</button></div>';
+        var snap=document.getElementById('pm-rm-open-snapshot');if(snap)snap.onclick=function(){var b=document.querySelector('.ct-nav-btn[data-route="snapshot"]');if(b&&typeof window.lpv2Route==='function')window.lpv2Route('snapshot',b)};
+        var rm=document.getElementById('pm-rm-open-rm');if(rm)rm.onclick=function(){window.open('https://pwang318.github.io/amanda-tracker/','_blank','noopener,noreferrer')};
+      }catch(e){host.innerHTML='<div class="ct-kicker">RM RELATIONSHIP HEALTH</div><h2>Relationship snapshot unavailable</h2><p>Power BI or Velocify data did not load. Use Refresh live data and check the source status before drawing conclusions.</p>'}
+      finally{window.__pmRmPanelBusy=false}
+    })();
+  }
+  navSetup();
+  var lpScore=document.getElementById('lp-v2-scorecard');
+  if(lpScore){var note=lpScore.parentNode.querySelector('.lp-lead-goal-note');if(!note){note=document.createElement('div');note.className='lp-lead-goal-note';note.innerHTML='<b>LP scorecard leads:</b> this remains the LP’s own goal and entry. The RM’s 100-lead minimum and active-agent calculation are reported separately.';lpScore.insertAdjacentElement('afterend',note)}}
+  var dash=document.getElementById('pm-dashboard');
+  if(dash&&window.MutationObserver){var obs=new MutationObserver(function(){if(document.getElementById('view-production-manager').classList.contains('active'))setTimeout(updateRelationshipSnapshot,350)});obs.observe(dash,{childList:true,subtree:false})}
+  var manager=document.getElementById('view-production-manager');if(manager&&window.MutationObserver){var viewObs=new MutationObserver(function(){if(manager.classList.contains('active'))setTimeout(updateRelationshipSnapshot,250)});viewObs.observe(manager,{attributes:true,attributeFilter:['class']})}
+  document.addEventListener('click',function(e){var btn=e.target.closest&&e.target.closest('#pm-refresh-btn');if(btn)setTimeout(updateRelationshipSnapshot,700)});
+})();
+</script>
 </body>
 <script id="v313-all-call-export">
 (function(){
@@ -13616,7 +13690,7 @@ function ctV72WeeklyMetrics(amandaActs,teamActs){
     partnerConversations:a.filter(x=>V72_TALK_TYPES.includes(String(x.act_type||'').trim())).length,
     buddyAsks:a.filter(x=>String(x.act_type||'')==='Realtor Buddy Referral Ask').length,
     meetingsScheduled:a.filter(x=>String(x.outcome||'').trim()==='Meeting Scheduled').length,
-    transactionCalls:a.filter(x=>['CTC Call','Under Contract Call'].includes(String(x.act_type||''))).length,
+    transactionCalls:a.filter(x=>['CTC Call','Under Contract Call'].includes(String(x.act_type||''))).length,\n    retentionMeetings:a.filter(x=>String(x.act_type||'')==='Retention Meeting').length,\n    breakBreads:a.filter(x=>String(x.act_type||'')==='Break Breads').length,
     meaningfulContacts:a.filter(ctV72MeaningfulActivity).length,
     noConnections:a.filter(ctV72NoConnection).length,
     textFollowUps:a.filter(ctV72TextSent).length
@@ -13685,7 +13759,7 @@ async function ctRenderAmandaOutcomeV72(){
   host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">Monthly Results</div><div class="ct-rm-v6-title">Team 100-point scorecard · calculated from Power BI and Velocify</div></div><div class="ct-rm-v6-total" data-v72-month="overall" role="button" tabindex="0"><span>Overall score</span>'+score.totalPts.toFixed(1)+' / 100</div></div>'+
     '<div class="ct-account-strip" aria-label="Power BI tier counts and active-agent total · Channel is included in A"><div class="ct-account-tile ct-account-channel" data-v72-month="Channel" role="button" tabindex="0"><span class="ct-account-label">Channel · 10+ closings (subset of A)</span><strong class="ct-account-value">'+meta.Channel+'</strong><small class="ct-account-note">Included in Power BI A</small></div><div class="ct-account-tile ct-account-a" data-v72-month="A" role="button" tabindex="0"><span class="ct-account-label">A · Power BI A level (includes Channel)</span><strong class="ct-account-value">'+meta.A+'</strong></div><div class="ct-account-tile ct-account-b" data-v72-month="B" role="button" tabindex="0"><span class="ct-account-label">B · 2–3 closings</span><strong class="ct-account-value">'+meta.B+'</strong></div><div class="ct-account-tile ct-account-c" data-v72-month="C" role="button" tabindex="0"><span class="ct-account-label">C · 1 closing or 1 lead</span><strong class="ct-account-value">'+meta.C+'</strong></div><div class="ct-account-tile ct-account-total" data-v72-month="Power BI Active Agents" role="button" tabindex="0"><span class="ct-account-label">Power BI Active Agents</span><strong class="ct-account-value">'+meta.total+'</strong></div></div>'+
     '<div class="ct-rm-v6-grid"><div class="ct-rm-v6-m" data-v72-month="tier" role="button" tabindex="0"><b>Tier Growth · net Channel/A/B counts · 50 points</b><strong>'+score.tierPts.toFixed(1)+' / 50</strong><small>'+t.label+': '+t.Channel+' Channel · '+t.A+' A · '+t.B+' B</small></div>'+
-    '<div class="ct-rm-v6-m" data-v72-month="ratio" role="button" tabindex="0"><b>Referral Leads per Active Agent · 30 points</b><strong>'+score.ratioPts.toFixed(1)+' / 30</strong><small>'+monthlyLeadCount+' active-agent leads MTD'+(monthlyLeadCount>scoredCurrentLeads.length?' ('+scoredCurrentLeads.length+' in Velocify; '+(monthlyLeadCount-scoredCurrentLeads.length)+' pending sync)':'')+' · '+projectedLeads+' projected ÷ '+meta.total+' Power BI A/B/C agents = '+score.ratio.toFixed(2)+' · Target 1.15; repeat and C-tier leads count</small></div>'+
+    '<div class="ct-rm-v6-m" data-v72-month="ratio" role="button" tabindex="0"><b>Referral Leads per Active Agent · 30 points</b><strong>'+score.ratioPts.toFixed(1)+' / 30</strong><small>'+monthlyLeadCount+' active-agent leads MTD'+(monthlyLeadCount>scoredCurrentLeads.length?' ('+scoredCurrentLeads.length+' in Velocify; '+(monthlyLeadCount-scoredCurrentLeads.length)+' pending sync)':'')+' · '+projectedLeads+' projected ÷ '+meta.total+' Power BI A/B/C agents = '+score.ratio.toFixed(2)+' · RM minimum 100 leads/month; dynamic score target 1.15 per active agent; repeat and C-tier leads count</small></div>'+
     '<div class="ct-rm-v6-m" data-v72-month="active" role="button" tabindex="0"><b>Active Agent Count · 20 points</b><strong>'+score.activePts.toFixed(1)+' / 20</strong><small>'+activeAgentCount+' active Power BI agents / 200 year-end target</small></div></div>';
 }
 window.ctRenderAmandaOutcomeV6=ctRenderAmandaOutcomeV72;
