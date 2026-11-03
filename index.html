@@ -10380,16 +10380,16 @@ async function pfrLoad(){
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Managed Relationship Tier</div><div style="font-size:10.5px;color:var(--text-3);margin-bottom:10px">Calculated from trailing-12-month closes/leads. This is intentionally separate from Power BI Level.</div>'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Power BI Agent Levels</div><div style="font-size:10.5px;color:var(--text-3);margin-bottom:10px">The Power BI A/B/C population is the scorecard source of truth. Managed 90-day relationships use a separate activity rule and must not replace the active-agent total. Channel is a subset of A, not an additional Power BI level.</div>'
       +'<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">'
-        +pfrTile("Managed Total",totalActive,null,"pfrOpenDrill(\'tier:all\')")
-        +pfrTile("Channel",countByTier.Channel,null,"pfrOpenDrill(\'tier:Channel\')")
-        +pfrTile("A",countByTier.A,null,"pfrOpenDrill(\'tier:A\')")
-        +pfrTile("B",countByTier.B,null,"pfrOpenDrill(\'tier:B\')")
-        +pfrTile("C",countByTier.C,null,"pfrOpenDrill(\'tier:C\')")
-        +pfrTile("No Tier",countByTier.None,null,"pfrOpenDrill(\'tier:None\')")
+        +pfrTile("Power BI Active",powerBiActiveCount,null,"pfrOpenDrill(\'pop:powerbi\')")
+        +pfrTile("A (incl. Channel)",Number(displayPbLevels.A||0),null,"pfrOpenDrill(\'pb:levels\')")
+        +pfrTile("B",Number(displayPbLevels.B||0),null,"pfrOpenDrill(\'pb:levels\')")
+        +pfrTile("C",Number(displayPbLevels.C||0),null,"pfrOpenDrill(\'pb:levels\')")
+        +pfrTile("No Power BI Level",powerBiNoLevelCount,null,"pfrOpenDrill(\'pb:levels\')")
+        +pfrTile("Managed 90d",totalActive,null,"pfrOpenDrill(\'tier:all\')")
       +'</div>'
-      +(countByTier.None>0?'<div style="margin-top:10px;background:#FBF3E5;border:1px solid #E8DDC8;border-radius:8px;padding:8px 12px;font-size:11px;color:#8C7355">&#9888; '+countByTier.None+' active partner'+(countByTier.None!==1?"s have":" has")+' no tier set &mdash; check the Power BI/Contacts import.</div>':'')
+      +'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">Power BI Active = A + B + C ('+powerBiActiveCount+' agents). Managed 90d is a smaller follow-up group ('+totalActive+' relationships), not a replacement denominator. Both figures update from their respective sources.</div>'
     +'</div>';
 
     html+='<div onclick="pfrOpenDrill(\'ratio\')" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
@@ -10482,7 +10482,7 @@ async function pfrLoad(){
       'Meeting brief':agenda.length+' agenda items · 30 minutes',
       'Power BI reconciliation':powerBiActiveCount+' active agents',
       'Pipeline signals':pbSnapshot?pbPipeline.pipelineTotal+' in pipeline · '+pbPipeline.prequalsTotal+' active prequals':'Pipeline data unavailable',
-      'Managed relationship tiers':totalActive+' managed relationships',
+      'Power BI agent tiers':powerBiActiveCount+' active agents · '+totalActive+' managed 90d',
       'Referral pace':meetingLeadsMTD+' partner referrals MTD',
       'Tier movement':(migCtoB+migBtoA+migAtoChannel+migOther)+' changes · '+range.label,
       'Proactive watch':proactiveWatch.length+' partners on watch',
@@ -10509,7 +10509,7 @@ function pfrCompactOverview(body,summaries){
   var titles=[
     {label:'Power BI reconciliation',find:'Power BI → Tracker Reconciliation',group:'numbers'},
     {label:'Pipeline signals',find:'Pipeline Signals from Power BI',group:'numbers'},
-    {label:'Managed relationship tiers',find:'Managed Relationship Tier',group:'numbers'},
+    {label:'Power BI agent tiers',find:'Power BI Agent Levels',group:'numbers'},
     {label:'Referral pace',find:'Active Agent-to-Lead Ratio',group:'numbers'},
     {label:'Tier movement',find:'Tier Migration Progress',group:'numbers'},
     {label:'Proactive watch',find:'Proactive Watch',group:'relationships'},
