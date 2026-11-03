@@ -10103,6 +10103,13 @@ async function pfrLoad(){
     var localPbSnapshot=window.CT_POWERBI_SNAPSHOT||null;
     if(!localPbSnapshot){try{localPbSnapshot=JSON.parse(localStorage.getItem('ct_powerbi_snapshot_v1')||'null');}catch(e){localPbSnapshot=null;}}
     var pbSource=pfrCurrentPowerBiSource(allAgents,lastImportLog,localPbSnapshot);
+    var sharedPopulation=await window.ctGetLivePowerBiSummary(false);
+    if(sharedPopulation && sharedPopulation.source_levels && Number(sharedPopulation.active_partner_rows)>0){
+      var sourceLevels=Object.assign({},pbSource.levels,sharedPopulation.source_levels);
+      pbSource.levels=sourceLevels;pbSource.total=Number(sharedPopulation.active_partner_rows);
+      pbSource.stamp=sharedPopulation.stamp||pbSource.stamp;pbSource.rawRows=sharedPopulation.raw_rows;
+      pbSource.syncNote=pbSource.profileTotal!==pbSource.total?'The uploaded roster has '+pbSource.total+' active agents. Shared profiles cover '+pbSource.profileTotal+' agents.':'';
+    }
     var latestPowerBiStamp=pbSource.stamp;
     var currentPowerBiAgents=pbSource.profiles;
     var powerBiActiveAgents=currentPowerBiAgents.filter(function(a){return !!a.powerbi_level;}).length;
@@ -10211,11 +10218,11 @@ async function pfrLoad(){
     var growthPlanTotal=Number(pbSource.total)||growthPlanRows.length;
     var growthPlanUnlisted=Math.max(0,growthPlanTotal-growthPlanRows.length);
     var missingGrowthPlans=growthPlanRows.filter(function(a){return !String(a.next_growth_opportunity||'').trim();}).sort(function(a,b){var order={Channel:0,A:1,B:2,C:3},ta=order[a.tier]===undefined?4:order[a.tier],tb=order[b.tier]===undefined?4:order[b.tier];return ta-tb||pfrProperCase(a.agent_name).localeCompare(pfrProperCase(b.agent_name));});
-    var growthPlanInvalidMissingRows=missingGrowthPlans.filter(function(a){return /^__Roster_delete_/i.test(String(a.agent_name||''));}).length;
-    missingGrowthPlans=missingGrowthPlans.filter(function(a){return !!String(a.agent_name||'').trim()&&!/^__Roster_delete_/i.test(String(a.agent_name||''));});
-    growthPlanUnlisted+=growthPlanInvalidMissingRows;
-    var growthPlanMissingCount=missingGrowthPlans.length+growthPlanUnlisted;
-    var growthOppPct=growthPlanTotal>0?Math.round(((growthPlanTotal-growthPlanMissingCount)/growthPlanTotal)*100):0;
+    growthPlanRows=growthPlanRows.filter(function(a){return !/^__Roster_delete_/i.test(pfrProperCase(a.agent_name).trim());});
+    missingGrowthPlans=missingGrowthPlans.filter(function(a){return !/^__Roster_delete_/i.test(pfrProperCase(a.agent_name).trim());});
+    growthPlanUnlisted=Math.max(0,growthPlanTotal-growthPlanRows.length);
+    var growthPlanMissingCount=missingGrowthPlans.length;
+    var growthOppPct=growthPlanRows.length?Math.round(100*(growthPlanRows.length-growthPlanMissingCount)/growthPlanRows.length):0;
     var top10GrowthOpp=active.filter(function(a){return a.next_growth_opportunity;}).sort(function(a,b){
       var order={Channel:0,A:1,B:2,C:3};
       return(order[a.tier]!==undefined?order[a.tier]:4)-(order[b.tier]!==undefined?order[b.tier]:4);
@@ -10434,9 +10441,9 @@ async function pfrLoad(){
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Growth Plans</div>'
-      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+growthOppPct+'% of Power BI active agents have a documented next growth opportunity</div>'
+      +'<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">'+growthOppPct+'% of reviewed profiles have a documented next growth opportunity</div>'
       +'<div style="font-size:11px;color:var(--text-2);margin-bottom:8px">'+growthPlanMissingCount+' of '+growthPlanTotal+' Power BI active agents are missing a documented growth plan</div>'
-      +(missingGrowthPlans.filter(function(a){return !!String(a.agent_name||'').trim()&&!/^__Roster_delete_/i.test(String(a.agent_name||''));}).length?'<div style="max-height:360px;overflow:auto;border-top:1px solid var(--border-light)">'+missingGrowthPlans.filter(function(a){return !!String(a.agent_name||'').trim()&&!/^__Roster_delete_/i.test(String(a.agent_name||''));}).map(function(a){return pfrListRow(null,a.agent_name,escHtml(pfrTierLabel(a.tier))+' · No next growth opportunity documented');}).join('')+'</div>':'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">All named Power BI active agents have a documented next growth opportunity.</div>')+(growthPlanInvalidMissingRows?'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">'+growthPlanInvalidMissingRows+' roster deletion markers are counted as missing, but hidden from the agent list.</div>':'')+(growthPlanUnlisted?'<div style="font-size:10.5px;color:var(--text-3);margin-top:8px">'+growthPlanUnlisted+' Power BI active agents have no usable name in the detail feed/profile data and are counted as missing but cannot be named here yet.'+(Math.max(growthPlanInvalidNameRows,growthPlanInvalidMissingRows)?' This includes '+Math.max(growthPlanInvalidNameRows,growthPlanInvalidMissingRows)+' roster deletion markers.':'')+'</div>':'')
+      +(missingGrowthPlans.filter(function(a){return !!String(a.agent_name||'').trim()&&!/^__Roster_delete_/i.test(String(a.agent_name||''));}).length?'<div style="max-height:360px;overflow:auto;border-top:1px solid var(--border-light)">'+missingGrowthPlans.filter(function(a){return !!String(a.agent_name||'').trim()&&!/^__Roster_delete_/i.test(String(a.agent_name||''));}).map(function(a){return pfrListRow(null,a.agent_name,escHtml(pfrTierLabel(a.tier))+' · No next growth opportunity documented');}).join('')+'</div>':'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">All named Power BI active agents have a documented next growth opportunity.</div>')+(growthPlanUnlisted?'<div style="font-size:11px;margin-top:8px">'+growthPlanUnlisted+' active roster entries lack a matched profile. Plan status is unknown.</div>':'')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
@@ -10472,7 +10479,7 @@ async function pfrLoad(){
 
     body.innerHTML=html;
     pfrCompactOverview(body,{
-      'Meeting brief':meetingExportData.score+' weighted score',
+      'Meeting brief':agenda.length+' agenda items · 30 minutes',
       'Power BI reconciliation':powerBiActiveCount+' active agents',
       'Pipeline signals':pbSnapshot?pbPipeline.pipelineTotal+' in pipeline · '+pbPipeline.prequalsTotal+' active prequals':'Pipeline data unavailable',
       'Managed relationship tiers':totalActive+' managed relationships',
@@ -13700,14 +13707,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       Array.prototype.forEach.call(summaryNodes,function(el){
         var txt=String(el.textContent||'').trim();
         if(/^[0-9]+ of [0-9]+ Power BI active agents are missing a documented growth plan$/.test(txt))missingEl=el;
-        if(/^[0-9]+% of Power BI active agents have a documented next growth opportunity$/.test(txt))coverageEl=el;
+        if(/^[0-9]+% of reviewed profiles have a documented next growth opportunity$/.test(txt))coverageEl=el;
       });
       var total=0,missing=0;
       if(missingEl){
         var match=String(missingEl.textContent||'').trim().match(/^([0-9]+) of ([0-9]+) Power BI active agents are missing a documented growth plan$/);
         if(match){missing=Math.max(0,Number(match[1])-removed);total=Number(match[2]);missingEl.textContent=missing+' of '+total+' Power BI active agents are missing a documented growth plan';}
       }
-      if(coverageEl&&total>0)coverageEl.textContent=Math.round(((total-missing)/total)*100)+'% of Power BI active agents have a documented next growth opportunity';
+      if(coverageEl&&total>0)coverageEl.textContent=Math.round(((total-missing)/total)*100)+'% of reviewed profiles have a documented next growth opportunity';
       var note=cardWithRemoval.querySelector('[data-growth-plan-cleanup-note]');
       if(!note){note=document.createElement('div');note.setAttribute('data-growth-plan-cleanup-note','true');note.style.cssText='font-size:10.5px;color:var(--text-3);margin-top:8px';cardWithRemoval.appendChild(note);}
       note.textContent=removed+' deleted roster markers excluded from the active-agent missing count and hidden from the list.';
