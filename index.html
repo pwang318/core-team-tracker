@@ -7602,7 +7602,7 @@ async function loadFaceTime(){
       sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=4000"),
       sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
       loadCoMarketing(),
-      sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,do_not_contact,relationship_status&limit=5000").catch(function(){return[];});}),
+      sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,do_not_contact,relationship_status&limit=5000").catch(function(){return[];});});}),
       sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000").catch(function(){return[];}),
       sbFetch("GET","face_time_events?select=*&status=eq.scheduled&event_date=gte."+today2()+"&order=event_date.asc,event_time.asc&limit=1000").catch(function(){return[];})
     ]);
@@ -7649,13 +7649,21 @@ async function loadFaceTime(){
     }
     ftRosterRows=(r[3]||[]).filter(function(p){
       var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
-      return !!k && ftIsCurrentPowerBiRow(p) && p.retained===true && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && !o.removed
+      return !!k && (ftIsCurrentPowerBiRow(p) || (!latestFtPbMs && ["A","B","C","CHANNEL"].includes(String(p.powerbi_level||p.tier||"").toUpperCase()))) && !p.do_not_contact && (p.relationship_status||"active")!=="inactive" && !o.removed
         && String(p.relationship_type||"realtor")!=="strategic_partner"
         && String(p.lp_outreach_status||"active")!=="nurture";
     }).map(function(p){
       var k=(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{},profileTier=String(p.tier||"").trim().toUpperCase(),pbTier=String(p.powerbi_level||"").trim().toUpperCase(),tier=profileTier==="CHANNEL"?"Channel":(["A","B","C"].includes(pbTier)?pbTier:(profileTier||"C"));
       return {name:p.agent_name,tier:tier,lp:o.lp||"Unassigned",rm:ctResolveRmOwner(k,tier),competitor_risk_flag:!!p.competitor_risk_flag,high_potential_flag:!!p.high_potential_flag,next_growth_opportunity:p.next_growth_opportunity||"",latest_lead_date:p.latest_lead_date||null,closes_past_year:p.closes_past_year||0,total_leads_past_year:p.total_leads_past_year||0};
     });
+    // Never represent a missing/partial Power BI roster as zero active agents.
+    window.CT_FT_ROSTER_LOADED=ftRosterRows.length>0;
+    var notice=document.getElementById("ft-roster-notice");
+    if(!notice&&listEl){notice=document.createElement("div");notice.id="ft-roster-notice";listEl.parentNode.insertBefore(notice,listEl);}
+    if(notice){
+      notice.style.cssText="padding:9px 12px;margin-bottom:12px;font-size:12px;border-radius:8px;background:"+(ftRosterRows.length&&latestFtPbMs?"#eff8f2":"#fff6e8")+";color:#2c4861;border:1px solid #d7e4eb";
+      notice.textContent=ftRosterRows.length?(ftRosterRows.length+" active agents loaded · "+(latestFtPbMs?"Latest shared Power BI profiles":"Profile fallback; verify current Power BI upload")):"Face Time roster unavailable. No zero counts should be interpreted as real; check the Power BI upload and refresh.";
+    }
     renderFaceTime();
   }catch(e){if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--red);padding:30px;font-size:13px">Error loading — '+e.message+'</div>';}
 }
@@ -7728,7 +7736,7 @@ function renderFtPriority(){
   el.innerHTML=html;
   el.querySelectorAll(".ft-priority-log").forEach(function(btn){btn.addEventListener("click",function(){ftOpenAgentLog(this.dataset.agent,this.dataset.lp);});});
   el.querySelectorAll(".ft-priority-book").forEach(function(btn){btn.addEventListener("click",function(){v33OpenSharedFaceTime(this.dataset.agent,this.dataset.lp,this.dataset.id||"");});});
-  var f=document.getElementById("ft-s-focus");if(f)f.textContent=focusTotal;
+  var f=document.getElementById("ft-s-focus");if(f)f.textContent=window.CT_FT_ROSTER_LOADED?focusTotal:"—";
 }
 
 /* ── Persistent LP-side RM response history ───────────────────────────────
@@ -8153,11 +8161,11 @@ function renderFaceTime(){
   var dueWeek=fullRows.filter(function(a){if(a.days===null)return false;var left=a.target-a.days;return left>=0&&left<=7;}).length;
   var okCount=fullRows.filter(function(a){return a.status==="ok";}).length;
   var mtdEl=document.getElementById("ft-s-mtd");if(mtdEl)mtdEl.textContent=mtd;
-  var dueEl=document.getElementById("ft-s-dueweek");if(dueEl)dueEl.textContent=dueWeek;
-  var okEl=document.getElementById("ft-s-ok");if(okEl)okEl.textContent=okCount;
+  var dueEl=document.getElementById("ft-s-dueweek");if(dueEl)dueEl.textContent=window.CT_FT_ROSTER_LOADED?dueWeek:"—";
+  var okEl=document.getElementById("ft-s-ok");if(okEl)okEl.textContent=window.CT_FT_ROSTER_LOADED?okCount:"—";
   renderFtPriority();
 
-  if(!agentList.length){listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px">No agents match these filters</div>';return;}
+  if(!agentList.length){listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px">No agents match these filters (or source roster is unavailable)</div>';return;}
 
   var tierColors={Channel:"#1E3A8A",A:"#B45309",B:"#1D4ED8",C:"#64748B"};
   var lpColors={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68",Isaak:"#3D4E68"};
