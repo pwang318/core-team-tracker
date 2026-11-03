@@ -71,6 +71,18 @@ body{font-family:'Geist','Inter',-apple-system,sans-serif;color:var(--text);font
 .ft-tier-hdr{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:10px 0 7px;border-bottom:2px solid;margin-bottom:9px;margin-top:16px}
 .ft-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .ft-row:last-child{border-bottom:none}
+/* Face Time list polish: readable rows, consistent action sizing and no visual clutter */
+#ft-list .ft-tier-hdr{margin-top:22px;padding:11px 12px;background:#f5f8fb;border-radius:8px 8px 0 0;letter-spacing:.4px;font-size:11px}
+#ft-list .ft-row{gap:10px 13px;padding:12px 10px;border-bottom:1px solid #e6edf2;min-height:50px}
+#ft-list .ft-row:hover{background:#f5f9fc}
+#ft-list .ft-name{font-weight:750;font-size:13px;flex:1 1 180px;color:#173451}
+#ft-list .ft-meta{white-space:normal;line-height:1.4}
+#ft-list .ft-due-label{min-width:92px;font-weight:750!important}
+#ft-list .ft-comkt-toggle{min-width:95px}
+#ft-list .ft-book-btn,#ft-list .ft-log-btn{min-height:34px!important;padding:7px 12px!important}
+#ft-list .ft-log-form{background:#f7fafd;margin:5px 0 13px;border-color:#cddde8;box-shadow:0 4px 12px rgba(12,46,74,.07)}
+@media(max-width:860px){#ft-list .ft-row{gap:8px}#ft-list .ft-name{flex-basis:100%}#ft-list .ft-comkt-toggle{min-width:auto}}
+
 .ft-name{font-size:13px;font-weight:600;flex:1;min-width:120px}
 .ft-days{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .ft-days.ok{background:#E8F5F1;color:#0A6B4C}
@@ -7694,7 +7706,7 @@ function renderFtPriority(){
     if(!list.length){html+='<div style="font-size:12px;color:var(--text-3)">No active assigned partners.</div>';}
     list.forEach(function(a){
       var last=a.lastDate?(a.days+"d since last visit"):'Book first visit';
-      var due=a.scheduled?('Booked '+a.scheduled.event_date+(a.scheduled.event_time?' · '+String(a.scheduled.event_time).slice(0,5):'')):(a.days===null?'Book first visit':(a.days>=a.target?'Overdue by '+(a.days-a.target)+'d':'Due in '+(a.target-a.days)+'d'));
+      var due=a.scheduled?('Booked '+a.scheduled.event_date+(a.scheduled.event_time?' · '+String(a.scheduled.event_time).slice(0,5):'')):(a.days===null?'Book first visit':(a.days>a.target?'Overdue '+(a.days-a.target)+'d':a.days===a.target?'Due today':'Due in '+(a.target-a.days)+'d'));
       var dueColor=a.scheduled?'#365342':((a.days===null||a.days>=a.target)?'#A32D2D':'#5C4A35');
       html+='<div style="display:grid;grid-template-columns:minmax(180px,1fr) 62px minmax(125px,.8fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid #F2F0F7">'
         +'<div><span style="font-size:12.5px;font-weight:700;color:var(--text-1)">'+displayName(a.name)+'</span> <span class="badge badge-'+String(a.tier).toLowerCase()+'" style="font-size:9px">'+a.tier+'</span></div>'
@@ -8100,7 +8112,7 @@ function renderLpFaceTimeFocus(lp){
   el.style.display="block";
   var html='<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px"><div><div style="font-size:12.5px;font-weight:800;color:#071B37">Face Time — your next 3</div><div style="font-size:11px;color:var(--text-2);margin-top:1px">Start with these 3 Face Time priorities.</div></div><button type="button" onclick="selectUser(document.querySelector(\'.wb-FaceTime\'),\'FaceTime\')" style="border:0;background:transparent;color:#071B37;font-size:11px;font-weight:800;cursor:pointer">Open Face Time →</button></div>';
   list.forEach(function(a){
-    var due=a.days===null?'Book first visit':(a.days>=a.target?'Overdue '+(a.days-a.target)+'d':'Due in '+(a.target-a.days)+'d');
+    var due=a.days===null?'Book first visit':(a.days>a.target?'Overdue '+(a.days-a.target)+'d':a.days===a.target?'Due today':'Due in '+(a.target-a.days)+'d');
     html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid #E7EFF3"><div style="font-size:12px;font-weight:700;color:var(--text-1)">'+displayName(a.name)+' <span style="font-size:9px;color:#6B7E8A">'+a.tier+'</span></div><div style="font-size:11px;color:'+(a.days===null||a.days>=a.target?'#A32D2D':'#5C4A35')+';font-weight:700">'+due+'</div></div>';
   });
   el.innerHTML=html;
@@ -8156,8 +8168,8 @@ function renderFaceTime(){
     rows.push({type:"hdr",tier:tier,label:tierLabels[tier],count:tList.length,color:tierColors[tier]});
     tList.forEach(function(a,i){
       var target=FT_TARGETS[tier];
-      var nextLabel=a.days===null?"Book first visit":a.days<target?"Next in "+(target-a.days)+"d":"Overdue by "+(a.days-target)+"d";
-      var overdue=a.days===null||a.days>=target;
+      var nextLabel=a.days===null?"First visit needed":a.days<target?"Due in "+(target-a.days)+"d":a.days===target?"Due today":"Overdue "+(a.days-target)+"d";
+      var overdue=a.days===null||a.days>target;
       rows.push({type:"agent",a:a,target:target,nextLabel:nextLabel,overdue:overdue,lc:lpColors[a.lp]||"#888",formId:"ftf"+tier+i});
     });
   });
@@ -8172,16 +8184,16 @@ function renderFaceTime(){
       var coBadge=a.coMkt?'<span class="co-mkt-tag" style="cursor:pointer" data-name="'+escHtml(a.name)+'" data-active="true">Co-marketing ✓</span>':'<span class="ft-comkt-off" data-name="'+escHtml(a.name)+'" data-active="false" style="cursor:pointer;font-size:10px;color:var(--text-3);border:1px dashed var(--border);border-radius:4px;padding:2px 8px">+ Co-marketing</span>';
       var rowStyle=a.coMkt?' style="background:#FAF7F2;border-left:3px solid #B45309;padding-left:8px;margin-left:-11px"':'';
       html2+='<div class="ft-row"'+rowStyle+'>'
-        +'<div class="ft-name">'+a.name+'</div>'
+        +'<div class="ft-name">'+escHtml(displayName(a.name))+'</div>'
         +'<span style="font-size:11px;font-weight:600;color:'+r.lc+';min-width:50px">'+a.lp+'</span>'
-        +'<span class="ft-days '+a.status+'">'+(a.days===null?"No record":a.days+"d ago")+'</span>'
-        +'<span class="ft-meta">'+(a.lastDate?fmtDate(a.lastDate)+(a.source?" via "+a.source:""):"Book first visit")+'</span>'
-        +'<span class="ft-meta" style="color:'+(a.scheduled?"#365342":(r.overdue?"#DC2626":"#0A6B4C"))+'">'+(a.scheduled?('Booked '+a.scheduled.event_date+(a.scheduled.event_time?' · '+String(a.scheduled.event_time).slice(0,5):'')):r.nextLabel)+'</span>'
+        +'<span class="ft-days '+a.status+'">'+(a.days===null?"No visit":a.days===0?"Today":a.days+"d ago")+'</span>'
+        +'<span class="ft-meta">'+(a.lastDate?"Last visit: "+fmtDate(a.lastDate)+(a.source?" · "+escHtml(displayName(a.source)):""):"No visits logged")+'</span>'
+        +'<span class="ft-meta ft-due-label" style="color:'+(a.scheduled?"#365342":(r.overdue?"#DC2626":"#0A6B4C"))+'">'+(a.scheduled?('Booked '+fmtDate(a.scheduled.event_date)+(a.scheduled.event_time?' · '+String(a.scheduled.event_time).slice(0,5):'')):r.nextLabel)+'</span>'
         +'<span class="ft-comkt-toggle">'+coBadge+'</span>'
         +'<span style="display:flex;gap:5px"><button class="ft-book-btn" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(a.lp)+'" data-id="'+escHtml(String(a.scheduled&&a.scheduled.id||""))+'" style="background:#F4F8F4;color:#365342;border:1px solid #BFD1C2;border-radius:6px;padding:4px 9px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap">'+(a.scheduled?'Open':'Book')+'</button><button class="ft-log-btn btn-ft-log" data-fid="'+fid+'" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:4px 9px;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap">Log visit</button></span>'
         +'</div>'
         +'<div class="ft-log-form" id="'+fid+'">'
-          +'<div style="font-size:11px;font-weight:600;color:var(--brand);margin-bottom:8px">Log break bread — '+a.name+'</div>'
+          +'<div style="font-size:11px;font-weight:600;color:var(--brand);margin-bottom:8px">Log partner visit — '+escHtml(displayName(a.name))+'</div>'
           +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
             +'<div><label style="font-size:10px;color:var(--text-3);font-weight:600;display:block;margin-bottom:3px;text-transform:uppercase">Date</label>'
             +'<input type="date" id="'+fid+'-date" value="'+today2()+'" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit"></div>'
@@ -8244,19 +8256,20 @@ async function ftSaveLog(agentName,formId){
   var by=document.getElementById(formId+"-by").value;
   var notes=document.getElementById(formId+"-notes").value.trim()||null;
   if(!date){alert("Select a date.");return;}
-  var btn=document.querySelector("#"+formId+" button");
+  var btn=document.querySelector("#"+formId+" .ft-save-btn");
   if(btn){btn.disabled=true;btn.textContent="Saving...";}
   try{
     await sbFetch("POST","break_breads",{agent_name:agentName,date:date,logged_by:by,notes:notes});
     try{var mk=(window.FT_SCHEDULED_EVENTS||[]).filter(function(e){return String(e.agent_name||"").trim().toUpperCase()===String(agentName||"").trim().toUpperCase()&&e.status==="scheduled";}).sort(function(a,b){return String(a.event_date||"").localeCompare(String(b.event_date||""));})[0];if(mk)await sbFetch("PATCH","face_time_events?id=eq."+encodeURIComponent(mk.id),{status:"completed",completed_by:by,notes:notes||mk.notes||null,updated_at:new Date().toISOString()});}catch(syncErr){console.warn("Shared Face Time completion sync failed",syncErr);}
     // Update ftData in memory
-    if(!ftData[agentName]||date>ftData[agentName].lastDate){
-      ftData[agentName]={lastDate:date,source:by,notes:notes||""};
+    var normalizedName=String(agentName||"").trim().toUpperCase();
+    if(!ftData[normalizedName]||date>ftData[normalizedName].lastDate){
+      ftData[normalizedName]={lastDate:date,source:by,notes:notes||""};
     }
     document.getElementById(formId+"-notes").value="";
     document.getElementById(formId).classList.remove("show");
     renderFaceTime();
-    showToast("Break bread logged for "+agentName+" ✓","success");
+    showToast("Visit logged for "+displayName(agentName)+" ✓","success");
   }catch(e){
     showToast("Save failed: "+e.message,"error");
   }finally{
