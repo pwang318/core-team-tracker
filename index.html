@@ -7661,35 +7661,50 @@ async function loadFaceTime(){
     };
     // v310: The Power BI importer can stamp individual profile rows at different times.
     // Do not silently remove valid active relationships because they missed a 2-minute window.
-    var ftActiveProfiles=ftProfileRows.filter(function(p){return eligibleProfile(p)&&ftIsCurrentPowerBiRow(p);});
+    // v312: Source-of-truth order is the most recent SHARED Power BI import,
+    // then a genuinely newer local upload. Never blend old profile rows into a
+    // healthy fresh Power BI cohort: that resurrects removed agents.
+    var ftStamped=ftProfileRows.filter(function(p){
+      var ms=Date.parse(p&&p.powerbi_last_seen_at||"");
+      return Number.isFinite(ms)&&latestFtPbMs&&Math.abs(ms-latestFtPbMs)<=15*60000;
+    });
+    var ftActiveProfiles=ftStamped.filter(eligibleProfile);
     var currentCount=ftActiveProfiles.length;
-    var ftSourceLabel="Latest Power BI profiles";
-    // Prefer the current browser Power BI roster when present, then restore other
-    // eligible live profiles as provisional, retaining all current-stamped records.
+    var ftSourceLabel="Latest shared Power BI profiles";
     var saved=null;try{saved=typeof ctGetCurrentPowerBiSnapshot==="function"?ctGetCurrentPowerBiSnapshot():null;}catch(e){}
+    var localMs=Date.parse(saved&&saved.imported_at||"")||0;
     var localBy=saved&&saved.by_agent||{},profileByName={};
     ftProfileRows.forEach(function(p){profileByName[String(p.agent_name||"").trim().toUpperCase()]=p;});
     var rosterKeys=new Set(ftActiveProfiles.map(function(p){return String(p.agent_name||"").trim().toUpperCase();}));
-    var browserAdded=0;
-    Object.keys(localBy).forEach(function(k){
-      var row=localBy[k]||{},name=String(row.name||k).trim(),key=name.toUpperCase();
-      if(!key||rosterKeys.has(key))return;
-      var profile=profileByName[key]||{};
-      var merged=Object.assign({},profile,{agent_name:profile.agent_name||name,
-        powerbi_level:profile.powerbi_level||row.level||"",
-        closes_past_year:profile.closes_past_year||row.closed_12mo||0,
-        total_leads_past_year:profile.total_leads_past_year||row.total_leads_12mo||0});
-      if(!eligibleProfile(merged))return;
-      ftActiveProfiles.push(merged);rosterKeys.add(key);browserAdded++;
-    });
-    var profileAdded=0;
-    ftProfileRows.forEach(function(p){
-      var key=String(p.agent_name||"").trim().toUpperCase();
-      var level=String(p.tier||p.powerbi_level||"").trim().toUpperCase();
-      if(!key||rosterKeys.has(key)||!eligibleProfile(p)||!["CHANNEL","A","B","C"].includes(level))return;
-      ftActiveProfiles.push(p);rosterKeys.add(key);profileAdded++;
-    });
-    if(browserAdded||profileAdded)ftSourceLabel="Live active profiles + Power BI roster (some dates unverified)";
+    var browserAdded=0,profileAdded=0;
+    var localIsNewer=localMs>0&&(!latestFtPbMs||localMs>latestFtPbMs+15*60000);
+    // Only a timestamped, genuinely newer local upload can replace the server roster.
+    if(localIsNewer&&Object.keys(localBy).length){
+      ftActiveProfiles=[];rosterKeys.clear();
+      Object.keys(localBy).forEach(function(k){
+        var row=localBy[k]||{},name=String(row.name||k).trim(),key=name.toUpperCase();
+        if(!key||rosterKeys.has(key))return;
+        var profile=profileByName[key]||{};
+        var merged=Object.assign({},profile,{agent_name:name,
+          powerbi_level:row.level||profile.powerbi_level||"",
+          closes_past_year:row.closed_12mo??profile.closes_past_year??0,
+          total_leads_past_year:row.total_leads_12mo??profile.total_leads_past_year??0});
+        if(!eligibleProfile(merged))return;
+        ftActiveProfiles.push(merged);rosterKeys.add(key);browserAdded++;
+      });
+      ftSourceLabel="Newer Power BI upload in this browser (shared sync pending)";
+    }
+    // If the freshest server batch was partial/failed, show provisional profiles
+    // instead of a blank list. Never label that provisional data as current Power BI.
+    if(!ftActiveProfiles.length){
+      ftProfileRows.forEach(function(p){
+        var key=String(p.agent_name||"").trim().toUpperCase();
+        var level=String(p.tier||p.powerbi_level||"").trim().toUpperCase();
+        if(!key||rosterKeys.has(key)||!eligibleProfile(p)||!["CHANNEL","A","B","C"].includes(level))return;
+        ftActiveProfiles.push(p);rosterKeys.add(key);profileAdded++;
+      });
+      if(profileAdded)ftSourceLabel="Provisional eligible profiles (Power BI sync incomplete)";
+    }
     // A failed profile query must not make Face Time completely empty when LP
     // ownership data is available. Those rows are labeled provisional.
     var assignmentAdded=0;
