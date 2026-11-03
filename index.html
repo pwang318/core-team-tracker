@@ -8277,7 +8277,16 @@ async function ftSaveLog(agentName,formId){
   if(btn){btn.disabled=true;btn.textContent="Saving...";}
   try{
     await sbFetch("POST","break_breads",{agent_name:agentName,date:date,logged_by:by,notes:notes});
-    try{var mk=(window.FT_SCHEDULED_EVENTS||[]).filter(function(e){return String(e.agent_name||"").trim().toUpperCase()===String(agentName||"").trim().toUpperCase()&&e.status==="scheduled";}).sort(function(a,b){return String(a.event_date||"").localeCompare(String(b.event_date||""));})[0];if(mk)await sbFetch("PATCH","face_time_events?id=eq."+encodeURIComponent(mk.id),{status:"completed",completed_by:by,notes:notes||mk.notes||null,updated_at:new Date().toISOString()});}catch(syncErr){console.warn("Shared Face Time completion sync failed",syncErr);}
+    var appointmentSyncFailed=false;
+    try{
+      // Only complete an appointment that has occurred by the logged visit date.
+      // An upcoming booked visit is a separate commitment and must remain booked.
+      var mk=(window.FT_SCHEDULED_EVENTS||[]).filter(function(e){return String(e.agent_name||"").trim().toUpperCase()===String(agentName||"").trim().toUpperCase()&&e.status==="scheduled"&&String(e.event_date||"")<=date;}).sort(function(a,b){return String(b.event_date||"").localeCompare(String(a.event_date||""));})[0];
+      if(mk){
+        await sbFetch("PATCH","face_time_events?id=eq."+encodeURIComponent(mk.id),{status:"completed",completed_by:by,notes:notes||mk.notes||null,updated_at:new Date().toISOString()});
+        window.FT_SCHEDULED_EVENTS=(window.FT_SCHEDULED_EVENTS||[]).filter(function(e){return String(e.id)!==String(mk.id);});
+      }
+    }catch(syncErr){appointmentSyncFailed=true;console.warn("Shared Face Time completion sync failed",syncErr);}
     // Update ftData in memory
     var normalizedName=String(agentName||"").trim().toUpperCase();
     if(!ftData[normalizedName]||date>ftData[normalizedName].lastDate){
@@ -8286,7 +8295,7 @@ async function ftSaveLog(agentName,formId){
     document.getElementById(formId+"-notes").value="";
     document.getElementById(formId).classList.remove("show");
     renderFaceTime();
-    showToast("Visit logged for "+displayName(agentName)+" ✓","success");
+    showToast(appointmentSyncFailed?"Visit saved; appointment status could not sync. Please review the booking.":"Visit logged for "+displayName(agentName)+" ✓",appointmentSyncFailed?"error":"success");
   }catch(e){
     showToast("Save failed: "+e.message,"error");
   }finally{
