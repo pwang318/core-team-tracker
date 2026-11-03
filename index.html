@@ -12678,8 +12678,16 @@ window.lpv2Route=function(route,btn){
       if(route==='facetime'){
         activate('view-facetime',btn);
         if(typeof currentUser!=='undefined')currentUser='FaceTime';
-        if(typeof renderFaceTime==='function')renderFaceTime();
-        else if(typeof loadFaceTime==='function')await Promise.resolve(loadFaceTime()).catch(()=>{});
+        // v311: entering Face Time must FETCH the current roster before rendering.
+        // renderFaceTime alone only reads ftRosterRows, which starts as [] on page load.
+        if(typeof loadFaceTime==='function'){
+          try{await Promise.resolve(loadFaceTime());}
+          catch(e){
+            console.error('Face Time navigation load failed',e);
+            var notice=document.getElementById('ft-roster-notice');
+            if(notice){notice.style.display='block';notice.textContent='Face Time could not refresh: '+String(e&&e.message||e);}
+          }
+        }else if(typeof renderFaceTime==='function')renderFaceTime();
         return;
       }
       if(route==='leads'){
