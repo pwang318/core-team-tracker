@@ -7592,7 +7592,7 @@ function sharedFaceTimeWhy(r){
 // Explicit roster exclusion: Patrick Klein is no longer active. Preserve historical
 // activity; do not reintroduce him via an older Power BI export or fallback queue.
 function ctExcludedFromActiveAgentRoster(name){
-  return String(name||"").trim().replace(/\\s+/g," ").toUpperCase()==="PATRICK KLEIN";
+  return String(name||"").trim().replace(/\s+/g," ").toUpperCase()==="PATRICK KLEIN";
 }
 var ftData={};  // normalized agent name → {lastDate, source, notes}
 var ftVisitRows=[]; // all visit records used for month-to-date counts
