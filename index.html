@@ -10221,7 +10221,16 @@ async function ctHydrateSharedPowerBiSnapshot(){
 function pfrCurrentPowerBiSource(profiles,importRow,localSnapshot){
   var stamp=null;
   profiles.forEach(function(p){if(p.powerbi_last_seen_at&&(!stamp||Date.parse(p.powerbi_last_seen_at)>Date.parse(stamp)))stamp=p.powerbi_last_seen_at;});
-  var current=stamp?profiles.filter(function(p){return !ctExcludedFromActiveAgentRoster(p.agent_name)&&p.powerbi_last_seen_at&&Math.abs(Date.parse(p.powerbi_last_seen_at)-Date.parse(stamp))<120000;}):[];
+  var stamped=stamp?profiles.filter(function(p){return !ctExcludedFromActiveAgentRoster(p.agent_name)&&p.powerbi_last_seen_at&&Math.abs(Date.parse(p.powerbi_last_seen_at)-Date.parse(stamp))<120000;}):[];
+  // Multiple legacy profiles can refer to one real agent. Never count both.
+  var byAgent=new Map();
+  stamped.forEach(function(p){
+    var key=String(p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');
+    if(!key||/^__roster_delete_/i.test(key))return;
+    var existing=byAgent.get(key),lv=String(p.powerbi_level||'').toUpperCase();
+    if(!existing||(!['A','B','C'].includes(String(existing.powerbi_level||'').toUpperCase())&&['A','B','C'].includes(lv)))byAgent.set(key,p);
+  });
+  var current=Array.from(byAgent.values());
   var counts={A:0,B:0,C:0,Blank:0,Other:0,Channel:0};
   current.forEach(function(p){var level=String(p.powerbi_level||'').trim().toUpperCase();if(level==='A'||level==='B'||level==='C')counts[level]++;else if(!level)counts.Blank++;else counts.Other++;if(Number(p.closes_past_year||0)>=10)counts.Channel++;});
   var receipt=importRow?ctParsePowerBiSummaryFromSourceApp(importRow.source_app,importRow.imported_at):null;
