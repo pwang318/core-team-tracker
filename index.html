@@ -13594,6 +13594,10 @@ async function planState(lp){
   carry.forEach(r=>{
     const key=rowClassKey(r),cls=classMap[key]||classMap[rowMatchKey(r)]||'';if(cls!=='NEW_BUILD'||!key||seenBuildReviewKeys.has(key))return;seenBuildReviewKeys.add(key);
     const close=meta(r.notes,'TXN_CLOSE_DATE'),closeDays=close?Math.ceil((new Date(close+'T12:00:00')-new Date(todayIso+'T12:00:00'))/86400000):null;
+    // Do not ask LPs to complete pre-closing buyer consultations after closing.
+    // Also stop follow-ups when the latest source milestone explicitly says closed/funded.
+    const milestone=String(meta(r.notes,'TXN_MILESTONE')||'').trim();
+    if((closeDays!==null&&closeDays<0)||/\b(closed|funded|funding complete|loan funded)\b/i.test(milestone))return;
     const touches=(buildTouchLogs||[]).filter(a=>meta(a.notes,'BUILD_KEY')===key).sort((a,b)=>(Date.parse(b.act_date||b.created_at||0)||0)-(Date.parse(a.act_date||a.created_at||0)||0));
     const latestConsult=touches.find(a=>meta(a.notes,'BUILD_EVENT')==='CONSULT'&&a.outcome==='Completed')||null;
     const latestAttempt=touches.find(a=>a.outcome==='Attempted')||null;
