@@ -72,6 +72,14 @@ body{font-family:'Geist','Inter',-apple-system,sans-serif;color:var(--text);font
 .ft-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .ft-row:last-child{border-bottom:none}
 /* Face Time list polish: readable rows, consistent action sizing and no visual clutter */
+#ft-list .ft-lane-summary{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 20px}
+#ft-list .ft-lane-summary span{padding:9px 13px;background:#f0f5f9;border:1px solid #dce6ee;border-radius:9px;font-size:12px;color:#29425c}
+#ft-list .ft-lane-summary b{font-size:16px;color:#102b4b}
+#ft-list .ft-lane-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#f2f6fa;border-left:4px solid;padding:12px 15px;margin-top:20px}
+#ft-list .ft-lane-head strong{font-size:13px;font-weight:800;text-transform:none;letter-spacing:0}
+#ft-list .ft-lane-head span{font-size:11px;letter-spacing:0;text-transform:none;font-weight:500;color:#62768a}
+#ft-list .ft-agent-context{display:block;margin-top:4px;font-size:10.5px;font-weight:500;color:#718096;line-height:1.45}
+
 #ft-list .ft-tier-hdr{margin-top:22px;padding:11px 12px;background:#f5f8fb;border-radius:8px 8px 0 0;letter-spacing:.4px;font-size:11px}
 #ft-list .ft-row{gap:10px 13px;padding:12px 10px;border-bottom:1px solid #e6edf2;min-height:50px}
 #ft-list .ft-row:hover{background:#f5f9fc}
@@ -7670,7 +7678,7 @@ function ftAgentRows(){
     var ft=ftData[(name||"").trim().toUpperCase()],days=null;
     if(ft&&ft.lastDate)days=Math.max(0,Math.round((now-new Date(ft.lastDate+"T12:00:00"))/86400000));
     var target=FT_TARGETS[tier]||FT_TARGETS.C;
-    var sched=(window.FT_SCHEDULED_EVENTS||[]).filter(function(x){return String(x.agent_name||"").trim().toUpperCase()===String(name||"").trim().toUpperCase()&&x.status==="scheduled";}).sort(function(a,b){return String(a.event_date||"").localeCompare(String(b.event_date||""));})[0]||null;
+    var sched=(window.FT_SCHEDULED_EVENTS||[]).filter(function(x){return String(x.agent_name||"").trim().toUpperCase()===String(name||"").trim().toUpperCase()&&x.status==="scheduled"&&String(x.event_date||"")>=today2();}).sort(function(a,b){return String(a.event_date||"").localeCompare(String(b.event_date||""));})[0]||null;
     var leadDate=e.latest_lead_date?String(e.latest_lead_date).slice(0,10):null,daysLead=leadDate?Math.max(0,Math.floor((now-new Date(leadDate+"T12:00:00"))/86400000)):null;
     var row={name:name,tier:tier,lp:lp,rm:e.rm||"Unassigned",days:days,status:ftStatus(tier,days),target:target,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name],scheduled:sched,competitor_risk_flag:!!e.competitor_risk_flag,high_potential_flag:!!e.high_potential_flag,next_growth_opportunity:e.next_growth_opportunity||"",daysLead:daysLead,closes_past_year:e.closes_past_year||0,total_leads_past_year:e.total_leads_past_year||0};
     row.priorityScore=sharedFaceTimePriorityScore(row);row.priorityWhy=sharedFaceTimeWhy(row);return row;
@@ -8152,39 +8160,48 @@ function renderFaceTime(){
   if(!agentList.length){listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px">No agents match these filters</div>';return;}
 
   var tierColors={Channel:"#1E3A8A",A:"#B45309",B:"#1D4ED8",C:"#64748B"};
-  var tierLabels={
-    Channel:"Channel — target every 14 days · 🟡 10d · 🔴 14d · 🚨 21d",
-    A:"A-Tier — target every 14 days · 🟡 10d · 🔴 14d · 🚨 21d",
-    B:"B-Tier — target every 30 days · 🟡 21d · 🔴 30d · 🚨 45d",
-    C:"C-Tier — target every 60 days · 🟡 45d · 🔴 60d · 🚨 90d"
-  };
   var lpColors={Gavin:"#3D4E68",Karen:"#3D4E68",Osgood:"#3D4E68",Jordan:"#3D4E68",Said:"#3D4E68",Isaak:"#3D4E68"};
-
-  // Build rows using DOM-safe approach (no inline onclick with dynamic strings)
-  var rows=[];
-  ["Channel","A","B","C"].forEach(function(tier){
-    var tList=agentList.filter(function(a){return a.tier===tier;});
-    if(!tList.length)return;
-    rows.push({type:"hdr",tier:tier,label:tierLabels[tier],count:tList.length,color:tierColors[tier]});
-    tList.forEach(function(a,i){
-      var target=FT_TARGETS[tier];
+  // Group by next action rather than tier. Keep tier visible on every row.
+  // A booked appointment does not mean a visit has happened; it stays in the booked lane.
+  var laneFor=function(a){
+    if(a.scheduled)return"booked";
+    if(a.days===null||a.days>=a.target-7)return"attention";
+    return"track";
+  };
+  var lanes=[
+    {id:"attention",title:"Needs attention",help:"No visit recorded, overdue, or due within 7 days",color:"#b53832"},
+    {id:"booked",title:"Visits booked",help:"Scheduled visits waiting to happen",color:"#286548"},
+    {id:"track",title:"On track",help:"Next visit is more than 7 days away",color:"#37617c"}
+  ];
+  var rows=[],laneCounts={attention:0,booked:0,track:0};
+  lanes.forEach(function(lane){
+    var members=agentList.filter(function(a){return laneFor(a)===lane.id;});
+    laneCounts[lane.id]=members.length;
+    if(!members.length)return;
+    members.sort(function(a,b){
+      if(lane.id==="booked")return String(a.scheduled.event_date||"").localeCompare(String(b.scheduled.event_date||""))||String(a.name).localeCompare(String(b.name));
+      if(lane.id==="attention"){var gapA=a.days===null?999:a.days-a.target,gapB=b.days===null?999:b.days-b.target;return gapB-gapA||(b.priorityScore-a.priorityScore)||String(a.name).localeCompare(String(b.name));}
+      return (a.target-a.days)-(b.target-b.days)||String(a.name).localeCompare(String(b.name));
+    });
+    rows.push({type:"hdr",lane:lane,count:members.length});
+    members.forEach(function(a,i){
+      var target=a.target;
       var nextLabel=a.days===null?"First visit needed":a.days<target?"Due in "+(target-a.days)+"d":a.days===target?"Due today":"Overdue "+(a.days-target)+"d";
-      var overdue=a.days===null||a.days>target;
-      rows.push({type:"agent",a:a,target:target,nextLabel:nextLabel,overdue:overdue,lc:lpColors[a.lp]||"#888",formId:"ftf"+tier+i});
+      rows.push({type:"agent",a:a,target:target,nextLabel:nextLabel,overdue:!a.scheduled&&(a.days===null||a.days>target),lc:lpColors[a.lp]||"#888",formId:"ftf"+lane.id+i});
     });
   });
 
   // Build HTML string — all onclick use data attrs, no dynamic string in onclick
-  var html2="";
+  var html2='<div class="ft-lane-summary"><span><b>'+laneCounts.attention+'</b> need attention</span><span><b>'+laneCounts.booked+'</b> booked</span><span><b>'+laneCounts.track+'</b> on track</span></div>';
   rows.forEach(function(r){
     if(r.type==="hdr"){
-      html2+='<div class="ft-tier-hdr" style="color:'+r.color+';border-color:'+r.color+'">'+r.label+' <span style="font-weight:400;font-size:9px;margin-left:8px">('+r.count+' agents)</span></div>';
+      html2+='<div class="ft-tier-hdr ft-lane-head" style="color:'+r.lane.color+';border-color:'+r.lane.color+'"><strong>'+r.lane.title+' ('+r.count+')</strong><span>'+r.lane.help+'</span></div>';
     } else {
       var a=r.a,fid=r.formId;
       var coBadge=a.coMkt?'<span class="co-mkt-tag" style="cursor:pointer" data-name="'+escHtml(a.name)+'" data-active="true">Co-marketing ✓</span>':'<span class="ft-comkt-off" data-name="'+escHtml(a.name)+'" data-active="false" style="cursor:pointer;font-size:10px;color:var(--text-3);border:1px dashed var(--border);border-radius:4px;padding:2px 8px">+ Co-marketing</span>';
       var rowStyle=a.coMkt?' style="background:#FAF7F2;border-left:3px solid #B45309;padding-left:8px;margin-left:-11px"':'';
       html2+='<div class="ft-row"'+rowStyle+'>'
-        +'<div class="ft-name">'+escHtml(displayName(a.name))+'</div>'
+        +'<div class="ft-name">'+escHtml(displayName(a.name))+'<small class="ft-agent-context">'+escHtml(a.tier==='Channel'?'Channel':a.tier+'-Tier')+' · Every '+r.target+' days'+(a.priorityWhy?' · '+escHtml(a.priorityWhy):'')+'</small></div>'
         +'<span style="font-size:11px;font-weight:600;color:'+r.lc+';min-width:50px">'+a.lp+'</span>'
         +'<span class="ft-days '+a.status+'">'+(a.days===null?"No visit":a.days===0?"Today":a.days+"d ago")+'</span>'
         +'<span class="ft-meta">'+(a.lastDate?"Last visit: "+fmtDate(a.lastDate)+(a.source?" · "+escHtml(displayName(a.source)):""):"No visits logged")+'</span>'
