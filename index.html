@@ -7605,7 +7605,7 @@ async function loadFaceTime(){
       ftSafe("RM visit history",sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=4000")),
       sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
       loadCoMarketing(),
-      ftSafe("Agent profiles",sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,do_not_contact,relationship_status&limit=5000");}).catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,do_not_contact,relationship_status&limit=5000");})),
+      ftSafe("Agent profiles",sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(e){ftSourceErrors.push("Full profile query unavailable: "+String(e&&e.message||e));return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,do_not_contact,relationship_status&limit=5000");}).catch(function(e){ftSourceErrors.push("Profile fallback query unavailable: "+String(e&&e.message||e));return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,do_not_contact,relationship_status&limit=5000");})),
       ftSafe("LP assignments",sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000")),
       sbFetch("GET","face_time_events?select=*&status=eq.scheduled&event_date=gte."+today2()+"&order=event_date.asc,event_time.asc&limit=1000").catch(function(){return[];})
     ]);
@@ -7659,45 +7659,72 @@ async function loadFaceTime(){
         &&String(p.relationship_type||"realtor").toLowerCase()!=="strategic_partner"
         &&String(p.lp_outreach_status||"active").toLowerCase()!=="nurture";
     };
+    // v310: The Power BI importer can stamp individual profile rows at different times.
+    // Do not silently remove valid active relationships because they missed a 2-minute window.
     var ftActiveProfiles=ftProfileRows.filter(function(p){return eligibleProfile(p)&&ftIsCurrentPowerBiRow(p);});
+    var currentCount=ftActiveProfiles.length;
+    var ftSourceLabel="Latest Power BI profiles";
+    // Prefer the current browser Power BI roster when present, then restore other
+    // eligible live profiles as provisional, retaining all current-stamped records.
+    var saved=null;try{saved=typeof ctGetCurrentPowerBiSnapshot==="function"?ctGetCurrentPowerBiSnapshot():null;}catch(e){}
+    var localBy=saved&&saved.by_agent||{},profileByName={};
+    ftProfileRows.forEach(function(p){profileByName[String(p.agent_name||"").trim().toUpperCase()]=p;});
+    var rosterKeys=new Set(ftActiveProfiles.map(function(p){return String(p.agent_name||"").trim().toUpperCase();}));
+    var browserAdded=0;
+    Object.keys(localBy).forEach(function(k){
+      var row=localBy[k]||{},name=String(row.name||k).trim(),key=name.toUpperCase();
+      if(!key||rosterKeys.has(key))return;
+      var profile=profileByName[key]||{};
+      var merged=Object.assign({},profile,{agent_name:profile.agent_name||name,
+        powerbi_level:profile.powerbi_level||row.level||"",
+        closes_past_year:profile.closes_past_year||row.closed_12mo||0,
+        total_leads_past_year:profile.total_leads_past_year||row.total_leads_12mo||0});
+      if(!eligibleProfile(merged))return;
+      ftActiveProfiles.push(merged);rosterKeys.add(key);browserAdded++;
+    });
+    var profileAdded=0;
+    ftProfileRows.forEach(function(p){
+      var key=String(p.agent_name||"").trim().toUpperCase();
+      var level=String(p.tier||p.powerbi_level||"").trim().toUpperCase();
+      if(!key||rosterKeys.has(key)||!eligibleProfile(p)||!["CHANNEL","A","B","C"].includes(level))return;
+      ftActiveProfiles.push(p);rosterKeys.add(key);profileAdded++;
+    });
+    if(browserAdded||profileAdded)ftSourceLabel="Live active profiles + Power BI roster (some dates unverified)";
+    // A failed profile query must not make Face Time completely empty when LP
+    // ownership data is available. Those rows are labeled provisional.
+    var assignmentAdded=0;
     if(!ftActiveProfiles.length){
-      // A partially uploaded Power BI file must not erase the active worklist.
-      var saved=null;try{saved=typeof ctGetCurrentPowerBiSnapshot==="function"?ctGetCurrentPowerBiSnapshot():null;}catch(e){}
-      var localBy=saved&&saved.by_agent||{},profileByName={};
-      ftProfileRows.forEach(function(p){profileByName[String(p.agent_name||"").trim().toUpperCase()]=p;});
-      ftActiveProfiles=Object.keys(localBy).map(function(k){
-        var row=localBy[k]||{},name=String(row.name||k),profile=profileByName[name.trim().toUpperCase()]||{};
-        return Object.assign({},profile,{agent_name:profile.agent_name||name,
-          powerbi_level:profile.powerbi_level||row.level||"",
-          closes_past_year:profile.closes_past_year||row.closed_12mo||0,
-          total_leads_past_year:profile.total_leads_past_year||row.total_leads_12mo||0});
-      }).filter(eligibleProfile);
-      if(ftActiveProfiles.length)ftSourceLabel="Browser Power BI roster (verify latest upload)";
-    }
-    if(!ftActiveProfiles.length){
-      // Last resort: the existing assigned active profile population is
-      // provisional and clearly labeled; never call it verified Power BI.
-      ftActiveProfiles=ftProfileRows.filter(function(p){
-        return eligibleProfile(p)&&["CHANNEL","A","B","C"].includes(String(p.tier||p.powerbi_level||"").trim().toUpperCase());
+      (r[4]||[]).forEach(function(a){
+        var name=String(a.agent_name||"").trim(),key=name.toUpperCase();
+        if(!name||rosterKeys.has(key)||a.lp==="__REMOVED__"||
+          (typeof ctRosterRemoved==="function"&&ctRosterRemoved(name))||
+          (typeof ctInactiveRosterNames!=="undefined"&&ctInactiveRosterNames.has(name.toLowerCase())))return;
+        var p=profileByName[key];
+        if(p&&!eligibleProfile(p))return;
+        ftActiveProfiles.push(Object.assign({},p||{},{
+          agent_name:name,tier:p&&p.tier||"C",powerbi_level:p&&p.powerbi_level||"C",
+          _fallbackLp:a.lp||"Unassigned"
+        }));
+        rosterKeys.add(key);assignmentAdded++;
       });
-      if(ftActiveProfiles.length)ftSourceLabel="Active agent profiles (Power BI date unverified)";
+      if(assignmentAdded)ftSourceLabel="Provisional LP assignments (Power BI not verified)";
     }
-    // Restore provisional coverage from the existing assignment-backed roster
-    // if Power BI/profile sources are currently unavailable.
     if(!ftActiveProfiles.length){
       var legacy=Array.isArray(agents)?agents:[],seenLegacy=new Set();
       ftActiveProfiles=legacy.filter(function(a){
         var name=String(a&&a[0]||"").trim(),key=name.toUpperCase(),owner=ownerMap[key]||{};
-        if(!name||seenLegacy.has(key)||owner.removed)return false;
-        seenLegacy.add(key);
-        return true;
+        if(!name||seenLegacy.has(key)||owner.removed||
+          (typeof ctRosterRemoved==="function"&&ctRosterRemoved(name))||
+          (typeof ctInactiveRosterNames!=="undefined"&&ctInactiveRosterNames.has(name.toLowerCase())))return false;
+        seenLegacy.add(key);return true;
       }).map(function(a){
         var name=String(a[0]).trim(),owner=ownerMap[name.toUpperCase()]||{};
         return {agent_name:name,tier:a[1]||"C",powerbi_level:a[1]||"C",
           _fallbackLp:owner.lp||a[2]||"Unassigned",closes_past_year:a[8]||0};
       });
-      if(ftActiveProfiles.length)ftSourceLabel="Provisional assigned roster (Power BI not verified)";
+      if(ftActiveProfiles.length)ftSourceLabel="Provisional cached roster (Power BI not verified)";
     }
+    if(!currentCount&&ftActiveProfiles.length)ftSourceErrors.push("No current-stamped Power BI profiles; showing clearly labeled fallback.");
     var uniqueFt=new Map();
     ftActiveProfiles.forEach(function(p){
       var k=String(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{},
