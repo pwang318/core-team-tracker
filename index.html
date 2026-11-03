@@ -10234,10 +10234,20 @@ async function pfrLoad(){
       return(order[a.tier]!==undefined?order[a.tier]:4)-(order[b.tier]!==undefined?order[b.tier]:4);
     }).slice(0,10);
 
-    var rated=rows.filter(function(r){return r.satisfaction!==null;});
-    var avgSatisfaction=rated.length?(rated.reduce(function(s,r){return s+r.satisfaction;},0)/rated.length).toFixed(1):null;
-    var lowSatisfaction=rows.filter(function(r){return r.satisfaction!==null&&r.satisfaction<=2;});
-    var ratedCoverage=totalActive?Math.round(rated.length/totalActive*100):0;
+    // Satisfaction coverage follows the complete latest Power BI A/B/C population,
+    // NOT the narrower 90-day managed relationships subset.
+    var satisfactionPopulation=currentPowerBiAgents.filter(function(a){
+      return ['A','B','C'].includes(String(a.powerbi_level||'').trim().toUpperCase());
+    });
+    var rated=satisfactionPopulation.map(function(a){
+      var v=a.satisfaction_rating,n=Number(v);
+      return {name:a.agent_name,tier:a.tier||a.powerbi_level,
+        satisfaction:v!==null&&v!==undefined&&String(v).trim()!==''&&Number.isFinite(n)&&n>=1&&n<=5?n:null};
+    }).filter(function(a){return a.satisfaction!==null;});
+    var avgSatisfaction=rated.length?(rated.reduce(function(sum,r){return sum+r.satisfaction;},0)/rated.length).toFixed(1):null;
+    var lowSatisfaction=rated.filter(function(r){return r.satisfaction<=2;});
+    var ratedCoverage=powerBiActiveCount?Math.round(rated.length/powerBiActiveCount*100):0;
+    var satisfactionSyncGap=Math.max(0,powerBiActiveCount-satisfactionPopulation.length);
     var highPotential=active.filter(function(a){return a.high_potential_flag&&String(a.next_growth_opportunity||"").trim();});
     var highPotentialNeedsReason=active.filter(function(a){return a.high_potential_flag&&!String(a.next_growth_opportunity||"").trim();});
 
@@ -10437,7 +10447,7 @@ async function pfrLoad(){
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:6px">Recorded Partner Satisfaction — Small Sample</div>'
-      +(avgSatisfaction?'<div style="font-size:24px;font-weight:800;color:'+(avgSatisfaction>=4?"#3E8E5A":avgSatisfaction>=3?"#B8842B":"#B54B42")+'">'+avgSatisfaction+'<span style="font-size:13px;font-weight:600;color:var(--text-3)"> / 5 avg</span></div><div style="font-size:10.5px;color:var(--text-3);margin-top:2px">'+rated.length+' of '+totalActive+' managed partners rated ('+ratedCoverage+'% coverage; Power BI population: '+powerBiActiveCount+')</div><div style="font-size:11px;color:var(--text-3);margin-top:7px">Average of recorded 1–5 scores only. Not a rating for all Power BI agents. '+(rated.length<10?'Fewer than 10 ratings; do not treat this as a representative satisfaction score.':'Interpret cautiously when response coverage is low.')+'</div><button type="button" onclick="pfrOpenDrill(\'satisfaction\')" style="cursor:pointer;margin-top:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:11px;font-weight:700">See the '+rated.length+' individual ratings</button>'
+      +(avgSatisfaction?'<div style="font-size:24px;font-weight:800;color:'+(avgSatisfaction>=4?"#3E8E5A":avgSatisfaction>=3?"#B8842B":"#B54B42")+'">'+avgSatisfaction+'<span style="font-size:13px;font-weight:600;color:var(--text-3)"> / 5 avg</span></div><div style="font-size:10.5px;color:var(--text-3);margin-top:2px">'+rated.length+' of '+powerBiActiveCount+' Power BI active agents rated ('+ratedCoverage+'% coverage)</div><div style="font-size:11px;color:var(--text-3);margin-top:7px">Average of recorded 1–5 scores from Power BI active agents only. Unrated agents are excluded from the average. '+(satisfactionSyncGap?'Agent profile sync incomplete for '+satisfactionSyncGap+' active agents. ':'')+'+(rated.length<10?'Fewer than 10 ratings; do not treat this as a representative satisfaction score.':'Interpret cautiously when response coverage is low.')+'</div><button type="button" onclick="pfrOpenDrill(\'satisfaction\')" style="cursor:pointer;margin-top:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:11px;font-weight:700">See the '+rated.length+' individual ratings</button>'
         :'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:6px 0">No satisfaction ratings set yet.</div>')
       +(lowSatisfaction.length?'<div onclick="pfrOpenDrill(\'lowsat\')" style="cursor:pointer;margin-top:10px;background:#FBF3F3;border:1px solid #F0AFAF;border-radius:8px;padding:10px 12px;font-size:12px;color:#B54B42;font-weight:600">&#9888; '+lowSatisfaction.length+' partner'+(lowSatisfaction.length!==1?"s":"")+' rated 1&ndash;2. Click to view &rarr;</div>':'')
     +'</div>';
@@ -10495,7 +10505,7 @@ async function pfrLoad(){
       'Referral pace':meetingLeadsMTD+' partner referrals MTD',
       'Tier movement':(migCtoB+migBtoA+migAtoChannel+migOther)+' changes · '+range.label,
       'Proactive watch':proactiveWatch.length+' partners on watch',
-      'Partner satisfaction':rated.length?avgSatisfaction+' / 5 · '+rated.length+'/'+totalActive+' managed rated ('+ratedCoverage+'%)':'No ratings recorded',
+      'Partner satisfaction':rated.length?avgSatisfaction+' / 5 · '+rated.length+'/'+powerBiActiveCount+' active agents rated':'0 of '+powerBiActiveCount+' active agents rated',
       'High-potential partners':highPotential.length+' documented · '+highPotentialNeedsReason.length+' needs reason',
       'Growth plans':growthPlanTotal?growthPlanMissingCount+' of '+growthPlanTotal+' missing a plan':'No active roster available',
       'Meeting cadence':meetingCadenceEligible.length?(meetingCadenceEligible.length-meetingCompliant)+' of '+meetingCadenceEligible.length+' due':'No partners on cadence',
@@ -10666,8 +10676,8 @@ function pfrOpenDrill(key){
   if(key==="satisfaction"){
     title.textContent="Recorded Partner Satisfaction — Respondents";
     var respondents=(pfrDrill.ratedPartners||[]).slice().sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
-    var managedCount=pfrDrill.totalActive||0, allPowerBi=pfrDrill.powerBiActiveCount||0;
-    body.innerHTML='<div style="padding:12px 16px;background:var(--surface-2);font-size:12px;line-height:1.6"><b>'+respondents.length+'</b> of <b>'+managedCount+'</b> managed partners have a valid 1–5 rating. The larger Power BI active-agent population is <b>'+allPowerBi+'</b>. This is a limited sample, not a verified survey of the full population. Ratings come from agent profile records; dates and survey methodology are not currently tracked.</div>'+respondents.map(function(r,i){return pfrListRow(i+1,r.name,escHtml(pfrTierLabel(r.tier))+' · recorded rating: '+r.satisfaction+' / 5');}).join('');
+    var allPowerBi=pfrDrill.powerBiActiveCount||0;
+    body.innerHTML='<div style="padding:12px 16px;background:var(--surface-2);font-size:12px;line-height:1.6"><b>'+respondents.length+'</b> of <b>'+allPowerBi+'</b> Power BI active agents have a valid 1–5 rating. This is a limited sample, not a verified survey of the full population. Ratings come from agent profile records; dates and survey methodology are not currently tracked.</div>'+respondents.map(function(r,i){return pfrListRow(i+1,r.name,escHtml(pfrTierLabel(r.tier))+' · recorded rating: '+r.satisfaction+' / 5');}).join('');
     overlay.style.display='flex';return;
   }else if(key==="lowsat"){
     title.textContent="Low Satisfaction / Support Rating";
