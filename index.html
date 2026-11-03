@@ -10471,7 +10471,23 @@ async function pfrLoad(){
     
 
     body.innerHTML=html;
-    pfrCompactOverview(body);
+    pfrCompactOverview(body,{
+      'Meeting brief':meetingExportData.score+' weighted score',
+      'Power BI reconciliation':powerBiActiveCount+' active agents',
+      'Pipeline signals':pbSnapshot?pbPipeline.pipelineTotal+' in pipeline · '+pbPipeline.prequalsTotal+' active prequals':'Pipeline data unavailable',
+      'Managed relationship tiers':totalActive+' managed relationships',
+      'Referral pace':meetingLeadsMTD+' partner referrals MTD',
+      'Tier movement':(migCtoB+migBtoA+migAtoChannel+migOther)+' changes · '+range.label,
+      'Proactive watch':proactiveWatch.length+' partners on watch',
+      'Partner satisfaction':rated.length?avgSatisfaction+' / 5 · '+rated.length+' rated':'No ratings recorded',
+      'High-potential partners':highPotential.length+' flagged',
+      'Growth plans':growthPlanTotal?growthPlanMissingCount+' of '+growthPlanTotal+' missing a plan':'No active roster available',
+      'Meeting cadence':meetingCadenceEligible.length?(meetingCadenceEligible.length-meetingCompliant)+' of '+meetingCadenceEligible.length+' due':'No partners on cadence',
+      'Growth next steps':top10GrowthOpp.length+' opportunities listed',
+      'Service recovery':periodActs.filter(function(a){return a.act_type==='Service Recovery'}).length+' logged · '+range.label,
+      'Partner feedback':periodActs.filter(function(a){return a.act_type==='Partner Feedback'}).length+' logged · '+range.label,
+      'Leadership escalations':escalations.length+' flagged · '+range.label
+    });
     body._portfolioCards[0]._portfolioExportData=meetingExportData;
     pfrRestoreMeetingDecisions(body._portfolioCards[0]);
   }catch(e){
@@ -10481,7 +10497,7 @@ async function pfrLoad(){
 }
 window.pfrLoad=pfrLoad;
 window.pfrGetHealthRows=function(){return Array.isArray(pfrDrill.rows)?pfrDrill.rows:null;};
-function pfrCompactOverview(body){
+function pfrCompactOverview(body,summaries){
   var cards=Array.from(body.children);if(!cards.length)return;
   var titles=[
     {label:'Power BI reconciliation',find:'Power BI → Tracker Reconciliation',group:'numbers'},
@@ -10493,16 +10509,20 @@ function pfrCompactOverview(body){
     {label:'Partner health',find:'Partner Health',group:'relationships'},
     {label:'Partner satisfaction',find:'Partner Satisfaction',group:'relationships'},
     {label:'High-potential partners',find:'High-Potential Agents',group:'relationships'},
-    {label:'Growth plans',find:'Growth Opportunity Coverage',group:'relationships'},
+    {label:'Growth plans',find:'Growth Plans',group:'relationships'},
     {label:'Meeting cadence',find:'Meeting Cadence Compliance',group:'relationships'},
     {label:'Growth next steps',find:'Top 10 Growth Opportunities',group:'activity'},
     {label:'Service recovery',find:'Service Recovery Themes',group:'activity'},
     {label:'Partner feedback',find:'Partner Feedback Themes',group:'activity'},
     {label:'Leadership escalations',find:'Required Leadership Escalations',group:'activity'}
   ];
-  var sourceByGroup={numbers:'Power BI / Velocify',relationships:'Tracker + Velocify',activity:'Tracker logs'};
-  var sourceByLabel={'Power BI reconciliation':'Power BI','Pipeline signals':'Power BI','Managed relationship tiers':'Power BI + tracker','Referral pace':'Velocify + Power BI','Tier movement':'Power BI + tracker','Partner health':'Tracker + Velocify','Growth plans':'Power BI + tracker'};
-  var nav=document.createElement('div');nav.className='lp-portfolio-dashboard-grid';
+  var nav=document.createElement('div');nav.className='pfr-overview';
+  var groups={};
+  [['Start here','Meeting preparation'],['numbers','Portfolio performance'],['relationships','Partner follow-up'],['activity','Actions and feedback']].forEach(function(pair){
+    var section=document.createElement('section'), title=document.createElement('h3'), grid=document.createElement('div');
+    title.textContent=pair[1];grid.className='pfr-overview-grid';
+    section.append(title,grid);nav.append(section);groups[pair[0]]=grid;
+  });
   var detail=document.createElement('section');detail.className='lp-portfolio-active-detail';
   cards.forEach(function(card,i){
     var heading=(card.firstElementChild&&card.firstElementChild.textContent||'').trim();
@@ -10510,9 +10530,9 @@ function pfrCompactOverview(body){
     // v90: Health scoring is temporarily removed from Portfolio until its source logic is rebuilt.
     if(entry.label==='Partner health'){ card.style.display='none'; return; }
     var tile=document.createElement('button');tile.type='button';tile.className='lp-portfolio-topic-tile';tile.dataset.portfolioTopic=String(i);tile.setAttribute('aria-expanded','false');
-    var source=sourceByLabel[entry.label]||sourceByGroup[entry.group]||'Power BI + tracker';
-    tile.innerHTML='<strong>'+escHtml(entry.label)+'</strong><span>'+escHtml(source)+(source.indexOf('Power BI')>=0&&body.dataset.powerBiStamp?' · '+escHtml(body.dataset.powerBiStamp):'')+' · Open →</span>';
-    nav.appendChild(tile);
+    var label=document.createElement('strong'),metric=document.createElement('span'),arrow=document.createElement('span');
+    label.textContent=entry.label;metric.textContent=summaries[entry.label]||'View details';arrow.textContent='›';arrow.setAttribute('aria-hidden','true');arrow.className='pfr-arrow';
+    tile.append(label,metric,arrow);groups[entry.group].append(tile);
     card.querySelectorAll('[onclick]').forEach(function(control){
       if(control.matches('a,button,[role="button"]'))return;
       control.setAttribute('role','button');control.setAttribute('tabindex','0');
@@ -11283,6 +11303,13 @@ async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId
 }
 .lp-portfolio-tabs button.active{background:#fff;color:#071B37;box-shadow:0 2px 7px rgba(35,51,73,.09)}
 .lp-portfolio-panel{display:none}.lp-portfolio-panel.active{display:block}
+.pfr-overview{display:grid;gap:16px;margin-bottom:14px}
+.pfr-overview h3{margin:0 0 8px;color:#304c69;font-size:14px}
+.pfr-overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));gap:8px}
+.pfr-overview .lp-portfolio-topic-tile{position:relative;min-height:64px;padding:10px 32px 10px 14px}
+.pfr-overview .lp-portfolio-topic-tile span{font-size:13px;margin-top:3px}
+.pfr-overview .lp-portfolio-topic-tile .pfr-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:20px;margin:0;color:#456888}
+.pfr-overview section:first-child .lp-portfolio-topic-tile{background:#edf5fa;border-left:4px solid #28577d}
 .lp-portfolio-dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 14px}
 .lp-portfolio-dashboard-grid button,.lp-portfolio-topic-tile{font:inherit;text-align:left;border:1px solid #C9D7E4;border-radius:12px;background:#fff;padding:16px;cursor:pointer;min-height:94px;box-shadow:0 2px 8px rgba(7,27,55,.04)}
 .lp-portfolio-dashboard-grid button strong,.lp-portfolio-topic-tile strong{display:block;color:#071B37;font-size:14px}
