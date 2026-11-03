@@ -10228,7 +10228,14 @@ function pfrCurrentPowerBiSource(profiles,importRow,localSnapshot){
   var receiptMs=Date.parse(receipt&&receipt.imported_at||'')||0,profileMs=Date.parse(stamp||'')||0;
   var useReceipt=!!receipt&&(!profileMs||receiptMs>=profileMs-15*60*1000);
   if(!useReceipt&&!profileMs)throw new Error('No current shared Power BI upload is available. Upload the report in Weekly Data Hub.');
-  var source=useReceipt?receipt:null,levels=source?source.levels:counts,sourceStamp=source?source.imported_at:stamp;
+  // Agent-level stamped records are authoritative for active membership. An import
+  // receipt is aggregate-only and can include an unclassified/removed agent.
+  // Retain its pipeline numbers, but never let it override a reconciled roster.
+  var cohortTotal=Number(counts.A||0)+Number(counts.B||0)+Number(counts.C||0);
+  var receiptTotal=receipt?Number(receipt.levels.A||0)+Number(receipt.levels.B||0)+Number(receipt.levels.C||0):0;
+  var receiptMismatch=!!receipt&&cohortTotal>0&&receiptTotal!==cohortTotal;
+  var source=useReceipt?receipt:null,levels=(cohortTotal>0?counts:(source?source.levels:counts)),
+      sourceStamp=(cohortTotal>0?stamp:(source?source.imported_at:stamp));
   var snapMs=Date.parse(localSnapshot&&localSnapshot.imported_at||'')||0;
   var matchingLocal=localSnapshot&&snapMs&&Math.abs(snapMs-Date.parse(sourceStamp))<15*60*1000&&
     ['A','B','C'].every(function(k){return Number(localSnapshot.levels&&localSnapshot.levels[k]||0)===Number(levels[k]||0);});
@@ -10238,7 +10245,8 @@ function pfrCurrentPowerBiSource(profiles,importRow,localSnapshot){
   var profileTotal=Number(counts.A||0)+Number(counts.B||0)+Number(counts.C||0);
   return {levels:levels,stamp:sourceStamp,rawRows:source?source.raw_rows:(detail?detail.raw_rows:null),
     pipeline:source||detail,detail:detail,profiles:current,profileTotal:profileTotal,total:total,
-    syncNote:profileTotal!==total?'Agent-level shared profiles show '+profileTotal+' of '+total+' active Power BI agents. Agent lists and relationship metrics are partial until the shared import catches up.':'',
+    syncNote:receiptMismatch?'Import receipt reports '+receiptTotal+' agents but the current classified roster contains '+cohortTotal+'. Using the agent-level roster; receipt needs reconciliation.':(profileTotal!==total?'Agent-level profiles show '+profileTotal+' of '+total+' active Power BI agents.':''),
+    receiptMismatch:receiptMismatch,
     source:source?'shared Power BI import receipt':'latest shared Power BI agent profiles'};
 }
 window.pfrCurrentPowerBiSource=pfrCurrentPowerBiSource;
@@ -10322,10 +10330,21 @@ async function pfrLoad(){
     var pbSource=pfrCurrentPowerBiSource(allAgents,lastImportLog,localPbSnapshot);
     var sharedPopulation=await window.ctGetLivePowerBiSummary(false);
     if(sharedPopulation && sharedPopulation.source_levels && Number(sharedPopulation.active_partner_rows)>0){
-      var sourceLevels=Object.assign({},pbSource.levels,sharedPopulation.source_levels);
-      pbSource.levels=sourceLevels;pbSource.total=Number(sharedPopulation.active_partner_rows);
-      pbSource.stamp=sharedPopulation.stamp||pbSource.stamp;pbSource.rawRows=sharedPopulation.raw_rows;
-      pbSource.syncNote=pbSource.profileTotal!==pbSource.total?'The uploaded roster has '+pbSource.total+' active agents. Shared profiles cover '+pbSource.profileTotal+' agents.':'';
+      // Do not replace a verified name-by-name roster with an aggregate or
+      // localStorage summary of a different (possibly older) import.
+      var summaryCount=Number(sharedPopulation.active_partner_rows);
+      var rosterCount=Number(pbSource.profileTotal||0);
+      var summaryStamp=Date.parse(sharedPopulation.stamp||'')||0;
+      var rosterStamp=Date.parse(pbSource.stamp||'')||0;
+      if(!rosterCount || (summaryCount===rosterCount&&summaryStamp>=rosterStamp-15*60000)){
+        pbSource.levels=Object.assign({},pbSource.levels,sharedPopulation.source_levels);
+        pbSource.total=summaryCount;
+        pbSource.stamp=sharedPopulation.stamp||pbSource.stamp;
+        pbSource.rawRows=sharedPopulation.raw_rows;
+      }else{
+        pbSource.syncNote=(pbSource.syncNote?pbSource.syncNote+' ':'')+
+          'Power BI summary says '+summaryCount+'; classified roster says '+rosterCount+'. Using the classified roster.';
+      }
     }
     var latestPowerBiStamp=pbSource.stamp;
     var currentPowerBiAgents=pbSource.profiles;
@@ -10438,7 +10457,7 @@ async function pfrLoad(){
       var name=String(a.name||'').trim(),profile=growthPlanProfileByName[name.toLowerCase().replace(/\s+/g,' ')]||{},level=String(a.level||profile.powerbi_level||'').trim().toUpperCase();
       return Object.assign({},profile,{agent_name:name||profile.agent_name,powerbi_level:level,tier:profile.tier||(Number(a.closed_12mo||profile.closes_past_year||0)>=10?'Channel':level),next_growth_opportunity:profile.next_growth_opportunity||''});
     }):currentPowerBiAgents.filter(function(a){return !!String(a.powerbi_level||'').trim()&&!!String(a.agent_name||'').trim()&&!/^__Roster_delete_/i.test(String(a.agent_name||''));});
-    var growthPlanTotal=Number(pbSource.total)||growthPlanRows.length;
+    var growthPlanTotal=Number(pbSource.profileTotal)||Number(pbSource.total)||growthPlanRows.length;
     var growthPlanUnlisted=Math.max(0,growthPlanTotal-growthPlanRows.length);
     var missingGrowthPlans=growthPlanRows.filter(function(a){return !String(a.next_growth_opportunity||'').trim();}).sort(function(a,b){var order={Channel:0,A:1,B:2,C:3},ta=order[a.tier]===undefined?4:order[a.tier],tb=order[b.tier]===undefined?4:order[b.tier];return ta-tb||pfrProperCase(a.agent_name).localeCompare(pfrProperCase(b.agent_name));});
     growthPlanRows=growthPlanRows.filter(function(a){return !/^__Roster_delete_/i.test(pfrProperCase(a.agent_name).trim());});
