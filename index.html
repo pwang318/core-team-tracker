@@ -10084,9 +10084,9 @@ async function pfrLoad(){
     var lastSeenRM={};
     // Last MEANINGFUL contact — same shared classifier as the RM Tracker (see top of file), so
     // a voicemail or unanswered call doesn't count as a touch in either app's calculation.
-    allActs.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&!lastSeenRM[n]&&isMeaningfulOutcome(a.outcome,NOT_MEANINGFUL_RM_OUTCOMES,a.act_type))lastSeenRM[n]=a.act_date;});
+    allActs.forEach(function(a){var n=(a.agent_name||"").trim().toLowerCase();if(n&&a.act_date&&isMeaningfulOutcome(a.outcome,NOT_MEANINGFUL_RM_OUTCOMES,a.act_type)&&(!lastSeenRM[n]||a.act_date>lastSeenRM[n]))lastSeenRM[n]=a.act_date;});
     var lastSeenLP={};
-    lpCalls.forEach(function(c){var n=(c.agent_name||"").trim().toLowerCase();if(n&&!lastSeenLP[n]&&isMeaningfulOutcome(c.outcome,NOT_MEANINGFUL_LP_OUTCOMES))lastSeenLP[n]=c.call_date;});
+    lpCalls.forEach(function(c){var n=(c.agent_name||"").trim().toLowerCase();if(n&&c.call_date&&isMeaningfulOutcome(c.outcome,NOT_MEANINGFUL_LP_OUTCOMES)&&(!lastSeenLP[n]||c.call_date>lastSeenLP[n]))lastSeenLP[n]=c.call_date;});
     // All-time last "meeting" (Partner Meeting act_type OR a Break Bread) per agent — drives
     // formal Meeting Cadence Compliance, which is distinct from the touch-cadence check above.
     var lastMeeting={};
@@ -10153,20 +10153,26 @@ async function pfrLoad(){
       var tier=a.tier||null;
       var threshold=PFR_TIER_TOUCH[tier]||14;
       var urgent=PFR_TIER_URGENT[tier]||21;
+      var lastLeadDate=null,leadSource="Unknown";
       var daysSinceLead=(function(){
         // Prefer Velocify's real last-lead-date; fall back to agent_profiles.latest_lead_date
         // (which only updates when the Power BI import runs and may be weeks stale)
         var vDate=lastLeadDateByAgent[key]||lastLeadDateByAgent[matchKey];
         var pDate=a.latest_lead_date;
         var best=vDate&&pDate?(vDate>pDate?vDate:pDate):(vDate||pDate);
-        return best?Math.round((now-new Date(best+"T12:00:00"))/86400000):null;
+        lastLeadDate=best||null;leadSource=vDate&&best===vDate?"Velocify":(best?"Agent profile (sync unverified)":"Unknown");
+        return best?Math.max(0,Math.round((now-new Date(best+"T12:00:00"))/86400000)):null;
       }());
       var health=pfrHealthScore(daysSinceLead,daysAny,threshold,urgent,!!a.competitor_risk_flag);
       var daysToYellowTouch=daysAny===null?null:threshold-daysAny;
       var daysToYellowLead=daysSinceLead===null?null:30-daysSinceLead;
-      var candidates=[daysToYellowTouch,daysToYellowLead].filter(function(d){return d!==null;});
+      var candidates=[daysToYellowTouch,daysToYellowLead].filter(function(d){return Number.isFinite(d)&&d>0;});
       var daysUntilYellow=candidates.length?Math.min.apply(null,candidates):null;
-      return{name:name,tier:tier,health:health,daysAny:daysAny,daysSinceLead:daysSinceLead,daysUntilYellow:daysUntilYellow,
+      var watchReasons=[];
+      if(daysToYellowLead!==null&&daysToYellowLead>0&&daysToYellowLead<=7)watchReasons.push("Referral inactivity: "+daysSinceLead+" days since last lead (30-day threshold; "+daysToYellowLead+" days remaining). Last lead "+(lastLeadDate||"unknown")+"; source: "+leadSource+".");
+      if(daysToYellowTouch!==null&&daysToYellowTouch>0&&daysToYellowTouch<=7)watchReasons.push("Contact cadence: "+daysAny+" days since meaningful conversation ("+threshold+"-day "+(tier||"unknown")+" tier threshold; "+daysToYellowTouch+" days remaining).");
+      var watchAction=daysToYellowLead!==null&&daysToYellowLead>0&&daysToYellowLead<=7?"Check recent referrals and schedule a business conversation.":"Schedule a meaningful conversation before the contact deadline.";
+      return{name:name,tier:tier,health:health,daysAny:daysAny,daysSinceLead:daysSinceLead,daysUntilYellow:daysUntilYellow,watchReasons:watchReasons,watchAction:watchAction,
         next_growth_opportunity:a.next_growth_opportunity||null,satisfaction:a.satisfaction_rating||null,
         high_potential:!!a.high_potential_flag,recovery_plan:a.recovery_plan||null,agent:a};
     });
@@ -10203,7 +10209,7 @@ async function pfrLoad(){
       return(b.daysSinceLead===null?9999:b.daysSinceLead)-(a.daysSinceLead===null?9999:a.daysSinceLead);
     }).slice(0,10);
     var PROACTIVE_WINDOW=7;
-    var proactiveWatch=rows.filter(function(r){return r.health==="Green"&&r.daysUntilYellow!==null&&r.daysUntilYellow<=PROACTIVE_WINDOW;})
+    var proactiveWatch=rows.filter(function(r){return r.health==="Green"&&r.daysUntilYellow!==null&&r.daysUntilYellow<=PROACTIVE_WINDOW&&r.watchReasons.length>0;})
       .sort(function(a,b){return a.daysUntilYellow-b.daysUntilYellow;});
 
     var growthPlanProfileByName={};
@@ -10231,7 +10237,8 @@ async function pfrLoad(){
     var rated=rows.filter(function(r){return r.satisfaction!==null;});
     var avgSatisfaction=rated.length?(rated.reduce(function(s,r){return s+r.satisfaction;},0)/rated.length).toFixed(1):null;
     var lowSatisfaction=rows.filter(function(r){return r.satisfaction!==null&&r.satisfaction<=2;});
-    var highPotential=active.filter(function(a){return a.high_potential_flag;});
+    var highPotential=active.filter(function(a){return a.high_potential_flag&&String(a.next_growth_opportunity||"").trim();});
+    var highPotentialNeedsReason=active.filter(function(a){return a.high_potential_flag&&!String(a.next_growth_opportunity||"").trim();});
 
     // Meeting Cadence Compliance — Channel/A monthly, B every other month, HIGH-POTENTIAL C quarterly.
     // Lower-potential C partners are managed through campaigns/events/selective outreach and are not
@@ -10260,7 +10267,7 @@ async function pfrLoad(){
 
     pfrDrill={rows:rows,migrations:migrations,lowSatisfaction:lowSatisfaction,
       escalations:escalations,
-      top10AtRisk:top10AtRisk,top10GrowthOpp:top10GrowthOpp,highPotential:highPotential,proactiveWatch:proactiveWatch,
+      top10AtRisk:top10AtRisk,top10GrowthOpp:top10GrowthOpp,highPotential:highPotential,highPotentialNeedsReason:highPotentialNeedsReason,proactiveWatch:proactiveWatch,
       powerBiActiveRows:currentPowerBiAgents,
       rmActivePartners:rmActivePartners,
       managedActivePartners:active,
@@ -10411,8 +10418,8 @@ async function pfrLoad(){
 
     html+='<div style="background:var(--surface);border:1px solid #1F4E79;border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Proactive Watch &mdash; reach out before they go Yellow</div>'
-      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Green partners within 7 days of crossing into Yellow if nothing changes.</div>'
-      +(proactiveWatch.length?proactiveWatch.map(function(r,i){return pfrListRow(i+1,pfrProperCase(r.name),pfrTierLabel(r.tier)+" &middot; "+r.daysUntilYellow+(r.daysUntilYellow===1?" day":" days")+" until Yellow");}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nobody\'s close to slipping right now.</div>')
+      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Green partners approaching a referral or meaningful-contact deadline within 7 days. Reasons and actions appear below.</div>'
+      +(proactiveWatch.length?proactiveWatch.map(function(r,i){return pfrListRow(i+1,pfrProperCase(r.name),escHtml(pfrTierLabel(r.tier))+" &middot; "+r.daysUntilYellow+" days to Yellow<br>"+r.watchReasons.map(escHtml).join("<br>")+"<br><b>Next:</b> "+escHtml(r.watchAction));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nobody\'s close to slipping right now.</div>')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
@@ -10435,8 +10442,9 @@ async function pfrLoad(){
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">High-Potential Agents to Watch</div>'
-      +(highPotential.length?highPotential.map(function(a,i){return pfrListRow(i+1,pfrProperCase(a.agent_name),pfrTierLabel(a.tier));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">None flagged yet.</div>')
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px">High-Potential Partners — Documented Opportunities</div>'
+      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Manually flagged, not automatically scored. A recorded growth opportunity is required to be actionable.</div>'
+      +(highPotential.length?highPotential.map(function(a,i){return pfrListRow(i+1,pfrProperCase(a.agent_name),escHtml(pfrTierLabel(a.tier))+" &middot; <b>Reason recorded:</b> "+escHtml(String(a.next_growth_opportunity).trim())+"<br><b>Next:</b> Validate and schedule a growth conversation.");}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">None with a documented opportunity.</div>')+(highPotentialNeedsReason.length?'<div style="font-size:12px;margin-top:10px"><b>Needs qualification ('+highPotentialNeedsReason.length+'):</b> Flag set without a reason; not verified.</div>'+highPotentialNeedsReason.map(function(a){return pfrListRow(null,pfrProperCase(a.agent_name),escHtml(pfrTierLabel(a.tier))+' &middot; Missing documented reason.<br><b>Next:</b> Document the opportunity or remove the flag.');}).join(''):'')
     +'</div>';
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
@@ -10487,7 +10495,7 @@ async function pfrLoad(){
       'Tier movement':(migCtoB+migBtoA+migAtoChannel+migOther)+' changes · '+range.label,
       'Proactive watch':proactiveWatch.length+' partners on watch',
       'Partner satisfaction':rated.length?avgSatisfaction+' / 5 · '+rated.length+' rated':'No ratings recorded',
-      'High-potential partners':highPotential.length+' flagged',
+      'High-potential partners':highPotential.length+' documented · '+highPotentialNeedsReason.length+' needs reason',
       'Growth plans':growthPlanTotal?growthPlanMissingCount+' of '+growthPlanTotal+' missing a plan':'No active roster available',
       'Meeting cadence':meetingCadenceEligible.length?(meetingCadenceEligible.length-meetingCompliant)+' of '+meetingCadenceEligible.length+' due':'No partners on cadence',
       'Growth next steps':top10GrowthOpp.length+' opportunities listed',
