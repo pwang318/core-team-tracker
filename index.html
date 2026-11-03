@@ -1789,6 +1789,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <button onclick="loadFaceTime()" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:700">↺ Refresh</button>
 </div>
+<div id="ft-roster-notice" role="status" aria-live="polite" style="display:none;margin-bottom:12px"></div>
 <div id="ft-scheduled-shared" style="margin-bottom:12px"></div>
 <div class="ft-summary">
 <div class="ft-stat"><div class="ft-stat-num" id="ft-s-mtd" style="color:#1F4E79">—</div><div class="ft-stat-label">Visits logged MTD</div></div>
@@ -7604,7 +7605,7 @@ async function loadFaceTime(){
       ftSafe("RM visit history",sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=4000")),
       sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
       loadCoMarketing(),
-      ftSafe("Agent profiles",sbFetch("GET","agent_profiles?select=*&limit=5000")),
+      ftSafe("Agent profiles",sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,do_not_contact,relationship_status&limit=5000");}).catch(function(){return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,do_not_contact,relationship_status&limit=5000");})),
       ftSafe("LP assignments",sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000")),
       sbFetch("GET","face_time_events?select=*&status=eq.scheduled&event_date=gte."+today2()+"&order=event_date.asc,event_time.asc&limit=1000").catch(function(){return[];})
     ]);
@@ -7681,13 +7682,29 @@ async function loadFaceTime(){
       });
       if(ftActiveProfiles.length)ftSourceLabel="Active agent profiles (Power BI date unverified)";
     }
+    // Restore provisional coverage from the existing assignment-backed roster
+    // if Power BI/profile sources are currently unavailable.
+    if(!ftActiveProfiles.length){
+      var legacy=Array.isArray(agents)?agents:[],seenLegacy=new Set();
+      ftActiveProfiles=legacy.filter(function(a){
+        var name=String(a&&a[0]||"").trim(),key=name.toUpperCase(),owner=ownerMap[key]||{};
+        if(!name||seenLegacy.has(key)||owner.removed)return false;
+        seenLegacy.add(key);
+        return true;
+      }).map(function(a){
+        var name=String(a[0]).trim(),owner=ownerMap[name.toUpperCase()]||{};
+        return {agent_name:name,tier:a[1]||"C",powerbi_level:a[1]||"C",
+          _fallbackLp:owner.lp||a[2]||"Unassigned",closes_past_year:a[8]||0};
+      });
+      if(ftActiveProfiles.length)ftSourceLabel="Provisional assigned roster (Power BI not verified)";
+    }
     var uniqueFt=new Map();
     ftActiveProfiles.forEach(function(p){
       var k=String(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{},
         t=String(p.tier||"").trim().toUpperCase(),pb=String(p.powerbi_level||"").trim().toUpperCase(),
         tier=t==="CHANNEL"?"Channel":(["A","B","C"].includes(pb)?pb:(["A","B","C"].includes(t)?t:"C"));
       if(!k||uniqueFt.has(k))return;
-      uniqueFt.set(k,{name:p.agent_name,tier:tier,lp:o.lp||"Unassigned",rm:ctResolveRmOwner(k,tier),
+      uniqueFt.set(k,{name:p.agent_name,tier:tier,lp:(o.lp&&o.lp!=="Unassigned"?o.lp:p._fallbackLp||"Unassigned"),rm:ctResolveRmOwner(k,tier),
         competitor_risk_flag:!!p.competitor_risk_flag,high_potential_flag:!!p.high_potential_flag,
         next_growth_opportunity:p.next_growth_opportunity||"",latest_lead_date:p.latest_lead_date||null,
         closes_past_year:p.closes_past_year||0,total_leads_past_year:p.total_leads_past_year||0});
@@ -7696,8 +7713,9 @@ async function loadFaceTime(){
     window.CT_FT_ROSTER_LOADED=!!ftRosterRows.length;
     window.CT_FT_VISITS_LOADED=!ftSourceErrors.some(function(x){return x.startsWith("RM visit history:");});
     var notice=document.getElementById("ft-roster-notice");
-    if(!notice&&listEl){notice=document.createElement("div");notice.id="ft-roster-notice";listEl.parentNode.insertBefore(notice,listEl);}
+    if(!notice){notice=document.createElement("div");notice.id="ft-roster-notice";var page=document.getElementById("view-facetime");if(page)page.insertBefore(notice,page.querySelector(".ft-summary")||page.firstChild);}
     if(notice){
+      notice.style.display="block";
       notice.style.cssText="padding:10px 12px;margin-bottom:12px;font-size:12px;border-radius:8px;background:"+(ftRosterRows.length&&ftSourceLabel==="Latest Power BI profiles"&&!ftSourceErrors.length?"#eff8f2":"#fff6e8")+";color:#2c4861;border:1px solid #d7e4eb";
       var unassigned=ftRosterRows.filter(function(p){return !p.lp||p.lp==="Unassigned";}).length;
       notice.textContent=ftRosterRows.length?
@@ -7705,7 +7723,13 @@ async function loadFaceTime(){
         "Agent roster unavailable. Profile rows: "+ftProfileRows.length+"; assignments: "+(r[4]||[]).length+"; Power BI stamp: "+(latestFtPbMs?"present":"missing")+(ftSourceErrors.length?"; errors: "+ftSourceErrors.join("; "):"")+". No data was deleted.";
     }
     renderFaceTime();
-  }catch(e){if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--red);padding:30px;font-size:13px">Error loading — '+e.message+'</div>';}
+  }catch(e){
+    var msg="Face Time could not load: "+String(e&&e.message||e);
+    var banner=document.getElementById("ft-roster-notice");
+    if(banner){banner.style.cssText="display:block;margin-bottom:12px;padding:12px;border:1px solid #f2c1b8;background:#fff0ed;color:#842c27;border-radius:8px";banner.textContent=msg;}
+    if(listEl)listEl.innerHTML='<div style="text-align:center;color:var(--red);padding:30px;font-size:13px">'+msg+'</div>';
+    console.error("Face Time load error",e);
+  }
 }
 
 function ftStatus(tier,days){
