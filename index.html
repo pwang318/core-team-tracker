@@ -5542,7 +5542,7 @@ async function handleUpload(input){
         ["Email","Phone Number","Address","Birthday"].forEach(function(c){if((out[c]===null||out[c]===undefined||String(out[c]).trim()==="")&&next&&next[c]!==null&&next[c]!==undefined&&String(next[c]).trim()!=="")out[c]=next[c];});
         return out;
       }
-      var rawValidPbRows=rawRows.filter(function(row){var n=(row["Agent"]||"").toString().trim();return n&&n.toUpperCase()!=="AGENT"&&n.toUpperCase()!=="NAN";});
+      var rawValidPbRows=rawRows.filter(function(row){var n=(row["Agent"]||"").toString().trim();return n&&n.toUpperCase()!=="AGENT"&&n.toUpperCase()!=="NAN"&&!ctExcludedFromActiveAgentRoster(n);});
       var uniquePbMap=new Map();
       rawValidPbRows.forEach(function(row){var k=pbAgentKey(row);if(!k)return;uniquePbMap.set(k,uniquePbMap.has(k)?pbMergeRows(uniquePbMap.get(k),row):Object.assign({},row));});
       var rows=Array.from(uniquePbMap.values());
@@ -7589,6 +7589,11 @@ function sharedFaceTimeWhy(r){
   if(r.competitor_risk_flag)why.push('retention risk');if(r.high_potential_flag)why.push('high potential');if(String(r.next_growth_opportunity||'').trim())why.push('active opportunity');if(r.daysLead!==null&&r.daysLead<=60)why.push('recent business');
   return why.slice(0,3).join(' · ')||'relationship cadence';
 }
+// Explicit roster exclusion: Patrick Klein is no longer active. Preserve historical
+// activity; do not reintroduce him via an older Power BI export or fallback queue.
+function ctExcludedFromActiveAgentRoster(name){
+  return String(name||"").trim().replace(/\\s+/g," ").toUpperCase()==="PATRICK KLEIN";
+}
 var ftData={};  // normalized agent name → {lastDate, source, notes}
 var ftVisitRows=[]; // all visit records used for month-to-date counts
 var ftRosterRows=[]; // shared active partner population from agent_profiles + agent_assignments
@@ -7654,7 +7659,7 @@ async function loadFaceTime(){
     var ftSourceLabel="Latest Power BI profiles";
     var eligibleProfile=function(p){
       var k=String(p.agent_name||"").trim().toUpperCase(),o=ownerMap[k]||{};
-      return !!k&&!p.do_not_contact&&!o.removed
+      return !!k&&!ctExcludedFromActiveAgentRoster(p.agent_name)&&!p.do_not_contact&&!o.removed
         &&String(p.relationship_status||"active").toLowerCase()!=="inactive"
         &&String(p.relationship_type||"realtor").toLowerCase()!=="strategic_partner"
         &&String(p.lp_outreach_status||"active").toLowerCase()!=="nurture";
@@ -7711,7 +7716,7 @@ async function loadFaceTime(){
     if(!ftActiveProfiles.length){
       (r[4]||[]).forEach(function(a){
         var name=String(a.agent_name||"").trim(),key=name.toUpperCase();
-        if(!name||rosterKeys.has(key)||a.lp==="__REMOVED__"||
+        if(!name||ctExcludedFromActiveAgentRoster(name)||rosterKeys.has(key)||a.lp==="__REMOVED__"||
           (typeof ctRosterRemoved==="function"&&ctRosterRemoved(name))||
           (typeof ctInactiveRosterNames!=="undefined"&&ctInactiveRosterNames.has(name.toLowerCase())))return;
         var p=profileByName[key];
@@ -7728,7 +7733,7 @@ async function loadFaceTime(){
       var legacy=Array.isArray(agents)?agents:[],seenLegacy=new Set();
       ftActiveProfiles=legacy.filter(function(a){
         var name=String(a&&a[0]||"").trim(),key=name.toUpperCase(),owner=ownerMap[key]||{};
-        if(!name||seenLegacy.has(key)||owner.removed||
+        if(!name||ctExcludedFromActiveAgentRoster(name)||seenLegacy.has(key)||owner.removed||
           (typeof ctRosterRemoved==="function"&&ctRosterRemoved(name))||
           (typeof ctInactiveRosterNames!=="undefined"&&ctInactiveRosterNames.has(name.toLowerCase())))return false;
         seenLegacy.add(key);return true;
@@ -9863,7 +9868,7 @@ async function lpSyncAgentProfilesFromUpload(rows){
   var toUpdate=[],toInsert=[];
   rows.forEach(function(row){
     var rawName=(row["Agent"]||"").toString().trim();
-    if(!rawName||rawName.toUpperCase()==="AGENT"||rawName.toUpperCase()==="NAN")return;
+    if(!rawName||rawName.toUpperCase()==="AGENT"||rawName.toUpperCase()==="NAN"||ctExcludedFromActiveAgentRoster(rawName))return;
     var closes=parseInt(row["Closed Past Year"])||0;
     var leads=parseInt(row["Total Leads Past Year"])||0;
     // Shared formula (identical in the RM Tracker): Channel 10+, A 4-9, B 2-3, C requires at
