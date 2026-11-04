@@ -13744,7 +13744,7 @@ function installHub(){
 window.v63RefreshHubStatuses=v63RefreshHubStatuses;
 window.v62PickLP=()=>document.getElementById('v62LPFile')?.click();window.v62PickRM=()=>document.getElementById('v62RMFile')?.click();window.v310PickLP=window.v62PickLP;window.v310PickRM=window.v62PickRM;
 
-function ensureExec(){let host=document.getElementById('v56Execution');if(host)return host;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;host=document.createElement('section');host.id='v56Execution';host.innerHTML='<div class="v56-exec-head"><div><h3>Tuesday Updates</h3><p>Only outstanding updates and due builder checks stay here. Logged updates disappear; builder check-ins follow the 14-day cadence and can come forward for a closing or milestone change.</p></div><div id="v56Summary" class="v56-summary">Loading…</div></div><div id="v56Rows"></div>';anchor.appendChild(host);return host}
+function ensureExec(){let host=document.getElementById('v56Execution');if(host)return host;const anchor=document.getElementById('lp-weekly-execution-host');if(!anchor)return null;host=document.createElement('section');host.id='v56Execution';host.innerHTML='<div class="v56-exec-head"><div><h3>Tuesday Updates</h3><p>Completed Tuesday updates are counted above and removed from the outstanding worklist. Due builder checks remain here; builder check-ins follow the 14-day cadence and can come forward for a closing or milestone change.</p></div><div id="v56Summary" class="v56-summary">Loading…</div></div><div id="v56Rows"></div>';anchor.appendChild(host);return host}
 async function planState(lp){
   const w=weekStart(),lastWeekDate=new Date(w+'T12:00:00');lastWeekDate.setDate(lastWeekDate.getDate()-7);const lastWeek=lastWeekDate.toISOString().slice(0,10),historyCutoff=new Date();historyCutoff.setDate(historyCutoff.getDate()-365);const historySince=historyCutoff.toISOString().slice(0,10);
   const [snapshotRows,classes,allLogs,buildTouchLogs]=await Promise.all([
@@ -13843,9 +13843,22 @@ function renderLpState(s,lp){
   }).join('');
   const buildReviews=[...(s.buildReviews||[])].sort((a,b)=>{const dateA=a.close||'9999-12-31',dateB=b.close||'9999-12-31';return dateA.localeCompare(dateB)||(a.due===b.due?0:a.due?-1:1)||String(a.client||'').localeCompare(String(b.client||''))}),buildDue=buildReviews.filter(x=>x.due).length,buildScheduled=buildReviews.length-buildDue;
   const buildReviewMarkup=buildReviews.length?'<section class="v143-build-review"><div class="v143-build-review-head"><div><h4>⚠ New-build buyer follow-up · Priority worklist</h4><p>Sorted by earliest closing date · Full strategy consultation at 45 days before closing, then weekly buyer check-ins through closing.</p></div><span>'+buildDue+' due · '+buildScheduled+' scheduled</span></div>'+buildReviews.map(x=>{const closeLabel=x.close?new Date(x.close+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Not set',dueLabel=x.dueDate?new Date(x.dueDate+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Not set',overdue=x.due&&x.dueDate&&x.dueDate<new Date().toLocaleDateString('en-CA'),agent=meta(x.row.notes,'BUYER_AGENT')||'Buyer agent not listed',milestone=meta(x.row.notes,'TXN_MILESTONE')||'Not provided',label=x.kind==='consult'?'45-day full consultation':x.kind==='weekly'?'Weekly buyer check-in':'Closing date needed',button=x.kind==='missing'?'<div class="v143-build-note">Add a projected closing date to the source record so the consultation can be scheduled.</div>':x.due?'<button type="button" onclick="v143OpenBuildTouch(\''+encodeURIComponent(x.key)+'\',\''+x.event+'\')">'+(x.event==='CONSULT'?'Log full consultation':'Log weekly client check-in')+'</button>':'<span class="v143-build-next">Next touch '+esc(x.dueDate)+'</span>';return'<div class="v143-build-row '+(overdue?'overdue':x.due?'due':'scheduled')+'"><div><b>'+esc(x.client||'Unnamed borrower')+'</b><small>'+esc(agent)+' · Close '+esc(closeLabel)+'</small><small class="v143-build-milestone">Loan milestone: '+esc(milestone)+'</small></div><div><b>'+esc(label)+'</b><small>'+esc(x.status)+' · Due '+esc(dueLabel)+'</small></div><div>'+button+'</div></div>'}).join('')+'</section>':'';
+  // The action list intentionally hides completed updates. Derive the
+  // completion summary from the actual saved LP plan and matching work logs,
+  // not from the remaining (open-only) rows. Never equate no plan with done.
+  const assigned=s.currentRows.length;
+  const completed=s.currentRows.filter(r=>!!doneRecord(r,s)).length;
+  const pending=assigned-completed;
   const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');
-  if(rowsEl)rowsEl.innerHTML=(html||'<div class="v56-empty">No open Tuesday updates assigned to '+esc(lp)+'.</div>')+buildReviewMarkup;
-  if(sumEl)sumEl.textContent=open+' outstanding · '+classified+' classified · '+issues+' review';
+  const completionMessage=!s.header
+    ?'No LP Tuesday plan loaded for the week of '+esc(s.w)+'. Check the upload in Data Hub.'
+    :assigned===0
+      ?'No Tuesday assignments in the uploaded plan for '+esc(lp)+'.'
+      :pending===0
+        ?'All caught up! '+completed+' of '+assigned+' Tuesday updates completed for '+esc(lp)+'. Completed items are saved and hidden from the worklist.'
+        :'Showing outstanding work for '+esc(lp)+'. '+completed+' of '+assigned+' Tuesday updates already completed and saved.';
+  if(rowsEl)rowsEl.innerHTML=(html||'<div class="v56-empty">'+completionMessage+'</div>')+buildReviewMarkup;
+  if(sumEl)sumEl.textContent=(!s.header?'Plan not loaded · ':completed+' of '+assigned+' completed · ')+open+' outstanding · '+classified+' classified · '+issues+' review';
 }
 async function loadLp(lp){
   lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();if(!ensureExec())return;state.lp=lp;try{const s=await planState(lp);renderLpState(s,lp)}catch(e){console.error('LP Tuesday plan history could not be loaded',e);const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');if(sumEl)sumEl.textContent='Tuesday data unavailable';if(rowsEl)rowsEl.innerHTML='<div class="v56-empty">Tuesday update history could not be loaded. Refresh the tracker or try again shortly; no zero status has been assumed.</div>'}
