@@ -13144,7 +13144,7 @@ const monday=()=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+
 const weekOf=v=>{const d=new Date(String(v||'').slice(0,10)+'T12:00:00');if(isNaN(d))return'';d.setDate(d.getDate()+(d.getDay()===0?-6:1-d.getDay()));return d.toISOString().slice(0,10)};
 const daysSince=v=>{if(!v)return null;const d=new Date(String(v).slice(0,10)+'T12:00:00'),today=new Date();today.setHours(12,0,0,0);return isNaN(d)?null:Math.floor((today-d)/86400000)};
 const total=(d,k)=>Object.keys(d||{}).reduce((n,x)=>n+((x===k||x.startsWith(k+'_'))?(Number(d[x])||0):0),0);
-function stage(r){const s=norm(r&&r.status),app=(typeof ctIsLeadAppConverted==='function'?ctIsLeadAppConverted(r):false)||/started|application|approval|pre.?approval|processing|underwriting|submitt|clear to close|ctc|closing|fund|closed/.test(s),attempt=s.match(/\bcontact\s*attempt\s*(\d+)\b/),attemptsComplete=!!attempt&&Number(attempt[1])>=5;return{app,resolved:app||ctInitialOutreachComplete(r)||attemptsComplete||/nurture|meeting scheduled|withdrawn|dead|lost|do not contact|duplicate|invalid/.test(s)}}
+function stage(r){const s=norm(r&&r.status),app=(typeof ctIsLeadAppConverted==='function'?ctIsLeadAppConverted(r):false)||/started|application|approval|pre.?approval|processing|underwriting|submitt|clear to close|ctc|closing|fund|closed/.test(s),attempt=s.match(/\bcontact\s*attempt\s*(\d+)\b/),attemptsComplete=!!attempt&&Number(attempt[1])>=5;return{app,resolved:app||ctInitialOutreachComplete(r)||attemptsComplete||/nurture|\bscheduled\b|withdrawn|dead|lost|do not contact|duplicate|invalid|not interested|bad lead|fake data/.test(s)}}
 function lastActionDate(r){return r&&(r.last_action_date||r.last_update)||null}
 function isStalled(r){const st=stage(r),leadAge=daysSince(r&&r.date_added),updateAge=daysSince(lastActionDate(r));if(st.resolved)return false;if(leadAge===null||leadAge>60)return false;return updateAge!==null&&updateAge>=5}
 function completion(plan,logs){const k=meta(plan.notes,'TUE_PLAN_KEY'),lp=shortLp(meta(plan.notes,'LP_OWNER')),client=norm(meta(plan.notes,'TXN_CLIENT')),planAt=Date.parse(plan.created_at||plan.act_date||0)||0;return logs.find(a=>{const al=shortLp(meta(a.notes,'LP')||meta(a.notes,'LP_OWNER'));if(al&&lp&&al!==lp)return false;const planWeek=weekOf(meta(plan.notes,'TUE_PLAN_DATE')||plan.act_date),logWeek=weekOf(a.act_date||a.created_at);if(planWeek&&logWeek&&logWeek<planWeek)return false;const ak=meta(a.notes,'TUE_PLAN_KEY');if(ak&&k)return ak===k;const logAt=Date.parse(a.created_at||a.act_date||0)||0;if(planAt&&logAt&&logAt<planAt)return false;return client&&norm(meta(a.notes,'TXN_CLIENT'))===client})||null}
@@ -13424,11 +13424,11 @@ async function load(force){
  try{
   const now=new Date(),ytd=now.getFullYear()+'-01-01',wk=monday(),priorWeekDate=new Date(wk+'T12:00:00');priorWeekDate.setDate(priorWeekDate.getDate()-7);const priorWeek=priorWeekDate.toISOString().slice(0,10),historyCutoff=new Date(now);historyCutoff.setDate(historyCutoff.getDate()-365);const historySince=historyCutoff.toISOString().slice(0,10);
   const [scores,vel,snapshotRows,updateLogs,classRows,buildTouchLogs,managerNoteLogs]=await Promise.all([
-   sbFetch('GET','lp_scorecards?person=in.(Gavin,Karen,Osgood,Jordan,Said,Isaak)&week_key=gte.'+wk+'&select=person,week_key,data&limit=1000').catch(()=>[]),
-   sbFetch('GET','velocify_leads?date_added=gte.'+ytd+'&select=*&order=date_added.desc&limit=20000').catch(()=>[]),
+   sbFetch('GET','lp_scorecards?person=in.(Gavin,Karen,Osgood,Jordan,Said,Isaak)&week_key=gte.'+wk+'&select=person,week_key,data&limit=1000'),
+   sbFetch('GET','velocify_leads?date_added=gte.'+ytd+'&select=*&order=date_added.desc&limit=20000'),
    sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Call%20Plan%20Snapshot&act_date=gte.'+historySince+'&select=id,agent_name,act_type,act_date,notes,created_at&order=created_at.desc&limit=10000'),
    sbFetch('GET','amanda_activities?act_type=eq.LP%20Tuesday%20File%20Update&act_date=gte.'+historySince+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=10000'),
-   sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Contact%20Classification&select=id,agent_name,act_type,act_date,notes,created_at&order=created_at.desc&limit=5000').catch(()=>[]),
+   sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Contact%20Classification&select=id,agent_name,act_type,act_date,notes,created_at&order=created_at.desc&limit=5000'),
    sbFetch('GET','amanda_activities?act_type=eq.LP%20New%20Build%20Client%20Touch&act_date=gte.'+historySince+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=10000').catch(()=>[]),
    sbFetch('GET','amanda_activities?act_type=eq.Production%20Manager%20New-Build%20Note&act_date=gte.'+historySince+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=10000').catch(()=>[])
   ]);
@@ -14263,14 +14263,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         const classification=classMap[tx]||classMap[mk]||(String(buyer||'').trim()?'CALL_REQUIRED':'CONTACT_ISSUE');
         const noCall=['FSBO','NEW_BUILD','NO_BUYER_AGENT'].includes(classification),needsReview=classification==='CONTACT_ISSUE';
         const log=logs.find(a=>(key&&meta(a.notes,'TUE_PLAN_KEY')===key)||(!key&&client&&norm(meta(a.notes,'TXN_CLIENT'))===norm(client)&&lpShort(meta(a.notes,'LP_OWNER'))===lp));
-        const result=log?'Completed':noCall?'Cleared · no call required':needsReview?'Needs review':'Open';
+        const result=log?'Completed':noCall?'Classified · update not logged':needsReview?'Needs review':'Open';
         // Saved Tuesday completions always take precedence over contact classification.
         // Missing buyer-agent details remain visible in the detail row, but a logged
         // update must not be counted as open or needing completion review.
-        if(summary[lp]){if(result==='Cleared · no call required')summary[lp].cleared++;else{summary[lp].assigned++;if(result==='Completed')summary[lp].completed++;else if(result==='Needs review')summary[lp].review++;else summary[lp].open++}}
+        if(summary[lp]){summary[lp].assigned++;if(result==='Completed')summary[lp].completed++;else if(result==='Needs review')summary[lp].review++;else{summary[lp].open++;if(noCall)summary[lp].cleared++;}}
         rows.push({'Week of':week,'LP':lp,'Borrower / Client':client,'Buyer Agent':buyer,'Property':meta(p.notes,'TXN_PROPERTY'),'Closing Date':meta(p.notes,'TXN_CLOSE_DATE'),'Milestone':meta(p.notes,'TXN_MILESTONE'),'Status':result,'Call Outcome':log?(log.outcome||'Update logged'):'','LP Note':log?noteText(log.notes):'','Next Follow-up':log?(log.follow_up_date||''):'','Logged At':log?(log.created_at||log.act_date||''):'','Plan Date':meta(p.notes,'TUE_PLAN_DATE')||p.act_date});
       });
-      const summaryRows=LPS.map(lp=>{const x=summary[lp],rate=x.assigned?Math.round(x.completed/x.assigned*100)+'%':'—';return{'LP':lp,'Assigned Updates':x.assigned,'Completed':x.completed,'Open':x.open,'Needs Review':x.review,'Cleared · No Call Required':x.cleared,'% Complete':rate}}),order={'Open':0,'Needs review':1,'Completed':2,'Cleared · no call required':3};
+      const summaryRows=LPS.map(lp=>{const x=summary[lp],rate=x.assigned?Math.round(x.completed/x.assigned*100)+'%':'—';return{'LP':lp,'Assigned Updates':x.assigned,'Completed':x.completed,'Open':x.open,'Needs Review':x.review,'Classified · Update Not Logged':x.cleared,'% Complete':rate}}),order={'Open':0,'Classified · update not logged':1,'Needs review':2,'Completed':3};
       rows.sort((a,b)=>String(a.LP).localeCompare(String(b.LP))||(order[a.Status]??9)-(order[b.Status]??9)||String(a['Borrower / Client']).localeCompare(String(b['Borrower / Client'])));
       const detailCols=[{wch:12},{wch:14},{wch:25},{wch:28},{wch:34},{wch:14},{wch:22},{wch:30},{wch:34},{wch:65},{wch:17},{wch:22},{wch:12}],sumCols=[{wch:16},{wch:18},{wch:12},{wch:12},{wch:14},{wch:24},{wch:12}],fallback=rows.length?rows:[{'Week of':week,'LP':'','Borrower / Client':'','Buyer Agent':'','Property':'','Closing Date':'','Milestone':'','Status':'No LP Tuesday plan loaded for this week.','Call Outcome':'','LP Note':'','Next Follow-up':'','Logged At':'','Plan Date':''}];
       try{
