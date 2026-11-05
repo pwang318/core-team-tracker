@@ -45,6 +45,9 @@ assert.equal(billing.perAgent[0].leads, 3, 'Unique referrals under both names mu
 assert.equal(billing.perAgent[1].leads, 1, 'Shared lead must not be double-counted');
 assert.equal(billing.closed, 3, 'Aliases must not double-count closings');
 assert(html.includes('co_marketing_partners?status=eq.active&select=partner_name,agent_roster'), 'Verified billing roster must feed co-marketing flags');
+assert(html.includes('Edit partner spend · expand only when needed'), 'Co-marketing quick spend table should not dominate the default view');
+assert(html.includes('Blank allocations do not mean $0 spent.'), 'Co-marketing should distinguish partner billing from unallocated agent spend');
+assert(html.includes('var pct=rawReq>0?Math.min(999,Math.round(lc.total/rawReq*100)):null;'), 'Co-marketing must not treat missing spend as a low performance score');
 assert(html.includes('if(lp==="Isaak")return [];'), 'LP1 must not receive realtor FaceTime tasks');
 assert(html.includes('id="lp-source-freshness"'), 'Team snapshot must show Power BI and Velocify freshness');
 assert(html.includes("if(owner!==lp)return false;"), 'Tuesday exports must match completions only to their actual LP owner');
