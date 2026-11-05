@@ -14247,7 +14247,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     try{
       const [acts,classes]=await Promise.all([
         sbFetch('GET','amanda_activities?act_date=gte.'+week+'&act_date=lte.'+through+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=12000'),
-        sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Contact%20Classification&select=act_date,notes,created_at&order=created_at.desc&limit=5000').catch(()=>[])
+        sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Contact%20Classification&select=act_date,notes,created_at&order=created_at.desc&limit=5000')
       ]);
       const snaps=acts.filter(a=>a.act_type==='Tuesday Call Plan Snapshot'&&/\[TUE_SPLIT_V310\]/.test(String(a.notes||''))),heads=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_HEADER').sort((a,b)=>(Date.parse(b.created_at||b.act_date||0)||0)-(Date.parse(a.created_at||a.act_date||0)||0)),head=heads[0]||null,batch=head?meta(head.notes,'TUE_PLAN_BATCH'):'';
       const plan=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_TXN'&&meta(a.notes,'TUE_PLAN_BATCH')===batch),logs=acts.filter(a=>a.act_type==='LP Tuesday File Update');
