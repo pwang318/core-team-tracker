@@ -2275,39 +2275,22 @@ function ctRenderLeadStatusAudit(data){
 
 // Reporting-only deduplication: preserve every raw Velocify record for audit and
 // LP handoff history, but count each logical borrower referral once.
-// Verified primary LPs for shared-workflow referrals. Keep raw Velocify LPs
-// intact for collaboration/audit; these rules only affect reporting credit.
-function ctResolvedReferralPrimaryLP(leadKey){
-  var key=String(leadKey||"").trim().toLowerCase();
-  var saidKeys={
-    "colleen welch__2026-10-01__mercedes welch":true,
-    "sahar shalash__2026-03-26__saniya":true,
-    "todd stone__2026-04-24__jeremy rodriguez":true
-  };
-  return saidKeys[key]?"Saleh, Said":"";
-}
 function ctUniqueVelocifyReferralRows(rows){
   var chosen=new Map(),unkeyed=[];
   (rows||[]).forEach(function(r){
     var key=String(r.lead_key||"").trim().toLowerCase();
     if(!key){unkeyed.push(r);return;}
-    var primary=ctResolvedReferralPrimaryLP(r.lead_key);
-    var row=primary?Object.assign({},r,{lp_user:primary,_reported_primary_lp:primary,_velocify_lp_user:r.lp_user}):r;
     var old=chosen.get(key);
-    if(!old){chosen.set(key,row);return;}
+    if(!old){chosen.set(key,r);return;}
     // Keep the strongest timestamp when the source supplies one. Do not treat
     // a "Bad Lead" row as more authoritative than "Started" without dated evidence.
     function freshness(x){return Date.parse(x.last_update||x.last_action_date||x.created_at||"")||0;}
     function rank(x){return ctIsLeadAppConverted(x)?2:ctIsLeadResolved(x)?1:0;}
-    var oldFresh=freshness(old),newFresh=freshness(row),pickNew=newFresh>oldFresh||(newFresh===oldFresh&&rank(row)>rank(old));
-    var winner=pickNew?row:old;
-    var owners=[old._velocify_lp_user||old.lp_user,row._velocify_lp_user||row.lp_user].map(function(v){return String(v||"").trim().toLowerCase();}).filter(Boolean);
+    var oldFresh=freshness(old),newFresh=freshness(r),pickNew=newFresh>oldFresh||(newFresh===oldFresh&&rank(r)>rank(old));
+    var winner=pickNew?r:old,loser=pickNew?old:r;
+    var owners=[old.lp_user,r.lp_user].map(function(v){return String(v||"").trim().toLowerCase();}).filter(Boolean);
     if(owners.length===2&&owners[0]!==owners[1]){
-      if(primary){
-        winner=Object.assign({},winner,{lp_user:primary,_reported_primary_lp:primary,_collaborating_lp_owners:[old._velocify_lp_user||old.lp_user,row._velocify_lp_user||row.lp_user]});
-      }else{
-        winner=Object.assign({},winner,{lp_user:"Ownership conflict — review",_conflicting_lp_owners:[old.lp_user,row.lp_user]});
-      }
+      winner=Object.assign({},winner,{lp_user:"Ownership conflict — review",_conflicting_lp_owners:[old.lp_user,r.lp_user]});
     }
     if(pickNew||winner!==old)chosen.set(key,winner);
   });
@@ -14914,10 +14897,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
      rows.forEach(function(r){var key=String(r.lead_key||'').trim().toLowerCase();if(!key)return;
        var a=groups.get(key);if(a)a.push(r);else groups.set(key,[r]);});
      groups.forEach(function(a){if(a.length>1)duplicates.push(a);});
-     var ownerIssues=duplicates.filter(function(a){return !ctResolvedReferralPrimaryLP(a[0].lead_key)&&new Set(a.map(function(r){return String(r.lp_user||'').trim().toLowerCase()}).filter(Boolean)).size>1;}).length;
-     var sharedWork=duplicates.filter(function(a){return !!ctResolvedReferralPrimaryLP(a[0].lead_key)&&new Set(a.map(function(r){return String(r.lp_user||'').trim().toLowerCase()}).filter(Boolean)).size>1;}).length;
+     var ownerIssues=duplicates.filter(function(a){return new Set(a.map(function(r){return String(r.lp_user||'').trim().toLowerCase()}).filter(Boolean)).size>1;}).length;
      var statusIssues=duplicates.filter(function(a){return new Set(a.map(function(r){return String(r.status||'').trim().toLowerCase()}).filter(Boolean)).size>1;}).length;
-     el.textContent='Velocify audit: '+duplicates.length+' duplicate lead key'+(duplicates.length===1?'':'s')+' in source · '+ownerIssues+' unresolved LP attribution'+(ownerIssues===1?'':'s')+' · '+sharedWork+' verified shared-LP record'+(sharedWork===1?'':'s')+' · '+statusIssues+' conflicting status'+(statusIssues===1?'':'es')+'. Primary credit for Colleen, Sahar and Todd is assigned to Said; helper LP details stay in source history. Any status disagreement still needs verification.';
+     el.textContent='Velocify audit: '+duplicates.length+' duplicate lead key'+(duplicates.length===1?'':'s')+' in source · '+ownerIssues+' conflicting LP attribution'+(ownerIssues===1?'':'s')+' · '+statusIssues+' conflicting status'+(statusIssues===1?'':'es')+'. Reporting counts these leads once; source records are retained pending Velocify confirmation.';
      el.style.color=duplicates.length?'#875b20':'#245f49';
    }catch(e){el.textContent='Velocify duplicate audit unavailable; current source records were not changed.';el.style.color='#875b20'}
  }
