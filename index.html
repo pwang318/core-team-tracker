@@ -1544,7 +1544,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-page-wrap">
 <input accept=".xlsx,.xls" id="fileInput" onchange="handleUpload(this)" style="display:none" type="file"/><div id="upload-result" style="margin:0 0 10px;font-size:12px"></div><div class="ct-page-head"><div><div class="ct-eyebrow">WEEKLY DATA</div><h1>Weekly Data Hub</h1><div class="ct-page-sub">The only upload location. Upload funded units and active-contract data from Encompass; Power BI drives active-partner health, roster and co-marketing data.</div></div></div>
 <div class="ct-data-grid">
-<section class="ct-card ct-data-source"><div class="ct-kicker">AGENT HEALTH</div><h2>Power BI Agent Portfolio</h2><p>Upload the current Power BI export to refresh active prequals, active pipeline, recent production and the relationship-health view.</p><div class="ct-data-actions"><button class="ct-primary-btn" onclick="loadXLSX()" type="button">Upload Power BI</button><button class="ct-link-btn" onclick="lpv3OpenAgentHealth()" type="button">Open Agent Health / Roster</button></div><div class="ct-data-note" id="lpv3-pb-status">No Power BI file loaded yet.</div><div class="ct-data-note" style="margin-top:8px">Power BI is uploaded here in the LP Tracker. A verified upload updates the shared agent profile and import record used by the RM and Director views; those views refresh from the same shared source.</div></section>
+<section class="ct-card ct-data-source"><div class="ct-kicker">AGENT HEALTH</div><h2>Power BI Agent Portfolio</h2><p>Upload the current Power BI export to refresh active prequals, active pipeline, recent production and the relationship-health view.</p><div class="ct-data-actions"><button class="ct-primary-btn" onclick="loadXLSX()" type="button">Upload Power BI</button><button class="ct-link-btn" onclick="lpv3OpenAgentHealth()" type="button">Open Agent Health / Roster</button></div><div class="ct-data-note" id="lpv3-pb-status">No Power BI file loaded yet.</div><div class="ct-data-note" id="lp-pb-reconciliation" style="margin-top:7px" role="status">Checking latest import totals…</div><div class="ct-data-note" style="margin-top:8px">Power BI is uploaded here in the LP Tracker. A verified upload updates the shared agent profile and import record used by the RM and Director views; those views refresh from the same shared source.</div></section>
 </div>
 <section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">WHAT EACH FILE CONTROLS</div><h2>Keep the sources clean</h2></div></div><div class="ct-source-map"><div><b>Encompass</b><span>Active contracts, buyer/listing agent contacts, LP assignment, milestone, closing date.</span></div><div><b>Power BI + lead activity</b><span>Active prequals, active pipeline, production, last lead, latest file/contract/close and agent health.</span></div></div></section>
 </div>
@@ -14863,3 +14863,26 @@ https://github.com/nodeca/pako/blob/main/LICENSE
  window.lpRefreshSourceFreshness=refresh;
  setInterval(function(){var el=document.getElementById('lp-source-freshness');if(el&&el.offsetParent!==null)refresh()},300000);
 })();</script>
+
+<script id="lp-powerbi-reconciliation-v315">
+(function(){
+ async function reconcilePowerBi(){
+   var el=document.getElementById('lp-pb-reconciliation');
+   if(!el||typeof sbFetch!=='function')return;
+   try{
+     var imports=await sbFetch('GET','powerbi_import_log?select=imported_at,source_app,rows_processed,errors&order=imported_at.desc&limit=1');
+     var last=Array.isArray(imports)?imports[0]:null;if(!last){el.textContent='No verified Power BI import yet.';return;}
+     var stamp=last.imported_at,raw=(String(last.source_app||'').match(/(?:^|;)raw=(\d+)/)||[])[1];
+     var profiles=await sbFetch('GET','agent_profiles?select=agent_name,powerbi_last_seen_at&powerbi_last_seen_at=eq.'+encodeURIComponent(stamp)+'&limit=5000');
+     var unique=new Set((profiles||[]).map(function(a){return String(a.agent_name||'').trim().toLowerCase()}).filter(Boolean)).size;
+     var input=Number(raw||last.rows_processed||0),processed=Number(last.rows_processed||0);
+     if(!input){el.textContent='Last Power BI sync recorded '+unique+' unique agent profiles.';return;}
+     var diff=input-unique;
+     el.textContent='Latest Power BI: '+input+' uploaded rows · '+unique+' unique agent profiles stamped · '+processed+' rows processed'+(diff>0?' · '+diff+' duplicate/unmatched source row'+(diff===1?'':'s')+' to review':' · counts reconciled');
+     el.style.color=diff>0?'#875b20':'#245f49';
+   }catch(e){el.textContent='Power BI import reconciliation unavailable; last verified totals remain unchanged.';el.style.color='#875b20'}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',reconcilePowerBi,{once:true});else reconcilePowerBi();
+ window.lpReconcilePowerBi=reconcilePowerBi;
+})();
+</script>
