@@ -7767,7 +7767,7 @@ async function loadFaceTime(){
       notice.style.cssText="padding:10px 12px;margin-bottom:12px;font-size:12px;border-radius:8px;background:"+(ftRosterRows.length&&ftSourceLabel==="Latest shared Power BI profiles"&&!ftSourceErrors.length?"#eff8f2":"#fff6e8")+";color:#2c4861;border:1px solid #d7e4eb";
       var unassigned=ftRosterRows.filter(function(p){return !p.lp||p.lp==="Unassigned";}).length;
       notice.textContent=ftRosterRows.length?
-        ftRosterRows.length+" agents · "+ftSourceLabel+(unassigned?" · "+unassigned+" need LP assignment":"")+(ftSourceErrors.length?" · Source warning: "+ftSourceErrors.join("; "):""):
+        ftRosterRows.length+" eligible Face Time agents · "+ftSourceLabel+(ftStamped.length&&ftSourceLabel==="Latest shared Power BI profiles"?" · "+ftStamped.length+" profiles in the latest import ("+Math.max(0,ftStamped.length-ftRosterRows.length)+" excluded by saved eligibility rules)":"")+(unassigned?" · "+unassigned+" need LP assignment":"")+(ftSourceErrors.length?" · Source warning: "+ftSourceErrors.join("; "):""):
         "Agent roster unavailable. Profile rows: "+ftProfileRows.length+"; assignments: "+(r[4]||[]).length+"; Power BI stamp: "+(latestFtPbMs?"present":"missing")+(ftSourceErrors.length?"; errors: "+ftSourceErrors.join("; "):"")+". No data was deleted.";
     }
     renderFaceTime();
