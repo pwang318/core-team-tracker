@@ -46,6 +46,9 @@ assert.equal(billing.perAgent[1].leads, 1, 'Shared lead must not be double-count
 assert.equal(billing.closed, 3, 'Aliases must not double-count closings');
 assert(html.includes('co_marketing_partners?status=eq.active&select=partner_name,agent_roster'), 'Verified billing roster must feed co-marketing flags');
 assert(html.includes('if(lp==="Isaak")return [];'), 'LP1 must not receive realtor FaceTime tasks');
+assert(html.includes('id="lp-source-freshness"'), 'Team snapshot must show Power BI and Velocify freshness');
+assert(html.includes("if(owner!==lp)return false;"), 'Tuesday exports must match completions only to their actual LP owner');
+assert(html.includes("meta(a.notes,'TUE_PLAN_LANE')==='LP_TXN'"), 'LP Tuesday export must not include RM listing-agent plan rows');
 
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
 if (errors.length) {
