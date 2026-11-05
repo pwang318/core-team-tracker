@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v150-velocify-dedup-20261105" name="version"/>
+<meta content="core-team-lp-v151-comarketing-source-consistency-20261105" name="version"/>
 <meta content="v145: sort new-build work by closing date, label touch dates, and show buyer plus builder/sales-rep follow-ups separately." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -3521,7 +3521,7 @@ function renderCallCard(a,lp,isBonus){
   if(lastNote&&lastNote.note)context.push('<strong>Last team note:</strong> '+escHtml(lastNote.note));
   if(rmAct)context.push('<strong>RM touch:</strong> '+fmt(rmAct));
   if(firstCall){var tenure=Math.max(0,Math.floor((TODAY-new Date(firstCall+'T12:00:00'))/86400000));context.push('<strong>Relationship:</strong> '+(tenure>=365?Math.floor(tenure/365)+'y':tenure>=30?Math.floor(tenure/30)+'mo':tenure+'d'));}
-  if(coMarketingAgents[name])context.push('<strong>Co-marketing:</strong> active');
+  if(coMarketingIsActive(name))context.push('<strong>Co-marketing:</strong> active');
   if(context.length)html+='<details class="ct-context-details"><summary>More context ▾</summary><div class="ct-context-body">'+context.map(function(x){return '<div>'+x+'</div>';}).join('')+'</div></details>';
 
   if(called){
@@ -5747,16 +5747,32 @@ var rmFollowupsData={};
 var agentFirstCall={};
 var agentLastCall={};
 var coMarketingAgents={};
+var coMarketingPartnerRoster={};
+function coMarketingKey(name){return String(name||"").trim().replace(/\s+/g," ").toUpperCase();}
+function coMarketingIsActive(name){return !!coMarketingAgents[coMarketingKey(name)];}
+function coMarketingIsBilled(name){return !!coMarketingPartnerRoster[coMarketingKey(name)];}
 var agentMilestones={};  // Phase 2: activation tracking
 var leadPipelineData={daily:{},wtd:{},mtd:{},ytd:{}};  // LP lead pipeline breakdown
 var churnRiskData={};    // Phase 3: churn risk by agent
 var lpEffectiveness={};  // Phase 4: LP effectiveness scores
 
 function loadCoMarketing(){
-  return sbFetch("GET","agent_profiles?co_marketing=eq.true&select=agent_name&limit=500").then(function(res){
-    coMarketingAgents={};
-    if(res)res.forEach(function(r){coMarketingAgents[r.agent_name]=true;});
-  }).catch(function(){});
+  // Merge verified active advertising partners with manually marked agent profiles.
+  return Promise.all([
+    sbFetch("GET","agent_profiles?co_marketing=eq.true&select=agent_name&limit=5000").catch(function(){return[];}),
+    sbFetch("GET","co_marketing_partners?status=eq.active&select=partner_name,agent_roster&limit=500").catch(function(){return[];})
+  ]).then(function(result){
+    coMarketingAgents={};coMarketingPartnerRoster={};
+    (result[0]||[]).forEach(function(p){var k=coMarketingKey(p.agent_name);if(k)coMarketingAgents[k]=true;});
+    (result[1]||[]).forEach(function(p){
+      var roster=Array.isArray(p.agent_roster)?p.agent_roster:[];
+      if(!roster.length)roster=[{name:p.partner_name}];
+      roster.forEach(function(a){[a.name,a.alias].forEach(function(v){
+        var k=coMarketingKey(v);if(!k)return;
+        coMarketingAgents[k]=true;coMarketingPartnerRoster[k]=true;
+      });});
+    });
+  }).catch(function(e){console.warn("Co-marketing roster unavailable",e)});
 }
 
 function getBirthdayAgentsThisWeek(){
@@ -5792,10 +5808,10 @@ function renderCoMktList(){
 
   // Active co-marketing agents (always shown at top) — excludes anyone removed from the
   // Current Relationship Roster, even though `agents` itself has no roster-status field.
-  var activeAgents=agents.filter(function(a){return coMarketingAgents[a[0]]&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());});
+  var activeAgents=agents.filter(function(a){return coMarketingIsActive(a[0])&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());});
   // Search results (non-active matching query) — same exclusion
   var searchResults=q?agents.filter(function(a){
-    return!coMarketingAgents[a[0]]&&a[0].toLowerCase().indexOf(q)>=0&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());
+    return!coMarketingIsActive(a[0])&&a[0].toLowerCase().indexOf(q)>=0&&!ctInactiveRosterNames.has((a[0]||"").trim().toLowerCase());
   }).slice(0,15):[];
 
   function agentRow(a,active){
@@ -5827,8 +5843,9 @@ function renderCoMktList(){
 
 function toggleCoMarketing(btn){
   var name=btn.getAttribute("data-name"),active=btn.getAttribute("data-active")==="true";
+  if(coMarketingIsBilled(name)){alert("This agent is part of an active billing partnership. Update their roster under Co-Marketing Relationships instead.");return;}
   var newVal=!active;
-  coMarketingAgents[name]=newVal;
+  coMarketingAgents[coMarketingKey(name)]=newVal;
   if(!contactCache[name])contactCache[name]={agent_name:name};
   contactCache[name].co_marketing=newVal;
   sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(name)+"&limit=1").then(function(res){
@@ -7826,7 +7843,7 @@ function ftAgentRows(){
     var target=FT_TARGETS[tier]||FT_TARGETS.C;
     var sched=(window.FT_SCHEDULED_EVENTS||[]).filter(function(x){return String(x.agent_name||"").trim().toUpperCase()===String(name||"").trim().toUpperCase()&&x.status==="scheduled"&&String(x.event_date||"")>=today2();}).sort(function(a,b){return String(a.event_date||"").localeCompare(String(b.event_date||""));})[0]||null;
     var leadDate=e.latest_lead_date?String(e.latest_lead_date).slice(0,10):null,daysLead=leadDate?Math.max(0,Math.floor((now-new Date(leadDate+"T12:00:00"))/86400000)):null;
-    var row={name:name,tier:tier,lp:lp,rm:e.rm||"Unassigned",days:days,status:ftStatus(tier,days),target:target,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:!!coMarketingAgents[name],scheduled:sched,competitor_risk_flag:!!e.competitor_risk_flag,high_potential_flag:!!e.high_potential_flag,next_growth_opportunity:e.next_growth_opportunity||"",daysLead:daysLead,closes_past_year:e.closes_past_year||0,total_leads_past_year:e.total_leads_past_year||0};
+    var row={name:name,tier:tier,lp:lp,rm:e.rm||"Unassigned",days:days,status:ftStatus(tier,days),target:target,lastDate:ft?ft.lastDate:null,source:ft?ft.source:"",notes:ft?ft.notes:"",coMkt:coMarketingIsActive(name),scheduled:sched,competitor_risk_flag:!!e.competitor_risk_flag,high_potential_flag:!!e.high_potential_flag,next_growth_opportunity:e.next_growth_opportunity||"",daysLead:daysLead,closes_past_year:e.closes_past_year||0,total_leads_past_year:e.total_leads_past_year||0};
     row.priorityScore=sharedFaceTimePriorityScore(row);row.priorityWhy=sharedFaceTimeWhy(row);return row;
   });
 }
@@ -8389,8 +8406,9 @@ function renderFaceTime(){
 }
 
 function ftToggleCoMarketing(name,isActive){
+  if(coMarketingIsBilled(name)){showToast("Active billing partnership: edit in Co-Marketing Relationships","error");return;}
   var newVal=!isActive;
-  coMarketingAgents[name]=newVal;
+  coMarketingAgents[coMarketingKey(name)]=newVal;
   sbFetch("GET","agent_profiles?agent_name=eq."+encodeURIComponent(name)+"&limit=1").then(function(res){
     var method=(res&&res.length)?"PATCH":"POST";
     var path=method==="PATCH"?"agent_profiles?agent_name=eq."+encodeURIComponent(name):"agent_profiles";
@@ -8399,7 +8417,7 @@ function ftToggleCoMarketing(name,isActive){
     renderFaceTime();
     showToast((newVal?"Marked":"Unmarked")+" "+name+" as co-marketing","success");
   }).catch(function(){
-    coMarketingAgents[name]=isActive; // revert on failure
+    coMarketingAgents[coMarketingKey(name)]=isActive; // revert on failure
     showToast("Save failed — try again","error");
   });
 }
@@ -8517,11 +8535,12 @@ function coMktLeadsForRoster(roster){
   (roster||[]).forEach(function(r){
     var names=[r.name];
     if(r.alias)names.push(r.alias);
-    var leads=0,closed=0;
+    var leads=0,closed=0,aliasSeen={};
+    // Name and alias identify the SAME realtor, not two independent referrals.
     names.forEach(function(n){
-      var key=n.trim().toUpperCase();
-      leads+=coMktLeadCounts[key]||0;
-      closed+=coMktClosedCounts[key]||0;
+      var key=n.trim().toUpperCase();if(aliasSeen[key])return;aliasSeen[key]=true;
+      leads=Math.max(leads,coMktLeadCounts[key]||0);
+      closed=Math.max(closed,coMktClosedCounts[key]||0);
     });
     var spend=parseFloat(r.spend)||0;
     var req=spend>0?Math.max(1,Math.floor(spend/250)):0;
