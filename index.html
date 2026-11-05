@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v146-tuesday-consistency-20261105" name="version"/>
+<meta content="core-team-lp-v147-roster-reconciliation-20261105" name="version"/>
 <meta content="v145: sort new-build work by closing date, label touch dates, and show buyer plus builder/sales-rep follow-ups separately." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -14555,7 +14555,7 @@ async function ctGetAlignedPowerBiSummaryV72(force){
     const localMs=Date.parse(local&&local.imported_at||'')||0,localBy=new Map();
     Object.values(local&&local.by_agent||{}).forEach(r=>{let lv=String(r&&r.level||'').trim().toUpperCase();if(!['A','B','C'].includes(lv)){const inferred=ctRelTierFromProduction({closes_past_year:r&&r.closed_12mo,total_leads_past_year:r&&r.total_leads_12mo});lv=inferred==='Channel'?'A':inferred||'';}const k=v72key(r&&r.name);if(k&&['A','B','C'].includes(lv)&&!localBy.has(k))localBy.set(k,Object.assign({},r,{level:lv}))});
     const verifiedMs=Date.parse(V76_VERIFIED_POWERBI.imported_at)||0;
-    const localRows=Array.from(localBy.values()),sameImportWindow=localRows.length>0&&localMs>0&&(!latestMs||localMs>=latestMs||Math.abs(latestMs-localMs)<15*60*1000),preferLocal=sameImportWindow&&localMs>verifiedMs&&(!useReceipt||Math.abs(receiptMs-localMs)<15*60*1000);
+    const localRows=Array.from(localBy.values()).filter(r=>!ctExcludedFromActiveAgentRoster(r.name)),sameImportWindow=localRows.length>0&&localMs>0&&(!latestMs||localMs>=latestMs||Math.abs(latestMs-localMs)<15*60*1000),preferLocal=sameImportWindow&&localMs>verifiedMs&&(!useReceipt||Math.abs(receiptMs-localMs)<15*60*1000);
     if(preferLocal){
       const localSource={A:0,B:0,C:0};localRows.forEach(r=>{const lv=String(r.level||'').trim().toUpperCase();localSource[lv]++});
       const localChannel=localRows.filter(r=>v72n(r.closed_12mo)>=10).length,profileBy=new Map();(profiles||[]).forEach(p=>{const k=v72key(p&&p.agent_name);if(k&&!profileBy.has(k))profileBy.set(k,p)});
@@ -14571,7 +14571,16 @@ async function ctGetAlignedPowerBiSummaryV72(force){
     const managed=rows.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive'),scoreLevels={Channel:0,A:0,B:0,C:0};
     rows.forEach(p=>{const tier=ctRelTierFromProduction(p);if(tier&&scoreLevels[tier]!==undefined)scoreLevels[tier]++});
     const activePartnerCount=rows.filter(p=>v72IsActivePartner(p,p,new Date())).length;
-    const data={active_partner_rows:source.total,score_partner_rows:activePartnerCount,score_levels:scoreLevels,managed_active_rows:managed.length,levels:scoreLevels,source_levels:{A:source.A,B:source.B,C:source.C},active_names:rows.map(p=>p.agent_name).filter(Boolean),raw_rows:source.raw,stamp:source.stamp,imported_at:source.stamp,profile_rows:rows.length,profile_behind:source.total>rows.length,source:receiptIsNewer?'shared Core Team Power BI import receipt':'verified current Power BI workbook'};
+    // Import receipts contain the original workbook population. An explicitly removed
+    // profile can still occur in that workbook; do not count it on the active roster.
+    // Preserve raw_rows for transparent auditing and exclude it only once per agent.
+    const removedInCohort=new Map();
+    rows.forEach(p=>{const key=v72key(p.agent_name);if(key&&ctExcludedFromActiveAgentRoster(p.agent_name))removedInCohort.set(key,p)});
+    const correctedSource={A:source.A,B:source.B,C:source.C};
+    removedInCohort.forEach(p=>{const lv=String(p.powerbi_level||'').trim().toUpperCase();if(correctedSource[lv]>0)correctedSource[lv]--;});
+    const visibleNames=rows.filter(p=>!ctExcludedFromActiveAgentRoster(p.agent_name));
+    const correctedTotal=Math.max(0,source.total-removedInCohort.size);
+    const data={active_partner_rows:correctedTotal,score_partner_rows:activePartnerCount,score_levels:scoreLevels,managed_active_rows:managed.length,levels:scoreLevels,source_levels:correctedSource,active_names:visibleNames.map(p=>p.agent_name).filter(Boolean),raw_rows:source.raw,stamp:source.stamp,imported_at:source.stamp,profile_rows:visibleNames.length,profile_behind:correctedTotal>visibleNames.length,removed_from_source:removedInCohort.size,source:receiptIsNewer?'shared Core Team Power BI import receipt minus removed':'verified current Power BI workbook minus removed'};
     V72_CACHE.data=data;V72_CACHE.at=Date.now();return data;
   })().finally(()=>{V72_CACHE.promise=null});return V72_CACHE.promise;
 }
