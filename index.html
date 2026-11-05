@@ -7609,7 +7609,7 @@ async function loadFaceTime(){
     var ftSafe=function(label,promise){return promise.catch(function(e){ftSourceErrors.push(label+": "+String(e&&e.message||e));return [];});};
     var r=await Promise.all([
       ftSafe("RM visit history",sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=in.(Break%20Breads,Break%20Bread)&order=act_date.desc&limit=4000")),
-      sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
+      ftSafe("LP visit history",sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000")),
       loadCoMarketing(),
       ftSafe("Agent profiles",sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(e){ftSourceErrors.push("Full profile query unavailable: "+String(e&&e.message||e));return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,do_not_contact,relationship_status&limit=5000");}).catch(function(e){ftSourceErrors.push("Profile fallback query unavailable: "+String(e&&e.message||e));return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,do_not_contact,relationship_status&limit=5000");})),
       ftSafe("LP assignments",sbFetch("GET","agent_assignments?select=agent_name,lp,rm&limit=5000")),
@@ -7759,7 +7759,7 @@ async function loadFaceTime(){
     });
     ftRosterRows=Array.from(uniqueFt.values());
     window.CT_FT_ROSTER_LOADED=!!ftRosterRows.length;
-    window.CT_FT_VISITS_LOADED=!ftSourceErrors.some(function(x){return x.startsWith("RM visit history:");});
+    window.CT_FT_VISITS_LOADED=!ftSourceErrors.some(function(x){return x.startsWith("RM visit history:")||x.startsWith("LP visit history:");});
     var notice=document.getElementById("ft-roster-notice");
     if(!notice){notice=document.createElement("div");notice.id="ft-roster-notice";var page=document.getElementById("view-facetime");if(page)page.insertBefore(notice,page.querySelector(".ft-summary")||page.firstChild);}
     if(notice){
@@ -14213,11 +14213,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const internal=new Set(['Tuesday Call Plan Snapshot','Transaction Snapshot','Transaction Contact Override','Data Sync','Power BI Sync']);
   async function ensureXlsx(){if(window.XLSX)return window.XLSX;return new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>res(window.XLSX);s.onerror=()=>rej(new Error('Excel export library unavailable'));document.head.appendChild(s)})}
   async function exportAll(){
+    try {
     const days=90,d=new Date();d.setDate(d.getDate()-days);const since=d.toISOString().slice(0,10);
     const [rm,lp,plans]=await Promise.all([
-      sbFetch('GET','amanda_activities?act_date=gte.'+since+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=act_date.desc&limit=12000').catch(()=>[]),
-      sbFetch('GET','call_logs?call_date=gte.'+since+'&select=id,agent_name,lp,call_date,outcome,note&order=call_date.desc&limit=12000').catch(()=>[]),
-      sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Call%20Plan%20Snapshot&act_date=gte.'+since+'&select=id,agent_name,act_date,notes,created_at&order=created_at.desc&limit=12000').catch(()=>[])
+      sbFetch('GET','amanda_activities?act_date=gte.'+since+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=act_date.desc&limit=12000'),
+      sbFetch('GET','call_logs?call_date=gte.'+since+'&select=id,agent_name,lp,call_date,outcome,note&order=call_date.desc&limit=12000'),
+      sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Call%20Plan%20Snapshot&act_date=gte.'+since+'&select=id,agent_name,act_date,notes,created_at&order=created_at.desc&limit=12000')
     ]);
     const rows=[];const add=(r,person,team,lpName,type,status)=>rows.push({date:r.date||'',person:person||'Unassigned',team,lp:lpName||'',activity:type||'',agent:r.agent||'',status:status||'Completed',outcome:r.outcome||'',notes:r.notes||''});
     (lp||[]).forEach(r=>add({date:r.call_date,agent:r.agent_name,outcome:r.outcome,notes:r.note},shortLp(r.lp)||'Unassigned','LP',shortLp(r.lp)||'Unassigned','LP call','Completed'));
@@ -14299,6 +14300,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       ws2['!cols']=detailCols;ws2['!autofilter']={ref:'A1:I1'};X.utils.book_append_sheet(wb,ws2,'All Calls + Updates');
       X.writeFile(wb,'Daniel-Team-All-Calls-'+new Date().toISOString().slice(0,10)+'.xlsx')
     }catch(e){const cols=['Date','Person / Team','Team','LP Owner','Call / Update Type','Agent / Partner','Status','Outcome','Notes'],csv=[cols].concat(detail.map(r=>cols.map(c=>r[c]))).map(row=>row.map(escCsv).join(',')).join('\r\n'),a=document.createElement('a'),u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download='Daniel-Team-All-Calls-'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+    } catch(e) {
+      console.error('All Calls + Updates export failed',e);
+      const msg='Could not export calls and updates. Source data did not load completely; no partial report was generated.';
+      const st=document.getElementById('v56MgmtStatus');
+      if(st){st.className='ct-v56-status err';st.textContent=msg;}
+      if(typeof ctShowToast==='function')ctShowToast(msg,'error');
+    }
   }
   async function exportLpTuesdayReport(){
     const lpShort=shortLp;
