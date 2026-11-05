@@ -8673,7 +8673,7 @@ function renderDirectorView(){
   csvHtml+='</div>';
 
   // ── Bulk spend editor — update several partners' verified monthly spend without opening each card ──
-  var bulkHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px">';
+  var bulkHtml='<details style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px"><summary style="padding:12px 14px;font-weight:700;cursor:pointer">Edit partner spend · expand only when needed</summary>';
   bulkHtml+='<div style="padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">Quick spend update — verified monthly numbers, not Power BI estimates</div>';
   bulkHtml+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   ["Partner","Platform","Agent Spend","Lender Spend","Zillow Total","Realtor.com Total"].forEach(function(h){
@@ -8692,7 +8692,7 @@ function renderDirectorView(){
     bulkHtml+='<td style="padding:6px 14px;border-bottom:1px solid var(--border-light);font-family:var(--font-mono);color:var(--text-3)">'+(bulkRealtorTotal!==null?"$"+bulkRealtorTotal.toLocaleString(undefined,{maximumFractionDigits:0}):"—")+'</td>';
     bulkHtml+='</tr>';
   });
-  bulkHtml+='</tbody></table></div>';
+  bulkHtml+='</tbody></table></details>';
 
   var html=csvHtml+bulkHtml+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
   var summaryRows=[];
@@ -8703,7 +8703,7 @@ function renderDirectorView(){
     var combinedYourSpend=(parseFloat(p.your_spend)||0)+(p.platform==="both"?(parseFloat(p.your_spend_zillow)||0):0);
     var req=combinedYourSpend>0?Math.ceil(combinedYourSpend/250):0;
     var rawReq=combinedYourSpend/250;
-    var pct=rawReq>0?Math.min(999,Math.round(lc.total/rawReq*100)):0;
+    var pct=rawReq>0?Math.min(999,Math.round(lc.total/rawReq*100)):null;
 
     // An annual CTA must never divide one month's spend by twelve months' production.
     var pb_leads=p.pb_leads_12mo||0;
@@ -8713,9 +8713,9 @@ function renderDirectorView(){
     var spend12mo=annualSpend>0?annualSpend:null;
     var pb_cta_num=pb_vol>0&&spend12mo!==null?(spend12mo/pb_vol)*100:null;
     var ctaOk=pb_cta_num===null||pb_cta_num<=0.50;
-    var statusLabel=pct>=80&&ctaOk?"On-track opp pace":pct>=80&&!ctaOk?"Opp pace met · CTA watch":pct>=50?"Watch opp pace":"Low opp pace";
-    var goalColor=pct>=80&&ctaOk?"#2E7D6A":pct>=50||pct>=80?"#B87333":"#8B3A3A";
-    var goalBg=pct>=80&&ctaOk?"#34D399":pct>=50||pct>=80?"#FBBF24":"#F87171";
+    var statusLabel=pct===null?"Spend not entered":pct>=80&&ctaOk?"On-track opp pace":pct>=80&&!ctaOk?"Opp pace met · CTA watch":pct>=50?"Watch opp pace":"Low opp pace";
+    var goalColor=pct===null?"#64748b":pct>=80&&ctaOk?"#2E7D6A":pct>=50?"#B87333":"#8B3A3A";
+    var goalBg=pct===null?"#cbd5e1":pct>=80&&ctaOk?"#34D399":pct>=50?"#FBBF24":"#F87171";
     var costPerLead=lc.total>0&&combinedYourSpend?("$"+(combinedYourSpend/lc.total).toFixed(0)):"—";
     var pb_notSynced=!p.pb_synced_at;
     var pb_cta=pb_cta_num!==null?pb_cta_num.toFixed(2)+"%":"—";
@@ -8767,7 +8767,7 @@ function renderDirectorView(){
     var pb12Color=pb12Pct>=80?"#2E7D6A":pb12Pct>=50?"#B87333":"#8B3A3A";
 
     html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:6px">';
-    html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">MTD Leads</div><div style="font-size:18px;font-weight:800">'+lc.total+'</div><div style="font-size:9px;color:'+goalColor+'">'+pct+'% of MTD goal</div></div>';
+    html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">MTD Leads</div><div style="font-size:18px;font-weight:800">'+lc.total+'</div><div style="font-size:9px;color:'+goalColor+'">'+(pct===null?"—":pct+"%")+' of MTD goal</div></div>';
     html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">12mo Leads</div><div style="font-size:18px;font-weight:800">'+pb_leads+'</div><div style="font-size:9px;color:'+pb12Color+'">'+pb12Pct+'% of 12mo goal</div></div>';
     html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">12mo Closings</div><div style="font-size:18px;font-weight:800;color:#2E7D6A">'+pb_closed+'</div></div>';
     html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">12mo Volume</div><div style="font-size:13px;font-weight:800">'+(pb_vol>0?"$"+(pb_vol/1000000).toFixed(2)+"M":"—")+'</div></div>';
@@ -8787,17 +8787,18 @@ function renderDirectorView(){
     html+='<span style="font-size:11px;font-weight:800;color:'+goalColor+'">'+lc.total+' leads</span>';
     html+='</div>';
 
-    html+='<div style="font-size:11px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">Agent roster &amp; monthly spend';
+    html+='<div style="font-size:11px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">Agent roster &amp; optional spend allocation';
     html+='<span style="display:flex;gap:6px">';
     html+='<button onclick="dmAddAgent('+idx+')" style="font-size:10px;border:1px solid var(--border);background:var(--bg);border-radius:6px;padding:2px 8px;cursor:pointer">+ Add agent</button>';
     html+='</span></div>';
-    html+='<div style="display:flex;gap:6px;padding:2px 0 4px;font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700"><span style="flex:1">Agent</span><span style="width:90px">Alias</span><span style="width:78px;text-align:right">Spend/mo</span><span style="min-width:44px;text-align:right">Leads</span><span style="min-width:44px;text-align:right">Closed</span><span style="width:14px"></span></div>';
+    html+='<div style="font-size:10px;color:var(--text-3);padding-bottom:7px">Partner billing totals above are authoritative. Blank allocations do not mean $0 spent.</div>';
+    html+='<div style="display:flex;gap:6px;padding:2px 0 4px;font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700"><span style="flex:1">Agent</span><span style="width:90px">Alias</span><span style="width:78px;text-align:right">Allocated $</span><span style="min-width:44px;text-align:right">Leads</span><span style="min-width:44px;text-align:right">Closed</span><span style="width:14px"></span></div>';
     html+='<div id="dmroster-'+idx+'">';
     lc.perAgent.forEach(function(a,ai){
       html+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border-light)">';
       html+='<input value="'+escHtml(a.name)+'" onchange="dmRosterField('+idx+','+ai+',\'name\',this.value)" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:11px">';
       html+='<input value="'+escHtml(a.alias||"")+'" placeholder="alias" onchange="dmRosterField('+idx+','+ai+',\'alias\',this.value)" style="width:90px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:10px;color:var(--text-3)">';
-      html+='<input type="number" step="1" value="'+(a.spend||"")+'" placeholder="$" onchange="dmRosterField('+idx+','+ai+',\'spend\',this.value)" style="width:78px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:10px;text-align:right">';
+      html+='<input type="number" step="1" value="'+(a.spend>0?a.spend:"")+'" placeholder="—" onchange="dmRosterField('+idx+','+ai+',\'spend\',this.value)" style="width:78px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:10px;text-align:right">';
       html+='<span style="font-size:10px;color:var(--text-3);font-family:var(--font-mono);min-width:44px;text-align:right">'+a.leads+'</span>';
       html+='<span style="font-size:10px;color:#2E7D6A;font-family:var(--font-mono);font-weight:700;min-width:44px;text-align:right">'+a.closed+'</span>';
       html+='<button onclick="dmRemoveAgent('+idx+','+ai+')" style="font-size:11px;color:var(--red);border:none;background:none;cursor:pointer">✕</button>';
@@ -8817,8 +8818,8 @@ function renderDirectorView(){
   var totalRawReq=summaryRows.reduce(function(s,r){return s+r.rawReq;},0);
   var overallPct=totalRawReq>0?Math.round(totalLeads/totalRawReq*100):0;
   var overallColor=overallPct>=80?"#2E7D6A":overallPct>=50?"#B87333":"#8B3A3A";
-  var concernCount=summaryRows.filter(function(r){return r.pct<50;}).length;
-  var watchCount=summaryRows.filter(function(r){return r.pct>=50&&r.pct<80;}).length;
+  var concernCount=summaryRows.filter(function(r){return r.pct!==null&&r.pct<50;}).length;
+  var watchCount=summaryRows.filter(function(r){return r.pct!==null&&r.pct>=50&&r.pct<80;}).length;
 
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px">';
   html+='<div style="font-size:13px;font-weight:700;margin-bottom:4px">Platform Performance</div>';
