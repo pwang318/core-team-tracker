@@ -63,6 +63,9 @@ const leadContext = {
   ctIsLeadResolved(v){return /bad lead|do not qualify/i.test(String(v.status||''));}
 };
 vm.runInNewContext(uniqueFn,leadContext);
+const primaryFn = html.match(/function ctResolvedReferralPrimaryLP\(leadKey\)\{[\s\S]*?\n\}/)?.[0];
+assert(primaryFn,'Verified shared-LP attribution map must be present');
+vm.runInNewContext(primaryFn,leadContext);
 const leadResult=leadContext.ctUniqueVelocifyReferralRows([
   {lead_key:'same',lp_user:'Said',status:'Started',created_at:'2026-11-02T00:00:00Z'},
   {lead_key:'same',lp_user:'Jordan',status:'Started',created_at:'2026-11-02T00:00:00Z'},
@@ -72,9 +75,6 @@ const leadResult=leadContext.ctUniqueVelocifyReferralRows([
 assert.equal(leadResult.length,2,'Duplicate lead keys must count once');
 assert.equal(leadResult[0].lp_user,'Ownership conflict — review','Conflicting LP owner must be flagged');
 assert.equal(leadResult[1].status,'Started','An undated bad-lead duplicate cannot erase proof an application started');
-const primaryFn = html.match(/function ctResolvedReferralPrimaryLP\(leadKey\)\{[\s\S]*?\n\}/)?.[0];
-assert(primaryFn,'Verified shared-LP attribution map must be present');
-vm.runInNewContext(primaryFn,leadContext);
 const shared=leadContext.ctUniqueVelocifyReferralRows([
  {lead_key:'Colleen Welch__2026-10-01__Mercedes Welch',lp_user:'Caldwell, Isaak',status:'Started',created_at:'2026-11-02'},
  {lead_key:'Colleen Welch__2026-10-01__Mercedes Welch',lp_user:'Saleh, Said',status:'Started',created_at:'2026-11-02'},
