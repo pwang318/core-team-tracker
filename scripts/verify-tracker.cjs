@@ -55,7 +55,7 @@ assert(html.includes("meta(p.notes,'TXN_LOAN_STATUS')"), 'Manager new-build queu
 assert(html.includes('Ownership conflict — review'), 'Conflicting LP lead ownership must not be silently assigned');
 assert(html.includes('id="lp-pb-reconciliation"'), 'Power BI Data Hub must reconcile source rows with unique agent profiles');
 assert(html.includes('id="lp-velocify-dup-audit"'), 'Data Hub must expose Velocify duplicates and attribution issues');
-assert(html.includes('source records are retained pending Velocify confirmation'), 'Do not silently erase contested Velocify rows');
+assert(html.includes('helper LP details stay in source history'), 'Do not silently erase collaborating LP attribution');
 const uniqueFn = html.match(/function ctUniqueVelocifyReferralRows\(rows\)\{[\s\S]*?\n\}/)?.[0];
 assert(uniqueFn, 'Velocify lead deduplication missing');
 const leadContext = {
