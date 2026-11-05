@@ -1506,7 +1506,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 </div>
 <div class="view" id="view-snapshot"><div class="ct-snapshot-page">
-<div class="ct-page-head"><div><div class="ct-eyebrow">TEAM ACCOUNTABILITY</div><h1>Team Snapshot</h1><div class="ct-page-sub">Current team production, conversion and execution.</div></div><div class="ct-snapshot-actions"><span class="ct-muted" id="snapshot-time"></span><button class="ct-link-btn" id="snapshot-live-refresh" onclick="refreshSnapshotFresh(this)" type="button">Refresh live data</button></div></div><div class="ct-sync-line" id="snapshot-live-status">Syncing current team data…</div>
+<div class="ct-page-head"><div><div class="ct-eyebrow">TEAM ACCOUNTABILITY</div><h1>Team Snapshot</h1><div class="ct-page-sub">Current team production, conversion and execution.</div></div><div class="ct-snapshot-actions"><span class="ct-muted" id="snapshot-time"></span><button class="ct-link-btn" id="snapshot-live-refresh" onclick="refreshSnapshotFresh(this)" type="button">Refresh live data</button></div></div><div class="ct-sync-line" id="snapshot-live-status">Syncing current team data…</div><div id="lp-source-freshness" style="font-size:12px;color:#45556c;margin:8px 0 12px;padding:9px 12px;background:#f4f6fb;border:1px solid #e1e5f0;border-radius:9px" role="status">Checking Power BI and Velocify sync dates…</div>
 <section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>Current position vs. performance targets</h2></div><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div><div id="lp-v2-team-gates"><div class="ct-loading">Loading performance targets…</div></div></section>
 <section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">THIS WEEK</div><h2>Team scorecards</h2><div class="ct-page-sub">Loan Partner scorecards with Amanda’s RM execution shown directly underneath.</div></div></div><div id="lp-v2-team-roster"><div class="ct-loading">Loading team scorecard…</div></div><div class="ct-amanda-anchor" id="ct-amanda-snapshot-anchor"></div></section>
 <section class="ct-card ct-standard-strip"><div><div class="ct-kicker">OPERATING STANDARD</div><h2>Produce. Convert. Execute. Grow.</h2><p>LP2 owns client + transaction execution and buyer/buyer-agent work on active contracts. LP1 supports front-end conversion. RM owns partner portfolio health, retention, growth and the listing-agent relationship lane.</p></div><button class="ct-primary-btn" onclick="lpv2Route('standard',this)" type="button">Open Operating Standard</button></section>
@@ -14828,3 +14828,30 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 .v143-build-modal-actions .secondary{background:#EFF4F7;color:#234C76}
 @media(max-width:720px){.v143-build-row{grid-template-columns:1fr;gap:8px}.v143-build-row button{width:100%}.v143-build-review-head{align-items:flex-start;flex-direction:column}.v143-build-form{grid-template-columns:1fr}.v143-build-form textarea,.v143-build-form small{grid-column:auto}}
 </style>
+
+<script id="lp-source-freshness-v314">
+(function(){
+ function safe(v){return String(v||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+ function stamp(v,limit){
+   if(!v)return '<span style="color:#a32222">Unavailable</span>';
+   var d=new Date(v),age=(Date.now()-d.getTime())/3600000;
+   if(!Number.isFinite(age))return 'Unavailable';
+   var stale=age>limit;
+   return '<span style="color:'+(stale?'#a32222':'#246246')+';font-weight:700">'+safe(d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}))+(stale?' · check refresh':' · synced')+'</span>';
+ }
+ async function refresh(){
+   var el=document.getElementById('lp-source-freshness');if(!el||typeof sbFetch!=='function')return;
+   try{
+     var responses=await Promise.allSettled([
+       sbFetch('GET','powerbi_import_log?select=imported_at&order=imported_at.desc&limit=1'),
+       sbFetch('GET','velocify_leads?select=created_at&order=created_at.desc&limit=1')
+     ]);
+     var a=responses[0].status==='fulfilled'?(responses[0].value||[])[0]:null;
+     var b=responses[1].status==='fulfilled'?(responses[1].value||[])[0]:null;
+     el.innerHTML='<b>Data freshness</b> · Power BI: '+stamp(a&&a.imported_at,48)+' · Velocify: '+stamp(b&&b.created_at,36)+' <span style="color:#637389">· uploads may lag source systems</span>';
+   }catch(err){el.textContent='Data freshness unavailable — check shared database connectivity.'}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
+ window.lpRefreshSourceFreshness=refresh;
+ setInterval(function(){var el=document.getElementById('lp-source-freshness');if(el&&el.offsetParent!==null)refresh()},300000);
+})();</script>
