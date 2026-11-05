@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v151-comarketing-source-consistency-20261105" name="version"/>
+<meta content="core-team-lp-v152-comarketing-mtd-pacing-20261105" name="version"/>
 <meta content="v145: sort new-build work by closing date, label touch dates, and show buyer plus builder/sales-rep follow-ups separately." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -8490,7 +8490,20 @@ var coMktPartners=[];
 var coMktLeadCounts={};
 var coMktLeadKeysByName={};
 var coMktClosedCounts={};
-var coMktLeadCountsSource="Live sync (velocify_leads, year-to-date)";
+var coMktLeadCountsSource="Live Velocify referrals · month-to-date";
+function coMktPaceMetrics(spend,leads,asOf){
+ var expected=Math.max(0,Number(spend)||0)/250,count=Math.max(0,Number(leads)||0);
+ var minimum=expected>0?Math.ceil(expected*0.8-1e-9):0;
+ var d=asOf||new Date(),days=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+ var fraction=Math.max(1,Math.min(days,d.getDate()))/days;
+ var fullPct=expected>0?Math.round(count/expected*100):null;
+ var pacePct=expected>0?Math.round(count/(expected*fraction)*100):null;
+ var target=expected*0.8*fraction,met=expected>0&&count>=minimum;
+ var status=expected<=0?"Spend not entered":met?"Monthly goal met":count>=target?"On track MTD":pacePct>=50?"Watch MTD pace":"Behind MTD pace";
+ var color=expected<=0?"#64748b":met||count>=target?"#2E7D6A":pacePct>=50?"#B87333":"#8B3A3A";
+ return {expected:expected,minimum:minimum,fullPct:fullPct,pacePct:pacePct,target:target,met:met,status:status,color:color,remaining:Math.max(0,minimum-count)};
+}
+
 
 function openDirectorView(btn){
   try{if(typeof rmStopPolling==='function')rmStopPolling()}catch(e){}
@@ -8552,7 +8565,7 @@ function coMktLeadsForRoster(roster){
       if(!teamSeenLeadKeys.has(key)){teamSeenLeadKeys.add(key);leads++;}
     });
     var spend=parseFloat(r.spend)||0;
-    var req=spend>0?Math.max(1,Math.floor(spend/250)):0;
+    var req=spend>0?Math.ceil(spend/250*0.8-1e-9):0;
     var rawReq=spend/250;
     var pct=rawReq>0?Math.round(leads/rawReq*100):null;
     perAgent.push({name:r.name,alias:r.alias,leads:leads,closed:closed,spend:spend,req:req,pct:pct,billingEnds:r.billing_ends||""});
@@ -8701,9 +8714,10 @@ function renderDirectorView(){
     var roster=p.agent_roster||[];
     var lc=coMktLeadsForRoster(roster);
     var combinedYourSpend=(parseFloat(p.your_spend)||0)+(p.platform==="both"?(parseFloat(p.your_spend_zillow)||0):0);
-    var req=combinedYourSpend>0?Math.ceil(combinedYourSpend/250):0;
-    var rawReq=combinedYourSpend/250;
-    var pct=rawReq>0?Math.min(999,Math.round(lc.total/rawReq*100)):null;
+    var pace=coMktPaceMetrics(combinedYourSpend,lc.total);
+    var req=pace.minimum;
+    var rawReq=pace.expected;
+    var pct=pace.pacePct;
 
     // An annual CTA must never divide one month's spend by twelve months' production.
     var pb_leads=p.pb_leads_12mo||0;
@@ -8712,10 +8726,9 @@ function renderDirectorView(){
     var annualSpend=Number(p.spend_12mo);
     var spend12mo=annualSpend>0?annualSpend:null;
     var pb_cta_num=pb_vol>0&&spend12mo!==null?(spend12mo/pb_vol)*100:null;
-    var ctaOk=pb_cta_num===null||pb_cta_num<=0.50;
-    var statusLabel=pct===null?"Spend not entered":pct>=80&&ctaOk?"On-track opp pace":pct>=80&&!ctaOk?"Opp pace met · CTA watch":pct>=50?"Watch opp pace":"Low opp pace";
-    var goalColor=pct===null?"#64748b":pct>=80&&ctaOk?"#2E7D6A":pct>=50?"#B87333":"#8B3A3A";
-    var goalBg=pct===null?"#cbd5e1":pct>=80&&ctaOk?"#34D399":pct>=50?"#FBBF24":"#F87171";
+    var statusLabel=pace.status;
+    var goalColor=pace.color;
+    var goalBg=pct===null?"#cbd5e1":pace.met||lc.total>=pace.target?"#34D399":pct>=50?"#FBBF24":"#F87171";
     var costPerLead=lc.total>0&&combinedYourSpend?("$"+(combinedYourSpend/lc.total).toFixed(0)):"—";
     var pb_notSynced=!p.pb_synced_at;
     var pb_cta=pb_cta_num!==null?pb_cta_num.toFixed(2)+"%":"—";
@@ -8728,7 +8741,7 @@ function renderDirectorView(){
     html+='<div style="padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="dmToggleCard('+idx+')">';
     html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">';
     html+='<div><div style="font-size:14px;font-weight:700">'+escHtml(p.partner_name)+'</div>';
-    html+='<div style="font-size:11px;color:var(--text-3)">'+escHtml(p.brokerage||"")+(p.since_date?" · Since "+fmt(p.since_date):"")+'</div></div>';
+    html+='<div style="font-size:11px;color:var(--text-3)">'+escHtml(p.brokerage||"")+(p.since_date?" · Since "+fmt(p.since_date):"")+'</div><div style="font-size:10px;color:var(--text-3);margin-top:4px">$'+combinedYourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'/mo · '+rawReq.toFixed(1)+' expected · '+req+' minimum at 80% · '+lc.total+' MTD · '+pace.remaining+' to goal</div></div>';
     html+='<div style="text-align:right">'+platTag(p.platform)+'<div style="font-size:11px;font-weight:700;color:'+goalColor+';margin-top:4px">'+statusLabel+'</div><div style="font-size:11px;font-weight:700;color:'+pb_cta_color+';margin-top:2px">CTA: '+pb_cta+'</div></div>';
     html+='</div></div>';
 
@@ -8762,12 +8775,12 @@ function renderDirectorView(){
     // ── Power BI synced metrics ──
     var pb_synced=p.pb_synced_at?"Last Power BI sync: "+p.pb_synced_at:"Not yet synced — upload Power BI export in Admin";
     var cleanDate=function(d){return(!d||d==="1970-01-01"||d.indexOf("1970")==0)?(p.pb_synced_at?"No closes yet":"—"):d;};
-    var pb12Goal=Math.floor(combinedYourSpend/250)*12;
+    var pb12Goal=(combinedYourSpend/250)*12;
     var pb12Pct=pb12Goal>0?Math.round(pb_leads/pb12Goal*100):0;
     var pb12Color=pb12Pct>=80?"#2E7D6A":pb12Pct>=50?"#B87333":"#8B3A3A";
 
     html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:6px">';
-    html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">MTD Leads</div><div style="font-size:18px;font-weight:800">'+lc.total+'</div><div style="font-size:9px;color:'+goalColor+'">'+(pct===null?"—":pct+"%")+' of MTD goal</div></div>';
+    html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">MTD Leads</div><div style="font-size:18px;font-weight:800">'+lc.total+'</div><div style="font-size:9px;color:'+goalColor+'">'+(pace.fullPct===null?"—":pace.fullPct+"%")+' of full-month target</div></div>';
     html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">12mo Leads</div><div style="font-size:18px;font-weight:800">'+pb_leads+'</div><div style="font-size:9px;color:'+pb12Color+'">'+pb12Pct+'% of 12mo goal</div></div>';
     html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">12mo Closings</div><div style="font-size:18px;font-weight:800;color:#2E7D6A">'+pb_closed+'</div></div>';
     html+='<div style="background:var(--surface-2);padding:8px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">12mo Volume</div><div style="font-size:13px;font-weight:800">'+(pb_vol>0?"$"+(pb_vol/1000000).toFixed(2)+"M":"—")+'</div></div>';
@@ -8816,25 +8829,26 @@ function renderDirectorView(){
   var totalClosed12=summaryRows.reduce(function(s,r){return s+Number(r.pbClosed||0);},0);
   var totalReq=summaryRows.reduce(function(s,r){return s+r.req;},0);
   var totalRawReq=summaryRows.reduce(function(s,r){return s+r.rawReq;},0);
-  var overallPct=totalRawReq>0?Math.round(totalLeads/totalRawReq*100):0;
-  var overallColor=overallPct>=80?"#2E7D6A":overallPct>=50?"#B87333":"#8B3A3A";
+  var overallPace=coMktPaceMetrics(totalYourSpend,totalLeads);
+  var overallPct=overallPace.pacePct===null?"—":overallPace.pacePct;
+  var overallColor=overallPace.color;
   var concernCount=summaryRows.filter(function(r){return r.pct!==null&&r.pct<50;}).length;
   var watchCount=summaryRows.filter(function(r){return r.pct!==null&&r.pct>=50&&r.pct<80;}).length;
 
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px">';
   html+='<div style="font-size:13px;font-weight:700;margin-bottom:4px">Platform Performance</div>';
-  html+='<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">Opportunity pace shows whether the platform is generating enough lead opportunities for the spend. Closings are shown separately because hitting the opportunity target does not automatically mean the platform is producing funded business.</div>';
+  html+='<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">MTD pace adjusts for days elapsed: $250 lender spend = 1 expected lead per month; 80% is the full-month minimum (rounded up). Annual cost to acquire and funded closings are separate. Only verified Velocify buyer leads are counted automatically.</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total spend</div><div style="font-size:18px;font-weight:800">$'+totalYourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">MTD referred leads</div><div style="font-size:18px;font-weight:800">'+totalLeads+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">12mo closings</div><div style="font-size:18px;font-weight:800">'+totalClosed12+'</div></div>';
-  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Opps required</div><div style="font-size:18px;font-weight:800">'+totalReq+'</div></div>';
-  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Opportunity pace</div><div style="font-size:18px;font-weight:800;color:'+overallColor+'">'+overallPct+'%</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">80% goal · leads</div><div style="font-size:18px;font-weight:800">'+totalReq+'</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">MTD pace</div><div style="font-size:18px;font-weight:800;color:'+overallColor+'">'+overallPct+'%</div></div>';
   html+='</div>';
 
   html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
   html+='<thead><tr>';
-  ["Partner","Platform","NFM spend/mo","Req./mo","MTD leads","12mo closes","Annual CTA","MTD pace"].forEach(function(h){
+  ["Partner","Platform","NFM spend/mo","80% goal/mo","MTD leads","12mo closes","Annual CTA","MTD status"].forEach(function(h){
     html+='<th style="background:var(--bg);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border)">'+h+'</th>';
   });
   html+='</tr></thead><tbody>';
