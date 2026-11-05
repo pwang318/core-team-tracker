@@ -5818,12 +5818,13 @@ function renderCoMktList(){
     var lp=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?a[2]:"—";
     var lpClass=(a[2]&&a[2]!=="null"&&a[2]!=="undefined")?"lp-tag lp-tag-"+a[2]:"";
     var lpSpan=lpClass?'<span class="'+lpClass+'">'+lp+'</span>':'<span style="color:#aaa;font-size:12px">'+lp+'</span>';
+    var billed=coMarketingIsBilled(a[0]);
+    var action=billed?'<span title="Manage this agent in Co-Marketing Relationships" style="font-size:11px;color:#526C79;font-weight:650;margin-left:10px">Billing roster</span>':
+      '<button class="btn btn-sm '+(active?"btn-danger":"btn-success")+'" style="margin-left:10px" data-name="'+a[0]+'" data-active="'+(active?"true":"false")+'" onclick="toggleCoMarketing(this)">'+(active?"✕ Remove":"✓ Mark active")+'</button>';
     return'<div class="alert-item" style="'+(active?"background:#E8F5F0;border-color:#6EE7C4;":"")+'">'+
       '<span style="font-weight:600;flex:1">'+displayName(a[0])+'</span>'+
       '<span class="badge badge-'+(a[1]||"c").toLowerCase()+'" style="margin-right:6px">'+a[1]+'</span>'+
-      lpSpan+
-      '<button class="btn btn-sm '+(active?"btn-danger":"btn-success")+'" style="margin-left:10px" data-name="'+a[0]+'" data-active="'+(active?"true":"false")+'" onclick="toggleCoMarketing(this)">'+
-      (active?"✕ Remove":"✓ Mark active")+'</button></div>';
+      lpSpan+action+'</div>';
   }
 
   var html2="";
@@ -8483,6 +8484,7 @@ function fmtDate(d){
 }
 var coMktPartners=[];
 var coMktLeadCounts={};
+var coMktLeadKeysByName={};
 var coMktClosedCounts={};
 var coMktLeadCountsSource="Live sync (velocify_leads, year-to-date)";
 
@@ -8507,16 +8509,16 @@ function loadCoMktPartners(){
   ]).then(function(res){
     coMktPartners=res[0]||[];
     var rawLeads=res[1]||[];
-    coMktLeadCounts={};
+    coMktLeadCounts={};coMktLeadKeysByName={};
     coMktLeadCountsSource="Live Velocify referrals · month-to-date · unique lead keys";
-    var seenLeadKeys=new Set();
-    rawLeads.forEach(function(r){
-      var name=(r.referral_partner_name||"").trim().toUpperCase();
-      if(!name)return;
-      var key=String(r.lead_key||"").trim().toUpperCase();
-      if(key&&seenLeadKeys.has(key))return;
-      if(key)seenLeadKeys.add(key);
-      coMktLeadCounts[name]=(coMktLeadCounts[name]||0)+1;
+    rawLeads.forEach(function(r,i){
+      var name=(r.referral_partner_name||"").trim().toUpperCase();if(!name)return;
+      var key=String(r.lead_key||"").trim().toUpperCase()||"UNKEYED:"+name+":"+i;
+      if(!coMktLeadKeysByName[name])coMktLeadKeysByName[name]=new Set();
+      coMktLeadKeysByName[name].add(key);
+    });
+    Object.keys(coMktLeadKeysByName).forEach(function(name){
+      coMktLeadCounts[name]=coMktLeadKeysByName[name].size;
     });
     coMktClosedCounts={};
     agents.forEach(function(a){
@@ -8531,16 +8533,19 @@ function loadCoMktPartners(){
 }
 
 function coMktLeadsForRoster(roster){
-  var total=0,closedTotal=0,perAgent=[];
+  var total=0,closedTotal=0,perAgent=[],teamSeenLeadKeys=new Set();
   (roster||[]).forEach(function(r){
     var names=[r.name];
     if(r.alias)names.push(r.alias);
-    var leads=0,closed=0,aliasSeen={};
-    // Name and alias identify the SAME realtor, not two independent referrals.
+    var leadKeys=new Set(),closed=0,aliasSeen={};
+    // Aliases belong to the same agent; merge unique lead IDs across names.
     names.forEach(function(n){
-      var key=n.trim().toUpperCase();if(aliasSeen[key])return;aliasSeen[key]=true;
-      leads=Math.max(leads,coMktLeadCounts[key]||0);
+      var key=String(n||"").trim().toUpperCase();if(!key||aliasSeen[key])return;aliasSeen[key]=true;
+      (coMktLeadKeysByName[key]||[]).forEach(function(leadKey){leadKeys.add(leadKey);});
       closed=Math.max(closed,coMktClosedCounts[key]||0);
+    });
+    var leads=0;leadKeys.forEach(function(key){
+      if(!teamSeenLeadKeys.has(key)){teamSeenLeadKeys.add(key);leads++;}
     });
     var spend=parseFloat(r.spend)||0;
     var req=spend>0?Math.max(1,Math.floor(spend/250)):0;
