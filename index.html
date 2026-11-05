@@ -14371,7 +14371,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         const classification=classMap[tx]||classMap[mk]||(String(buyer||'').trim()?'CALL_REQUIRED':'CONTACT_ISSUE');
         const noCall=['FSBO','NEW_BUILD','NO_BUYER_AGENT'].includes(classification),needsReview=classification==='CONTACT_ISSUE';
         const log=logs.find(a=>{
-          const owner=lpShort(meta(a.notes,'LP')||meta(a.notes,'LP_OWNER'));if(owner&&owner!==lp)return false;
+          const owner=lpShort(meta(a.notes,'LP')||meta(a.notes,'LP_OWNER'));if(owner!==lp)return false;
           const planWeek=meta(p.notes,'TUE_PLAN_DATE')||p.act_date;
           if(String(a.act_date||a.created_at||'').slice(0,10)<String(planWeek||''))return false;
           const ak=meta(a.notes,'TUE_PLAN_KEY'),atx=meta(a.notes,'TXN_KEY');
