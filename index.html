@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v148-isaak-lp1-facetime-20261105" name="version"/>
+<meta content="core-team-lp-v149-co-marketing-verification-20261105" name="version"/>
 <meta content="v145: sort new-build work by closing date, label touch dates, and show buyer plus builder/sales-rep follow-ups separately." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -8462,18 +8462,22 @@ function openDirectorView(btn){
 function loadCoMktPartners(){
   var el=document.getElementById("director-cards");
   el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text-3);font-size:13px">Loading...</div>';
-  var ytdStart=new Date().getFullYear()+"-01-01";
+  var now=new Date(),monthStart=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
   return Promise.all([
     sbFetch("GET","co_marketing_partners?select=*&order=partner_name.asc"),
-    sbFetch("GET","velocify_leads?date_added=gte."+ytdStart+"&select=referral_partner_name&limit=5000")
+    sbFetch("GET","velocify_leads?date_added=gte."+monthStart+"&select=referral_partner_name,lead_key&limit=5000")
   ]).then(function(res){
     coMktPartners=res[0]||[];
     var rawLeads=res[1]||[];
     coMktLeadCounts={};
-    coMktLeadCountsSource="Live sync (velocify_leads, year-to-date)";
+    coMktLeadCountsSource="Live Velocify referrals · month-to-date · unique lead keys";
+    var seenLeadKeys=new Set();
     rawLeads.forEach(function(r){
       var name=(r.referral_partner_name||"").trim().toUpperCase();
       if(!name)return;
+      var key=String(r.lead_key||"").trim().toUpperCase();
+      if(key&&seenLeadKeys.has(key))return;
+      if(key)seenLeadKeys.add(key);
       coMktLeadCounts[name]=(coMktLeadCounts[name]||0)+1;
     });
     coMktClosedCounts={};
@@ -8607,26 +8611,8 @@ function renderDirectorView(){
   var el=document.getElementById("director-cards");
   if(!coMktPartners.length){el.innerHTML='<div style="padding:20px;color:var(--text-3);font-size:13px">No partners yet — run the setup SQL to seed them.</div>';return;}
 
-  // Verified 12mo expenditure from Power BI — used for Cost to Acquire calculation
-  // Last verified: 2026-07-29. Update by uploading Power BI export in Admin.
-  var PB_SPEND_12MO={
-    "BRANDON THOMPSON":26000,"BRANDON THOMPSON TEAM":26000,
-    "KISHMA JAMES":15353,"KISHMA JAMES TEAM":15353,
-    "KRISTINA MURPHY":13000,"KRISTINA MURPHY TEAM":13000,
-    "LEXIS GRANDY":0,
-    "OSCAR MARTINEZ":2235,"OSCAR MARTINEZ MEJIA":2235,"OSCAR MARTINEZ MEJIA TEAM":2235,
-    "RACQUEL LUDAWAY":4137,
-    "SAHAR SHALASH":10530,"SAHAR SHALASH TEAM":10530,
-    "SAM COOPER":119971,"SAM COOPER TEAM":119971,
-    "TODD STONE":18648,
-    "TONY AMOS":1050,"ANTHONY AMOS":1050
-  };
-  coMktPartners.forEach(function(p){
-    if(!p.spend_12mo||p.spend_12mo===0){
-      var key=(p.partner_name||"").trim().toUpperCase();
-      if(PB_SPEND_12MO[key]!==undefined)p.spend_12mo=PB_SPEND_12MO[key];
-    }
-  });
+  // Do not use stale July 2026 annual spend constants. Monthly spend is verified
+  // from the latest billing workbook; 12-month spend must be independently sourced.
 
   coMktPartners.sort(function(a,b){return(a.partner_name||"").localeCompare(b.partner_name||"");});
 
@@ -8666,26 +8652,27 @@ function renderDirectorView(){
   coMktPartners.forEach(function(p,idx){
     var roster=p.agent_roster||[];
     var lc=coMktLeadsForRoster(roster);
-    var req=p.your_spend?Math.max(1,Math.floor(p.your_spend/250)):0;
-    var rawReq=(parseFloat(p.your_spend)||0)/250;
+    var combinedYourSpend=(parseFloat(p.your_spend)||0)+(p.platform==="both"?(parseFloat(p.your_spend_zillow)||0):0);
+    var req=combinedYourSpend>0?Math.ceil(combinedYourSpend/250):0;
+    var rawReq=combinedYourSpend/250;
     var pct=rawReq>0?Math.min(999,Math.round(lc.total/rawReq*100)):0;
+
+    // An annual CTA must never divide one month's spend by twelve months' production.
+    var pb_leads=p.pb_leads_12mo||0;
+    var pb_closed=p.pb_closed_12mo||0;
+    var pb_vol=p.pb_vol_12mo||0;
+    var annualSpend=Number(p.spend_12mo);
+    var spend12mo=annualSpend>0?annualSpend:null;
+    var pb_cta_num=pb_vol>0&&spend12mo!==null?(spend12mo/pb_vol)*100:null;
     var ctaOk=pb_cta_num===null||pb_cta_num<=0.50;
     var statusLabel=pct>=80&&ctaOk?"On-track opp pace":pct>=80&&!ctaOk?"Opp pace met · CTA watch":pct>=50?"Watch opp pace":"Low opp pace";
     var goalColor=pct>=80&&ctaOk?"#2E7D6A":pct>=50||pct>=80?"#B87333":"#8B3A3A";
     var goalBg=pct>=80&&ctaOk?"#34D399":pct>=50||pct>=80?"#FBBF24":"#F87171";
-    var costPerLead=lc.total>0&&p.your_spend?("$"+(p.your_spend/lc.total).toFixed(0)):"—";
-    var combinedYourSpend=(parseFloat(p.your_spend)||0)+(p.platform==="both"?(parseFloat(p.your_spend_zillow)||0):0);
-
-    // ── Compute CTA vars here so they're available for card header ──
-    var pb_leads=p.pb_leads_12mo||0;
-    var pb_closed=p.pb_closed_12mo||0;
-    var pb_vol=p.pb_vol_12mo||0;
-    var spend12mo=parseFloat(p.spend_12mo)||combinedYourSpend;
-    var pb_cta_num=pb_vol>0?(spend12mo/pb_vol)*100:null;
+    var costPerLead=lc.total>0&&combinedYourSpend?("$"+(combinedYourSpend/lc.total).toFixed(0)):"—";
     var pb_notSynced=!p.pb_synced_at;
-    var pb_cta=pb_cta_num!==null?pb_cta_num.toFixed(2)+"%":(pb_notSynced?"—":"No Closes");
+    var pb_cta=pb_cta_num!==null?pb_cta_num.toFixed(2)+"%":"—";
     var pb_cta_color=pb_cta_num===null?"var(--text-3)":pb_cta_num<=0.50?"#2E7D6A":pb_cta_num<=1.0?"#B87333":"#E53935";
-    var pb_cta_label=pb_cta_num!==null?(pb_cta_num<=0.50?"✅ On target":pb_cta_num<=1.0?"⚠ Watch":"🚨 Above goal"):(pb_notSynced?"—":"No closes yet");
+    var pb_cta_label=pb_cta_num!==null?(pb_cta_num<=0.50?"✅ On target":pb_cta_num<=1.0?"⚠ Watch":"🚨 Above goal"):"Annual spend not verified";
 
     summaryRows.push({id:idx,name:p.partner_name,platform:p.platform,yourSpend:combinedYourSpend,req:req,rawReq:rawReq,leads:lc.total,closed:lc.closed,pbLeads:pb_leads,pbClosed:pb_closed,pct:pct,color:goalColor,status:statusLabel,cta:pb_cta,ctaColor:pb_cta_color});
 
@@ -8790,7 +8777,7 @@ function renderDirectorView(){
   html+='<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">Opportunity pace shows whether the platform is generating enough lead opportunities for the spend. Closings are shown separately because hitting the opportunity target does not automatically mean the platform is producing funded business.</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total spend</div><div style="font-size:18px;font-weight:800">$'+totalYourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'</div></div>';
-  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">YTD opportunities</div><div style="font-size:18px;font-weight:800">'+totalLeads+'</div></div>';
+  html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">MTD referred leads</div><div style="font-size:18px;font-weight:800">'+totalLeads+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">12mo closings</div><div style="font-size:18px;font-weight:800">'+totalClosed12+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Opps required</div><div style="font-size:18px;font-weight:800">'+totalReq+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Opportunity pace</div><div style="font-size:18px;font-weight:800;color:'+overallColor+'">'+overallPct+'%</div></div>';
@@ -8798,7 +8785,7 @@ function renderDirectorView(){
 
   html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
   html+='<thead><tr>';
-  ["Partner","Platform","Total spend","Req.","YTD opps","12mo closes","Cost to Acquire","Opp pace"].forEach(function(h){
+  ["Partner","Platform","NFM spend/mo","Req./mo","MTD leads","12mo closes","Annual CTA","MTD pace"].forEach(function(h){
     html+='<th style="background:var(--bg);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border)">'+h+'</th>';
   });
   html+='</tr></thead><tbody>';
@@ -8849,8 +8836,7 @@ function dmAddAgent(idx){
 var ZILLOW_SPEND_LATEST={
   "BRANDON THOMPSON":2000,
   "KRISTINA MURPHY":1000,
-  "SAM COOPER":855,
-  "THE JAMES TEAM":620
+  "KISHMA JAMES":620
 };
 function dmRemoveAgent(idx,agentIdx){
   var p=coMktPartners[idx];
