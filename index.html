@@ -13461,6 +13461,8 @@ async function load(force){
     const prior=isCurrent?priorByTx.get(tx):null,oldMilestone=prior?String(meta(prior.notes,'TXN_MILESTONE')||'').trim().toLowerCase():'',newMilestone=String(item.milestone||'').trim().toLowerCase(),milestoneChanged=!!(oldMilestone&&newMilestone&&oldMilestone!==newMilestone),closeDays=item.close?Math.ceil((new Date(item.close+'T12:00:00')-new Date())/86400000):null,base=touchDateFor(p),nextDue=base?new Date(String(base).slice(0,10)+'T12:00:00'):null;
     if(nextDue&&!isNaN(nextDue))nextDue.setDate(nextDue.getDate()+14);
     const dueDate=nextDue&&!isNaN(nextDue)?nextDue.toISOString().slice(0,10):'';
+    const closedBySource=(closeDays!==null&&closeDays<0)||/\b(closed|funded|funding complete|loan funded)\b/i.test(String(item.milestone||''));
+    if(closedBySource)return;
     const dueNow=milestoneChanged||(closeDays!==null&&closeDays<=7)||!dueDate||dueDate<=isoToday;
     const builder=Object.assign(item,{isBuilder:true,builderDueDate:dueDate,builderScheduled:!dueNow,milestoneChanged});
     (dueNow?builderDue:scheduledBuilders).push(builder);return;
@@ -13473,6 +13475,8 @@ async function load(force){
    if(classFor(p)!=='NEW_BUILD')return;
    const key=rowClassKey(p),item=itemFor(p),dedupe=key||[item.lp,item.client].join('|');if(seenBuildReviewKeys.has(dedupe))return;seenBuildReviewKeys.add(dedupe);
    const close=item.close,closeDays=close?Math.ceil((new Date(close+'T12:00:00')-new Date(isoToday+'T12:00:00'))/86400000):null;
+   // Match LP worklist: never report post-close or funded files as overdue consultations.
+   if((closeDays!==null&&closeDays<0)||/\b(closed|funded|funding complete|loan funded)\b/i.test(String(item.milestone||'')))return;
    const touches=(buildTouchLogs||[]).filter(a=>meta(a.notes,'BUILD_KEY')===key).sort((a,b)=>(Date.parse(b.act_date||b.created_at||0)||0)-(Date.parse(a.act_date||a.created_at||0)||0));
    const consult=touches.find(a=>meta(a.notes,'BUILD_EVENT')==='CONSULT'&&a.outcome==='Completed')||null;
    const attempt=touches.find(a=>a.outcome==='Attempted')||null;
