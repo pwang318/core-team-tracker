@@ -1544,7 +1544,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-page-wrap">
 <input accept=".xlsx,.xls" id="fileInput" onchange="handleUpload(this)" style="display:none" type="file"/><div id="upload-result" style="margin:0 0 10px;font-size:12px"></div><div class="ct-page-head"><div><div class="ct-eyebrow">WEEKLY DATA</div><h1>Weekly Data Hub</h1><div class="ct-page-sub">The only upload location. Upload funded units and active-contract data from Encompass; Power BI drives active-partner health, roster and co-marketing data.</div></div></div>
 <div class="ct-data-grid">
-<section class="ct-card ct-data-source"><div class="ct-kicker">AGENT HEALTH</div><h2>Power BI Agent Portfolio</h2><p>Upload the current Power BI export to refresh active prequals, active pipeline, recent production and the relationship-health view.</p><div class="ct-data-actions"><button class="ct-primary-btn" onclick="loadXLSX()" type="button">Upload Power BI</button><button class="ct-link-btn" onclick="lpv3OpenAgentHealth()" type="button">Open Agent Health / Roster</button></div><div class="ct-data-note" id="lpv3-pb-status">No Power BI file loaded yet.</div><div class="ct-data-note" id="lp-pb-reconciliation" style="margin-top:7px" role="status">Checking latest import totals…</div><div class="ct-data-note" style="margin-top:8px">Power BI is uploaded here in the LP Tracker. A verified upload updates the shared agent profile and import record used by the RM and Director views; those views refresh from the same shared source.</div></section>
+<section class="ct-card ct-data-source"><div class="ct-kicker">AGENT HEALTH</div><h2>Power BI Agent Portfolio</h2><p>Upload the current Power BI export to refresh active prequals, active pipeline, recent production and the relationship-health view.</p><div class="ct-data-actions"><button class="ct-primary-btn" onclick="loadXLSX()" type="button">Upload Power BI</button><button class="ct-link-btn" onclick="lpv3OpenAgentHealth()" type="button">Open Agent Health / Roster</button></div><div class="ct-data-note" id="lpv3-pb-status">No Power BI file loaded yet.</div><div class="ct-data-note" id="lp-pb-reconciliation" style="margin-top:7px" role="status">Checking latest import totals…</div><div class="ct-data-note" id="lp-velocify-dup-audit" style="margin-top:7px" role="status">Checking Velocify duplicate lead keys…</div><div class="ct-data-note" style="margin-top:8px">Power BI is uploaded here in the LP Tracker. A verified upload updates the shared agent profile and import record used by the RM and Director views; those views refresh from the same shared source.</div></section>
 </div>
 <section class="ct-card"><div class="ct-section-head"><div><div class="ct-kicker">WHAT EACH FILE CONTROLS</div><h2>Keep the sources clean</h2></div></div><div class="ct-source-map"><div><b>Encompass</b><span>Active contracts, buyer/listing agent contacts, LP assignment, milestone, closing date.</span></div><div><b>Power BI + lead activity</b><span>Active prequals, active pipeline, production, last lead, latest file/contract/close and agent health.</span></div></div></section>
 </div>
@@ -14884,5 +14884,26 @@ https://github.com/nodeca/pako/blob/main/LICENSE
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',reconcilePowerBi,{once:true});else reconcilePowerBi();
  window.lpReconcilePowerBi=reconcilePowerBi;
+})();
+</script>
+<script id="lp-velocify-dup-audit-v316">
+(function(){
+ async function audit(){
+   var el=document.getElementById('lp-velocify-dup-audit');if(!el||typeof sbFetch!=='function')return;
+   try{
+     var rows=await sbFetch('GET','velocify_leads?select=lead_key,referral_partner_name,lp_user,status&limit=5000');
+     if(!Array.isArray(rows))throw Error('Lead source unavailable');
+     var groups=new Map(),duplicates=[];
+     rows.forEach(function(r){var key=String(r.lead_key||'').trim().toLowerCase();if(!key)return;
+       var a=groups.get(key);if(a)a.push(r);else groups.set(key,[r]);});
+     groups.forEach(function(a){if(a.length>1)duplicates.push(a);});
+     var ownerIssues=duplicates.filter(function(a){return new Set(a.map(function(r){return String(r.lp_user||'').trim().toLowerCase()}).filter(Boolean)).size>1;}).length;
+     var statusIssues=duplicates.filter(function(a){return new Set(a.map(function(r){return String(r.status||'').trim().toLowerCase()}).filter(Boolean)).size>1;}).length;
+     el.textContent='Velocify audit: '+duplicates.length+' duplicate lead key'+(duplicates.length===1?'':'s')+' in source · '+ownerIssues+' conflicting LP attribution'+(ownerIssues===1?'':'s')+' · '+statusIssues+' conflicting status'+(statusIssues===1?'':'es')+'. Reporting counts these leads once; source records are retained pending Velocify confirmation.';
+     el.style.color=duplicates.length?'#875b20':'#245f49';
+   }catch(e){el.textContent='Velocify duplicate audit unavailable; current source records were not changed.';el.style.color='#875b20'}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',audit,{once:true});else audit();
+ window.lpAuditVelocifyDuplicates=audit;
 })();
 </script>
