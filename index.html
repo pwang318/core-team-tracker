@@ -7608,7 +7608,7 @@ async function loadFaceTime(){
     var ftSourceErrors=[];
     var ftSafe=function(label,promise){return promise.catch(function(e){ftSourceErrors.push(label+": "+String(e&&e.message||e));return [];});};
     var r=await Promise.all([
-      ftSafe("RM visit history",sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=eq.Break Breads&order=act_date.desc&limit=4000")),
+      ftSafe("RM visit history",sbFetch("GET","amanda_activities?select=agent_name,act_date,notes&act_type=in.(Break%20Breads,Break%20Bread)&order=act_date.desc&limit=4000")),
       sbFetch("GET","break_breads?select=agent_name,date,notes,logged_by&order=date.desc&limit=4000").catch(function(){return[];}),
       loadCoMarketing(),
       ftSafe("Agent profiles",sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,retained,do_not_contact,relationship_status,relationship_type,lp_outreach_status,competitor_risk_flag,high_potential_flag,next_growth_opportunity,latest_lead_date,closes_past_year,total_leads_past_year&limit=5000").catch(function(e){ftSourceErrors.push("Full profile query unavailable: "+String(e&&e.message||e));return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,powerbi_last_seen_at,do_not_contact,relationship_status&limit=5000");}).catch(function(e){ftSourceErrors.push("Profile fallback query unavailable: "+String(e&&e.message||e));return sbFetch("GET","agent_profiles?select=agent_name,tier,powerbi_level,do_not_contact,relationship_status&limit=5000");})),
@@ -7764,7 +7764,7 @@ async function loadFaceTime(){
     if(!notice){notice=document.createElement("div");notice.id="ft-roster-notice";var page=document.getElementById("view-facetime");if(page)page.insertBefore(notice,page.querySelector(".ft-summary")||page.firstChild);}
     if(notice){
       notice.style.display="block";
-      notice.style.cssText="padding:10px 12px;margin-bottom:12px;font-size:12px;border-radius:8px;background:"+(ftRosterRows.length&&ftSourceLabel==="Latest Power BI profiles"&&!ftSourceErrors.length?"#eff8f2":"#fff6e8")+";color:#2c4861;border:1px solid #d7e4eb";
+      notice.style.cssText="padding:10px 12px;margin-bottom:12px;font-size:12px;border-radius:8px;background:"+(ftRosterRows.length&&ftSourceLabel==="Latest shared Power BI profiles"&&!ftSourceErrors.length?"#eff8f2":"#fff6e8")+";color:#2c4861;border:1px solid #d7e4eb";
       var unassigned=ftRosterRows.filter(function(p){return !p.lp||p.lp==="Unassigned";}).length;
       notice.textContent=ftRosterRows.length?
         ftRosterRows.length+" agents · "+ftSourceLabel+(unassigned?" · "+unassigned+" need LP assignment":"")+(ftSourceErrors.length?" · Source warning: "+ftSourceErrors.join("; "):""):
@@ -14199,6 +14199,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       const people=rms.length?rms:['Amanda'];
       people.forEach(person=>add({date:r.act_date,agent:r.agent_name,outcome:r.outcome,notes:cleanNotes(r.notes)},person,'RM Team',lpName,type,'Completed'));
     });
+    // Include saved LP Tuesday completions in management's all-calls workbook.
+    // Previously these were intentionally skipped from RM activity, but never
+    // re-added; completed Tuesday work was absent from the export entirely.
+    (rm||[]).filter(r=>r.act_type==='LP Tuesday File Update').forEach(r=>{
+      const owner=shortLp(meta(r.notes,'LP_OWNER')||meta(r.notes,'LP'))||'Unassigned';
+      add({date:r.act_date,agent:r.agent_name,outcome:r.outcome||'Update logged',notes:cleanNotes(r.notes)},owner,'LP',owner,'LP Tuesday File Update','Completed');
+    });
     const rockfordListingReps=new Set(['erika wehner','michelle erickson','jordan holibaugh','deron bender','katie summers','katie sumer','troy borden','lindsey pinna','lindsay pinna','robin blake','aimee whitlatch','colin burnheimer','angie bronkowski','angie bronowski','dan manley','mark boyd'].map(norm));
     const snap=(plans||[]).filter(r=>meta(r.notes,'TUE_PLAN_LANE')==='LP_TXN'||meta(r.notes,'TUE_PLAN_LANE')==='RM_LISTING');
     snap.forEach(p=>{
@@ -14239,7 +14246,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     const status=document.getElementById('v56MgmtStatus');if(status)status.textContent='Building this week\'s LP Tuesday status workbook…';
     try{
       const [acts,classes]=await Promise.all([
-        sbFetch('GET','amanda_activities?act_date=gte.'+week+'&act_date=lte.'+through+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=12000').catch(()=>[]),
+        sbFetch('GET','amanda_activities?act_date=gte.'+week+'&act_date=lte.'+through+'&select=id,agent_name,act_type,act_date,outcome,notes,follow_up_date,created_at&order=created_at.desc&limit=12000'),
         sbFetch('GET','amanda_activities?act_type=eq.Tuesday%20Contact%20Classification&select=act_date,notes,created_at&order=created_at.desc&limit=5000').catch(()=>[])
       ]);
       const snaps=acts.filter(a=>a.act_type==='Tuesday Call Plan Snapshot'&&/\[TUE_SPLIT_V310\]/.test(String(a.notes||''))),heads=snaps.filter(a=>meta(a.notes,'TUE_PLAN_LANE')==='LP_HEADER').sort((a,b)=>(Date.parse(b.created_at||b.act_date||0)||0)-(Date.parse(a.created_at||a.act_date||0)||0)),head=heads[0]||null,batch=head?meta(head.notes,'TUE_PLAN_BATCH'):'';
