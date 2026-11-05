@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v149-co-marketing-verification-20261105" name="version"/>
+<meta content="core-team-lp-v150-velocify-dedup-20261105" name="version"/>
 <meta content="v145: sort new-build work by closing date, label touch dates, and show buyer plus builder/sales-rep follow-ups separately." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -2273,7 +2273,27 @@ function ctRenderLeadStatusAudit(data){
   host.innerHTML=h;
 }
 
+// Reporting-only deduplication: preserve every raw Velocify record for audit and
+// LP handoff history, but count each logical borrower referral once.
+function ctUniqueVelocifyReferralRows(rows){
+  var chosen=new Map(),unkeyed=[];
+  (rows||[]).forEach(function(r){
+    var key=String(r.lead_key||"").trim().toLowerCase();
+    if(!key){unkeyed.push(r);return;}
+    var old=chosen.get(key);
+    if(!old){chosen.set(key,r);return;}
+    function rank(x){
+      var status=String(x.status||"").toLowerCase();
+      var terminal=/bad lead|fake data|does not qualify|do not qualify|not interested|duplicate|funded|funding|closed/.test(status);
+      return (terminal?100:0)+(ctIsLeadAppConverted(x)?10:0);
+    }
+    var oldRank=rank(old),newRank=rank(r);
+    if(newRank>oldRank||(newRank===oldRank&&String(r.last_update||r.created_at||"")>String(old.last_update||old.created_at||"")))chosen.set(key,r);
+  });
+  return Array.from(chosen.values()).concat(unkeyed);
+}
 function renderReferralLeadsDirect(data){
+  data=ctUniqueVelocifyReferralRows(data);
   // Compute stats
   var now=new Date();
   var todayStr=localDateStr(now);
@@ -9266,7 +9286,7 @@ function ctMapStatusToStage(status){
 // converted/resolved — separate signal from agent staleness.
 function ctIsLeadStalled(r){
   var s=(r.status||"").toLowerCase();
-  if(ctInitialOutreachComplete(r)||ctIsLeadResolved(r)) return false;
+  if(ctInitialOutreachComplete(r)||ctIsLeadResolved(r)||s.indexOf("nurture")>=0||s.indexOf("scheduled")>=0) return false;
   var lu=r.last_action_date||r.last_update||r.date_added;
   if(!lu) return true;
   var days=Math.floor((new Date()-new Date(lu+"T00:00:00"))/86400000);
