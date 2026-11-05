@@ -7832,7 +7832,7 @@ function ftOpenAgentLog(name,lp){
 }
 function renderFtPriority(){
   var el=document.getElementById("ft-priority");if(!el)return;
-  var lps=["Gavin","Karen","Osgood","Jordan","Said","Isaak"],html="",focusTotal=0;
+  var lps=["Gavin","Karen","Osgood","Jordan","Said"],html="",focusTotal=0;
   lps.forEach(function(lp){
     var list=ftPriorityForLp(lp,3);focusTotal+=list.length;
     html+='<div style="border-top:1px solid #ECE8F5;padding:10px 0 8px">'
