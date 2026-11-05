@@ -2282,13 +2282,17 @@ function ctUniqueVelocifyReferralRows(rows){
     if(!key){unkeyed.push(r);return;}
     var old=chosen.get(key);
     if(!old){chosen.set(key,r);return;}
-    function rank(x){
-      var status=String(x.status||"").toLowerCase();
-      var terminal=/bad lead|fake data|does not qualify|do not qualify|not interested|duplicate|funded|funding|closed/.test(status);
-      return (terminal?100:0)+(ctIsLeadAppConverted(x)?10:0);
+    // Keep the strongest timestamp when the source supplies one. Do not treat
+    // a "Bad Lead" row as more authoritative than "Started" without dated evidence.
+    function freshness(x){return Date.parse(x.last_update||x.last_action_date||x.created_at||"")||0;}
+    function rank(x){return ctIsLeadAppConverted(x)?2:ctIsLeadResolved(x)?1:0;}
+    var oldFresh=freshness(old),newFresh=freshness(r),pickNew=newFresh>oldFresh||(newFresh===oldFresh&&rank(r)>rank(old));
+    var winner=pickNew?r:old,loser=pickNew?old:r;
+    var owners=[old.lp_user,r.lp_user].map(function(v){return String(v||"").trim().toLowerCase();}).filter(Boolean);
+    if(owners.length===2&&owners[0]!==owners[1]){
+      winner=Object.assign({},winner,{lp_user:"Ownership conflict — review",_conflicting_lp_owners:[old.lp_user,r.lp_user]});
     }
-    var oldRank=rank(old),newRank=rank(r);
-    if(newRank>oldRank||(newRank===oldRank&&String(r.last_update||r.created_at||"")>String(old.last_update||old.created_at||"")))chosen.set(key,r);
+    if(pickNew||winner!==old)chosen.set(key,winner);
   });
   return Array.from(chosen.values()).concat(unkeyed);
 }
@@ -13499,7 +13503,7 @@ async function load(force){
     const prior=isCurrent?priorByTx.get(tx):null,oldMilestone=prior?String(meta(prior.notes,'TXN_MILESTONE')||'').trim().toLowerCase():'',newMilestone=String(item.milestone||'').trim().toLowerCase(),milestoneChanged=!!(oldMilestone&&newMilestone&&oldMilestone!==newMilestone),closeDays=item.close?Math.ceil((new Date(item.close+'T12:00:00')-new Date())/86400000):null,base=touchDateFor(p),nextDue=base?new Date(String(base).slice(0,10)+'T12:00:00'):null;
     if(nextDue&&!isNaN(nextDue))nextDue.setDate(nextDue.getDate()+14);
     const dueDate=nextDue&&!isNaN(nextDue)?nextDue.toISOString().slice(0,10):'';
-    const closedBySource=(closeDays!==null&&closeDays<0)||/\b(closed|funded|funding complete|loan funded)\b/i.test(String(item.milestone||''));
+    const closedBySource=(closeDays!==null&&closeDays<0)||/\b(closed|funded|funding complete|loan funded)\b/i.test([item.milestone,meta(p.notes,'TXN_LOAN_STATUS')].join(' '));
     if(closedBySource)return;
     const dueNow=milestoneChanged||(closeDays!==null&&closeDays<=7)||!dueDate||dueDate<=isoToday;
     const builder=Object.assign(item,{isBuilder:true,builderDueDate:dueDate,builderScheduled:!dueNow,milestoneChanged});
@@ -13514,7 +13518,7 @@ async function load(force){
    const key=rowClassKey(p),item=itemFor(p),dedupe=key||[item.lp,item.client].join('|');if(seenBuildReviewKeys.has(dedupe))return;seenBuildReviewKeys.add(dedupe);
    const close=item.close,closeDays=close?Math.ceil((new Date(close+'T12:00:00')-new Date(isoToday+'T12:00:00'))/86400000):null;
    // Match LP worklist: never report post-close or funded files as overdue consultations.
-   if((closeDays!==null&&closeDays<0)||/\b(closed|funded|funding complete|loan funded)\b/i.test(String(item.milestone||'')))return;
+   if((closeDays!==null&&closeDays<0)||/\b(closed|funded|funding complete|loan funded)\b/i.test([item.milestone,meta(p.notes,'TXN_LOAN_STATUS')].join(' ')))return;
    const touches=(buildTouchLogs||[]).filter(a=>meta(a.notes,'BUILD_KEY')===key).sort((a,b)=>(Date.parse(b.act_date||b.created_at||0)||0)-(Date.parse(a.act_date||a.created_at||0)||0));
    const consult=touches.find(a=>meta(a.notes,'BUILD_EVENT')==='CONSULT'&&a.outcome==='Completed')||null;
    const attempt=touches.find(a=>a.outcome==='Attempted')||null;
@@ -13817,6 +13821,10 @@ async function planState(lp){
   const priorByTx=new Map(historyRows.map(r=>[rowClassKey(r),r])),sourceRows=currentRows.concat(historyRows),seenBuilder=new Set(),carry=[];
   sourceRows.forEach(r=>{
     const cls=classFor(r),tx=rowClassKey(r),pw=weekStart(meta(r.notes,'TUE_PLAN_DATE')||r.act_date),isCurrent=pw===w;
+    const closing=meta(r.notes,'TXN_CLOSE_DATE'),loanPhase=[meta(r.notes,'TXN_MILESTONE'),meta(r.notes,'TXN_LOAN_STATUS')].join(' ');
+    // One terminal-file rule for all LP new-build queues, even if status is
+    // recorded under loan status rather than milestone in the Encompass upload.
+    if(cls==='NEW_BUILD'&&((closing&&closing<todayIso)||/\b(closed|funded|funding complete|loan funded|cancelled|canceled|withdrawn)\b/i.test(loanPhase)))return;
     if(cls==='NEW_BUILD'&&tx){if(seenBuilder.has(tx))return;seenBuilder.add(tx)}
     const prior=isCurrent?priorByTx.get(tx):null,oldMilestone=prior?norm(meta(prior.notes,'TXN_MILESTONE')):'',newMilestone=norm(meta(r.notes,'TXN_MILESTONE')),milestoneChanged=!!(cls==='NEW_BUILD'&&oldMilestone&&newMilestone&&oldMilestone!==newMilestone);
     const close=meta(r.notes,'TXN_CLOSE_DATE'),closeDays=close?Math.ceil((new Date(close+'T12:00:00')-today)/86400000):null,urgent=closeDays!==null&&closeDays<=7,nextDue=cls==='NEW_BUILD'?nextBuilderDue(r):'',scheduled=cls==='NEW_BUILD'&&!urgent&&!milestoneChanged&&!!nextDue&&nextDue>todayIso;
@@ -13834,7 +13842,7 @@ async function planState(lp){
     // Do not ask LPs to complete pre-closing buyer consultations after closing.
     // Also stop follow-ups when the latest source milestone explicitly says closed/funded.
     const milestone=String(meta(r.notes,'TXN_MILESTONE')||'').trim();
-    if((closeDays!==null&&closeDays<0)||/\b(closed|funded|funding complete|loan funded)\b/i.test(milestone))return;
+    if((closeDays!==null&&closeDays<0)||/\b(closed|funded|funding complete|loan funded|cancelled|canceled|withdrawn)\b/i.test([milestone,meta(r.notes,'TXN_LOAN_STATUS')].join(' ')))return;
     const touches=(buildTouchLogs||[]).filter(a=>meta(a.notes,'BUILD_KEY')===key).sort((a,b)=>(Date.parse(b.act_date||b.created_at||0)||0)-(Date.parse(a.act_date||a.created_at||0)||0));
     const latestConsult=touches.find(a=>meta(a.notes,'BUILD_EVENT')==='CONSULT'&&a.outcome==='Completed')||null;
     const latestAttempt=touches.find(a=>a.outcome==='Attempted')||null;
