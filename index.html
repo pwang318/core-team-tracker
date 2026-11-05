@@ -14252,8 +14252,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         const classification=classMap[tx]||classMap[mk]||(String(buyer||'').trim()?'CALL_REQUIRED':'CONTACT_ISSUE');
         const noCall=['FSBO','NEW_BUILD','NO_BUYER_AGENT'].includes(classification),needsReview=classification==='CONTACT_ISSUE';
         const log=logs.find(a=>(key&&meta(a.notes,'TUE_PLAN_KEY')===key)||(!key&&client&&norm(meta(a.notes,'TXN_CLIENT'))===norm(client)&&lpShort(meta(a.notes,'LP_OWNER'))===lp));
-        const result=noCall?'Cleared · no call required':needsReview?'Needs review':log?'Completed':'Open';
-        if(summary[lp]){if(noCall)summary[lp].cleared++;else{summary[lp].assigned++;if(needsReview)summary[lp].review++;else if(log)summary[lp].completed++;else summary[lp].open++}}
+        const result=log?'Completed':noCall?'Cleared · no call required':needsReview?'Needs review':'Open';
+        // Saved Tuesday completions always take precedence over contact classification.
+        // Missing buyer-agent details remain visible in the detail row, but a logged
+        // update must not be counted as open or needing completion review.
+        if(summary[lp]){if(result==='Cleared · no call required')summary[lp].cleared++;else{summary[lp].assigned++;if(result==='Completed')summary[lp].completed++;else if(result==='Needs review')summary[lp].review++;else summary[lp].open++}}
         rows.push({'Week of':week,'LP':lp,'Borrower / Client':client,'Buyer Agent':buyer,'Property':meta(p.notes,'TXN_PROPERTY'),'Closing Date':meta(p.notes,'TXN_CLOSE_DATE'),'Milestone':meta(p.notes,'TXN_MILESTONE'),'Status':result,'Call Outcome':log?(log.outcome||'Update logged'):'','LP Note':log?noteText(log.notes):'','Next Follow-up':log?(log.follow_up_date||''):'','Logged At':log?(log.created_at||log.act_date||''):'','Plan Date':meta(p.notes,'TUE_PLAN_DATE')||p.act_date});
       });
       const summaryRows=LPS.map(lp=>{const x=summary[lp],rate=x.assigned?Math.round(x.completed/x.assigned*100)+'%':'—';return{'LP':lp,'Assigned Updates':x.assigned,'Completed':x.completed,'Open':x.open,'Needs Review':x.review,'Cleared · No Call Required':x.cleared,'% Complete':rate}}),order={'Open':0,'Needs review':1,'Completed':2,'Cleared · no call required':3};
