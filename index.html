@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v147-roster-reconciliation-20261105" name="version"/>
+<meta content="core-team-lp-v148-isaak-lp1-facetime-20261105" name="version"/>
 <meta content="v145: sort new-build work by closing date, label touch dates, and show buyer plus builder/sales-rep follow-ups separately." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -7758,7 +7758,7 @@ async function loadFaceTime(){
         t=String(p.tier||"").trim().toUpperCase(),pb=String(p.powerbi_level||"").trim().toUpperCase(),
         tier=t==="CHANNEL"?"Channel":(["A","B","C"].includes(pb)?pb:(["A","B","C"].includes(t)?t:"C"));
       if(!k||uniqueFt.has(k))return;
-      uniqueFt.set(k,{name:p.agent_name,tier:tier,lp:(o.lp&&o.lp!=="Unassigned"?o.lp:p._fallbackLp||"Unassigned"),rm:ctResolveRmOwner(k,tier),
+      uniqueFt.set(k,{name:p.agent_name,tier:tier,lp:o.lp||"Unassigned",rm:ctResolveRmOwner(k,tier),
         competitor_risk_flag:!!p.competitor_risk_flag,high_potential_flag:!!p.high_potential_flag,
         next_growth_opportunity:p.next_growth_opportunity||"",latest_lead_date:p.latest_lead_date||null,
         closes_past_year:p.closes_past_year||0,total_leads_past_year:p.total_leads_past_year||0});
@@ -7798,7 +7798,7 @@ function ftStatus(tier,days){
 
 function ftAgentRows(){
   var now=new Date();
-  var roster=ftRosterRows||[];
+  var roster=(ftRosterRows||[]).filter(function(e){return e.lp!=="Isaak";});
   return roster.map(function(e){
     var name=e.name,tier=e.tier||"C",lp=e.lp||"Unassigned";
     var ft=ftData[(name||"").trim().toUpperCase()],days=null;
@@ -7812,6 +7812,7 @@ function ftAgentRows(){
 }
 
 function ftPriorityForLp(lp,count){
+  if(lp==="Isaak")return [];
   var rows=ftAgentRows().filter(function(a){return a.lp===lp;});
   rows.sort(function(a,b){if(!!a.scheduled!==!!b.scheduled)return a.scheduled?1:-1;return (b.priorityScore-a.priorityScore)||String(a.name).localeCompare(String(b.name));});
   return rows.slice(0,count||3);
@@ -7832,7 +7833,7 @@ function ftOpenAgentLog(name,lp){
 }
 function renderFtPriority(){
   var el=document.getElementById("ft-priority");if(!el)return;
-  var lps=["Gavin","Karen","Osgood","Jordan","Said","Isaak"],html="",focusTotal=0;
+  var lps=["Gavin","Karen","Osgood","Jordan","Said"],html="",focusTotal=0;
   lps.forEach(function(lp){
     var list=ftPriorityForLp(lp,3);focusTotal+=list.length;
     html+='<div style="border-top:1px solid #ECE8F5;padding:10px 0 8px">'
@@ -8241,6 +8242,7 @@ window.ctHandleRmFlag=ctHandleRmFlag;
 
 function renderLpFaceTimeFocus(lp){
   var el=document.getElementById("lp-facetime-focus");if(!el)return;
+  if(lp==="Isaak"){el.style.display="none";el.innerHTML="";return;}
   if(!Object.keys(ftData||{}).length){el.style.display="none";return;}
   var list=ftPriorityForLp(lp,3);if(!list.length){el.style.display="none";return;}
   el.style.display="block";
