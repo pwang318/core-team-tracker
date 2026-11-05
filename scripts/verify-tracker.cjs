@@ -50,6 +50,27 @@ assert(html.includes('id="lp-source-freshness"'), 'Team snapshot must show Power
 assert(html.includes("if(owner!==lp)return false;"), 'Tuesday exports must match completions only to their actual LP owner');
 assert(html.includes("meta(a.notes,'TUE_PLAN_LANE')==='LP_TXN'"), 'LP Tuesday export must not include RM listing-agent plan rows');
 
+assert(html.includes("if(cls==='NEW_BUILD'&&((closing&&closing<todayIso)||"), 'LP new-build queue must exclude closed files');
+assert(html.includes("meta(p.notes,'TXN_LOAN_STATUS')"), 'Manager new-build queue must honor loan status');
+assert(html.includes('Ownership conflict — review'), 'Conflicting LP lead ownership must not be silently assigned');
+const uniqueFn = html.match(/function ctUniqueVelocifyReferralRows\(rows\)\{[\s\S]*?\n\}/)?.[0];
+assert(uniqueFn, 'Velocify lead deduplication missing');
+const leadContext = {
+  ctIsLeadAppConverted(v){return String(v.status||'').toLowerCase()==='started';},
+  ctIsLeadResolved(v){return /bad lead|do not qualify/i.test(String(v.status||''));}
+};
+vm.runInNewContext(uniqueFn,leadContext);
+const leadResult=leadContext.ctUniqueVelocifyReferralRows([
+  {lead_key:'same',lp_user:'Said',status:'Started',created_at:'2026-11-02T00:00:00Z'},
+  {lead_key:'same',lp_user:'Jordan',status:'Started',created_at:'2026-11-02T00:00:00Z'},
+  {lead_key:'bad-conflict',lp_user:'Said',status:'Started',created_at:'2026-11-02T00:00:00Z'},
+  {lead_key:'bad-conflict',lp_user:'Said',status:'Bad Lead / Fake Data',created_at:'2026-11-02T00:00:00Z'}
+]);
+assert.equal(leadResult.length,2,'Duplicate lead keys must count once');
+assert.equal(leadResult[0].lp_user,'Ownership conflict — review','Conflicting LP owner must be flagged');
+assert.equal(leadResult[1].status,'Started','An undated bad-lead duplicate cannot erase proof an application started');
+
+
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
 if (errors.length) {
   console.error(errors.join('\n'));
