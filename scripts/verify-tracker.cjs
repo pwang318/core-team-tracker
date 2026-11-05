@@ -53,6 +53,7 @@ assert(html.includes("meta(a.notes,'TUE_PLAN_LANE')==='LP_TXN'"), 'LP Tuesday ex
 assert(html.includes("if(cls==='NEW_BUILD'&&((closing&&closing<todayIso)||"), 'LP new-build queue must exclude closed files');
 assert(html.includes("meta(p.notes,'TXN_LOAN_STATUS')"), 'Manager new-build queue must honor loan status');
 assert(html.includes('Ownership conflict — review'), 'Conflicting LP lead ownership must not be silently assigned');
+assert(html.includes('id="lp-pb-reconciliation"'), 'Power BI Data Hub must reconcile source rows with unique agent profiles');
 const uniqueFn = html.match(/function ctUniqueVelocifyReferralRows\(rows\)\{[\s\S]*?\n\}/)?.[0];
 assert(uniqueFn, 'Velocify lead deduplication missing');
 const leadContext = {
