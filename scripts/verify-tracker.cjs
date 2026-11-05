@@ -23,6 +23,30 @@ if (duplicates.length) errors.push('Duplicate static HTML IDs: ' + [...new Set(d
 for (const id of ['view-lp', 'view-facetime', 'view-data-hub', 'view-snapshot', 'view-production-manager', 'v56Summary', 'v56Rows']) {
   if (!html.includes(`id="${id}"`) && !html.includes(`id=\'${id}\'`)) errors.push('Required tracker ID missing: ' + id);
 }
+// Business rule regression: co-marketing aliases identify the same agent, and
+// leads shared by multiple roster aliases must count exactly once.
+const rosterFn = html.match(/function coMktLeadsForRoster\(roster\)\{[\s\S]*?\n\}/)?.[0];
+assert(rosterFn, 'Co-marketing roster calculator missing');
+const billingContext = {
+  coMktLeadKeysByName: {
+    'AGENT A': new Set(['L1', 'L2']),
+    'A ALIAS': new Set(['L2', 'L3']),
+    'AGENT B': new Set(['L3', 'L4']),
+  },
+  coMktClosedCounts: {'AGENT A': 2, 'A ALIAS': 1, 'AGENT B': 1},
+};
+vm.runInNewContext(rosterFn, billingContext);
+const billing = billingContext.coMktLeadsForRoster([
+  {name:'Agent A', alias:'A Alias', spend:250},
+  {name:'Agent B', spend:250}
+]);
+assert.equal(billing.total, 4, 'Lead keys must be counted once across aliases and team members');
+assert.equal(billing.perAgent[0].leads, 3, 'Unique referrals under both names must be retained');
+assert.equal(billing.perAgent[1].leads, 1, 'Shared lead must not be double-counted');
+assert.equal(billing.closed, 3, 'Aliases must not double-count closings');
+assert(html.includes('co_marketing_partners?status=eq.active&select=partner_name,agent_roster'), 'Verified billing roster must feed co-marketing flags');
+assert(html.includes('if(lp==="Isaak")return [];'), 'LP1 must not receive realtor FaceTime tasks');
+
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
 if (errors.length) {
   console.error(errors.join('\n'));
