@@ -2234,7 +2234,7 @@ function ctInitialOutreachComplete(value){
 function ctIsLeadResolved(value){
   var s=((value&&typeof value==="object"?value.status:value)||"").toString().toLowerCase().trim();
   if(ctIsLeadAppConverted(value))return true;
-  return s.indexOf("does not qualify")>=0||
+  return /\b(?:does|do) not qualify\b/.test(s)||
          s.indexOf("not interested")>=0||
          s.indexOf("bad lead")>=0||
          s.indexOf("fake data")>=0||
