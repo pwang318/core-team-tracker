@@ -1325,7 +1325,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-page-head"><div><div class="ct-eyebrow">LOAN PARTNER</div><h1 id="lp-hero-name">Weekly Execution</h1><div class="ct-page-sub" id="lp-hero-sub">Loading current work…</div></div><div class="ct-role-pill" id="lp-v2-role-pill">LP2 · Client + transaction execution</div></div>
 <section class="ct-card ct-scorecard-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>My current position</h2></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="ct-link-btn" onclick="lpv4OpenMyScorecard(currentUser)" type="button">Update my scorecard</button><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div></div><div class="ct-velocify-notice" style="padding:11px 13px;border:1px solid #d4dce6;border-radius:10px;background:#f4f7fa;color:#27445c;font-size:12px;line-height:1.5;margin:10px 0"><strong>Referral lead data notice:</strong> Referral lead data updates daily and may not reflect the most recent activity. <strong>Check Velocify for the most up-to-date lead information, status, and activity.</strong></div><div id="lp-v2-scorecard"><div class="ct-loading">Loading scorecard…</div></div></section>
 <section class="ct-card ct-focus-card"><div class="ct-section-head"><div><div class="ct-kicker">RELATIONSHIP MOMENT</div><h2>Face Time priorities</h2></div><button class="ct-link-btn" onclick="lpv2Route('facetime',this)" type="button">Open Face Time</button></div><div class="ct-embedded-block" id="lp-facetime-focus"><div class="ct-loading">Loading Face Time priorities…</div></div></section>
-<section class="ct-card ct-execution-card"><div class="ct-section-head"><div><div class="ct-kicker">EXECUTION</div><h2>Active contracts + buyer movement</h2></div></div><div class="ct-helper">Work under-contract buyer/client updates first. Then review preapprovals and prequals for the next meaningful move. Routine listing-agent relationship work belongs to RM.</div><div class="ct-stall-explainer"><strong>What “Stalled” means:</strong> the buyer has stayed in the same unresolved stage for 5+ days without a meaningful status update. Open the buyer, choose the reason they are stuck, document what changed, and set the next action/owner. Updating the record resets the stall clock.</div><div id="lp-weekly-execution-host"></div></section>
+<section class="ct-card ct-execution-card"><div class="ct-section-head"><div><div class="ct-kicker">PRIORITY WORK</div><h2>Today’s work order</h2></div></div><div class="ct-helper">Work under-contract buyer/client updates first. Then review preapprovals and prequals for the next meaningful move. Routine listing-agent relationship work belongs to RM.</div><div class="ct-stall-explainer"><strong>What “Stalled” means:</strong> the buyer has stayed in the same unresolved stage for 5+ days without a meaningful status update. Open the buyer, choose the reason they are stuck, document what changed, and set the next action/owner. Updating the record resets the stall clock.</div><div id="lp-weekly-execution-host"></div></section>
 <section class="ct-card ct-handoff-card"><div class="ct-section-head"><div><div class="ct-kicker">TEAM HANDOFFS</div><h2>RM → LP actions</h2></div></div>
 <div class="ct-embedded-block" id="lp-rm-flags-for-you"><div id="lp-rm-flags-for-you-list"></div><span id="lp-rm-flag-badge" style="display:none"></span></div>
 <div class="lp-rm-response-panel" id="lp-rm-responses"><details id="lp-rm-responses-details"><summary><b>Recent RM responses</b><span id="lp-rm-response-badge" style="display:none">NEW</span><span id="lp-rm-response-open-label">View ▾</span></summary><button id="lp-rm-response-clear-all" type="button">Clear alert</button><div id="lp-rm-response-summary"></div><div id="lp-rm-responses-list">Loading…</div></details></div>
@@ -13100,7 +13100,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <div class="view" id="view-production-manager">
 <div class="ct-page-head">
 <div><div class="ct-eyebrow">PRODUCTION LEADERSHIP</div><h1>Production Manager</h1><div class="ct-page-sub">LP scorecards, active-contract execution, lead follow-up and weekly accountability.</div></div>
-<div class="pm-actions"><span class="pm-last" id="pm-last-refresh">Not refreshed yet</span><button class="ct-link-btn" onclick="pmOpenDataHub()" type="button">Weekly Data Hub</button><button class="ct-link-btn" onclick="pmExportTuesdayReport()" type="button">Export LP Tuesday Status</button><button class="ct-link-btn" onclick="pmExportTuesday()" type="button">Export All Calls + Updates</button><button class="ct-link-btn" id="pm-overdue-export-btn" onclick="pmExportOverdueLeads()" type="button">Export Overdue Leads</button><button class="ct-primary-btn" id="pm-refresh-btn" onclick="pmLoad(true)" type="button">Refresh live data</button></div>
+<div class="pm-actions"><span class="pm-last" id="pm-last-refresh">Not refreshed yet</span><button class="ct-link-btn" onclick="pmOpenDataHub()" type="button">Weekly Data Hub</button><details class="ct-manager-export-menu"><summary class="ct-link-btn">Export reports (3)</summary><div class="ct-manager-export-list"><button class="ct-link-btn" onclick="pmExportTuesdayReport()" type="button">LP Tuesday Status</button><button class="ct-link-btn" onclick="pmExportTuesday()" type="button">All Calls + Updates</button><button class="ct-link-btn" id="pm-overdue-export-btn" onclick="pmExportOverdueLeads()" type="button">Overdue Leads</button></div></details><button class="ct-primary-btn" id="pm-refresh-btn" onclick="pmLoad(true)" type="button">Refresh live data</button></div>
 </div>
 <div style="margin:8px 0 14px;display:flex;gap:9px;align-items:center;flex-wrap:wrap"><button class="ct-link-btn" type="button" onclick="pmLockManager()">Lock manager view</button><span style="font-size:11px;color:#6b7e8a">Coaching suggestions use current tracker records; confirm recent activity in Velocify before coaching.</span></div><div id="pm-dashboard"><div class="pm-loading">Loading current production data…</div></div>
 </div>
@@ -14172,6 +14172,32 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 @media(max-width:850px){#view-production-manager .pm-coach-guidance{grid-template-columns:1fr}#view-production-manager .pm-coach-guidance>div+div{border-left:0;border-top:1px solid #e1e9ef;padding-top:10px}}
 @media(max-width:560px){#view-production-manager .pm-coach-group-head{display:block}#view-production-manager .pm-coach-group-head p{margin-top:3px}#view-production-manager .pm-coach-summary{padding:13px}#view-production-manager .pm-coach-evidence{grid-template-columns:1fr}}
 </style>
+<style id="ct-ux-clean-v1">
+/* Cleaner daily LP workflow and a single compact manager export menu. */
+#view-lp .ct-lp-page>.ct-execution-card{border-color:#c9d8e7;box-shadow:0 3px 14px rgba(38,59,99,.05)}
+#view-lp .ct-execution-card .ct-section-head h2{font-size:clamp(17px,2vw,21px)}
+#view-production-manager .ct-manager-export-menu{position:relative;flex:0 0 auto}
+#view-production-manager .ct-manager-export-menu>summary{cursor:pointer;list-style:none;white-space:nowrap;user-select:none}
+#view-production-manager .ct-manager-export-menu>summary::-webkit-details-marker{display:none}
+#view-production-manager .ct-manager-export-menu>summary:after{content:" ▾"}
+#view-production-manager .ct-manager-export-menu[open]>summary:after{content:" ▴"}
+#view-production-manager .ct-manager-export-list{position:absolute;right:0;top:calc(100% + 6px);z-index:120;display:grid;gap:5px;min-width:205px;padding:8px;background:#fff;border:1px solid #dce6ee;border-radius:10px;box-shadow:0 8px 25px rgba(15,35,48,.13)}
+#view-production-manager .ct-manager-export-list .ct-link-btn{text-align:left;width:100%;white-space:normal}
+@media(max-width:700px){#view-production-manager .ct-manager-export-list{right:auto;left:0}}
+</style>
+<script id="ct-ux-clean-v1-js">
+(function(){
+  function alignDailyWork(){
+    const page=document.querySelector('#view-lp .ct-lp-page');
+    if(!page)return;
+    const heading=page.querySelector(':scope > .ct-page-head');
+    const work=page.querySelector(':scope > .ct-execution-card');
+    if(heading&&work&&heading.nextElementSibling!==work)heading.insertAdjacentElement('afterend',work);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',alignDailyWork,{once:true});
+  else alignDailyWork();
+})();
+</script>
 </body>
 <script id="v313-all-call-export">
 (function(){
