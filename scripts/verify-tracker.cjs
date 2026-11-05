@@ -55,7 +55,7 @@ assert(html.includes("meta(p.notes,'TXN_LOAN_STATUS')"), 'Manager new-build queu
 assert(html.includes('Ownership conflict — review'), 'Conflicting LP lead ownership must not be silently assigned');
 assert(html.includes('id="lp-pb-reconciliation"'), 'Power BI Data Hub must reconcile source rows with unique agent profiles');
 assert(html.includes('id="lp-velocify-dup-audit"'), 'Data Hub must expose Velocify duplicates and attribution issues');
-assert(html.includes('helper LP details stay in source history'), 'Do not silently erase collaborating LP attribution');
+assert(html.includes('source records are retained pending Velocify confirmation'), 'Do not silently erase contested Velocify rows');
 const uniqueFn = html.match(/function ctUniqueVelocifyReferralRows\(rows\)\{[\s\S]*?\n\}/)?.[0];
 assert(uniqueFn, 'Velocify lead deduplication missing');
 const leadContext = {
@@ -63,9 +63,6 @@ const leadContext = {
   ctIsLeadResolved(v){return /bad lead|do not qualify/i.test(String(v.status||''));}
 };
 vm.runInNewContext(uniqueFn,leadContext);
-const primaryFn = html.match(/function ctResolvedReferralPrimaryLP\(leadKey\)\{[\s\S]*?\n\}/)?.[0];
-assert(primaryFn,'Verified shared-LP attribution map must be present');
-vm.runInNewContext(primaryFn,leadContext);
 const leadResult=leadContext.ctUniqueVelocifyReferralRows([
   {lead_key:'same',lp_user:'Said',status:'Started',created_at:'2026-11-02T00:00:00Z'},
   {lead_key:'same',lp_user:'Jordan',status:'Started',created_at:'2026-11-02T00:00:00Z'},
@@ -75,17 +72,6 @@ const leadResult=leadContext.ctUniqueVelocifyReferralRows([
 assert.equal(leadResult.length,2,'Duplicate lead keys must count once');
 assert.equal(leadResult[0].lp_user,'Ownership conflict — review','Conflicting LP owner must be flagged');
 assert.equal(leadResult[1].status,'Started','An undated bad-lead duplicate cannot erase proof an application started');
-const shared=leadContext.ctUniqueVelocifyReferralRows([
- {lead_key:'Colleen Welch__2026-10-01__Mercedes Welch',lp_user:'Caldwell, Isaak',status:'Started',created_at:'2026-11-02'},
- {lead_key:'Colleen Welch__2026-10-01__Mercedes Welch',lp_user:'Saleh, Said',status:'Started',created_at:'2026-11-02'},
- {lead_key:'Todd Stone__2026-04-24__Jeremy Rodriguez',lp_user:'Johnston, Jordan',status:'Started',created_at:'2026-11-02'},
- {lead_key:'Todd Stone__2026-04-24__Jeremy Rodriguez',lp_user:'Saleh, Said',status:'Started',created_at:'2026-11-02'}
-]);
-assert.equal(shared.length,2,'Shared referrals must count once each');
-assert(shared.every(x=>x.lp_user==='Saleh, Said'),'Said is confirmed primary for the shared referrals');
-assert(shared.every(x=>x._collaborating_lp_owners.length===2),'Original helper attribution must remain auditable');
-assert.equal(leadContext.ctResolvedReferralPrimaryLP('Sahar Shalash__2026-03-26__Saniya'),'Saleh, Said','Sahar referral credits Said');
-
 
 
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
