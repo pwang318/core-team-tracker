@@ -12,7 +12,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="core-team-lp-v152-comarketing-mtd-pacing-20261105" name="version"/>
+<meta content="core-team-lp-v153-shared-roster-sync-20261106" name="version"/>
 <meta content="v145: sort new-build work by closing date, label touch dates, and show buyer plus builder/sales-rep follow-ups separately." name="build-notes"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -6442,12 +6442,14 @@ async function refreshLpSharedData(source){
   _sharedRealtimeTimer=setTimeout(async function(){
     try{
       var poll=source==="poll",allActivity=poll||["call_logs","lp_flags","amanda_activities","rm_lp_flags","rm_followups","break_breads"].indexOf(source)>=0;
-      if(source==="agent_profiles"||poll){
+      // A completed Power BI import changes the entire roster, not only the dashboard.
+      // Clear all derived summaries on import-log events and on the 60-second fallback poll.
+      if(source==="agent_profiles"||source==="powerbi_import_log"||poll){
         contactCache={};loadAgents();
         if(typeof window.ctInvalidateLivePowerBi==="function")window.ctInvalidateLivePowerBi();
         if(typeof window.ctHydrateSharedPowerBiSnapshot==="function")await window.ctHydrateSharedPowerBiSnapshot().catch(function(){});
       }
-      if(source==="agent_assignments"||poll)await loadAgentAssignments().catch(function(){});
+      if(source==="agent_assignments"||source==="powerbi_import_log"||poll)await loadAgentAssignments().catch(function(){});
       if(allActivity){
         await Promise.all([
           loadCallLogs().catch(function(){}),
@@ -6458,15 +6460,20 @@ async function refreshLpSharedData(source){
         ]);
       }
       var snapshotView=document.getElementById("view-snapshot");
-      if(!poll&&snapshotView&&snapshotView.classList.contains("active")&&typeof window.lpLoadSnapshotFresh==="function"){
+      if(snapshotView&&snapshotView.classList.contains("active")&&typeof window.lpLoadSnapshotFresh==="function"){
         await window.lpLoadSnapshotFresh({force:true}).catch(function(){});
       }else if(!poll&&["Gavin","Karen","Osgood","Jordan","Said","Isaak"].indexOf(currentUser)>=0&&Object.keys(pendingNote).length===0){
         renderLP(currentUser);
       }
+      // Re-query the Partner Growth page after every new import (and on polling).
+      var partnerGrowth=document.getElementById("view-partner-growth");
+      if(partnerGrowth&&partnerGrowth.classList.contains("active")&&typeof window.ctRenderTierOpportunities==="function"){
+        await window.ctRenderTierOpportunities().catch(function(e){console.warn("Partner Growth refresh failed:",e);});
+      }
       var pfr=document.getElementById("view-portfolio");
-      if(!poll&&pfr&&pfr.classList.contains("active")&&typeof window.pfrLoad==="function")window.pfrLoad().catch(function(){});
+      if(pfr&&pfr.classList.contains("active")&&typeof window.pfrLoad==="function")window.pfrLoad().catch(function(){});
       var pm=document.getElementById("view-production-manager");
-      if(pm&&pm.classList.contains("active")&&typeof window.pmLoad==="function"&&!poll)window.pmLoad(true).catch(function(){});
+      if(pm&&pm.classList.contains("active")&&typeof window.pmLoad==="function")window.pmLoad(true).catch(function(){});
       if((source==="lp_flags"||source==="rm_lp_flags"||source==="call_logs"||poll)&&typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
     }catch(e){console.warn("Cross-tracker shared-data refresh failed:",e);}
   },180);
@@ -12286,14 +12293,24 @@ function openOperatingStandardView(btn){
    return g.gap+' more closings to '+g.next+' · work '+activity+' and identify the next conversion.';
  }
  async function rows(){
-   const snap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null,by=snap&&snap.by_agent||{};let map={};
-   Object.keys(by).forEach(k=>{const x=by[k]||{};map[key(x.name||k)]={name:x.name||k,powerLevel:x.level||'',closed:n(x.closed_12mo),leads:n(x.total_leads_12mo),preq:n(x.active_prequals),pipe:n(x.active_pipeline)};});
-   try{
-     const profiles=await sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status&order=powerbi_last_seen_at.desc&limit=3000');
-     let latest=null;(profiles||[]).forEach(p=>{if(p.powerbi_last_seen_at&&(!latest||new Date(p.powerbi_last_seen_at)>new Date(latest)))latest=p.powerbi_last_seen_at;});
-     const current=(profiles||[]).filter(p=>latest&&p.powerbi_last_seen_at&&Math.abs(new Date(p.powerbi_last_seen_at)-new Date(latest))<120000);
-     if(current.length){const fresh={};current.forEach(p=>{const k=key(p.agent_name),old=map[k]||{};fresh[k]={name:p.agent_name,powerLevel:p.powerbi_level||'',closed:n(p.closes_past_year),leads:n(p.total_leads_past_year),preq:n(old.preq),pipe:n(old.pipe),inactive:p.relationship_status==='inactive'};});map=fresh;}
-   }catch(e){console.warn('Next-tier roster used local Power BI data:',e.message);}
+   // Always prefer the latest server-stamped Power BI cohort. Local data only supplies
+   // optional per-agent pipeline details for the SAME upload, never roster membership.
+   const snap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;
+   const by=snap&&snap.by_agent||{},map={};
+   const profiles=await sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,do_not_contact&powerbi_last_seen_at=not.is.null&order=powerbi_last_seen_at.desc&limit=5000');
+   let latest=null;
+   (profiles||[]).forEach(p=>{if(p.powerbi_last_seen_at&&(!latest||Date.parse(p.powerbi_last_seen_at)>Date.parse(latest)))latest=p.powerbi_last_seen_at;});
+   if(!latest)throw new Error('No shared Power BI agent roster is available. Upload Power BI in Weekly Data Hub.');
+   const sameUpload=!!(snap&&snap.imported_at&&Math.abs(Date.parse(snap.imported_at)-Date.parse(latest))<120000);
+   const details={};
+   if(sameUpload)Object.keys(by).forEach(k=>{const r=by[k]||{};details[key(r.name||k)]=r;});
+   (profiles||[]).forEach(p=>{
+     if(!p.powerbi_last_seen_at||Math.abs(Date.parse(p.powerbi_last_seen_at)-Date.parse(latest))>=120000)return;
+     if(typeof ctExcludedFromActiveAgentRoster==='function'&&ctExcludedFromActiveAgentRoster(p.agent_name))return;
+     const k=key(p.agent_name);if(!k||map[k])return;
+     const old=details[k]||{};
+     map[k]={name:p.agent_name,powerLevel:p.powerbi_level||'',closed:n(p.closes_past_year),leads:n(p.total_leads_past_year),preq:n(old.active_prequals),pipe:n(old.active_pipeline),inactive:p.relationship_status==='inactive',doNotContact:p.do_not_contact===true};
+   });
    return Object.values(map).map(r=>Object.assign(r,growth(r),{owner:owner(r.name)}));
  }
  function renderBody(){
