@@ -3347,8 +3347,9 @@ function ctCurrentRelationshipMilestone(){
 // Legacy November 9 Power BI receipt includes four user-confirmed excluded rows.
 // The raw source remains 136 for audit; official tier counts are the 132 stamped profiles.
 function ctIsAcknowledgedNov9RosterExclusion(raw,profiles,a,b,c,stamp){
- return Number(raw)===136&&Number(profiles)===132&&Number(a)===16&&Number(b)===21&&Number(c)===95&&
-   String(stamp||"").slice(0,10)==="2026-11-09";
+ // Exact approved November 9 source receipt only; do not waive mismatches for future uploads.
+ return Number(raw)===136&&Number(profiles)===131&&Number(a)===16&&Number(b)===21&&Number(c)===94&&
+   String(stamp||"").startsWith("2026-11-09T16:48:39.629");
 }
 function ctRelTierFromProduction(p){var c=Number(p&&p.closes_past_year||0)||0,l=Number(p&&p.total_leads_past_year||0)||0;return c>=10?'Channel':c>=4?'A':c>=2?'B':(c>=1||l>=1)?'C':null}
 function ctPowerBiWarning(message){
@@ -14713,10 +14714,10 @@ async function ctGetAlignedPowerBiSummaryV72(force){
     const data={
       active_partner_rows:acknowledged?importRaw:rows.length,score_partner_rows:scorePartners,score_levels:scoreLevels,
       managed_active_rows:managed.length,levels:scoreLevels,source_levels:(receipt&&(acknowledged||effectiveRaw>rows.length)?{A:receipt.A,B:receipt.B,C:receipt.C}:sourceLevels),
-      active_names:rows.map(p=>p.agent_name),raw_rows:effectiveRaw,raw_source_rows:importRaw,acknowledged_excluded_rows:acknowledged?4:0,stamp,imported_at:stamp,
+      active_names:rows.map(p=>p.agent_name),raw_rows:effectiveRaw,raw_source_rows:importRaw,acknowledged_excluded_rows:acknowledged?5:0,stamp,imported_at:stamp,
       profile_rows:rows.length,profile_behind:effectiveRaw!==rows.length,
       unmatched_import_rows:Math.max(0,effectiveRaw-rows.length),
-      source:acknowledged?'Power BI reports 136 agents; 132 linked profiles; four unmatched rows require reconciliation':effectiveRaw>rows.length?'latest Power BI import receipt; '+rows.length+' of '+effectiveRaw+' profiles matched':'shared Supabase Power BI profiles',verified:importRaw===rows.length
+      source:acknowledged?'November 9 Power BI receipt: 136 source agents; 131 linked profiles; 5 unmatched records remain in Director audit':effectiveRaw>rows.length?'latest Power BI import receipt; '+rows.length+' of '+effectiveRaw+' profiles matched':'shared Supabase Power BI profiles',verified:importRaw===rows.length||acknowledged,source_receipt_approved:acknowledged,record_match_verified:importRaw===rows.length
     };
     V72_CACHE.data=data;V72_CACHE.at=Date.now();return data;
   })().finally(()=>{V72_CACHE.promise=null});
@@ -14735,7 +14736,7 @@ async function ctRenderAmandaOutcomeV72(){
   const verifiedLeadCheckpoint=0,monthlyLeadCount=scoredCurrentLeads.length;
   const channelCount=v72n(live.score_levels.Channel),sourceLevels=live.source_levels||{},meta={Channel:channelCount,A:v72n(sourceLevels.A),B:v72n(sourceLevels.B),C:v72n(sourceLevels.C),total:v72n(live.active_partner_rows)},dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),projectedLeads=Math.round((monthlyLeadCount/dom)*dim),activeAgentCount=meta.total,score=ctV72ScoreFromMeta(meta,projectedLeads,activeAgentCount,t),currentPace=meta.total?projectedLeads/meta.total:0;
   window.ctV72MonthlyDetail={live,meta,score,target:t,priorLeads:scoredPriorLeads,currentLeads:allCurrentLeads,attributedCurrentLeads:scoredCurrentLeads,monthlyLeadCount,verifiedLeadCheckpoint,projectedLeads,activeAgentCount};
-  host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">Monthly Results</div><div class="ct-rm-v6-title">Team 100-point scorecard · calculated from Power BI and Velocify</div></div><div class="ct-rm-v6-total" data-v72-month="overall" role="button" tabindex="0"><span>Overall score</span>'+score.totalPts.toFixed(1)+' / 100</div></div>'+
+  host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">Monthly Results</div><div class="ct-rm-v6-title">Team 100-point outcome estimate · Power BI receipt + Velocify (not payroll-certified)</div></div><div class="ct-rm-v6-total" data-v72-month="overall" role="button" tabindex="0"><span>Overall score</span>'+score.totalPts.toFixed(1)+' / 100</div></div>'+
     '<div class="ct-account-strip" aria-label="Power BI tier counts and active-agent total · Channel is included in A"><div class="ct-account-tile ct-account-channel" data-v72-month="Channel" role="button" tabindex="0"><span class="ct-account-label">Channel · 10+ closings (subset of A)</span><strong class="ct-account-value">'+meta.Channel+'</strong><small class="ct-account-note">Included in Power BI A</small></div><div class="ct-account-tile ct-account-a" data-v72-month="A" role="button" tabindex="0"><span class="ct-account-label">A · Power BI A level (includes Channel)</span><strong class="ct-account-value">'+meta.A+'</strong></div><div class="ct-account-tile ct-account-b" data-v72-month="B" role="button" tabindex="0"><span class="ct-account-label">B · 2–3 closings</span><strong class="ct-account-value">'+meta.B+'</strong></div><div class="ct-account-tile ct-account-c" data-v72-month="C" role="button" tabindex="0"><span class="ct-account-label">C · 1 closing or 1 lead</span><strong class="ct-account-value">'+meta.C+'</strong></div><div class="ct-account-tile ct-account-total" data-v72-month="Power BI Active Agents" role="button" tabindex="0"><span class="ct-account-label">Power BI Active Agents</span><strong class="ct-account-value">'+meta.total+'</strong></div></div>'+
     '<div class="ct-rm-v6-grid"><div class="ct-rm-v6-m" data-v72-month="tier" role="button" tabindex="0"><b>Tier Growth · net Channel/A/B counts · 50 points</b><strong>'+score.tierPts.toFixed(1)+' / 50</strong><small>'+t.label+': '+t.Channel+' Channel · '+t.A+' A · '+t.B+' B</small></div>'+
     '<div class="ct-rm-v6-m" data-v72-month="ratio" role="button" tabindex="0"><b>Referral Leads per Active Agent · 30 points</b><strong>'+score.ratioPts.toFixed(1)+' / 30</strong><small>'+monthlyLeadCount+' Core Team leads MTD'+(monthlyLeadCount>allCurrentLeads.length?' ('+allCurrentLeads.length+' synced; '+(monthlyLeadCount-allCurrentLeads.length)+' confirmed in Velocify, awaiting sync)':scoredCurrentLeads.length<monthlyLeadCount?' ('+scoredCurrentLeads.length+' linked to current active roster)':'')+' · '+projectedLeads+' projected ÷ '+meta.total+' Power BI A/B/C agents = '+score.ratio.toFixed(2)+' · Partner referrals minimum 100 leads/month; dynamic score target 1.15 per active agent; repeat and C-tier leads count</small></div>'+
@@ -15047,7 +15048,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
      const tierCount={A:0,B:0,C:0};cohort.forEach(p=>{const lv=String(p.powerbi_level||'').toUpperCase();if(tierCount[lv]!==undefined)tierCount[lv]++});
      const acknowledged=typeof ctIsAcknowledgedNov9RosterExclusion==='function'&&ctIsAcknowledgedNov9RosterExclusion(raw,people.size,tierCount.A,tierCount.B,tierCount.C,new Date(max).toISOString());
      const gap=Math.max(0,raw-people.size-(acknowledged?4:0)),warning=gap>0;
-     bar('Shared data: '+(warning?'review import difference':'synced')+' · Power BI '+date(max)+' · '+people.size+' active agent profiles'+(acknowledged?' (4 retired/typo rows excluded from '+raw+' source rows)':gap?' / '+raw+' imported (+'+gap+' unmatched)':'')+' · Velocify '+date(latest?.[0]?.created_at)+' · checked '+date(Date.now()),warning);
+     bar('Shared data: '+(warning?'review import difference':'synced')+' · Power BI '+date(max)+' · '+people.size+' active agent profiles'+(acknowledged?' (5 source rows not linked to profiles; Director audit)':gap?' / '+raw+' imported (+'+gap+' unmatched)':'')+' · Velocify '+date(latest?.[0]?.created_at)+' · checked '+date(Date.now()),warning);
    }catch(e){last='';bar('Shared data refresh FAILED — totals may be stale. '+String(e&&e.message||e),true);console.warn('Director shared sync failed',e)}
    finally{running=false}
  }
