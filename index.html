@@ -4008,14 +4008,14 @@ async function renderGrowthScoreboard(){
   var managedAgents=agents.filter(isActive),live=null;
   try{live=await ctGetLivePowerBiSummary(false);}catch(e){console.warn('Live Power BI summary unavailable',e)}
   var pbSnap=ctGetCurrentPowerBiSnapshot(),pbLevels=(pbSnap&&pbSnap.levels)||{},milestone=ctCurrentRelationshipMilestone();
-  var total=live?Number(live.active_partner_rows||0):(ctPowerBiActiveCount(pbSnap)||managedAgents.length);
+  var total=live&&live.verified?Number(live.active_partner_rows):null; // Never substitute managed or browser-roster counts for the official Power BI scorecard denominator.
   var channelTier=live?Number(live.levels.Channel||0):Number(pbLevels.Channel||0);
   var aTier=live?Number(live.levels.A||0):Number(pbLevels.A||0),bTier=live?Number(live.levels.B||0):Number(pbLevels.B||0),cTier=live?Number(live.levels.C||0):Number(pbLevels.C||0);
   if(!live&&!ctPowerBiActiveCount(pbSnap)){channelTier=managedAgents.filter(function(a){return a[1]==="Channel";}).length;aTier=managedAgents.filter(function(a){return a[1]==="A";}).length;bTier=managedAgents.filter(function(a){return a[1]==="B";}).length;cTier=managedAgents.filter(function(a){return a[1]==="C";}).length;}
   var GOAL_TOTAL=200,GOAL_CHANNEL=milestone.Channel,GOAL_A=milestone.A,GOAL_B=milestone.B;
 
   function bar(val,goal,color){
-    var pct=Math.min(val/goal,1);
+    if(val===null||!Number.isFinite(Number(val)))return '<div style="font-size:11px;color:#9a3412">Power BI verification required</div>';var pct=Math.min(val/goal,1);
     var labelColor=pct>=1?"#15803d":pct>=0.7?"#b8922a":"#64748b";
     return'<div style="height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden;margin:5px 0 3px"><div style="height:100%;width:'+Math.round(pct*100)+'%;background:'+color+';border-radius:3px;transition:width .4s"></div></div>'
       +'<div style="font-size:10px;color:'+labelColor+'">'+val+' / '+goal+' goal &nbsp;('+Math.round(pct*100)+'%)</div>';
@@ -4040,7 +4040,7 @@ async function renderGrowthScoreboard(){
   el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">'
     +'<div style="background:#f8fafc;border-radius:8px;padding:14px;border:1px solid var(--border)">'
       +'<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Power BI Active Agents</div>'
-      +'<div style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-.02em">'+total+'</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-.02em">'+(total===null?'—':total)+'</div>'
       +bar(total,GOAL_TOTAL,"#1F4E79")
     +'</div>'
     +'<div style="background:#fff8e8;border-radius:8px;padding:14px;border:1px solid #ecd9a8">'
