@@ -3325,10 +3325,8 @@ function renderLP(lp){
 
 
 function ctGetCurrentPowerBiSnapshot(){
-  var snap=window.CT_POWERBI_SNAPSHOT||null;
-  if(!snap){try{snap=JSON.parse(localStorage.getItem("ct_powerbi_snapshot_v1")||"null");}catch(e){snap=null;}}
-  if(!snap&&typeof CT_DEFAULT_POWERBI_SNAPSHOT!=="undefined")snap=CT_DEFAULT_POWERBI_SNAPSHOT;
-  return snap||null;
+ // Browser data never overrides the last verified shared-server import.
+ return window.__ctVerifiedSharedPowerBiSnapshot||null;
 }
 function ctPowerBiActiveCount(snapshot){
   var s=snapshot||ctGetCurrentPowerBiSnapshot()||{},l=s.levels||{};
@@ -10221,19 +10219,31 @@ function ctPowerBiSummarySourceApp(snapshot){
 // This keeps Partner Growth consistent for Nyny, Mack and every LP instead of
 // relying only on the localStorage of the browser that performed the upload.
 async function ctHydrateSharedPowerBiSnapshot(){
-  var localSnap=ctGetCurrentPowerBiSnapshot();
-  try{
-    var logs=await sbFetch("GET","powerbi_import_log?select=imported_at,source_app&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1");
-    var row=logs&&logs[0],shared=row?ctParsePowerBiSummaryFromSourceApp(row.source_app,row.imported_at):null;
-    if(shared&&(!localSnap||!localSnap.imported_at||new Date(shared.imported_at)>new Date(localSnap.imported_at))){
-      window.CT_POWERBI_SNAPSHOT=shared;
-      try{localStorage.setItem("ct_powerbi_snapshot_v1",JSON.stringify(shared));}catch(e){}
-      return shared;
-    }
-  }catch(e){console.warn("Shared Power BI summary could not be loaded:",e.message);}
-  return localSnap;
+ try{
+  const verified=await ctGetLivePowerBiSummary(true);
+  if(!verified||verified.verified!==true)throw new Error('Shared Power BI import not validated');
+  const logs=await sbFetch('GET','powerbi_import_log?select=imported_at,source_app,rows_processed&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1');
+  const row=logs&&logs[0],summary=row?ctParsePowerBiSummaryFromSourceApp(row.source_app,row.imported_at):null;
+  if(!summary||summary.imported_at!==verified.imported_at)throw new Error('Shared import timestamp changed during refresh');
+  const profiles=await sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year&powerbi_last_seen_at=not.is.null&limit=5000');
+  const stamp=decodeURIComponent((String(row.source_app||'').match(/(?:^|;)profileStamp=([^;]+)/)||[])[1]||'')||row.imported_at;
+  const ms=Date.parse(stamp),by=new Map();
+  (profiles||[]).forEach(p=>{if(Math.abs(Date.parse(p.powerbi_last_seen_at||'')-ms)>=1000)return;const k=String(p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');if(k)by.set(k,p);});
+  if(by.size!==Number(row.rows_processed))throw new Error('Shared agent detail batch incomplete');
+  summary.by_agent={};
+  by.forEach((p,k)=>{summary.by_agent[k]={name:p.agent_name,level:p.powerbi_level,closed_12mo:Number(p.closes_past_year||0),total_leads_12mo:Number(p.total_leads_past_year||0)};});
+  summary.verified_server=true;
+  window.__ctVerifiedSharedPowerBiSnapshot=summary;
+  window.CT_POWERBI_SNAPSHOT=summary;
+  ctPowerBiWarning(null);
+  return summary;
+ }catch(e){
+  window.__ctVerifiedSharedPowerBiSnapshot=null;
+  window.CT_POWERBI_SNAPSHOT=null;
+  ctPowerBiWarning(e.message||'Server unavailable');
+  throw e;
+ }
 }
-
 function pfrCurrentPowerBiSource(profiles,importRow,localSnapshot){
   var stamp=null;
   profiles.forEach(function(p){if(p.powerbi_last_seen_at&&(!stamp||Date.parse(p.powerbi_last_seen_at)>Date.parse(stamp)))stamp=p.powerbi_last_seen_at;});
