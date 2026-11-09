@@ -14939,3 +14939,46 @@ https://github.com/nodeca/pako/blob/main/LICENSE
  window.lpAuditVelocifyDuplicates=audit;
 })();
 </script>
+
+<!-- v154: synchronize director snapshot to same shared data as LP and RM -->
+<script id="ct-v154-director-shared-live-sync">
+(function(){
+ 'use strict';
+ let last='',busy=false;
+ const safe=async(fn)=>{try{if(typeof fn==='function')await fn();}catch(e){console.warn('Director refresh step failed',e);}};
+ async function signature(){
+  if(typeof sbFetch!=='function')return '';
+  const d=new Date(),month=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
+  const [p,logs,leads]=await Promise.all([
+   sbFetch('GET','agent_profiles?select=powerbi_last_seen_at&powerbi_last_seen_at=not.is.null&order=powerbi_last_seen_at.desc&limit=1'),
+   sbFetch('GET','powerbi_import_log?select=imported_at&order=imported_at.desc&limit=1'),
+   sbFetch('GET','velocify_leads?date_added=gte.'+month+'&select=lead_key,date_added,status,lp_user&limit=10000')
+  ]);
+  return [p?.[0]?.powerbi_last_seen_at,logs?.[0]?.imported_at,(leads||[]).map(x=>[x.lead_key,x.date_added,x.status,x.lp_user].join('~')).sort().join('|')].join('#');
+ }
+ async function refresh(force){
+  if(busy||document.visibilityState==='hidden')return;
+  busy=true;
+  try{
+   const s=await signature();if(!s||(!force&&s===last))return;last=s;
+   if(typeof window.ctInvalidateLivePowerBi==='function')window.ctInvalidateLivePowerBi();
+   await safe(()=>window.ctGetAlignedPowerBiSummaryV72?.(true));
+   await safe(()=>window.ctGetLivePowerBiSummary?.(true));
+   if(document.getElementById('view-snapshot')?.classList.contains('active')){
+    await safe(()=>window.ctV56RefreshTeamSnapshot?.());
+    await safe(()=>window.ctRenderAmandaSnapshot?.());
+   }
+   await safe(()=>window.lpRefreshSourceFreshness?.());
+  }catch(e){console.warn('Director shared source refresh unavailable',e)}
+  finally{busy=false;}
+ }
+ window.ctV154RefreshDirector=()=>refresh(true);
+ function boot(){
+  setTimeout(()=>refresh(true),2400);
+  setInterval(()=>refresh(false),30000);
+  window.addEventListener('focus',()=>refresh(true));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true)});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
