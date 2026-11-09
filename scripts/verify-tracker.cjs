@@ -92,9 +92,9 @@ assert.equal(leadResult[1].status,'Started','An undated bad-lead duplicate canno
 
 assert(html.includes('active_partner_rows:acknowledged?importRaw:rows.length,score_partner_rows:scorePartners'),'LP must use source count only for explicitly acknowledged import exceptions');
 assert(html.includes("if(!live.verified){const tiers=live.source_levels||{};host.innerHTML="),'LP scorecard must show raw counts but withhold weighted results on unmatched Power BI imports');
-assert(html.includes('profile_rows:rows.length'),'LP must expose matched profile count separately from import rows');assert(html.includes('verified:importRaw===rows.length'),'Withhold certification while roster rows remain unmatched');
-assert(html.includes('acknowledged_excluded_rows:acknowledged?4:0'),'Approved November 9 source exclusions must remain explicit');
-assert(html.includes('var total=live&&(live.verified||live.acknowledged_excluded_rows===4)?Number(live.active_partner_rows):null;'),'LP summary may show explicitly acknowledged source roster, never a browser or managed count');
+assert(html.includes('profile_rows:rows.length'),'LP must expose matched profile count separately from import rows');assert(html.includes('record_match_verified:importRaw===rows.length'),'Keep record-level verification separate from the approved source-receipt estimate');
+assert(html.includes('acknowledged_excluded_rows:acknowledged?5:0'),'Exact November 9 source exception must remain explicit');
+assert(html.includes('var total=live&&(live.verified||live.acknowledged_excluded_rows===5)?Number(live.active_partner_rows):null;'),'LP summary may show explicitly acknowledged source roster, never a browser or managed count');
 assert(html.includes("(total===null?'—':total)"),'LP summary must visibly withhold unverified active count');
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
 if (errors.length) {
