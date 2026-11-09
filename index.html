@@ -14553,7 +14553,7 @@ const V72_MEETING_TYPES=["Partner Meeting","Break Breads","Strategic Partner Mee
 const V72_DIRECTOR_TYPES=["Amanda Coaching / Development","RM Scorecard Review","RM Portfolio Review","RM Process Improvement","Tracker / System Development","RM Training","RM Leadership Escalation Support"];
 const V72_GOALS={partnerMeetings:8,teamNewMeetings:5,existingMeetings:5,coldCalls:125,partnerConversations:100,buddyAsks:3};
 const V72_CACHE={at:0,data:null,promise:null};
-const V76_VERIFIED_POWERBI={imported_at:'2026-11-02T16:40:00.000Z',raw:132,Channel:2,A:18,B:20,C:94,total:132};
+// Historical November 2 hard-coded counts removed; only current shared import is authoritative.
 const v72n=v=>Number(v||0)||0;
 function v72RecentWithin90(value,now){const ms=Date.parse(String(value||''));return Number.isFinite(ms)&&ms<=now.getTime()+86400000&&ms>=now.getTime()-90*86400000}
 function v72IsActivePartner(record,profile,now){const p=profile||{},r=record||{};if(p.do_not_contact===true||String(p.relationship_status||'active').toLowerCase()==='inactive'||String(p.relationship_type||'realtor').toLowerCase()==='strategic_partner')return false;if(p.retained===true)return true;return v72RecentWithin90(r.latest_lead||r.latest_lead_date||p.latest_lead_date,now)||v72RecentWithin90(r.latest_close||r.latest_close_date||p.latest_close_date,now)}
@@ -14609,64 +14609,61 @@ function v72AmandaActivity(a){if(!a)return false;const type=String(a.act_type||'
 function v72TeamActivity(a){if(!a)return false;const type=String(a.act_type||''),notes=String(a.notes||'');if(/\[TXN_TRIGGER\]/i.test(notes)||V72_DIRECTOR_TYPES.includes(type)||v72key(a.agent_name)==='rm tracker')return false;return v72DecodeRmPeople(notes).some(x=>x==='Amanda'||x==='Nyny')}
 function v72Milestone(){const m=new Date().getMonth()+1;if(m<=9)return{label:'September 30 goal',Channel:2,A:14,B:21};if(m===10)return{label:'October 31 goal',Channel:2,A:16,B:24};if(m===11)return{label:'November 30 goal',Channel:3,A:18,B:27};return{label:'December 31 goal',Channel:4,A:20,B:30}}
 async function ctGetAlignedPowerBiSummaryV72(force){
-  if(!force&&V72_CACHE.data&&Date.now()-V72_CACHE.at<45000)return V72_CACHE.data;if(V72_CACHE.promise)return V72_CACHE.promise;
+  if(!force&&V72_CACHE.data&&Date.now()-V72_CACHE.at<30000)return V72_CACHE.data;
+  if(V72_CACHE.promise)return V72_CACHE.promise;
   V72_CACHE.promise=(async()=>{
+    // Shared Supabase records are authoritative. Browser workbooks and historical
+    // verified constants must never replace newer server data on another device.
     const [profiles,logs]=await Promise.all([
-      sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,relationship_type,do_not_contact,retained,latest_lead_date,latest_close_date&powerbi_last_seen_at=not.is.null&limit=5000').catch(()=>[]),
-      sbFetch('GET','powerbi_import_log?select=imported_at,source_app,rows_processed,errors&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1').catch(()=>[])
+      sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,relationship_type,do_not_contact,retained,latest_lead_date,latest_close_date&powerbi_last_seen_at=not.is.null&limit=5000'),
+      sbFetch('GET','powerbi_import_log?select=imported_at,source_app,rows_processed,errors&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1')
     ]);
-    let latestMs=0,stamp=null;(profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(Number.isFinite(ms)&&ms>latestMs){latestMs=ms;stamp=p.powerbi_last_seen_at}});
-    const by=new Map();if(latestMs)(profiles||[]).forEach(p=>{const ms=Date.parse(p&&p.powerbi_last_seen_at||'');if(!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000)return;let lv=String(p&&p.powerbi_level||'').trim().toUpperCase();if(!['A','B','C'].includes(lv)){const inferred=ctRelTierFromProduction(p);lv=inferred==='Channel'?'A':inferred||'';}if(!['A','B','C'].includes(lv))return;const k=v72key(p.agent_name);if(k&&!by.has(k))by.set(k,Object.assign({},p,{powerbi_level:lv}))});
-    const rows=Array.from(by.values()),profileSource={A:0,B:0,C:0};rows.forEach(p=>{const l=String(p.powerbi_level||'').trim().toUpperCase();if(profileSource[l]!==undefined)profileSource[l]++});
-    const profileChannel=rows.filter(p=>v72n(p.closes_past_year)>=10).length,receiptRow=logs&&logs[0],receipt=receiptRow?ctV72ParseReceipt(receiptRow.source_app,receiptRow.imported_at):null,receiptMs=Date.parse(receipt&&receipt.imported_at||'')||0,useReceipt=!!receipt&&(!latestMs||receiptMs>=latestMs||Math.abs(receiptMs-latestMs)<15*60*1000);
-
-    /* v73: preserve v71's current-workbook authority. v72 accidentally removed this branch,
-       so an incomplete 131-row profile population could overwrite the 136 agents that the
-       user had just uploaded and verified in this browser. */
-    let local=null;try{local=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():(window.CT_POWERBI_SNAPSHOT||null)}catch(e){}
-    const localMs=Date.parse(local&&local.imported_at||'')||0,localBy=new Map();
-    Object.values(local&&local.by_agent||{}).forEach(r=>{let lv=String(r&&r.level||'').trim().toUpperCase();if(!['A','B','C'].includes(lv)){const inferred=ctRelTierFromProduction({closes_past_year:r&&r.closed_12mo,total_leads_past_year:r&&r.total_leads_12mo});lv=inferred==='Channel'?'A':inferred||'';}const k=v72key(r&&r.name);if(k&&['A','B','C'].includes(lv)&&!localBy.has(k))localBy.set(k,Object.assign({},r,{level:lv}))});
-    const verifiedMs=Date.parse(V76_VERIFIED_POWERBI.imported_at)||0;
-    const localRows=Array.from(localBy.values()).filter(r=>!ctExcludedFromActiveAgentRoster(r.name)),sameImportWindow=localRows.length>0&&localMs>0&&(!latestMs||localMs>=latestMs||Math.abs(latestMs-localMs)<15*60*1000),preferLocal=sameImportWindow&&localMs>verifiedMs&&(!useReceipt||Math.abs(receiptMs-localMs)<15*60*1000);
-    if(preferLocal){
-      const localSource={A:0,B:0,C:0};localRows.forEach(r=>{const lv=String(r.level||'').trim().toUpperCase();localSource[lv]++});
-      const localChannel=localRows.filter(r=>v72n(r.closed_12mo)>=10).length,profileBy=new Map();(profiles||[]).forEach(p=>{const k=v72key(p&&p.agent_name);if(k&&!profileBy.has(k))profileBy.set(k,p)});
-      const localManaged=localRows.filter(r=>{const p=profileBy.get(v72key(r.name))||{};return p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive'}),localTierCounts={Channel:0,A:0,B:0,C:0},localTiered=[];
-      localRows.forEach(r=>{const tier=ctRelTierFromProduction({closes_past_year:r.closed_12mo,total_leads_past_year:r.total_leads_12mo});if(tier&&localTierCounts[tier]!==undefined){localTierCounts[tier]++;localTiered.push(r)}});
-      const localActivePartnerCount=localRows.filter(r=>v72IsActivePartner(r,profileBy.get(v72key(r.name)),new Date())).length;
-      const localData={active_partner_rows:localRows.length,score_partner_rows:localActivePartnerCount,score_levels:localTierCounts,managed_active_rows:localManaged.length,levels:localTierCounts,source_levels:localSource,active_names:localRows.map(r=>r.name).filter(Boolean),raw_rows:v72n(local.raw_rows)||localRows.length,stamp:local.imported_at,imported_at:local.imported_at,profile_rows:rows.length,profile_behind:rows.length<localRows.length,source:'current uploaded Power BI workbook'};
-      V72_CACHE.data=localData;V72_CACHE.at=Date.now();return localData;
-    }
-
-    const receiptIsNewer=useReceipt&&receiptMs>verifiedMs;
-    const source=receiptIsNewer?{A:receipt.A,B:receipt.B,C:receipt.C,Channel:receipt.Channel,total:receipt.total,raw:receipt.raw,stamp:receipt.imported_at}:{A:V76_VERIFIED_POWERBI.A,B:V76_VERIFIED_POWERBI.B,C:V76_VERIFIED_POWERBI.C,Channel:V76_VERIFIED_POWERBI.Channel,total:V76_VERIFIED_POWERBI.total,raw:V76_VERIFIED_POWERBI.raw,stamp:V76_VERIFIED_POWERBI.imported_at};
-    const managed=rows.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive'),scoreLevels={Channel:0,A:0,B:0,C:0};
-    rows.forEach(p=>{const tier=ctRelTierFromProduction(p);if(tier&&scoreLevels[tier]!==undefined)scoreLevels[tier]++});
-    const activePartnerCount=rows.filter(p=>v72IsActivePartner(p,p,new Date())).length;
-    // Import receipts contain the original workbook population. An explicitly removed
-    // profile can still occur in that workbook; do not count it on the active roster.
-    // Preserve raw_rows for transparent auditing and exclude it only once per agent.
-    const removedInCohort=new Map();
-    rows.forEach(p=>{const key=v72key(p.agent_name);if(key&&ctExcludedFromActiveAgentRoster(p.agent_name))removedInCohort.set(key,p)});
-    const correctedSource={A:source.A,B:source.B,C:source.C};
-    removedInCohort.forEach(p=>{const lv=String(p.powerbi_level||'').trim().toUpperCase();if(correctedSource[lv]>0)correctedSource[lv]--;});
-    const visibleNames=rows.filter(p=>!ctExcludedFromActiveAgentRoster(p.agent_name));
-    const correctedTotal=Math.max(0,source.total-removedInCohort.size);
-    const data={active_partner_rows:correctedTotal,score_partner_rows:activePartnerCount,score_levels:scoreLevels,managed_active_rows:managed.length,levels:scoreLevels,source_levels:correctedSource,active_names:visibleNames.map(p=>p.agent_name).filter(Boolean),raw_rows:source.raw,stamp:source.stamp,imported_at:source.stamp,profile_rows:visibleNames.length,profile_behind:correctedTotal>visibleNames.length,removed_from_source:removedInCohort.size,source:receiptIsNewer?'shared Core Team Power BI import receipt minus removed':'verified current Power BI workbook minus removed'};
+    if(!Array.isArray(profiles)||!Array.isArray(logs))throw Error('Power BI shared data is unavailable');
+    const latestMs=Math.max(0,...profiles.map(p=>Date.parse(p&&p.powerbi_last_seen_at||'')||0));
+    if(!latestMs)throw Error('No imported Power BI profiles are available from the shared server');
+    const by=new Map();
+    profiles.forEach(p=>{
+      const ms=Date.parse(p&&p.powerbi_last_seen_at||''),k=v72key(p&&p.agent_name);
+      if(!k||!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000)return;
+      let lv=String(p.powerbi_level||'').trim().toUpperCase();
+      if(!['A','B','C'].includes(lv))return;
+      if(!by.has(k))by.set(k,Object.assign({},p,{powerbi_level:lv}));
+    });
+    const rows=Array.from(by.values());
+    if(!rows.length)throw Error('No valid A/B/C Power BI records found in the current shared import');
+    const sourceLevels={A:0,B:0,C:0},scoreLevels={Channel:0,A:0,B:0,C:0};
+    rows.forEach(p=>{
+      sourceLevels[p.powerbi_level]++;
+      const t=ctRelTierFromProduction(p);if(t&&scoreLevels[t]!==undefined)scoreLevels[t]++;
+    });
+    const managed=rows.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive');
+    const scorePartners=rows.filter(p=>v72IsActivePartner(p,p,new Date())).length;
+    const receipt=logs[0]?ctV72ParseReceipt(logs[0].source_app,logs[0].imported_at):null;
+    const stamp=new Date(latestMs).toISOString();
+    const importRaw=receipt&&Math.abs((Date.parse(receipt.imported_at)||0)-latestMs)<120000?receipt.raw:rows.length;
+    const data={
+      active_partner_rows:rows.length,score_partner_rows:scorePartners,score_levels:scoreLevels,
+      managed_active_rows:managed.length,levels:scoreLevels,source_levels:sourceLevels,
+      active_names:rows.map(p=>p.agent_name),raw_rows:importRaw,stamp,imported_at:stamp,
+      profile_rows:rows.length,profile_behind:importRaw!==rows.length,
+      unmatched_import_rows:Math.max(0,importRaw-rows.length),
+      source:'shared Supabase Power BI profiles',verified:true
+    };
     V72_CACHE.data=data;V72_CACHE.at=Date.now();return data;
-  })().finally(()=>{V72_CACHE.promise=null});return V72_CACHE.promise;
+  })().finally(()=>{V72_CACHE.promise=null});
+  return V72_CACHE.promise;
 }
 window.ctGetLivePowerBiSummary=ctGetAlignedPowerBiSummaryV72;try{ctGetLivePowerBiSummary=ctGetAlignedPowerBiSummaryV72}catch(e){}
 const oldInvalidate=window.ctInvalidateLivePowerBi;window.ctInvalidateLivePowerBi=function(){V72_CACHE.at=0;V72_CACHE.data=null;try{if(typeof oldInvalidate==='function')oldInvalidate()}catch(e){}};
 async function ctRenderAmandaOutcomeV72(){
   const box=document.getElementById('ct-amanda-snapshot');if(!box)return;const grid=box.querySelector('.ct-amanda-grid');if(!grid)return;let host=box.querySelector('.ct-rm-v6-outcome');if(!host){host=document.createElement('div');host.className='ct-rm-v6-outcome';grid.before(host)}
   const live=await ctGetAlignedPowerBiSummaryV72(false),t=v72Milestone(),now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),1),iso=d=>d.toISOString().slice(0,10);let currentLeads=[],priorLeads=[];
-  try{[currentLeads,priorLeads]=await Promise.all([sbFetch('GET','velocify_leads?date_added=gte.'+iso(monthStart)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[]),sbFetch('GET','velocify_leads?date_added=gte.'+iso(prevStart)+'&date_added=lt.'+iso(prevEnd)+'&select=referral_partner_name,date_added&limit=5000').catch(()=>[])])}catch(e){}
+  try{[currentLeads,priorLeads]=await Promise.all([sbFetch('GET','velocify_leads?date_added=gte.'+iso(monthStart)+'&select=lead_key,referral_partner_name,date_added&limit=5000'),sbFetch('GET','velocify_leads?date_added=gte.'+iso(prevStart)+'&date_added=lt.'+iso(prevEnd)+'&select=lead_key,referral_partner_name,date_added&limit=5000')])}catch(e){}
   const activeKeys=new Set((live.active_names||[]).map(v72key).filter(Boolean));
-  const allCurrentLeads=currentLeads||[],scoredCurrentLeads=allCurrentLeads.filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)}),scoredPriorLeads=(priorLeads||[]).filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)});
-  // Verified October 2026 MTD checkpoint remains until the Velocify rows catch up; expires next month.
-  // Verified Nov 2, 2026 Velocify screenshot shows 5 Core Team leads while the shared daily mirror has only 3; let live rows take over when they catch up, and expire this checkpoint next month.
-  const verifiedLeadCheckpoint=now.getFullYear()===2026?(now.getMonth()===9?85:now.getMonth()===10?5:0):0,monthlyLeadCount=Math.max(allCurrentLeads.length,verifiedLeadCheckpoint);
+  const uniqueLeads=records=>Array.from((records||[]).reduce((m,r,i)=>{const k=String(r.lead_key||'').trim().toUpperCase()||'ROW:'+String(r.referral_partner_name||'')+':'+String(r.date_added||'')+':'+i;if(!m.has(k))m.set(k,r);return m;},new Map()).values());
+  const allCurrentLeads=uniqueLeads(currentLeads),scoredCurrentLeads=allCurrentLeads.filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)}),scoredPriorLeads=uniqueLeads(priorLeads).filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)});
+  // Never substitute manual historical lead checkpoints for current Velocify rows.
+  const verifiedLeadCheckpoint=0,monthlyLeadCount=allCurrentLeads.length;
   const channelCount=v72n(live.score_levels.Channel),sourceLevels=live.source_levels||{},meta={Channel:channelCount,A:v72n(sourceLevels.A),B:v72n(sourceLevels.B),C:v72n(sourceLevels.C),total:v72n(live.active_partner_rows)},dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),projectedLeads=Math.round((monthlyLeadCount/dom)*dim),activeAgentCount=meta.total,score=ctV72ScoreFromMeta(meta,projectedLeads,activeAgentCount,t),currentPace=meta.total?projectedLeads/meta.total:0;
   window.ctV72MonthlyDetail={live,meta,score,target:t,priorLeads:scoredPriorLeads,currentLeads:allCurrentLeads,attributedCurrentLeads:scoredCurrentLeads,monthlyLeadCount,verifiedLeadCheckpoint,projectedLeads,activeAgentCount};
   host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">Monthly Results</div><div class="ct-rm-v6-title">Team 100-point scorecard · calculated from Power BI and Velocify</div></div><div class="ct-rm-v6-total" data-v72-month="overall" role="button" tabindex="0"><span>Overall score</span>'+score.totalPts.toFixed(1)+' / 100</div></div>'+
