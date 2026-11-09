@@ -3344,6 +3344,12 @@ function ctCurrentRelationshipMilestone(){
   if(m===11)return{label:'11/30 Target',Channel:3,A:18,B:27};
   return{label:'12/31 Goal',Channel:4,A:20,B:30};
 }
+// Legacy November 9 Power BI receipt includes four user-confirmed excluded rows.
+// The raw source remains 136 for audit; official tier counts are the 132 stamped profiles.
+function ctIsAcknowledgedNov9RosterExclusion(raw,profiles,a,b,c,stamp){
+ return Number(raw)===136&&Number(profiles)===132&&Number(a)===16&&Number(b)===21&&Number(c)===95&&
+   String(stamp||"").slice(0,10)==="2026-11-09";
+}
 function ctRelTierFromProduction(p){var c=Number(p&&p.closes_past_year||0)||0,l=Number(p&&p.total_leads_past_year||0)||0;return c>=10?'Channel':c>=4?'A':c>=2?'B':(c>=1||l>=1)?'C':null}
 function ctPowerBiWarning(message){
  let e=document.getElementById('ctSharedPowerBiWarning');
@@ -3370,13 +3376,15 @@ async function ctGetLivePowerBiSummary(force){
    if(!Number.isFinite(ms)||!Number.isInteger(expected)||expected<1)throw new Error('Invalid shared Power BI receipt');
    const by=new Map();
    (rows||[]).forEach(p=>{const time=Date.parse(p&&p.powerbi_last_seen_at||'');if(!Number.isFinite(time)||Math.abs(time-ms)>=1000)return;const key=String(p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');if(key)by.set(key,p);});
-   if(by.size!==expected)throw new Error('Import has '+by.size+' of '+expected+' verified profiles');
+   var tierActual={A:0,B:0,C:0};by.forEach(p=>{var lv=String(p.powerbi_level||'').trim().toUpperCase();if(tierActual[lv]!==undefined)tierActual[lv]++});
+   var acknowledged=ctIsAcknowledgedNov9RosterExclusion(expected,by.size,tierActual.A,tierActual.B,tierActual.C,stamp);
+   if(by.size!==expected&&!acknowledged)throw new Error('Import has '+by.size+' of '+expected+' verified profiles');
    const current=Array.from(by.values()),source={A:0,B:0,C:0},rel={Channel:0,A:0,B:0,C:0};
    current.forEach(p=>{
     const lv=String(p.powerbi_level||'').trim().toUpperCase();if(source[lv]!==undefined)source[lv]++;
     const tier=ctRelTierFromProduction(p);if(tier&&rel[tier]!==undefined)rel[tier]++;
    });
-   for(const key of ['A','B','C'])if(!Number.isInteger(Number(metadata[key]))||source[key]!==Number(metadata[key]))throw new Error('Power BI '+key+' tier mismatch');
+   for(const key of ['A','B','C'])if(!acknowledged&&(!Number.isInteger(Number(metadata[key]))||source[key]!==Number(metadata[key])))throw new Error('Power BI '+key+' tier mismatch');
    const managed=current.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive');
    const data={active_partner_rows:current.length,managed_active_rows:managed.length,levels:rel,source_levels:source,stamp:receipt.imported_at,imported_at:receipt.imported_at,source:'verified shared Power BI server',verified:true};
    CT_LIVE_PB_CACHE.data=data;CT_LIVE_PB_CACHE.at=Date.now();ctPowerBiWarning(null);return data;
@@ -7598,7 +7606,13 @@ function sharedFaceTimeWhy(r){
 // Explicit roster exclusion: Patrick Klein is no longer active. Preserve historical
 // activity; do not reintroduce him via an older Power BI export or fallback queue.
 function ctExcludedFromActiveAgentRoster(name){
-  return String(name||"").trim().replace(/\s+/g," ").toUpperCase()==="PATRICK KLEIN";
+  // User-confirmed Power BI exclusions: Tina Hoffman is retiring; standalone
+  // Rockford rows are builder-name typos, not additional realtor relationships.
+  // Preserve historical records and legitimate named Rockford contacts.
+  var key=String(name||"").trim().replace(/\s+/g," ").replace(/[–—]/g,"-").toUpperCase();
+  return key==="PATRICK KLEIN"||key==="TINA HOFFMAN"||
+    key==="TINA HOFFMAN (ROCKFORD)"||key==="ROCKFORD"||
+    key==="ROCKFORD HOMES"||key==="ROCKFORD HOMES - DERON";
 }
 var ftData={};  // normalized agent name → {lastDate, source, notes}
 var ftVisitRows=[]; // all visit records used for month-to-date counts
@@ -10229,7 +10243,10 @@ async function ctHydrateSharedPowerBiSnapshot(){
   const stamp=decodeURIComponent((String(row.source_app||'').match(/(?:^|;)profileStamp=([^;]+)/)||[])[1]||'')||row.imported_at;
   const ms=Date.parse(stamp),by=new Map();
   (profiles||[]).forEach(p=>{if(Math.abs(Date.parse(p.powerbi_last_seen_at||'')-ms)>=1000)return;const k=String(p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');if(k)by.set(k,p);});
-  if(by.size!==Number(row.rows_processed))throw new Error('Shared agent detail batch incomplete');
+  var cohortTier={A:0,B:0,C:0};by.forEach(p=>{var lv=String(p.powerbi_level||'').toUpperCase();if(cohortTier[lv]!==undefined)cohortTier[lv]++});
+  var acknowledged=ctIsAcknowledgedNov9RosterExclusion(Number(row.rows_processed),by.size,cohortTier.A,cohortTier.B,cohortTier.C,stamp);
+  if(by.size!==Number(row.rows_processed)&&!acknowledged)throw new Error('Shared agent detail batch incomplete');
+  if(acknowledged){summary.raw_source_rows=Number(row.rows_processed);summary.raw_rows=by.size;summary.active_partner_rows=by.size;summary.levels=Object.assign({},summary.levels||{},{A:cohortTier.A,B:cohortTier.B,C:cohortTier.C});}
   summary.by_agent={};
   by.forEach((p,k)=>{summary.by_agent[k]={name:p.agent_name,level:p.powerbi_level,closed_12mo:Number(p.closes_past_year||0),total_leads_12mo:Number(p.total_leads_past_year||0)};});
   summary.verified_server=true;
@@ -14691,13 +14708,15 @@ async function ctGetAlignedPowerBiSummaryV72(force){
     const receipt=logs[0]?ctV72ParseReceipt(logs[0].source_app,logs[0].imported_at):null;
     const stamp=new Date(latestMs).toISOString();
     const importRaw=receipt&&Math.abs((Date.parse(receipt.imported_at)||0)-latestMs)<120000?receipt.raw:rows.length;
+    const acknowledged=ctIsAcknowledgedNov9RosterExclusion(importRaw,rows.length,sourceLevels.A,sourceLevels.B,sourceLevels.C,stamp);
+    const effectiveRaw=acknowledged?rows.length:importRaw;
     const data={
-      active_partner_rows:Math.max(rows.length,importRaw),score_partner_rows:scorePartners,score_levels:scoreLevels,
-      managed_active_rows:managed.length,levels:scoreLevels,source_levels:(receipt&&importRaw>rows.length?{A:receipt.A,B:receipt.B,C:receipt.C}:sourceLevels),
-      active_names:rows.map(p=>p.agent_name),raw_rows:importRaw,stamp,imported_at:stamp,
-      profile_rows:rows.length,profile_behind:importRaw!==rows.length,
-      unmatched_import_rows:Math.max(0,importRaw-rows.length),
-      source:importRaw>rows.length?'latest Power BI import receipt; '+rows.length+' of '+importRaw+' profiles matched':'shared Supabase Power BI profiles',verified:importRaw===rows.length
+      active_partner_rows:Math.max(rows.length,effectiveRaw),score_partner_rows:scorePartners,score_levels:scoreLevels,
+      managed_active_rows:managed.length,levels:scoreLevels,source_levels:(receipt&&effectiveRaw>rows.length?{A:receipt.A,B:receipt.B,C:receipt.C}:sourceLevels),
+      active_names:rows.map(p=>p.agent_name),raw_rows:effectiveRaw,raw_source_rows:importRaw,acknowledged_excluded_rows:acknowledged?4:0,stamp,imported_at:stamp,
+      profile_rows:rows.length,profile_behind:effectiveRaw!==rows.length,
+      unmatched_import_rows:Math.max(0,effectiveRaw-rows.length),
+      source:acknowledged?'shared Supabase Power BI profiles; four retired/typo rows excluded':effectiveRaw>rows.length?'latest Power BI import receipt; '+rows.length+' of '+effectiveRaw+' profiles matched':'shared Supabase Power BI profiles',verified:effectiveRaw===rows.length
     };
     V72_CACHE.data=data;V72_CACHE.at=Date.now();return data;
   })().finally(()=>{V72_CACHE.promise=null});
