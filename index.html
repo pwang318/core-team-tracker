@@ -6399,21 +6399,21 @@ async function refreshLpSharedData(source){
       if(source==="agent_profiles"||source==="powerbi_import_log"||poll){
         contactCache={};loadAgents();
         if(typeof window.ctInvalidateLivePowerBi==="function")window.ctInvalidateLivePowerBi();
-        if(typeof window.ctHydrateSharedPowerBiSnapshot==="function")await window.ctHydrateSharedPowerBiSnapshot().catch(function(){});
+        if(typeof window.ctHydrateSharedPowerBiSnapshot==="function")await window.ctHydrateSharedPowerBiSnapshot().catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);});
       }
-      if(source==="agent_assignments"||source==="powerbi_import_log"||poll)await loadAgentAssignments().catch(function(){});
+      if(source==="agent_assignments"||source==="powerbi_import_log"||poll)await loadAgentAssignments().catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);});
       if(allActivity){
         await Promise.all([
-          loadCallLogs().catch(function(){}),
-          loadRmActivity().catch(function(){}),
-          loadRmFollowups().catch(function(){}),
-          loadAmandaSnapshot().catch(function(){}),
-          loadFaceTime().catch(function(){})
+          loadCallLogs().catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);}),
+          loadRmActivity().catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);}),
+          loadRmFollowups().catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);}),
+          loadAmandaSnapshot().catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);}),
+          loadFaceTime().catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);})
         ]);
       }
       var snapshotView=document.getElementById("view-snapshot");
       if(snapshotView&&snapshotView.classList.contains("active")&&typeof window.lpLoadSnapshotFresh==="function"){
-        await window.lpLoadSnapshotFresh({force:true}).catch(function(){});
+        await window.lpLoadSnapshotFresh({force:true}).catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);});
       }else if(!poll&&["Gavin","Karen","Osgood","Jordan","Said","Isaak"].indexOf(currentUser)>=0&&Object.keys(pendingNote).length===0){
         renderLP(currentUser);
       }
@@ -6423,11 +6423,11 @@ async function refreshLpSharedData(source){
         await window.ctRenderTierOpportunities().catch(function(e){console.warn("Partner Growth refresh failed:",e);});
       }
       var pfr=document.getElementById("view-portfolio");
-      if(pfr&&pfr.classList.contains("active")&&typeof window.pfrLoad==="function")window.pfrLoad().catch(function(){});
+      if(pfr&&pfr.classList.contains("active")&&typeof window.pfrLoad==="function")window.pfrLoad().catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);});
       var pm=document.getElementById("view-production-manager");
-      if(pm&&pm.classList.contains("active")&&typeof window.pmLoad==="function")window.pmLoad(true).catch(function(){});
+      if(pm&&pm.classList.contains("active")&&typeof window.pmLoad==="function")window.pmLoad(true).catch(function(e){ctPowerBiWarning('Some sections could not refresh: '+(e&&e.message||'Request failed'));console.warn('LP shared section refresh failed',e);});
       if((source==="lp_flags"||source==="rm_lp_flags"||source==="call_logs"||poll)&&typeof window.ctLoadNotifications==="function")window.ctLoadNotifications();
-    }catch(e){console.warn("Cross-tracker shared-data refresh failed:",e);}
+    }catch(e){ctPowerBiWarning("Cross-tracker shared-data refresh failed: "+(e&&e.message||"Request failed"));console.warn("Cross-tracker shared-data refresh failed:",e);}
   },180);
 }
 function startSharedDataPolling(){
