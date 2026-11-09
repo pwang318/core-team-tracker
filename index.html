@@ -3380,7 +3380,7 @@ async function ctGetLivePowerBiSummary(force){
    });
    for(const key of ['A','B','C'])if(!Number.isInteger(Number(metadata[key]))||source[key]!==Number(metadata[key]))throw new Error('Power BI '+key+' tier mismatch');
    const managed=current.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive');
-   const data={active_partner_rows:current.length,managed_active_rows:managed.length,levels:rel,source_levels:source,stamp:receipt.imported_at,imported_at:receipt.imported_at,source:'verified shared Power BI server'};
+   const data={active_partner_rows:current.length,managed_active_rows:managed.length,levels:rel,source_levels:source,stamp:receipt.imported_at,imported_at:receipt.imported_at,source:'verified shared Power BI server',verified:true};
    CT_LIVE_PB_CACHE.data=data;CT_LIVE_PB_CACHE.at=Date.now();ctPowerBiWarning(null);return data;
   }catch(error){CT_LIVE_PB_CACHE.data=null;CT_LIVE_PB_CACHE.at=0;ctPowerBiWarning(error.message||'Unknown error');throw error;}
  })().finally(function(){CT_LIVE_PB_CACHE.promise=null;});
