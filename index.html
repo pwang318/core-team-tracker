@@ -14134,15 +14134,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     (async function(){
       try{
         if(!window.ctV72MonthlyDetail&&typeof window.ctRenderAmandaSnapshot==='function')await window.ctRenderAmandaSnapshot();
-        if(typeof window.ctGetLivePowerBiSummary==='function')await window.ctGetLivePowerBiSummary(true);
+        var verificationError='';try{if(typeof window.ctGetLivePowerBiSummary==='function'){var verifiedSummary=await window.ctGetLivePowerBiSummary(true);if(!verifiedSummary||verifiedSummary.verified!==true)verificationError='Latest Power BI roster is not verified';}}catch(verificationFailure){verificationError=String(verificationFailure&&verificationFailure.message||'Latest Power BI roster cannot be verified');}
         if(typeof window.ctRenderAmandaOutcomeV6==='function')await window.ctRenderAmandaOutcomeV6();
         var d=window.ctV72MonthlyDetail;
         if(!d||!d.meta){host.innerHTML='<a class="pm-rm-card-link" href="https://pwang318.github.io/amanda-tracker/" target="_blank" rel="noopener noreferrer"><div class="ct-kicker">PARTNER RELATIONSHIP SNAPSHOT</div><h2>Waiting for the current Power BI upload</h2><p>RM relationship health uses the latest Power BI file uploaded through the LP tracker. Upload the current roster to populate active-agent coverage and the RM goal. Amanda’s weekly activity above remains visible.</p><span class="pm-rm-card-cta">Open RM Tracker ↗</span></a>';return}
-        var agents=Number(d.activeAgentCount||d.meta.total)||0,monthly=Number(d.monthlyLeadCount||0),projected=Number(d.projectedLeads||0),dynamic=Math.max(100,Math.ceil(agents*1.15)),monthLabel=new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(new Date());
+        var agents=Number(d.activeAgentCount||d.meta.total)||0,agentsDisplay=verificationError?'Unverified':agents,dynamicDisplay=verificationError?'Unverified':Math.max(100,Math.ceil(agents*1.15)),monthly=Number(d.monthlyLeadCount||0),projected=Number(d.projectedLeads||0),dynamic=Math.max(100,Math.ceil(agents*1.15)),monthLabel=new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(new Date());
         var source=d.live||{},stamp=source.imported_at?new Date(source.imported_at).toLocaleString():'Import timestamp unavailable';
         var currentRows=Array.isArray(d.currentLeads)?d.currentLeads.length:0,matchedRows=Array.isArray(d.attributedCurrentLeads)?d.attributedCurrentLeads.length:currentRows,pendingSync=Math.max(0,monthly-currentRows);
         var weeklyNote=document.getElementById('ct-amanda-snapshot')?'Weekly RM activity appears in Amanda’s results above.':'Weekly RM activity will appear above when its feed loads.';
-        host.innerHTML='<a class="pm-rm-card-link" href="https://pwang318.github.io/amanda-tracker/" target="_blank" rel="noopener noreferrer"><div class="ct-kicker">PARTNER RELATIONSHIP SNAPSHOT</div><h2>Partner coverage and referral pace · '+esc(monthLabel)+'</h2><p>Partner referrals minimum: 100 monthly. Dynamic goal: the larger of 100 or 1.15 × current active agents. LP Leads scorecards remain separately owned.</p><div class="pm-rm-metrics"><div class="pm-rm-metric"><span>Power BI active agents</span><b>'+agents+'</b><div class="pm-rm-detail">Current A/B/C roster used by RM calculation</div></div><div class="pm-rm-metric"><span>Partner referrals MTD</span><b>'+monthly+'</b><div class="pm-rm-detail">Core Team Velocify view'+(pendingSync?'; '+currentRows+' synced + '+pendingSync+' confirmed, awaiting sync':matchedRows<currentRows?'; '+matchedRows+' linked to active roster':'; all leads synced')+'</div></div><div class="pm-rm-metric"><span>Minimum monthly floor</span><b>100</b><div class="pm-rm-detail">RM floor target</div></div><div class="pm-rm-metric"><span>Dynamic RM goal</span><b>'+dynamic+'</b><div class="pm-rm-detail">'+agents+' active agents × 1.15, with 100 minimum</div></div><div class="pm-rm-metric"><span>Projected monthly pace</span><b>'+projected+'</b><div class="pm-rm-detail">'+Number(d.score&&d.score.ratio||0).toFixed(2)+' referrals per active agent</div></div></div><div class="pm-rm-detail">'+esc(weeklyNote)+'</div><div class="pm-rm-source">Power BI roster/import: '+esc(stamp)+' · '+esc(source.source||'Source label unavailable')+'. Partner referrals MTD follows the OH330 Core Team Velocify view. Any verified lead count ahead of the shared daily sync is labeled as awaiting sync. Shared changes refresh by realtime push when enabled, with a 60-second fallback.</div><span class="pm-rm-card-cta">Open RM Tracker ↗</span></a>';
+        host.innerHTML='<a class="pm-rm-card-link" href="https://pwang318.github.io/amanda-tracker/" target="_blank" rel="noopener noreferrer"><div class="ct-kicker">PARTNER RELATIONSHIP SNAPSHOT</div><h2>Partner coverage and referral pace · '+esc(monthLabel)+'</h2><p>Partner referrals minimum: 100 monthly. Dynamic goal: the larger of 100 or 1.15 × current active agents. LP Leads scorecards remain separately owned.</p><div class="pm-rm-metrics"><div class="pm-rm-metric"><span>Power BI active agents</span><b>'+agentsDisplay+'</b><div class="pm-rm-detail">Current A/B/C roster; click for underlying Power BI records</div></div><div class="pm-rm-metric"><span>Partner referrals MTD</span><b>'+monthly+'</b><div class="pm-rm-detail">Core Team Velocify view'+(pendingSync?'; '+currentRows+' synced + '+pendingSync+' confirmed, awaiting sync':matchedRows<currentRows?'; '+matchedRows+' linked to active roster':'; all leads synced')+'</div></div><div class="pm-rm-metric"><span>Minimum monthly floor</span><b>100</b><div class="pm-rm-detail">RM floor target</div></div><div class="pm-rm-metric"><span>Dynamic RM goal</span><b>'+dynamicDisplay+'</b><div class="pm-rm-detail">'+agents+' active agents × 1.15, with 100 minimum</div></div><div class="pm-rm-metric"><span>Projected monthly pace</span><b>'+projected+'</b><div class="pm-rm-detail">'+Number(d.score&&d.score.ratio||0).toFixed(2)+' referrals per active agent</div></div></div><div class="pm-rm-detail">'+esc(weeklyNote)+'</div>'+(verificationError?'<div role="alert" class="pm-rm-verification">Power BI reconciliation required: '+esc(verificationError)+'. Agent counts and dynamic goals are hidden until the imported roster matches the shared profiles.</div>':'')+'<div class="pm-rm-source">Power BI roster/import: '+esc(stamp)+' · '+esc(source.source||'Source label unavailable')+'. Partner referrals MTD follows the OH330 Core Team Velocify view. Any verified lead count ahead of the shared daily sync is labeled as awaiting sync. Shared changes refresh by realtime push when enabled, with a 60-second fallback.</div><span class="pm-rm-card-cta">Open RM Tracker ↗</span></a>';
       }catch(e){host.innerHTML='<a class="pm-rm-card-link" href="https://pwang318.github.io/amanda-tracker/" target="_blank" rel="noopener noreferrer"><div class="ct-kicker">PARTNER RELATIONSHIP SNAPSHOT</div><h2>Relationship snapshot unavailable</h2><p>Power BI or Velocify data did not load. Use Refresh live data and check the source status before drawing conclusions.</p><span class="pm-rm-card-cta">Open RM Tracker ↗</span></a>'}
       finally{window.__pmRmPanelBusy=false}
     })();
@@ -14258,6 +14258,77 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',alignDailyWork,{once:true});
   else alignDailyWork();
+})();
+</script>
+
+<style id="ct-rm-clickable-snapshot-v121">
+#pm-rm-relationship .pm-rm-metric{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+#pm-rm-relationship .pm-rm-metric:hover,#pm-rm-relationship .pm-rm-metric:focus-visible{border-color:#4b77b0;box-shadow:0 0 0 2px #dcecff;outline:none}
+#pm-rm-relationship .pm-rm-verification{padding:10px 12px;margin-top:9px;background:#fff5e8;border:1px solid #e2a54c;border-radius:8px;color:#754608;font-size:12px}
+#ct-rm-snapshot-detail{position:fixed;z-index:100100;inset:0;background:#0b1a2c99;display:flex;align-items:center;justify-content:center;padding:16px}
+#ct-rm-snapshot-detail .rm-detail-pane{width:min(680px,95vw);max-height:85vh;overflow:auto;background:#fff;border-radius:12px;padding:22px;box-shadow:0 12px 50px #0003;color:#18344a}
+#ct-rm-snapshot-detail .rm-detail-header{display:flex;align-items:start;justify-content:space-between;gap:14px}
+#ct-rm-snapshot-detail .rm-detail-header button{padding:7px 12px;border:1px solid #bccbd9;border-radius:7px;cursor:pointer;background:#f6f9fc}
+#ct-rm-snapshot-detail .rm-detail-rows{margin-top:12px;max-height:46vh;overflow:auto}
+#ct-rm-snapshot-detail .rm-detail-row{padding:9px 5px;border-bottom:1px solid #e3eaf1;display:flex;justify-content:space-between;gap:10px;font-size:12px}
+</style>
+<script id="ct-rm-clickable-snapshot-v121">
+(function(){
+  function esc(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function openDetail(index){
+    var d=window.ctV72MonthlyDetail||{},live=d.live||{},agents=Number(d.activeAgentCount||0),referrals=Number(d.monthlyLeadCount||0),projection=Number(d.projectedLeads||0);
+    var titles=['Power BI active agents','Partner referrals MTD','Minimum monthly floor','Dynamic RM goal','Projected monthly pace'];
+    var title=titles[index],message='',records=[],pending=false;
+    if(index===0){
+      message='Current Power BI agent roster. The list must reconcile to the latest imported source; unverified counts must not be treated as official.';
+      pending=true;
+    }else if(index===1||index===4){
+      var leads=Array.isArray(d.currentLeads)?d.currentLeads:[];
+      records=leads.map(function(x){return {name:x.referral_partner_name||'Partner not recorded',detail:x.date_added||'',type:'Referral lead'}});
+      message=index===1?referrals+' referrals month-to-date from the synced Core Team Velocify view. '+(referrals>leads.length?(referrals-leads.length)+' awaiting lead-level sync.':''):projection+' projected referrals this month based on current daily pace; current MTD: '+referrals+'.';
+    }else if(index===2){
+      message='The RM referral floor is 100 partner referrals per month. This is a policy target, not a Power BI source count.';
+      records=[{name:'Minimum monthly referrals',detail:'100',type:'RM target'}];
+    }else{
+      message='The RM goal is max(100, ceiling(active Power BI agents × 1.15)). A numeric goal is only reliable after agent profile reconciliation.';
+      records=[{name:'Source agent count',detail:String(agents)+' (subject to import verification)',type:'Power BI'}, {name:'Formula',detail:'max(100, ceil(active agents × 1.15))',type:'RM target'}];
+    }
+    var overlay=document.getElementById('ct-rm-snapshot-detail');
+    if(overlay)overlay.remove();
+    overlay=document.createElement('div');overlay.id='ct-rm-snapshot-detail';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label',title);
+    overlay.innerHTML='<div class="rm-detail-pane"><div class="rm-detail-header"><h3>'+esc(title)+'</h3><button type="button" data-close>Close</button></div><p>'+esc(message)+'</p><div class="rm-detail-rows"></div></div>';
+    document.body.appendChild(overlay);
+    var rows=overlay.querySelector('.rm-detail-rows'),close=overlay.querySelector('[data-close]');
+    function draw(list){rows.innerHTML=list.length?list.map(function(r){return '<div class="rm-detail-row"><strong>'+esc(r.name)+'</strong><span>'+esc(r.type||'')+'</span><span>'+esc(r.detail||'')+'</span></div>'}).join(''):'<p>No individual records are available from this source yet.</p>';}
+    draw(records);
+    if(pending){
+      rows.innerHTML='<p>Checking the latest shared Power BI import and agent profiles…</p>';
+      Promise.all([typeof window.ctGetLivePowerBiSummary==='function'?window.ctGetLivePowerBiSummary(true):Promise.reject(new Error('Verification service unavailable')),typeof window.sbFetch==='function'?window.sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at&powerbi_last_seen_at=not.is.null&limit=5000'):Promise.reject(new Error('Agent list unavailable'))]).then(function(results){
+        if(!document.body.contains(overlay))return;
+        var latest=results[0],list=results[1]||[],stamp=Date.parse(latest.imported_at);
+        var current=list.filter(function(r){return Math.abs(Date.parse(r.powerbi_last_seen_at)-stamp)<1000});
+        draw(current.map(function(r){return{name:r.agent_name,type:'Power BI '+(r.powerbi_level||'unclassified'),detail:'Current import'}}).sort(function(a,b){return a.name.localeCompare(b.name)}));
+      }).catch(function(error){if(!document.body.contains(overlay))return;rows.innerHTML='<p role="alert">Import cannot be verified: '+esc(error.message||'Unknown mismatch')+'. Reconcile the Power BI source rows before using the agent count.</p>';});
+    }
+    close.onclick=function(){overlay.remove()};overlay.onclick=function(e){if(e.target===overlay)overlay.remove()};close.focus();
+  }
+  document.addEventListener('click',function(e){
+    var tile=e.target.closest&&e.target.closest('#pm-rm-relationship .pm-rm-metric');if(!tile)return;
+    var parent=tile.parentNode,index=Array.prototype.indexOf.call(parent.children,tile);if(index<0)return;
+    e.preventDefault();e.stopImmediatePropagation();openDetail(index);
+  },true);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){var dialog=document.getElementById('ct-rm-snapshot-detail');if(dialog)dialog.remove();return}
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var tile=e.target.closest&&e.target.closest('#pm-rm-relationship .pm-rm-metric');if(!tile)return;
+    e.preventDefault();e.stopImmediatePropagation();openDetail(Array.prototype.indexOf.call(tile.parentNode.children,tile));
+  },true);
+  function makeAccessible(){
+    document.querySelectorAll('#pm-rm-relationship .pm-rm-metric').forEach(function(tile){tile.setAttribute('role','button');tile.setAttribute('tabindex','0');tile.setAttribute('aria-label','View details: '+(tile.querySelector('span')||{}).textContent)});
+  }
+  var anchor=document.getElementById('ct-amanda-snapshot-anchor');
+  if(anchor&&window.MutationObserver)new MutationObserver(makeAccessible).observe(anchor,{childList:true,subtree:true});
+  makeAccessible();
 })();
 </script>
 </body>
