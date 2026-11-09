@@ -90,11 +90,11 @@ assert.equal(leadResult[0].lp_user,'Ownership conflict — review','Conflicting 
 assert.equal(leadResult[1].status,'Started','An undated bad-lead duplicate cannot erase proof an application started');
 
 
-assert(html.includes('active_partner_rows:rows.length,score_partner_rows:scorePartners'),'LP active-agent count must use matched current Power BI profiles, not raw source rows');
+assert(html.includes('active_partner_rows:acknowledged?importRaw:rows.length,score_partner_rows:scorePartners'),'LP must use source count only for explicitly acknowledged import exceptions');
 assert(html.includes("if(!live.verified){host.innerHTML="),'LP scorecard must withhold weighted results on unmatched future Power BI imports');
-assert(html.includes('profile_rows:rows.length'),'LP must expose matched profile count separately from import rows');
+assert(html.includes('profile_rows:rows.length'),'LP must expose matched profile count separately from import rows');assert(html.includes('verified:importRaw===rows.length'),'Withhold certification while roster rows remain unmatched');
 assert(html.includes('acknowledged_excluded_rows:acknowledged?4:0'),'Approved November 9 source exclusions must remain explicit');
-assert(html.includes('var total=live&&live.verified?Number(live.active_partner_rows):null;'),'LP summary must never use browser or managed count as official Power BI count');
+assert(html.includes('var total=live&&(live.verified||live.acknowledged_excluded_rows===4)?Number(live.active_partner_rows):null;'),'LP summary may show explicitly acknowledged source roster, never a browser or managed count');
 assert(html.includes("(total===null?'—':total)"),'LP summary must visibly withhold unverified active count');
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
 if (errors.length) {
