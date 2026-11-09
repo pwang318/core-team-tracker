@@ -90,6 +90,10 @@ assert.equal(leadResult[0].lp_user,'Ownership conflict — review','Conflicting 
 assert.equal(leadResult[1].status,'Started','An undated bad-lead duplicate cannot erase proof an application started');
 
 
+assert(html.includes('active_partner_rows:rows.length,score_partner_rows:scorePartners'),'LP active-agent count must use matched current Power BI profiles, not raw source rows');
+assert(html.includes("if(!live.verified){host.innerHTML="),'LP scorecard must withhold weighted results on unmatched future Power BI imports');
+assert(html.includes('profile_rows:rows.length'),'LP must expose matched profile count separately from import rows');
+assert(html.includes('acknowledged_excluded_rows:acknowledged?4:0'),'Approved November 9 source exclusions must remain explicit');
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
 if (errors.length) {
   console.error(errors.join('\n'));
