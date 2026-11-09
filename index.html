@@ -14950,11 +14950,11 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   if(typeof sbFetch!=='function')return '';
   const d=new Date(),month=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
   const [p,logs,leads]=await Promise.all([
-   sbFetch('GET','agent_profiles?select=powerbi_last_seen_at&powerbi_last_seen_at=not.is.null&order=powerbi_last_seen_at.desc&limit=1'),
+   sbFetch('GET','agent_profiles?select=agent_name,powerbi_last_seen_at,powerbi_level,retained,relationship_status,do_not_contact,closes_past_year&limit=5000'),
    sbFetch('GET','powerbi_import_log?select=imported_at&order=imported_at.desc&limit=1'),
    sbFetch('GET','velocify_leads?date_added=gte.'+month+'&select=lead_key,date_added,status,lp_user&limit=10000')
   ]);
-  return [p?.[0]?.powerbi_last_seen_at,logs?.[0]?.imported_at,(leads||[]).map(x=>[x.lead_key,x.date_added,x.status,x.lp_user].join('~')).sort().join('|')].join('#');
+  const profiles=(p||[]).map(x=>[x.agent_name,x.powerbi_last_seen_at,x.powerbi_level,x.retained,x.relationship_status,x.do_not_contact,x.closes_past_year].join('~')).sort().join('|');return [profiles,logs?.[0]?.imported_at,(leads||[]).map(x=>[x.lead_key,x.date_added,x.status,x.lp_user].join('~')).sort().join('|')].join('#');
  }
  async function refresh(force){
   if(busy||document.visibilityState==='hidden')return;
