@@ -94,6 +94,8 @@ assert(html.includes('active_partner_rows:rows.length,score_partner_rows:scorePa
 assert(html.includes("if(!live.verified){host.innerHTML="),'LP scorecard must withhold weighted results on unmatched future Power BI imports');
 assert(html.includes('profile_rows:rows.length'),'LP must expose matched profile count separately from import rows');
 assert(html.includes('acknowledged_excluded_rows:acknowledged?4:0'),'Approved November 9 source exclusions must remain explicit');
+assert(html.includes('var total=live&&live.verified?Number(live.active_partner_rows):null;'),'LP summary must never use browser or managed count as official Power BI count');
+assert(html.includes("(total===null?'—':total)"),'LP summary must visibly withhold unverified active count');
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
 if (errors.length) {
   console.error(errors.join('\n'));
