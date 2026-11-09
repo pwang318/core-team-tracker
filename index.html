@@ -14893,22 +14893,21 @@ https://github.com/nodeca/pako/blob/main/LICENSE
  window.lpReconcilePowerBi=reconcilePowerBi;
 })();
 </script>
-<script id="lp-velocify-dup-audit-v316">
+<script id="lp-velocify-application-audit-v317">
 (function(){
  async function audit(){
-   var el=document.getElementById('lp-velocify-dup-audit');if(!el||typeof sbFetch!=='function')return;
-   try{
-     var rows=await sbFetch('GET','velocify_leads?select=lead_key,referral_partner_name,lp_user,status&limit=5000');
-     if(!Array.isArray(rows))throw Error('Lead source unavailable');
-     var groups=new Map(),duplicates=[];
-     rows.forEach(function(r){var key=String(r.lead_key||'').trim().toLowerCase();if(!key)return;
-       var a=groups.get(key);if(a)a.push(r);else groups.set(key,[r]);});
-     groups.forEach(function(a){if(a.length>1)duplicates.push(a);});
-     var ownerIssues=duplicates.filter(function(a){return new Set(a.map(function(r){return String(r.lp_user||'').trim().toLowerCase()}).filter(Boolean)).size>1;}).length;
-     var statusIssues=duplicates.filter(function(a){return new Set(a.map(function(r){return String(r.status||'').trim().toLowerCase()}).filter(Boolean)).size>1;}).length;
-     el.textContent='Velocify audit: '+duplicates.length+' duplicate lead key'+(duplicates.length===1?'':'s')+' in source · '+ownerIssues+' conflicting LP attribution'+(ownerIssues===1?'':'s')+' · '+statusIssues+' conflicting status'+(statusIssues===1?'':'es')+'. Reporting counts these leads once; source records are retained pending Velocify confirmation.';
-     el.style.color=duplicates.length?'#875b20':'#245f49';
-   }catch(e){el.textContent='Velocify duplicate audit unavailable; current source records were not changed.';el.style.color='#875b20'}
+  const el=document.getElementById('lp-velocify-dup-audit');if(!el||typeof sbFetch!=='function')return;
+  try{
+   const rows=await sbFetch('GET','velocify_application_registry?select=application_id,application_key,referral_key,referral_partner_name,application_lp,application_status,referral_rows&limit=5000');
+   if(!Array.isArray(rows))throw new Error('Application registry unavailable');
+   const unique=new Set(rows.map(r=>r.application_key)),referrals=new Map();
+   rows.forEach(r=>{if(!referrals.has(r.referral_key))referrals.set(r.referral_key,[]);referrals.get(r.referral_key).push(r);});
+   const shared=[...referrals.values()].filter(a=>a.length>1);
+   const mismatches=shared.filter(a=>new Set(a.map(r=>String(r.application_status||'').toLowerCase())).size>1);
+   if(unique.size!==rows.length)throw new Error('Nonunique application identities');
+   el.textContent='Velocify reconciled: '+rows.length+' uniquely identified application records · '+shared.length+' shared referral keys (application LP owners preserved)'+(mismatches.length?' · '+mismatches.length+' referral with differing application statuses for review':'')+'. Referrals and applications are counted separately.';
+   el.style.color=mismatches.length?'#875b20':'#245f49';
+  }catch(e){el.textContent='Velocify application reconciliation unavailable · '+(e.message||'Shared server error');el.style.color='#875b20';}
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',audit,{once:true});else audit();
  window.lpAuditVelocifyDuplicates=audit;
