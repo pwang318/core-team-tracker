@@ -3347,92 +3347,44 @@ function ctCurrentRelationshipMilestone(){
   return{label:'12/31 Goal',Channel:4,A:20,B:30};
 }
 function ctRelTierFromProduction(p){var c=Number(p&&p.closes_past_year||0)||0,l=Number(p&&p.total_leads_past_year||0)||0;return c>=10?'Channel':c>=4?'A':c>=2?'B':(c>=1||l>=1)?'C':null}
+function ctPowerBiWarning(message){
+ let e=document.getElementById('ctSharedPowerBiWarning');
+ if(!message){if(e)e.remove();return;}
+ if(!e){e=document.createElement('div');e.id='ctSharedPowerBiWarning';e.setAttribute('role','alert');e.style.cssText='position:sticky;top:0;z-index:9999;background:#FFF3DC;border:2px solid #DB9B28;color:#704509;text-align:center;font-weight:700;padding:10px 14px';document.body.prepend(e);}
+ e.textContent='⚠ Shared data refresh unavailable: '+message+' · Refresh to retry. Counts are not verified.';
+}
 async function ctGetLivePowerBiSummary(force){
-  if(!force&&CT_LIVE_PB_CACHE.data&&Date.now()-CT_LIVE_PB_CACHE.at<45000)return CT_LIVE_PB_CACHE.data;
-  if(CT_LIVE_PB_CACHE.promise)return CT_LIVE_PB_CACHE.promise;
-  CT_LIVE_PB_CACHE.promise=(async function(){
-    var rows=await sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,do_not_contact&powerbi_last_seen_at=not.is.null&limit=5000').catch(function(){return[];});
-
-    // v71 — the workbook that was actually uploaded in THIS browser is the immediate authority
-    // for the current Power BI population. agent_profiles supplies relationship-status / DNC
-    // cleanup, but a missed profile write must never make the LP dashboard pretend an agent was
-    // absent from the workbook. This is exactly what caused 136 in the upload receipt but 131 in
-    // Amanda's scorecard.
-    var localSnap=null;
-    try{localSnap=typeof ctGetCurrentPowerBiSnapshot==='function'?ctGetCurrentPowerBiSnapshot():null;}catch(e){}
-    var localMs=Date.parse(localSnap&&localSnap.imported_at||'')||0;
-
-    var latestMs=0,stamp=null;
-    (rows||[]).forEach(function(p){
-      var ms=Date.parse(p&&p.powerbi_last_seen_at||'');
-      if(Number.isFinite(ms)&&ms>latestMs){latestMs=ms;stamp=p.powerbi_last_seen_at;}
-    });
-
-    var profileByKey=new Map();
-    (rows||[]).forEach(function(p){
-      var k=String(p&&p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');
-      if(k&&!profileByKey.has(k))profileByKey.set(k,p);
-    });
-
-    var localRows=[];
-    if(localSnap&&localSnap.by_agent){
-      Object.keys(localSnap.by_agent).forEach(function(k){
-        var r=localSnap.by_agent[k]||{};
-        if(ctExcludedFromActiveAgentRoster(r.name||k))return;
-        var lv=String(r.level||'').trim().toUpperCase();
-        if(!['A','B','C'].includes(lv)){var inferred=ctRelTierFromProduction({closes_past_year:Number(r.closed_12mo||0)||0,total_leads_past_year:Number(r.total_leads_12mo||0)||0});lv=inferred==='Channel'?'A':inferred||'';}
-        if(['A','B','C'].includes(lv))localRows.push(Object.assign({},r,{level:lv}));
-      });
-    }
-
-    // Prefer the local workbook when it is the same import window as the shared stamp (or newer).
-    // If another machine performs a genuinely newer import later, that newer server stamp wins.
-    var preferLocal=localRows.length>0&&localMs>0&&(!latestMs||localMs>=latestMs||Math.abs(latestMs-localMs)<15*60*1000);
-    if(preferLocal){
-      var source={A:0,B:0,C:0},rel={Channel:0,A:0,B:0,C:0};
-      localRows.forEach(function(r){
-        var lv=String(r.level||'').trim().toUpperCase();
-        if(source[lv]!==undefined)source[lv]++;
-      });
-      var managed=localRows.filter(function(r){
-        var key=String(r.name||'').trim().toLowerCase().replace(/\s+/g,' ');
-        var p=profileByKey.get(key)||{};
-        return p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive';
-      });
-      managed.forEach(function(r){
-        var t=ctRelTierFromProduction({closes_past_year:Number(r.closed_12mo||0)||0,total_leads_past_year:Number(r.total_leads_12mo||0)||0});
-        if(t&&rel[t]!==undefined)rel[t]++;
-      });
-      var localData={
-        active_partner_rows:localRows.length,
-        managed_active_rows:managed.length,
-        levels:rel,
-        source_levels:source,
-        stamp:localSnap.imported_at,
-        imported_at:localSnap.imported_at,
-        source:'current Power BI upload + shared relationship status'
-      };
-      CT_LIVE_PB_CACHE.data=localData;CT_LIVE_PB_CACHE.at=Date.now();return localData;
-    }
-
-    // Shared-server fallback for a fresh browser/device that has not performed the current upload.
-    var source={A:0,B:0,C:0},rel={Channel:0,A:0,B:0,C:0},by=new Map();
-    if(latestMs)(rows||[]).forEach(function(p){
-      var ms=Date.parse(p&&p.powerbi_last_seen_at||''),lv=String(p&&p.powerbi_level||'').trim().toUpperCase();
-      if(ctExcludedFromActiveAgentRoster(p.agent_name)||!Number.isFinite(ms)||Math.abs(ms-latestMs)>=120000)return;
-      if(!['A','B','C'].includes(lv)){var inferred=ctRelTierFromProduction(p);lv=inferred==='Channel'?'A':inferred||'';}
-      if(!['A','B','C'].includes(lv))return;
-      var k=String(p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');
-      if(k&&!by.has(k))by.set(k,Object.assign({},p,{powerbi_level:lv}));
-    });
-    var current=Array.from(by.values());
-    current.forEach(function(p){var lv=String(p.powerbi_level||'').trim().toUpperCase();if(source[lv]!==undefined)source[lv]++;});
-    var managed=current.filter(function(p){return p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive';});
-    managed.forEach(function(p){var t=ctRelTierFromProduction(p);if(t&&rel[t]!==undefined)rel[t]++;});
-    var data={active_partner_rows:current.length,managed_active_rows:managed.length,levels:rel,source_levels:source,stamp:stamp,imported_at:stamp,source:'shared Power BI server'};
-    CT_LIVE_PB_CACHE.data=data;CT_LIVE_PB_CACHE.at=Date.now();return data;
-  })().finally(function(){CT_LIVE_PB_CACHE.promise=null;});
-  return CT_LIVE_PB_CACHE.promise;
+ if(!force&&CT_LIVE_PB_CACHE.data&&Date.now()-CT_LIVE_PB_CACHE.at<45000)return CT_LIVE_PB_CACHE.data;
+ if(CT_LIVE_PB_CACHE.promise)return CT_LIVE_PB_CACHE.promise;
+ CT_LIVE_PB_CACHE.promise=(async function(){
+  try{
+   const [rows,logs]=await Promise.all([
+    sbFetch('GET','agent_profiles?select=agent_name,powerbi_level,powerbi_last_seen_at,closes_past_year,total_leads_past_year,relationship_status,do_not_contact&powerbi_last_seen_at=not.is.null&limit=5000'),
+    sbFetch('GET','powerbi_import_log?select=imported_at,source_app,rows_processed,errors&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1')
+   ]);
+   const receipt=logs&&logs[0];
+   if(!receipt||String(receipt.errors||'0')!=='0')throw new Error('Missing successful shared import receipt');
+   const sourceText=String(receipt.source_app||'');
+   const metadata={};
+   sourceText.split(';').slice(1).forEach(p=>{const i=p.indexOf('=');if(i>0)metadata[p.slice(0,i)]=p.slice(i+1);});
+   const stamp=metadata.profileStamp?decodeURIComponent(metadata.profileStamp):receipt.imported_at;
+   const ms=Date.parse(stamp),expected=Number(receipt.rows_processed);
+   if(!Number.isFinite(ms)||!Number.isInteger(expected)||expected<1)throw new Error('Invalid shared Power BI receipt');
+   const by=new Map();
+   (rows||[]).forEach(p=>{const time=Date.parse(p&&p.powerbi_last_seen_at||'');if(!Number.isFinite(time)||Math.abs(time-ms)>=1000)return;const key=String(p.agent_name||'').trim().toLowerCase().replace(/\s+/g,' ');if(key)by.set(key,p);});
+   if(by.size!==expected)throw new Error('Import has '+by.size+' of '+expected+' verified profiles');
+   const current=Array.from(by.values()),source={A:0,B:0,C:0},rel={Channel:0,A:0,B:0,C:0};
+   current.forEach(p=>{
+    const lv=String(p.powerbi_level||'').trim().toUpperCase();if(source[lv]!==undefined)source[lv]++;
+    const tier=ctRelTierFromProduction(p);if(tier&&rel[tier]!==undefined)rel[tier]++;
+   });
+   for(const key of ['A','B','C'])if(!Number.isInteger(Number(metadata[key]))||source[key]!==Number(metadata[key]))throw new Error('Power BI '+key+' tier mismatch');
+   const managed=current.filter(p=>p.do_not_contact!==true&&String(p.relationship_status||'active').toLowerCase()!=='inactive');
+   const data={active_partner_rows:current.length,managed_active_rows:managed.length,levels:rel,source_levels:source,stamp:receipt.imported_at,imported_at:receipt.imported_at,source:'verified shared Power BI server'};
+   CT_LIVE_PB_CACHE.data=data;CT_LIVE_PB_CACHE.at=Date.now();ctPowerBiWarning(null);return data;
+  }catch(error){CT_LIVE_PB_CACHE.data=null;CT_LIVE_PB_CACHE.at=0;ctPowerBiWarning(error.message||'Unknown error');throw error;}
+ })().finally(function(){CT_LIVE_PB_CACHE.promise=null;});
+ return CT_LIVE_PB_CACHE.promise;
 }
 window.ctGetLivePowerBiSummary=ctGetLivePowerBiSummary;
 window.ctInvalidateLivePowerBi=function(){CT_LIVE_PB_CACHE.at=0;CT_LIVE_PB_CACHE.data=null;};
