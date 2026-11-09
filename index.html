@@ -14658,12 +14658,12 @@ const oldInvalidate=window.ctInvalidateLivePowerBi;window.ctInvalidateLivePowerB
 async function ctRenderAmandaOutcomeV72(){
   const box=document.getElementById('ct-amanda-snapshot');if(!box)return;const grid=box.querySelector('.ct-amanda-grid');if(!grid)return;let host=box.querySelector('.ct-rm-v6-outcome');if(!host){host=document.createElement('div');host.className='ct-rm-v6-outcome';grid.before(host)}
   const live=await ctGetAlignedPowerBiSummaryV72(false),t=v72Milestone(),now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),1),iso=d=>d.toISOString().slice(0,10);let currentLeads=[],priorLeads=[];
-  try{[currentLeads,priorLeads]=await Promise.all([sbFetch('GET','velocify_leads?date_added=gte.'+iso(monthStart)+'&select=lead_key,referral_partner_name,date_added&limit=5000'),sbFetch('GET','velocify_leads?date_added=gte.'+iso(prevStart)+'&date_added=lt.'+iso(prevEnd)+'&select=lead_key,referral_partner_name,date_added&limit=5000')])}catch(e){}
+  [currentLeads,priorLeads]=await Promise.all([sbFetch('GET','velocify_leads?date_added=gte.'+iso(monthStart)+'&select=lead_key,referral_partner_name,date_added&limit=5000'),sbFetch('GET','velocify_leads?date_added=gte.'+iso(prevStart)+'&date_added=lt.'+iso(prevEnd)+'&select=lead_key,referral_partner_name,date_added&limit=5000')]);
   const activeKeys=new Set((live.active_names||[]).map(v72key).filter(Boolean));
   const uniqueLeads=records=>Array.from((records||[]).reduce((m,r,i)=>{const k=String(r.lead_key||'').trim().toUpperCase()||'ROW:'+String(r.referral_partner_name||'')+':'+String(r.date_added||'')+':'+i;if(!m.has(k))m.set(k,r);return m;},new Map()).values());
   const allCurrentLeads=uniqueLeads(currentLeads),scoredCurrentLeads=allCurrentLeads.filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)}),scoredPriorLeads=uniqueLeads(priorLeads).filter(r=>{const k=v72key(r.referral_partner_name);return !!k&&activeKeys.has(k)});
   // Never substitute manual historical lead checkpoints for current Velocify rows.
-  const verifiedLeadCheckpoint=0,monthlyLeadCount=allCurrentLeads.length;
+  const verifiedLeadCheckpoint=0,monthlyLeadCount=scoredCurrentLeads.length;
   const channelCount=v72n(live.score_levels.Channel),sourceLevels=live.source_levels||{},meta={Channel:channelCount,A:v72n(sourceLevels.A),B:v72n(sourceLevels.B),C:v72n(sourceLevels.C),total:v72n(live.active_partner_rows)},dom=Math.max(1,now.getDate()),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),projectedLeads=Math.round((monthlyLeadCount/dom)*dim),activeAgentCount=meta.total,score=ctV72ScoreFromMeta(meta,projectedLeads,activeAgentCount,t),currentPace=meta.total?projectedLeads/meta.total:0;
   window.ctV72MonthlyDetail={live,meta,score,target:t,priorLeads:scoredPriorLeads,currentLeads:allCurrentLeads,attributedCurrentLeads:scoredCurrentLeads,monthlyLeadCount,verifiedLeadCheckpoint,projectedLeads,activeAgentCount};
   host.innerHTML='<div class="ct-rm-v6-head"><div><div class="ct-rm-v6-k">Monthly Results</div><div class="ct-rm-v6-title">Team 100-point scorecard · calculated from Power BI and Velocify</div></div><div class="ct-rm-v6-total" data-v72-month="overall" role="button" tabindex="0"><span>Overall score</span>'+score.totalPts.toFixed(1)+' / 100</div></div>'+
@@ -14938,44 +14938,51 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 </script>
 
 <!-- v154: synchronize director snapshot to same shared data as LP and RM -->
-<script id="ct-v154-director-shared-live-sync">
+<script id="ct-v155-director-data-health">
 (function(){
  'use strict';
- let last='',busy=false;
- const safe=async(fn)=>{try{if(typeof fn==='function')await fn();}catch(e){console.warn('Director refresh step failed',e);}};
- async function signature(){
-  if(typeof sbFetch!=='function')return '';
-  const d=new Date(),month=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
-  const [p,logs,leads]=await Promise.all([
-   sbFetch('GET','agent_profiles?select=agent_name,powerbi_last_seen_at,powerbi_level,retained,relationship_status,do_not_contact,closes_past_year&limit=5000'),
-   sbFetch('GET','powerbi_import_log?select=imported_at&order=imported_at.desc&limit=1'),
-   sbFetch('GET','velocify_leads?date_added=gte.'+month+'&select=lead_key,date_added,status,lp_user&limit=10000')
-  ]);
-  const profiles=(p||[]).map(x=>[x.agent_name,x.powerbi_last_seen_at,x.powerbi_level,x.retained,x.relationship_status,x.do_not_contact,x.closes_past_year].join('~')).sort().join('|');return [profiles,logs?.[0]?.imported_at,(leads||[]).map(x=>[x.lead_key,x.date_added,x.status,x.lp_user].join('~')).sort().join('|')].join('#');
+ let last='',running=false;
+ const q=async path=>{if(typeof sbFetch!=='function')throw Error('Shared data connection is unavailable');return sbFetch('GET',path);};
+ const date=v=>{const d=new Date(v);return Number.isFinite(d.getTime())?d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'unavailable'};
+ function bar(message,warning){
+   let el=document.getElementById('ct-v155-sync-indicator');
+   if(!el){el=document.createElement('div');el.id='ct-v155-sync-indicator';el.setAttribute('role','status');el.style.cssText='position:fixed;right:12px;bottom:12px;z-index:3000;max-width:min(450px,calc(100vw - 24px));font:12px/1.4 Arial,sans-serif;padding:10px 12px;border:1px solid #cfdce7;border-radius:10px;box-shadow:0 5px 18px #0002;background:#fff;color:#21435c';document.body.appendChild(el);}
+   el.style.borderColor=warning?'#e7ba7f':'#cfdce7';el.style.background=warning?'#fff8ed':'#fff';el.textContent=message;
  }
  async function refresh(force){
-  if(busy||document.visibilityState==='hidden')return;
-  busy=true;
-  try{
-   const s=await signature();if(!s||(!force&&s===last))return;last=s;
-   if(typeof window.ctInvalidateLivePowerBi==='function')window.ctInvalidateLivePowerBi();
-   await safe(()=>window.ctGetAlignedPowerBiSummaryV72?.(true));
-   await safe(()=>window.ctGetLivePowerBiSummary?.(true));
-   if(document.getElementById('view-snapshot')?.classList.contains('active')){
-    await safe(()=>window.ctV56RefreshTeamSnapshot?.());
-    await safe(()=>window.ctRenderAmandaSnapshot?.());
-   }
-   await safe(()=>window.lpRefreshSourceFreshness?.());
-  }catch(e){console.warn('Director shared source refresh unavailable',e)}
-  finally{busy=false;}
+   if(running||document.visibilityState==='hidden')return;running=true;
+   try{
+     const d=new Date(),month=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
+     const [profiles,logs,leads,latest]=await Promise.all([
+       q('agent_profiles?select=agent_name,powerbi_last_seen_at,powerbi_level,retained,relationship_status,do_not_contact,closes_past_year&limit=5000'),
+       q('powerbi_import_log?select=imported_at,source_app,rows_processed&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1'),
+       q('velocify_leads?date_added=gte.'+month+'&select=lead_key,date_added,status,lp_user&limit=10000'),
+       q('velocify_leads?select=created_at&order=created_at.desc&limit=1')
+     ]);
+     if(!Array.isArray(profiles)||!Array.isArray(logs)||!Array.isArray(leads))throw Error('Incomplete shared server response');
+     const stamps=profiles.map(p=>Date.parse(p.powerbi_last_seen_at||'')||0),max=Math.max(0,...stamps);
+     if(!max)throw Error('No authoritative Power BI roster');
+     const cohort=profiles.filter(p=>Math.abs((Date.parse(p.powerbi_last_seen_at)||0)-max)<120000&&['A','B','C'].includes(String(p.powerbi_level||'').toUpperCase()));
+     const people=new Set(cohort.map(p=>String(p.agent_name||'').toLowerCase().trim()));
+     const raw=Number((String(logs[0]?.source_app||'').match(/(?:^|;)raw=(\d+)/)||[])[1]||logs[0]?.rows_processed||0);
+     const signature=[cohort.map(p=>[p.agent_name,p.powerbi_level,p.retained,p.relationship_status,p.do_not_contact,p.closes_past_year].join('~')).sort().join('|'),logs[0]?.imported_at,leads.map(l=>[l.lead_key,l.status,l.lp_user,l.date_added].join('~')).sort().join('|')].join('#');
+     if(force||signature!==last){
+       if(typeof window.ctInvalidateLivePowerBi==='function')window.ctInvalidateLivePowerBi();
+       const summary=await window.ctGetLivePowerBiSummary(true);
+       if(!summary||!summary.verified)throw Error('Authoritative Power BI validation failed');
+       if(document.getElementById('view-snapshot')?.classList.contains('active')){
+         if(typeof window.ctV56RefreshTeamSnapshot==='function')await window.ctV56RefreshTeamSnapshot();
+         if(typeof window.ctRenderAmandaSnapshot==='function')await window.ctRenderAmandaSnapshot();
+       }
+       last=signature;
+     }
+     const gap=Math.max(0,raw-people.size),warning=gap>0;
+     bar('Shared data: '+(warning?'review import difference':'synced')+' · Power BI '+date(max)+' · '+people.size+' profiles'+(gap?' / '+raw+' imported (+'+gap+' unmatched)':'')+' · Velocify '+date(latest?.[0]?.created_at)+' · checked '+date(Date.now()),warning);
+   }catch(e){last='';bar('Shared data refresh FAILED — totals may be stale. '+String(e&&e.message||e),true);console.warn('Director shared sync failed',e)}
+   finally{running=false}
  }
- window.ctV154RefreshDirector=()=>refresh(true);
- function boot(){
-  setTimeout(()=>refresh(true),2400);
-  setInterval(()=>refresh(false),30000);
-  window.addEventListener('focus',()=>refresh(true));
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true)});
- }
+ window.ctV155RefreshDirector=()=>refresh(true);
+ function boot(){setTimeout(()=>refresh(true),2200);setInterval(()=>refresh(false),30000);window.addEventListener('focus',()=>refresh(true));document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true)})}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
