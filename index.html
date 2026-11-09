@@ -15044,8 +15044,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
        }
        last=signature;
      }
-     const gap=Math.max(0,raw-people.size),warning=gap>0;
-     bar('Shared data: '+(warning?'review import difference':'synced')+' · Power BI '+date(max)+' · '+people.size+' profiles'+(gap?' / '+raw+' imported (+'+gap+' unmatched)':'')+' · Velocify '+date(latest?.[0]?.created_at)+' · checked '+date(Date.now()),warning);
+     const tierCount={A:0,B:0,C:0};cohort.forEach(p=>{const lv=String(p.powerbi_level||'').toUpperCase();if(tierCount[lv]!==undefined)tierCount[lv]++});
+     const acknowledged=typeof ctIsAcknowledgedNov9RosterExclusion==='function'&&ctIsAcknowledgedNov9RosterExclusion(raw,people.size,tierCount.A,tierCount.B,tierCount.C,new Date(max).toISOString());
+     const gap=Math.max(0,raw-people.size-(acknowledged?4:0)),warning=gap>0;
+     bar('Shared data: '+(warning?'review import difference':'synced')+' · Power BI '+date(max)+' · '+people.size+' active agent profiles'+(acknowledged?' (4 retired/typo rows excluded from '+raw+' source rows)':gap?' / '+raw+' imported (+'+gap+' unmatched)':'')+' · Velocify '+date(latest?.[0]?.created_at)+' · checked '+date(Date.now()),warning);
    }catch(e){last='';bar('Shared data refresh FAILED — totals may be stale. '+String(e&&e.message||e),true);console.warn('Director shared sync failed',e)}
    finally{running=false}
  }
