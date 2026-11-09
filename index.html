@@ -14711,12 +14711,12 @@ async function ctGetAlignedPowerBiSummaryV72(force){
     const acknowledged=ctIsAcknowledgedNov9RosterExclusion(importRaw,rows.length,sourceLevels.A,sourceLevels.B,sourceLevels.C,stamp);
     const effectiveRaw=acknowledged?rows.length:importRaw;
     const data={
-      active_partner_rows:rows.length,score_partner_rows:scorePartners,score_levels:scoreLevels,
-      managed_active_rows:managed.length,levels:scoreLevels,source_levels:(receipt&&effectiveRaw>rows.length?{A:receipt.A,B:receipt.B,C:receipt.C}:sourceLevels),
+      active_partner_rows:acknowledged?importRaw:rows.length,score_partner_rows:scorePartners,score_levels:scoreLevels,
+      managed_active_rows:managed.length,levels:scoreLevels,source_levels:(receipt&&(acknowledged||effectiveRaw>rows.length)?{A:receipt.A,B:receipt.B,C:receipt.C}:sourceLevels),
       active_names:rows.map(p=>p.agent_name),raw_rows:effectiveRaw,raw_source_rows:importRaw,acknowledged_excluded_rows:acknowledged?4:0,stamp,imported_at:stamp,
       profile_rows:rows.length,profile_behind:effectiveRaw!==rows.length,
       unmatched_import_rows:Math.max(0,effectiveRaw-rows.length),
-      source:acknowledged?'shared Supabase Power BI profiles; four retired/typo rows excluded':effectiveRaw>rows.length?'latest Power BI import receipt; '+rows.length+' of '+effectiveRaw+' profiles matched':'shared Supabase Power BI profiles',verified:effectiveRaw===rows.length
+      source:acknowledged?'Power BI reports 136 agents; 132 linked profiles; four unmatched rows require reconciliation':effectiveRaw>rows.length?'latest Power BI import receipt; '+rows.length+' of '+effectiveRaw+' profiles matched':'shared Supabase Power BI profiles',verified:importRaw===rows.length
     };
     V72_CACHE.data=data;V72_CACHE.at=Date.now();return data;
   })().finally(()=>{V72_CACHE.promise=null});
@@ -14726,7 +14726,7 @@ window.ctGetLivePowerBiSummary=ctGetAlignedPowerBiSummaryV72;try{ctGetLivePowerB
 const oldInvalidate=window.ctInvalidateLivePowerBi;window.ctInvalidateLivePowerBi=function(){V72_CACHE.at=0;V72_CACHE.data=null;try{if(typeof oldInvalidate==='function')oldInvalidate()}catch(e){}};
 async function ctRenderAmandaOutcomeV72(){
   const box=document.getElementById('ct-amanda-snapshot');if(!box)return;const grid=box.querySelector('.ct-amanda-grid');if(!grid)return;let host=box.querySelector('.ct-rm-v6-outcome');if(!host){host=document.createElement('div');host.className='ct-rm-v6-outcome';grid.before(host)}
-  const live=await ctGetAlignedPowerBiSummaryV72(false);if(!live.verified){host.innerHTML='<div role="alert" style="padding:14px;border:1px solid #b98b29;background:#fff8e9;border-radius:10px">Power BI scorecard verification required. Latest matched profiles: '+Number(live.profile_rows||0)+'; imported source rows: '+Number(live.raw_source_rows||0)+'. No weighted score will be reported until the shared roster reconciles.</div>';return}const t=v72Milestone(),now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),1),iso=d=>d.toISOString().slice(0,10);let currentLeads=[],priorLeads=[];
+  const live=await ctGetAlignedPowerBiSummaryV72(false);if(!live.verified){const tiers=live.source_levels||{};host.innerHTML='<div role="alert" style="padding:14px;border:1px solid #b98b29;background:#fff8e9;border-radius:10px"><strong>Power BI active agents: '+Number(live.active_partner_rows||0)+'</strong> · A '+Number(tiers.A||0)+' · B '+Number(tiers.B||0)+' · C '+Number(tiers.C||0)+'. <p>Only '+Number(live.profile_rows||0)+' agent profiles are linked; '+Math.max(0,Number(live.raw_source_rows||0)-Number(live.profile_rows||0))+' source rows need reconciliation. Weighted score withheld until profile and referral checks pass.</p></div>';return}const t=v72Milestone(),now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),prevStart=new Date(now.getFullYear(),now.getMonth()-1,1),prevEnd=new Date(now.getFullYear(),now.getMonth(),1),iso=d=>d.toISOString().slice(0,10);let currentLeads=[],priorLeads=[];
   [currentLeads,priorLeads]=await Promise.all([sbFetch('GET','velocify_leads?date_added=gte.'+iso(monthStart)+'&select=lead_key,referral_partner_name,date_added&limit=5000'),sbFetch('GET','velocify_leads?date_added=gte.'+iso(prevStart)+'&date_added=lt.'+iso(prevEnd)+'&select=lead_key,referral_partner_name,date_added&limit=5000')]);
   const activeKeys=new Set((live.active_names||[]).map(v72key).filter(Boolean));
   const uniqueLeads=records=>Array.from((records||[]).reduce((m,r,i)=>{const k=String(r.lead_key||'').trim().toUpperCase()||'ROW:'+String(r.referral_partner_name||'')+':'+String(r.date_added||'')+':'+i;if(!m.has(k))m.set(k,r);return m;},new Map()).values());
