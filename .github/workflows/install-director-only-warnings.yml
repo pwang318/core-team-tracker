@@ -1,0 +1,38 @@
+name: Install LP director-only warning presentation
+on:
+  push:
+    paths:
+      - 'ui/director-only-warnings.js'
+      - '.github/workflows/install-director-only-warnings.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Include warning filter in LP application
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          asset='<script defer src="./ui/director-only-warnings.js?v=20261109"></script>'
+          if asset not in s:
+              if '</body>' not in s:
+                  raise SystemExit('Missing closing body tag')
+              s=s.replace('</body>',asset+'</body>',1)
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit application change
+        run: |
+          if ! git diff --quiet -- index.html; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html
+            git commit -m "Load LP warning filter on dashboard"
+            git push
+          fi
