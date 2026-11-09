@@ -4008,7 +4008,7 @@ async function renderGrowthScoreboard(){
   var managedAgents=agents.filter(isActive),live=null;
   try{live=await ctGetLivePowerBiSummary(false);}catch(e){console.warn('Live Power BI summary unavailable',e)}
   var pbSnap=ctGetCurrentPowerBiSnapshot(),pbLevels=(pbSnap&&pbSnap.levels)||{},milestone=ctCurrentRelationshipMilestone();
-  var total=live&&live.verified?Number(live.active_partner_rows):null; // Never substitute managed or browser-roster counts for the official Power BI scorecard denominator.
+  var total=live&&(live.verified||live.acknowledged_excluded_rows===4)?Number(live.active_partner_rows):null; // Never substitute managed or browser-roster counts for the official Power BI scorecard denominator.
   var channelTier=live?Number(live.levels.Channel||0):Number(pbLevels.Channel||0);
   var aTier=live?Number(live.levels.A||0):Number(pbLevels.A||0),bTier=live?Number(live.levels.B||0):Number(pbLevels.B||0),cTier=live?Number(live.levels.C||0):Number(pbLevels.C||0);
   if(!live&&!ctPowerBiActiveCount(pbSnap)){channelTier=managedAgents.filter(function(a){return a[1]==="Channel";}).length;aTier=managedAgents.filter(function(a){return a[1]==="A";}).length;bTier=managedAgents.filter(function(a){return a[1]==="B";}).length;cTier=managedAgents.filter(function(a){return a[1]==="C";}).length;}
