@@ -26,6 +26,7 @@ jobs:
               if '</body>' not in s:
                   raise SystemExit('Missing closing body tag')
               s=s.replace('</body>',asset+'</body>',1)
+          if s != p.read_text(encoding='utf-8'):
               p.write_text(s,encoding='utf-8')
           PY
       - name: Commit application change
