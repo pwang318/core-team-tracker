@@ -1,17 +1,20 @@
 (function(){
 'use strict';
-const noticePattern=/(shared power bi cannot be verified|shared data:\s*reconciliation required|power bi import incomplete|power bi tier totals do not match|shared power bi unavailable|shared import.*(?:unverified|incomplete)|only \d+ of \d+ agent profiles stamped)/i;
+const noticePattern=/(shared power bi cannot be verified|shared data:\s*reconciliation required|shared data refresh failed|authoritative power bi validation failed|power bi import incomplete|power bi tier totals do not match|shared power bi unavailable|shared import.*(?:unverified|incomplete)|only \d+ of \d+ agent profiles stamped|withheld until profile and referral checks pass)/i;
 const style=document.createElement('style');
 style.textContent='[data-director-only-warning="true"]{display:none!important}';
 document.head.appendChild(style);
 function tidy(){
+ // Presentation only: never modify fetch, Power BI reconciliation, or stored scorecard data.
  for(const node of document.querySelectorAll('[role="alert"],[class*="warning"],[class*="Warning"],[id*="warning"],[id*="Warning"],.toast,.banner')){
   if(!noticePattern.test((node.textContent||'').slice(0,1200)))continue;
+  if(node.closest('#view-data-hub'))continue;
   if(node.querySelector('button[type="submit"],input,textarea'))continue;
   node.setAttribute('data-director-only-warning','true');
  }
  for(const node of document.querySelectorAll('body *')){
   if(node.children.length!==0 || !noticePattern.test(node.textContent||''))continue;
+  if(node.closest('#view-data-hub'))continue;
   let p=node;
   while(p.parentElement && p.parentElement!==document.body){
    if(p.matches('[role="alert"],[class*="warning"],[class*="Warning"],[class*="banner"],[class*="Banner"]'))break;
