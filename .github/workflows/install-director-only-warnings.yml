@@ -20,7 +20,8 @@ jobs:
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          asset='<script defer src="./ui/director-only-warnings.js?v=20261109"></script>'
+          asset='<script defer src="./ui/director-only-warnings.js?v=20261110"></script>'
+          s=s.replace('<script defer src="./ui/director-only-warnings.js?v=20261109"></script>',asset)
           if asset not in s:
               if '</body>' not in s:
                   raise SystemExit('Missing closing body tag')
