@@ -11159,6 +11159,18 @@ function ctStripRmMeta(notes){
     n=n.replace(/\s*\[TXN_TRIGGER\]/gi,"");
     n=n.replace(/\s*\[TXN_[A-Z_]+(?::[^\]]*)?\]/gi,"");
     n=n.replace(/\s*\[(?:RM_OWNER|RM_ATTENDEES|LP_ATTENDEES|NEXT_STEP_OWNER):[^\]]*\]/gi,"");
+    // Shared RM/LP queue records may prefix human notes with machine routing keys.
+    // Strip these only from the visible copy; stored notes and read fingerprints stay intact.
+    n=n.replace(/\s*\[(?:TUE_[A-Z0-9_]+|LP_OWNER|MATCH_KEY|RM_SUPPLEMENT_KEY|BUILD_KEY|RM_WORK_KEY|RM_WORKFLOW_KEY|PLAN_KEY|TASK_KEY|BATCH_KEY|SYNC_KEY)(?::[^\]]*)?\]/gi,"");
+    // Some imported activity puts multiple transport keys at the start of a note.
+    // Keep free-text bracketed comments and actual follow-up instructions untouched.
+    n=n.replace(/^(?:\s*\[(?:[A-Z][A-Z0-9_]{2,})(?::[^\]]*)?\])+\s*/g,"");
+    // Decode URL-escaped human prose only when it isn't a routing key.
+    if(/%[0-9a-f]{2}/i.test(n)){
+      try{n=decodeURIComponent(n);}catch(_){}
+    }
+    n=n.replace(/\s*\[(?:TUE_[A-Z0-9_]+|LP_OWNER|MATCH_KEY|RM_SUPPLEMENT_KEY|BUILD_KEY|RM_WORK_KEY|RM_WORKFLOW_KEY|PLAN_KEY|TASK_KEY|BATCH_KEY|SYNC_KEY)(?::[^\]]*)?\]/gi,"");
+
     // Privacy guard: loan/account identifiers never belong in a human-facing tracker note.
     n=n.replace(/\b(?:Loan\s*(?:Number|No\.?|#)|Ln\s*#)\s*[:#-]?\s*[A-Z0-9][A-Z0-9-]{3,}\b/gi,"");
     n=n.replace(/\b(?:new-contract|clear-to-close)-loan-[A-Z0-9-]+\b/gi,"");
