@@ -13186,12 +13186,37 @@ async function buildRows(){
   (profiles||[]).forEach(p=>{if(!p||!p.agent_name)return;pm[key(p.agent_name)]=p;if(DELETE_MARKERS.has(String(p.display_name||'').trim()))deleted.add(key(p.agent_name))});
   (assignments||[]).forEach(a=>{if(a&&a.agent_name)am[key(a.agent_name)]=a});
   window.__CT_REMOVED_ROWS=(profiles||[]).filter(p=>p&&DELETE_MARKERS.has(String(p.display_name||'').trim())).map(p=>({name:p.agent_name,marker:p.display_name}));
-  const pbRows=powerBiRows(),managedRows=pbRows.filter(p=>!deleted.has(key(p.name))),s=snapshot()||{};
+  // Latest shared Power BI profile stamp is authoritative for the visible roster.
+  // A browser snapshot may enrich per-agent buyer metrics only if it is from the same import.
+  const serverStamp=Math.max(0,...(profiles||[]).map(p=>Date.parse(p.powerbi_last_seen_at||'')||0));
+  const s=snapshot()||{}, localStamp=Date.parse(s.imported_at||s.import_date||s.timestamp||'')||0;
+  const matchingLocal=serverStamp&&localStamp&&Math.abs(serverStamp-localStamp)<15*60000?powerBiRows():[];
+  const localBy={};matchingLocal.forEach(p=>{if(p&&p.name)localBy[key(p.name)]=p;});
+  const pbRows=(profiles||[]).filter(p=>{
+    const t=Date.parse(p.powerbi_last_seen_at||'')||0;
+    return serverStamp&&Math.abs(t-serverStamp)<=15*60000&&['A','B','C'].includes(String(p.powerbi_level||p.tier||'').toUpperCase());
+  }).map(p=>{
+    const local=localBy[key(p.agent_name)]||{};
+    return {name:p.agent_name,level:p.powerbi_level||p.tier,active_prequals:local.active_prequals??null,
+      active_pipeline:local.active_pipeline??null,latest_lead:p.latest_lead_date||null,
+      latest_close:p.latest_close_date||null,latest_started:local.latest_started||null,
+      latest_contract:local.latest_contract||null};
+  });
+  const managedRows=pbRows.filter(p=>{
+    const pr=pm[key(p.name)]||{},a=am[key(p.name)]||{};
+    return !deleted.has(key(p.name))&&String(pr.relationship_status||'active').toLowerCase()==='active'
+      &&String(a.lp||'')!=='__REMOVED__';
+  });
   let live=null;try{live=typeof window.ctGetLivePowerBiSummary==='function'?await window.ctGetLivePowerBiSummary(false):null}catch(e){}
-  const hasPre=Number.isFinite(Number(s.active_prequals_total)),hasPipe=Number.isFinite(Number(s.active_pipeline_total));
-  const active=num(live&&live.active_partner_rows)||num(s.active_partner_rows)||pbRows.length,managed=managedRows.length;
-  window.__CT_HEALTH_TOTALS={active,pre:hasPre?num(s.active_prequals_total):pbRows.reduce((n,r)=>n+num(r.active_prequals),0),pipe:hasPipe?num(s.active_pipeline_total):pbRows.reduce((n,r)=>n+num(r.active_pipeline),0),managed,removed:Math.max(0,active-managed)};
-  return managedRows.map(p=>{const pr=pm[key(p.name)]||{},a=am[key(p.name)]||{},latestLead=p.latest_lead||pr.latest_lead_date||null,latestClose=p.latest_close||pr.latest_close_date||null,ld=age(latestLead),cd=age(latestClose);let health='red',action='Call today',why=ld===null?'No lead on record':ld+'d since last lead';if(ld!==null&&ld<=30){health='green';action='Current';why=ld+'d since last lead'}else if(ld!==null&&ld<=60){health='yellow';action='Call / review';why=ld+'d since last lead'}else if(cd!==null&&cd<=90)why+=' · recent close';return{name:p.name,tier:level(p.level)||'—',rm:cleanRm(a.rm),lp:shortLp(a.lp),email:p.email||pr.email||'',phone:p.phone||pr.phone||'',pre:num(p.active_prequals),pipe:num(p.active_pipeline),last:latestLead,lastStart:p.latest_started||null,lastContract:p.latest_contract||null,lastClose:latestClose,daysLead:ld,health,action,why}})
+  const receipts=await db('GET','powerbi_import_log?select=imported_at,source_app,errors&source_app=like.core-team-tracker%25&order=imported_at.desc&limit=1').catch(()=>[]);
+  const receipt=receipts&&receipts[0]||{},data={};
+  String(receipt.source_app||'').split(';').slice(1).forEach(part=>{const i=part.indexOf('=');if(i>0)data[part.slice(0,i)]=part.slice(i+1)});
+  const receiptMatch=serverStamp&&Math.abs(Date.parse(decodeURIComponent(data.profileStamp||receipt.imported_at||''))-serverStamp)<15*60000&&String(receipt.errors||'0')==='0';
+  const pre=receiptMatch&&Number.isFinite(Number(data.preq))?Number(data.preq):matchingLocal.length?num(s.active_prequals_total):null;
+  const pipe=receiptMatch&&Number.isFinite(Number(data.pipe))?Number(data.pipe):matchingLocal.length?num(s.active_pipeline_total):null;
+  const active=pbRows.length,managed=managedRows.length;
+  window.__CT_HEALTH_TOTALS={active,pre,pipe,managed,removed:Math.max(0,active-managed)};
+  return managedRows.map(p=>{const pr=pm[key(p.name)]||{},a=am[key(p.name)]||{},latestLead=p.latest_lead||pr.latest_lead_date||null,latestClose=p.latest_close||pr.latest_close_date||null,ld=age(latestLead),cd=age(latestClose);let health='red',action='Call today',why=ld===null?'No lead on record':ld+'d since last lead';if(ld!==null&&ld<=30){health='green';action='Current';why=ld+'d since last lead'}else if(ld!==null&&ld<=60){health='yellow';action='Call / review';why=ld+'d since last lead'}else if(cd!==null&&cd<=90)why+=' · recent close';return{name:p.name,tier:level(p.level)||'—',rm:cleanRm(a.rm),lp:shortLp(a.lp),email:p.email||pr.email||'',phone:p.phone||pr.phone||'',pre:p.active_prequals==null?null:num(p.active_prequals),pipe:p.active_pipeline==null?null:num(p.active_pipeline),last:latestLead,lastStart:p.latest_started||null,lastContract:p.latest_contract||null,lastClose:latestClose,daysLead:ld,health,action,why}})
 }
 function renderRemoved(){
   // Deleted agents remain excluded by buildRows(), but their recovery archive
@@ -13201,7 +13226,7 @@ function renderRemoved(){
 }
 function render(){
  const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');if(!host)return;const all=(window.__CT_HEALTH_ROWS||[]).slice(),totals=window.__CT_HEALTH_TOTALS||{active:all.length,pre:0,pipe:0,managed:all.length,removed:0},q=key((document.getElementById('lpv3-health-q')||{}).value),hf=(document.getElementById('lpv3-health-filter')||{}).value||'',lf=(document.getElementById('lpv3-health-lp')||{}).value||'';let rows=all.slice();if(hf==='action')rows=rows.filter(r=>r.health==='red'||r.health==='yellow');else if(['red','yellow','green'].includes(hf))rows=rows.filter(r=>r.health===hf);if(q)rows=rows.filter(r=>key(r.name).includes(q));if(lf)rows=rows.filter(r=>r.lp===lf);const rank={red:0,yellow:1,green:2};rows.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??999)-(a.daysLead??999))||String(a.name).localeCompare(String(b.name)));const cnt=h=>all.filter(r=>r.health===h).length,follow=cnt('red')+cnt('yellow');
- if(sum)sum.innerHTML='<div class="ct-health-summary-grid"><div class="ct-health-summary"><b>'+totals.active+'</b><span>Power BI Active</span><small>Latest uploaded A/B/C population</small></div><div class="ct-health-summary"><b>'+totals.pre+'</b><span>Current Prequal Buyers</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+totals.pipe+'</b><span>Current Buyers in Pipeline</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+totals.managed+'</b><span>Managed Roster</span><small>'+totals.removed+' removed · '+follow+' need follow-up</small></div></div><div class="ct-health-chip-row"><span class="ct-health-chip green">Green · lead in last 30 days · '+cnt('green')+'</span><span class="ct-health-chip yellow">Yellow · 31–60 days since last lead · '+cnt('yellow')+'</span><span class="ct-health-chip red">Red · 61+ days since last lead · '+cnt('red')+'</span></div>';
+ if(sum)sum.innerHTML='<div class="ct-health-summary-grid"><div class="ct-health-summary"><b>'+totals.active+'</b><span>Power BI Active</span><small>Latest uploaded A/B/C population</small></div><div class="ct-health-summary"><b>'+(totals.pre===null?'—':totals.pre)+'</b><span>Current Prequal Buyers</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+(totals.pipe===null?'—':totals.pipe)+'</b><span>Current Buyers in Pipeline</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+totals.managed+'</b><span>Managed Roster</span><small>'+totals.removed+' removed · '+follow+' need follow-up</small></div></div><div class="ct-health-chip-row"><span class="ct-health-chip green">Green · lead in last 30 days · '+cnt('green')+'</span><span class="ct-health-chip yellow">Yellow · 31–60 days since last lead · '+cnt('yellow')+'</span><span class="ct-health-chip red">Red · 61+ days since last lead · '+cnt('red')+'</span></div>';
  host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>RM Owner</th><th>LP Owner</th><th>Actions</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead><tbody>'+(rows.length?rows.map(r=>'<tr data-health-agent="'+esc(r.name)+'"><td><b>'+esc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+esc(r.action)+'</small></td><td><button type="button" class="ct-health-agent-link" onclick="return ctV42OpenContact(this)">'+esc(r.name)+'</button><small>'+esc(r.why)+'</small></td><td>'+esc(r.tier)+'</td><td><select class="ct-owner-select" data-owner-role="rm">'+options(RM_OPTIONS,r.rm)+'</select></td><td><select class="ct-owner-select" data-owner-role="lp">'+options(LP_OPTIONS,r.lp)+'</select></td><td><div class="ct-owner-actions"><button type="button" class="ct-owner-save" onclick="return ctV42Save(this)">Save</button><button type="button" class="ct-owner-delete" onclick="return ctV42Delete(this)">Delete Everywhere</button></div><span class="ct-owner-status"></span></td><td>'+r.pre+'</td><td>'+r.pipe+'</td><td>'+fmt(r.last)+'</td><td>'+fmt(r.lastStart)+'</td><td>'+fmt(r.lastContract)+'</td><td>'+fmt(r.lastClose)+'</td></tr>').join(''):'<tr><td colspan="12" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+'</tbody></table></div>';renderRemoved()
 }
 async function refresh(){const host=document.getElementById('lpv3-health-table');if(host)host.innerHTML='<div style="padding:20px;color:#718391">Loading current Power BI roster…</div>';window.__CT_HEALTH_ROWS=await buildRows();render()}
