@@ -1790,6 +1790,15 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <button onclick="loadFaceTime()" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:700">↺ Refresh</button>
 </div>
 <div id="ft-roster-notice" role="status" aria-live="polite" style="display:none;margin-bottom:12px"></div>
+<section id="ft-action-worklist" style="background:#fff;border:1px solid #dce5ed;border-radius:12px;padding:15px 17px;margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px"><div><strong style="font-size:14px;color:#102a43">Face Time follow-up worklist</strong><div style="font-size:11px;color:#607582;margin-top:3px">Find every agent who needs a visit, not just this week's top three. Select an agent to open their full record.</div></div><span id="ft-action-count" style="font-size:11px;color:#4b6477"></span></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+<input id="ft-action-search" aria-label="Search agents" type="search" placeholder="Search agent name…" oninput="renderFtActionWorklist()" style="flex:1 1 180px;min-width:140px;border:1px solid #cdd9e4;border-radius:7px;padding:9px;font-size:12px">
+<select id="ft-action-status" aria-label="Visit due status" onchange="renderFtActionWorklist()" style="border:1px solid #cdd9e4;border-radius:7px;padding:9px;font-size:12px;background:white"><option value="due14">Due in next 14 days</option><option value="due7">Due in next 7 days</option><option value="overdue">Overdue / no first visit</option><option value="booked">Visits booked</option><option value="all">All agents</option><option value="ontrack">On track</option></select>
+<select id="ft-action-lp" aria-label="Filter by LP" onchange="renderFtActionWorklist()" style="border:1px solid #cdd9e4;border-radius:7px;padding:9px;font-size:12px;background:white"><option value="all">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Unassigned</option></select>
+<select id="ft-action-sort" aria-label="Sort agents" onchange="renderFtActionWorklist()" style="border:1px solid #cdd9e4;border-radius:7px;padding:9px;font-size:12px;background:white"><option value="due">Sort: most urgent</option><option value="name">Name A–Z</option><option value="tier">Tier / urgency</option><option value="lp">LP / urgency</option></select>
+</div><div id="ft-action-results" aria-live="polite"><div style="color:#64748b;font-size:12px">Loading current roster…</div></div>
+</section>
 <div id="ft-scheduled-shared" style="margin-bottom:12px"></div>
 <div class="ft-summary">
 <div class="ft-stat"><div class="ft-stat-num" id="ft-s-mtd" style="color:#1F4E79">—</div><div class="ft-stat-label">Visits logged MTD</div></div>
@@ -7845,6 +7854,62 @@ function ftOpenAgentLog(name,lp){
     if(form)form.scrollIntoView({behavior:"smooth",block:"center"});
   },40);
 }
+function ftOpenAgentRow(name,lp){
+  var details=document.getElementById("ft-full-details");if(details)details.open=true;
+  var lpEl=document.getElementById("ft-lp-filter"),tierEl=document.getElementById("ft-tier-filter"),statusEl=document.getElementById("ft-status-filter"),comktEl=document.getElementById("ft-comkt-filter");
+  if(lpEl)lpEl.value="all";if(tierEl)tierEl.value="all";if(statusEl)statusEl.value="all";if(comktEl)comktEl.value="all";
+  renderFaceTime();
+  var matching=Array.from(document.querySelectorAll("#ft-list .ft-row[data-agent]")).find(function(el){return el.dataset.agent===name;});
+  if(matching){matching.scrollIntoView({behavior:"smooth",block:"center"});matching.style.outline="2px solid #78acc4";setTimeout(function(){matching.style.outline="";},2200);}
+}
+var ftActionShowAll=false;
+function renderFtActionWorklist(){
+  var host=document.getElementById("ft-action-results");if(!host)return;
+  var loaded=!!window.CT_FT_ROSTER_LOADED;
+  if(!loaded){host.innerHTML='<div style="color:#64748b;font-size:12px;padding:10px">Current roster unavailable. Refresh Face Time to retry.</div>';return;}
+  var status=(document.getElementById("ft-action-status")||{}).value||"due14",sort=(document.getElementById("ft-action-sort")||{}).value||"due",lp=(document.getElementById("ft-action-lp")||{}).value||"all",search=String((document.getElementById("ft-action-search")||{}).value||"").trim().toLowerCase();
+  var rows=ftAgentRows().filter(function(a){
+    var left=a.days===null?null:a.target-a.days;
+    if(lp!=="all"&&a.lp!==lp)return false;
+    if(search&&!String(a.name).toLowerCase().includes(search))return false;
+    if(status==="overdue")return !a.scheduled&&(left===null||left<=0);
+    if(status==="due7")return !a.scheduled&&left!==null&&left>=0&&left<=7;
+    if(status==="due14")return !a.scheduled&&(left===null||left<=14);
+    if(status==="booked")return !!a.scheduled;
+    if(status==="ontrack")return !a.scheduled&&left!==null&&left>14;
+    return true;
+  });
+  var urgency=function(a){return a.scheduled?100000:(a.days===null?-100000:a.target-a.days);};
+  rows.sort(function(a,b){
+    if(sort==="name")return a.name.localeCompare(b.name);
+    if(sort==="tier"){var rank={Channel:0,A:1,B:2,C:3};return (rank[a.tier]??9)-(rank[b.tier]??9)||urgency(a)-urgency(b)||a.name.localeCompare(b.name);}
+    if(sort==="lp")return a.lp.localeCompare(b.lp)||urgency(a)-urgency(b)||a.name.localeCompare(b.name);
+    return urgency(a)-urgency(b)||a.name.localeCompare(b.name);
+  });
+  var count=document.getElementById("ft-action-count");if(count)count.textContent=rows.length+" matching agents";
+  var showing=ftActionShowAll?rows:rows.slice(0,30);
+  var html='<div style="display:grid;gap:0">';
+  showing.forEach(function(a){
+    var left=a.days===null?null:a.target-a.days;
+    var due=a.scheduled?"Booked "+String(a.scheduled.event_date||""):(left===null?"First visit needed":left<0?"Overdue "+Math.abs(left)+"d":left===0?"Due today":"Due in "+left+"d");
+    var urgent=!a.scheduled&&(left===null||left<=0);
+    var color=a.scheduled?"#286548":urgent?"#b53832":"#73521e";
+    html+='<div style="display:grid;grid-template-columns:minmax(140px,1.3fr) minmax(95px,.8fr) minmax(95px,.8fr) auto;align-items:center;gap:8px;padding:9px 2px;border-top:1px solid #edf0f4;font-size:11px">'
+      +'<button type="button" class="ft-action-name" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(a.lp)+'" style="text-align:left;padding:0;border:0;background:none;color:#155d85;text-decoration:underline;text-underline-offset:3px;font-size:12px;font-weight:700;cursor:pointer">'+escHtml(displayName(a.name))+'</button>'
+      +'<span style="color:#567083">'+escHtml(a.tier)+' · '+escHtml(a.lp)+'</span>'
+      +'<strong style="color:'+color+'">'+escHtml(due)+'</strong>'
+      +'<span style="display:flex;gap:5px;justify-content:flex-end"><button type="button" class="ft-action-book" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(a.lp)+'" data-id="'+escHtml(String(a.scheduled&&a.scheduled.id||""))+'" style="padding:5px 7px;border:1px solid #b8d4c3;border-radius:6px;background:#f3f9f5;cursor:pointer">'+(a.scheduled?'Open':'Book')+'</button><button type="button" class="ft-action-log" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(a.lp)+'" style="padding:5px 7px;border:1px solid #c3dbe7;border-radius:6px;background:#eff9fc;cursor:pointer">Log</button></span></div>';
+  });
+  html+='</div>';
+  if(!rows.length)html='<div style="padding:12px;color:#64748b;font-size:12px">No agents match these filters.</div>';
+  if(rows.length>30)html+='<button type="button" id="ft-action-more" style="margin-top:10px;border:1px solid #cedce6;background:#f7fafc;border-radius:7px;padding:8px 12px;cursor:pointer;font-size:12px">'+(ftActionShowAll?'Show fewer':'Show all '+rows.length+' agents')+'</button>';
+  host.innerHTML=html;
+  host.querySelectorAll(".ft-action-name").forEach(function(btn){btn.addEventListener("click",function(){ftOpenAgentRow(this.dataset.agent,this.dataset.lp);});});
+  host.querySelectorAll(".ft-action-book").forEach(function(btn){btn.addEventListener("click",function(){v33OpenSharedFaceTime(this.dataset.agent,this.dataset.lp,this.dataset.id||"");});});
+  host.querySelectorAll(".ft-action-log").forEach(function(btn){btn.addEventListener("click",function(){ftOpenAgentLog(this.dataset.agent,this.dataset.lp);});});
+  var more=document.getElementById("ft-action-more");if(more)more.addEventListener("click",function(){ftActionShowAll=!ftActionShowAll;renderFtActionWorklist();});
+}
+
 function renderFtPriority(){
   var el=document.getElementById("ft-priority");if(!el)return;
   var lps=["Gavin","Karen","Osgood","Jordan","Said"],html="",focusTotal=0;
@@ -8298,6 +8363,7 @@ function renderFaceTime(){
   var dueEl=document.getElementById("ft-s-dueweek");if(dueEl)dueEl.textContent=window.CT_FT_ROSTER_LOADED?dueWeek:"—";
   var okEl=document.getElementById("ft-s-ok");if(okEl)okEl.textContent=window.CT_FT_ROSTER_LOADED?okCount:"—";
   renderFtPriority();
+  renderFtActionWorklist();
 
   if(!agentList.length){listEl.innerHTML='<div style="text-align:center;color:var(--text-4);padding:30px">No agents match these filters (or source roster is unavailable)</div>';return;}
 
@@ -8342,8 +8408,8 @@ function renderFaceTime(){
       var a=r.a,fid=r.formId;
       var coBadge=a.coMkt?'<span class="co-mkt-tag" style="cursor:pointer" data-name="'+escHtml(a.name)+'" data-active="true">Co-marketing ✓</span>':'<span class="ft-comkt-off" data-name="'+escHtml(a.name)+'" data-active="false" style="cursor:pointer;font-size:10px;color:var(--text-3);border:1px dashed var(--border);border-radius:4px;padding:2px 8px">+ Co-marketing</span>';
       var rowStyle=a.coMkt?' style="background:#FAF7F2;border-left:3px solid #B45309;padding-left:8px;margin-left:-11px"':'';
-      html2+='<div class="ft-row"'+rowStyle+'>'
-        +'<div class="ft-name">'+escHtml(displayName(a.name))+'<small class="ft-agent-context">'+escHtml(a.tier==='Channel'?'Channel':a.tier+'-Tier')+' · Every '+r.target+' days'+(a.priorityWhy?' · '+escHtml(a.priorityWhy):'')+'</small></div>'
+      html2+='<div class="ft-row" data-agent="'+escHtml(a.name)+'"'+rowStyle+'>'
+        +'<div class="ft-name"><button type="button" class="ft-inline-name" data-agent="'+escHtml(a.name)+'" data-lp="'+escHtml(a.lp)+'" style="background:none;border:0;padding:0;font:inherit;color:#155d85;text-decoration:underline;cursor:pointer;text-align:left">'+escHtml(displayName(a.name))+'</button><small class="ft-agent-context">'+escHtml(a.tier==='Channel'?'Channel':a.tier+'-Tier')+' · Every '+r.target+' days'+(a.priorityWhy?' · '+escHtml(a.priorityWhy):'')+'</small></div>'
         +'<span style="font-size:11px;font-weight:600;color:'+r.lc+';min-width:50px">'+a.lp+'</span>'
         +'<span class="ft-days '+a.status+'">'+(a.days===null?"No visit":a.days===0?"Today":a.days+"d ago")+'</span>'
         +'<span class="ft-meta">'+(a.lastDate?"Last visit: "+fmtDate(a.lastDate)+(a.source?" · "+escHtml(displayName(a.source)):""):"No visits logged")+'</span>'
@@ -8373,6 +8439,7 @@ function renderFaceTime(){
   listEl.querySelectorAll(".ft-log-btn,.ft-cancel-btn").forEach(function(btn){
     btn.addEventListener("click",function(){ftToggleLog(this.dataset.fid);});
   });
+  listEl.querySelectorAll(".ft-inline-name").forEach(function(btn){btn.addEventListener("click",function(){ftOpenAgentRow(this.dataset.agent,this.dataset.lp);});});
   listEl.querySelectorAll(".ft-book-btn").forEach(function(btn){btn.addEventListener("click",function(){v33OpenSharedFaceTime(this.dataset.agent,this.dataset.lp,this.dataset.id||"");});});
   listEl.querySelectorAll(".ft-save-btn").forEach(function(btn){
     btn.addEventListener("click",function(){ftSaveLog(this.dataset.agent,this.dataset.fid);});
