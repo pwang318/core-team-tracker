@@ -55,9 +55,9 @@ $('contactForm').onsubmit=e=>{e.preventDefault();let x=norm(Object.fromEntries([
 $('deleteBtn').onclick=()=>{if(editing){$('editor').close();removeContact(editing)}};
 document.querySelectorAll('[data-filter]').forEach(el=>el.onclick=()=>{filter=el.dataset.filter;document.querySelectorAll('[data-filter]').forEach(t=>t.classList.toggle('active',t===el));render()});
 $('signInBtn').onclick=async()=>{if(!client)return alert('Sign-in library failed to load');let email=mail($('loginEmail').value);if(!valid(email))return alert('Enter your work email');const {error}=await client.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:true}});if(error)alert(error.message);else toast('Check your email for the secure sign-in link')};
-$('signOutBtn').onclick=async()=>{if(dirty){alert('Save is pending. Please wait for cloud sync before signing out.');return}await client.auth.signOut();user=null;loginUI();toast('Signed out — browser copy remains available')};
+$('signOutBtn').onclick=async()=>{if(dirty){alert('Save is pending. Please wait for cloud sync before signing out.');return}await client.auth.signOut();user=null;contacts=[];history=[];selected.clear();dirty=false;localStorage.removeItem(KEY);localStorage.removeItem(OLD);sessionStorage.removeItem('agent-email-first-load');loginUI();render();toast('Signed out; local contact copy cleared for privacy')};
 $('refreshBtn').onclick=loadCloud;
 try{let obj=JSON.parse(localStorage.getItem(KEY)||'null');if(!obj){let legacy=JSON.parse(localStorage.getItem(OLD)||'[]');obj={contacts:Array.isArray(legacy)?legacy:[],history:[]}}contacts=[...new Map((obj.contacts||[]).map(norm).filter(x=>valid(x.email)).map(x=>[x.email,x])).values()];history=Array.isArray(obj.history)?obj.history:[]}catch(e){toast('Could not load browser contacts — import a backup')}
-render();initializeAuth();
+render();initializeAuth();window.addEventListener('focus',()=>{if(user&&!dirty&&!loading)loadCloud()});
 })();
 </script></body></html>
