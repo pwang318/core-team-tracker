@@ -124,7 +124,14 @@
     if (!activeKey()) { S.tier = null; renderAll(); return Promise.resolve(); }
     if (S.loading) return S.loading;
     S.loading = api('core_api_load').then(function (d) {
-      S.tier = d.tier; S.tasks = d.tasks || []; S.loans = {};
+      // A refresh may have read a row before a save finished on this device.
+      var localTasks = new Map(S.tasks.map(function (task) { return [task.id, task]; }));
+      S.tier = d.tier;
+      S.tasks = (d.tasks || []).map(function (task) {
+        var local = localTasks.get(task.id);
+        return local && Number(local.row_version) > Number(task.row_version) ? local : task;
+      });
+      S.loans = {};
       (d.loans || []).forEach(function (l) { S.loans[l.loan_number] = l; });
       S.coverage = d.coverage || []; S.corrections = d.corrections || []; S.signoffs = d.signoffs || []; S.imports = d.imports || [];
       S.loadedAt = new Date(); S.error = null;
@@ -321,6 +328,8 @@
     var b = L.bucket(t, today()), loan = S.loans[t.loan_number] || {}, out = L.outcomeLabel(t, today());
     var cls = t.status === 'completed' ? 'chip-done' : t.status === 'needs_review' ? 'chip-purple' : (t.status === 'exception' || t.status === 'attempted') ? 'chip-attempt' : b === 'overdue' ? 'chip-overdue' : 'chip-open';
     var text = t.status === 'open' ? relDays(t.due_date) : out;
+    var saved = t.status === 'open' && (t.borrower_notes || t.service_update || t.agent_outcome || t.referral_response)
+      ? '<span class="cx-chip chip-attempt">Progress saved</span>' : '';
     var issue = L.isIssue(t) && t.status !== 'exception' ? '<span class="cx-chip chip-overdue">Client concern</span>' : '';
     var meta = [typeLabel(t.task_type), 'Due ' + fmtDate(t.due_date)];
     if (['tuesday', 'contract', 'preclose'].includes(t.task_type)) {
@@ -331,7 +340,7 @@
     if (/^pc/.test(t.task_type) && loan.closed_date) meta.push('Closed ' + fmtDate(loan.closed_date));
     if (t.coverage_lp) meta.push('Covering for ' + lpLabel(t.owner_lp));
     return '<button type="button" class="cx-item" data-open-task="' + esc(t.id) + '"><span class="i-name">' + esc(borrowerOf(t)) + '</span>' +
-      '<span class="i-meta">' + esc(meta.join(' · ')) + '</span><span class="i-right"><span class="cx-chip ' + cls + '">' + esc(text) + '</span>' + issue + '</span></button>';
+      '<span class="i-meta">' + esc(meta.join(' · ')) + '</span><span class="i-right"><span class="cx-chip ' + cls + '">' + esc(text) + '</span>' + saved + issue + '</span></button>';
   }
   function listHtml(tasks, emptyText) {
     if (!tasks.length) return '<div class="cx-empty">' + esc(emptyText || 'Nothing here.') + '</div>';
@@ -759,7 +768,7 @@
         if (p.agent_outcome && p.agent_outcome !== prev.agent_outcome) evs.push({ event_type: p.agent_outcome === 'no_buyer_agent' ? 'status' : p.agent_outcome === 'attempted' ? 'attempt' : 'conversation', party: 'buyer_agent', channel: p.agent_outcome, detail: (p.agent_notes || '').slice(0, 500) });
         if (p.status && p.status !== prev.status) evs.push({ event_type: 'status', party: 'system', channel: p.status, detail: p.status === 'exception' ? p.exception_reason : null });
         if (p.escalated && !prev.escalated) evs.push({ event_type: 'escalation', party: 'borrower', detail: p.concern_notes });
-        return logEvents(row, evs).then(function () { ov.__dirty = false; setState('Saved'); toast(okMsg || 'Saved to the shared server.'); return row; });
+        return logEvents(row, evs).then(function () { ov.__dirty = false; setState('Saved'); toast(okMsg || 'Progress saved. Complete the call when all required items are entered.'); return row; });
       }).catch(function (e) {
         setState('Not saved', true); busy(false); toast(friendlyServerError(e), true);
         if (/another device/.test(String(e.message))) { ov.__dirty = false; renderDrawer(t.id); }
