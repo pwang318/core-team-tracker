@@ -3,18 +3,30 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
 
-const html = fs.readFileSync('index.html', 'utf8');
-const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+const markup = fs.readFileSync('index.html', 'utf8');
+const scripts = [...markup.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+const assetPaths = ['lp-core.js', 'income-worksheet.js', 'portfolio-zip.js'];
+let previousScript = -1;
+for (const asset of assetPaths) {
+  const index = scripts.findIndex(([_, attrs]) => attrs.includes(`src="./assets/${asset}"`));
+  assert(index > previousScript, `Missing or out of order tracker asset: ${asset}`);
+  assert(!/\b(defer|async|type)\s*(?:=|$)/i.test(scripts[index][1]), `Expected a synchronous classic script: ${asset}`);
+  previousScript = index;
+}
+
 let checked = 0;
 const errors = [];
 for (const [index, script] of scripts.entries()) {
-  if (/\bsrc\s*=/.test(script[1])) continue;
+  const src = /\bsrc\s*=\s*["'](\.\/[^"'?]+)(?:\?[^"']*)?["']/i.exec(script[1]);
+  if (/\bsrc\s*=/.test(script[1]) && !src) continue;
   if (/\btype\s*=\s*["'](?:application\/json|text\/plain)/i.test(script[1])) continue;
   const id = /\bid\s*=\s*["']([^"']+)/i.exec(script[1])?.[1] ?? 'unnamed';
-  try { new vm.Script(script[2], { filename: `inline-script-${index}-${id}.js` }); checked++; }
+  try { new vm.Script(src ? fs.readFileSync(src[1], 'utf8') : script[2], { filename: src?.[1] ?? `inline-script-${index}-${id}.js` }); checked++; }
   catch (error) { errors.push(`Script ${index} (${id}): ${error.message}`); }
 }
-const staticMarkup = html
+// Keep business rule assertions compatible with classic scripts moved to assets.
+const html = [markup, ...assetPaths.map(path => fs.readFileSync(`assets/${path}`, 'utf8'))].join('\n');
+const staticMarkup = markup
   .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
   .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '');
 const ids = [...staticMarkup.matchAll(/\bid\s*=\s*["']([^"']+)["']/gi)].map(m => m[1]);
