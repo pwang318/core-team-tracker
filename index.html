@@ -1924,6 +1924,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <script src="./assets/lp-core.js"></script>
 <script src="./assets/encompass-funded.js"></script>
+<script src="./assets/post-closing.js"></script>
 <script src="./assets/post-closing-worklist.js"></script>
 </div>
 <style>
@@ -4603,13 +4604,15 @@ async function previewFunded(file, status) {
   status.textContent='Checking workbook…';
   try {
     const X=await xlsx();
-    const workbook=X.read(await file.arrayBuffer(),{type:'array',cellDates:true});
+    const bytes=await file.arrayBuffer();
+    const workbook=X.read(bytes,{type:'array',cellDates:true});
     const {selectFundedSheet,validateFundedRows}=window.ctEncompassFunded;
     const rows=X.utils.sheet_to_json(selectFundedSheet(workbook),{defval:''});
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
     const {eligible,review,nonFunded}=validateFundedRows(rows,today);
     const assigned=eligible.filter(record=>record.owner).length;
     status.textContent=eligible.length+' funded loans eligible for scheduling · '+review.length+' validation issues · '+nonFunded+' other milestones. LP ownership: '+assigned+' matched, '+(eligible.length-assigned)+' need Mack’s review.';
+    return {eligible,bytes};
   } catch (error) {
     status.textContent='Workbook could not be validated: '+error.message;
   }
@@ -4625,9 +4628,48 @@ function installFundedUpload(){const grid=document.querySelector('#view-data-hub
  input.hidden=true;
  const status=document.createElement('p');
  status.setAttribute('role','status');
+ const apply=document.createElement('button');
+ apply.type='button';
+ apply.className='ct-primary-btn';
+ apply.textContent='Import post-closing calls';
+ apply.hidden=true;
+ let validated;
  preview.onclick=()=>input.click();
- input.onchange=()=>{const file=input.files[0];input.value='';previewFunded(file,status)};
- s.querySelector('.ct-data-actions').append(preview);
+ input.onchange=async()=>{
+   const file=input.files[0];
+   input.value='';
+   if(!file)return;
+   apply.hidden=true;
+   preview.disabled=true;
+   try { validated=await previewFunded(file,status); }
+   finally { preview.disabled=false; }
+   apply.hidden=!(validated?.eligible.length && typeof window.ctTeamAccess?.importFundedBatch==='function');
+ };
+ apply.onclick=async()=>{
+   const access=window.ctTeamAccess;
+   if(!validated?.eligible.length || !access?.importFundedBatch)return;
+   apply.disabled=true;
+   preview.disabled=true;
+   status.textContent='Importing post-closing calls…';
+   try {
+     const digest=await crypto.subtle.digest('SHA-256',validated.bytes);
+     const reference='Encompass Excel '+Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+     const loans=await Promise.all(validated.eligible.map(async record=>({
+       loan_key:await txnHash(record.loan),closed_on:record.closed,owner:record.owner
+     })));
+     const result=await access.importFundedBatch({p_loans:loans,p_source_reference:reference});
+     const fields=['imported','unchanged','needs_review','outside_window'];
+     if(!fields.every(field=>Number.isSafeInteger(result?.[field])&&result[field]>=0) ||
+        fields.reduce((count,field)=>count+result[field],0)!==loans.length)throw new Error('Invalid import response');
+     status.textContent=result.imported+' imported · '+result.unchanged+' already imported · '+result.needs_review+' need review · '+result.outside_window+' outside the launch window.';
+   } catch {
+     status.textContent='Import couldn’t be confirmed. Retry the validated workbook to check its status.';
+   } finally {
+     preview.disabled=false;
+     apply.disabled=false;
+   }
+ };
+ s.querySelector('.ct-data-actions').append(preview,apply);
  s.append(input,status);
 }
 

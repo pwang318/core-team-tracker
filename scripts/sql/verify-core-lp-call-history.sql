@@ -46,12 +46,21 @@ begin
      or (select count(*) from public.core_lp_post_closing_calls where complete) <> 1 then
     raise exception 'Expected two attempts and one completion';
   end if;
+  if not exists (
+    select 1 from public.core_lp_post_closing_worklist
+    where loan_key = '60000000000000000001' and milestone = 30
+      and attempt_count = 2 and completed_at is not null
+      and latest_outcome = 'live' and original_due_on = date '2024-01-31'
+  ) then
+    raise exception 'Worklist does not reflect recorded activity';
+  end if;
 end;
 $$;
 select set_config('request.jwt.claim.sub', '60000000-0000-4000-8000-000000000002', true);
 do $$
 begin
-  if exists (select 1 from public.core_lp_post_closing_calls) then
+  if exists (select 1 from public.core_lp_post_closing_calls)
+     or exists (select 1 from public.core_lp_post_closing_worklist) then
     raise exception 'Unassigned LP can read call history';
   end if;
   begin
