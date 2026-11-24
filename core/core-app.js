@@ -260,6 +260,7 @@
     if ($('#view-lp') && $('#view-lp').classList.contains('active')) renderToday();
     if ($('#view-core-command') && $('#view-core-command').classList.contains('active')) renderCommand();
     if ($('#view-core-plan') && $('#view-core-plan').classList.contains('active')) renderPlan();
+    if ($('#view-production-manager.active')) renderCoaching();
     var d = $('.cx-overlay[data-task]'); if (d && !d.__dirty) renderDrawer(d.dataset.task);
   }
 
@@ -348,6 +349,51 @@
       day: L.daySummary(mine, t0)
     };
   }
+  function renderCoaching() {
+    var host = $('#core-coaching');
+    if (!host) return;
+    if (!activeKey() || !S.tier || !S.loadedAt || S.error) {
+      host.innerHTML = '<div class="cx-empty" role="status">' + (S.error ? 'Live coaching totals are unavailable. Refresh to retry.' :
+        S.loading || activeKey() ? 'Loading live coaching totals…' : 'Open your shared CORE team link to see live coaching totals.') + '</div>';
+      return;
+    }
+    var t0 = today(), closeBy = L.addDays(t0, 7), week = L.weekMonday(t0);
+    var rows = LPS.map(function (lp) {
+      var b = lpBuckets(lp);
+      var closing = b['tue-remaining'].filter(function (task) {
+        var loan = S.loans[task.loan_number];
+        return loan && loan.est_closing_date && loan.est_closing_date <= closeBy;
+      }).length;
+      var due = b.pc30.length + b.pc60.length + b.pc90.length;
+      var missing = scorecardFor(lp, week);
+      var priority = [
+        [b.issues.length, 'Resolve client concerns'],
+        [closing, 'Update borrowers closing within 7 days or past closing'],
+        [b['tue-overdue'].length + b['pc-overdue'].length, 'Clear overdue calls'],
+        [b['tue-remaining'].length, 'Finish Tuesday updates'],
+        [due, 'Complete due post-closing calls'],
+        [missing === false ? 1 : 0, 'Enter this week’s scorecard']
+      ];
+      var rank = priority.findIndex(function (item) { return item[0] > 0; });
+      return { lp: lp, rank: rank < 0 ? priority.length : rank, action: rank < 0 ? 'No urgent action' : priority[rank][1],
+        count: rank < 0 ? 0 : priority[rank][0], open: b['tue-remaining'].length, post: due,
+        scorecard: missing === null ? 'Unavailable' : missing === false ? 'Missing' : 'Entered' };
+    }).sort(function (a, b) { return a.rank - b.rank || b.count - a.count; });
+    host.innerHTML = '<div class="cx-card"><div class="cx-head"><h2>Who to coach today</h2></div>' +
+      '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>LP</th><th>Start here</th><th>Tuesday open</th><th>Post-closing due</th><th>Scorecard</th></tr></thead><tbody>' +
+      rows.map(function (row) {
+        return '<tr><td><button type="button" class="cx-link" data-coach-lp="' + esc(row.lp) + '">' + esc(row.lp) + '</button></td>' +
+          '<td><b>' + esc(row.action) + '</b>' + (row.count && row.rank < 5 ? ' · ' + row.count : '') + '</td><td>' +
+          row.open + '</td><td>' + row.post + '</td><td>' + esc(row.scorecard) + '</td></tr>';
+      }).join('') + '</tbody></table></div></div>';
+    $all('[data-coach-lp]', host).forEach(function (button) {
+      button.addEventListener('click', function () {
+        var link = $('.ct-nav-btn[data-lp="' + button.dataset.coachLp + '"]');
+        if (link) link.click();
+      });
+    });
+  }
+
   var TILE_TITLES = { 'tue-assigned': 'Tuesday Updates assigned', 'tue-completed': 'Tuesday Updates completed', 'tue-remaining': 'Tuesday Updates remaining', 'tue-overdue': 'Overdue Tuesday Updates',
     'tue-ccr': 'CCR requests completed', 'tue-intros': 'CCR introductions received', pc30: '30-day calls', pc60: '60-day calls', pc90: '90-day calls', 'pc-overdue': 'Overdue post-closing calls' };
 
@@ -1359,6 +1405,6 @@
     window.addEventListener('hashchange', function () { var k = readHashKey(); if (k) { setKey(k); loadAll(); } });
     window.addEventListener('storage', function (e) { if (e.key === KEY_STORE) { teamKey = e.newValue; loadAll(); } });
   }
-  window.CoreApp = { open: openView, openTuesdayWorklist: openTuesdayWorklist, managerSignIn: managerSignIn, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, _rpc: function (fn, args) { return apiAct(fn, args); } };
+  window.CoreApp = { open: openView, openTuesdayWorklist: openTuesdayWorklist, renderCoaching: renderCoaching, managerSignIn: managerSignIn, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, _rpc: function (fn, args) { return apiAct(fn, args); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
