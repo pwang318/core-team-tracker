@@ -24,7 +24,7 @@ jobs:
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          tag = '<script defer src="./core/core-logic.js?v=20261124g"></script><script defer src="./core/core-app.js?v=20261124j"></script>'
+          tag = '<script defer src="./core/core-logic.js?v=20261124g"></script><script defer src="./core/core-app.js?v=20261124k"></script>'
           if tag not in s:
               if s.count('</body>') != 1:
                   raise SystemExit('Expected exactly one closing body tag')

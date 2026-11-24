@@ -117,7 +117,6 @@
   var S = { tier: null, tasks: [], loans: {}, coverage: [], corrections: [], signoffs: [], imports: [], loadedAt: null, loading: null, error: null,
     lpFilter: null, cmdTab: 'overview', cmdPeriod: 'week', records: null, planPeriod: 'year', ext: null, scorecards: null, _rec: {} };
   function isManager() { return S.tier === 'manager' || S.tier === 'admin'; }
-  function isLeaderish() { return !!S.tier; } // everyone with the shared link can view; only manager actions are restricted
   function canWrite() { return S.tier === 'team' || isManager(); }
   function hasImport(kind) { return S.imports.some(function (r) { return r.kind === kind; }); }
 
@@ -198,7 +197,7 @@
     var label = function (s) { return ((s.querySelector('.ct-nav-label') || {}).textContent || ''); };
     var team = sections.find(function (s) { return /TEAM/.test(label(s)); });
     if (team && !$('[data-route="core-command"]')) {
-      var b1 = navBtn('core-command', '◆', 'Production Manager'), b2 = navBtn('core-plan', '◇', 'Daniel’s 2027 Plan');
+      var b1 = navBtn('core-command', '◆', 'Command Center'), b2 = navBtn('core-plan', '◇', 'Daniel’s 2027 Plan');
       var pm = team.querySelector('[data-route="production-manager"]');
       team.insertBefore(b1, pm || null); team.insertBefore(b2, b1.nextSibling);
     }
@@ -285,7 +284,6 @@
     $all('[data-cx="forget"]', root).forEach(function (b) { b.addEventListener('click', function () { if (window.confirm('Remove the team access link from this device?')) forgetDevice(); }); });
     $all('[data-open-task]', root).forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input')) return; openDrawer(b.getAttribute('data-open-task')); }); });
     $all('[data-cx="refresh"]', root).forEach(function (b) { b.addEventListener('click', function () { S.scorecards = null; S.ext = null; loadAll(); }); });
-    $all('[data-cx="mgr-on"]', root).forEach(function (b) { b.addEventListener('click', managerSignIn); });
     $all('[data-cx="mgr-off"]', root).forEach(function (b) { b.addEventListener('click', function () { setMgrKey(null); toast('Manager actions turned off on this device.'); loadAll(); }); });
   }
   function syncLine() {
@@ -802,14 +800,17 @@
   }
   function renderCommand() {
     var host = $('#view-core-command'); if (!host) return;
-    if (!activeKey() || !S.tier) { host.innerHTML = '<div class="cx-stack"><div><div class="cx-kicker">Production Manager</div><h2>Production Manager</h2></div>' + (S.loading ? '<div class="cx-empty">Checking team access…</div>' : accessCard('Unlock team execution data')) + '</div>'; bindAccess(host); return; }
-    if (!isLeaderish()) { host.innerHTML = '<div class="cx-card"><h3>Production Command Center</h3><p class="cx-sub">This view needs the Production Manager or leadership link.</p>' + syncLine() + '</div>'; bindAccess(host); return; }
+    if (!activeKey() || !S.tier) {
+      host.innerHTML = '<div class="cx-stack"><h2>Command Center</h2><div class="cx-empty">' +
+        (S.loading ? 'Loading team data…' : 'Open Command Center from your shared CORE team link.') + '</div></div>';
+      return;
+    }
     var tabs = [['overview', 'Call overview'], ['records', 'Call records'], ['data', 'Weekly imports']];
     var more = [['scorecards', 'Scorecards'], ['production', 'Production metrics'], ['unassigned', 'Assign loans'], ['funding', 'Funding review'], ['coverage', 'Coverage'], ['corrections', 'Corrective actions']];
     var p = S.cmdPeriod;
-    host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Production Manager' + (!isManager() ? ' · view only' : '') + '</div><h2>Production Manager</h2><div class="cx-sub">' + freshnessLine() + '</div></div>' +
+    host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><h2>Command Center</h2><div class="cx-sub">' + freshnessLine() + '</div></div>' +
       '<div class="cx-row"><select data-cx="period" aria-label="Period" style="width:auto">' + opts(Object.keys(PERIODS).map(function (k) { return [k, PERIODS[k]]; }), p) + '</select>' +
-      '<button type="button" class="cx-btn" data-cx="export">Export to Excel</button>' + (!isManager() ? '<button type="button" class="cx-btn primary" data-cx="mgr-on">Manager sign-in</button>' : '') + '</div></div>' + syncLine() +
+      '<button type="button" class="cx-btn" data-cx="export">Export to Excel</button></div></div>' + syncLine() +
       (S.error ? '<div class="cx-err">' + esc(S.error) + '</div>' : '') +
       '<div class="cx-tabs" role="tablist">' + tabs.map(function (t) { return '<button type="button" role="tab" class="cx-tab' + (S.cmdTab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '">' + esc(t[1]) + '</button>'; }).join('') + '</div>' +
       '<label class="cx-f">More manager tools <select data-cx="manager-tool" aria-label="More manager tools">' + opts(more, S.cmdTab, 'Choose a tool') + '</select></label>' +
@@ -1054,7 +1055,7 @@
     var recentImports = S.imports.filter(function (report) { return L.isoOfInstant(report.imported_at) >= cutoff; });
     return '<div class="cx-stack">' +
       (isManager() ? '<div class="cx-split"><div class="cx-card"><h3>Weekly pipeline report</h3><p class="cx-note">Encompass Tuesday Updates report with the "Loan Partner 2" column. Creates the week\'s Tuesday Updates, new contract calls and pre-closing reviews. Re-importing the same file creates nothing new.</p><label class="cx-f">Report date</label><input type="date" data-imp-date value="' + today() + '"><label class="cx-f">File</label><input type="file" accept=".xlsx,.xls" data-imp="pipeline"><div data-preview="pipeline" style="margin-top:10px">' + importMsg('pipeline') + '</div></div>' +
-        '<div class="cx-card"><h3>Funded Units report</h3><p class="cx-note">Uses the Funding milestone, actual Closed Date, and Encompass LP2. Pre-launch loans get 30- or 60-day calls still due at launch. Loans closed from launch onward get all three calls.</p><label class="cx-f">File</label><input type="file" accept=".xlsx,.xls" data-imp="funded"><div data-preview="funded" style="margin-top:10px">' + importMsg('funded') + '</div></div></div>' : '') +
+        '<div class="cx-card"><h3>Funded Units report</h3><p class="cx-note">Uses the Funding milestone, actual Closed Date, and Encompass LP2. Pre-launch loans get 30- or 60-day calls still due at launch. Loans closed from launch onward get all three calls.</p><label class="cx-f">File</label><input type="file" accept=".xlsx,.xls" data-imp="funded"><div data-preview="funded" style="margin-top:10px">' + importMsg('funded') + '</div></div></div>' : '<p class="cx-note">Mack can enable uploads from Production Manager.</p>') +
       '<div class="cx-card"><h3>Import history · last 60 days</h3><div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>When</th><th>Report</th><th>File</th><th class="cx-num">Rows</th><th class="cx-num">Unique</th><th class="cx-num">Duplicates</th><th class="cx-num">New loans</th><th class="cx-num">Calls created</th><th>Sent to review</th><th>By</th></tr></thead><tbody>' +
       (recentImports.length ? recentImports.map(function (r) {
         var counts = {}; (r.exceptions || []).forEach(function (e) { counts[e.type] = (counts[e.type] || 0) + (e.count || 1); });
@@ -1333,6 +1334,6 @@
     window.addEventListener('hashchange', function () { var k = readHashKey(); if (k) { setKey(k); loadAll(); } });
     window.addEventListener('storage', function (e) { if (e.key === KEY_STORE) { teamKey = e.newValue; loadAll(); } });
   }
-  window.CoreApp = { open: openView, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, _rpc: function (fn, args) { return apiAct(fn, args); } };
+  window.CoreApp = { open: openView, managerSignIn: managerSignIn, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, _rpc: function (fn, args) { return apiAct(fn, args); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
