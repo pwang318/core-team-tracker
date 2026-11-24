@@ -12274,7 +12274,7 @@ function openOperatingStandardView(btn){
   if(typeof window.refreshSnapshotFresh==='function'&&!window.refreshSnapshotFresh.__ctv2){const old=window.refreshSnapshotFresh;const wrapped=async function(btn){const r=await old.apply(this,arguments);await lpv2RenderSnapshot();return r};wrapped.__ctv2=true;window.refreshSnapshotFresh=wrapped;}
 
   // Default to the leadership/team scorecard instead of a random LP worklist.
-  const start=()=>{const b=document.querySelector('.ct-nav-btn[data-route="snapshot"]');if(b){setTimeout(()=>lpv2Route('snapshot',b),120)}};
+  const start=()=>{if(new URLSearchParams(location.search).get('view')==='tuesday')return;const b=document.querySelector('.ct-nav-btn[data-route="snapshot"]');if(b){setTimeout(()=>lpv2Route('snapshot',b),120)}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
 </script>
