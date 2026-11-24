@@ -547,13 +547,15 @@
       (t.status === 'completed' ? '<div class="cx-complete-banner" style="margin-top:12px">✓ ' + esc(out) + ' · ' + esc(fmtTime(t.completed_at)) + ' by ' + esc(t.completed_by || '') + '. Completed records are locked.</div>' : '') +
       '<form data-cx="task" novalidate>' +
       '<h3 style="margin-top:18px">' + (isTue ? 'Step 1 · Borrower call' : 'Borrower call') + '</h3>' +
-      '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>' +
+      (isTue ? '' : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
       '<label class="cx-f" for="cx-bo">Borrower contact outcome</label><select id="cx-bo" name="borrower_outcome"' + dis + '>' + opts(L.BORROWER_OUTCOMES, t.borrower_outcome, 'Select outcome') + '</select>' +
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
+      (isTue ? '<label class="cx-f" for="cx-su">Loan status update given</label><textarea id="cx-su" name="service_update" placeholder="e.g. Appraisal came in at value; conditions submitted; on track for the 12/9 closing"' + dis + '>' + esc(t.service_update || '') + '</textarea>' : '') +
+      (isTue ? '<details id="cx-borrower-details" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"><b>Conversation notes and required steps</b></summary><p class="cx-note">' + esc(L.SCRIPT_NOTES[type]) + '</p>' : '') +
       '<label class="cx-f" for="cx-cat">Conversation date and time</label><input id="cx-cat" type="datetime-local" name="conversation_at" value="' + esc(toLocalInput(t.conversation_at)) + '"' + dis + '>' +
       '<div style="margin-top:12px"><div class="cx-f" style="margin:0 0 4px">Conversation steps</div>' + checks + '</div>' +
       '<label class="cx-f" for="cx-bn">Borrower conversation notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="What was discussed, in your own words"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>' +
-      (isTue ? '<label class="cx-f" for="cx-su">Loan status update given</label><textarea id="cx-su" name="service_update" placeholder="e.g. Appraisal came in at value; conditions submitted; on track for the 12/9 closing"' + dis + '>' + esc(t.service_update || '') + '</textarea>' : '') +
+      (isTue ? '</details>' : '') +
       '<h3 style="margin-top:18px">' + (type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
       (isTue ? '<blockquote id="cx-ccr-script" class="cx-script" style="margin:8px 0 0">' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '') +
       '<label class="cx-check' + (t.referral_requested ? ' done' : '') + '" style="margin-top:8px"><input type="checkbox" name="referral_requested"' + (t.referral_requested ? ' checked' : '') + dis + '><span><b>I asked the referral question on this call.</b></span></label>' +
@@ -563,15 +565,15 @@
       '<div class="cx-split"><div><label class="cx-f" for="cx-crm">CRM (Velocify) reference · required</label><input id="cx-crm" type="text" name="crm_reference" value="' + esc(t.crm_reference || '') + '"' + dis + '></div>' +
       '<div><label class="cx-f" for="cx-rs">Referral status</label><select id="cx-rs" name="referral_status"' + dis + '>' + opts([['open', 'Open'], ['in_process', 'Application in process'], ['funded', 'Funded'], ['lost', 'Did not proceed']], t.referral_status, 'Select') + '</select></div></div>' +
       '<label class="cx-f" for="cx-ft">Follow-through notes</label><textarea id="cx-ft" name="followthrough_note"' + dis + '>' + esc(t.followthrough_note || '') + '</textarea></div>' +
-      '<h3 style="margin-top:18px">Client experience</h3>' +
+      (isTue ? '<details class="cx-card" style="margin-top:12px;padding:14px"' + (t.concern_status && t.concern_status !== 'none' ? ' open' : '') + '><summary style="cursor:pointer"><b>Client concern</b></summary>' : '<h3 style="margin-top:18px">Client experience</h3>') +
       '<label class="cx-f" for="cx-cs">Any concern raised?</label><select id="cx-cs" name="concern_status"' + dis + '>' + opts([['none', 'No concern'], ['resolved', 'Concern raised and resolved on this call'], ['unresolved', 'Unresolved concern: resolution required']], t.concern_status || 'none') + '</select>' +
       '<div id="cx-concern"' + ((t.concern_status || 'none') === 'none' ? ' class="cx-hide"' : '') + '><label class="cx-f" for="cx-cn">Concern details and what was done</label><textarea id="cx-cn" name="concern_notes"' + dis + '>' + esc(t.concern_notes || '') + '</textarea>' +
       '<label class="cx-check" style="margin-top:8px"><input type="checkbox" name="escalated"' + (t.escalated ? ' checked' : '') + dis + '><span>Escalate to the Production Manager</span></label></div>' +
-      (isTue ? '<details id="cx-agent-section" class="cx-card" style="margin-top:18px;padding:14px"><summary style="cursor:pointer"><b>Step 2 · Buyer agent update</b></summary>' +
+      (isTue ? '</details><section id="cx-agent-section" class="cx-card" style="margin-top:12px;padding:14px"><h3>Step 2 · Buyer agent update</h3>' +
         '<div id="cx-agent-help" class="cx-note" style="margin-top:8px">' + (agentPresent ? 'Update ' + esc(loan.buyer_agent_name) + ' after the borrower call.' : 'No buyer agent is on file for this loan.') + '</div>' +
         '<fieldset id="cx-agent" aria-describedby="cx-agent-help" style="border:0;padding:0;margin:0"><label class="cx-f" for="cx-ao">Buyer agent contact outcome</label><select id="cx-ao" name="agent_outcome"' + dis + '>' + opts(L.AGENT_OUTCOMES, t.agent_outcome || (editable && !agentPresent ? 'no_buyer_agent' : null), 'Select outcome') + '</select>' +
-        '<label class="cx-f" for="cx-an">Buyer agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></fieldset></details>' : '') +
-      '<details class="cx-card" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>Follow-up</b></summary><div class="cx-split"><div><label class="cx-f" for="cx-na">Next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(t.next_action || '') + '"' + dis + '></div>' +
+        '<div id="cx-agent-notes"' + (t.agent_notes || ['spoke', 'update_sent'].includes(t.agent_outcome) ? '' : ' class="cx-hide"') + '><label class="cx-f" for="cx-an">Buyer agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></div></fieldset></section>' : '') +
+      '<details id="cx-follow-up" class="cx-card" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>Follow-up</b></summary><div class="cx-split"><div><label class="cx-f" for="cx-na">Next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(t.next_action || '') + '"' + dis + '></div>' +
       '<div><label class="cx-f" for="cx-nd">Follow-up date</label><input id="cx-nd" type="date" name="next_action_date" value="' + esc(t.next_action_date || '') + '"' + dis + '></div></div></details>' +
       (editable ? '<details id="cx-reqs" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"></summary><div style="margin-top:8px"></div></details>' : '') +
       '<div id="cx-exception" class="cx-card cx-hide" style="margin-top:14px;padding:14px"><h3>Client concern or exception</h3><p class="cx-note">Use when a concern needs resolution or the required conversation could not happen. It is not counted as completed.</p>' +
@@ -579,7 +581,7 @@
       '<label class="cx-f" for="cx-er">Circumstance and recovery action</label><textarea id="cx-er" name="exception_reason">' + esc(t.exception_reason || '') + '</textarea>' +
       '<div class="cx-row" style="margin-top:10px"><button type="button" class="cx-btn primary" data-cx="save-exception">Save</button><button type="button" class="cx-btn ghost" data-cx="cancel-exception">Cancel</button></div></div>' +
       (isManager() ? managerBlock(t) : '') +
-      '<h3 style="margin-top:22px">Conversation and activity history</h3><div id="cx-history" style="margin-top:8px">' + historyHtml(id) + '</div>' +
+      (isTue ? '<details class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"><b>Activity history</b></summary>' : '<h3 style="margin-top:22px">Conversation and activity history</h3>') + '<div id="cx-history" style="margin-top:8px">' + historyHtml(id) + '</div>' + (isTue ? '</details>' : '') +
       '<div class="cx-drawer-foot"><span id="cx-save-state" class="cx-note" aria-live="polite"></span>' +
       (editable ? '<button type="button" class="cx-btn" data-cx="save">Save progress</button><button type="button" class="cx-btn accent" data-cx="complete">Complete ' + esc(typeLabel(type)) + '</button><button type="button" class="cx-btn ghost" data-cx="show-exception">Concern or exception</button>' : '') +
       '<button type="button" class="cx-btn ghost" data-cx="close">Close</button></div></form>';
@@ -614,18 +616,26 @@
     var state = $('#cx-save-state', ov);
     function setState(txt, bad) { if (state) { state.textContent = txt; state.style.color = bad ? 'var(--cx-bad)' : ''; } }
     function valid() { return L.validateTask(Object.assign({}, t, collect(form, t)), loan); }
+    var compact = t.task_type === 'tuesday', saving = false;
     function refreshReqs() {
       if (!editable) return;
       var p = Object.assign({}, t, collect(form, t)), errs = L.validateTask(p, loan), box = $('#cx-reqs', ov);
       box.querySelector('summary').textContent = errs.length ? 'Completion checklist (' + errs.length + ' remaining)' : 'Ready to complete';
-      box.querySelector('div').innerHTML = errs.length ? '<ul class="cx-req">' + errs.map(function (e) { return '<li>' + esc(L.friendlyError(e)) + '</li>'; }).join('') + '</ul>'
+      var checklist = errs;
+      if (compact) {
+        var stepCount = errs.filter(function (e) { return e.startsWith('Conversation step not confirmed:'); }).length;
+        if (stepCount) checklist = errs.filter(function (e) { return !e.startsWith('Conversation step not confirmed:'); }).concat('Confirm ' + stepCount + ' conversation ' + (stepCount === 1 ? 'step' : 'steps'));
+      }
+      box.querySelector('div').innerHTML = errs.length ? '<ul class="cx-req">' + checklist.map(function (e) { return '<li>' + esc(L.friendlyError(e)) + '</li>'; }).join('') + '</ul>'
         : '<div class="cx-ok">✓ Every required conversation and referral step is documented.</div>';
-      var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = errs.length > 0;
+      var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = saving || (!compact && errs.length > 0);
       var bo = p.borrower_outcome, ar = $('#cx-attempt-row', ov);
       if (ar) ar.innerHTML = bo && bo !== 'conversation' ? '<button type="button" class="cx-btn sm" data-cx="log-attempt">Log this attempt</button><span class="cx-note">Attempts are saved with the time. They do not complete the call.</span>' : '';
       var la = $('[data-cx="log-attempt"]', ov); if (la) la.onclick = function () { logAttempt(bo); };
       var named = $('#cx-named', ov); if (named) named.classList.toggle('cx-hide', p.referral_response !== 'named_introduction');
       var cc = $('#cx-concern', ov); if (cc) cc.classList.toggle('cx-hide', (p.concern_status || 'none') === 'none');
+      var agentNotes = $('#cx-agent-notes', ov);
+      if (agentNotes) agentNotes.classList.toggle('cx-hide', !p.agent_notes && !['spoke', 'update_sent'].includes(p.agent_outcome));
       var ag = $('#cx-agent', ov);
       if (ag && L.hasBuyerAgent(loan.buyer_agent_name)) {
         ag.disabled = bo !== 'conversation';
@@ -644,7 +654,7 @@
       });
     }
     refreshReqs();
-    function busy(on) { $all('.cx-drawer-foot .cx-btn', ov).forEach(function (b) { if (b.dataset.cx !== 'close') b.disabled = on || (b.dataset.cx === 'complete' && valid().length > 0); }); }
+    function busy(on) { saving = on; $all('.cx-drawer-foot .cx-btn', ov).forEach(function (b) { if (b.dataset.cx !== 'close') b.disabled = on || (!compact && b.dataset.cx === 'complete' && valid().length > 0); }); }
     function save(extra, okMsg) {
       var p = Object.assign(collect(form, t), extra || {});
       if (!(extra && extra.status) && p.borrower_outcome && p.borrower_outcome !== 'conversation' && t.status === 'open') p.status = 'attempted';
@@ -674,7 +684,16 @@
     on('save', function () { save(null).then(function () { renderDrawer(t.id); refreshEvents(t.id); renderAll(); }).catch(function () {}); });
     on('complete', function () {
       var errs = valid();
-      if (errs.length) { toast('Not complete yet: ' + L.friendlyError(errs[0]), true); return; }
+      if (errs.length) {
+        if (compact) {
+          var checklist = $('#cx-reqs', ov);
+          checklist.open = true;
+          if (errs.some(function (e) { return /^Conversation |^Borrower conversation notes/.test(e); })) $('#cx-borrower-details', ov).open = true;
+          if (errs.some(function (e) { return /^(Next action|Follow-up date)/.test(e); })) $('#cx-follow-up', ov).open = true;
+          $('summary', checklist).focus();
+        } else toast('Not complete yet: ' + L.friendlyError(errs[0]), true);
+        return;
+      }
       save({ status: 'completed' }, typeLabel(t.task_type) + ' completed. Saved to the shared server.').then(function () { closeDrawer(); renderAll(); }).catch(function () {});
     });
     on('show-exception', function () { var x = $('#cx-exception', ov); x.classList.remove('cx-hide'); if (x.scrollIntoView) x.scrollIntoView({ behavior: 'smooth' }); });
