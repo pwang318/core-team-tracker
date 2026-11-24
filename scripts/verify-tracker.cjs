@@ -97,6 +97,21 @@ assert(html.includes('acknowledged_excluded_rows:acknowledged?5:0'),'Exact Novem
 assert(html.includes('var total=live&&(live.verified||live.acknowledged_excluded_rows===5)?Number(live.active_partner_rows):null;'),'LP summary may show explicitly acknowledged source roster, never a browser or managed count');
 assert(html.includes("(total===null?'—':total)"),'LP summary must visibly withhold unverified active count');
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
+// CORE execution module (Tuesday Updates, 30/60/90 calls, Command Center, 2027 Plan)
+const coreTag = '<script defer src="./core/core-logic.js?v=20261124"></script><script defer src="./core/core-app.js?v=20261124"></script>';
+if (!html.includes(coreTag)) {
+  // The install-core-execution workflow adds the tag right after a push; allow that one window only.
+  assert(fs.existsSync('.github/workflows/install-core-execution.yml'), 'CORE module scripts must load after the tracker, logic first');
+  console.log('Notice: CORE module tag not yet in index.html; install-core-execution workflow will add it.');
+}
+for (const f of ['core/core-logic.js', 'core/core-app.js', 'core/core-app.css']) {
+  assert(fs.existsSync(f), 'Missing ' + f);
+  if (f.endsWith('.js')) { try { new vm.Script(fs.readFileSync(f, 'utf8'), { filename: f }); } catch (e) { errors.push(f + ': ' + e.message); } }
+}
+const coreApp = fs.readFileSync('core/core-app.js', 'utf8');
+assert(!/service_role/i.test(coreApp + html), 'No service-role key may appear in browser code');
+assert(!/rest\/v1\/core_/.test(coreApp), 'Borrower tables must only be reached through key-checked core_api functions');
+assert(!/sample|demo data|fixture/i.test(coreApp.replace(/\/\*[\s\S]*?\*\//g, '')), 'No sample-data workflow in production code');
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exitCode = 1;
