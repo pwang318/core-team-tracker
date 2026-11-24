@@ -501,12 +501,13 @@
       '<label class="cx-f" for="cx-cs">Any concern raised?</label><select id="cx-cs" name="concern_status"' + dis + '>' + opts([['none', 'No concern'], ['resolved', 'Concern raised and resolved on this call'], ['unresolved', 'Unresolved concern: resolution required']], t.concern_status || 'none') + '</select>' +
       '<div id="cx-concern"' + ((t.concern_status || 'none') === 'none' ? ' class="cx-hide"' : '') + '><label class="cx-f" for="cx-cn">Concern details and what was done</label><textarea id="cx-cn" name="concern_notes"' + dis + '>' + esc(t.concern_notes || '') + '</textarea>' +
       '<label class="cx-check" style="margin-top:8px"><input type="checkbox" name="escalated"' + (t.escalated ? ' checked' : '') + dis + '><span>Escalate to the Production Manager</span></label></div>' +
-      (isTue ? '<h3 style="margin-top:18px">Step 2 · Buyer agent update</h3><div class="cx-note">' + (agentPresent ? 'Update ' + esc(loan.buyer_agent_name) + ' after the borrower call.' : 'No buyer agent is on file for this loan.') + '</div>' +
-        '<fieldset id="cx-agent" style="border:0;padding:0;margin:0"><label class="cx-f" for="cx-ao">Buyer agent contact outcome</label><select id="cx-ao" name="agent_outcome"' + dis + '>' + opts(L.AGENT_OUTCOMES, t.agent_outcome, 'Select outcome') + '</select>' +
-        '<label class="cx-f" for="cx-an">Buyer agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></fieldset>' : '') +
-      '<h3 style="margin-top:18px">Next step</h3><div class="cx-split"><div><label class="cx-f" for="cx-na">Next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(t.next_action || '') + '"' + dis + '></div>' +
-      '<div><label class="cx-f" for="cx-nd">Follow-up date</label><input id="cx-nd" type="date" name="next_action_date" value="' + esc(t.next_action_date || '') + '"' + dis + '></div></div>' +
-      (editable ? '<div id="cx-reqs" class="cx-card" style="margin-top:18px;padding:14px"></div>' : '') +
+      (isTue ? '<details id="cx-agent-section" class="cx-card" style="margin-top:18px;padding:14px"><summary style="cursor:pointer"><b>Step 2 · Buyer agent update</b></summary>' +
+        '<div id="cx-agent-help" class="cx-note" style="margin-top:8px">' + (agentPresent ? 'Update ' + esc(loan.buyer_agent_name) + ' after the borrower call.' : 'No buyer agent is on file for this loan.') + '</div>' +
+        '<fieldset id="cx-agent" aria-describedby="cx-agent-help" style="border:0;padding:0;margin:0"><label class="cx-f" for="cx-ao">Buyer agent contact outcome</label><select id="cx-ao" name="agent_outcome"' + dis + '>' + opts(L.AGENT_OUTCOMES, t.agent_outcome || (editable && !agentPresent ? 'no_buyer_agent' : null), 'Select outcome') + '</select>' +
+        '<label class="cx-f" for="cx-an">Buyer agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></fieldset></details>' : '') +
+      '<details class="cx-card" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>Follow-up</b></summary><div class="cx-split"><div><label class="cx-f" for="cx-na">Next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(t.next_action || '') + '"' + dis + '></div>' +
+      '<div><label class="cx-f" for="cx-nd">Follow-up date</label><input id="cx-nd" type="date" name="next_action_date" value="' + esc(t.next_action_date || '') + '"' + dis + '></div></div></details>' +
+      (editable ? '<details id="cx-reqs" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"></summary><div style="margin-top:8px"></div></details>' : '') +
       '<div id="cx-exception" class="cx-card cx-hide" style="margin-top:14px;padding:14px"><h3>Client concern or exception</h3><p class="cx-note">Use when a concern needs resolution or the required conversation could not happen. It is not counted as completed.</p>' +
       '<label class="cx-f" for="cx-ek">Type</label><select id="cx-ek" name="exception_kind">' + opts([['service_recovery', 'Client concern: resolution required'], ['unreachable', 'Borrower unreachable after attempts'], ['other', 'Other documented circumstance']], t.exception_kind || 'service_recovery') + '</select>' +
       '<label class="cx-f" for="cx-er">Circumstance and recovery action</label><textarea id="cx-er" name="exception_reason">' + esc(t.exception_reason || '') + '</textarea>' +
@@ -550,7 +551,8 @@
     function refreshReqs() {
       if (!editable) return;
       var p = Object.assign({}, t, collect(form, t)), errs = L.validateTask(p, loan), box = $('#cx-reqs', ov);
-      box.innerHTML = errs.length ? '<div class="cx-f" style="margin:0 0 6px">Before this can be completed</div><ul class="cx-req">' + errs.map(function (e) { return '<li>' + esc(L.friendlyError(e)) + '</li>'; }).join('') + '</ul>'
+      box.querySelector('summary').textContent = errs.length ? 'Completion checklist (' + errs.length + ' remaining)' : 'Ready to complete';
+      box.querySelector('div').innerHTML = errs.length ? '<ul class="cx-req">' + errs.map(function (e) { return '<li>' + esc(L.friendlyError(e)) + '</li>'; }).join('') + '</ul>'
         : '<div class="cx-ok">✓ Every required conversation and referral step is documented.</div>';
       var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = errs.length > 0;
       var bo = p.borrower_outcome, ar = $('#cx-attempt-row', ov);
@@ -558,7 +560,13 @@
       var la = $('[data-cx="log-attempt"]', ov); if (la) la.onclick = function () { logAttempt(bo); };
       var named = $('#cx-named', ov); if (named) named.classList.toggle('cx-hide', p.referral_response !== 'named_introduction');
       var cc = $('#cx-concern', ov); if (cc) cc.classList.toggle('cx-hide', (p.concern_status || 'none') === 'none');
-      var ag = $('#cx-agent', ov); if (ag) ag.disabled = !(bo === 'conversation' || t.borrower_outcome === 'conversation');
+      var ag = $('#cx-agent', ov);
+      if (ag && L.hasBuyerAgent(loan.buyer_agent_name)) {
+        ag.disabled = bo !== 'conversation';
+        $('#cx-agent-help', ov).textContent = ag.disabled
+          ? 'Select Spoke with borrower in the borrower conversation above to enable these fields.'
+          : 'Update ' + loan.buyer_agent_name + ' after the borrower call.';
+      }
       $all('.cx-check', ov).forEach(function (l) { var i = l.querySelector('input'); if (i) l.classList.toggle('done', i.checked); });
     }
     if (editable) {
@@ -579,7 +587,7 @@
       return saveTask(t, p).then(function (row) {
         var evs = [];
         if (p.borrower_outcome && p.borrower_outcome !== prev.borrower_outcome) evs.push({ event_type: p.borrower_outcome === 'conversation' ? 'conversation' : 'attempt', party: 'borrower', channel: p.borrower_outcome, occurred_at: p.borrower_outcome === 'conversation' && p.conversation_at ? p.conversation_at : new Date().toISOString(), detail: p.borrower_outcome === 'conversation' ? (p.borrower_notes || '').slice(0, 500) : null });
-        if (p.agent_outcome && p.agent_outcome !== prev.agent_outcome) evs.push({ event_type: p.agent_outcome === 'attempted' ? 'attempt' : 'conversation', party: 'buyer_agent', channel: p.agent_outcome, detail: (p.agent_notes || '').slice(0, 500) });
+        if (p.agent_outcome && p.agent_outcome !== prev.agent_outcome) evs.push({ event_type: p.agent_outcome === 'no_buyer_agent' ? 'status' : p.agent_outcome === 'attempted' ? 'attempt' : 'conversation', party: 'buyer_agent', channel: p.agent_outcome, detail: (p.agent_notes || '').slice(0, 500) });
         if (p.status && p.status !== prev.status) evs.push({ event_type: 'status', party: 'system', channel: p.status, detail: p.status === 'exception' ? p.exception_reason : null });
         if (p.escalated && !prev.escalated) evs.push({ event_type: 'escalation', party: 'borrower', detail: p.concern_notes });
         return logEvents(row, evs).then(function () { ov.__dirty = false; setState('Saved'); toast(okMsg || 'Saved to the shared server.'); return row; });
