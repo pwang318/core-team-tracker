@@ -3,6 +3,16 @@
 
   const columns = ['Loan Number', 'Loan Officer', 'Closed Date', 'Last Finished Milestone'];
 
+  const lpColumn = 'Loan Team Member Name - Loan Partner 2';
+  const lpNames = new Map([
+    ['gavin dill', 'Gavin'], ['gavin', 'Gavin'],
+    ['karen de la riva', 'Karen'], ['karen', 'Karen'],
+    ['osgood mcmahon', 'Osgood'], ['osgood', 'Osgood'],
+    ['jordan johnston', 'Jordan'], ['jordan', 'Jordan'],
+    ['said saleh', 'Said'], ['said', 'Said'],
+    ['isaak', 'Isaak'],
+  ]);
+
   function selectFundedSheet(workbook) {
     return workbook.Sheets.Data || workbook.Sheets.Table || workbook.Sheets[workbook.SheetNames[0]];
   }
@@ -26,6 +36,7 @@
 
     const loans = new Map();
     const conflicts = new Set();
+    const ownership = new Map();
     const review = [];
     let nonFunded = 0;
     for (const [index, row] of rows.entries()) {
@@ -48,6 +59,20 @@
         review.push({row: index + 2, reason: 'Conflicting closing dates'});
       }
       if (!existing) loans.set(loan, {loan, closed, owner: null});
+
+      const name = String(row[lpColumn] ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+      if (!name) continue;
+      const owner = lpNames.get(name) ?? null;
+      const identity = owner ?? name;
+      const prior = ownership.get(loan);
+      if (!prior) {
+        ownership.set(loan, {identity});
+        loans.get(loan).owner = owner;
+      } else if (prior.identity !== identity && !prior.conflict) {
+        prior.conflict = true;
+        loans.get(loan).owner = null;
+        review.push({row: index + 2, reason: 'Conflicting LP2 assignments'});
+      }
     }
     const eligible = [...loans.values()].filter(record => !conflicts.has(record.loan));
     return {eligible, review, nonFunded};

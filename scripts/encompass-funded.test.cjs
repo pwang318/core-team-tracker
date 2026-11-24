@@ -36,3 +36,18 @@ test('validates funded rows and holds conflicting dates for review', () => {
 test('requires funding evidence and a supported export layout', () => {
   assert.throws(() => validateFundedRows([{'Loan Number': '001'}], '2026-11-24'), /Last Finished Milestone/);
 });
+
+test('maps verified LP2 owners and leaves unknown or conflicting owners unassigned', () => {
+  const lp2 = 'Loan Team Member Name - Loan Partner 2';
+  const assigned = (number, owner) => ({...row(number, '2026-11-01'), [lp2]:owner});
+  const result = validateFundedRows([
+    assigned('001', ' Gavin Dill '),
+    assigned('002', 'Former LP'),
+    assigned('003', 'Gavin Dill'),
+    assigned('003', 'Karen De La Riva'),
+    assigned('004', ''),
+    assigned('005', 'said saleh'),
+  ], '2026-11-24');
+  assert.deepEqual(result.eligible.map(loan => loan.owner), ['Gavin', null, null, null, 'Said']);
+  assert.equal(result.review.filter(issue => issue.reason === 'Conflicting LP2 assignments').length, 1);
+});

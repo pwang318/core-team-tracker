@@ -4601,7 +4601,8 @@ async function previewFunded(file, status) {
     const rows=X.utils.sheet_to_json(selectFundedSheet(workbook),{defval:''});
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
     const {eligible,review,nonFunded}=validateFundedRows(rows,today);
-    status.textContent=eligible.length+' funded loans eligible for scheduling · '+review.length+' validation issues · '+nonFunded+' other milestones. Verify LP ownership separately.';
+    const assigned=eligible.filter(record=>record.owner).length;
+    status.textContent=eligible.length+' funded loans eligible for scheduling · '+review.length+' validation issues · '+nonFunded+' other milestones. LP ownership: '+assigned+' matched, '+(eligible.length-assigned)+' need Mack’s review.';
   } catch (error) {
     status.textContent='Workbook could not be validated: '+error.message;
   }
