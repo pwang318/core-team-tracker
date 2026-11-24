@@ -741,7 +741,7 @@
     var t0 = today(), rows = teamStats(range);
     var tue = L.referralMetrics(S.tasks, ['tuesday'], range, t0);
     var team = L.daySummary(S.tasks, t0, function (t) { return !!owner(t); });
-    var unLoans = Object.keys(S.loans).map(function (k) { return S.loans[k]; }).filter(function (l) { return l.ownership_status !== 'verified' && (l.pipeline_status === 'active' || l.pipeline_status === 'funded'); });
+    var unLoans = Object.keys(S.loans).map(function (k) { return S.loans[k]; }).filter(needsOwner);
     var concerns = S.tasks.filter(L.isIssue), review = S.tasks.filter(function (t) { return t.status === 'needs_review'; });
     var overdueAll = S.tasks.filter(function (t) { return owner(t) && isOpen(t) && t.due_date < t0; });
     var wk = L.weekMonday(t0), missingSc = S.scorecards && S.scorecards.ok ? LPS.filter(function (lp) { return !scorecardFor(lp, wk); }) : null;
@@ -894,12 +894,20 @@
           (classify ? '<td><select data-src-loan="' + esc(l.loan_number) + '" data-ver="' + l.row_version + '" style="min-width:150px">' + opts(SOURCE_OPTS, l.funding_source_category, 'Not classified') + '</select></td>' : '') + '</tr>';
       }).join('') + '</tbody></table></div>';
   }
+  function needsOwner(loan) {
+    if (loan.ownership_status === 'verified') return false;
+    if (loan.pipeline_status === 'active') return true;
+    return loan.pipeline_status === 'funded' && S.tasks.some(function (task) {
+      return task.loan_number === loan.loan_number && /^pc(30|60|90)$/.test(task.task_type)
+        && ['open','attempted','needs_review'].indexOf(task.status) >= 0;
+    });
+  }
   function unassignedBody() {
-    var loans = Object.keys(S.loans).map(function (k) { return S.loans[k]; }).filter(function (l) { return l.ownership_status !== 'verified' && l.pipeline_status !== 'not_funded' && l.pipeline_status !== 'inactive'; })
+    var loans = Object.keys(S.loans).map(function (k) { return S.loans[k]; }).filter(needsOwner)
       .sort(function (a, b) { return String(b.closed_date || b.est_closing_date || '').localeCompare(String(a.closed_date || a.est_closing_date || '')); });
-    return '<div class="cx-card"><div class="cx-head"><div><h3>Assignment review queue</h3><div class="cx-note">Ownership could not be verified from a loan number. The Funded Units report has no reliable LP2, and Realtor, borrower and processor names are never used to guess. Verify in Encompass, then assign.</div></div>' +
+    return '<div class="cx-card"><div class="cx-head"><div><h3>Assignment review queue</h3><div class="cx-note">An active loan or scheduled post-closing call needs verified LP2 ownership. Verify the assignment in Encompass, then assign.</div></div>' +
       (isManager() && loans.length ? '<div class="cx-row"><select data-assign-lp style="width:auto">' + opts(LPS.map(function (x) { return [x, x]; }), '', 'Assign selected to…') + '</select><button type="button" class="cx-btn primary sm" data-assign-go="1">Assign</button></div>' : '') + '</div>' +
-      (loans.length ? loansTable(loans, isManager()) : '<div class="cx-complete-banner" style="margin-top:12px">✓ Complete. Every borrower has a verified owner.</div>') + '</div>';
+      (loans.length ? loansTable(loans, isManager()) : '<div class="cx-complete-banner" style="margin-top:12px">No assignments need ownership review.</div>') + '</div>';
   }
   function fundingBody() {
     var ex = Object.keys(S.loans).map(function (k) { return S.loans[k]; }).filter(function (l) { return l.pipeline_status === 'funding_exception'; });
@@ -931,7 +939,7 @@
   function dataBody() {
     return '<div class="cx-stack">' +
       (isManager() ? '<div class="cx-split"><div class="cx-card"><h3>Weekly pipeline report</h3><p class="cx-note">Encompass Tuesday Updates report with the "Loan Partner 2" column. Creates the week\'s Tuesday Updates, new contract calls and pre-closing reviews. Re-importing the same file creates nothing new.</p><label class="cx-f">Report date</label><input type="date" data-imp-date value="' + today() + '"><label class="cx-f">File</label><input type="file" accept=".xlsx,.xls" data-imp="pipeline"><div data-preview="pipeline" style="margin-top:10px">' + importMsg('pipeline') + '</div></div>' +
-        '<div class="cx-card"><h3>Funded Units report</h3><p class="cx-note">Validates each row, then creates 30/60/90-day calls from the actual Closed Date for loans at the Funding milestone. Other milestones and missing dates go to review. Existing conversations are never overwritten.</p><label class="cx-f">File</label><input type="file" accept=".xlsx,.xls" data-imp="funded"><div data-preview="funded" style="margin-top:10px">' + importMsg('funded') + '</div></div></div>' : '') +
+        '<div class="cx-card"><h3>Funded Units report</h3><p class="cx-note">Uses the Funding milestone, actual Closed Date, and Encompass LP2. Pre-launch loans get 30- or 60-day calls still due at launch. Loans closed from launch onward get all three calls.</p><label class="cx-f">File</label><input type="file" accept=".xlsx,.xls" data-imp="funded"><div data-preview="funded" style="margin-top:10px">' + importMsg('funded') + '</div></div></div>' : '') +
       '<div class="cx-card"><h3>Import history and data freshness</h3><div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>When</th><th>Report</th><th>File</th><th class="cx-num">Rows</th><th class="cx-num">Unique</th><th class="cx-num">Duplicates</th><th class="cx-num">New loans</th><th class="cx-num">Calls created</th><th>Sent to review</th><th>By</th></tr></thead><tbody>' +
       (S.imports.length ? S.imports.map(function (r) {
         var counts = {}; (r.exceptions || []).forEach(function (e) { counts[e.type] = (counts[e.type] || 0) + (e.count || 1); });
@@ -1038,7 +1046,8 @@
     if (!file) return;
     box.innerHTML = '<div class="cx-note">Reading ' + esc(file.name) + '…</div>';
     loadXlsx().then(function (X) { return file.arrayBuffer().then(function (buf) { return X.read(buf, { type: 'array', cellDates: true }); }); }).then(function (wb) {
-      var X = window.XLSX, sheets = wb.SheetNames, best = null;
+      var X = window.XLSX, sheets = wb.SheetNames.slice(), best = null;
+      if (wb.Sheets.Data) sheets = ['Data'].concat(sheets.filter(function (name) { return name !== 'Data'; }));
       var parse = function (name) { var rows = X.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: true, defval: null }); return kind === 'pipeline' ? L.parsePipeline(rows) : L.parseFunded(rows); };
       for (var i = 0; i < sheets.length && !best; i++) { var p0 = parse(sheets[i]); if (!p0.error) best = { sheet: sheets[i], parsed: p0 }; }
       if (!best) { box.innerHTML = '<div class="cx-err">This file does not match the ' + (kind === 'pipeline' ? 'pipeline report: no "Loan Partner 2" column' : 'Funded Units report: Loan Number, Borrower Name, Last Finished Milestone and Closed Date are required') + '. Nothing was imported.</div>'; return; }
@@ -1157,10 +1166,10 @@
     var scEntered = sc ? sc.filter(Boolean) : [], scTot = scEntered.reduce(function (a, s) { return a + s.total; }, 0), scGoal = scEntered.reduce(function (a, s) { return a + s.goal; }, 0);
     var cvRow = function (label, val, tgt, note) { return '<tr><td>' + esc(label) + '</td><td class="cx-num">' + esc(tgt) + '</td><td class="cx-num">' + (val === null || val === undefined ? '<span class="cx-muted">Data unavailable</span>' : !started ? '<span class="cx-muted">Not started</span>' : val + '%') + '</td><td class="cx-small cx-muted">' + esc(note || '') + '</td></tr>'; };
     var bott = [];
-    if (fun && started) [['Lead to application', fun.leadToApp, 80], ['Application to preapproval', fun.appToPre, 55], ['Preapproval to contract', fun.preToContract, per === 'quarter' && curQ === 1 ? 60 : 65], ['Contract to funded', fun.contractToFunded, 75]].forEach(function (s) { if (s[1] !== null && s[1] < s[2]) bott.push(s[0] + ': ' + s[1] + '% against ' + s[2] + '% plan'); });
+    if (fun && started) [['Application to preapproval', fun.appToPre, 55], ['Preapproval to contract', fun.preToContract, per === 'quarter' && curQ === 1 ? 60 : 65], ['Contract to funded', fun.contractToFunded, 75]].forEach(function (s) { if (s[1] !== null && s[1] < s[2]) bott.push(s[0] + ': ' + s[1] + '% against ' + s[2] + '% plan'); });
     if (signed) {
       var od = S.tasks.filter(function (t) { return owner(t) && isOpen(t) && t.due_date < t0; }).length; if (od) bott.push(od + ' overdue client calls across the team');
-      var un = Object.keys(S.loans).filter(function (k) { return S.loans[k].ownership_status !== 'verified' && S.loans[k].pipeline_status !== 'inactive' && S.loans[k].pipeline_status !== 'not_funded'; }).length; if (un) bott.push(un + ' borrowers awaiting verified LP ownership');
+      var un = Object.keys(S.loans).filter(function (k) { return needsOwner(S.loans[k]); }).length; if (un) bott.push(un + ' borrowers awaiting verified LP ownership');
     }
     if (sc && sc.some(function (x) { return !x; })) bott.push(sc.filter(function (x) { return !x; }).length + ' LP scorecards not entered this week');
     host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Leadership</div><h2>2027 Business Plan</h2><div class="cx-sub">' + esc(periodLabel) + ' · Targets from the final CORE Team 2027 Business Plan</div></div>' +
@@ -1169,8 +1178,8 @@
       (t0 < y + '-01-01' ? '<div class="cx-warn">The 2027 plan year begins January 1, 2027. Until then, actuals read "Not started" and required pace shows what each week will need.</div>' : '') +
       '<div class="cx-tiles">' +
       planTile('Funded loans', ns(funded ? funded.length : null), paceFoot(fp, 'fundings') + (per === 'year' ? ' · stretch ' + P.fundings.stretch : ''), nsCls(!!funded, 'hero'), signed ? 'plan-funded' : null) +
-      planTile('Unique relationship leads', fun ? ns(fun.leads) : 'Data unavailable', 'Target ' + leadTarget + (fun ? ' · Velocify unique leads, all sources; relationship vs. advertising split needs reconciliation' : ''), nsCls(!!fun)) +
-      planTile('Application starts', fun ? ns(fun.apps) : 'Data unavailable', 'Target ' + startTarget + ' · Velocify application conversions; Encompass file starts are not connected', nsCls(!!fun)) +
+      planTile('Unique relationship leads', started ? 'Data unavailable' : 'Not started', 'Target ' + leadTarget + ' · Requires a verified relationship-source count', nsCls(false)) +
+      planTile('Application starts', started ? 'Data unavailable' : 'Not started', 'Target ' + startTarget + ' · Requires Encompass file starts', nsCls(false)) +
       planTile('CCR introductions', ns(ccr ? ccr.named.length : null), 'Target ' + refTarget + ' unique' + (refFunded ? ' · ' + refFunded + ' funded' : '') + (ccr ? ' · ' + ccr.asked.length + ' requests' : ''), nsCls(!!ccr), signed ? 'plan-ccr' : null) +
       planTile('PCR introductions', ns(pcr ? pcr.named.length : null), 'Target ' + refTarget + ' unique' + (refFunded ? ' · ' + refFunded + ' funded' : '') + (pcr ? ' · ' + pcr.asked.length + ' requests' : ''), nsCls(!!pcr), signed ? 'plan-pcr' : null) +
       planTile('Team execution today', execu === null ? 'Data unavailable' : execu.pct === null ? 'No calls due' : execu.pct + '%', execu ? execu.completed.length + ' done · ' + execu.remaining.length + ' outstanding' : '', execu === null ? 'is-na' : '') +
@@ -1181,7 +1190,7 @@
       (funded && unclassified && started ? '<div class="cx-warn" style="margin-top:8px">Needs reconciliation: ' + unclassified + ' funded loans have no source category yet.</div>' : '') +
       '<p class="cx-note" style="margin-top:8px">Returning past clients (own financing) and past-client referrals (introducing someone else) are separate sources.</p></div>' +
       '<div class="cx-card"><h3>Conversion funnel</h3><div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>Stage</th><th class="cx-num">Plan</th><th class="cx-num">Actual</th><th>Source</th></tr></thead><tbody>' +
-      cvRow('Referred lead to 1003', fun ? fun.leadToApp : null, '80%+', 'Velocify cohort') + cvRow('Application start to preapproval', fun ? fun.appToPre : null, '55%', 'Velocify cohort') +
+      cvRow('Referred lead to 1003', null, '80%+', 'Requires a verified referred-lead cohort') + cvRow('Application start to preapproval', fun ? fun.appToPre : null, '55%', 'Velocify cohort') +
       cvRow('Preapproval to contract', fun ? fun.preToContract : null, per === 'quarter' && curQ === 1 ? '60% (Q1)' : '65%', 'Velocify cohort') + cvRow('Contract to funding', fun ? fun.contractToFunded : null, '75%', 'Velocify cohort') +
       cvRow('Referral introduction to funding', ccr && (ccr.named.length + pcr.named.length) ? Math.round(100 * (ccr.namedFunded.length + pcr.namedFunded.length) / (ccr.named.length + pcr.named.length)) : null, '25% modeled', 'LP referral status') +
       '</tbody></table></div><p class="cx-note" style="margin-top:8px">Cohort rates use each lead\'s current Velocify status (actual, not projected). Daniel\'s goal of 30%+ of clients generating referrals is a separate measure from the 25% modeled yield.</p></div></div>' +

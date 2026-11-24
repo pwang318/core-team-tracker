@@ -137,6 +137,7 @@
   };
   var FUNDED_COLS = {
     loan_number: [/^loan number$/],
+    lp2: [/^loan team member name\s*-\s*loan partner 2$/, /^loan partner 2$/, /^lp2$/],
     borrower_name: [/^borrower name$/],
     last_milestone: [/^last finished milestone$/],
     loan_officer: [/^loan officer$/],
@@ -217,6 +218,7 @@
     var out = m.rows.map(function (r) {
       var o = {
         loan_number: normalizeLoanNumber(r.loan_number),
+        lp2: clean(r.lp2),
         borrower_name: clean(r.borrower_name),
         last_milestone: clean(r.last_milestone),
         closed_date: toIsoDate(r.closed_date),
