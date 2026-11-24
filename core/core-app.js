@@ -169,7 +169,27 @@
 
   // ================================================================ shell: styles, nav, views
   var lastLp = null;
+  function installClientCallScripts() {
+    var anchor = $('#scriptsModal #scriptNoResults');
+    if (!anchor || $('#scriptsModal [data-script-cat="core-client-calls"]')) return;
+    var category = document.createElement('details');
+    category.className = 'script-cat cx cx-supporting';
+    category.dataset.scriptCat = 'core-client-calls';
+    category.style.marginBottom = '10px';
+    category.innerHTML = '<summary>CORE Team client calls</summary><div class="script-cat-body" style="padding:14px">' +
+      ['contract', 'tuesday', 'preclose', 'pc30', 'pc60', 'pc90'].map(function (type) {
+        var task = L.TASK_TYPES[type];
+        return '<details class="cx-card" data-core-script="' + type + '" style="margin-bottom:8px;padding:10px 14px">' +
+          '<summary style="cursor:pointer"><b>' + esc(task.label) + '</b> · ' + esc(task.referral) + '</summary>' +
+          '<p class="cx-note">' + esc(L.SCRIPT_NOTES[type]) + '</p><ol>' +
+          L.CHECKS[type].map(function (check) { return '<li>' + esc(check[1]) + '</li>'; }).join('') +
+          '</ol></details>';
+      }).join('') + '</div>';
+    anchor.after(category);
+  }
+
   function injectShell() {
+    installClientCallScripts();
     if (!$('link[data-core-css]')) {
       var link = document.createElement('link'); link.rel = 'stylesheet'; link.href = './core/core-app.css?v=20261124b'; link.setAttribute('data-core-css', '1');
       document.head.appendChild(link);
