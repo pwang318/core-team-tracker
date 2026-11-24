@@ -219,11 +219,22 @@
     if (page && !$('#core-today')) {
       var head = page.querySelector('.ct-page-head');
       var tdy = document.createElement('section'); tdy.id = 'core-today'; tdy.className = 'cx';
-      page.insertBefore(tdy, head ? head.nextSibling : page.firstChild);
+      var builderShortcut = document.createElement('div');
+      builderShortcut.id = 'core-builder-shortcut';
+      builderShortcut.hidden = true;
+      builderShortcut.innerHTML = '<button id="lp-builder-shortcut" class="ct-link-btn" type="button" hidden></button>';
+      page.insertBefore(builderShortcut, head ? head.nextSibling : page.firstChild);
+      page.insertBefore(tdy, builderShortcut.nextSibling);
       var det = document.createElement('details'); det.id = 'core-supporting'; det.className = 'cx cx-supporting';
-      det.innerHTML = '<summary><span>Other daily priorities</span><span class="cx-sub">Work order, lead and preapproval follow-ups, new builds, Face Time, scorecard detail and team handoffs</span></summary>';
+      det.innerHTML = '<summary><span>Other daily priorities</span><span class="cx-sub">Builder follow-ups, Face Time, scorecard detail, and RM handoffs</span></summary>';
       $all(':scope > section.ct-card', page).forEach(function (n) { det.appendChild(n); });
       page.insertBefore(det, tdy.nextSibling);
+      builderShortcut.querySelector('button').addEventListener('click', function () {
+        var work = det.querySelector('.ct-execution-card');
+        if (!work || work.hidden) return;
+        det.open = true;
+        work.scrollIntoView({ block: 'start' });
+      });
       try { det.open = localStorage.getItem('core.supporting.open') === '1'; } catch (e) {}
       det.addEventListener('toggle', function () { try { localStorage.setItem('core.supporting.open', det.open ? '1' : '0'); } catch (e) {} });
     }
@@ -441,6 +452,8 @@
     var privateView = !!(activeKey() && S.tier);
     var supporting = $('#core-supporting');
     if (supporting) supporting.hidden = !privateView;
+    var builderShortcut = $('#core-builder-shortcut');
+    if (builderShortcut) builderShortcut.hidden = !privateView;
     if (!privateView) {
       host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) + '</div>';
       $all('[data-public-tile]', host).forEach(function (button) {

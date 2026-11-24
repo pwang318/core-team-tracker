@@ -1325,7 +1325,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-page-head"><div><div class="ct-eyebrow">LOAN PARTNER</div><h1 id="lp-hero-name">Weekly Execution</h1><div class="ct-page-sub" id="lp-hero-sub">Loading current work…</div></div><div class="ct-role-pill" id="lp-v2-role-pill">LP2 · Client + transaction execution</div></div>
 <section class="ct-card ct-scorecard-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>My current position</h2></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="ct-link-btn" onclick="lpv4OpenMyScorecard(currentUser)" type="button">Update my scorecard</button><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div></div><div class="ct-velocify-notice" style="padding:11px 13px;border:1px solid #d4dce6;border-radius:10px;background:#f4f7fa;color:#27445c;font-size:12px;line-height:1.5;margin:10px 0"><strong>Referral lead data notice:</strong> Referral lead data updates daily and may not reflect the most recent activity. <strong>Check Velocify for the most up-to-date lead information, status, and activity.</strong></div><div id="lp-v2-scorecard"><div class="ct-loading">Loading scorecard…</div></div></section>
 <section class="ct-card ct-focus-card"><div class="ct-section-head"><div><div class="ct-kicker">RELATIONSHIP MOMENT</div><h2>Face Time priorities</h2></div><button class="ct-link-btn" onclick="lpv2Route('facetime',this)" type="button">Open Face Time</button></div><div class="ct-embedded-block" id="lp-facetime-focus"><div class="ct-loading">Loading Face Time priorities…</div></div></section>
-<section class="ct-card ct-execution-card"><div class="ct-section-head"><div><div class="ct-kicker">PRIORITY WORK</div><h2>Today’s work order</h2></div></div><div class="ct-helper">Work under-contract buyer/client updates first. Then review preapprovals and prequals for the next meaningful move. Routine listing-agent relationship work belongs to RM.</div><div class="ct-stall-explainer"><strong>What “Stalled” means:</strong> the buyer has stayed in the same unresolved stage for 5+ days without a meaningful status update. Open the buyer, choose the reason they are stuck, document what changed, and set the next action/owner. Updating the record resets the stall clock.</div><div id="lp-weekly-execution-host"></div></section>
+<section class="ct-card ct-execution-card" hidden><div id="lp-weekly-execution-host"></div></section>
 <section class="ct-card ct-handoff-card"><div class="ct-section-head"><div><div class="ct-kicker">TEAM HANDOFFS</div><h2>RM → LP actions</h2></div></div>
 <div class="ct-embedded-block" id="lp-rm-flags-for-you"><div id="lp-rm-flags-for-you-list"></div><span id="lp-rm-flag-badge" style="display:none"></span></div>
 <div class="lp-rm-response-panel" id="lp-rm-responses"><details id="lp-rm-responses-details"><summary><b>Recent RM responses</b><span id="lp-rm-response-badge" style="display:none">NEW</span><span id="lp-rm-response-open-label">View ▾</span></summary><button id="lp-rm-response-clear-all" type="button">Clear alert</button><div id="lp-rm-response-summary"></div><div id="lp-rm-responses-list">Loading…</div></details></div>
@@ -8126,7 +8126,7 @@ async function ctLoadRecentRmResponses(lp){
       :actualReplies.length+" recent RM response"+(actualReplies.length===1?"":"s")+" — no unread alerts.";
     if(openLabel)openLabel.textContent=unread.length?"Open response"+(unread.length===1?"":"s")+" ▾":"View responses ▾";
 
-    var html='<div style="max-height:320px;overflow-y:auto;padding-right:3px">';
+    var html='';
     visibleRows.forEach(function(r,i){
       var agent=r.agent_name?displayName(r.agent_name):"General flag",when=r.rm_note_at?fmt(String(r.rm_note_at).slice(0,10)):"",by=r.rm_note_by||"RM";
       var flagText=String(r.flag_note||"").trim(),response=String(r.rm_note||"").trim(),missingResponse=r.handled&&!response;
@@ -14066,13 +14066,23 @@ function renderLpState(s,lp){
   }).join('');
   const buildReviews=[...(s.buildReviews||[])].sort((a,b)=>{const dateA=a.close||'9999-12-31',dateB=b.close||'9999-12-31';return dateA.localeCompare(dateB)||(a.due===b.due?0:a.due?-1:1)||String(a.client||'').localeCompare(String(b.client||''))}),buildDue=buildReviews.filter(x=>x.due).length,buildScheduled=buildReviews.length-buildDue;
   const buildReviewMarkup=buildReviews.length?'<section class="v143-build-review"><div class="v143-build-review-head"><div><h4>⚠ New-build buyer follow-up · Priority worklist</h4><p>Sorted by earliest closing date · Full strategy consultation at 45 days before closing, then weekly buyer check-ins through closing.</p></div><span>'+buildDue+' due · '+buildScheduled+' scheduled</span></div>'+buildReviews.map(x=>{const closeLabel=x.close?new Date(x.close+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Not set',dueLabel=x.dueDate?new Date(x.dueDate+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Not set',overdue=x.due&&x.dueDate&&x.dueDate<new Date().toLocaleDateString('en-CA'),agent=meta(x.row.notes,'BUYER_AGENT')||'Buyer agent not listed',milestone=meta(x.row.notes,'TXN_MILESTONE')||'Not provided',label=x.kind==='consult'?'45-day full consultation':x.kind==='weekly'?'Weekly buyer check-in':'Closing date needed',button=x.kind==='missing'?'<div class="v143-build-note">Add a projected closing date to the source record so the consultation can be scheduled.</div>':x.due?'<button type="button" onclick="v143OpenBuildTouch(\''+encodeURIComponent(x.key)+'\',\''+x.event+'\')">'+(x.event==='CONSULT'?'Log full consultation':'Log weekly client check-in')+'</button>':'<span class="v143-build-next">Next touch '+esc(x.dueDate)+'</span>';return'<div class="v143-build-row '+(overdue?'overdue':x.due?'due':'scheduled')+'"><div><b>'+esc(x.client||'Unnamed borrower')+'</b><small>'+esc(agent)+' · Close '+esc(closeLabel)+'</small><small class="v143-build-milestone">Loan milestone: '+esc(milestone)+'</small></div><div><b>'+esc(label)+'</b><small>'+esc(x.status)+' · Due '+esc(dueLabel)+'</small></div><div>'+button+'</div></div>'}).join('')+'</section>':'';
-  const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');
-  if(rowsEl)rowsEl.innerHTML=html+buildReviewMarkup||'<div class="v56-empty">No builder follow-ups on the current plan.</div>';
-  if(sumEl)sumEl.textContent='';
+  const rowsEl=document.getElementById('v56Rows');
+  if(rowsEl)rowsEl.innerHTML=html+buildReviewMarkup;
+  const dueCount=builderRows.filter(r=>!r._builderScheduled&&!doneRecord(r,s)).length+buildDue;
+  const scheduledCount=builderRows.length+buildReviews.length;
+  showBuilderWork(scheduledCount ? (dueCount ? 'Builder follow-ups · '+dueCount+' due' : 'Builder follow-ups · scheduled') : '');
+}
+function showBuilderWork(label){
+  const section=document.querySelector('#view-lp .ct-execution-card');
+  const shortcut=document.getElementById('lp-builder-shortcut');
+  const summary=document.getElementById('v56Summary');
+  if(section)section.hidden=!label;
+  if(shortcut){shortcut.hidden=!label;shortcut.textContent=label;}
+  if(summary){summary.hidden=true;summary.textContent='';}
 }
 
 async function loadLp(lp){
-  lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();if(!ensureExec())return;state.lp=lp;try{const s=await planState(lp);renderLpState(s,lp)}catch(e){console.error('Builder follow-up data could not be loaded',e);const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');if(sumEl)sumEl.textContent='Builder data unavailable';if(rowsEl)rowsEl.innerHTML='<div class="v56-empty">Builder follow-ups could not be loaded. Refresh the tracker to retry.</div>'}
+  lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();if(!ensureExec())return;showBuilderWork('');state.lp=lp;try{const s=await planState(lp);if(state.lp===lp)renderLpState(s,lp)}catch(e){if(state.lp!==lp)return;showBuilderWork('Builder follow-ups unavailable');console.error('Builder follow-up data could not be loaded',e);const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');if(sumEl)sumEl.textContent='Builder data unavailable';if(rowsEl)rowsEl.innerHTML='<div class="v56-empty">Builder follow-ups could not be loaded. Refresh the tracker to retry.</div>'}
 }
 window.v310LoadPlan=loadLp;window.ctV56LoadLpTuesday=loadLp;
 window.v57BuyerClassDirty=function(sel){const wrap=sel&&sel.closest('.v56-actions'),btn=wrap&&wrap.querySelector('.v57-save-class');if(btn){btn.classList.remove('saved');btn.disabled=false;btn.textContent='Save status'}};
@@ -14493,7 +14503,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261124g"></script><script defer src="./core/core-app.js?v=20261124p"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261124g"></script><script defer src="./core/core-app.js?v=20261124q"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
@@ -15158,7 +15168,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
  const date=v=>{const d=new Date(v);return Number.isFinite(d.getTime())?d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'unavailable'};
  function bar(message,warning){
    let el=document.getElementById('ct-v155-sync-indicator');
-   if(!el){el=document.createElement('div');el.id='ct-v155-sync-indicator';el.setAttribute('role','status');el.style.cssText='position:fixed;right:12px;bottom:12px;z-index:3000;max-width:min(450px,calc(100vw - 24px));font:12px/1.4 Arial,sans-serif;padding:10px 12px;border:1px solid #cfdce7;border-radius:10px;box-shadow:0 5px 18px #0002;background:#fff;color:#21435c';document.body.appendChild(el);}
+   const hub=document.querySelector('#view-data-hub');if(!hub)return;
+   if(!el){el=document.createElement('div');el.id='ct-v155-sync-indicator';el.className='ct-card';el.setAttribute('role','status');el.style.cssText='margin:12px 0;padding:10px 12px;font-size:12px;color:#21435c';hub.appendChild(el);}
    el.style.borderColor=warning?'#e7ba7f':'#cfdce7';el.style.background=warning?'#fff8ed':'#fff';el.textContent=message;
  }
  async function refresh(force){
