@@ -570,7 +570,14 @@
     if (S.tier !== 'team') return false;
     return !(t.status === 'completed' || t.status === 'cancelled' || t.status === 'needs_review');
   }
-  var PC60_NEXT_CALL = 'Make the 90-day follow-up call';
+  var NEXT_ACTION_BY_CALL = {
+    tuesday: 'Make the next Tuesday update',
+    contract: 'Make the first Tuesday update',
+    preclose: 'Confirm closing with the borrower',
+    pc30: 'Make the 60-day follow-up call',
+    pc60: 'Make the 90-day follow-up call',
+    pc90: 'Schedule a future client check-in'
+  };
   function renderDrawer(id) {
     var ov = $('.cx-overlay[data-task="' + id + '"]'); if (!ov) return;
     var t = S.tasks.find(function (x) { return x.id === id; });
@@ -578,7 +585,8 @@
     if (!t) { box.innerHTML = '<div class="cx-err">This record is no longer available.</div><button class="cx-btn" type="button" data-cx="close">Close</button>'; box.querySelector('[data-cx="close"]').onclick = closeDrawer; return; }
     var loan = S.loans[t.loan_number] || {}, editable = canEdit(t), ck = t.script_checks || {}, type = t.task_type;
     var isTue = type === 'tuesday', isPc = /^pc/.test(type), dis = editable ? '' : ' disabled';
-    var selectedNextAction = t.next_action === PC60_NEXT_CALL ? PC60_NEXT_CALL : t.next_action ? 'other' : '';
+    var nextActions = [NEXT_ACTION_BY_CALL[type], 'Send the information we discussed', 'Follow up on a borrower concern', 'Call the borrower back'];
+    var selectedNextAction = nextActions.includes(t.next_action) ? t.next_action : t.next_action ? 'other' : '';
     var checks = (L.CHECKS[type] || []).filter(function (c) { return !isTue || c[0] !== 'referral_ask'; }).map(function (c) {
       return '<label class="cx-check' + (ck[c[0]] ? ' done' : '') + '"><input type="checkbox" data-check="' + c[0] + '"' + (ck[c[0]] ? ' checked' : '') + dis + '><span>' + esc(c[1]) + '</span></label>';
     }).join('') + (type === 'pc60' ? '<label class="cx-check' + (ck.rate_drop_na ? ' done' : '') + '"><input type="checkbox" data-check="rate_drop_na"' + (ck.rate_drop_na ? ' checked' : '') + dis + '><span>The Five-Year Rate Drop Pledge does not apply to this loan</span></label>' : '');
@@ -626,10 +634,10 @@
         '<fieldset id="cx-agent" aria-describedby="cx-agent-help" style="border:0;padding:0;margin:0"><label class="cx-f" for="cx-ao">Buyer agent contact outcome</label><select id="cx-ao" name="agent_outcome"' + dis + '>' + opts(L.AGENT_OUTCOMES, t.agent_outcome || (editable && !agentPresent ? 'no_buyer_agent' : null), 'Select outcome') + '</select>' +
         '<div id="cx-agent-notes"' + (t.agent_notes || ['spoke', 'update_sent'].includes(t.agent_outcome) ? '' : ' class="cx-hide"') + '><label class="cx-f" for="cx-an">Buyer agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></div></fieldset></section>' : '') +
       '<details id="cx-follow-up" class="cx-card" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>Follow-up</b></summary><div class="cx-split"><div>' +
-      (type === 'pc60' ? '<label class="cx-f" for="cx-na-choice">Next action</label><select id="cx-na-choice"' + dis + '>' +
-        opts([[PC60_NEXT_CALL, PC60_NEXT_CALL], ['other', 'Other next action']], selectedNextAction, 'Select next action') + '</select>' +
-        '<div id="cx-na-other"' + (selectedNextAction === 'other' ? '' : ' class="cx-hide"') + '><label class="cx-f" for="cx-na">Describe the next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(selectedNextAction === 'other' ? t.next_action : '') + '"' + dis + '></div>'
-        : '<label class="cx-f" for="cx-na">Next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(t.next_action || '') + '"' + dis + '>') + '</div>' +
+      '<label class="cx-f" for="cx-na-choice">Next action</label><select id="cx-na-choice"' + dis + '>' +
+      opts(nextActions.map(function (action) { return [action, action]; }).concat([['other', 'Other next action']]), selectedNextAction, 'Select next action') + '</select>' +
+      '<div id="cx-na-other"' + (selectedNextAction === 'other' ? '' : ' class="cx-hide"') + '><label class="cx-f" for="cx-na">Describe the next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(selectedNextAction === 'other' ? t.next_action : '') + '"' + dis + '></div></div>' +
+
       '<div><label class="cx-f" for="cx-nd">Follow-up date</label><input id="cx-nd" type="date" name="next_action_date" value="' + esc(t.next_action_date || '') + '"' + dis + '></div></div></details>' +
       (editable ? '<details id="cx-reqs" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"></summary><div style="margin-top:8px"></div></details>' : '') +
       '<div id="cx-exception" class="cx-card cx-hide" style="margin-top:14px;padding:14px"><h3>Client concern or exception</h3><p class="cx-note">Use when a concern needs resolution or the required conversation could not happen. It is not counted as completed.</p>' +
