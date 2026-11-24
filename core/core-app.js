@@ -311,7 +311,7 @@
     var text = t.status === 'open' ? relDays(t.due_date) : out;
     var issue = L.isIssue(t) && t.status !== 'exception' ? '<span class="cx-chip chip-overdue">Client concern</span>' : '';
     var meta = [typeLabel(t.task_type), 'Due ' + fmtDate(t.due_date)];
-    if (t.task_type === 'tuesday') {
+    if (['tuesday', 'contract', 'preclose'].includes(t.task_type)) {
       if (loan.loan_type) meta.push(loan.loan_type);
       if (t.loan_number) meta.push('Loan ending ' + String(t.loan_number).slice(-4));
     }
