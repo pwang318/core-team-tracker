@@ -1323,6 +1323,11 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="welcome"><div class="welcome-logo">CORE TEAM</div><h2>Intelligence Platform</h2><p>Select your name to see current execution work, Tuesday active-contract updates, and scorecard progress. Shared updates sync across the team.</p></div>
 </div><div class="view" id="view-lp"><div class="ct-lp-page">
 <div class="ct-page-head"><div><div class="ct-eyebrow">LOAN PARTNER</div><h1 id="lp-hero-name">Weekly Execution</h1><div class="ct-page-sub" id="lp-hero-sub">Loading current work…</div></div><div class="ct-role-pill" id="lp-v2-role-pill">LP2 · Client + transaction execution</div></div>
+<section class="ct-card" id="lp-post-closing" aria-labelledby="lp-post-closing-title">
+<div class="ct-section-head"><h2 id="lp-post-closing-title">Post-closing calls</h2></div>
+<p role="status">Select an LP to view post-closing calls.</p>
+<ul></ul>
+</section>
 <section class="ct-card ct-scorecard-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>My current position</h2></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="ct-link-btn" onclick="lpv4OpenMyScorecard(currentUser)" type="button">Update my scorecard</button><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div></div><div class="ct-velocify-notice" style="padding:11px 13px;border:1px solid #d4dce6;border-radius:10px;background:#f4f7fa;color:#27445c;font-size:12px;line-height:1.5;margin:10px 0"><strong>Referral lead data notice:</strong> Referral lead data updates daily and may not reflect the most recent activity. <strong>Check Velocify for the most up-to-date lead information, status, and activity.</strong></div><div id="lp-v2-scorecard"><div class="ct-loading">Loading scorecard…</div></div></section>
 <section class="ct-card ct-focus-card"><div class="ct-section-head"><div><div class="ct-kicker">RELATIONSHIP MOMENT</div><h2>Face Time priorities</h2></div><button class="ct-link-btn" onclick="lpv2Route('facetime',this)" type="button">Open Face Time</button></div><div class="ct-embedded-block" id="lp-facetime-focus"><div class="ct-loading">Loading Face Time priorities…</div></div></section>
 <section class="ct-card ct-execution-card"><div class="ct-section-head"><div><div class="ct-kicker">PRIORITY WORK</div><h2>Today’s work order</h2></div></div><div class="ct-helper">Work under-contract buyer/client updates first. Then review preapprovals and prequals for the next meaningful move. Routine listing-agent relationship work belongs to RM.</div><div class="ct-stall-explainer"><strong>What “Stalled” means:</strong> the buyer has stayed in the same unresolved stage for 5+ days without a meaningful status update. Open the buyer, choose the reason they are stuck, document what changed, and set the next action/owner. Updating the record resets the stall clock.</div><div id="lp-weekly-execution-host"></div></section>
@@ -1919,6 +1924,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <script src="./assets/lp-core.js"></script>
 <script src="./assets/encompass-funded.js"></script>
+<script src="./assets/post-closing-worklist.js"></script>
 </div>
 <style>
 #v33SharedFaceTimeModal{display:none;position:fixed;inset:0;background:rgba(29,31,39,.36);z-index:12050;align-items:center;justify-content:center;padding:18px}
@@ -2727,6 +2733,7 @@ function openOperatingStandardView(btn){
       '<div class="ct-gates-inline">'+conversionHtml+'</div>';
   }
   window.lpv2PrimeLp=function(lp){
+    window.ctShowPostClosingWorklist(lp);
     const name=document.getElementById('lp-hero-name');if(name)name.textContent=lp+' · Weekly Execution';
     const sub=document.getElementById('lp-hero-sub');if(sub)sub.textContent=lp==='Isaak'?'Convert early buyer activity into complete, clean applications and support the front end.':'Move active buyers, execute under-contract communication, and protect the client experience.';
     lpv2RenderLpScorecard(lp);
