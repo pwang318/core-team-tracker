@@ -115,7 +115,7 @@
 
   // ================================================================ state
   var S = { tier: null, tasks: [], loans: {}, coverage: [], corrections: [], signoffs: [], imports: [], loadedAt: null, loading: null, error: null,
-    lpFilter: null, cmdTab: 'overview', cmdPeriod: 'week', records: null, planPeriod: 'year', ext: null, scorecards: null, _rec: {} };
+    lpFilter: null, cmdTab: 'overview', tuesdayStatus: 'open', cmdPeriod: 'week', records: null, planPeriod: 'year', ext: null, scorecards: null, _rec: {} };
   function isManager() { return S.tier === 'manager' || S.tier === 'admin'; }
   function canWrite() { return S.tier === 'team' || isManager(); }
   function hasImport(kind) { return S.imports.some(function (r) { return r.kind === kind; }); }
@@ -805,7 +805,7 @@
         (S.loading ? 'Loading team data…' : 'Open Command Center from your shared CORE team link.') + '</div></div>';
       return;
     }
-    var tabs = [['overview', 'Call overview'], ['records', 'Call records'], ['data', 'Weekly imports']];
+    var tabs = [['overview', 'Call overview'], ['tuesday', 'Tuesday worklist'], ['records', 'Call records'], ['data', 'Weekly imports']];
     var more = [['scorecards', 'Scorecards'], ['production', 'Production metrics'], ['unassigned', 'Assign loans'], ['funding', 'Funding review'], ['coverage', 'Coverage'], ['corrections', 'Corrective actions']];
     var p = S.cmdPeriod;
     host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><h2>Command Center</h2><div class="cx-sub">' + freshnessLine() + '</div></div>' +
@@ -818,6 +818,11 @@
     bindAccess(host);
     $all('[data-tab]', host).forEach(function (b) { b.addEventListener('click', function () { S.cmdTab = b.dataset.tab; renderCommand(); }); });
     $('[data-cx="manager-tool"]', host).addEventListener('change', function (event) { if (event.target.value) { S.cmdTab = event.target.value; renderCommand(); } });
+    $all('[data-tuesday-status]', host).forEach(function (b) { b.addEventListener('click', function () {
+      S.tuesdayStatus = b.dataset.tuesdayStatus;
+      renderCommand();
+      $('[data-tuesday-status="' + S.tuesdayStatus + '"]', host).focus();
+    }); });
     var ps = $('[data-cx="period"]', host); if (ps) ps.addEventListener('change', function () { S.cmdPeriod = ps.value; renderCommand(); });
     var ex = $('[data-cx="export"]', host); if (ex) ex.addEventListener('click', function () { exportWorkbook(p); });
     wireCommandBody(host);
@@ -849,6 +854,7 @@
   function commandBody(tab, period) {
     var range = periodRange(period); S._rec = {};
     if (tab === 'overview') return overviewBody(range, period);
+    if (tab === 'tuesday') return tuesdayWorklist();
     if (tab === 'records') return recordsBody();
     if (tab === 'scorecards') return scorecardsBody();
     if (tab === 'production') return productionBody(range, period);
@@ -858,6 +864,24 @@
     if (tab === 'corrections') return correctionsBody();
     if (tab === 'data') return dataBody();
     return '';
+  }
+  function tuesdayWorklist() {
+    var completed = S.tuesdayStatus === 'completed';
+    var sections = LPS.map(function (lp) {
+      var tasks = lpBuckets(lp)[completed ? 'tue-completed' : 'tue-remaining'];
+      return tasks.length ? '<section class="cx-card"><h3>' + esc(lp) + ' · ' + tasks.length + '</h3>' + listHtml(tasks) + '</section>' : '';
+    }).join('');
+    return '<div class="cx-stack"><div class="cx-head"><h3>Tuesday updates</h3><div class="cx-row">' +
+      [['open', 'Still open'], ['completed', 'Completed']].map(function (option) {
+        var selected = option[0] === S.tuesdayStatus;
+        return '<button type="button" class="cx-btn' + (selected ? ' primary' : '') + '" data-tuesday-status="' + option[0] + '" aria-pressed="' + selected + '">' + option[1] + '</button>';
+      }).join('') + '</div></div>' +
+      (sections || '<div class="cx-empty">' + (completed ? 'No completed updates this week.' : 'No open updates for the loan partners.') + '</div>') + '</div>';
+  }
+  function openTuesdayWorklist() {
+    S.cmdTab = 'tuesday';
+    S.tuesdayStatus = 'open';
+    openView('core-command');
   }
   function overviewBody(range, period) {
     var t0 = today(), rows = teamStats(range);
@@ -1328,12 +1352,13 @@
   // ================================================================ boot
   function boot() {
     try { injectShell(); } catch (e) { console.error('CORE module shell', e); }
+    if (new URLSearchParams(location.search).get('view') === 'tuesday') openTuesdayWorklist();
     if (activeKey()) loadAll(); else { loadScorecards(); renderAll(); }
     setInterval(function () { if (!document.hidden && activeKey() && S.tier && !$('.cx-overlay')) loadAll(); }, 60000);
     document.addEventListener('visibilitychange', function () { if (!document.hidden && activeKey() && S.loadedAt && Date.now() - S.loadedAt > 20000 && !$('.cx-overlay')) loadAll(); });
     window.addEventListener('hashchange', function () { var k = readHashKey(); if (k) { setKey(k); loadAll(); } });
     window.addEventListener('storage', function (e) { if (e.key === KEY_STORE) { teamKey = e.newValue; loadAll(); } });
   }
-  window.CoreApp = { open: openView, managerSignIn: managerSignIn, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, _rpc: function (fn, args) { return apiAct(fn, args); } };
+  window.CoreApp = { open: openView, openTuesdayWorklist: openTuesdayWorklist, managerSignIn: managerSignIn, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, _rpc: function (fn, args) { return apiAct(fn, args); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
