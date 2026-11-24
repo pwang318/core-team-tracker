@@ -1918,6 +1918,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 </div>
 <script src="./assets/lp-core.js"></script>
+<script src="./assets/encompass-funded.js"></script>
 </div>
 <style>
 #v33SharedFaceTimeModal{display:none;position:fixed;inset:0;background:rgba(29,31,39,.36);z-index:12050;align-items:center;justify-content:center;padding:18px}
@@ -4590,7 +4591,37 @@ function fundedLocal(){try{return JSON.parse(localStorage.getItem('ct_funded_uni
 async function fundedData(force){if(!force&&window.__CT_V56_FUNDED)return window.__CT_V56_FUNDED;const server=await fundedServer(),local=fundedLocal();let best=server||local||null;if(server&&local){const st=String(server.asOf||''),lt=String(local.asOf||'');best=lt>st?local:server}window.__CT_V56_FUNDED=best;return best}
 window.ctV56GetFundedSnapshot=fundedData;
 async function uploadFunded(file){if(!file)return;const st=document.getElementById('ctFundedStatus');if(st)st.textContent='Reviewing '+file.name+'…';try{const X=await xlsx(),wb=X.read(await file.arrayBuffer(),{type:'array',cellDates:true}),ws=wb.Sheets.Data||wb.Sheets.Table||wb.Sheets[wb.SheetNames[0]],raw=X.utils.sheet_to_json(ws,{defval:''});if(!raw.length)throw new Error('No funded rows found.');const required=['Loan Number','Loan Officer','Closed Date'],missing=required.filter(k=>!Object.prototype.hasOwnProperty.call(raw[0],k));if(missing.length)throw new Error('Missing required columns: '+missing.join(', '));const seen=new Set(),cleanRows=[];for(const r of raw){const loan=String(r['Loan Number']||'').trim(),closed=dateText(r['Closed Date']),lo=String(r['Loan Officer']||'').trim(),buyer=String(r['Borrower Name']||'').trim()||'Buyer name not recorded';if(!loan||!closed||!/daniel\s+sa/i.test(lo)||seen.has(loan))continue;seen.add(loan);cleanRows.push({closed,buyer,type:String(r['Loan Type']||'').trim()||'—',hash:await txnHash(loan)})}if(!cleanRows.length)throw new Error('No Daniel Sa funded loans with a Closed Date were found.');const months={};cleanRows.forEach(x=>{const m=x.closed.slice(0,7);months[m]=(months[m]||0)+1});const batch='FUNDED-'+Date.now(),snap={total:cleanRows.length,asOf:cleanRows.map(x=>x.closed).sort().pop(),source:file.name+' · Encompass',months,rows:cleanRows,batch};localStorage.setItem('ct_funded_units_v1',JSON.stringify(snap));window.__CT_V56_FUNDED=snap;const now=new Date().toISOString().slice(0,10),payload=[{agent_name:'Daniel Sa',act_type:FUNDED,act_date:now,outcome:'Snapshot loaded',notes:'[FUNDED_KIND:HEADER]'+tag('FUNDED_BATCH',batch)+tag('FUNDED_TOTAL',snap.total)+tag('FUNDED_ASOF',snap.asOf)}].concat(cleanRows.map(x=>({agent_name:'Daniel Sa',act_type:FUNDED,act_date:x.closed,outcome:'Funded',notes:'[FUNDED_KIND:ROW]'+tag('FUNDED_BATCH',batch)+tag('FUNDED_HASH',x.hash)+tag('FUNDED_BUYER',encodeURIComponent(x.buyer))+tag('FUNDED_LOAN_TYPE',x.type)})));for(let i=0;i<payload.length;i+=100)await sbFetch('POST','amanda_activities',payload.slice(i,i+100));if(st)st.textContent=snap.total+' unique funded units loaded through '+snap.asOf+'. Shared snapshot updated.';await refreshTeam()}catch(e){console.error(e);if(st)st.textContent='Upload not applied: '+(e.message||e)}finally{const i=document.getElementById('ctFundedFile');if(i)i.value=''}}
-function installFundedUpload(){const grid=document.querySelector('#view-data-hub .ct-data-grid');if(!grid||document.getElementById('ctFundedUploadCard'))return;const s=document.createElement('section');s.id='ctFundedUploadCard';s.className='ct-card ct-data-source ct-funded-upload';s.innerHTML='<div class="ct-kicker">WEEKLY · TEAM PRODUCTION</div><h2>Encompass Funded Units</h2><p>Upload the latest funded-units report. Each unique Daniel Sa loan with a valid Closed Date counts once.</p><div class="ct-data-actions"><button class="ct-primary-btn" type="button" onclick="document.getElementById(\'ctFundedFile\').click()">Upload Weekly Funded Units</button></div><input id="ctFundedFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="ct-funded-status" id="ctFundedStatus">No shared funded report loaded yet.</div>';grid.prepend(s);s.querySelector('input').addEventListener('change',e=>uploadFunded(e.target.files&&e.target.files[0]))}
+async function previewFunded(file, status) {
+  if (!file) return;
+  status.textContent='Checking workbook…';
+  try {
+    const X=await xlsx();
+    const workbook=X.read(await file.arrayBuffer(),{type:'array',cellDates:true});
+    const {selectFundedSheet,validateFundedRows}=window.ctEncompassFunded;
+    const rows=X.utils.sheet_to_json(selectFundedSheet(workbook),{defval:''});
+    const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+    const {eligible,review,nonFunded}=validateFundedRows(rows,today);
+    status.textContent=eligible.length+' funded loans eligible for scheduling · '+review.length+' validation issues · '+nonFunded+' other milestones. Verify LP ownership separately.';
+  } catch (error) {
+    status.textContent='Workbook could not be validated: '+error.message;
+  }
+}
+function installFundedUpload(){const grid=document.querySelector('#view-data-hub .ct-data-grid');if(!grid||document.getElementById('ctFundedUploadCard'))return;const s=document.createElement('section');s.id='ctFundedUploadCard';s.className='ct-card ct-data-source ct-funded-upload';s.innerHTML='<div class="ct-kicker">WEEKLY · TEAM PRODUCTION</div><h2>Encompass Funded Units</h2><p>Upload the latest funded-units report. Each unique Daniel Sa loan with a valid Closed Date counts once.</p><div class="ct-data-actions"><button class="ct-primary-btn" type="button" onclick="document.getElementById(\'ctFundedFile\').click()">Upload Weekly Funded Units</button></div><input id="ctFundedFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="ct-funded-status" id="ctFundedStatus">No shared funded report loaded yet.</div>';grid.prepend(s);s.querySelector('input').addEventListener('change',e=>uploadFunded(e.target.files&&e.target.files[0]));
+ const preview=document.createElement('button');
+ preview.type='button';
+ preview.className='ct-primary-btn';
+ preview.textContent='Validate workbook';
+ const input=document.createElement('input');
+ input.type='file';
+ input.accept='.xlsx,.xls';
+ input.hidden=true;
+ const status=document.createElement('p');
+ status.setAttribute('role','status');
+ preview.onclick=()=>input.click();
+ input.onchange=()=>{const file=input.files[0];input.value='';previewFunded(file,status)};
+ s.querySelector('.ct-data-actions').append(preview);
+ s.append(input,status);
+}
 
 function total(d,k){return Object.keys(d||{}).reduce((n,x)=>n+((x===k||x.startsWith(k+'_'))?(Number(d[x])||0):0),0)}
 function appConverted(r){try{return typeof ctIsLeadAppConverted==='function'?ctIsLeadAppConverted(r):/started|approval|pre-approval|preapproval|contract|processing|underwrit|clear to close|funded|closed/i.test(String(r&&r.status||''))}catch(e){return false}}
