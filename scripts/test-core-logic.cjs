@@ -71,8 +71,8 @@ t('pipeline parsing rejects wrong report', () => {
 });
 t('funded parsing reconciles non-Funding milestones', () => {
   const r = L.parseFunded([
-    ['Loan Number', 'Borrower Name', 'Messages', 'Last Finished Milestone', 'Loan Officer', 'Subject Property Address', 'Subject Property City', 'Subject Property State', 'Est Closing Date', 'Loan Type', 'Buyers Agent Name', 'Closed Date', 'Loan Processor', 'Referral Source Name'],
-    ['91000000001', 'Test, Echo', '1', 'Funding', 'LO', '1 Main', 'Columbus', 'OH', '2026-01-02', 'FHA', 'Big Realty', '2026-01-02 00:00:00', 'P', ''],
+    ['Loan Number', 'Borrower Name', 'Messages', 'Last Finished Milestone', 'Loan Officer', 'Subject Property Address', 'Subject Property City', 'Subject Property State', 'Est Closing Date', 'Loan Type', 'Buyers Agent Name', 'Closed Date', 'Loan Processor', 'Referral Source Name', 'Loan Team Member Name - Loan Partner 2'],
+    ['91000000001', 'Test, Echo', '1', 'Funding', 'LO', '1 Main', 'Columbus', 'OH', '2026-01-02', 'FHA', 'Big Realty', '2026-01-02 00:00:00', 'P', '', 'Gavin Dill'],
     ['91000000002', 'Test, Golf', '', 'Completion', 'LO', '', '', '', '', '', '', '2026-06-09 00:00:00', '', ''],
     ['91000000003', 'Test, Hotel', '', 'Funding', 'LO', '', '', '', '', '', '', '', '', '']
   ]);
@@ -80,6 +80,7 @@ t('funded parsing reconciles non-Funding milestones', () => {
   assert.ok(r.issues.some(i => i.type === 'funding_exception' && i.loan_number === '91000000002'));
   assert.ok(r.issues.some(i => i.type === 'missing_closed_date' && i.loan_number === '91000000003'));
   assert.equal(r.rows[0].closed_date, '2026-01-02');
+  assert.equal(r.rows[0].lp2, 'Gavin Dill');
 });
 
 const base = { task_type: 'tuesday', borrower_outcome: 'conversation', conversation_at: new Date(Date.now() - 60000).toISOString(),

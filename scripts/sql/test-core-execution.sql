@@ -17,6 +17,8 @@ insert into public.call_logs(agent_name, note) values ('Existing Agent','pre-exi
 
 \i supabase/migrations/20261124_core_execution.sql
 \i supabase/migrations/20261124_core_execution.sql
+\i supabase/migrations/20261124194049_core_funded_lp2_rollout.sql
+\i supabase/migrations/20261124194049_core_funded_lp2_rollout.sql
 \echo 'PASS migration applies twice (idempotent)'
 
 select public.core_set_access_key('team',    'team-key-0123456789abcdefXYZ', 'LPs');
@@ -167,13 +169,14 @@ select public.core_import_funded(:M, 'Mack', $j$[
  {"loan_number":"91000000002","borrower_name":"Test, Foxtrot","last_milestone":"Funding","closed_date":"2026-12-31"},
  {"loan_number":"91000000003","borrower_name":"Test, Golf","last_milestone":"Completion","closed_date":"2026-06-09"},
  {"loan_number":"91000000004","borrower_name":"Test, Hotel","last_milestone":"Funding","closed_date":""},
- {"loan_number":"91000000005","borrower_name":"Test, India","last_milestone":"Funding","closed_date":"2026-10-31"},
- {"loan_number":"91000000005","borrower_name":"Test, India","last_milestone":"Funding","closed_date":"2026-10-31"}
+ {"loan_number":"91000000005","borrower_name":"Test, India","last_milestone":"Funding","closed_date":"2026-10-31","lp2":"Said Saleh"},
+ {"loan_number":"91000000005","borrower_name":"Test, India","last_milestone":"Funding","closed_date":"2026-10-31","lp2":"Said Saleh"}
 ]$j$::jsonb, 'funded_units_test.xlsx') as r \gset f1_
 select pg_temp.eq('funded: duplicates counted', (:'f1_r'::jsonb->>'duplicates')::int, 1);
-select pg_temp.eq('funded: 4 funded x 3 tasks', (:'f1_r'::jsonb->>'tasks_created')::int, 12);
-select pg_temp.eq('PC30 Jan 31 -> Mar 2', (select due_date from public.core_tasks where task_key='PC30:91000000001'), date '2026-03-02');
-select pg_temp.eq('pre-launch call is Needs Review', pg_temp.tstatus('PC30:91000000001'), 'needs_review');
+select pg_temp.eq('funded: launch-window tasks only', (:'f1_r'::jsonb->>'tasks_created')::int, 8);
+select pg_temp.eq('historical loan creates no backlog', (select count(*) from public.core_tasks where loan_number='91000000001'), 0::bigint);
+select pg_temp.eq('pre-launch closing has no 90-day call', pg_temp.tstatus('PC90:91000000005'), null::text);
+select pg_temp.eq('LP2 flows from Funded Units onto tasks', (select owner_lp from public.core_tasks where task_key='PC30:91000000005'), 'Said');
 select pg_temp.eq('PC30 Dec 31 -> Jan 30', (select due_date from public.core_tasks where task_key='PC30:91000000002'), date '2027-01-30');
 select pg_temp.eq('PC60 Dec 31 -> Mar 1', (select due_date from public.core_tasks where task_key='PC60:91000000002'), date '2027-03-01');
 select pg_temp.eq('PC90 Dec 31 -> Mar 31', (select due_date from public.core_tasks where task_key='PC90:91000000002'), date '2027-03-31');
@@ -187,6 +190,18 @@ select pg_temp.eq('completed Tuesday history kept after funding', pg_temp.tstatu
 select public.core_import_funded(:M, 'Mack', '[{"loan_number":"91000000001","last_milestone":"Funding","closed_date":"2026-01-31"},{"loan_number":"91000000002","last_milestone":"Funding","closed_date":"2026-12-31"}]'::jsonb, 'funded_units_test.xlsx') as r \gset f2_
 select pg_temp.eq('funded reimport creates 0 tasks', (:'f2_r'::jsonb->>'tasks_created')::int, 0);
 
+-- Initial calls include the date boundary. Conflicting ownership cannot assign the work.
+select public.core_import_funded(:M, 'Mack', $j$[
+ {"loan_number":"91000000006","last_milestone":"Funding","closed_date":"2026-09-25","lp2":"Gavin Dill"},
+ {"loan_number":"91000000007","last_milestone":"Funding","closed_date":"2026-10-25","lp2":"Gavin Dill"},
+ {"loan_number":"91000000007","last_milestone":"Funding","closed_date":"2026-10-25","lp2":"Said Saleh"}
+]$j$::jsonb, 'rollout_boundaries.xlsx') as r \gset boundaries_
+select pg_temp.eq('60-day call due on launch is included', (select due_date from public.core_tasks where task_key='PC60:91000000006'), date '2026-11-24');
+select pg_temp.eq('already overdue 30-day call is excluded', pg_temp.tstatus('PC30:91000000006'), null::text);
+select pg_temp.eq('conflicting LP2 routes to review', (select ownership_status from public.core_loans where loan_number='91000000007'), 'conflict');
+select pg_temp.eq('conflicting LP2 never assigns a call', (select owner_lp from public.core_tasks where task_key='PC30:91000000007'), null::text);
+
+
 -- Post-closing: PCR rules; completing one milestone never completes another
 select pg_temp.expect_error($q$select pg_temp.tsave('team-key-0123456789abcdefXYZ','Gavin','PC30:90000000001','{"status":"completed","borrower_outcome":"conversation","conversation_at":"2026-11-24T15:00:00Z","borrower_notes":"First payment set up, statement received fine","script_checks":{"settling":true,"first_statement":true,"payment_servicing":true,"questions_assistance":true,"offered_again":true},"referral_requested":true,"referral_response":"asked_no_referral","next_action":"60-day call","next_action_date":"2027-01-26"}')$q$, 'referral_ask');
 select pg_temp.expect_error($q$select pg_temp.tsave('team-key-0123456789abcdefXYZ','Gavin','PC30:90000000001','{"status":"completed","borrower_outcome":"conversation","conversation_at":"2026-11-24T15:00:00Z","borrower_notes":"First payment set up, statement received fine","script_checks":{"settling":true,"first_statement":true,"payment_servicing":true,"questions_assistance":true,"referral_ask":true,"offered_again":true},"referral_requested":false,"referral_response":"asked_no_referral","next_action":"60-day call","next_action_date":"2027-01-26"}')$q$, 'referral was requested');
@@ -199,10 +214,15 @@ select pg_temp.eq('completed call keeps its original due date', (select due_date
 select pg_temp.eq('rescheduled count reported', (:'f3_r'::jsonb->>'tasks_rescheduled')::int, 2);
 select pg_temp.expect_error($q$select public.core_resolve_funding('mgr-key-0123456789abcdefXYZ0','Mack','91000000003', true, '')$q$, 'Document');
 select public.core_resolve_funding(:M, 'Mack', '91000000003', true, 'Verified funded in Encompass funding screen');
-select pg_temp.eq('reconciled exception gets 3 tasks', (select count(*) from public.core_tasks where loan_number='91000000003'), 3::bigint);
+select pg_temp.eq('verified historical exception creates no backlog', (select count(*) from public.core_tasks where loan_number='91000000003'), 0::bigint);
 
--- 9. Bulk: Needs Review closure touches only needs_review rows; coverage
-select pg_temp.eq('bulk close touches only Needs Review', public.core_api_bulk_tasks(:M, 'Mack', array(select id from public.core_tasks where loan_number in ('91000000001','90000000001')), '{"status":"cancelled","review_note":"Reviewed: pre-launch history"}'), 3);
+-- 9. Existing historical records still support Mack's bulk review action.
+begin;
+select set_config('core.system_write','on',true);
+insert into public.core_tasks(task_key,task_type,loan_number,due_date,status)
+  values ('PC30:91000000001','pc30','91000000001','2026-03-02','needs_review');
+commit;
+select pg_temp.eq('bulk close touches only Needs Review', public.core_api_bulk_tasks(:M, 'Mack', array(select id from public.core_tasks where loan_number in ('91000000001','90000000001')), '{"status":"cancelled","review_note":"Reviewed: pre-launch history"}'), 1);
 select pg_temp.eq('completed call not cancelled by bulk', pg_temp.tstatus('PC30:90000000001'), 'completed');
 select public.core_api_coverage(:M, 'Mack', 'add', jsonb_build_object('from_lp','Gavin','to_lp','Karen','start_date',public.core_today(),'end_date',public.core_today()+2,'reason','PTO'));
 select pg_temp.expect_error($q$select public.core_api_coverage('team-key-0123456789abcdefXYZ','Gavin','add','{}')$q$, 'CORE_FORBIDDEN');

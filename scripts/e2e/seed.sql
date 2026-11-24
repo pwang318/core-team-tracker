@@ -25,6 +25,7 @@ insert into public.powerbi_import_log(source_app, rows_processed) values ('core-
 insert into public.velocify_leads(lead_key, date_added) values ('L1', current_date - 2), ('L2', current_date - 3);
 
 \i supabase/migrations/20261124_core_execution.sql
+\i supabase/migrations/20261124194049_core_funded_lp2_rollout.sql
 
 select public.core_set_access_key('team',    'e2e-team-key-0123456789abcdef', 'LPs');
 select public.core_set_access_key('manager', 'e2e-mgr-key-0123456789abcdef0', 'Mack');

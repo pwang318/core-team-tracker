@@ -85,14 +85,14 @@ const pipeThisWeek = xlsxFile('pipeline_this_week.xlsx', PIPE_H, [
   pipeRow('', L.addDays(today, 25), 'Testcase, Nolp', '99100000005', 'Purchase', 'Agent Delta'),
   pipeRow('Gavin Dill', L.addDays(today, 3), 'Testcase, Closingsoon', '99100000002', 'Purchase', 'Agent Bravo')
 ]);
-const FUND_H = ['Loan Number', 'Borrower Name', 'Messages', 'Last Finished Milestone', 'Loan Officer', 'Subject Property Address', 'Subject Property City', 'Subject Property State', 'Est Closing Date', 'Loan Type', 'Buyers Agent Name', 'Closed Date', 'Loan Processor', 'Referral Source Name'];
-function fundRow(loan, name, ms, closed) { return [loan, name, ' ', ms, 'Fictional LO', '1 Test St', 'Columbus', 'OH', closed, 'Conventional', 'Fictional Realty', closed ? closed + ' 00:00:00' : ' ', 'Fictional Processor', ' ']; }
+const FUND_H = ['Loan Number', 'Borrower Name', 'Messages', 'Last Finished Milestone', 'Loan Officer', 'Subject Property Address', 'Subject Property City', 'Subject Property State', 'Est Closing Date', 'Loan Type', 'Buyers Agent Name', 'Closed Date', 'Loan Processor', 'Referral Source Name', 'Loan Team Member Name - Loan Partner 2'];
+function fundRow(loan, name, ms, closed, lp2 = '') { return [loan, name, ' ', ms, 'Fictional LO', '1 Test St', 'Columbus', 'OH', closed, 'Conventional', 'Fictional Realty', closed ? closed + ' 00:00:00' : ' ', 'Fictional Processor', ' ', lp2]; }
 const fundedFile = xlsxFile('funded_units_synthetic.xlsx', FUND_H, [
   fundRow('99100000006', 'Testcase, Fundedgavin', 'Funding', L.addDays(today, -30)),
   fundRow('99200000001', 'Testcase, Unmatched', 'Funding', L.addDays(today, -33)),
   fundRow('99200000002', 'Testcase, Oldloan', 'Funding', '2026-01-31'),
   fundRow('99200000003', 'Testcase, Completionms', 'Completion', L.addDays(today, -40)),
-  fundRow('99200000004', 'Testcase, Recent', 'Funding', L.addDays(today, -2)),
+  fundRow('99200000004', 'Testcase, Recent', 'Funding', L.addDays(today, -2), 'Karen De La Riva'),
   fundRow('99200000005', 'Testcase, Nodate', 'Funding', '')
 ]);
 const wrongFile = xlsxFile('not_a_report.xlsx', ['Agent', 'Level'], [['Someone', 'A']]);
@@ -233,7 +233,9 @@ const taskId = async (loan, type) => (await db('select id from core_tasks where 
     const g = k => pc.find(r => r.task_key === k);
     assert.equal(g('PC30:99100000006').d, today); assert.equal(g('PC30:99100000006').owner_lp, 'Gavin');
     assert.equal(g('PC60:99200000004').d, L.addDays(L.addDays(today, -2), 60));
-    assert.equal(g('PC30:99200000002').status, 'needs_review');
+    assert.equal(g('PC30:99200000002'), undefined, 'historical loans do not create a backlog');
+    assert.equal(g('PC90:99100000006'), undefined, 'pre-launch loans do not get 90-day calls');
+    assert.equal(g('PC90:99200000004').owner_lp, 'Karen');
     assert.equal(g('PC30:99200000001').owner_lp, null);
     assert.equal(pc.filter(r => r.task_key.includes('99200000003')).length, 0);
     assert.equal(pc.filter(r => r.task_key.includes('99200000005')).length, 0, 'missing closed date creates nothing');
@@ -272,14 +274,14 @@ const taskId = async (loan, type) => (await db('select id from core_tasks where 
     await pm.click('[data-assign-go]');
     await pm.waitForFunction(() => !document.querySelector('[data-sel-loan="99200000001"]'), null, { timeout: 15000 });
     const r = await db("select owner_lp from core_tasks where loan_number='99200000001'");
-    assert.ok(r.length === 3 && r.every(x => x.owner_lp === 'Gavin'));
+    assert.ok(r.length === 2 && r.every(x => x.owner_lp === 'Gavin'));
     assert.equal((await db("select actor from core_task_events where event_type='assignment' limit 1"))[0].actor, 'Mack');
   });
   await step('Funding review: Mack verifies a non-Funding milestone; calls scheduled', async () => {
     await pm.click('#view-core-command [data-tab="funding"]');
     await pm.click('[data-fund="99200000003|1"]');
     await pm.waitForFunction(() => !document.querySelector('[data-fund="99200000003|1"]'), null, { timeout: 15000 });
-    assert.equal((await db("select count(*)::int n from core_tasks where loan_number='99200000003'"))[0].n, 3);
+    assert.equal((await db("select count(*)::int n from core_tasks where loan_number='99200000003'"))[0].n, 2);
   });
   await step('Coverage: Osgood covers Karen today', async () => {
     await pm.click('#view-core-command [data-tab="coverage"]');
@@ -516,6 +518,8 @@ const taskId = async (loan, type) => (await db('select id from core_tasks where 
     assert.match(await pm.textContent('#view-core-command'), /Testcase, Closingsoon/);
   });
   await step('Needs Review historical calls are closed in bulk by Mack', async () => {
+    await db("begin; select set_config('core.system_write','on',true); insert into core_tasks(task_key,task_type,loan_number,due_date,status) values ('PC30:99200000002','pc30','99200000002','2026-03-02','needs_review'); commit;");
+    await pm.evaluate(() => window.CoreApp.reload());
     await pm.click('#view-core-command [data-tab="overview"]');
     await pm.click('#view-core-command .cx-tile[data-tile="rec:review"]');
     await pm.click('#view-core-command [data-selall]'); await pm.click('[data-bulk-review]');
@@ -545,6 +549,8 @@ const taskId = async (loan, type) => (await db('select id from core_tasks where 
     assert.match(t, /stretch 420/); assert.match(t, /Target 2200/); assert.match(t, /Target 1800/);
     if (today < '2027-01-01') { assert.match(t, /Funded loans\s*Not started/); assert.doesNotMatch(t, /Funded loans\s*0\b/); }
     assert.match(t, /A-level incl\. Channel/); assert.match(t, /Scorecards this week/);
+    assert.match(t, /Unique relationship leads\s*(Not started|Data unavailable)/);
+    assert.match(t, /Application starts\s*(Not started|Data unavailable)/);
     assert.doesNotMatch(t, /NaN|undefined/);
     await pd.click('[data-per="quarter"]'); assert.match(await pd.textContent('#view-core-plan'), /Target 80/);
     await pd.click('[data-per="month"]'); assert.doesNotMatch(await pd.textContent('#view-core-plan'), /NaN|undefined/);

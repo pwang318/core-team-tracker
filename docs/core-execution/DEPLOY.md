@@ -35,18 +35,19 @@ co-marketing, income, data hub, Production Manager and admin views are unchanged
 
 ## Database setup (Supabase SQL editor, project uclucbdkjqyqdvifyptx)
 
-1. Run `supabase/migrations/20261124_core_execution.sql`. It is idempotent and
-   creates only `core_*` objects.
+1. For a new database, apply `supabase/migrations/20261124_core_execution.sql`,
+   then `supabase/migrations/20261124194049_core_funded_lp2_rollout.sql`.
+   If CORE is already installed, apply only the rollout migration. It replaces
+   the importer and scheduler in place and preserves existing records.
 2. Set the keys (values are hashed; keep the originals somewhere safe):
 
 ```sql
 select public.core_set_access_key('team',    '<team key>',        'Shared team link');
 select public.core_set_access_key('manager', '<Mack passcode>',   'Production Manager');
-select public.core_set_access_key('admin',   '<Director passcode>','Director');
+select public.core_set_access_key('leader',   '<Director passcode>','Director');
 ```
 
-3. Optional: change the date before which unlogged post-closing calls count as
-   Needs Review (default `2026-11-24`):
+3. Set the actual post-closing launch date before the first funded import (default `2026-11-24`):
 
 ```sql
 update public.core_settings set value = '"2026-11-24"' where key = 'launch_date';
@@ -56,10 +57,11 @@ update public.core_settings set value = '"2026-11-24"' where key = 'launch_date'
 
 1. Weekly pipeline report (Encompass Tuesday Updates workbook, sheet with
    "Loan Team Member Name - Loan Partner 2"). The LP2 column is the verified owner.
-2. Funded Units report. Funding milestone + Closed Date → 30/60/90-day calls.
-   Other milestones go to Funding review. Funded loans whose loan number never
-   appeared in a pipeline report go to the Unassigned queue; nothing is guessed
-   from Realtor, borrower or processor names.
+2. Funded Units report with Encompass LP2. Loans with the Funding milestone
+   get calls from the actual Closed Date. Pre-launch loans get only 30- and
+   60-day calls due on or after launch. Loans closed from launch onward get
+   all three calls. Other milestones go to Funding review. Missing or
+   conflicting ownership on scheduled work goes to Assignment review.
 
 Re-importing the same file creates no duplicate tasks; a corrected Closed Date
 reschedules only calls that have not happened yet.
@@ -78,6 +80,7 @@ reschedules only calls that have not happened yet.
 
 * Website: `git revert` the release commit, or reset `main` to the tag
   `backup-pre-core-20261124` and push. GitHub Pages republishes automatically.
-* Database (only if needed): back up the `core_*` tables, then run
+* Rollout-only database rollback: restore the two function definitions from the base CORE migration. Existing task and loan rows should be kept.
+* Full database removal (only if needed): back up the `core_*` tables, then run
   `supabase/migrations/20261124_core_execution_rollback.sql`. It removes only
   `core_*` objects. Reverting the website alone is enough to hide the module.
