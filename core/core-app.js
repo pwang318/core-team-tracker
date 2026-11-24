@@ -184,7 +184,7 @@
           '<p class="cx-note">' + esc(L.SCRIPT_NOTES[type]) + '</p><ol>' +
           L.CHECKS[type].map(function (check) { return '<li>' + esc(check[1]) + '</li>'; }).join('') +
           '</ol></details>';
-      }).join('') + '</div>';
+      }).join('') + '<p class="cx-note">Monthly post-closing call block: first Thursday at 1 p.m.</p></div>';
     anchor.after(category);
   }
 
@@ -1005,7 +1005,7 @@
   function dataBody() {
     return '<div class="cx-stack">' +
       (isManager() ? '<div class="cx-split"><div class="cx-card"><h3>Weekly pipeline report</h3><p class="cx-note">Encompass Tuesday Updates report with the "Loan Partner 2" column. Creates the week\'s Tuesday Updates, new contract calls and pre-closing reviews. Re-importing the same file creates nothing new.</p><label class="cx-f">Report date</label><input type="date" data-imp-date value="' + today() + '"><label class="cx-f">File</label><input type="file" accept=".xlsx,.xls" data-imp="pipeline"><div data-preview="pipeline" style="margin-top:10px">' + importMsg('pipeline') + '</div></div>' +
-        '<div class="cx-card"><h3>Funded Units report</h3><p class="cx-note">Validates each row, then creates 30/60/90-day calls from the actual Closed Date for loans at the Funding milestone. Other milestones and missing dates go to review. Existing conversations are never overwritten.</p><label class="cx-f">File</label><input type="file" accept=".xlsx,.xls" data-imp="funded"><div data-preview="funded" style="margin-top:10px">' + importMsg('funded') + '</div></div></div>' : '') +
+        '<div class="cx-card"><h3>Funded Units report</h3><p class="cx-note">Uses the Funding milestone, actual Closed Date, and Encompass LP2. Pre-launch loans get 30- or 60-day calls still due at launch. Loans closed from launch onward get all three calls.</p><label class="cx-f">File</label><input type="file" accept=".xlsx,.xls" data-imp="funded"><div data-preview="funded" style="margin-top:10px">' + importMsg('funded') + '</div></div></div>' : '') +
       '<div class="cx-card"><h3>Import history and data freshness</h3><div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>When</th><th>Report</th><th>File</th><th class="cx-num">Rows</th><th class="cx-num">Unique</th><th class="cx-num">Duplicates</th><th class="cx-num">New loans</th><th class="cx-num">Calls created</th><th>Sent to review</th><th>By</th></tr></thead><tbody>' +
       (S.imports.length ? S.imports.map(function (r) {
         var counts = {}; (r.exceptions || []).forEach(function (e) { counts[e.type] = (counts[e.type] || 0) + (e.count || 1); });

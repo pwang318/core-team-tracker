@@ -56,10 +56,16 @@ update public.core_settings set value = '"2026-11-24"' where key = 'launch_date'
 
 1. Weekly pipeline report (Encompass Tuesday Updates workbook, sheet with
    "Loan Team Member Name - Loan Partner 2"). The LP2 column is the verified owner.
-2. Funded Units report. Funding milestone + Closed Date → 30/60/90-day calls.
-   Other milestones go to Funding review. Funded loans whose loan number never
-   appeared in a pipeline report go to the Unassigned queue; nothing is guessed
-   from Realtor, borrower or processor names.
+2. Funded Units report. A Funding milestone and a valid Closed Date set
+   call eligibility. The Encompass LP2 column provides ownership when it
+   matches the tracker roster. Conflicts, unknown owners, and funding
+   exceptions go to review.
+3. Apply `20261124203000_core_postclose_launch.sql` followed by
+   `20261124203100_core_funded_lp2.sql` after the base migration.
+   Loans closed on or after the launch date get all three milestones.
+   Pre-launch closings get 30- and 60-day calls whose due dates are on or
+   after launch. The launch migration cancels untouched pre-launch 90-day
+   tasks from the initial import and retains their audit history.
 
 Re-importing the same file creates no duplicate tasks; a corrected Closed Date
 reschedules only calls that have not happened yet.
