@@ -329,10 +329,10 @@
   var TILE_TITLES = { 'tue-assigned': 'Tuesday Updates assigned', 'tue-completed': 'Tuesday Updates completed', 'tue-remaining': 'Tuesday Updates remaining', 'tue-overdue': 'Overdue Tuesday Updates',
     'tue-ccr': 'CCR requests completed', 'tue-intros': 'CCR introductions received', pc30: '30-day calls', pc60: '60-day calls', pc90: '90-day calls', 'pc-overdue': 'Overdue post-closing calls' };
 
-  var publicLpSummary = null, publicLpLoading = null, publicLpFetchedAt = 0;
+  var publicLpSummary = null, publicLpLoading = null, publicLpFetchedAt = 0, publicLpTile = null;
   function publicLpCard(lp) {
     if (!publicLpLoading && Date.now() - publicLpFetchedAt > 60000) {
-      publicLpLoading = rpc('core_api_lp_public_summary', {})
+      publicLpLoading = rpc('core_api_lp_public_schedule', {})
         .then(function (rows) { publicLpSummary = rows; })
         .catch(function () { publicLpSummary = null; })
         .finally(function () {
@@ -343,11 +343,24 @@
     }
     var counts = publicLpSummary && publicLpSummary.find(function (row) { return row.lp === lp; });
     if (!counts) return '<div class="cx-empty" role="status">' + (publicLpLoading ? 'Loading dashboard…' : 'Dashboard totals are temporarily unavailable.') + '</div>';
+    var tiles = [
+      ['tuesday', 'Tuesday updates', counts.tuesday_open], ['pc30', '30-day calls due', counts.pc30_due],
+      ['pc60', '60-day calls due', counts.pc60_due], ['pc90', '90-day calls due', counts.pc90_due]
+    ];
+    var selected = publicLpTile && publicLpTile.lp === lp ? publicLpTile.key : null;
+    var active = tiles.find(function (item) { return item[0] === selected; });
+    var schedule = (counts.schedule || []).filter(function (row) { return row.task_type === selected; });
     return '<div class="cx-card"><h3>Workload summary</h3><div class="cx-tiles" style="margin-top:14px">' +
-      [['Tuesday updates', counts.tuesday_open], ['30-day calls due', counts.pc30_due],
-        ['60-day calls due', counts.pc60_due], ['90-day calls due', counts.pc90_due]].map(function (item) {
-        return '<div class="cx-tile"><span class="t-label">' + esc(item[0]) + '</span><span class="t-val">' + esc(item[1]) + '</span></div>';
-      }).join('') + '</div></div>';
+      tiles.map(function (item) {
+        return '<button type="button" class="cx-tile" data-public-tile="' + item[0] + '" aria-expanded="' + (selected === item[0]) + '" aria-controls="core-public-detail"><span class="t-label">' + item[1] + '</span><span class="t-val">' + esc(item[2]) + '</span><span class="t-foot">View schedule</span></button>';
+      }).join('') + '</div><div id="core-public-detail"' + (active ? '' : ' hidden') + '>' +
+      (active ? '<h3 style="margin-top:14px">' + active[1] + '</h3>' +
+        (selected === 'tuesday' ? '<blockquote class="cx-script" style="margin:8px 0">CCR script · ' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '<p class="cx-sub">Due and upcoming in the next 7 days</p>') +
+        (schedule.length ? '<div class="cx-list">' + schedule.map(function (row) {
+          return '<div class="cx-item"><span class="i-name">' + esc(fmtDate(row.due_date)) + '</span><span class="i-meta">' +
+            (row.status === 'attempted' ? 'Attempted' : 'Open') + '</span><span class="i-right">' + esc(row.total) + '</span></div>';
+        }).join('') + '</div>' : '<div class="cx-empty">No open work in this period.</div>') +
+        '<p class="cx-note" style="margin-top:10px">Open your shared team link for borrower records and call logging.</p>' : '') + '</div></div>';
   }
 
   var renderedLp = null;
@@ -362,6 +375,14 @@
     if (supporting) supporting.hidden = !privateView;
     if (!privateView) {
       host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) + '</div>';
+      $all('[data-public-tile]', host).forEach(function (button) {
+        button.addEventListener('click', function () {
+          var key = button.dataset.publicTile;
+          publicLpTile = button.getAttribute('aria-expanded') === 'true' ? null : { lp: lp, key: key };
+          renderToday();
+          $('[data-public-tile="' + key + '"]', host).focus();
+        });
+      });
       return;
     }
     var t0 = today(), B = lpBuckets(lp), loaded = !!S.loadedAt && !S.error;
