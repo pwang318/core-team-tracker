@@ -329,6 +329,27 @@
   var TILE_TITLES = { 'tue-assigned': 'Tuesday Updates assigned', 'tue-completed': 'Tuesday Updates completed', 'tue-remaining': 'Tuesday Updates remaining', 'tue-overdue': 'Overdue Tuesday Updates',
     'tue-ccr': 'CCR requests completed', 'tue-intros': 'CCR introductions received', pc30: '30-day calls', pc60: '60-day calls', pc90: '90-day calls', 'pc-overdue': 'Overdue post-closing calls' };
 
+  var publicLpSummary = null, publicLpLoading = null, publicLpFetchedAt = 0;
+  function publicLpCard(lp) {
+    if (!publicLpLoading && Date.now() - publicLpFetchedAt > 60000) {
+      publicLpLoading = rpc('core_api_lp_public_summary', {})
+        .then(function (rows) { publicLpSummary = rows; })
+        .catch(function () { publicLpSummary = null; })
+        .finally(function () {
+          publicLpFetchedAt = Date.now();
+          publicLpLoading = null;
+          renderToday();
+        });
+    }
+    var counts = publicLpSummary && publicLpSummary.find(function (row) { return row.lp === lp; });
+    if (!counts) return '<div class="cx-empty" role="status">' + (publicLpLoading ? 'Loading dashboard…' : 'Dashboard totals are temporarily unavailable.') + '</div>';
+    return '<div class="cx-card"><h3>Workload summary</h3><div class="cx-tiles" style="margin-top:14px">' +
+      [['Tuesday updates', counts.tuesday_open], ['30-day calls due', counts.pc30_due],
+        ['60-day calls due', counts.pc60_due], ['90-day calls due', counts.pc90_due]].map(function (item) {
+        return '<div class="cx-tile"><span class="t-label">' + esc(item[0]) + '</span><span class="t-val">' + esc(item[1]) + '</span></div>';
+      }).join('') + '</div></div>';
+  }
+
   var renderedLp = null;
   function renderToday() {
     var host = $('#core-today'); if (!host) return;
@@ -336,9 +357,12 @@
     renderedLp = lp;
     if (!lp) { host.innerHTML = ''; return; }
     lastLp = lp;
-    if (!activeKey() || !S.tier) {
-      host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Today</div><h2>' + esc(lp) + '\'s day</h2></div></div>' + (S.loading ? '<div class="cx-empty">Checking team access…</div>' : accessCard('Unlock Tuesday Updates and post-closing calls')) + scorecardCard(lp) + '</div>';
-      bindAccess(host); bindScorecard(host, lp); return;
+    var privateView = !!(activeKey() && S.tier);
+    var supporting = $('#core-supporting');
+    if (supporting) supporting.hidden = !privateView;
+    if (!privateView) {
+      host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) + '</div>';
+      return;
     }
     var t0 = today(), B = lpBuckets(lp), loaded = !!S.loadedAt && !S.error;
     var tr = hasImport('pipeline') && loaded, pr = hasImport('funded_units') && loaded;
