@@ -1,5 +1,6 @@
 -- Run against a disposable database after applying the CORE LP migrations.
 begin;
+insert into core_lp_private.post_closing_rollout (launch_on) values ('2024-01-01');
 insert into auth.users (id) values
   ('20000000-0000-4000-8000-000000000001'),
   ('20000000-0000-4000-8000-000000000002');
