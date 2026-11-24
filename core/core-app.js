@@ -550,11 +550,12 @@
       (isTue ? '' : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
       '<label class="cx-f" for="cx-bo">Borrower contact outcome</label><select id="cx-bo" name="borrower_outcome"' + dis + '>' + opts(L.BORROWER_OUTCOMES, t.borrower_outcome, 'Select outcome') + '</select>' +
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
-      (isTue ? '<label class="cx-f" for="cx-su">Loan status update given</label><textarea id="cx-su" name="service_update" placeholder="e.g. Appraisal came in at value; conditions submitted; on track for the 12/9 closing"' + dis + '>' + esc(t.service_update || '') + '</textarea>' : '') +
+      (isTue ? '<label class="cx-f" for="cx-bn">Borrower update notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="Summarize the loan status, what you discussed, and any borrower questions."' + dis + '>' +
+        esc([t.service_update, t.borrower_notes].filter(function (note, i, notes) { return note && notes.indexOf(note) === i; }).join('\n\n')) + '</textarea>' : '') +
       (isTue ? '<details id="cx-borrower-details" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"><b>Conversation notes and required steps</b></summary><p class="cx-note">' + esc(L.SCRIPT_NOTES[type]) + '</p>' : '') +
       '<label class="cx-f" for="cx-cat">Conversation date and time</label><input id="cx-cat" type="datetime-local" name="conversation_at" value="' + esc(toLocalInput(t.conversation_at)) + '"' + dis + '>' +
       '<div style="margin-top:12px"><div class="cx-f" style="margin:0 0 4px">Conversation steps</div>' + checks + '</div>' +
-      '<label class="cx-f" for="cx-bn">Borrower conversation notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="What was discussed, in your own words"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>' +
+      (isTue ? '' : '<label class="cx-f" for="cx-bn">Borrower conversation notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="What was discussed, in your own words"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>') +
       (isTue ? '</details>' : '') +
       '<h3 style="margin-top:18px">' + (type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
       (isTue ? '<blockquote id="cx-ccr-script" class="cx-script" style="margin:8px 0 0">' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '') +
@@ -601,6 +602,15 @@
   function collect(form, t) {
     var p = {};
     PATCH_FIELDS.forEach(function (n) { var el = form.querySelector('[name="' + n + '"]'); if (el) p[n] = el.value === '' ? null : el.value; });
+    if (t.task_type === 'tuesday') {
+      var notes = form.querySelector('[name="borrower_notes"]');
+      if (notes.value === notes.defaultValue && t.borrower_notes && t.service_update) {
+        p.borrower_notes = t.borrower_notes;
+        p.service_update = t.service_update;
+      } else {
+        p.service_update = p.borrower_notes;
+      }
+    }
     var ca = form.querySelector('[name="conversation_at"]'); if (ca) p.conversation_at = fromLocalInput(ca.value);
     var rq = form.querySelector('[name="referral_requested"]'); if (rq) p.referral_requested = rq.checked;
     var es = form.querySelector('[name="escalated"]'); if (es) p.escalated = es.checked;
@@ -620,12 +630,16 @@
     function refreshReqs() {
       if (!editable) return;
       var p = Object.assign({}, t, collect(form, t)), errs = L.validateTask(p, loan), box = $('#cx-reqs', ov);
-      box.querySelector('summary').textContent = errs.length ? 'Completion checklist (' + errs.length + ' remaining)' : 'Ready to complete';
       var checklist = errs;
       if (compact) {
+        var needsNotes = /^Borrower conversation notes required|^Meaningful service update required/;
+        if (errs.some(function (e) { return needsNotes.test(e); })) {
+          checklist = errs.filter(function (e) { return !needsNotes.test(e); }).concat('Enter borrower update notes (20+ characters)');
+        }
         var stepCount = errs.filter(function (e) { return e.startsWith('Conversation step not confirmed:'); }).length;
-        if (stepCount) checklist = errs.filter(function (e) { return !e.startsWith('Conversation step not confirmed:'); }).concat('Confirm ' + stepCount + ' conversation ' + (stepCount === 1 ? 'step' : 'steps'));
+        if (stepCount) checklist = checklist.filter(function (e) { return !e.startsWith('Conversation step not confirmed:'); }).concat('Confirm ' + stepCount + ' conversation ' + (stepCount === 1 ? 'step' : 'steps'));
       }
+      box.querySelector('summary').textContent = errs.length ? 'Completion checklist (' + checklist.length + ' remaining)' : 'Ready to complete';
       box.querySelector('div').innerHTML = errs.length ? '<ul class="cx-req">' + checklist.map(function (e) { return '<li>' + esc(L.friendlyError(e)) + '</li>'; }).join('') + '</ul>'
         : '<div class="cx-ok">✓ Every required conversation and referral step is documented.</div>';
       var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = saving || (!compact && errs.length > 0);
@@ -688,7 +702,7 @@
         if (compact) {
           var checklist = $('#cx-reqs', ov);
           checklist.open = true;
-          if (errs.some(function (e) { return /^Conversation |^Borrower conversation notes/.test(e); })) $('#cx-borrower-details', ov).open = true;
+          if (errs.some(function (e) { return /^Conversation /.test(e); })) $('#cx-borrower-details', ov).open = true;
           if (errs.some(function (e) { return /^(Next action|Follow-up date)/.test(e); })) $('#cx-follow-up', ov).open = true;
           $('summary', checklist).focus();
         } else toast('Not complete yet: ' + L.friendlyError(errs[0]), true);
