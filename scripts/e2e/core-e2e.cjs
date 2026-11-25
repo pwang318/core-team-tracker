@@ -125,9 +125,12 @@ async function fillTuesday(page, opts) {
   if (await page.$('#cx-su')) await page.fill('#cx-su', 'Approval received; appraisal at value; on track for closing');
   await page.check('.cx-overlay input[name="referral_requested"]');
   await page.selectOption('#cx-rr', opts.referral || 'asked_no_referral');
-  if (await page.$('#cx-ao')) {
-    await page.selectOption('#cx-ao', opts.agent || 'spoke');
-    if ((opts.agent || 'spoke') !== 'no_buyer_agent') await page.fill('#cx-an', 'Told the buyer agent appraisal is at value and CTC is expected');
+  if (await page.$('#cx-agent') && opts.agent !== 'no_buyer_agent') {
+    await page.check('#cx-agent input[value="' + (opts.agent || 'spoke') + '"]');
+    if (await page.$('#cx-agent-notes:not(.cx-hide)')) {
+      await page.click('#cx-agent-notes summary');
+      await page.fill('#cx-an', 'Told the buyer agent appraisal is at value and CTC is expected');
+    }
   }
   await page.fill('#cx-na', 'Confirm clear to close with processor');
   await page.fill('#cx-nd', L.addDays(today, 1));
@@ -436,7 +439,7 @@ const taskId = async (loan, type) => (await db('select id from core_tasks where 
   await step('30-day call: PCR ask required; completes; 60-day untouched', async () => {
     const id = await taskId('99100000006', 'pc30');
     await openTask(pg, id);
-    assert.equal(await pg.locator('#cx-ao').count(), 0);
+    assert.equal(await pg.locator('#cx-agent').count(), 0);
     await pg.selectOption('#cx-bo', 'conversation');
     const boxes = await pg.$$('.cx-overlay [data-check]'); assert.equal(boxes.length, 6);
     for (const c of boxes) await c.check();

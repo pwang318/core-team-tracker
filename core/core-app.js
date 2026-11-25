@@ -855,6 +855,7 @@
       '<div><b>Loan</b><br>' + esc([loan.loan_purpose, loan.loan_type].filter(Boolean).join(' · ') || '—') + '</div></div></div>' +
       (t.status === 'needs_review' ? '<div class="cx-warn" style="margin-top:12px">Needs Review: due before launch with no reliable completion evidence. Not counted against the LP. ' + esc(t.review_note || '') + '</div>' : '') +
       (t.status === 'completed' ? '<div class="cx-complete-banner" style="margin-top:12px">✓ ' + esc(out) + ' · ' + esc(fmtTime(t.completed_at)) + ' by ' + esc(t.completed_by || '') + '. Completed records are locked.</div>' : '') +
+      (!editable && isTue && t.status !== 'completed' ? '<p class="cx-note">This record is read-only. Ask Mack to check its status or your team access if it still needs an update.</p>' : '') +
       '<form data-cx="task" novalidate>' +
       '<h3 style="margin-top:18px">' + (isTue ? 'Step 1 · Borrower call' : 'Borrower call') + '</h3>' +
       (isTue ? '' : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
@@ -883,8 +884,11 @@
       '<label class="cx-check" style="margin-top:8px"><input type="checkbox" name="escalated"' + (t.escalated ? ' checked' : '') + dis + '><span>Escalate to the Production Manager</span></label></div>' +
       (isTue ? '</details>' : '') + (isTue && agentPresent ? '<section id="cx-agent-section" class="cx-card" style="margin-top:12px;padding:14px"><h3>Step 2 · Buyer agent update</h3>' +
         '<div id="cx-agent-help" class="cx-note" style="margin-top:8px">' + ('Record the update to ' + esc(loan.buyer_agent_name) + '.') + '</div>' +
-        '<fieldset id="cx-agent" aria-describedby="cx-agent-help" style="border:0;padding:0;margin:0"><label class="cx-f" for="cx-ao">Buyer agent contact outcome</label><select id="cx-ao" name="agent_outcome"' + dis + '>' + opts(L.AGENT_OUTCOMES, t.agent_outcome, 'Select outcome') + '</select>' +
-        '<details id="cx-agent-notes"' + (t.agent_notes || ['spoke', 'update_sent'].includes(t.agent_outcome) ? '' : ' class="cx-hide"') + '><summary>Optional buyer-agent notes</summary><label class="cx-f" for="cx-an">Buyer-agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></details></fieldset></section>' : isTue ? '<input type="hidden" name="agent_outcome" value="' + esc(t.agent_outcome || (editable ? 'no_buyer_agent' : '')) + '">' : '') +
+        '<fieldset id="cx-agent" aria-describedby="cx-agent-help" style="border:0;padding:0;margin:8px 0 0;min-width:0"' + dis + '><legend class="cx-f">Buyer agent contact outcome</legend>' +
+        L.AGENT_OUTCOMES.filter(function (outcome) { return outcome[0] !== 'no_buyer_agent'; }).map(function (outcome) {
+          return '<label class="cx-check"><input type="radio" name="agent_outcome" value="' + esc(outcome[0]) + '"' + (outcome[0] === t.agent_outcome ? ' checked' : '') + '><span>' + esc(outcome[1]) + '</span></label>';
+        }).join('') + '</fieldset>' +
+        '<details id="cx-agent-notes"' + (t.agent_notes || ['spoke', 'update_sent'].includes(t.agent_outcome) ? '' : ' class="cx-hide"') + '><summary>Optional buyer-agent notes</summary><label class="cx-f" for="cx-an">Buyer-agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></details></section>' : isTue ? '<p class="cx-note">No buyer-agent update required. No agent is on file.</p><input type="hidden" name="agent_outcome" value="' + esc(t.agent_outcome || (editable ? 'no_buyer_agent' : '')) + '">' : '') +
       '<details id="cx-follow-up" class="cx-card" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>Follow-up</b></summary><div class="cx-split"><div>' +
       '<label class="cx-f" for="cx-na-choice">Next action</label><select id="cx-na-choice"' + dis + '>' +
       opts(nextActions.map(function (action) { return [action, action]; }).concat([['other', 'Other next action']]), selectedNextAction, 'Select next action') + '</select>' +
@@ -917,7 +921,8 @@
   var PATCH_FIELDS = ['borrower_outcome', 'borrower_notes', 'service_update', 'referral_response', 'referral_name', 'referral_contact', 'crm_reference', 'followthrough_note', 'referral_status', 'concern_status', 'concern_notes', 'agent_outcome', 'agent_notes', 'next_action', 'next_action_date'];
   function collect(form, t) {
     var p = {};
-    PATCH_FIELDS.forEach(function (n) { var el = form.querySelector('[name="' + n + '"]'); if (el) p[n] = el.value === '' ? null : el.value; });
+    PATCH_FIELDS.forEach(function (n) { var el = form.querySelector('[name="' + n + '"]:not([type="radio"]), [name="' + n + '"]:checked');
+      if (el || n === 'agent_outcome' && t.task_type === 'tuesday') p[n] = el && el.value || null; });
     if (t.task_type === 'tuesday') {
       var notes = form.querySelector('[name="borrower_notes"]');
       if (notes.value === notes.defaultValue && t.borrower_notes && t.service_update) {
@@ -1067,7 +1072,7 @@
     }
     var on = function (sel, fn) { var b = $('[data-cx="' + sel + '"]', ov); if (b) b.addEventListener('click', fn); };
     on('save', function () {
-      var agentOnly = compact && !$('#cx-bo', ov).value && !!($('#cx-ao', ov) || {}).value;
+      var agentOnly = compact && !$('#cx-bo', ov).value && !!$('#cx-agent input:checked', ov);
       if (compact && !$('#cx-bo', ov).value && !agentOnly) {
         toast('Choose a borrower or buyer-agent outcome before saving.', true);
         $('#cx-bo', ov).focus();
@@ -1084,7 +1089,8 @@
           hint.textContent = L.friendlyError(errs[0]);
           if (errs.some(function (e) { return /^Conversation /.test(e); })) $('#cx-borrower-details', ov).open = true;
           if (errs.some(function (e) { return /^(Next action|Follow-up date)/.test(e); })) $('#cx-follow-up', ov).open = true;
-          hint.focus();
+          var agentChoice = errs[0] === 'Buyer agent update required' && $('#cx-agent input', ov);
+          (agentChoice || hint).focus();
         } else toast('Not complete yet: ' + L.friendlyError(errs[0]), true);
         return;
       }
