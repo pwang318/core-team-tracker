@@ -1,6 +1,6 @@
 /* CORE Team LP Tracker - execution module.
  * LP homepage (Tuesday Updates, 30/60/90 calls, My Scorecard), Mack's Production
- * Command Center and Daniel's 2027 Plan dashboard.
+ * Production Command (Mack, with early warnings) and Daniel's 2027 Plan dashboard.
  *
  * Access: a private team link (#team=<key>) unlocks borrower data. The key is checked
  * by the database on every call (core_api_* functions); the tables themselves are not
@@ -226,9 +226,29 @@
     var label = function (s) { return ((s.querySelector('.ct-nav-label') || {}).textContent || ''); };
     var team = sections.find(function (s) { return /TEAM/.test(label(s)); });
     if (team && !$('[data-route="core-command"]')) {
-      var b1 = navBtn('core-command', '◆', 'Command Center'), b2 = navBtn('core-plan', '◇', 'Growth & Execution Plan');
+      var b1 = navBtn('core-command', '◆', 'Production Command'), b2 = navBtn('core-plan', '◇', 'Growth & Execution Plan');
       var pm = team.querySelector('[data-route="production-manager"]');
       team.insertBefore(b1, pm || null); team.insertBefore(b2, b1.nextSibling);
+      // Production Manager now lives inside Production Command as the "LP coaching & leads" tab.
+      if (pm) pm.style.display = 'none';
+    }
+    if (!$('#cx-merged-nav-css')) {
+      var css = document.createElement('style'); css.id = 'cx-merged-nav-css';
+      css.textContent = '.ct-nav-btn[data-route="production-manager"]{display:none!important}';
+      document.head.appendChild(css);
+    }
+    var pmView = $('#view-production-manager');
+    if (pmView && !$('[data-pm-merged]', pmView)) {
+      var bar = document.createElement('div'); bar.className = 'cx'; bar.setAttribute('data-pm-merged', '1');
+      bar.innerHTML = '<div class="cx-stack" style="margin:6px 0 10px"><h2 style="margin:0">Production Command</h2><div class="cx-tabs" role="tablist">' +
+        '<button type="button" class="cx-tab" data-pm-go="overview">Early warnings</button><button type="button" class="cx-tab" data-pm-go="tuesday">Tuesday worklist</button>' +
+        '<button type="button" class="cx-tab on" aria-selected="true">LP coaching &amp; leads</button></div></div>';
+      pmView.insertBefore(bar, pmView.firstChild);
+      $all('[data-pm-go]', bar).forEach(function (b) { b.addEventListener('click', function () { S.cmdTab = b.dataset.pmGo; openView('core-command'); }); });
+      var h1 = pmView.querySelector('.ct-page-head h1'); if (h1) h1.textContent = 'LP coaching & leads';
+      var eb = pmView.querySelector('.ct-page-head .ct-eyebrow'); if (eb) eb.textContent = 'PRODUCTION COMMAND';
+      var sub = pmView.querySelector('.ct-page-head .ct-page-sub'); if (sub) sub.textContent = 'Coaching cards, overdue Velocify leads, new-build check-ins and scorecards for each LP.';
+      var live = pmView.querySelector('.ct-page-head button[onclick*="openTuesdayWorklist"]'); if (live) live.style.display = 'none';
     }
     var lpSec = sections.find(function (s) { return /LOAN PARTNERS/.test(label(s)); });
     if (lpSec && !$('[data-route="core-scorecard"]')) {
@@ -838,7 +858,10 @@
       '<form data-cx="task" novalidate>' +
       '<h3 style="margin-top:18px">' + (isTue ? 'Step 1 · Borrower call' : 'Borrower call') + '</h3>' +
       (isTue ? '' : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
-      '<label class="cx-f" for="cx-bo">Borrower contact outcome</label><select id="cx-bo" name="borrower_outcome"' + dis + '>' + borrowerOutcomeOptions(t) + '</select>' +
+      '<label class="cx-f" for="cx-bo">' + (isTue ? 'How did the call go?' : 'Borrower contact outcome') + '</label><select id="cx-bo" name="borrower_outcome"' + (isTue ? ' class="cx-hide" aria-hidden="true" tabindex="-1"' : '') + dis + '>' + borrowerOutcomeOptions(t) + '</select>' +
+      (isTue ? '<div id="cx-bo-btns" class="cx-row" role="group" aria-label="How did the call go?" style="gap:8px;margin-top:6px">' + [['conversation', 'Talked with borrower'], ['vm_update', 'Left voicemail + texted update'], ['no_answer_update', 'No answer + texted update']].map(function (o) {
+        return '<button type="button" class="cx-check" data-bo="' + o[0] + '" aria-pressed="false" style="flex:1;min-width:150px;justify-content:center;padding:12px;font-weight:700"' + dis + '>' + esc(o[1]) + '</button>';
+      }).join('') + '</div>' + (L.tuesdayUpdateTextConfirmed(t) ? '<p class="cx-note" style="margin-top:6px">Update text already sent. Pick <b>Talked with borrower</b> once you reach them.</p>' : '') : '') +
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
       (isTue ? '<label class="cx-f" for="cx-bn">Update notes</label><textarea id="cx-bn" name="borrower_notes" rows="2" placeholder="e.g. Appraisal in, on track to close 12/12"' + dis + '>' +
         esc([t.service_update, t.borrower_notes].filter(function (note, i, notes) { return note && notes.indexOf(note) === i; }).join('\n\n')) + '</textarea>' : '') +
@@ -1009,6 +1032,17 @@
       });
     }
     if (compact && editable && $('#cx-bo', ov).value === 'conversation' && !$('#cx-cat', ov).value) $('#cx-cat', ov).value = localInputNow();
+    function syncOutcomeButtons() {
+      var v = $('#cx-bo', ov) ? $('#cx-bo', ov).value : '';
+      $all('[data-bo]', ov).forEach(function (b) { var on = b.dataset.bo === v; b.setAttribute('aria-pressed', String(on)); b.classList.toggle('done', on); b.style.background = on ? 'var(--cx-purple-soft, #EEEBFB)' : ''; b.style.borderColor = on ? 'var(--cx-purple, #6B4FD8)' : ''; });
+    }
+    $all('[data-bo]', ov).forEach(function (b) {
+      b.addEventListener('click', function () {
+        var sel = $('#cx-bo', ov); if (!sel || b.disabled) return;
+        sel.value = b.dataset.bo; sel.dispatchEvent(new Event('change', { bubbles: true })); syncOutcomeButtons();
+      });
+    });
+    syncOutcomeButtons();
     refreshReqs();
     function busy(on) { saving = on; $all('.cx-drawer-foot .cx-btn', ov).forEach(function (b) { if (b.dataset.cx !== 'close') b.disabled = on || (!compact && b.dataset.cx === 'complete' && valid().length > 0); }); }
     function applyTextDelivery(patch) {
@@ -1166,7 +1200,185 @@
     });
   }
 
-  // ================================================================ Command Center (Mack)
+  // ================================================================ Early warnings (Production Command + Daniel's verdict)
+  // Catch fallout before it happens: every warning names the borrower or LP, why it matters,
+  // and gives a one-click action (open the record, or copy a ready-to-send note to the LP).
+  var ATTEMPT_OUTCOMES = ['voicemail', 'text_sent', 'no_answer', 'email_sent', 'wrong_number'];
+  function leadLp(r) {
+    var s = String(r && (r.lp_user || r.lp) || '').toLowerCase().trim();
+    if (s.indexOf('dill') >= 0 || s === 'gavin') return 'Gavin';
+    if (s.indexOf('de la riva') >= 0 || s === 'karen') return 'Karen';
+    if (s.indexOf('mcmahon') >= 0 || s === 'osgood') return 'Osgood';
+    if (s.indexOf('johnston') >= 0 || s === 'jordan') return 'Jordan';
+    if (s.indexOf('saleh') >= 0 || s === 'said') return 'Said';
+    if (s.indexOf('isaak') >= 0 || s.indexOf('caldwell') >= 0) return 'Isaak';
+    return null;
+  }
+  // Same rule as the Production Manager overdue-lead export: added in the last 60 days,
+  // no recorded action for 5+ days, and not yet applied, nurtured, scheduled or closed out.
+  function isStaleLead(r) {
+    var s = String(r && r.status || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    var applied = false;
+    try { applied = typeof window.ctIsLeadAppConverted === 'function' && window.ctIsLeadAppConverted(r); } catch (e) {}
+    applied = applied || /started|application|approval|pre.?approval|processing|underwriting|submitt|clear to close|ctc|closing|fund|closed/.test(s);
+    var attempt = s.match(/\bcontact\s*attempt\s*(\d+)\b/), outreachDone = false;
+    try { outreachDone = typeof window.ctInitialOutreachComplete === 'function' && window.ctInitialOutreachComplete(r); } catch (e) {}
+    if (applied || outreachDone || (attempt && Number(attempt[1]) >= 5) ||
+      /nurture|\bscheduled\b|withdrawn|dead|lost|do not contact|duplicate|invalid|not interested|bad lead|fake data/.test(s)) return false;
+    var added = L.toIsoDate(r.date_added), last = L.toIsoDate(r.last_action_date || r.last_update);
+    if (!added || !last || !leadLp(r)) return false;
+    var t0 = today();
+    return L.daysBetween(added, t0) <= 60 && L.daysBetween(last, t0) >= 5;
+  }
+  function loadStaleLeads(force) {
+    if (!force && S.staleLeads && Date.now() - S.staleLeads.at < 5 * 60000) return Promise.resolve(S.staleLeads);
+    if (S._staleLoading) return S._staleLoading;
+    S._staleLoading = anonGet('velocify_leads?select=*&date_added=gte.' + L.addDays(today(), -60) + '&order=date_added.desc&limit=5000')
+      .then(function (rows) { S.staleLeads = { at: Date.now(), ok: Array.isArray(rows), rows: (rows || []).filter(isStaleLead) }; })
+      .catch(function () { S.staleLeads = { at: Date.now(), ok: false, rows: [] }; })
+      .then(function () { S._staleLoading = null; renderAll(); return S.staleLeads; });
+    return S._staleLoading;
+  }
+  function firstName(name) { var n = String(name || '').trim(); if (n.indexOf(',') > 0) n = n.split(',')[1].trim() + ' ' + n.split(',')[0].trim(); return n || 'the borrower'; }
+  function earlyWarnings() {
+    var t0 = today(), wk = L.weekMonday(t0), soon = L.addDays(t0, 7), dow = new Date(t0 + 'T12:00:00').getDay();
+    var out = { ready: !!S.loadedAt && !S.error && hasImport('pipeline'), closing: [], quiet: [], behind: [], leads: [] };
+    if (!out.ready) return out;
+    var byLoan = {};
+    S.tasks.forEach(function (t) { (byLoan[t.loan_number] = byLoan[t.loan_number] || []).push(t); });
+    var flagged = {};
+    // 1. Closing soon with no contact this week, closing date passed, or an open client concern.
+    S.tasks.filter(function (t) { return L.isIssue(t) && t.status !== 'completed'; }).forEach(function (t) {
+      var b = borrowerOf(t), lp = owner(t) || 'Unassigned';
+      flagged[t.loan_number] = 1;
+      out.closing.push({ sev: 3, sort: '0', lp: lp, who: b, task: t, why: 'Open client concern' + (t.escalated ? ' · escalated' : ''),
+        note: 'Hi ' + lp + ', ' + firstName(b) + ' has an open client concern. What is the plan to resolve it today? Please update the tracker once it is handled.' });
+    });
+    Object.keys(S.loans).forEach(function (ln) {
+      var loan = S.loans[ln], tasks = byLoan[ln] || [];
+      if (loan.pipeline_status !== 'active' || loan.funding_verified || flagged[ln]) return;
+      var open = tasks.filter(isOpen).sort(sortWork), lp = (open[0] && owner(open[0])) || loan.lp_owner || 'Unassigned';
+      var b = loan.borrower_name || 'Borrower name unavailable', close = loan.est_closing_date;
+      var talks = tasks.filter(function (t) { return t.borrower_outcome === 'conversation' && t.conversation_at; })
+        .map(function (t) { return L.isoOfInstant(t.conversation_at); }).sort();
+      var lastTalk = talks.length ? talks[talks.length - 1] : null;
+      if (close && close < t0) {
+        flagged[ln] = 1;
+        out.closing.push({ sev: 2, sort: '1' + close, lp: lp, who: b, task: open[0] || null, loan: loan,
+          why: 'Closing date ' + fmtDate(close) + ' passed · not showing funded',
+          note: 'Hi ' + lp + ', ' + firstName(b) + '\'s closing date (' + fmtDate(close) + ') has passed but the loan is not showing funded. Can you confirm the new closing date and update the borrower and buyer agent today?' });
+        return;
+      }
+      if (close && close <= soon && !(lastTalk && lastTalk >= wk)) {
+        flagged[ln] = 1;
+        var days = L.daysBetween(t0, close);
+        out.closing.push({ sev: 2, sort: '2' + close, lp: lp, who: b, task: open[0] || null, loan: loan,
+          why: 'Closes ' + (days === 0 ? 'today' : days === 1 ? 'tomorrow' : 'in ' + days + ' days') + ' (' + fmtDate(close) + ') · borrower not reached this week',
+          note: 'Hi ' + lp + ', ' + firstName(b) + ' closes ' + fmtDate(close) + ' and has not been reached this week. Please call today and log it in the tracker so nothing slips before closing.' });
+        return;
+      }
+      // 2. Borrower gone quiet: 2+ unanswered weeks, or no live conversation in 14+ days on a file we have been calling.
+      var misses = tasks.filter(function (t) { return t.status !== 'completed' && t.status !== 'cancelled' && ATTEMPT_OUTCOMES.indexOf(t.borrower_outcome) >= 0; }).length;
+      var firstDue = tasks.map(function (t) { return t.due_date; }).filter(Boolean).sort()[0];
+      var silentFor = lastTalk ? L.daysBetween(lastTalk, t0) : firstDue ? L.daysBetween(firstDue, t0) : 0;
+      if ((misses >= 2 && silentFor >= 7) || (open.length && silentFor >= 14)) {
+        out.quiet.push({ sev: 1, sort: String(1000 - silentFor).padStart(4, '0'), lp: lp, who: b, task: open[0] || null, loan: loan,
+          why: (misses >= 2 ? misses + ' calls without reaching them · ' : '') + (lastTalk ? 'last live conversation ' + silentFor + ' days ago' : 'no live conversation logged yet'),
+          note: 'Hi ' + lp + ', we have not had a live conversation with ' + firstName(b) + (lastTalk ? ' since ' + fmtDate(lastTalk) : ' yet') + '. Can you try a different time of day, and text to set up a quick call?' });
+      }
+    });
+    // 3. LP falling behind: overdue calls carried forward, missing scorecard, late corrective actions.
+    teamStats(periodRange('week')).forEach(function (r) {
+      var reasons = [], tasks = r.overdue.slice();
+      if (r.overdue.length) reasons.push(r.overdue.length + ' overdue call' + (r.overdue.length === 1 ? '' : 's'));
+      var pcLate = r.mine.filter(function (t) { return /^pc/.test(t.task_type) && isOpen(t) && L.workDueDate(t) < t0 && r.overdue.indexOf(t) < 0; });
+      if (pcLate.length) { reasons.push(pcLate.length + ' post-closing call' + (pcLate.length === 1 ? '' : 's') + ' overdue'); tasks = tasks.concat(pcLate); }
+      if (r.sc === false && (dow >= 3 || dow === 0)) reasons.push('scorecard not entered this week');
+      var late = r.corr.filter(function (c) { return c.status !== 'resolved' && c.due_date < t0; });
+      if (late.length) reasons.push(late.length + ' corrective action' + (late.length === 1 ? '' : 's') + ' past due');
+      if (!reasons.length) return;
+      out.behind.push({ sev: r.overdue.length + pcLate.length + (r.sc === false ? 1 : 0) + late.length, sort: String(999 - tasks.length).padStart(3, '0'), lp: r.lp, who: r.lp, tasks: tasks,
+        why: reasons.join(' · '),
+        note: 'Hi ' + r.lp + ', quick check-in from the tracker: ' + reasons.join(', ') + '. Can you get these cleared today? Let me know if you need coverage or help.' });
+    });
+    // 4. Leads and buyer agents going cold.
+    if (S.staleLeads && S.staleLeads.ok) S.staleLeads.rows.forEach(function (r) {
+      var lp = leadLp(r), last = L.toIsoDate(r.last_action_date || r.last_update), idle = L.daysBetween(last, t0);
+      var buyer = r.buyer_name || r.borrower_name || r.customer_name || 'Buyer name unavailable', partner = r.referral_partner_name || '';
+      out.leads.push({ sev: 1, sort: String(999 - idle).padStart(3, '0'), lp: lp, who: buyer, lead: true,
+        why: 'Velocify lead · no activity for ' + idle + ' days' + (partner ? ' · referred by ' + partner : '') + ' · ' + (r.status || 'status not recorded'),
+        note: 'Hi ' + lp + ', ' + buyer + (partner ? ' (referred by ' + partner + ')' : '') + ' has had no Velocify activity for ' + idle + ' days. Can you reach out today and update the status? The referral partner will be waiting to hear.' });
+    });
+    L.currentTuesdayWork(S.tasks, t0).forEach(function (t) {
+      var loan = S.loans[t.loan_number] || {};
+      if (t.task_type !== 'tuesday' || t.status === 'completed' || t.status === 'cancelled' || L.workDueDate(t) > t0) return;
+      if (!L.hasBuyerAgent(loan.buyer_agent_name) || ['spoke', 'update_sent'].indexOf(t.agent_outcome) >= 0 || flagged[t.loan_number]) return;
+      flagged[t.loan_number] = 1;
+      var lp = owner(t) || 'Unassigned';
+      out.leads.push({ sev: 1, sort: '000', lp: lp, who: loan.buyer_agent_name, task: t,
+        why: 'Buyer agent · no Tuesday update yet on ' + borrowerOf(t),
+        note: 'Hi ' + lp + ', ' + loan.buyer_agent_name + ' has not had a Tuesday update on ' + firstName(borrowerOf(t)) + ' this week. Can you send them a quick status today? Agents who stay informed keep sending us buyers.' });
+    });
+    ['closing', 'quiet', 'behind', 'leads'].forEach(function (k) { out[k].sort(function (a, b) { return (b.sev - a.sev) || String(a.sort).localeCompare(String(b.sort)); }); });
+    return out;
+  }
+  var WARN_GROUPS = [
+    ['closing', 'Closing soon or client at risk', 'Fix today. These can delay or lose a closing.', 'var(--cx-bad, #B84A42)'],
+    ['quiet', 'Borrowers gone quiet', 'Reach them before a small issue becomes a surprise at closing.', '#C98A14'],
+    ['behind', 'LPs falling behind', 'Step in early. Offer coverage or a 10-minute check-in.', '#7A5AC8'],
+    ['leads', 'Leads and buyer agents going cold', 'A referral partner is waiting. Silence costs future referrals.', '#1E83A8']
+  ];
+  function warningsHtml(w, limit) {
+    if (!w.ready) return '<div class="cx-empty">Early warnings need the current pipeline report. Check Tools and reporting.</div>';
+    limit = limit || 5;
+    var total = WARN_GROUPS.reduce(function (n, g) { return n + w[g[0]].length; }, 0);
+    var head = '<div class="cx-card" style="border-left:5px solid ' + (w.closing.length ? 'var(--cx-bad, #B84A42)' : total ? '#C98A14' : '#2E8B57') + '">' +
+      '<div class="cx-kicker">Early warnings · ' + esc(fmtDate(today())) + '</div><h3 style="margin:4px 0 6px">' +
+      (!total ? 'Nothing at risk right now' : total + ' item' + (total === 1 ? '' : 's') + ' could slip if nobody acts') + '</h3>' +
+      '<div class="cx-row" style="gap:8px;flex-wrap:wrap">' + WARN_GROUPS.map(function (g) {
+        var n = w[g[0]].length;
+        return '<button type="button" class="cx-btn sm" data-warn-jump="' + g[0] + '" style="border-color:' + (n ? g[3] : '#cfdbe3') + ';color:' + (n ? g[3] : '#6d8190') + '"><b>' + n + '</b>&nbsp;' + esc(g[1]) + '</button>';
+      }).join('') + '</div>' +
+      (S.staleLeads && !S.staleLeads.ok ? '<p class="cx-note" style="margin-top:8px">Velocify leads could not be read, so stale leads are not shown.</p>' : !S.staleLeads ? '<p class="cx-note" style="margin-top:8px">Checking Velocify for stale leads…</p>' : '') +
+      '<p class="cx-note" style="margin-top:8px">Each item has a ready-to-send note. Click <b>Copy note</b> and paste it to the LP in Teams.</p></div>';
+    S._warn = {};
+    var groups = WARN_GROUPS.map(function (g) {
+      var items = w[g[0]];
+      if (!items.length) return '';
+      var rows = items.map(function (it, i) {
+        var id = g[0] + '-' + i; S._warn[id] = it;
+        var open = it.task ? '<button type="button" class="cx-btn sm" data-open-task="' + esc(it.task.id) + '">Open call</button>' :
+          it.tasks && it.tasks.length ? '<button type="button" class="cx-btn sm" data-rec="' + reg('warn-' + id, it.lp + ' · overdue work', it.tasks) + '">Open ' + it.tasks.length + ' call' + (it.tasks.length === 1 ? '' : 's') + '</button>' :
+          it.loan ? '<button type="button" class="cx-btn sm" data-rec="' + reg('warn-' + id, it.who, [], [it.loan]) + '">Open loan</button>' : '';
+        return '<div class="cx-item" style="cursor:default;align-items:center;' + (i >= limit ? 'display:none' : '') + '" data-warn-row="' + g[0] + '">' +
+          '<span class="i-name">' + esc(it.who) + (it.lp && it.lp !== it.who ? ' <span class="cx-muted" style="font-weight:400">· ' + esc(it.lp) + '</span>' : '') + '</span>' +
+          '<span class="i-meta">' + esc(it.why) + '</span>' +
+          '<span class="i-right" style="gap:6px">' + open + '<button type="button" class="cx-btn sm accent" data-warn-copy="' + id + '">Copy note</button></span></div>';
+      }).join('');
+      return '<section class="cx-card" id="warn-' + g[0] + '" style="border-top:4px solid ' + g[3] + '"><div class="cx-head"><div><h3>' + esc(g[1]) + ' · ' + items.length + '</h3><div class="cx-sub">' + esc(g[2]) + '</div></div></div>' +
+        '<div class="cx-list" style="margin-top:10px">' + rows + '</div>' +
+        (items.length > limit ? '<button type="button" class="cx-link" data-warn-more="' + g[0] + '" style="margin-top:8px">Show all ' + items.length + '</button>' : '') + '</section>';
+    }).join('');
+    return head + groups;
+  }
+  function wireWarnings(host) {
+    $all('[data-warn-copy]', host).forEach(function (b) {
+      b.addEventListener('click', function () {
+        var it = S._warn && S._warn[b.dataset.warnCopy]; if (!it) return;
+        var done = function () { toast('Note copied. Paste it to ' + it.lp + ' in Teams.'); b.textContent = 'Copied ✓'; };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(it.note).then(done, function () { window.prompt('Copy this note:', it.note); });
+        else window.prompt('Copy this note:', it.note);
+      });
+    });
+    $all('[data-warn-more]', host).forEach(function (b) {
+      b.addEventListener('click', function () { $all('[data-warn-row="' + b.dataset.warnMore + '"]', host).forEach(function (r) { r.style.display = ''; }); b.remove(); });
+    });
+    $all('[data-warn-jump]', host).forEach(function (b) {
+      b.addEventListener('click', function () { var s = $('#warn-' + b.dataset.warnJump, host); if (s && s.scrollIntoView) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    });
+  }
+
+  // ================================================================ Production Command (Mack)
   var PERIODS = { week: 'This week', recent30: 'Last 30 days', recent60: 'Last 60 days' };
   function periodRange(key) {
     var t = today();
@@ -1181,21 +1393,29 @@
         (loan.pipeline_status === 'active' || (loan.funding_verified && openLoanNumbers.has(loan.loan_number)));
     });
   }
+  function openCoaching() {
+    var pmBtn = $('.ct-nav-btn[data-route="production-manager"]');
+    if (typeof window.pmOpenView === 'function') window.pmOpenView(pmBtn);
+    else if (pmBtn) pmBtn.click();
+    var cmd = $('.ct-nav-btn[data-route="core-command"]');
+    if (cmd && $('#view-production-manager.active')) { $all('.ct-nav-btn,.who-btn').forEach(function (b) { b.classList.remove('active'); }); cmd.classList.add('active'); }
+  }
   function renderCommand() {
     var host = $('#view-core-command'); if (!host) return;
+    if (!S.staleLeads && !S._staleLoading) loadStaleLeads();
     if (!activeKey() || !S.tier) {
-      host.innerHTML = '<div class="cx-stack"><h2>Command Center</h2><div class="cx-empty">' +
+      host.innerHTML = '<div class="cx-stack"><h2>Production Command</h2><div class="cx-empty">' +
         (activeKey() ? (S.loading ? 'Loading team data…' : 'Could not load team data. <button type="button" class="cx-btn" data-cx="refresh">Retry</button>') + '</div>' :
           'Select a loan partner in the tracker navigation to view their schedule.</div>') + '</div>';
       bindAccess(host);
       return;
     }
-    var tabs = [['overview', 'Priorities'], ['tuesday', 'Tuesday worklist']];
+    var tabs = [['overview', 'Early warnings'], ['tuesday', 'Tuesday worklist'], ['coaching', 'LP coaching & leads']];
     var more = [['records', 'Call records'], ['data', 'Weekly imports'], ['scorecards', 'Scorecards'], ['production', 'Production metrics'], ['unassigned', 'Assign loans'], ['funding', 'Funding review'], ['coverage', 'Coverage'], ['corrections', 'Corrective actions']];
     var p = S.cmdPeriod;
     var toolsOpen = !!($('[data-command-tools]', host) || {}).open || more.some(function (tool) { return tool[0] === S.cmdTab; });
     var numbersOpen = !!($('[data-command-breakdown]', host) || {}).open;
-    host.innerHTML = '<div class="cx-stack"><h2>Command Center</h2>' +
+    host.innerHTML = '<div class="cx-stack"><div><h2 style="margin:0">Production Command</h2><div class="cx-sub">Catch problems before they turn into fallout. Start with Early warnings every morning.</div></div>' +
       (S.error ? '<div class="cx-err">' + esc(S.error) + '</div>' : '') +
       '<div class="cx-tabs" role="tablist">' + tabs.map(function (t) { return '<button type="button" role="tab" class="cx-tab' + (S.cmdTab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '">' + esc(t[1]) + '</button>'; }).join('') + '</div>' +
       '<details class="cx-supporting" data-command-tools' + (toolsOpen ? ' open' : '') + '><summary>Tools and reporting</summary>' +
@@ -1208,7 +1428,7 @@
     if (breakdown) breakdown.open = numbersOpen;
     bindAccess(host);
     $('[data-execution-plan]', host).addEventListener('click', function () { openView('core-plan'); });
-    $all('[data-tab]', host).forEach(function (b) { b.addEventListener('click', function () { S.cmdTab = b.dataset.tab; renderCommand(); }); });
+    $all('[data-tab]', host).forEach(function (b) { b.addEventListener('click', function () { if (b.dataset.tab === 'coaching') { openCoaching(); return; } S.cmdTab = b.dataset.tab; renderCommand(); }); });
     $('[data-cx="manager-tool"]', host).addEventListener('change', function (event) { if (event.target.value) { S.cmdTab = event.target.value; renderCommand(); } });
     $all('[data-tuesday-status]', host).forEach(function (b) { b.addEventListener('click', function () {
       S.tuesdayStatus = b.dataset.tuesdayStatus;
@@ -1326,16 +1546,9 @@
           '<td class="cx-num">' + numCell(att.length, reg(k + '-pca', k + ' · attempted calls', att)) + '</td><td class="cx-num">' + numCell(r.pc.asked.length, reg(k + '-pcr', k + ' · PCR requests', r.pc.asked)) + '</td><td class="cx-num">' + numCell(r.pc.named.length, reg(k + '-pci', k + ' · PCR introductions', r.pc.named.map(function (n) { return n.task; }))) + '</td></tr>';
       }).join('') + '</tbody></table></div>' +
       '<p class="cx-note" style="margin-top:8px">Calls due in the period. An attempted call is never counted as completed. Historical calls without evidence sit in Needs Review and are excluded.</p></div>';
-    var next;
-    if (concerns.length) next = ['Resolve client concerns', concerns.length, 'data-rec="concerns"'];
-    else if (overdueAll.length) next = ['Clear overdue calls', overdueAll.length, 'data-rec="overdue"'];
-    else if (unLoans.length) next = ['Assign borrowers without an owner', unLoans.length, 'data-tab-go="unassigned"'];
-    else if (team.remaining.length) next = ['Finish today’s calls', team.remaining.length, 'data-rec="' + reg('team-rem', 'Team calls still due today', team.remaining) + '"'];
-    return '<div class="cx-stack"><section class="cx-card"><h3>Start here</h3>' +
-      (S.error || !hasImport('pipeline') || !hasImport('funded_units') ? '<p class="cx-note">Check report availability under Tools and reporting. Priorities use the records currently available.</p>' : '') +
-      (next ? '<p><b>' + esc(next[0]) + '</b> · ' + next[1] + '</p><button type="button" class="cx-btn primary" ' + next[2] + '>Open worklist</button>' :
-        '<p>No urgent items in the loaded records.</p>') +
-      '</section><details class="cx-supporting" data-command-breakdown><summary>Team breakdown and accountability</summary><div class="cx-tiles">' + tiles + '</div>' +
+    return '<div class="cx-stack">' + (S.error || !hasImport('pipeline') || !hasImport('funded_units') ? '<p class="cx-note">Some reports are missing or stale. Check Tools and reporting.</p>' : '') +
+      warningsHtml(earlyWarnings()) +
+      '<details class="cx-supporting" data-command-breakdown><summary>Team numbers and coaching flags</summary><div class="cx-tiles">' + tiles + '</div>' +
       daily + tueTbl + pcTbl + coachingCard(rows) + '</details></div>';
   }
   function coachingCard(rows) {
@@ -1501,6 +1714,7 @@
     if (!$('#view-core-command').classList.contains('active')) openView('core-command'); else renderCommand();
   }
   function wireCommandBody(host) {
+    wireWarnings(host);
     $all('[data-tile]', host).forEach(function (b) {
       b.addEventListener('click', function () {
         var k = b.getAttribute('data-tile');
@@ -1762,6 +1976,65 @@
       forecastReviewSection(scheduled, actual, target) +
       (past.length ? '<button type="button" class="cx-btn" data-plan-rec="forecast-past">Review ' + past.length + ' past closing dates</button>' : '') + '</section>';
   }
+  // Daniel's first question: are we on track? One verdict, then the top three risks with owners.
+  function planVerdict(c) {
+    var P = L.PLAN, t0 = c.t0, w = c.signed ? earlyWarnings() : { ready: false, closing: [], quiet: [], behind: [], leads: [] };
+    if (!S.staleLeads && !S._staleLoading) loadStaleLeads();
+    var status = 'unknown', headline = '', detail = '';
+    var weekly = function (n, days) { return Math.round(10 * n / (days / 7)) / 10; };
+    var funded90 = c.signed && hasImport('funded_units') ? fundedIn({ start: L.addDays(t0, -89), end: t0 }).length : null;
+    var rate = funded90 === null ? null : weekly(funded90, 90);
+    if (c.fp.status === 'not_started') {
+      var q1Need = +(P.fundings.quarters[1] / 13).toFixed(1);
+      if (rate === null) { status = 'unknown'; headline = 'The 2027 plan starts January 1'; detail = 'Import the Funded Units report to compare the team\'s current pace with what Q1 needs (' + q1Need + ' fundings a week).'; }
+      else {
+        status = rate >= q1Need * 0.95 ? 'on' : rate >= q1Need * 0.8 ? 'risk' : 'behind';
+        headline = status === 'on' ? 'On track to start 2027 at plan pace' : status === 'risk' ? 'At risk: slightly below the pace 2027 needs' : 'Behind: current pace is well below what 2027 needs';
+        detail = 'The team funded ' + funded90 + ' loans in the last 90 days (' + rate + ' a week). Q1 2027 needs ' + P.fundings.quarters[1] + ' fundings, about ' + q1Need + ' a week, starting January 1.';
+      }
+    } else if (c.fp.status === 'unavailable') {
+      status = 'unknown'; headline = 'Funding data unavailable'; detail = 'Import the Funded Units report to see whether the team is on track.';
+    } else {
+      var scheduled = Object.values(S.loans).filter(function (l) { return l.pipeline_status === 'active' && !l.funding_verified && L.inRange(l.est_closing_date, c.range) && l.est_closing_date >= t0; }).length;
+      var forecast = (c.funded ? c.funded.length : 0) + scheduled;
+      status = c.fp.status === 'met' || (c.fp.status === 'on_pace' && forecast >= c.fundTarget) ? 'on' : (c.fp.status === 'on_pace' || forecast >= c.fundTarget * 0.9) ? 'risk' : 'behind';
+      headline = status === 'on' ? 'On track' : status === 'risk' ? 'At risk' : 'Behind plan';
+      detail = (c.funded ? c.funded.length : 0) + ' of ' + c.fundTarget + ' funded so far' + (c.fp.gap ? '. The team needs ' + c.fp.requiredPerWeek + ' fundings a week from here' : '') +
+        '. ' + scheduled + ' more loans are scheduled to close in this period, so if they all fund the team lands at ' + forecast + ' of ' + c.fundTarget + '.';
+    }
+    var risks = [];
+    var add = function (score, text, ownerName, action, label) { if (score > 0) risks.push({ score: score, text: text, owner: ownerName, action: action, label: label }); };
+    if (status === 'behind' || status === 'risk') add(status === 'behind' ? 40 : 20, 'Funding pace: ' + (rate !== null && c.fp.status === 'not_started' ? 'running ' + rate + ' a week' : 'need ' + (c.fp.requiredPerWeek || '—') + ' a week') + '. Review closing blockers and the forecast weekly.', 'Daniel', 'forecast', 'Open funding forecast');
+    if (w.closing.length) add(30 + w.closing.length, w.closing.length + ' loan' + (w.closing.length === 1 ? '' : 's') + ' closing soon or at risk with no contact this week (or an open client concern).', 'Mack + LPs', 'warn', 'Open early warnings');
+    if (c.gap) add(15 + (c.gap[2] - c.gap[1]), c.gap[0] + ' conversion is ' + c.gap[1] + '% against a ' + c.gap[2] + '% plan. ' + c.gap[3], 'Mack', 'coaching', 'Open LP coaching');
+    if (w.behind.length) add(10 + 3 * w.behind.length, w.behind.length + ' LP' + (w.behind.length === 1 ? ' is' : 's are') + ' behind (' + w.behind.map(function (x) { return x.lp; }).join(', ') + '): overdue calls or missing scorecards.', 'Mack', 'warn', 'Open early warnings');
+    if (w.leads.length) add(8 + w.leads.length, w.leads.length + ' leads or buyer agents going cold with no follow-up.', 'LPs (Mack checks)', 'warn', 'Open early warnings');
+    if (w.quiet.length) add(6 + w.quiet.length, w.quiet.length + ' borrower' + (w.quiet.length === 1 ? ' has' : 's have') + ' gone quiet, with no live conversation recently.', 'LPs', 'warn', 'Open early warnings');
+    if (c.un) add(10 + c.un, c.un + ' active loans have no LP owner.', 'Mack', 'unassigned', 'Assign owners');
+    risks.sort(function (a, b) { return b.score - a.score; });
+    var top = risks.slice(0, 3), colors = { on: '#2E8B57', risk: '#C98A14', behind: '#B84A42', unknown: '#6d8190' };
+    var badge = { on: 'ON TRACK', risk: 'AT RISK', behind: 'BEHIND', unknown: 'NO VERDICT YET' }[status];
+    S._planRisks = top;
+    return { status: status, html: '<section class="cx-card" style="border-left:6px solid ' + colors[status] + '">' +
+      '<div class="cx-kicker">Are we on track?</div><div class="cx-row" style="align-items:center;gap:10px;margin:6px 0"><span class="cx-chip" style="background:' + colors[status] + ';color:#fff;font-weight:800">' + badge + '</span><h3 style="margin:0">' + esc(headline) + '</h3></div>' +
+      '<p style="margin:4px 0 12px">' + esc(detail) + '</p>' +
+      '<h4 style="margin:10px 0 6px">Top risks this week</h4>' +
+      (top.length ? '<ol class="cx-list" style="padding-left:0;list-style:none;margin:0">' + top.map(function (r, i) {
+        return '<li class="cx-item" style="cursor:default;align-items:center"><span class="i-name">' + (i + 1) + '. ' + esc(r.text) + '</span><span class="i-meta">Owner: <b>' + esc(r.owner) + '</b></span><span class="i-right"><button type="button" class="cx-btn sm" data-plan-risk="' + i + '">' + esc(r.label) + '</button></span></li>';
+      }).join('') + '</ol>' : '<div class="cx-empty">No major risks flagged from current data.</div>') +
+      '<p class="cx-note" style="margin-top:10px">Details below: funding forecast, goals, conversion and relationships.</p></section>' };
+  }
+  function wirePlanVerdict(host) {
+    $all('[data-plan-risk]', host).forEach(function (b) {
+      b.addEventListener('click', function () {
+        var r = (S._planRisks || [])[+b.dataset.planRisk]; if (!r) return;
+        if (r.action === 'forecast') { var f = $('[data-plan-forecast]', host); if (f) { f.open = true; f.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
+        if (r.action === 'coaching') { openCoaching(); return; }
+        S.cmdTab = r.action === 'unassigned' ? 'unassigned' : 'overview';
+        openView('core-command');
+      });
+    });
+  }
   function renderPlan() {
     var host = $('#view-core-plan'); if (!host) return;
     var P = L.PLAN, t0 = today(), y = P.year;
@@ -1812,9 +2085,10 @@
     var cvRow = function (label, val, tgt, note) { return '<tr><td>' + esc(label) + '</td><td class="cx-num">' + esc(tgt) + '</td><td class="cx-num">' + (val === null || val === undefined ? '<span class="cx-muted">Data unavailable</span>' : !started ? '<span class="cx-muted">Not started</span>' : val + '%') + '</td><td class="cx-small cx-muted">' + esc(note || '') + '</td></tr>'; };
     var bott = [];
     if (fun && started) [['Lead to application', fun.leadToApp, 80], ['Application to preapproval', fun.appToPre, 55], ['Preapproval to contract', fun.preToContract, per === 'quarter' && curQ === 1 ? 60 : 65], ['Contract to funded', fun.contractToFunded, 75]].forEach(function (s) { if (s[1] !== null && s[1] < s[2]) bott.push(s[0] + ': ' + s[1] + '% against ' + s[2] + '% plan'); });
+    var od = 0, un = 0;
     if (signed) {
-      var od = L.currentTuesdayWork(S.tasks, t0).filter(function (t) { return owner(t) && isOpen(t) && L.workDueDate(t) < t0; }).length; if (od) bott.push(od + ' overdue client calls across the team');
-      var un = unassignedActiveLoans().length; if (un) bott.push(un + ' active loans need an LP owner');
+      od = L.currentTuesdayWork(S.tasks, t0).filter(function (t) { return owner(t) && isOpen(t) && L.workDueDate(t) < t0; }).length; if (od) bott.push(od + ' overdue client calls across the team');
+      un = unassignedActiveLoans().length; if (un) bott.push(un + ' active loans need an LP owner');
     }
     if (sc && sc.some(function (x) { return !x; })) bott.push(sc.filter(function (x) { return !x; }).length + ' LP scorecards not entered this week');
     var stages = started && fun ? [
@@ -1825,14 +2099,8 @@
     ] : [];
     var gap = stages.filter(function (stage) { return stage[1] !== null && stage[1] < stage[2]; })
       .sort(function (a, b) { return (b[2] - b[1]) - (a[2] - a[1]); })[0];
-    var focus = gap ? gap[0] + ' is at ' + gap[1] + '% against ' + gap[2] + '%. Mack: ' + gap[3] :
-      fp.status === 'behind' ? 'Funding is behind pace. Daniel: review closing blockers and plan for ' + fp.requiredPerWeek + ' fundings per week.' :
-      od ? od + ' overdue client calls. Mack: confirm each owner and next contact date in Command Center.' :
-      un ? un + ' active loans need an LP owner. Mack: confirm ownership in Command Center.' :
-      'Mack and the RM: review the 90-day referral watch and agree on the next move for each partner nearing the cutoff.';
-    var focusLabel = gap ? 'Open Production Manager' : fp.status === 'behind' ? 'Review funding forecast' : od || un ? 'Open Command Center' : 'Open Team Portfolio';
-    var weeklyFocus = '<section class="cx-card"><h3>What to do this week</h3><p>' + esc(focus) +
-      '</p><p class="cx-note">Daniel reviews progress at the next weekly meeting.</p><button type="button" class="cx-btn primary" data-plan-focus>' + focusLabel + '</button></section>';
+    var verdict = planVerdict({ per: per, range: range, t0: t0, fp: fp, fundTarget: fundTarget, funded: funded, gap: gap, od: od, un: un, sc: sc, signed: signed, curQ: curQ });
+    var weeklyFocus = verdict.html;
     host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Leadership</div><h2>Growth &amp; Execution Plan</h2><div class="cx-sub">' + esc(periodLabel) + ' · Targets from the final CORE Team 2027 Business Plan</div></div>' +
       '<div class="cx-tabs">' + [['month', 'Month'], ['quarter', 'Quarter'], ['year', 'Year']].map(function (p) { return '<button type="button" class="cx-tab' + (per === p[0] ? ' on' : '') + '" data-per="' + p[0] + '">' + p[1] + '</button>'; }).join('') + '</div></div>' +
       (S.tier ? syncLine() : '') +
@@ -1872,28 +2140,10 @@
       '<div>Pipeline report: ' + (signed ? freshImport('pipeline') : 'Locked') + '</div><div>Funded Units: ' + (signed ? freshImport('funded_units') : 'Locked') + '</div>' +
       '<div>Power BI profiles: ' + (S.ext && S.ext.pbi ? esc(fmtTime(S.ext.pbi.imported_at)) : 'Unavailable') + '</div><div>Velocify: ' + (S.ext && S.ext.vel ? 'latest lead ' + esc(fmtTime(S.ext.vel.created_at)) : 'Unavailable') + '</div></div></div></div></details></details></div>';
     bindAccess(host);
-    $('[data-plan-focus]', host).addEventListener('click', function () {
-      if (!gap && fp.status === 'behind') {
-        var forecast = $('[data-plan-forecast]', host);
-        forecast.open = true;
-        $('summary', forecast).focus();
-        return;
-      }
-      if (!gap && (od || un)) {
-        S.cmdTab = od ? 'overview' : 'unassigned';
-        openView('core-command');
-        return;
-      }
-      var route = gap ? 'production-manager' : 'portfolio';
-      var link = $('.ct-nav-btn[data-route="' + route + '"]');
-      if (link) link.click();
-    });
+    wirePlanVerdict(host);
     $('[data-lp-jump="execution-tuesday"]', host).addEventListener('click', openTuesdayWorklist);
     $('[data-lp-jump="execution-calls"]', host).addEventListener('click', function () { S.cmdTab = 'overview'; S.cmdPeriod = 'week'; openView('core-command'); });
-    $('[data-lp-jump="execution-coaching"]', host).addEventListener('click', function () {
-      var link = $('.ct-nav-btn[data-route="production-manager"]');
-      if (link) link.click();
-    });
+    $('[data-lp-jump="execution-coaching"]', host).addEventListener('click', openCoaching);
     $all('[data-per]', host).forEach(function (b) { b.addEventListener('click', function () { S.planPeriod = b.dataset.per; renderPlan(); }); });
     var reviewList = $('[data-forecast-list]', host);
     if (reviewList) reviewList.open = reviewsOpen;
