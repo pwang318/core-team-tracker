@@ -506,7 +506,7 @@
     return '<div class="cx-list">' + tasks.slice().sort(sortWork).map(itemHtml).join('') + '</div>';
   }
   function lpBuckets(lp) {
-    var t0 = today(), tue = L.tuesdayOf(t0), mine = S.tasks.filter(function (t) { return owner(t) === lp; });
+    var t0 = today(), tue = L.tuesdayOf(t0), mine = L.currentTuesdayWork(S.tasks, t0).filter(function (t) { return owner(t) === lp; });
     var tueAssigned = mine.filter(function (t) {
       if (t.task_type !== 'tuesday' || t.status === 'needs_review') return false;
       var res = L.resolvedOn(t);
@@ -850,6 +850,7 @@
       '<h3 style="margin-top:18px">' + (isTue ? 'Step 1 · Borrower call' : 'Borrower call') + '</h3>' +
       (isTue ? '' : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
       '<label class="cx-f" for="cx-bo">Borrower contact outcome</label><select id="cx-bo" name="borrower_outcome"' + dis + '>' + opts(L.BORROWER_OUTCOMES, t.borrower_outcome, 'Select outcome') + '</select>' +
+      (isTue && editable ? '<label id="cx-update-text-label" class="cx-check cx-hide"><input type="checkbox" id="cx-update-text"> I texted the borrower their loan update</label>' : '') +
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
       (isTue ? '<label class="cx-f" for="cx-bn">Borrower update notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="Summarize the loan status, what you discussed, and any borrower questions."' + dis + '>' +
         esc([t.service_update, t.borrower_notes].filter(function (note, i, notes) { return note && notes.indexOf(note) === i; }).join('\n\n')) + '</textarea>' : '') +
@@ -934,8 +935,30 @@
     function setState(txt, bad) { if (state) { state.textContent = txt; state.style.color = bad ? 'var(--cx-bad)' : ''; } }
     function valid() { return L.validateTask(Object.assign({}, t, collect(form, t)), loan); }
     var compact = t.task_type === 'tuesday', saving = false;
+    var followUpDate = $('#cx-nd', ov), suggestedDate = '', dateEdited = false;
+    function updateTextSelected() {
+      return ['voicemail', 'no_answer'].includes($('#cx-bo', ov).value) && !!($('#cx-update-text', ov) || {}).checked;
+    }
+    function suggestAttemptDate() {
+      if (!compact || !followUpDate) return;
+      var outcome = $('#cx-bo', ov).value, label = $('#cx-update-text-label', ov);
+      if (label) label.classList.toggle('cx-hide', !['voicemail', 'no_answer'].includes(outcome));
+      if (dateEdited) return;
+      if (!['voicemail', 'no_answer'].includes(outcome)) {
+        if (suggestedDate) followUpDate.value = t.next_action_date || '';
+        suggestedDate = '';
+        return;
+      }
+      var date = today();
+      if (!suggestedDate && followUpDate.value > date && !updateTextSelected()) return;
+      var urgent = L.isIssue(Object.assign({}, t, collect(form, t)));
+      suggestedDate = L.suggestTuesdayRetry(date, loan.est_closing_date, urgent, updateTextSelected());
+      followUpDate.value = suggestedDate;
+      $('#cx-follow-up', ov).open = true;
+    }
     function refreshReqs() {
       if (!editable) return;
+      suggestAttemptDate();
       var p = Object.assign({}, t, collect(form, t)), errs = L.validateTask(p, loan), box = $('#cx-reqs', ov);
       var checklist = errs;
       if (compact) {
@@ -951,7 +974,7 @@
         : '<div class="cx-ok">✓ Every required conversation and referral step is documented.</div>';
       var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = saving || (!compact && errs.length > 0);
       var bo = p.borrower_outcome, ar = $('#cx-attempt-row', ov);
-      if (ar) ar.innerHTML = bo && bo !== 'conversation' ? '<button type="button" class="cx-btn sm" data-cx="log-attempt">Log this attempt</button><span class="cx-note">Attempts are saved with the time. They do not complete the call.</span>' : '';
+      if (ar) ar.innerHTML = bo && bo !== 'conversation' ? '<button type="button" class="cx-btn sm" data-cx="log-attempt">Log this attempt</button><span class="cx-note">' + (compact ? 'Review the follow-up date before saving. Choose an earlier date for urgent files.' : 'Attempts are saved with the time. They do not complete the call.') + '</span>' : '';
       var followUp = $('#cx-follow-up', ov);
       if (compact && followUp && bo && bo !== 'conversation' && !p.next_action_date) followUp.open = true;
       var la = $('[data-cx="log-attempt"]', ov); if (la) la.onclick = function () { logAttempt(bo); };
@@ -969,8 +992,9 @@
       $all('.cx-check', ov).forEach(function (l) { var i = l.querySelector('input'); if (i) l.classList.toggle('done', i.checked); });
     }
     if (editable) {
-      form.addEventListener('input', function () { ov.__dirty = true; setState('Unsaved changes'); refreshReqs(); });
+      form.addEventListener('input', function (e) { if (e.target === followUpDate) dateEdited = true; ov.__dirty = true; setState('Unsaved changes'); refreshReqs(); });
       form.addEventListener('change', function (e) {
+        if (e.target === followUpDate) dateEdited = true;
         ov.__dirty = true; setState('Unsaved changes');
         if (e.target.id === 'cx-na-choice') $('#cx-na-other', form).classList.toggle('cx-hide', e.target.value !== 'other');
         if (e.target.name === 'borrower_outcome' && e.target.value === 'conversation') { var ca = form.querySelector('[name="conversation_at"]'); if (ca && !ca.value) ca.value = localInputNow(); }
@@ -979,14 +1003,22 @@
     }
     refreshReqs();
     function busy(on) { saving = on; $all('.cx-drawer-foot .cx-btn', ov).forEach(function (b) { if (b.dataset.cx !== 'close') b.disabled = on || (!compact && b.dataset.cx === 'complete' && valid().length > 0); }); }
+    function applyTextDelivery(patch) {
+      if (!compact || !updateTextSelected()) return null;
+      var channel = patch.borrower_outcome;
+      patch.borrower_outcome = 'text_sent';
+      patch.script_checks = Object.assign({}, patch.script_checks || t.script_checks, { update_text_sent: true });
+      return { event_type: 'attempt', party: 'borrower', channel: channel };
+    }
     function save(extra, okMsg) {
       var p = Object.assign(collect(form, t), extra || {});
       if (!(extra && extra.status) && p.borrower_outcome && p.borrower_outcome !== 'conversation' && t.status === 'open') p.status = 'attempted';
+      var callBeforeText = applyTextDelivery(p);
       var prev = Object.assign({}, t);
       setState('Saving…'); busy(true);
       return saveTask(t, p).then(function (row) {
-        var evs = [];
-        if (p.borrower_outcome && p.borrower_outcome !== prev.borrower_outcome) evs.push({ event_type: p.borrower_outcome === 'conversation' ? 'conversation' : 'attempt', party: 'borrower', channel: p.borrower_outcome, occurred_at: p.borrower_outcome === 'conversation' && p.conversation_at ? p.conversation_at : new Date().toISOString(), detail: p.borrower_outcome === 'conversation' ? (p.borrower_notes || '').slice(0, 500) : null });
+        var evs = callBeforeText ? [callBeforeText] : [];
+        if (p.borrower_outcome && (callBeforeText || p.borrower_outcome !== prev.borrower_outcome)) evs.push({ event_type: p.borrower_outcome === 'conversation' ? 'conversation' : 'attempt', party: 'borrower', channel: p.borrower_outcome, occurred_at: p.borrower_outcome === 'conversation' && p.conversation_at ? p.conversation_at : new Date().toISOString(), detail: callBeforeText ? 'Borrower loan update sent by text.' : p.borrower_outcome === 'conversation' ? (p.borrower_notes || '').slice(0, 500) : null });
         if (p.agent_outcome && p.agent_outcome !== prev.agent_outcome) evs.push({ event_type: p.agent_outcome === 'no_buyer_agent' ? 'status' : p.agent_outcome === 'attempted' ? 'attempt' : 'conversation', party: 'buyer_agent', channel: p.agent_outcome, detail: (p.agent_notes || '').slice(0, 500) });
         if (p.status && p.status !== prev.status) evs.push({ event_type: 'status', party: 'system', channel: p.status, detail: p.status === 'exception' ? p.exception_reason : null });
         if (p.escalated && !prev.escalated) evs.push({ event_type: 'escalation', party: 'borrower', detail: p.concern_notes });
@@ -1005,8 +1037,12 @@
         patch.next_action_date = followUp.next_action_date;
         patch.next_action = followUp.next_action;
       }
+      var callBeforeText = applyTextDelivery(patch);
+      var events = callBeforeText ? [callBeforeText] : [];
+      events.push({ event_type: 'attempt', party: 'borrower', channel: patch.borrower_outcome,
+        detail: callBeforeText ? 'Borrower loan update sent by text.' : ((form.querySelector('[name="borrower_notes"]') || {}).value || '').slice(0, 500) || null });
       saveTask(t, patch)
-        .then(function (row) { return logEvents(row, [{ event_type: 'attempt', party: 'borrower', channel: channel, detail: ((form.querySelector('[name="borrower_notes"]') || {}).value || '').slice(0, 500) || null }]); })
+        .then(function (row) { return logEvents(row, events); })
         .then(function () { ov.__dirty = false; toast(compact && patch.next_action_date > today() ? 'Attempt saved. Follow-up scheduled for ' + fmtDate(patch.next_action_date) + '.' :
           (compact ? 'Attempt saved. Set a future follow-up date to move this update off today’s list.' : 'Attempt saved. The call stays open until you reach the borrower.')); renderDrawer(t.id); refreshEvents(t.id); renderAll(); })
         .catch(function (e) { setState('Not saved', true); busy(false); toast(friendlyServerError(e), true); });
@@ -1163,11 +1199,12 @@
     var t0 = today(), wk = L.weekMonday(t0);
     return LPS.map(function (lp) {
       var mine = S.tasks.filter(function (t) { return owner(t) === lp; });
+      var current = L.currentTuesdayWork(S.tasks, t0).filter(function (t) { return owner(t) === lp; });
       return { lp: lp, mine: mine,
         tue: L.referralMetrics(mine, ['tuesday'], range, t0), pc: L.referralMetrics(mine, ['pc30', 'pc60', 'pc90'], range, t0),
-        day: L.daySummary(mine, t0), sc: scorecardFor(lp, wk),
+        day: L.daySummary(current, t0), sc: scorecardFor(lp, wk),
         cover: S.coverage.filter(function (c) { return c.start_date <= t0 && c.end_date >= t0 && (c.from_lp === lp || c.to_lp === lp); }),
-        overdue: mine.filter(function (t) { return isOpen(t) && L.workDueDate(t) < t0; }),
+        overdue: current.filter(function (t) { return isOpen(t) && L.workDueDate(t) < t0; }),
         upcoming: mine.filter(function (t) { return isOpen(t) && t.due_date > t0 && t.due_date <= L.addDays(t0, 7); }),
         concerns: mine.filter(L.isIssue),
         corr: S.corrections.filter(function (c) { return c.lp === lp && c.status !== 'verified'; }),
@@ -1214,7 +1251,7 @@
     var team = L.daySummary(S.tasks, t0, function (t) { return !!owner(t); });
     var unLoans = unassignedActiveLoans();
     var concerns = S.tasks.filter(L.isIssue), review = S.tasks.filter(function (t) { return t.status === 'needs_review' && t.due_date >= L.addDays(t0, -59); });
-    var overdueAll = S.tasks.filter(function (t) { return owner(t) && isOpen(t) && L.workDueDate(t) < t0; });
+    var overdueAll = L.currentTuesdayWork(S.tasks, t0).filter(function (t) { return owner(t) && isOpen(t) && L.workDueDate(t) < t0; });
     var wk = L.weekMonday(t0), missingSc = S.scorecards && S.scorecards.ok ? LPS.filter(function (lp) { return !scorecardFor(lp, wk); }) : null;
     var tueOd = tue.outstanding.filter(function (t) { return L.workDueDate(t) < t0; });
     var tiles =
@@ -1743,7 +1780,7 @@
     var bott = [];
     if (fun && started) [['Lead to application', fun.leadToApp, 80], ['Application to preapproval', fun.appToPre, 55], ['Preapproval to contract', fun.preToContract, per === 'quarter' && curQ === 1 ? 60 : 65], ['Contract to funded', fun.contractToFunded, 75]].forEach(function (s) { if (s[1] !== null && s[1] < s[2]) bott.push(s[0] + ': ' + s[1] + '% against ' + s[2] + '% plan'); });
     if (signed) {
-      var od = S.tasks.filter(function (t) { return owner(t) && isOpen(t) && L.workDueDate(t) < t0; }).length; if (od) bott.push(od + ' overdue client calls across the team');
+      var od = L.currentTuesdayWork(S.tasks, t0).filter(function (t) { return owner(t) && isOpen(t) && L.workDueDate(t) < t0; }).length; if (od) bott.push(od + ' overdue client calls across the team');
       var un = unassignedActiveLoans().length; if (un) bott.push(un + ' active loans need an LP owner');
     }
     if (sc && sc.some(function (x) { return !x; })) bott.push(sc.filter(function (x) { return !x; }).length + ' LP scorecards not entered this week');

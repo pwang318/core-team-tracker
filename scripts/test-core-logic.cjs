@@ -229,6 +229,15 @@ t('Velocify funnel matches the existing LP Conversion stage rules and dedupes le
   assert.equal(L.velocifyFunnel(relationship).contracts, 1);
 
 });
+t('Tuesday and Thursday attempts suggest the next appropriate follow-up day', () => {
+  assert.equal(L.suggestTuesdayRetry('2026-11-24'), '2026-11-26');
+  assert.equal(L.suggestTuesdayRetry('2026-11-26'), '2026-12-01');
+  assert.equal(L.suggestTuesdayRetry('2026-11-24',null,false,true), '2026-12-01');
+  assert.equal(L.suggestTuesdayRetry('2026-11-24','2026-11-30',false,true), '2026-11-29');
+  assert.equal(L.suggestTuesdayRetry('2026-11-24','2026-11-25'), '2026-11-25');
+  assert.equal(L.suggestTuesdayRetry('2026-11-24','2026-11-24'), '2026-11-24');
+  assert.equal(L.suggestTuesdayRetry('2026-11-24',null,true), '2026-11-24');
+});
 t('Tuesday attempts return on the scheduled date without counting as complete', () => {
   const call = {task_type:'tuesday',status:'attempted',borrower_outcome:'voicemail',due_date:'2026-11-24',next_action_date:'2026-11-26'};
   assert.equal(L.tuesdayFollowupScheduled(call,'2026-11-25'),true);
@@ -240,6 +249,15 @@ t('Tuesday attempts return on the scheduled date without counting as complete', 
   assert.equal(L.bucket({...call,next_action_date:null},'2026-11-25'),'overdue');
   assert.equal(L.bucket({...call,task_type:'pc60'},'2026-11-25'),'overdue');
   assert.equal(L.bucket({...call,borrower_outcome:'conversation'},'2026-11-25'),'overdue');
+});
+t('A delivered text carries into the new weekly task without creating a second call', () => {
+  const old = { id:'old', loan_number:'sample', task_type:'tuesday', status:'attempted', borrower_outcome:'text_sent',
+    script_checks:{update_text_sent:true}, plan_week:'2026-11-24', due_date:'2026-11-24', next_action_date:'2026-12-01' };
+  const fresh = { id:'new', loan_number:'sample', task_type:'tuesday', status:'open', plan_week:'2026-12-01', due_date:'2026-12-01' };
+  assert.deepEqual(L.currentTuesdayWork([old,fresh],'2026-12-01'),[fresh]);
+  assert.deepEqual(L.currentTuesdayWork([old],'2026-12-01'),[old]);
+  assert.equal(L.daySummary([old,fresh],'2026-12-01').remaining.length,1);
+  assert.match(L.outcomeLabel(old,'2026-11-25'),/Update text sent/);
 });
 t('Scorecard summary uses the existing metrics, goals and totals', () => {
   const s = L.scorecardSummary('Gavin', { past_client_talks_Mon: 3, past_client_talks_Tue: 2, apps_1003_Wed: 4, contracts_Fri: 1 });
