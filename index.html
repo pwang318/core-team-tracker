@@ -10808,8 +10808,8 @@ async function pfrLoad(){
       +'</div>'
     +'</div>';
 
-    html+='<div style="background:var(--surface);border:1px solid #1F4E79;border-radius:12px;padding:16px;margin-bottom:14px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Proactive Watch &mdash; reach out before they go Yellow</div>'
+    html+='<div id="portfolio-contact-watch" style="margin:14px 0">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Contact and referral reminders &mdash; reach out before they go Yellow</div>'
       +'<div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Green partners approaching a referral or meaningful-contact deadline within 7 days. Reasons and actions appear below.</div>'
       +(proactiveWatch.length?proactiveWatch.map(function(r,i){return pfrListRow(i+1,pfrProperCase(r.name),escHtml(pfrTierLabel(r.tier))+" &middot; "+r.daysUntilYellow+" days to Yellow<br>"+r.watchReasons.map(escHtml).join("<br>")+"<br><b>Next:</b> "+escHtml(r.watchAction));}).join(""):'<div style="text-align:center;color:var(--text-3);font-size:12px;padding:8px 0">Nobody\'s close to slipping right now.</div>')
     +'</div>';
@@ -10885,8 +10885,8 @@ async function pfrLoad(){
       'Power BI agent tiers':powerBiActiveCount+' active agents · '+totalActive+' managed 90d',
       'Referral pace':meetingLeadsMTD+' partner referrals MTD',
       'Tier movement':(migCtoB+migBtoA+migAtoChannel+migOther)+' changes · '+range.label,
-      '90-day referral watch':referralApproaching.length+' approaching · '+referralPast.length+' at 90+ days',
-      'Proactive watch':proactiveWatch.length+' partners on watch',
+      'Who needs outreach':referralApproaching.length+' nearing 90 days · '+proactiveWatch.length+' contact or referral reminders',
+      'Contact and referral reminders':proactiveWatch.length+' partners on watch',
       'Partner satisfaction':rated.length?avgSatisfaction+' / 5 · '+rated.length+'/'+powerBiActiveCount+' active agents rated':'0 of '+powerBiActiveCount+' active agents rated',
       'High-potential partners':highPotential.length+' documented · '+highPotentialNeedsReason.length+' needs reason',
       'Growth plans':growthPlanTotal?growthPlanMissingCount+' of '+growthPlanTotal+' missing a plan':'No active roster available',
@@ -10906,6 +10906,12 @@ async function pfrLoad(){
 window.pfrLoad=pfrLoad;
 window.pfrGetHealthRows=function(){return Array.isArray(pfrDrill.rows)?pfrDrill.rows:null;};
 function pfrCompactOverview(body,summaries){
+  var outreach=body.querySelector('#portfolio-referral-watch');
+  var reminders=body.querySelector('#portfolio-contact-watch');
+  if(outreach&&reminders){
+    var recovery=outreach.querySelector('details');
+    outreach.insertBefore(reminders,recovery);
+  }
   var cards=Array.from(body.children);if(!cards.length)return;
   var titles=[
     {label:'Power BI reconciliation',find:'Power BI → Tracker Reconciliation',group:'numbers'},
@@ -10913,8 +10919,8 @@ function pfrCompactOverview(body,summaries){
     {label:'Power BI agent tiers',find:'Power BI Agent Levels',group:'numbers'},
     {label:'Referral pace',find:'Active Agent-to-Lead Ratio',group:'numbers'},
     {label:'Tier movement',find:'Tier Migration Progress',group:'numbers'},
-    {label:'90-day referral watch',find:'90-day referral watch',group:'relationships'},
-    {label:'Proactive watch',find:'Proactive Watch',group:'relationships'},
+    {label:'Who needs outreach',find:'90-day referral watch',group:'relationships'},
+    {label:'Contact and referral reminders',find:'Contact and referral reminders',group:'relationships'},
     {label:'Partner health',find:'Partner Health',group:'relationships'},
     {label:'Partner satisfaction',find:'Partner Satisfaction',group:'relationships'},
     {label:'High-potential partners',find:'High-Potential Agents',group:'relationships'},
@@ -10928,6 +10934,7 @@ function pfrCompactOverview(body,summaries){
   var nav=document.createElement('div');nav.className='pfr-overview';
   var priorities=document.createElement('section'), heading=document.createElement('h3'), priorityGrid=document.createElement('div');
   heading.textContent='Start here';priorityGrid.className='pfr-overview-grid';
+  priorityGrid.style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
   priorities.append(heading,priorityGrid);nav.append(priorities);
   var reports=document.createElement('details'), summary=document.createElement('summary');
   summary.textContent='More portfolio reports';reports.append(summary);nav.append(reports);
@@ -10947,7 +10954,7 @@ function pfrCompactOverview(body,summaries){
     var label=document.createElement('strong'),metric=document.createElement('span'),arrow=document.createElement('span');
     label.textContent=entry.label;metric.textContent=summaries[entry.label]||'View details';arrow.textContent='›';arrow.setAttribute('aria-hidden','true');arrow.className='pfr-arrow';
     tile.append(label,metric,arrow);
-    var primary=['90-day referral watch','Proactive watch','Meeting brief'].indexOf(entry.label);
+    var primary=['Who needs outreach','Meeting brief'].indexOf(entry.label);
     if(primary>=0){tile.dataset.priority=primary;var next=Array.from(priorityGrid.children).find(function(b){return Number(b.dataset.priority)>primary;});priorityGrid.insertBefore(tile,next||null);}
     else groups[entry.group].append(tile);
     card.querySelectorAll('[onclick]').forEach(function(control){
