@@ -106,8 +106,8 @@ t('Tuesday notes are required but have no minimum length', () => {
   assert.deepEqual(L.validateTask({ ...base, borrower_notes: 'On track' }), []);
   assert.ok(L.validateTask({ ...base, borrower_notes: '' }).some(x => x.includes('Update notes required')));
 });
-t('Other calls: named introduction still requires a CRM reference', () => {
-  const pc = { ...base, task_type: 'pc30', script_checks: Object.fromEntries(L.CHECKS.pc30.map(c => [c[0], true])), next_action: '60-day call', next_action_date: '2027-01-01', referral_response: 'named_introduction', referral_name: 'Pat Example' };
+t('Contract and pre-closing calls: named introduction still requires a CRM reference', () => {
+  const pc = { ...base, task_type: 'preclose', script_checks: Object.fromEntries(L.CHECKS.preclose.map(c => [c[0], true])), next_action: '30-day call', next_action_date: '2027-01-01', referral_response: 'named_introduction', referral_name: 'Pat Example' };
   assert.ok(L.validateTask(pc).some(x => x.includes('CRM')));
   assert.deepEqual(L.validateTask({ ...pc, crm_reference: 'VEL-123' }).filter(x => x.includes('CRM')), []);
 });
@@ -128,8 +128,9 @@ t('Post-closing validation per call type', () => {
     script_checks: { settling: true, servicing_transfer: true, mortgage_questions: true, rate_drop_na: true, referral_ask: true, offered_again: true } };
   assert.deepEqual(L.validateTask(pc), [], 'rate drop pledge N/A accepted, no buyer agent needed after closing');
   assert.ok(L.validateTask({ ...pc, referral_response: null }).some(x => x.includes('Referral response')));
-  assert.ok(L.validateTask({ ...pc, task_type: 'pc30' }).some(x => x.includes('first_statement')));
-  assert.ok(L.validateTask({ ...pc, task_type: 'pc90' }).some(x => x.includes('homeowner_experience')));
+  assert.deepEqual(L.validateTask({ ...pc, task_type: 'pc30', script_checks: {} }), [], '30-day call needs no checklist');
+  assert.deepEqual(L.validateTask({ ...pc, task_type: 'pc90', borrower_notes: 'All good', referral_response: 'named_introduction', referral_name: 'Pat Friend' }), [], 'short note and name-only referral complete a 90-day call');
+  assert.ok(L.validateTask({ ...pc, borrower_notes: '' }).some(x => x.includes('Call notes required')));
   assert.ok(L.validateTask({ ...pc, referral_requested: false }).some(x => x.includes('referral was requested')), 'PCR ask mandatory');
   assert.deepEqual(L.CHECKS.pc30.map(c => c[0]), ['settling', 'first_statement', 'payment_servicing', 'questions_assistance', 'referral_ask', 'offered_again']);
 });

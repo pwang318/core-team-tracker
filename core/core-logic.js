@@ -325,9 +325,9 @@
     ['wrong_number', 'Wrong or disconnected number (attempt)']
   ];
   var AGENT_OUTCOMES = [
-    ['spoke', 'Spoke with buyer agent'],
-    ['update_sent', 'Update delivered by text or email'],
-    ['attempted', 'Attempted, no response yet'],
+    ['spoke', 'Talked with the agent'],
+    ['update_sent', 'Sent the agent the update (text or email)'],
+    ['attempted', 'Couldn\'t reach the agent yet'],
     ['no_buyer_agent', 'No buyer agent on this loan']
   ];
 
@@ -336,11 +336,14 @@
   function validateTask(t, loan) {
     var e = [];
     t = t || {}; var checks = t.script_checks || {};
+    // Tuesday Updates and 30/60/90-day calls use the simple form: a short note, the referral
+    // answer, no required checklist, no CRM reference and no next action (the next call is scheduled).
+    var simple = t.task_type === 'tuesday' || /^pc/.test(t.task_type || '');
     if (t.borrower_outcome !== 'conversation') e.push('Borrower conversation required (voicemail, text or no answer is an attempt, not a completed conversation)');
     if (!t.conversation_at) e.push('Conversation date and time required');
     else if (new Date(t.conversation_at).getTime() > Date.now() + 5 * 60000) e.push('Conversation time cannot be in the future');
-    if (t.task_type === 'tuesday' ? len(t.borrower_notes) < 1 : len(t.borrower_notes) < 20) e.push(t.task_type === 'tuesday' ? 'Update notes required' : 'Borrower conversation notes required (20+ characters)');
-    (t.task_type === 'tuesday' ? [] : CHECKS[t.task_type] || []).forEach(function (c) {
+    if (simple ? len(t.borrower_notes) < 1 : len(t.borrower_notes) < 20) e.push(t.task_type === 'tuesday' ? 'Update notes required' : simple ? 'Call notes required' : 'Borrower conversation notes required (20+ characters)');
+    (simple ? [] : CHECKS[t.task_type] || []).forEach(function (c) {
       var k = c[0];
       if (!(checks[k] === true || (k === 'rate_drop_pledge' && checks.rate_drop_na === true))) e.push('Conversation step not confirmed: ' + k);
     });
@@ -348,11 +351,11 @@
     if (t.task_type !== 'contract' && !t.referral_response) e.push('Referral response required');
     if (t.referral_response === 'named_introduction') {
       if (len(t.referral_name) < 2) e.push('Named introduction requires the referral name');
-      if (t.task_type !== 'tuesday' && len(t.crm_reference) < 3) e.push('Named introduction requires the CRM (Velocify) reference');
+      if (!simple && len(t.crm_reference) < 3) e.push('Named introduction requires the CRM (Velocify) reference');
     }
     if (t.concern_status === 'unresolved') e.push('Unresolved client concern: record service recovery instead of completing');
     if (t.concern_status === 'resolved' && len(t.concern_notes) < 10) e.push('Describe the concern and how it was resolved');
-    if (t.task_type !== 'tuesday' || len(t.next_action)) {
+    if (!simple || len(t.next_action)) {
       if (len(t.next_action) < 3) e.push('Next action required');
       if (!t.next_action_date) e.push('Follow-up date required');
     }
