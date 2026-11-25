@@ -502,12 +502,12 @@
         count: rank < 0 ? 0 : priority[rank][0], open: b['tue-remaining'].length, post: due,
         scorecard: missing === null ? 'Unavailable' : missing === false ? 'Missing' : 'Entered' };
     }).sort(function (a, b) { return a.rank - b.rank || b.count - a.count; });
-    host.innerHTML = '<div class="cx-card"><div class="cx-head"><h2>Who to coach today</h2><button type="button" class="cx-btn" data-execution-plan>Growth &amp; Execution Plan</button></div>' +
+    host.innerHTML = '<div class="cx-card"><div class="cx-head"><div><h2>Who to coach today</h2><div class="cx-sub">' + (hasImport('pipeline') ? rows.reduce(function (n, row) { return n + row.open; }, 0) + ' live Tuesday updates open' : 'Live Tuesday count unavailable') + '</div></div><button type="button" class="cx-btn" data-execution-plan>Growth &amp; Execution Plan</button></div>' +
       '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>LP</th><th>Start here</th><th>Tuesday open</th><th>Post-closing due</th><th>Scorecard</th></tr></thead><tbody>' +
       rows.map(function (row) {
         return '<tr><td><button type="button" class="cx-link" data-coach-lp="' + esc(row.lp) + '">' + esc(row.lp) + '</button></td>' +
           '<td><b>' + esc(row.action) + '</b>' + (row.count && row.rank < 6 ? ' · ' + row.count : '') + '</td><td>' +
-          row.open + '</td><td>' + row.post + '</td><td>' + esc(row.scorecard) + '</td></tr>';
+          (hasImport('pipeline') ? row.open : '—') + '</td><td>' + row.post + '</td><td>' + esc(row.scorecard) + '</td></tr>';
       }).join('') + '</tbody></table></div></div>';
     $('[data-execution-plan]', host).addEventListener('click', function () { openView('core-plan'); });
     $all('[data-coach-lp]', host).forEach(function (button) {
