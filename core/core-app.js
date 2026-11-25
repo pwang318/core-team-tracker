@@ -249,6 +249,12 @@
       var eb = pmView.querySelector('.ct-page-head .ct-eyebrow'); if (eb) eb.textContent = 'PRODUCTION COMMAND';
       var sub = pmView.querySelector('.ct-page-head .ct-page-sub'); if (sub) sub.textContent = 'Coaching cards, overdue Velocify leads, new-build check-ins and scorecards for each LP.';
       var live = pmView.querySelector('.ct-page-head button[onclick*="openTuesdayWorklist"]'); if (live) live.style.display = 'none';
+      // Old Tuesday-plan reports (pre-tracker snapshot records) are retired from view; the live
+      // early warnings and coaching cards replace them. Lead and new-build exceptions stay.
+      var legacy = $('#pm-dashboard', pmView); legacy = legacy && legacy.closest('details'); if (legacy) legacy.style.display = 'none';
+      var exc = $('#pm-current-exceptions', pmView); exc = exc && exc.closest('details');
+      if (exc) { exc.open = true; var es = exc.querySelector('summary b'); if (es) es.textContent = 'Overdue Velocify leads and new-build work'; }
+      $all('.ct-page-head ~ div', pmView).forEach(function (d) { if (/Coaching suggestions use current tracker records/.test(d.textContent)) { var sp = d.querySelector('span'); if (sp) sp.textContent = 'Coaching uses live tracker, scorecard and Velocify data.'; } });
     }
     var lpSec = sections.find(function (s) { return /LOAN PARTNERS/.test(label(s)); });
     if (lpSec && !$('[data-route="core-scorecard"]')) {
@@ -532,53 +538,95 @@
       day: L.daySummary(mine, t0)
     };
   }
+  // LP coaching (Production Command → LP coaching & leads). Live tracker data only:
+  // Tuesday calls, CCR asks, overdue and post-closing calls, copied notes, scorecards,
+  // stale Velocify leads and quiet borrowers. Each LP gets one focus, a conversation
+  // starter, and a copy-ready coaching note.
+  function coachingFor(lp, w, stats) {
+    var t0 = today(), wk = L.weekMonday(t0), b = lpBuckets(lp), dow = new Date(t0 + 'T12:00:00').getDay();
+    var st = stats.find(function (r) { return r.lp === lp; }) || {};
+    var closeBy = L.addDays(t0, 7);
+    var closing = b['tue-remaining'].filter(function (t) { var l = S.loans[t.loan_number]; return l && l.est_closing_date && l.est_closing_date <= closeBy; });
+    var overdue = b['tue-overdue'].concat(b['pc-overdue'].filter(function (t) { return b['tue-overdue'].indexOf(t) < 0; }));
+    var conv = st.tue ? st.tue.conversations.length : 0, asked = st.tue ? st.tue.asked.length : 0, askPct = conv ? Math.round(100 * asked / conv) : null;
+    var dupes = st.dupes || [], stale = w.leads.filter(function (x) { return x.lp === lp && !x.task; }), quiet = w.quiet.filter(function (x) { return x.lp === lp; });
+    var row = scorecardFor(lp, wk), sc = row ? L.scorecardSummary(lp, row.data, liveMetrics(lp)) : null;
+    var expected = Math.min(100, Math.max(0, (dow === 0 ? 5 : dow === 6 ? 5 : dow) * 20));
+    var items = [];
+    var push = function (level, n, focus, prompt, tasks) { if (n) items.push({ level: level, n: n, focus: focus, prompt: prompt, tasks: tasks || [] }); };
+    push(3, b.issues.length, b.issues.length + ' open client concern' + (b.issues.length === 1 ? '' : 's'), 'Walk me through the concern. What is the fix, and when will the client hear back?', b.issues);
+    push(3, closing.length, closing.length + ' borrower' + (closing.length === 1 ? '' : 's') + ' closing within 7 days still to call', 'Which of these closings is most at risk? Let\'s call that one first, today.', closing);
+    push(3, overdue.length, overdue.length + ' overdue call' + (overdue.length === 1 ? '' : 's'), 'What is blocking these? Do you need coverage for part of the list?', overdue);
+    push(2, dupes.length, dupes.length + ' set' + (dupes.length === 1 ? '' : 's') + ' of identical notes on different borrowers', 'Let\'s look at these notes together. Each one should describe that borrower\'s actual call.', [].concat.apply([], dupes));
+    if (askPct !== null && conv >= 3 && askPct < 80) push(2, 1, 'Referral question asked on ' + askPct + '% of live calls', 'Let\'s role-play the 7-day CCR question so it feels natural at the end of every call.');
+    push(2, stale.length, stale.length + ' Velocify lead' + (stale.length === 1 ? '' : 's') + ' with no activity for 5+ days', 'Which of these leads can you reach today? The referral partner is waiting to hear.');
+    push(1, quiet.length, quiet.length + ' borrower' + (quiet.length === 1 ? '' : 's') + ' gone quiet', 'Try a different time of day and text first to set up the call.', quiet.map(function (q) { return q.task; }).filter(Boolean));
+    if (S.scorecards && S.scorecards.ok && !row && dow !== 1) push(1, 1, 'Scorecard not entered this week', 'Take two minutes now to enter this week\'s scorecard.');
+    else if (sc && sc.pct !== null && dow >= 3 && dow <= 5 && sc.pct < expected * 0.6) push(1, 1, 'Scorecard at ' + sc.pct + '% of the weekly goal', 'Which goal is furthest behind? Pick one action today that moves it.');
+    items.sort(function (a, b2) { return b2.level - a.level || b2.n - a.n; });
+    var level = items.length ? items[0].level : 0;
+    var lp1 = lp === 'Isaak';
+    var metrics = [
+      ['Tuesday this week', hasImport('pipeline') ? b['tue-completed'].length + ' / ' + b['tue-assigned'].length + (b['tue-assigned'].length ? ' · ' + pctOf(b['tue-completed'].length, b['tue-assigned'].length) + '%' : '') : '—'],
+      ['Referral question asked', askPct === null ? 'No live calls yet' : askPct + '% of live calls'],
+      ['Overdue calls', String(overdue.length)],
+      ['Scorecard', !S.scorecards || !S.scorecards.ok ? 'Unavailable' : !row ? 'Not entered' : sc.total + ' / ' + sc.goal + ' · ' + sc.pct + '%'],
+      ['Stale leads', S.staleLeads && S.staleLeads.ok ? String(stale.length) : '—']
+    ].filter(function (m) { return !lp1 || (m[0] !== 'Tuesday this week' && m[0] !== 'Referral question asked'); });
+    var note = items.length ? 'Hi ' + lp + ', quick coaching check-in: ' + items.slice(0, 3).map(function (i) { return i.focus.charAt(0).toLowerCase() + i.focus.slice(1); }).join('; ') + '. ' + items[0].prompt + ' Let me know how I can help.' :
+      'Hi ' + lp + ', nice work this week. Your calls and notes are current. Keep it up!';
+    return { lp: lp, level: level, items: items, metrics: metrics, note: note, role: lp === 'Isaak' ? 'LP1 · front-end conversion' : 'LP2 · client + transaction execution' };
+  }
   function renderCoaching() {
     var host = $('#core-coaching');
     if (!host) return;
     if (!activeKey() || !S.tier || !S.loadedAt || S.error) {
-      host.innerHTML = '<div class="cx-empty" role="status">' + (S.error ? 'Live coaching totals are unavailable. Refresh to retry.' :
-        S.loading || activeKey() ? 'Loading live coaching totals…' : 'Live coaching totals are unavailable in this view.') + '</div>';
+      host.innerHTML = '<div class="cx-empty" role="status">' + (S.error ? 'Live coaching is unavailable. Refresh to retry.' :
+        S.loading || activeKey() ? 'Loading live coaching…' : 'Live coaching is unavailable in this view.') + '</div>';
       return;
     }
-    var t0 = today(), closeBy = L.addDays(t0, 7), week = L.weekMonday(t0);
-    var rows = LPS.map(function (lp) {
-      var b = lpBuckets(lp);
-      var closing = b['tue-remaining'].filter(function (task) {
-        var loan = S.loans[task.loan_number];
-        return loan && loan.est_closing_date && loan.est_closing_date <= closeBy;
-      }).length;
-      var due = b.pc30.length + b.pc60.length + b.pc90.length;
-      var missing = scorecardFor(lp, week);
-      var priority = [
-        [b.issues.length, 'Resolve client concerns'],
-        [closing, 'Update borrowers closing within 7 days or past closing'],
-        [b['tue-overdue'].length + b['pc-overdue'].length, 'Clear overdue calls'],
-        [b['tue-remaining'].length, 'Finish Tuesday updates'],
-        [due, 'Complete due post-closing calls'],
-        [b.journey.length, 'Complete contract and pre-closing calls'],
-        [missing === false ? 1 : 0, 'Enter this week’s scorecard']
-      ];
-      var rank = priority.findIndex(function (item) { return item[0] > 0; });
-      return { lp: lp, rank: rank < 0 ? priority.length : rank, action: rank < 0 ? 'No urgent action' : priority[rank][1],
-        count: rank < 0 ? 0 : priority[rank][0], open: b['tue-remaining'].length, post: due,
-        scorecard: missing === null ? 'Unavailable' : missing === false ? 'Missing' : 'Entered' };
-    }).sort(function (a, b) { return a.rank - b.rank || b.count - a.count; });
-    var first = rows[0], breakdownOpen = !!($('[data-coaching-details]', host) || {}).open;
-    host.innerHTML = '<div class="cx-card"><h2>Who to coach today</h2>' +
-      (first.count ? '<p><b>' + esc(first.lp) + '</b> · ' + esc(first.action) + '</p><button type="button" class="cx-btn primary" data-coach-lp="' + esc(first.lp) + '">Open ' + esc(first.lp) + '’s dashboard</button>' :
-        '<p>No urgent items in the loaded coaching data.</p>') +
-      '<p class="cx-note">' + (hasImport('pipeline') ? rows.reduce(function (n, row) { return n + row.open; }, 0) + ' Tuesday updates still to call' : 'Live Tuesday count unavailable') + '</p>' +
-      '<details class="cx-supporting" data-coaching-details' + (breakdownOpen ? ' open' : '') + '><summary>All LPs and scorecards</summary>' +
-      '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>LP</th><th>Start here</th><th>Tuesday still to call</th><th>Post-closing due</th><th>Scorecard</th></tr></thead><tbody>' +
-      rows.map(function (row) {
-        return '<tr><td><button type="button" class="cx-link" data-coach-lp="' + esc(row.lp) + '">' + esc(row.lp) + '</button></td>' +
-          '<td><b>' + esc(row.action) + '</b>' + (row.count && row.rank < 6 ? ' · ' + row.count : '') + '</td><td>' +
-          (hasImport('pipeline') ? row.open : '—') + '</td><td>' + row.post + '</td><td>' + esc(row.scorecard) + '</td></tr>';
-      }).join('') + '</tbody></table></div></details></div>';
+    if (!S.staleLeads && !S._staleLoading) loadStaleLeads();
+    if (!S.scorecards) loadScorecards().then(renderCoaching);
+    var w = earlyWarnings(), stats = teamStats(periodRange('week'));
+    var cards = LPS.map(function (lp) { return coachingFor(lp, w, stats); })
+      .sort(function (a, b) { return b.level - a.level || b.items.length - a.items.length; });
+    var colors = ['#2E8B57', '#1E83A8', '#C98A14', '#B84A42'], labels = ['On track', 'Watch', 'Coach this week', 'Coach today'];
+    S._coachNotes = {}; S._rec = S._rec || {};
+    var need = cards.filter(function (c) { return c.level >= 2; });
+    host.innerHTML = '<div class="cx-card"><div class="cx-head"><div><div class="cx-kicker">Live data · ' + esc(fmtDate(today())) + '</div><h2 style="margin:2px 0">LP coaching</h2>' +
+      '<div class="cx-sub">' + (need.length ? 'Coach first: <b>' + esc(need.map(function (c) { return c.lp; }).join(', ')) + '</b>.' : 'No one needs urgent coaching right now.') +
+      ' Each card shows one focus, a question to open the conversation, and a note you can send.</div></div></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;margin-top:14px">' + cards.map(function (c) {
+        S._coachNotes[c.lp] = c.note;
+        var top = c.items[0];
+        if (top && top.tasks.length) S._rec['coach-' + c.lp] = { title: c.lp + ' · ' + top.focus, tasks: top.tasks };
+        return '<section class="cx-card" style="border-top:4px solid ' + colors[c.level] + ';padding:14px">' +
+          '<div class="cx-head"><div><h3 style="margin:0">' + esc(c.lp) + '</h3><div class="cx-sub">' + esc(c.role) + '</div></div>' +
+          '<span class="cx-chip" style="background:' + colors[c.level] + ';color:#fff">' + labels[c.level] + '</span></div>' +
+          '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin:10px 0">' + c.metrics.map(function (m) {
+            return '<div style="background:var(--cx-soft,#F3F6F9);border-radius:8px;padding:7px 9px"><div class="cx-small cx-muted">' + esc(m[0]) + '</div><b>' + esc(m[1]) + '</b></div>';
+          }).join('') + '</div>' +
+          (top ? '<div style="border-left:3px solid ' + colors[c.level] + ';padding:6px 10px;margin:6px 0"><b>Focus:</b> ' + esc(top.focus) + '</div>' +
+            '<div style="border-left:3px solid #9fb3c2;padding:6px 10px;margin:6px 0"><b>Ask:</b> “' + esc(top.prompt) + '”</div>' +
+            (c.items.length > 1 ? '<details style="margin:4px 0"><summary class="cx-note" style="cursor:pointer">' + (c.items.length - 1) + ' more to watch</summary><ul style="margin:6px 0 0 18px">' + c.items.slice(1).map(function (i) { return '<li>' + esc(i.focus) + '</li>'; }).join('') + '</ul></details>' : '')
+            : '<div style="padding:6px 0">Nothing flagged. Recognize the good work.</div>') +
+          '<div class="cx-row" style="gap:6px;margin-top:10px;flex-wrap:wrap">' +
+          (top && top.tasks.length ? '<button type="button" class="cx-btn sm" data-rec="coach-' + esc(c.lp) + '">Open ' + top.tasks.length + ' call' + (top.tasks.length === 1 ? '' : 's') + '</button>' : '') +
+          '<button type="button" class="cx-btn sm accent" data-coach-copy="' + esc(c.lp) + '">Copy coaching note</button>' +
+          '<button type="button" class="cx-btn sm" data-coach-lp="' + esc(c.lp) + '">Open ' + esc(c.lp) + '’s dashboard</button>' +
+          '<button type="button" class="cx-btn sm" data-coach-sc="' + esc(c.lp) + '">Scorecard</button></div></section>';
+      }).join('') + '</div></div>';
     $all('[data-coach-lp]', host).forEach(function (button) {
+      button.addEventListener('click', function () { var link = $('.ct-nav-btn[data-lp="' + button.dataset.coachLp + '"]'); if (link) link.click(); });
+    });
+    $all('[data-coach-sc]', host).forEach(function (button) { button.addEventListener('click', function () { openMyScorecard(button.dataset.coachSc); }); });
+    $all('[data-rec]', host).forEach(function (button) { button.addEventListener('click', function () { openRec(button.getAttribute('data-rec')); }); });
+    $all('[data-coach-copy]', host).forEach(function (button) {
       button.addEventListener('click', function () {
-        var link = $('.ct-nav-btn[data-lp="' + button.dataset.coachLp + '"]');
-        if (link) link.click();
+        var text = S._coachNotes[button.dataset.coachCopy] || '';
+        var done = function () { toast('Coaching note copied. Paste it to ' + button.dataset.coachCopy + ' in Teams.'); button.textContent = 'Copied ✓'; };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { window.prompt('Copy this note:', text); });
+        else window.prompt('Copy this note:', text);
       });
     });
   }
