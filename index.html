@@ -918,10 +918,6 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </style>
 <style id="ct-conversion-growth-page-css">
 #view-leads #leads-tab-leads{display:block!important}
-#view-lp-conversion .ct-page-wrap>.ct-page-wrap{padding:0!important;max-width:none!important}
-#view-lp-conversion #lp-conversion-content{padding:0!important;max-width:none!important}
-#view-partner-growth .ct-page-wrap{max-width:none}
-#view-partner-growth .section-head:first-of-type{margin-top:8px}
 </style><style id="ct-v56-clean-weekly-css">
 /* v56 — single weekly source + persistent per-loan Tuesday classifications */
 #ctWeeklyOpsHub{margin-top:14px}
@@ -974,7 +970,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-nav-section"><div class="ct-nav-label">TEAM</div><button class="who-btn ct-nav-btn wb-Snapshot" data-route="snapshot" onclick="lpv2Route('snapshot',this)" type="button"><span class="ct-nav-icon">▦</span><span>Team Snapshot</span></button><button class="who-btn ct-nav-btn" data-route="portfolio" onclick="lpv2Route('portfolio',this)" type="button"><span class="ct-nav-icon">▤</span><span>Team Portfolio</span></button><button class="who-btn ct-nav-btn wb-ProductionManager" data-route="production-manager" onclick="lpv2Route('production-manager',this)" type="button"><span class="ct-nav-icon">◈</span><span>Production Manager</span></button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LOAN PARTNERS</div>
 <button class="who-btn ct-nav-btn wb-Gavin" data-lp="Gavin" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Gavin</button><button class="who-btn ct-nav-btn wb-Karen" data-lp="Karen" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Karen</button><button class="who-btn ct-nav-btn wb-Osgood" data-lp="Osgood" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Osgood</button><button class="who-btn ct-nav-btn wb-Jordan" data-lp="Jordan" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Jordan</button><button class="who-btn ct-nav-btn wb-Said" data-lp="Said" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Said</button><button class="who-btn ct-nav-btn wb-Isaak" data-lp="Isaak" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Isaak</button></div>
-<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="lp-conversion" onclick="lpv2Route('lp-conversion',this)" type="button">LP Conversion</button><button class="who-btn ct-nav-btn" data-route="partner-growth" onclick="lpv2Route('partner-growth',this)" type="button">Partner Growth</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Integrity</button><button class="who-btn ct-nav-btn" data-route="income" onclick="lpv2Route('income',this)" type="button">Income Calculation</button></div>
+<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Quality</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">DATA</div><button class="who-btn ct-nav-btn" data-route="data-hub" onclick="lpv2Route('data-hub',this)" type="button">Weekly Data Hub</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LEARN + TOOLS</div><button class="who-btn ct-nav-btn wb-OperatingStandard" data-route="standard" onclick="lpv2Route('standard',this)" type="button">Operating Standard</button><button class="who-btn ct-nav-btn ct-action-btn" data-route="scripts" onclick="lpv2Route('scripts',this)" type="button">Scripts + Training</button><button class="who-btn ct-nav-btn wb-Admin" data-route="admin" onclick="lpv2Route('admin',this)" type="button">Admin</button></div>
 </div>
@@ -1410,11 +1406,24 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="fi-callout">
 <div><strong>CORE Team action</strong><span>Watch for daily messages from Processing / the LOAs and respond quickly to the specific items they need.</span></div>
 </div>
+<style>#fi-income-standard .ct-income-flow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}#fi-income-standard .ct-income-step{flex:1 1 220px;display:flex;gap:10px;border:1px solid #DCE7EC;border-radius:10px;padding:12px;background:#fff}#fi-income-standard .ct-income-step>b{flex:0 0 26px;height:26px;border-radius:50%;background:#1E83A8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}#fi-income-standard .ct-income-step h3{margin:0 0 4px;font-size:14px}#fi-income-standard .ct-income-step p{margin:0;font-size:12px;color:#4d6270}#fi-income-standard .ct-income-arrow{align-self:center;color:#1E83A8;font-weight:700}</style><div class="ct-page-wrap" id="fi-income-standard" style="margin-top:18px"><div class="ct-page-head"><div><div class="ct-eyebrow">FILE QUALITY</div><h1>Income Calculation Standard</h1><div class="ct-page-sub">Use the same steps on every file so income is calculated consistently.</div></div></div>
+<section class="ct-card"><div class="ct-income-flow"><div class="ct-income-step"><b>1</b><div><h3>Income waiver first</h3><p>If a waiver is available, use it. Approved waiver sources: <strong>Income Wizard, Argyle, Finicity.</strong></p></div></div><div class="ct-income-arrow">→</div><div class="ct-income-step"><b>2</b><div><h3>Manual calculation only when needed</h3><p>If no waiver is available, use only the <strong>Encompass Income Calculator</strong> or the approved <strong>MGIC Income Worksheet</strong> below.</p></div></div><div class="ct-income-arrow">→</div><div class="ct-income-step"><b>3</b><div><h3>Anything else requires documentation</h3><p>If another calculator must be used, document the reason clearly in File Integrity.</p></div></div></div></section>
+<section class="ct-card ct-income-tool-card">
+<div class="ct-kicker">APPROVED MANUAL CALCULATOR</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap">
+<div style="min-width:260px;flex:1">
+<h2 style="margin:0 0 6px">MGIC Income Worksheet</h2>
+<p class="ct-page-sub" style="margin:0">Use this attached approved worksheet when an income waiver is not available and you are not using the Encompass Income Calculator.</p>
+</div>
+<button class="ct-primary-btn" onclick="ctDownloadIncomeWorksheet()" type="button">Open / Download Income Worksheet</button>
+</div>
+</section>
+<section class="ct-card"><div class="ct-kicker">WHY THIS MATTERS</div><h2>Consistency is the standard</h2><p class="ct-page-sub">Using the same approved calculation path improves Sales, Processing, Underwriting and QC review and makes coaching opportunities visible.</p></section>
+</div>
 </div>
 <div class="view" id="view-operating-standard">
 <div class="operating standard-standard">
 <div class="pbs-hero"><div class="pbs-kicker">CORE TEAM OPERATING STANDARD</div><h1>Produce. Convert. Execute. Grow.</h1><p>The tracker should make ownership visible, catch execution gaps early, and keep the team working the same operating system from lead through funding and relationship growth.</p></div>
-<div class="pbs-live" id="pbs-live-team-progress"><div class="pbs-live-head"><div><b>Live team position</b><span>Current scorecard data compared with the performance targets.</span></div><button onclick="pbsLoadLiveProgress(true)" type="button">Refresh</button></div><div class="pbs-live-grid" id="pbs-live-grid"><div class="pbs-live-loading">Loading current measurements…</div></div></div>
 <div class="pbs-grid">
 <div class="pbs-card" onclick="lpv3OpenStandardDetail('production')" role="button" tabindex="0"><div class="pbs-weight">60%<span>Production</span></div><h3>What it measures</h3><p>Funded results, current-month pace and sustained rolling production. Strong production matters most, but it cannot erase a fundamental execution failure.</p></div>
 <div class="pbs-card" onclick="lpv3OpenStandardDetail('conversion')" role="button" tabindex="0"><div class="pbs-weight">25%<span>Conversion</span></div><h3>What it measures</h3><p>Effectiveness across the buyer funnel: Lead → 1003 → Pre-Approval → Contract → Funding.</p></div>
@@ -1553,24 +1562,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-page-wrap">
 <div class="ct-page-head"><div><div class="ct-eyebrow">RELATIONSHIP VISIBILITY</div><h1>Agent Health / Roster</h1><div class="ct-page-sub">Use this page to see who is still an Active Partner and who needs relationship outreach. Active Agent = current Power BI population with a valid Level. Health colors still show lead/close recency.</div></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="ct-link-btn" id="ctExportActiveOwnershipBtn" onclick="ctExportActiveAgentOwnership()" type="button">Export All LP Assignments</button><select id="ctExportLpChoice" aria-label="Choose LP for assignment export" style="min-height:36px;border:1px solid #cbd5e1;border-radius:8px;padding:6px 9px;background:#fff;color:#172235"><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Isaak">Isaak</option><option value="Unassigned">Unassigned</option></select><button class="ct-link-btn" id="ctExportOneLpBtn" type="button" onclick="return ctV42ExportSelected()">Export Selected LP</button><span id="ctExportLpStatus" role="status" style="font-size:11px;color:#64748b"></span></div></div>
 <div id="lpv3-health-summary"></div>
-<div class="ct-health-clarity-note"><b>How to use this:</b> Green = relationship is producing recent leads. Yellow = check in before momentum fades. Red = call today. Prequal and pipeline numbers are buyer counts for context, not the number of agents.</div><section class="ct-card"><div class="ct-health-toolbar"><input id="lpv3-health-q" oninput="lpv3RenderAgentHealth()" placeholder="Search agent…"/><select id="lpv3-health-filter" onchange="lpv3RenderAgentHealth()"><option value="action">Needs follow-up first</option><option value="red">Red · Call today</option><option value="yellow">Yellow · Check in</option><option value="green">Green · Recent lead</option></select><select id="lpv3-health-lp" onchange="lpv3RenderAgentHealth()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option><option>Unassigned</option></select></div><div id="lpv3-health-table"><div class="ct-loading">Loading agent health…</div></div></section>
-</div>
-</div>
-<div class="view" id="view-income-standard">
-<div class="ct-page-wrap">
-<div class="ct-page-head"><div><div class="ct-eyebrow">FILE QUALITY</div><h1>Income Calculation Standard</h1><div class="ct-page-sub">Use the same waterfall on every file so income is calculated consistently and File Integrity stays clean.</div></div></div>
-<section class="ct-card"><div class="ct-income-flow"><div class="ct-income-step"><b>1</b><div><h3>Income waiver first</h3><p>If a waiver is available, use it. Approved waiver sources: <strong>Income Wizard, Argyle, Finicity.</strong></p></div></div><div class="ct-income-arrow">→</div><div class="ct-income-step"><b>2</b><div><h3>Manual calculation only when needed</h3><p>If no waiver is available, use only the <strong>Encompass Income Calculator</strong> or the approved <strong>MGIC Income Worksheet</strong> below.</p></div></div><div class="ct-income-arrow">→</div><div class="ct-income-step"><b>3</b><div><h3>Anything else requires documentation</h3><p>If another calculator must be used, document the reason clearly in File Integrity.</p></div></div></div></section>
-<section class="ct-card ct-income-tool-card">
-<div class="ct-kicker">APPROVED MANUAL CALCULATOR</div>
-<div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap">
-<div style="min-width:260px;flex:1">
-<h2 style="margin:0 0 6px">MGIC Income Worksheet</h2>
-<p class="ct-page-sub" style="margin:0">Use this attached approved worksheet when an income waiver is not available and you are not using the Encompass Income Calculator.</p>
-</div>
-<button class="ct-primary-btn" onclick="ctDownloadIncomeWorksheet()" type="button">Open / Download Income Worksheet</button>
-</div>
-</section>
-<section class="ct-card"><div class="ct-kicker">WHY THIS MATTERS</div><h2>Consistency is the standard</h2><p class="ct-page-sub">Using the same approved calculation path improves Sales, Processing, Underwriting and QC review and makes coaching opportunities visible.</p></section>
+<div class="ct-health-clarity-note"><b>How to use this:</b> Green = relationship is producing recent leads. Yellow = check in before momentum fades. Red = call today. Prequal and pipeline numbers are buyer counts for context, not the number of agents.</div><section class="ct-card"><div class="ct-health-toolbar"><input id="lpv3-health-q" oninput="lpv3RenderAgentHealth()" placeholder="Search agent…"/><select id="lpv3-health-filter" onchange="lpv3RenderAgentHealth()"><option value="action">Needs follow-up first</option><option value="red">Red · Call today</option><option value="yellow">Yellow · Check in</option><option value="green">Green · Recent lead</option></select><select id="lpv3-health-lp" onchange="lpv3RenderAgentHealth()"><option value="">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Isaak</option><option>Unassigned</option></select></div><p style="font-size:12px;color:#5f7380;margin:6px 0 8px">To change an agent’s RM or LP owner, use <b>Admin → Reassign Agents</b>.</p><div id="lpv3-health-table"><div class="ct-loading">Loading agent health…</div></div></section>
 </div>
 </div>
 <div class="view" id="view-leads">
@@ -1677,15 +1669,8 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <div class="tbl-wrap"><table><thead><tr><th>Agent</th><th>Lvl</th><th>RM Owner</th><th>LP Owner</th><th>Status</th><th>Contact</th><th>Last called</th><th>Last Velocify activity</th><th>This week</th></tr></thead><tbody id="d-tbody"></tbody></table></div>
 </div>
-</div><div class="view" id="view-lp-conversion"><div class="ct-page-wrap">
-<div class="ct-page-head">
-<div>
-<div class="ct-eyebrow">SHARED WORK</div>
-<h1>LP Conversion</h1>
-<div class="ct-page-sub">Use this page to review Loan Partner lead-to-application conversion, pipeline movement and LP effectiveness. Agent relationship growth is kept on the separate Partner Growth page.</div>
-</div>
-</div>
-<div class="ct-page-wrap" id="lp-conversion-content">
+
+<details id="leads-more-conversion" style="background:#fff;border:1px solid #DCE7EC;border-radius:10px;padding:10px 14px;margin:1rem 0"><summary style="cursor:pointer;font-weight:800;font-size:13px">Conversion by date range, LP pipeline and effectiveness</summary><div style="margin-top:12px">
 <div class="section-head">Lead → Application conversion</div>
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:1rem">
 <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">Search any date range for team and per-LP Lead → App conversion. Only confirmed file/application stages count; Does Not Qualify alone does not.</div>
@@ -1698,25 +1683,13 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <div id="conv-range-results" style="margin-top:12px"></div>
 </div>
-<div id="d-allclear-section" style="display:none!important"></div>
-<div id="d-rm-summary" style="display:none!important"></div>
-<div class="section-head">LP weekly scorecards</div><div id="d-lp-scorecard-summary" style="margin-bottom:1rem"></div>
-<div id="velocify-leaderboard-anchor" style="display:none!important"></div>
 <div class="section-head">LP lead pipeline</div><div id="d-lead-pipeline-full" style="margin-bottom:1rem"><div style="text-align:center;padding:16px;color:var(--text-3);font-size:12px">Loading lead data...</div></div>
 <div class="section-head">LP effectiveness</div><div id="d-lp-effectiveness-section" style="margin-bottom:1rem"></div>
-</div></div></div><div class="view" id="view-partner-growth"><div class="ct-page-wrap"><div class="ct-page-head">
-<div>
-<div class="ct-eyebrow">SHARED WORK</div>
-<h1>Partner Growth</h1>
-<div class="ct-page-sub">Find partners closest to moving up and the active buyers who could get them there.</div>
-</div>
-</div><div class="ct-tier-opportunities" id="ct-tier-opportunities"><div class="no-data">Loading Partner Growth…</div></div>
-<details class="ct-card"><summary>Tier scoreboard and partner reports</summary>
-<div class="section-head">Tier growth scoreboard</div><div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div>
-<div class="section-head">Lead-producing partners</div><div class="vel-board" id="velocify-leaderboard"><div class="no-data">Loading…</div></div>
-<div class="section-head">All-time partner leaderboard</div><div id="leaderboard"></div></details>
-<div aria-hidden="true" id="d-churn-risk-section" style="display:none!important"></div></div></div>
-<div id="lead-drilldown-overlay" onclick="if(event.target===this)closeDrilldown()" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;align-items:center;justify-content:center;padding:16px">
+<div id="d-allclear-section" style="display:none!important"></div>
+<div id="d-rm-summary" style="display:none!important"></div>
+<div id="velocify-leaderboard-anchor" style="display:none!important"></div>
+</div></details>
+</div><div id="lead-drilldown-overlay" onclick="if(event.target===this)closeDrilldown()" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;align-items:center;justify-content:center;padding:16px">
 <div style="background:var(--surface);border-radius:12px;width:100%;max-width:560px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border)">
 <div id="drilldown-header" style="background:#1F4E79;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
 <div id="drilldown-title" style="color:#fff;font-size:14px;font-weight:700"></div>
@@ -1907,6 +1880,12 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <div class="lp-portfolio-panel" id="lp-portfolio-tier">
 <div id="lp-portfolio-tier-body"><div class="no-data">Open Tier Growth to load the current score.</div></div>
+<div id="lp-portfolio-growth-list" style="margin-top:16px"><div class="section-head">Every partner close to the next tier</div><div class="ct-tier-opportunities" id="ct-tier-opportunities"><div class="no-data">Loading Partner Growth…</div></div>
+<details class="ct-card"><summary>Tier scoreboard and partner reports</summary>
+<div class="section-head">Tier growth scoreboard</div><div id="d-growth-scoreboard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem"></div>
+<div class="section-head">Lead-producing partners</div><div class="vel-board" id="velocify-leaderboard"><div class="no-data">Loading…</div></div>
+<div class="section-head">All-time partner leaderboard</div><div id="leaderboard"></div></details>
+<div aria-hidden="true" id="d-churn-risk-section" style="display:none!important"></div></div>
 </div>
 
 <div class="lp-portfolio-panel" id="lp-portfolio-ownership">
@@ -5700,7 +5679,7 @@ async function handleUpload(input){
       if(coMktPartners.length&&typeof renderDirectorView==="function"&&currentUser==="Director")renderDirectorView();
       // If Portfolio Review is already open, refresh it from the newly stamped profiles now.
       if(document.getElementById("pfr-body")){try{await window.pfrLoad();}catch(pfrErr){console.warn("Portfolio refresh failed:",pfrErr.message);}}
-      if(document.getElementById("view-partner-growth")&&document.getElementById("view-partner-growth").classList.contains("active")&&typeof ctRenderTierOpportunities==="function"){
+      if(document.getElementById("lp-portfolio-tier")&&document.getElementById("lp-portfolio-tier").classList.contains("active")&&typeof ctRenderTierOpportunities==="function"){
         try{await ctRenderTierOpportunities();}catch(tierErr){console.warn("Next-tier opportunities refresh failed:",tierErr.message);}
       }
 
@@ -6442,7 +6421,7 @@ async function refreshLpSharedData(source){
         renderLP(currentUser);
       }
       // Re-query the Partner Growth page after every new import (and on polling).
-      var partnerGrowth=document.getElementById("view-partner-growth");
+      var partnerGrowth=document.getElementById("lp-portfolio-tier");
       if(partnerGrowth&&partnerGrowth.classList.contains("active")&&typeof window.ctRenderTierOpportunities==="function"){
         await window.ctRenderTierOpportunities().catch(function(e){console.warn("Partner Growth refresh failed:",e);});
       }
@@ -10926,7 +10905,7 @@ async function pfrLoad(){
     },[
       ['Production',pbSnapshot?pbPipeline.pipelineTotal+' in pipeline · '+pbPipeline.prequalsTotal+' active prequals':'Pipeline data unavailable','Mack reviews files that may slip and assigns next steps.'],
       ['Relationships',referralApproaching.length+' nearing the 90-day referral mark','The RM owns outreach before the cutoff.'],
-      ['Tier growth',nearTierCount===null?'Count unavailable':nearTierCount+' one closing away','Review the owners and active buyers in Partner Growth.','partner-growth'],
+      ['Tier growth',nearTierCount===null?'Count unavailable':nearTierCount+' one closing away','Review the owners and active buyers in Team Portfolio → Tier Growth.','partner-growth'],
       ['Leadership decisions',escalations.length+' escalations logged · '+range.label,'Review escalations and decide what needs leadership help.']
     ],referralApproaching.filter(function(item){return item.watch.remaining>=8;}).length,agentPace);
     body._portfolioCards[0]._portfolioExportData=meetingExportData;
@@ -11547,7 +11526,7 @@ if(typeof refreshLpSharedData==="function"){
 
 
 // v17 — makeover layer + v16 load recovery; all operational logic preserved.
-function runLpUiIntegrityCheck(){const check=()=>{const requiredViews=["welcome","lp","rm","file-integrity","operating-standard","scorecards","snapshot","ownership","data-hub","agent-health","income-standard","leads","lp-conversion","partner-growth","admin","facetime","co-marketing","agent-search","portfolio","production-manager"];const missingViews=requiredViews.filter(n=>!document.getElementById("view-"+n));if(missingViews.length)console.error("LP Tracker UI integrity issue: missing "+missingViews.join(", "));else console.log("LP Tracker UI integrity check passed ("+requiredViews.length+" views)");};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",check,{once:true});else setTimeout(check,0);}
+function runLpUiIntegrityCheck(){const check=()=>{const requiredViews=["welcome","lp","rm","file-integrity","operating-standard","scorecards","snapshot","ownership","data-hub","agent-health","leads","admin","facetime","co-marketing","agent-search","portfolio","production-manager"];const missingViews=requiredViews.filter(n=>!document.getElementById("view-"+n));if(missingViews.length)console.error("LP Tracker UI integrity issue: missing "+missingViews.join(", "));else console.log("LP Tracker UI integrity check passed ("+requiredViews.length+" views)");};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",check,{once:true});else setTimeout(check,0);}
 runLpUiIntegrityCheck();
 // v45 watchdog: a slow request is shown as slow, not falsely reported as disconnected.
 // Successful Supabase traffic automatically restores Live through lpMarkServerReachable().
@@ -11992,7 +11971,7 @@ async function v33CancelSharedFaceTime(){var id=document.getElementById('v33FtId
     document.querySelectorAll('#view-portfolio .lp-portfolio-panel').forEach(p=>p.classList.remove('active'));
     const panel=document.getElementById('lp-portfolio-'+name);if(panel)panel.classList.add('active');
     if(name==='overview'){try{pfrLoad()}catch(e){}}
-    if(name==='tier')loadTier();
+    if(name==='tier'){loadTier();(async()=>{try{if(typeof ctHydrateSharedPowerBiSnapshot==='function')await ctHydrateSharedPowerBiSnapshot();if(typeof renderGrowthScoreboard==='function')renderGrowthScoreboard();if(typeof ctRenderTierOpportunities==='function')await ctRenderTierOpportunities();if(typeof renderVelocifyLeaderboard==='function')renderVelocifyLeaderboard();if(typeof renderLeaderboard==='function')renderLeaderboard();}catch(e){console.warn('Tier growth list',e)}})();}
     if(name==='health')loadHealth();
     if(name==='ownership')mountOwnership();
   };
@@ -12268,7 +12247,7 @@ function openOperatingStandardView(btn){
       if(route==='leads'){if(typeof openLeadsView==='function')return openLeadsView(btn);ctShowView('view-leads',btn);if(typeof loadReferralLeadsDirect==='function')loadReferralLeadsDirect();return;}
       if(route==='agent-search'){if(typeof openAgentSearchView==='function')return openAgentSearchView(btn);ctShowView('view-agent-search',btn);if(typeof renderGlobalAgentSearch==='function')renderGlobalAgentSearch();return;}
       if(route==='agent-health'){return lpv3OpenAgentHealth(btn);}
-      if(route==='income'){ctShowView('view-income-standard',btn);return;}
+      if(route==='income'){ctShowView('view-file-integrity',btn);return;}
       if(route==='standard'){if(typeof openOperatingStandardView==='function'){const r=openOperatingStandardView(btn);if(typeof pbsLoadLiveProgress==='function')setTimeout(()=>pbsLoadLiveProgress(true),50);return r;}ctShowView('view-operating-standard',btn);return;}
       if(route==='admin'){if(typeof selectUser==='function')return selectUser(btn,'Admin');return ctShowView('view-admin',btn);}
     }catch(e){console.error('Navigation error',route,e);if(typeof ctShowToast==='function')ctShowToast('Could not open '+route+'. Please refresh and try again.')}
@@ -12846,7 +12825,7 @@ window.lpv2Route=function(route,btn){
     }
     if(route==='scripts'){ctOpenScripts(btn);return}
     if(route==='standard'){ctActivate('view-operating-standard',btn);if(typeof pbsLoadLiveProgress==='function')setTimeout(()=>Promise.resolve(pbsLoadLiveProgress(true)).catch(()=>{}),20);return}
-    if(route==='income'){ctActivate('view-income-standard',btn);return}
+    if(route==='income'){ctActivate('view-file-integrity',btn);return}
     if(route==='file-integrity'){ctActivate('view-file-integrity',btn);try{if(typeof loadFileIntegrity==='function')loadFileIntegrity()}catch(e){}return}
     if(route==='leads'){ctActivate('view-leads',btn);try{if(typeof loadReferralLeadsDirect==='function')loadReferralLeadsDirect()}catch(e){}return}
     if(route==='facetime'){if(typeof selectUser==='function'){selectUser(btn,'FaceTime');return}ctActivate('view-facetime',btn);return}
@@ -13014,10 +12993,18 @@ window.lpv2Route=function(route,btn){
       if(route==='leads'){
         activate('view-leads',btn);
         if(typeof loadReferralLeadsDirect==='function')await Promise.resolve(loadReferralLeadsDirect()).catch(()=>{});
+        try{
+          if(typeof loadLeadPipeline==='function')loadLeadPipeline();
+          if(typeof renderLpEffectiveness==='function')renderLpEffectiveness();
+          const cs=document.getElementById('conv-range-start'),ce=document.getElementById('conv-range-end');
+          if(cs&&!cs.value){cs.value='2026-04-01';if(ce)ce.value=typeof localDateStr==='function'?localDateStr(new Date()):new Date().toISOString().slice(0,10);if(typeof runConversionRangeSearch==='function')runConversionRangeSearch();}
+        }catch(e){console.warn('Lead conversion sections',e)}
         return;
       }
       if(route==='lp-conversion'){
-        activate('view-lp-conversion',btn);
+        activate('view-leads',document.querySelector('.ct-nav-btn[data-route="leads"]')||btn);
+        if(typeof loadReferralLeadsDirect==='function')Promise.resolve(loadReferralLeadsDirect()).catch(()=>{});
+        const more=document.getElementById('leads-more-conversion');if(more)more.open=true;
         try{
           if(typeof renderLpScorecardSummary==='function')renderLpScorecardSummary();
           if(typeof loadLeadPipeline==='function')loadLeadPipeline();
@@ -13032,7 +13019,8 @@ window.lpv2Route=function(route,btn){
         return;
       }
       if(route==='partner-growth'){
-        activate('view-partner-growth',btn);
+        const pf=document.querySelector('.ct-nav-btn[data-route="portfolio"]');if(typeof lpv2Route==='function'&&pf){await lpv2Route('portfolio',pf);const tb=[...document.querySelectorAll('#lpPortfolioTabs button')].find(b=>/Tier Growth/.test(b.textContent));if(tb)window.lpPortfolioTab('tier',tb);}
+        return;
         try{
           if(typeof ctHydrateSharedPowerBiSnapshot==='function')await ctHydrateSharedPowerBiSnapshot();
           if(typeof renderGrowthScoreboard==='function')renderGrowthScoreboard();
@@ -13078,7 +13066,7 @@ window.lpv2Route=function(route,btn){
         return;
       }
       if(route==='income'){
-        activate('view-income-standard',btn);
+        activate('view-file-integrity',btn);
         return;
       }
       if(route==='data-hub'||route==='upload'){
@@ -13129,8 +13117,8 @@ window.lpv2Route=function(route,btn){
   window.ctRouteHealth=function(){
     const expected={
       snapshot:'view-snapshot',lp:'view-lp',facetime:'view-facetime',leads:'view-leads',
-      'lp-conversion':'view-lp-conversion','partner-growth':'view-partner-growth',portfolio:'view-portfolio','agent-health':'view-agent-health','co-marketing':'view-co-marketing',
-      'file-integrity':'view-file-integrity',income:'view-income-standard',
+      'lp-conversion':'view-leads','partner-growth':'view-portfolio',portfolio:'view-portfolio','agent-health':'view-agent-health','co-marketing':'view-co-marketing',
+      'file-integrity':'view-file-integrity',income:'view-file-integrity',
       'data-hub':'view-data-hub',standard:'view-operating-standard',admin:'view-admin'
     };
     const missing=[];
@@ -13363,7 +13351,7 @@ function renderRemoved(){
 function render(){
  const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');if(!host)return;const all=(window.__CT_HEALTH_ROWS||[]).slice(),totals=window.__CT_HEALTH_TOTALS||{active:all.length,pre:0,pipe:0,managed:all.length,removed:0},q=key((document.getElementById('lpv3-health-q')||{}).value),hf=(document.getElementById('lpv3-health-filter')||{}).value||'',lf=(document.getElementById('lpv3-health-lp')||{}).value||'';let rows=all.slice();if(hf==='action')rows=rows.filter(r=>r.health==='red'||r.health==='yellow');else if(['red','yellow','green'].includes(hf))rows=rows.filter(r=>r.health===hf);if(q)rows=rows.filter(r=>key(r.name).includes(q));if(lf)rows=rows.filter(r=>r.lp===lf);const rank={red:0,yellow:1,green:2};rows.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??999)-(a.daysLead??999))||String(a.name).localeCompare(String(b.name)));const cnt=h=>all.filter(r=>r.health===h).length,follow=cnt('red')+cnt('yellow');
  if(sum)sum.innerHTML='<div class="ct-health-summary-grid"><div class="ct-health-summary"><b>'+totals.active+'</b><span>Power BI Active</span><small>Latest uploaded A/B/C population</small></div><div class="ct-health-summary"><b>'+(totals.pre===null?'—':totals.pre)+'</b><span>Current Prequal Buyers</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+(totals.pipe===null?'—':totals.pipe)+'</b><span>Current Buyers in Pipeline</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+totals.managed+'</b><span>Managed Roster</span><small>'+totals.removed+' removed · '+follow+' need follow-up</small></div></div><div class="ct-health-chip-row"><span class="ct-health-chip green">Green · lead in last 30 days · '+cnt('green')+'</span><span class="ct-health-chip yellow">Yellow · 31–60 days since last lead · '+cnt('yellow')+'</span><span class="ct-health-chip red">Red · 61+ days since last lead · '+cnt('red')+'</span></div>';
- host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>RM Owner</th><th>LP Owner</th><th>Actions</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead><tbody>'+(rows.length?rows.map(r=>'<tr data-health-agent="'+esc(r.name)+'"><td><b>'+esc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+esc(r.action)+'</small></td><td><button type="button" class="ct-health-agent-link" onclick="return ctV42OpenContact(this)">'+esc(r.name)+'</button><small>'+esc(r.why)+'</small></td><td>'+esc(r.tier)+'</td><td><select class="ct-owner-select" data-owner-role="rm">'+options(RM_OPTIONS,r.rm)+'</select></td><td><select class="ct-owner-select" data-owner-role="lp">'+options(LP_OPTIONS,r.lp)+'</select></td><td><div class="ct-owner-actions"><button type="button" class="ct-owner-save" onclick="return ctV42Save(this)">Save</button><button type="button" class="ct-owner-delete" onclick="return ctV42Delete(this)">Delete Everywhere</button></div><span class="ct-owner-status"></span></td><td>'+r.pre+'</td><td>'+r.pipe+'</td><td>'+fmt(r.last)+'</td><td>'+fmt(r.lastStart)+'</td><td>'+fmt(r.lastContract)+'</td><td>'+fmt(r.lastClose)+'</td></tr>').join(''):'<tr><td colspan="12" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+'</tbody></table></div>';renderRemoved()
+ host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>RM Owner</th><th>LP Owner</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead><tbody>'+(rows.length?rows.map(r=>'<tr data-health-agent="'+esc(r.name)+'"><td><b>'+esc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+esc(r.action)+'</small></td><td><button type="button" class="ct-health-agent-link" onclick="return ctV42OpenContact(this)">'+esc(r.name)+'</button><small>'+esc(r.why)+'</small></td><td>'+esc(r.tier)+'</td><td>'+esc(r.rm||'Unassigned')+'</td><td>'+esc(r.lp||'Unassigned')+'</td><td>'+r.pre+'</td><td>'+r.pipe+'</td><td>'+fmt(r.last)+'</td><td>'+fmt(r.lastStart)+'</td><td>'+fmt(r.lastContract)+'</td><td>'+fmt(r.lastClose)+'</td></tr>').join(''):'<tr><td colspan="11" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+'</tbody></table></div>';renderRemoved()
 }
 async function refresh(){const host=document.getElementById('lpv3-health-table');if(host)host.innerHTML='<div style="padding:20px;color:#718391">Loading current Power BI roster…</div>';window.__CT_HEALTH_ROWS=await buildRows();render()}
 window.ctLoadAgentHealthFresh=refresh;window.ctRenderHealthRows=render;window.lpv3RenderAgentHealth=render;
@@ -14091,11 +14079,9 @@ function installHub(){
   let s=document.getElementById('ctWeeklyOpsHub');
   if(s){v63RefreshHubStatuses();return s;}
   s=document.createElement('section');s.id='ctWeeklyOpsHub';s.innerHTML='<div class="ct-v56-hubgrid">'+
-    '<div class="ct-v56-hubcard management" style="grid-column:1/-1"><div class="ct-v56-kicker">MANAGEMENT REPORTING</div><h3>Weekly exports</h3><p>Export calls, Tuesday completion status, and current contract status from the latest uploaded plans and logged activity.</p><button class="ct-v56-btn" type="button" onclick="ctExportLpTuesdayReport()">Export LP Tuesday Update Status</button> <button class="ct-v56-btn secondary" type="button" onclick="ctExportAllCalls()">Export All Calls + Updates</button> <button class="ct-v56-btn secondary" type="button" onclick="ctExportContractStatusManagement()">Export Contract Status for Management</button><div id="v56MgmtStatus" class="ct-v56-status">Checking this week\'s saved lists…</div></div>'+
-    '<div class="ct-v56-hubcard"><h3>LP pipeline and funded reports</h3><p>Upload these here to update the LP call worklists.</p><button class="ct-v56-btn" type="button" onclick="CoreApp.openImports()">Open weekly imports</button></div>'+
-    '<details class="ct-v56-hubcard"><summary><b>Older LP Tuesday report</b></summary><h3>LP Tuesday report</h3><p>This file controls LP buyer/client + buyer-agent Tuesday updates. Re-uploading replaces only the LP plan for this week; RM work is untouched.</p><button class="ct-v56-btn" type="button" onclick="v62PickLP()">Upload LP report</button><input id="v62LPFile" type="file" accept=".xlsx,.xls" style="display:none"><div id="v62LPStatus" class="ct-v56-status">Checking this week\'s LP list…</div></details>'+
-    '<div class="ct-v56-hubcard"><div class="ct-v56-kicker">2 · RM TUESDAY LIST</div><h3>Upload Mack\'s RM Excel</h3><p>This file controls RM listing-agent Tuesday calls only. Re-uploading replaces only the RM plan for this week; LP work is untouched.</p><button class="ct-v56-btn" type="button" onclick="v62PickRM()">Upload RM Tuesday List</button><input id="v62RMFile" type="file" accept=".xlsx,.xls" style="display:none"><div id="v62RMStatus" class="ct-v56-status">Checking this week\'s RM list…</div></div>'+
-    '</div>';grid.appendChild(s);document.getElementById('v62LPFile').addEventListener('change',e=>importLpTuesday(e.target));document.getElementById('v62RMFile').addEventListener('change',e=>importRmTuesday(e.target));v63RefreshHubStatuses();return s;
+    '<div class="ct-v56-hubcard"><div class="ct-v56-kicker">1 · ENCOMPASS</div><h3>Pipeline and Funded Units reports</h3><p>Upload the weekly Encompass pipeline report and the Funded Units report. These build every LP call list and the funded totals.</p><button class="ct-v56-btn" type="button" onclick="CoreApp.openImports()">Open weekly imports</button></div>'+
+    '<div class="ct-v56-hubcard"><div class="ct-v56-kicker">2 · RM TUESDAY LIST</div><h3>RM listing-agent call list</h3><p>This file controls RM listing-agent Tuesday calls only. Re-uploading replaces only the RM plan for this week; LP work is untouched.</p><button class="ct-v56-btn" type="button" onclick="v62PickRM()">Upload RM Tuesday List</button><input id="v62RMFile" type="file" accept=".xlsx,.xls" style="display:none"><div id="v62RMStatus" class="ct-v56-status">Checking this week\'s RM list…</div></div>'+
+    '</div>';grid.appendChild(s);document.getElementById('v62RMFile').addEventListener('change',e=>importRmTuesday(e.target));v63RefreshHubStatuses();return s;
 }
 window.v63RefreshHubStatuses=v63RefreshHubStatuses;
 window.v62PickLP=()=>document.getElementById('v62LPFile')?.click();window.v62PickRM=()=>document.getElementById('v62RMFile')?.click();window.v310PickLP=window.v62PickLP;window.v310PickRM=window.v62PickRM;
@@ -14276,10 +14262,11 @@ window.ctGetCurrentPowerBiSnapshot=function(){let s=window.CT_POWERBI_SNAPSHOT||
 
 async function fundedServer(){try{const heads=await sbFetch('GET','amanda_activities?act_type=eq.Funded%20Unit%20Snapshot&agent_name=eq.Daniel%20Sa&select=id,act_date,notes,created_at&notes=like.'+encodeURIComponent('*[FUNDED_KIND:HEADER]*')+'&order=created_at.desc&limit=1').catch(()=>[]),h=(heads||[]).find(x=>meta(x.notes,'FUNDED_KIND')==='HEADER');if(!h)return null;const batch=meta(h.notes,'FUNDED_BATCH'),total=Number(meta(h.notes,'FUNDED_TOTAL')),asOf=meta(h.notes,'FUNDED_ASOF');if(!batch||!Number.isFinite(total))return null;const rows=window.CoreApp?.state?.tier?await sbFetch('GET','amanda_activities?act_type=eq.Funded%20Unit%20Snapshot&agent_name=eq.Daniel%20Sa&select=act_date,notes,created_at&notes=like.'+encodeURIComponent('*[FUNDED_BATCH:'+batch+']*')+'&order=act_date.asc&limit=2000').catch(()=>[]):[],mine=(rows||[]).filter(x=>meta(x.notes,'FUNDED_KIND')==='ROW'&&meta(x.notes,'FUNDED_BATCH')===batch).map(x=>({closed:x.act_date,buyer:decodeURIComponent(meta(x.notes,'FUNDED_BUYER')||'Buyer name not recorded'),type:meta(x.notes,'FUNDED_LOAN_TYPE')||'—'})),months={};mine.forEach(x=>{const m=String(x.closed).slice(0,7);months[m]=(months[m]||0)+1});return{total,asOf,rows:mine,months,source:'Encompass · shared snapshot',batch}}catch(e){return null}}
 function fundedLocal(){try{return JSON.parse(localStorage.getItem('ct_funded_units_v1')||'null')}catch(e){return null}}
-async function fundedData(force){if(!force&&window.__CT_V56_FUNDED)return window.__CT_V56_FUNDED;const server=await fundedServer(),local=fundedLocal();let best=server||local||null;if(server&&local){const st=String(server.asOf||''),lt=String(local.asOf||'');best=lt>st?local:server}window.__CT_V56_FUNDED=best;return best}
+// Funded totals come from the weekly Funded Units import (Production Command → Weekly imports).
+// The retired older funded upload is only used until that import has data.
+function fundedCore(){try{const S=window.CoreApp&&window.CoreApp.state;if(!S||!S.loadedAt||!(S.imports||[]).some(r=>r.kind==='funded_units'))return null;const rows=Object.values(S.loans||{}).filter(l=>l.funding_verified&&l.closed_date).map(l=>({closed:String(l.closed_date).slice(0,10),buyer:l.borrower_name||'Buyer name not recorded',type:l.loan_type||'—'}));if(!rows.length)return null;const months={};rows.forEach(x=>{const m=x.closed.slice(0,7);months[m]=(months[m]||0)+1});const imp=S.imports.find(r=>r.kind==='funded_units');return{total:rows.length,asOf:rows.map(x=>x.closed).sort().pop(),rows,months,source:'Encompass Funded Units · weekly import',batch:'core-'+String(imp&&imp.imported_at||'')}}catch(e){return null}}
+async function fundedData(force){const core=fundedCore();if(core){window.__CT_V56_FUNDED=core;return core}if(!force&&window.__CT_V56_FUNDED)return window.__CT_V56_FUNDED;const server=await fundedServer(),local=fundedLocal();let best=server||local||null;if(server&&local){const st=String(server.asOf||''),lt=String(local.asOf||'');best=lt>st?local:server}return best}
 window.ctV56GetFundedSnapshot=fundedData;
-async function uploadFunded(file){if(!file)return;const st=document.getElementById('ctFundedStatus');if(st)st.textContent='Reviewing '+file.name+'…';try{const X=await xlsx(),wb=X.read(await file.arrayBuffer(),{type:'array',cellDates:true}),ws=wb.Sheets.Data||wb.Sheets.Table||wb.Sheets[wb.SheetNames[0]],raw=X.utils.sheet_to_json(ws,{defval:''});if(!raw.length)throw new Error('No funded rows found.');const required=['Loan Number','Loan Officer','Closed Date'],missing=required.filter(k=>!Object.prototype.hasOwnProperty.call(raw[0],k));if(missing.length)throw new Error('Missing required columns: '+missing.join(', '));const seen=new Set(),cleanRows=[];for(const r of raw){const loan=String(r['Loan Number']||'').trim(),closed=dateText(r['Closed Date']),lo=String(r['Loan Officer']||'').trim(),buyer=String(r['Borrower Name']||'').trim()||'Buyer name not recorded';if(!loan||!closed||!/daniel\s+sa/i.test(lo)||seen.has(loan))continue;seen.add(loan);cleanRows.push({closed,buyer,type:String(r['Loan Type']||'').trim()||'—',hash:await txnHash(loan)})}if(!cleanRows.length)throw new Error('No Daniel Sa funded loans with a Closed Date were found.');const months={};cleanRows.forEach(x=>{const m=x.closed.slice(0,7);months[m]=(months[m]||0)+1});const batch='FUNDED-'+Date.now(),snap={total:cleanRows.length,asOf:cleanRows.map(x=>x.closed).sort().pop(),source:file.name+' · Encompass',months,rows:cleanRows,batch};localStorage.setItem('ct_funded_units_v1',JSON.stringify(snap));window.__CT_V56_FUNDED=snap;const now=new Date().toISOString().slice(0,10),payload=[{agent_name:'Daniel Sa',act_type:FUNDED,act_date:now,outcome:'Snapshot loaded',notes:'[FUNDED_KIND:HEADER]'+tag('FUNDED_BATCH',batch)+tag('FUNDED_TOTAL',snap.total)+tag('FUNDED_ASOF',snap.asOf)}].concat(cleanRows.map(x=>({agent_name:'Daniel Sa',act_type:FUNDED,act_date:x.closed,outcome:'Funded',notes:'[FUNDED_KIND:ROW]'+tag('FUNDED_BATCH',batch)+tag('FUNDED_HASH',x.hash)+tag('FUNDED_BUYER',encodeURIComponent(x.buyer))+tag('FUNDED_LOAN_TYPE',x.type)})));for(let i=0;i<payload.length;i+=100)await sbFetch('POST','amanda_activities',payload.slice(i,i+100));if(st)st.textContent=snap.total+' unique funded units loaded through '+snap.asOf+'. Shared snapshot updated.';await refreshTeam()}catch(e){console.error(e);if(st)st.textContent='Upload not applied: '+(e.message||e)}finally{const i=document.getElementById('ctFundedFile');if(i)i.value=''}}
-function installFundedUpload(){const grid=document.querySelector('#view-data-hub .ct-data-grid');if(!grid||document.getElementById('ctFundedUploadCard'))return;const s=document.createElement('details');s.id='ctFundedUploadCard';s.className='ct-card ct-data-source ct-funded-upload';s.innerHTML='<summary><b>Older funded totals report</b></summary><h2>Funded totals report</h2><p>Upload the latest funded-units report. Each unique Daniel Sa loan with a valid Closed Date counts once.</p><div class="ct-data-actions"><button class="ct-primary-btn" type="button" onclick="document.getElementById(\'ctFundedFile\').click()">Upload funded report</button></div><input id="ctFundedFile" type="file" accept=".xlsx,.xls" style="display:none"><div class="ct-funded-status" id="ctFundedStatus">No shared funded report loaded yet.</div>';grid.prepend(s);s.querySelector('input').addEventListener('change',e=>uploadFunded(e.target.files&&e.target.files[0]))}
 
 function total(d,k){return Object.keys(d||{}).reduce((n,x)=>n+((x===k||x.startsWith(k+'_'))?(Number(d[x])||0):0),0)}
 function appConverted(r){try{return typeof ctIsLeadAppConverted==='function'?ctIsLeadAppConverted(r):/started|approval|pre-approval|preapproval|contract|processing|underwrit|clear to close|funded|closed/i.test(String(r&&r.status||''))}catch(e){return false}}
@@ -14314,7 +14301,7 @@ async function exportContracts(){const st=document.getElementById('v56MgmtStatus
 window.ctExportContractStatusManagement=exportContracts;window.ctExportMgmtContractStatus=exportContracts;window.ctV56RefreshManagementStatus=async function(){const st=document.getElementById('v56MgmtStatus');if(!st)return;try{const t=await currentTuesdayAll(),files=new Set(t.rows.map(r=>meta(r.notes,'TXN_KEY')).filter(Boolean)).size||t.rows.length;st.textContent=(files?files+' current-week active contract files loaded':'No current-week LP Tuesday plan loaded')+'.'}catch(e){}};
 
 function removeOldHealthExport(){document.getElementById('ctExportMgmtContractBtn')?.remove();document.getElementById('ctMgmtContractExportStatus')?.remove()}
-function boot(){removeOldHealthExport();installFundedUpload();installHub();ensureModal();setTimeout(()=>refreshTeam(),250);setTimeout(()=>{if(window.currentUser)loadLp(window.currentUser)},350);setTimeout(()=>window.ctV56RefreshManagementStatus(),450);fundedData(true).then(d=>{const st=document.getElementById('ctFundedStatus');if(st&&d)st.textContent=d.total+' unique funded units loaded through '+d.asOf+'. Shared snapshot loaded.'})}
+function boot(){removeOldHealthExport();document.getElementById('ctFundedUploadCard')?.remove();installHub();ensureModal();setTimeout(()=>refreshTeam(),250);setTimeout(()=>{if(window.currentUser)loadLp(window.currentUser)},350);setTimeout(()=>window.ctV56RefreshManagementStatus(),450);fundedData(true).then(d=>{const st=document.getElementById('ctFundedStatus');if(st&&d)st.textContent=d.total+' unique funded units loaded through '+d.asOf+'. Shared snapshot loaded.'})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
