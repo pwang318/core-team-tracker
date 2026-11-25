@@ -868,7 +868,7 @@
       '<div style="margin-top:12px"><div class="cx-f" style="margin:0 0 4px">Conversation steps</div>' + checks + '</div>') +
       (isTue ? '' : '<label class="cx-f" for="cx-bn">Borrower conversation notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="What was discussed, in your own words"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>') +
       (isTue ? '</details>' : '') +
-      '<h3 style="margin-top:18px">' + (type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
+      (isTue ? '<section id="cx-tuesday-ccr">' : '') + '<h3 style="margin-top:18px">' + (type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
       (isTue ? '<blockquote id="cx-ccr-script" class="cx-script" style="margin:8px 0 0">' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '') +
       (isTue ? '' : '<label class="cx-check' + (referralAsked ? ' done' : '') + '" style="margin-top:8px"><input type="checkbox" name="referral_requested"' + (referralAsked ? ' checked' : '') + dis + '><span><b>I asked the referral question on this call.</b></span></label>') +
       '<label class="cx-f" for="cx-rr">' + (isTue ? 'CCR response after asking' : 'Client response') + '</label><select id="cx-rr" name="referral_response"' + dis + '>' + opts(L.REFERRAL_RESPONSES, t.referral_response, 'Select response') + '</select>' +
@@ -877,7 +877,7 @@
       '<div class="cx-split"><div><label class="cx-f" for="cx-crm">CRM (Velocify) reference · required</label><input id="cx-crm" type="text" name="crm_reference" value="' + esc(t.crm_reference || '') + '"' + dis + '></div>' +
       '<div><label class="cx-f" for="cx-rs">Referral status</label><select id="cx-rs" name="referral_status"' + dis + '>' + opts([['open', 'Open'], ['in_process', 'Application in process'], ['funded', 'Funded'], ['lost', 'Did not proceed']], t.referral_status, 'Select') + '</select></div></div>' +
       '<label class="cx-f" for="cx-ft">Follow-through notes</label><textarea id="cx-ft" name="followthrough_note"' + dis + '>' + esc(t.followthrough_note || '') + '</textarea></div>' +
-      (isTue ? '<details class="cx-card" style="margin-top:12px;padding:14px"' + (t.concern_status && t.concern_status !== 'none' ? ' open' : '') + '><summary style="cursor:pointer"><b>Client concern</b></summary>' : '<h3 style="margin-top:18px">Client experience</h3>') +
+      (isTue ? '</section>' : '') + (isTue ? '<details class="cx-card" style="margin-top:12px;padding:14px"' + (t.concern_status && t.concern_status !== 'none' ? ' open' : '') + '><summary style="cursor:pointer"><b>Client concern</b></summary>' : '<h3 style="margin-top:18px">Client experience</h3>') +
       '<label class="cx-f" for="cx-cs">Any concern raised?</label><select id="cx-cs" name="concern_status"' + dis + '>' + opts([['none', 'No concern'], ['resolved', 'Concern raised and resolved on this call'], ['unresolved', 'Unresolved concern: resolution required']], t.concern_status || 'none') + '</select>' +
       '<div id="cx-concern"' + ((t.concern_status || 'none') === 'none' ? ' class="cx-hide"' : '') + '><label class="cx-f" for="cx-cn">Concern details and what was done</label><textarea id="cx-cn" name="concern_notes"' + dis + '>' + esc(t.concern_notes || '') + '</textarea>' +
       '<label class="cx-check" style="margin-top:8px"><input type="checkbox" name="escalated"' + (t.escalated ? ' checked' : '') + dis + '><span>Escalate to the Production Manager</span></label></div>' +
@@ -973,6 +973,13 @@
       box.querySelector('div').innerHTML = errs.length ? '<ul class="cx-req">' + checklist.map(function (e) { return '<li>' + esc(L.friendlyError(e)) + '</li>'; }).join('') + '</ul>'
         : '<div class="cx-ok">✓ Every required conversation and referral step is documented.</div>';
       var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = saving || (!compact && errs.length > 0);
+      if (compact) {
+        var textUpdate = updateTextSelected();
+        $('#cx-tuesday-ccr', ov).classList.toggle('cx-hide', textUpdate);
+        box.classList.toggle('cx-hide', textUpdate);
+        cb.classList.toggle('cx-hide', textUpdate);
+        $('[data-cx="save"]', ov).textContent = textUpdate ? 'Save update text' : 'Save progress';
+      }
       var bo = p.borrower_outcome, ar = $('#cx-attempt-row', ov);
       if (ar) {
         ar.innerHTML = !compact && bo && bo !== 'conversation' ? '<button type="button" class="cx-btn sm" data-cx="log-attempt">Log this attempt</button><span class="cx-note">Attempts are saved with the time.</span>' : '';
