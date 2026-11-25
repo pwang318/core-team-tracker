@@ -214,7 +214,7 @@
   function injectShell() {
     installClientCallScripts();
     if (!$('link[data-core-css]')) {
-      var link = document.createElement('link'); link.rel = 'stylesheet'; link.href = './core/core-app.css?v=20261125d'; link.setAttribute('data-core-css', '1');
+      var link = document.createElement('link'); link.rel = 'stylesheet'; link.href = './core/core-app.css?v=20261125e'; link.setAttribute('data-core-css', '1');
       document.head.appendChild(link);
     }
     var sections = $all('.ct-nav-section');
@@ -244,15 +244,16 @@
       var head = page.querySelector('.ct-page-head');
       var tdy = document.createElement('section'); tdy.id = 'core-today'; tdy.className = 'cx';
       page.insertBefore(tdy, head ? head.nextSibling : page.firstChild);
-      var det = document.createElement('details'); det.id = 'core-supporting'; det.className = 'cx cx-supporting';
-      det.innerHTML = '<summary><span>Other daily priorities</span><span class="cx-sub">Face Time, scorecard detail, and RM handoffs</span></summary>';
-      $all(':scope > section.ct-card', page).forEach(function (n) { det.appendChild(n); });
-      page.insertBefore(det, tdy.nextSibling);
-      try { det.open = localStorage.getItem('core.supporting.open') === '1'; } catch (e) {}
-      det.addEventListener('toggle', function () { try { localStorage.setItem('core.supporting.open', det.open ? '1' : '0'); } catch (e) {} });
+      var supporting = document.createElement('section');
+      supporting.id = 'core-supporting'; supporting.hidden = true;
+      $all(':scope > section.ct-card', page).forEach(function (n) { supporting.appendChild(n); });
+      page.insertBefore(supporting, tdy.nextSibling);
     }
     if (host && !host.__coreObs) {
-      host.__coreObs = new MutationObserver(function () { if (host.classList.contains('active')) setTimeout(renderToday, 0); });
+      host.__coreObs = new MutationObserver(function () {
+        if (host.classList.contains('active')) setTimeout(renderToday, 0);
+        else { lpPanel = null; S.lpFilter = null; }
+      });
       host.__coreObs.observe(host, { attributes: true, attributeFilter: ['class'] });
       setInterval(function () { var lp = currentLpPage(); if (lp && lp !== renderedLp) renderToday(); }, 400);
     }
@@ -266,6 +267,28 @@
   function openMyScorecard(lp) {
     if (lp && typeof window.lpv4OpenMyScorecard === 'function') { window.lpv4OpenMyScorecard(lp); return; }
     if (typeof window.openScorecardsView === 'function') window.openScorecardsView();
+  }
+  function openScorecardFromWork(lp) {
+    openMyScorecard(lp);
+    var view = $('#view-scorecards.active');
+    var original = view && $('#lp-scorecard-back', view);
+    if (!original) return;
+    var back = document.createElement('button');
+    back.type = 'button'; back.className = original.className;
+    back.textContent = '← Back to Your Work';
+    original.hidden = true;
+    original.after(back);
+    var observer = new MutationObserver(function () {
+      if (view.classList.contains('active')) return;
+      observer.disconnect(); back.remove(); original.hidden = false;
+    });
+    observer.observe(view, { attributes: true, attributeFilter: ['class'] });
+    back.addEventListener('click', function () {
+      var lpButton = $('.ct-nav-btn[data-route="lp"][data-lp="' + lp + '"]');
+      if (lpButton) lpButton.click();
+      var grid = $('[data-lp-jump="core-scorecard-card"]');
+      if (grid) grid.focus();
+    });
   }
   function openView(id, btn) {
     $all('.view').forEach(function (v) { v.classList.remove('active'); });
@@ -461,7 +484,7 @@
         '<p class="cx-note" style="margin-top:10px">Open your shared team link for borrower records and call logging.</p>' : '') + '</div></div>';
   }
 
-  var renderedLp = null;
+  var renderedLp = null, lpPanel = null;
   function lpShortcut(id, label, status) {
     return '<button type="button" class="cx-tile" data-lp-jump="' + id + '"><span class="t-label">' +
       esc(label) + '</span><strong>' + esc(status) + '</strong></button>';
@@ -477,12 +500,18 @@
   function renderToday() {
     var host = $('#core-today'); if (!host) return;
     var lp = currentLpPage();
+    if (lp !== renderedLp) { lpPanel = null; S.lpFilter = null; }
     renderedLp = lp;
     if (!lp) { host.innerHTML = ''; return; }
     lastLp = lp;
     var privateView = !!(activeKey() && S.tier);
     var supporting = $('#core-supporting');
-    if (supporting) supporting.hidden = !privateView;
+    var panel = privateView ? lpPanel : null;
+    if (!privateView) { lpPanel = null; S.lpFilter = null; }
+    if (supporting) {
+      supporting.hidden = panel !== 'core-lp-builder' && panel !== 'core-supporting';
+      supporting.classList.toggle('is-builder', panel === 'core-lp-builder');
+    }
     if (!privateView && activeKey()) {
       host.innerHTML = '<div class="cx-stack"><h2>' + esc(lp) + ' · LP Dashboard</h2><div class="cx-card" role="status">' +
         (S.loading ? 'Loading your call worklist…' : 'Could not load your call worklist. <button type="button" class="cx-btn" data-cx="refresh">Retry</button>') + '</div></div>';
@@ -515,7 +544,7 @@
     var f = S.lpFilter && S.lpFilter.lp === lp ? S.lpFilter.key : null;
     var signed = S.signoffs.find(function (s) { return s.lp === lp && s.work_date === t0 && s.task_group === 'tuesday'; });
     var att = B['tue-remaining'].filter(function (t) { return t.status === 'attempted'; }).length;
-    var tue = '<div class="cx-card" id="core-lp-tuesday" tabindex="-1"><div class="cx-head"><div><div class="cx-kicker">Primary workflow</div><h3>Tuesday Updates</h3><div class="cx-sub">Borrower first, then the buyer agent. Service first, referral second.</div></div></div>' +
+    var tue = panel === 'core-lp-tuesday' ? '<div class="cx-card" id="core-lp-tuesday" tabindex="-1"><div class="cx-head"><div><div class="cx-kicker">Primary workflow</div><h3>Tuesday Updates</h3><div class="cx-sub">Borrower first, then the buyer agent. Service first, referral second.</div></div></div>' +
       '<div class="cx-tiles" style="margin-top:14px">' +
       tileHtml('tue-assigned', 'Total assigned', tr ? String(B['tue-assigned'].length) : 'No data', tr ? 'This week plus carried forward' : (S.error ? 'Live pipeline data unavailable' : 'Pipeline report not imported yet'), tr ? '' : 'is-na', f === 'tue-assigned') +
       tileHtml('tue-completed', 'Completed', tr ? String(B['tue-completed'].length) : 'No data', 'Conversation and CCR documented', tr ? '' : 'is-na', f === 'tue-completed') +
@@ -525,44 +554,50 @@
       tileHtml('tue-intros', 'CCR introductions', tr ? String(B['tue-intros'].length) : 'No data', 'Named introductions received', tr ? '' : 'is-na', f === 'tue-intros') +
       '</div>' + (tr && f && f.indexOf('tue-') === 0 ? worklistHtml(f, B) : (tr && B['tue-remaining'].length ? '<div style="margin-top:14px">' + listHtml(B['tue-remaining']) + '</div>' : '')) +
       '<div class="cx-row" style="margin-top:14px"><button type="button" class="cx-btn accent" data-cx="signoff-tuesday"' + (!tr || B['tue-remaining'].length || signed || !canWrite() ? ' disabled' : '') + '>' + (signed ? '✓ Tuesday Updates completed ' + esc(fmtTime(signed.signed_off_at)) : "Complete Today's Tuesday Updates") + '</button>' +
-      (tr && B['tue-remaining'].length && !signed ? '<span class="cx-note">' + B['tue-remaining'].length + ' assigned ' + (B['tue-remaining'].length === 1 ? 'update is' : 'updates are') + ' not complete yet.</span>' : '') + '</div></div>';
-    var pc = '<div class="cx-card" id="core-lp-postclosing" tabindex="-1"><div class="cx-head"><div><div class="cx-kicker">Primary workflow</div><h3>Post-Closing Calls</h3><div class="cx-sub">30, 60 and 90 days after closing. Service questions before the past-client referral ask.</div></div></div>' +
+      (tr && B['tue-remaining'].length && !signed ? '<span class="cx-note">' + B['tue-remaining'].length + ' assigned ' + (B['tue-remaining'].length === 1 ? 'update is' : 'updates are') + ' not complete yet.</span>' : '') + '</div></div>' : '';
+    var pc = panel === 'core-lp-postclosing' ? '<div class="cx-card" id="core-lp-postclosing" tabindex="-1"><div class="cx-head"><div><div class="cx-kicker">Primary workflow</div><h3>Post-Closing Calls</h3><div class="cx-sub">30, 60 and 90 days after closing. Service questions before the past-client referral ask.</div></div></div>' +
       '<div class="cx-tiles" style="margin-top:14px">' +
       ['pc30', 'pc60', 'pc90'].map(function (k) {
         var n = B[k].length, soon = B['soon' + k.slice(2)].length;
         return tileHtml(k, k.slice(2) + '-day calls', countOrComplete(n, pr), pr ? (n ? 'Due now' : 'None due') + (soon ? ' · ' + soon + ' in next 7 days' : '') : (S.error ? 'Live funded data unavailable' : 'Funded Units not imported yet'), stateCls(n, pr), f === k);
       }).join('') +
       tileHtml('pc-overdue', 'Overdue calls', countOrComplete(B['pc-overdue'].length, pr), pr && B['pc-overdue'].length ? 'Carried forward until completed' : '', stateCls(B['pc-overdue'].length, pr, true), f === 'pc-overdue') +
-      '</div>' + (pr && f && f.indexOf('pc') === 0 ? worklistHtml(f, B) : (function () { var due = B.pc30.concat(B.pc60, B.pc90); return pr && due.length ? '<div style="margin-top:14px">' + listHtml(due) + '</div>' : ''; })()) + '</div>';
-    var issues = B.issues.length ? '<div class="cx-card" id="core-lp-concerns" tabindex="-1"><div class="cx-head"><h3>Client concerns</h3><span class="cx-chip chip-overdue">' + B.issues.length + '</span></div><div style="margin-top:12px">' + listHtml(B.issues) + '</div></div>' : '';
-    var journey = '<div class="cx-card" id="core-lp-journey" tabindex="-1"><div class="cx-head"><div><div class="cx-kicker">Client journey</div><h3>New contract and pre-closing calls</h3></div></div><div style="margin-top:12px">' + listHtml(B.journey, tr ? 'No calls due.' : 'Pipeline data unavailable.') + '</div></div>';
+      '</div>' + (pr && f && f.indexOf('pc') === 0 ? worklistHtml(f, B) : (function () { var due = B.pc30.concat(B.pc60, B.pc90); return pr && due.length ? '<div style="margin-top:14px">' + listHtml(due) + '</div>' : ''; })()) + '</div>' : '';
+    var issues = panel === 'core-supporting' && B.issues.length ? '<div class="cx-card" id="core-lp-concerns" tabindex="-1"><div class="cx-head"><h3>Client concerns</h3><span class="cx-chip chip-overdue">' + B.issues.length + '</span></div><div style="margin-top:12px">' + listHtml(B.issues) + '</div></div>' : '';
+    var journey = panel === 'core-lp-journey' ? '<div class="cx-card" id="core-lp-journey" tabindex="-1"><div class="cx-head"><div><div class="cx-kicker">Client journey</div><h3>New contract and pre-closing calls</h3></div></div><div style="margin-top:12px">' + listHtml(B.journey, tr ? 'No calls due.' : 'Pipeline data unavailable.') + '</div></div>' : '';
     var due = B.pc30.length + B.pc60.length + B.pc90.length;
-    var corrections = correctionsCard(lp);
+    var corrections = panel === 'core-supporting' ? correctionsCard(lp) : '';
+    var otherOpen = B.issues.length || S.corrections.some(function (c) { return c.lp === lp && (c.status === 'open' || c.status === 'reopened'); });
     var shortcuts = '<nav aria-label="Your work" class="cx-tiles cx-lp-shortcuts">' +
       lpShortcut('core-lp-tuesday', 'Tuesday updates', tr ? B['tue-remaining'].length + ' open' : 'Unavailable') +
       lpShortcut('core-lp-builder', 'Builder follow-ups', builderStatus(lp)) +
       lpShortcut('core-lp-postclosing', '30/60/90-day calls', pr ? due + ' due' : 'Unavailable') +
       lpShortcut('core-lp-journey', 'Contract & pre-closing', tr ? B.journey.length + ' due' : 'Unavailable') +
-      (B.issues.length ? lpShortcut('core-lp-concerns', 'Client concerns', B.issues.length + ' open') : '') +
-      (corrections ? lpShortcut('core-lp-corrections', 'Actions from Mack', 'Needs review') : '') +
       lpShortcut('core-scorecard-card', 'My scorecard', 'Open scorecard') +
-      lpShortcut('core-supporting', 'Other priorities', 'Face Time & RM handoffs') + '</nav>';
+      lpShortcut('core-supporting', 'Other priorities', otherOpen ? 'Concerns or actions to review' : 'Face Time & RM handoffs') + '</nav>';
+    var panels = { 'core-lp-tuesday': tue, 'core-lp-postclosing': pc, 'core-lp-journey': journey, 'core-supporting': issues + corrections };
     var d = B.day;
     host.innerHTML = '<div class="cx-stack">' +
-      '<div class="cx-head"><div><div class="cx-kicker">' + esc(new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: L.TZ })) + '</div><h2>' + esc(lp) + '\'s day</h2>' +
+      '<div class="cx-head"><div><div class="cx-kicker">' + esc(new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: L.TZ })) + '</div><h2>' + esc(lp) + ' · Your Work</h2>' +
       '<div class="cx-sub">' + (!loaded ? 'Waiting for shared data…' : d.required.length ? d.completed.filter(function (t) { return t.due_date <= t0; }).length + ' of ' + d.required.length + ' required calls done today (' + d.pct + '%)' + (d.remaining.length ? ' · ' + d.remaining.length + ' to go' : ' · all done') : 'No required calls due today') + '</div></div>' + syncLine() + '</div>' +
-      (S.error ? '<div class="cx-err">' + esc(S.error) + '</div>' : '') + shortcuts + tue + pc + issues + journey + corrections + scorecardCard(lp) + '</div>';
-    bindAccess(host); bindScorecard(host, lp);
+      (S.error ? '<div class="cx-err">' + esc(S.error) + '</div>' : '') + (panel ? '<button type="button" class="cx-btn" data-lp-back>← Back to Your Work</button>' + (panels[panel] || '') : shortcuts) + '</div>';
+    bindAccess(host);
+    var back = $('[data-lp-back]', host);
+    if (back) back.addEventListener('click', function () {
+      lpPanel = null; S.lpFilter = null;
+      renderToday();
+      var tile = $('[data-lp-jump="' + panel + '"]', host);
+      if (tile) tile.focus({ preventScroll: true });
+      if (host.scrollIntoView) host.scrollIntoView({ block: 'start' });
+    });
     $all('[data-lp-jump]', host).forEach(function (button) {
       button.addEventListener('click', function () {
         var id = button.dataset.lpJump;
-        if (id === 'core-scorecard-card') { openMyScorecard(lp); return; }
-        var target = document.getElementById(id);
-        if (!target) return;
-        var group = target.closest('details');
-        if (group) group.open = true;
-        (id === 'core-supporting' ? target.querySelector('summary') : target).focus({ preventScroll: true });
-        if (target.scrollIntoView) target.scrollIntoView({ block: 'start' });
+        if (id === 'core-scorecard-card') { openScorecardFromWork(lp); return; }
+        lpPanel = id;
+        renderToday();
+        $('[data-lp-back]', host).focus({ preventScroll: true });
+        if (host.scrollIntoView) host.scrollIntoView({ block: 'start' });
       });
     });
     $all('[data-resolve-corr]', host).forEach(function (b) {
@@ -599,14 +634,6 @@
         (c.task_id ? '<button type="button" class="cx-btn sm" data-open-task="' + esc(c.task_id) + '">Record</button>' : '') + (canWrite() ? '<button type="button" class="cx-btn sm" data-resolve-corr="' + esc(c.id) + '">Mark resolved</button>' : '') + '</span></div>';
     }).join('') + '</div></div>';
   }
-  function scorecardCard(lp) {
-    var wk = L.weekMonday(today()), row = scorecardFor(lp, wk), sum = row ? L.scorecardSummary(lp, row.data, liveMetrics(lp)) : null;
-    var chip = row === null ? '<span class="cx-chip">' + (S.scorecards ? 'Status unavailable' : 'Loading…') + '</span>' : row ? '<span class="cx-chip chip-done">Entered this week</span>' : '<span class="cx-chip chip-overdue">Due this week</span>';
-    return '<div class="cx-card" id="core-scorecard-card"><div class="cx-head"><div><div class="cx-kicker">My Scorecard</div><h3>Week of ' + esc(fmtDate(wk)) + '</h3><div class="cx-sub">' +
-      (sum ? sum.total + ' of ' + sum.goal + ' weekly goal (' + sum.pct + '%) · ' + sum.rows.map(function (r) { return esc(r.label) + ' ' + r.total + '/' + r.goal; }).join(' · ') : row === false ? 'Not entered yet. The scorecard week closes ' + esc(fmtDate(L.addDays(wk, 6))) + '.' : 'Scorecard status could not be loaded; open the scorecard to check.') +
-      '</div></div><div class="cx-row">' + chip + '<button type="button" class="cx-btn primary" data-cx="scorecard">' + (row ? 'Edit my scorecard' : 'Complete my scorecard') + '</button></div></div></div>';
-  }
-  function bindScorecard(host, lp) { var b = $('[data-cx="scorecard"]', host); if (b) b.addEventListener('click', function () { openMyScorecard(lp); }); }
   function worklistHtml(k, B) {
     var list = B[k] || [], isPcN = /^pc\d/.test(k);
     if (isPcN) list = list.concat(B['soon' + k.slice(2)] || []);

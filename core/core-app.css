@@ -114,3 +114,14 @@ details.cx-supporting>summary{display:flex;flex-direction:column;gap:2px}
 .cx .cx-lp-shortcuts .t-label{color:var(--cx-navy)}
 .cx .cx-lp-shortcuts strong{font-size:12px;color:var(--cx-sub);font-weight:500}
 #view-lp [id^="core-lp-"],#core-supporting{scroll-margin-top:90px}
+#core-supporting[hidden],
+#core-supporting.is-builder > :not(.ct-execution-card),
+#core-supporting:not(.is-builder) > .ct-execution-card,
+#lp-scorecard-back[hidden]{display:none!important}
+#core-today{scroll-margin-top:90px}
+.cx .cx-lp-shortcuts{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cx .cx-lp-shortcuts .cx-tile{min-height:84px;justify-content:center;padding:12px 14px}
+.cx .cx-lp-shortcuts .t-label{font-size:14px}
+@media(max-width:720px){
+  .cx .cx-lp-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
