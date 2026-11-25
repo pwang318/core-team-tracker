@@ -91,10 +91,11 @@ t('Tuesday validation: complete record passes', () => assert.deepEqual(L.validat
 t('Tuesday validation: attempts are not conversations', () => {
   for (const o of ['voicemail', 'text_sent', 'no_answer']) assert.ok(L.validateTask({ ...base, borrower_outcome: o })[0].includes('Borrower conversation required'));
 });
-t('Tuesday validation: referral ask mandatory even with own financing', () => {
-  const e = L.validateTask({ ...base, referral_response: 'own_financing', script_checks: { ...base.script_checks, referral_ask: false } });
-  assert.ok(e.some(x => x.includes('referral_ask')));
-  assert.ok(L.validateTask({ ...base, referral_requested: false }).some(x => x.includes('referral was requested')));
+t('Tuesday validation: a recorded CCR response needs no duplicate checklist', () => {
+  const call = { ...base, referral_response: 'own_financing', script_checks: {}, service_update: '', agent_notes: '', next_action: null, next_action_date: null };
+  assert.deepEqual(L.validateTask(call,{buyer_agent_name:'Agent One'}), []);
+  assert.ok(L.validateTask({ ...call, referral_requested: false }).some(x => x.includes('referral was requested')));
+  assert.ok(L.validateTask({ ...call, next_action: 'Call back' }).some(x => x.includes('Follow-up date')));
 });
 t('Named introduction requires a CRM reference', () => {
   const nt = { ...base, referral_response: 'named_introduction', referral_name: 'Pat Example' };
@@ -102,11 +103,12 @@ t('Named introduction requires a CRM reference', () => {
   assert.ok(L.validateTask({ ...nt, followthrough_note: 'Called Pat, 1003 set Thursday' }).some(x => x.includes('CRM')), 'follow-through alone is not enough');
   assert.deepEqual(L.validateTask({ ...nt, crm_reference: 'VEL-123' }), []);
 });
-t('Tuesday validation: buyer agent rules', () => {
-  assert.ok(L.validateTask({ ...base, agent_outcome: 'attempted' }).some(x => x.includes('Buyer agent update')));
-  assert.ok(L.validateTask({ ...base, agent_outcome: 'no_buyer_agent' }, { buyer_agent_name: 'Agent One' }).some(x => x.includes('on file')));
-  assert.deepEqual(L.validateTask({ ...base, agent_outcome: 'no_buyer_agent', agent_notes: '' }, { buyer_agent_name: 'None None' }), []);
-  assert.ok(L.validateTask({ ...base, agent_notes: 'short' }).some(x => x.includes('buyer agent notes')));
+t('Tuesday validation: a buyer-agent outcome is required when an agent is on file', () => {
+  for (const outcome of ['attempted','no_buyer_agent',null]) {
+    assert.ok(L.validateTask({ ...base, agent_outcome: outcome }, { buyer_agent_name: 'Agent One' }).some(x => x.includes('Buyer agent update')));
+  }
+  assert.deepEqual(L.validateTask({ ...base, agent_outcome: 'update_sent', agent_notes: '' }, { buyer_agent_name: 'Agent One' }), []);
+  assert.deepEqual(L.validateTask({ ...base, agent_outcome: null }, { buyer_agent_name: 'None None' }), []);
 });
 t('Unresolved concern blocks completion; exception path validates', () => {
   assert.ok(L.validateTask({ ...base, concern_status: 'unresolved', concern_notes: 'Unhappy with fees' }).some(x => x.includes('service recovery')));

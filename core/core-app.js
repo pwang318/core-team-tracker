@@ -862,15 +862,16 @@
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
       (isTue ? '<label class="cx-f" for="cx-bn">Borrower update notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="Summarize the loan status, what you discussed, and any borrower questions."' + dis + '>' +
         esc([t.service_update, t.borrower_notes].filter(function (note, i, notes) { return note && notes.indexOf(note) === i; }).join('\n\n')) + '</textarea>' : '') +
-      (isTue ? '<details id="cx-borrower-details" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"><b>Conversation notes and required steps</b></summary><p class="cx-note">' + esc(L.SCRIPT_NOTES[type]) + '</p>' : '') +
+      (isTue ? '<details id="cx-borrower-details" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"><b>Call script and time</b></summary><p class="cx-note">' + esc(L.SCRIPT_NOTES[type]) + '</p>' : '') +
       '<label class="cx-f" for="cx-cat">Conversation date and time</label><input id="cx-cat" type="datetime-local" name="conversation_at" value="' + esc(toLocalInput(t.conversation_at)) + '"' + dis + '>' +
-      '<div style="margin-top:12px"><div class="cx-f" style="margin:0 0 4px">Conversation steps</div>' + checks + '</div>' +
+      (isTue ? '<ul>' + L.CHECKS.tuesday.map(function (step) { return '<li>' + esc(step[1]) + '</li>'; }).join('') + '</ul>' :
+      '<div style="margin-top:12px"><div class="cx-f" style="margin:0 0 4px">Conversation steps</div>' + checks + '</div>') +
       (isTue ? '' : '<label class="cx-f" for="cx-bn">Borrower conversation notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="What was discussed, in your own words"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>') +
       (isTue ? '</details>' : '') +
       '<h3 style="margin-top:18px">' + (type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
       (isTue ? '<blockquote id="cx-ccr-script" class="cx-script" style="margin:8px 0 0">' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '') +
-      '<label class="cx-check' + (referralAsked ? ' done' : '') + '" style="margin-top:8px"><input type="checkbox" name="referral_requested"' + (isTue ? ' data-check="referral_ask"' : '') + (referralAsked ? ' checked' : '') + dis + '><span><b>I asked the referral question on this call.</b></span></label>' +
-      '<label class="cx-f" for="cx-rr">Client response</label><select id="cx-rr" name="referral_response"' + dis + '>' + opts(L.REFERRAL_RESPONSES, t.referral_response, 'Select response') + '</select>' +
+      (isTue ? '' : '<label class="cx-check' + (referralAsked ? ' done' : '') + '" style="margin-top:8px"><input type="checkbox" name="referral_requested"' + (referralAsked ? ' checked' : '') + dis + '><span><b>I asked the referral question on this call.</b></span></label>') +
+      '<label class="cx-f" for="cx-rr">' + (isTue ? 'CCR response after asking' : 'Client response') + '</label><select id="cx-rr" name="referral_response"' + dis + '>' + opts(L.REFERRAL_RESPONSES, t.referral_response, 'Select response') + '</select>' +
       '<div id="cx-named"' + (t.referral_response === 'named_introduction' ? '' : ' class="cx-hide"') + '><div class="cx-split"><div><label class="cx-f" for="cx-rn">Referral name</label><input id="cx-rn" type="text" name="referral_name" value="' + esc(t.referral_name || '') + '"' + dis + '></div>' +
       '<div><label class="cx-f" for="cx-rc">Referral phone or email</label><input id="cx-rc" type="text" name="referral_contact" value="' + esc(t.referral_contact || '') + '"' + dis + '></div></div>' +
       '<div class="cx-split"><div><label class="cx-f" for="cx-crm">CRM (Velocify) reference · required</label><input id="cx-crm" type="text" name="crm_reference" value="' + esc(t.crm_reference || '') + '"' + dis + '></div>' +
@@ -880,10 +881,10 @@
       '<label class="cx-f" for="cx-cs">Any concern raised?</label><select id="cx-cs" name="concern_status"' + dis + '>' + opts([['none', 'No concern'], ['resolved', 'Concern raised and resolved on this call'], ['unresolved', 'Unresolved concern: resolution required']], t.concern_status || 'none') + '</select>' +
       '<div id="cx-concern"' + ((t.concern_status || 'none') === 'none' ? ' class="cx-hide"' : '') + '><label class="cx-f" for="cx-cn">Concern details and what was done</label><textarea id="cx-cn" name="concern_notes"' + dis + '>' + esc(t.concern_notes || '') + '</textarea>' +
       '<label class="cx-check" style="margin-top:8px"><input type="checkbox" name="escalated"' + (t.escalated ? ' checked' : '') + dis + '><span>Escalate to the Production Manager</span></label></div>' +
-      (isTue ? '</details><section id="cx-agent-section" class="cx-card" style="margin-top:12px;padding:14px"><h3>Step 2 · Buyer agent update</h3>' +
-        '<div id="cx-agent-help" class="cx-note" style="margin-top:8px">' + (agentPresent ? 'Update ' + esc(loan.buyer_agent_name) + ' after the borrower call.' : 'No buyer agent is on file for this loan.') + '</div>' +
-        '<fieldset id="cx-agent" aria-describedby="cx-agent-help" style="border:0;padding:0;margin:0"><label class="cx-f" for="cx-ao">Buyer agent contact outcome</label><select id="cx-ao" name="agent_outcome"' + dis + '>' + opts(L.AGENT_OUTCOMES, t.agent_outcome || (editable && !agentPresent ? 'no_buyer_agent' : null), 'Select outcome') + '</select>' +
-        '<div id="cx-agent-notes"' + (t.agent_notes || ['spoke', 'update_sent'].includes(t.agent_outcome) ? '' : ' class="cx-hide"') + '><label class="cx-f" for="cx-an">Buyer agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></div></fieldset></section>' : '') +
+      (isTue ? '</details>' : '') + (isTue && agentPresent ? '<section id="cx-agent-section" class="cx-card" style="margin-top:12px;padding:14px"><h3>Step 2 · Buyer agent update</h3>' +
+        '<div id="cx-agent-help" class="cx-note" style="margin-top:8px">' + ('Update ' + esc(loan.buyer_agent_name) + ' after the borrower call.') + '</div>' +
+        '<fieldset id="cx-agent" aria-describedby="cx-agent-help" style="border:0;padding:0;margin:0"><label class="cx-f" for="cx-ao">Buyer agent contact outcome</label><select id="cx-ao" name="agent_outcome"' + dis + '>' + opts(L.AGENT_OUTCOMES, t.agent_outcome, 'Select outcome') + '</select>' +
+        '<details id="cx-agent-notes"' + (t.agent_notes || ['spoke', 'update_sent'].includes(t.agent_outcome) ? '' : ' class="cx-hide"') + '><summary>Optional buyer-agent notes</summary><label class="cx-f" for="cx-an">Buyer-agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></details></fieldset></section>' : isTue ? '<input type="hidden" name="agent_outcome" value="' + esc(t.agent_outcome || (editable ? 'no_buyer_agent' : '')) + '">' : '') +
       '<details id="cx-follow-up" class="cx-card" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>Follow-up</b></summary><div class="cx-split"><div>' +
       '<label class="cx-f" for="cx-na-choice">Next action</label><select id="cx-na-choice"' + dis + '>' +
       opts(nextActions.map(function (action) { return [action, action]; }).concat([['other', 'Other next action']]), selectedNextAction, 'Select next action') + '</select>' +
@@ -928,10 +929,13 @@
     var nextChoice = $('#cx-na-choice', form);
     if (nextChoice && nextChoice.value !== 'other') p.next_action = nextChoice.value || null;
     var ca = form.querySelector('[name="conversation_at"]'); if (ca) p.conversation_at = fromLocalInput(ca.value);
-    var rq = form.querySelector('[name="referral_requested"]'); if (rq) p.referral_requested = rq.checked;
+    var rq = form.querySelector('[name="referral_requested"]');
+    if (t.task_type === 'tuesday') p.referral_requested = p.borrower_outcome === 'conversation' && !!p.referral_response;
+    else if (rq) p.referral_requested = rq.checked;
     var es = form.querySelector('[name="escalated"]'); if (es) p.escalated = es.checked;
     var checks = Object.assign({}, t.script_checks || {});
     $all('[data-check]', form).forEach(function (c) { checks[c.getAttribute('data-check')] = c.checked; });
+    if (t.task_type === 'tuesday') checks.referral_ask = p.referral_requested;
     p.script_checks = checks;
     if (!p.concern_status) p.concern_status = 'none';
     return p;
@@ -965,14 +969,6 @@
       suggestAttemptDate();
       var p = Object.assign({}, t, collect(form, t)), errs = L.validateTask(p, loan), box = $('#cx-reqs', ov);
       var checklist = errs;
-      if (compact) {
-        var needsNotes = /^Borrower conversation notes required|^Meaningful service update required/;
-        if (errs.some(function (e) { return needsNotes.test(e); })) {
-          checklist = errs.filter(function (e) { return !needsNotes.test(e); }).concat('Enter borrower update notes (20+ characters)');
-        }
-        var stepCount = errs.filter(function (e) { return e.startsWith('Conversation step not confirmed:'); }).length;
-        if (stepCount) checklist = checklist.filter(function (e) { return !e.startsWith('Conversation step not confirmed:'); }).concat('Confirm ' + stepCount + ' conversation ' + (stepCount === 1 ? 'step' : 'steps'));
-      }
       box.querySelector('summary').textContent = errs.length ? 'Completion checklist (' + checklist.length + ' remaining)' : 'Ready to complete';
       box.querySelector('div').innerHTML = errs.length ? '<ul class="cx-req">' + checklist.map(function (e) { return '<li>' + esc(L.friendlyError(e)) + '</li>'; }).join('') + '</ul>'
         : '<div class="cx-ok">✓ Every required conversation and referral step is documented.</div>';
@@ -1015,6 +1011,7 @@
         refreshReqs();
       });
     }
+    if (compact && editable && $('#cx-bo', ov).value === 'conversation' && !$('#cx-cat', ov).value) $('#cx-cat', ov).value = localInputNow();
     refreshReqs();
     function busy(on) { saving = on; $all('.cx-drawer-foot .cx-btn', ov).forEach(function (b) { if (b.dataset.cx !== 'close') b.disabled = on || (!compact && b.dataset.cx === 'complete' && valid().length > 0); }); }
     function applyTextDelivery(patch) {

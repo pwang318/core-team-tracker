@@ -340,7 +340,7 @@
     if (!t.conversation_at) e.push('Conversation date and time required');
     else if (new Date(t.conversation_at).getTime() > Date.now() + 5 * 60000) e.push('Conversation time cannot be in the future');
     if (len(t.borrower_notes) < 20) e.push('Borrower conversation notes required (20+ characters)');
-    (CHECKS[t.task_type] || []).forEach(function (c) {
+    (t.task_type === 'tuesday' ? [] : CHECKS[t.task_type] || []).forEach(function (c) {
       var k = c[0];
       if (!(checks[k] === true || (k === 'rate_drop_pledge' && checks.rate_drop_na === true))) e.push('Conversation step not confirmed: ' + k);
     });
@@ -352,14 +352,12 @@
     }
     if (t.concern_status === 'unresolved') e.push('Unresolved client concern: record service recovery instead of completing');
     if (t.concern_status === 'resolved' && len(t.concern_notes) < 10) e.push('Describe the concern and how it was resolved');
-    if (len(t.next_action) < 3) e.push('Next action required');
-    if (!t.next_action_date) e.push('Follow-up date required');
-    if (t.task_type === 'tuesday') {
-      if (len(t.service_update) < 15) e.push('Meaningful service update required (15+ characters)');
-      if (!t.agent_outcome || t.agent_outcome === 'attempted') e.push('Buyer agent update required (an unanswered attempt does not complete it)');
-      else if (t.agent_outcome === 'no_buyer_agent' && loan && hasBuyerAgent(loan.buyer_agent_name)) e.push('A buyer agent is on file for this loan; record the buyer agent contact');
-      else if ((t.agent_outcome === 'spoke' || t.agent_outcome === 'update_sent') && len(t.agent_notes) < 10) e.push('Separate buyer agent notes required (10+ characters)');
+    if (t.task_type !== 'tuesday' || len(t.next_action)) {
+      if (len(t.next_action) < 3) e.push('Next action required');
+      if (!t.next_action_date) e.push('Follow-up date required');
     }
+    if (t.task_type === 'tuesday' && loan && hasBuyerAgent(loan.buyer_agent_name) &&
+        (!t.agent_outcome || ['attempted','no_buyer_agent'].includes(t.agent_outcome))) e.push('Buyer agent update required');
     return e;
   }
   function validateException(t) {
