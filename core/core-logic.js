@@ -545,6 +545,32 @@
     var remaining = daysBetween(date, threshold);
     return { status: remaining <= 0 ? 'past' : remaining <= 14 ? 'approaching' : 'current', remaining: remaining, threshold: threshold };
   }
+  function realtorReferralPace(rows, date, nameKey) {
+    var monthStart = monthRange(date).start;
+    var recentStart = addDays(date, -29);
+    var weekStart = addDays(date, -6);
+    var seen = new Set(), agents = new Set();
+    var result = { realtor: 0, builder: 0, agents: 0, recentRealtor: 0, unassigned: 0, through: null };
+    (rows || []).forEach(function (row) {
+      var day = toIsoDate(row.date_added), key = row.lead_key || row.id;
+      if (!day || day > date || (key && seen.has(key))) return;
+      if (key) seen.add(key);
+      var source = clean(row.lead_source).toLowerCase();
+      if (source !== 'realtor referral' && source !== 'builder referral') return;
+      if (!result.through || day > result.through) result.through = day;
+      if (day >= monthStart) result[source === 'realtor referral' ? 'realtor' : 'builder']++;
+      if (source !== 'realtor referral') return;
+      var agent = nameKey(row.referral_partner_name);
+      if (agent && day >= recentStart) agents.add(agent);
+      var owner = clean(row.lp_user).toLowerCase();
+      if (day >= weekStart) {
+        result.recentRealtor++;
+        if (!owner || /^(unassigned|unknown|none|n\/a|-)$/i.test(owner)) result.unassigned++;
+      }
+    });
+    result.agents = agents.size;
+    return result;
+  }
   function velocifySources(rows) {
     var categories = { relationship: [], advertising: [], unclassified: [] };
     var sourceByLead = new Map();
@@ -594,7 +620,7 @@
     effectiveOwner: effectiveOwner, bucket: bucket, isIssue: isIssue, daySummary: daySummary, resolvedOn: resolvedOn,
     referralMetrics: referralMetrics, uniqueReferrals: uniqueReferrals, duplicateNotes: duplicateNotes,
     pace: pace, tierFromCloses: tierFromCloses, inRange: inRange, outcomeLabel: outcomeLabel,
-    velocifyStage: velocifyStage, velocifyFunnel: velocifyFunnel, velocifySources: velocifySources, referralWatch: referralWatch, SCORECARD: SCORECARD, scorecardMetrics: scorecardMetrics,
+    velocifyStage: velocifyStage, velocifyFunnel: velocifyFunnel, velocifySources: velocifySources, realtorReferralPace: realtorReferralPace, referralWatch: referralWatch, SCORECARD: SCORECARD, scorecardMetrics: scorecardMetrics,
     scorecardSummary: scorecardSummary, weekMonday: weekMonday
   };
 });

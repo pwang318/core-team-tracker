@@ -10383,7 +10383,7 @@ function pfrBuildMeetingAgenda(input){
       context:'Referral score: '+i.referralPoints.toFixed(1)+'/30. '+i.priorLabel+': '+i.priorMonthLeads+' leads / '+i.powerBiActiveCount+' active partners = '+(i.powerBiActiveCount?i.priorMonthLeads/i.powerBiActiveCount:0).toFixed(2)+' (goal 1.15). Active partner growth: '+i.activePoints.toFixed(1)+'/20; '+i.powerBiActiveCount+'/200. '+(i.velocifyCheckpointNote||'Velocify MTD is current through '+leadDate+'.'),
       people:i.topReferrers.length?i.topReferrers.map(function(r){return r.name+' — '+r.count+' '+new Date(i.latestLeadDate+'T12:00:00').toLocaleDateString('en-US',{month:'long'})+' referrals';}):['No current-month referrers in the synced lead data.'],
       talkingPoints:['What is converting right now: leads → preapprovals → active contracts?','Which preapproved buyers need an agent introduction, property strategy, or another push toward contract?','Who is sending us business right now, and which active partners have room to send more?','Where do we have pipeline sitting without movement, and what is blocking the next step?','Which 2–3 relationships or buyer opportunities can we move this week, and what specific value will we bring?'],
-      question:'Choose up to three portfolio or pipeline actions. Record the partner or opportunity, specific next move, owner and due date.'},
+      question:'Choose three agents to ask for a buyer introduction. Record the owner and follow-up date in Shared weekly actions. Next meeting, review introductions received and buyer conversations completed.'},
     {key:'health',minutes:9,title:'Relationship health',result:i.redCount+' red; '+i.yellowCount+' yellow; '+i.missingNextMove+' managed relationships have no documented next move.',
       context:i.redNoTouch+' red relationships have no meaningful touch in the loaded history. Check history before assigning recovery; red and missing-next-move counts can overlap.',
       people:i.riskNames.length?i.riskNames:['Open Health to select relationships from the shared profiles.'],
@@ -10413,7 +10413,7 @@ async function pfrLoad(){
       sbFetch("GET","break_breads?select=agent_name,date&order=date.desc&limit=3000").catch(function(){return[];}),
       // Real last-lead-date per agent from Velocify (trailing 12 months) — more accurate than
       // latest_lead_date on agent_profiles, which only updates when the Power BI import runs.
-      sbFetch("GET","velocify_leads?select=referral_partner_name,date_added&order=date_added.desc&limit=5000&date_added=gte."+(function(){var d=new Date();d.setFullYear(d.getFullYear()-1);return d.toISOString().slice(0,10);}())),
+      sbFetch("GET","velocify_leads?select=lead_key,referral_partner_name,date_added,lead_source,lp_user&order=date_added.desc,lead_key.asc&limit=5000&date_added=gte."+(function(){var d=new Date();d.setFullYear(d.getFullYear()-1);return d.toISOString().slice(0,10);}())),
       sbFetch("GET","powerbi_import_log?select=imported_at,source_app,rows_processed,matched,created,updated,skipped,errors&order=imported_at.desc&limit=20").catch(function(){return[];})
     ]);
     var allAgents=results[0]||[],allActs=results[1]||[],lpCalls=results[2]||[],migrations=results[3]||[],periodLeads=results[4]||[],monthLeads=results[5]||[],periodActs=results[6]||[],allBreads=results[7]||[],allLeads=results[8]||[],importLogs=results[9]||[],lastImportLog=(importLogs||[]).find(function(r){return String(r.source_app||"").indexOf("core-team-tracker")===0;})||null;
@@ -10685,6 +10685,11 @@ async function pfrLoad(){
     var referralRatio=powerBiActiveCount?priorMonthLeads/powerBiActiveCount:0;
     var referralPoints=points(referralRatio,1.15,30);
     var activePoints=points(powerBiActiveCount,200,20);
+    var agentPace=window.CoreLogic.realtorReferralPace(allLeads,window.CoreLogic.todayIso(),function(name){
+      return ctAgentNameKey(String(name||''));
+    });
+    agentPace.goal=ratioDenominator>0?Math.ceil(ratioDenominator*115/100):null;
+    agentPace.portfolioLeads=meetingLeadsMTD;
     var nearTierCount=typeof window.ctCountTierOpportunities==='function' ? await window.ctCountTierOpportunities().catch(function(){return null;}) : null;
     var referrerCounts={};
     monthLeads.forEach(function(lead){
@@ -10885,7 +10890,7 @@ async function pfrLoad(){
       ['Relationships',referralApproaching.length+' nearing the 90-day referral mark','The RM owns outreach before the cutoff.'],
       ['Tier growth',nearTierCount===null?'Count unavailable':nearTierCount+' one closing away','Review the owners and active buyers in Partner Growth.','partner-growth'],
       ['Leadership decisions',escalations.length+' escalations logged · '+range.label,'Review escalations and decide what needs leadership help.']
-    ],referralApproaching.filter(function(item){return item.watch.remaining>=8;}).length);
+    ],referralApproaching.filter(function(item){return item.watch.remaining>=8;}).length,agentPace);
     body._portfolioCards[0]._portfolioExportData=meetingExportData;
     pfrRestoreMeetingDecisions(body._portfolioCards[0]);
   }catch(e){
@@ -10895,7 +10900,7 @@ async function pfrLoad(){
 }
 window.pfrLoad=pfrLoad;
 window.pfrGetHealthRows=function(){return Array.isArray(pfrDrill.rows)?pfrDrill.rows:null;};
-function pfrCompactOverview(body,summaries,directorRows,newWarnings){
+function pfrCompactOverview(body,summaries,directorRows,newWarnings,agentPace){
   var outreach=body.querySelector('#portfolio-referral-watch');
   var reminders=body.querySelector('#portfolio-contact-watch');
   if(outreach&&reminders){
@@ -10925,6 +10930,21 @@ function pfrCompactOverview(body,summaries,directorRows,newWarnings){
   var changes=document.createElement('section');
   changes.dataset.portfolioChanges=String(newWarnings||0);
   nav.append(changes);
+  if(agentPace){
+    var pace=document.createElement('section'), paceTitle=document.createElement('h3'), paceLine=document.createElement('p');
+    paceTitle.textContent='Agent Lead Pace';
+    paceLine.textContent=agentPace.through ?
+      agentPace.realtor+' Realtor referrals · '+agentPace.builder+' builder referrals this month · '+agentPace.agents+' Realtors sent leads in the last 30 days' :
+      'No dated Realtor or builder referral records in the synced feed.';
+    pace.append(paceTitle,paceLine);
+    var paceDetail=document.createElement('details'), paceLabel=document.createElement('summary'), context=document.createElement('p');
+    paceLabel.textContent='Goal and follow-up';
+    context.textContent=(agentPace.goal===null?'Portfolio referral goal unavailable.':agentPace.portfolioLeads+' total portfolio leads this month toward a goal of '+agentPace.goal+' across sources.')+
+      (agentPace.through?' · Itemized Realtor and builder records through '+agentPace.through+' · '+agentPace.unassigned+' of '+agentPace.recentRealtor+' synced Realtor referrals from the last 7 days have no LP recorded.':'');
+    var followUp=document.createElement('p');
+    followUp.textContent='RM: ask three agents for a specific buyer introduction. Mack: confirm the LP owner and next contact date. Record the commitments and review introductions and buyer conversations at the next meeting.';
+    paceDetail.append(paceLabel,context,followUp);pace.append(paceDetail);nav.append(pace);
+  }
   if(directorRows){
     var overview=document.createElement('details'), overviewTitle=document.createElement('summary');
     overviewTitle.textContent='Director overview';overview.append(overviewTitle);
@@ -14595,7 +14615,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125j"></script><script defer src="./core/core-app.js?v=20261125p"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125q"></script><script defer src="./core/core-app.js?v=20261125p"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
