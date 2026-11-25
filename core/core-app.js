@@ -120,28 +120,45 @@
   function canWrite() { return S.tier === 'team' || isManager(); }
   function hasImport(kind) { return S.imports.some(function (r) { return r.kind === kind; }); }
 
+  function clearCallAccess() {
+    Object.assign(S, { tier: null, tasks: [], loans: {}, coverage: [], corrections: [], signoffs: [], imports: [],
+      records: null, _rec: {}, loadedAt: null });
+    if ($('.cx-overlay[data-task]')) closeDrawer();
+  }
+
   function loadAll() {
-    if (!activeKey()) { S.tier = null; renderAll(); return Promise.resolve(); }
+    var key = activeKey();
     if (S.loading) return S.loading;
-    S.loading = api('core_api_load').then(function (d) {
+    if (!key) { clearCallAccess(); renderAll(); return Promise.resolve(); }
+    S.loading = rpc('core_api_load', { p_key: key }).then(function (d) {
+      if (key !== activeKey()) return;
+      if (!d || !Object.prototype.hasOwnProperty.call(TIER_NAME, d.tier) || !Array.isArray(d.tasks) || !Array.isArray(d.loans)) {
+        throw new Error('The shared server returned incomplete call data.');
+      }
       // A refresh may have read a row before a save finished on this device.
       var localTasks = new Map(S.tasks.map(function (task) { return [task.id, task]; }));
       S.tier = d.tier;
-      S.tasks = (d.tasks || []).map(function (task) {
+      S.tasks = d.tasks.map(function (task) {
         var local = localTasks.get(task.id);
         return local && Number(local.row_version) > Number(task.row_version) ? local : task;
       });
       S.loans = {};
-      (d.loans || []).forEach(function (l) { S.loans[l.loan_number] = l; });
+      d.loans.forEach(function (loan) { S.loans[loan.loan_number] = loan; });
       S.coverage = d.coverage || []; S.corrections = d.corrections || []; S.signoffs = d.signoffs || []; S.imports = d.imports || [];
       S.loadedAt = new Date(); S.error = null;
     }).catch(function (e) {
+      if (key !== activeKey()) return;
       S.error = friendlyServerError(e);
-      if (/not valid|access link required/i.test(String(e.message))) {
-        if (mgrKey) { setMgrKey(null); S.error = 'The manager passcode has changed. Sign in again for manager actions.'; S.loading = null; return loadAll(); }
-        setKey(null); S.tier = null;
+      if (/CORE_FORBIDDEN:.*(?:not valid|access link required)/i.test(String(e.message))) {
+        clearCallAccess();
+        if (mgrKey) setMgrKey(null);
+        else setKey(null);
       }
-    }).then(function () { return loadScorecards(); }).then(function () { S.loading = null; renderAll(); }, function () { S.loading = null; renderAll(); });
+    }).then(function () { return loadScorecards(); }).finally(function () {
+      S.loading = null;
+      if (key !== activeKey() && activeKey()) return loadAll();
+      renderAll();
+    });
     return S.loading;
   }
   // Existing LP scorecards: lp_scorecards table and methodology are unchanged.
@@ -444,14 +461,14 @@
     var schedule = (counts.schedule || []).filter(function (row) { return row.task_type === selected; });
     return '<div class="cx-card"><h3>Workload summary</h3><div class="cx-tiles" style="margin-top:14px">' +
       tiles.map(function (item) {
-        return '<button type="button" class="cx-tile" data-public-tile="' + item[0] + '" aria-expanded="' + (selected === item[0]) + '" aria-controls="core-public-detail"><span class="t-label">' + item[1] + '</span><span class="t-val">' + esc(item[2]) + '</span><span class="t-foot">View schedule</span></button>';
+        return '<button type="button" class="cx-tile" data-public-tile="' + item[0] + '" aria-expanded="' + (selected === item[0]) + '" aria-controls="core-public-detail"><span class="t-label">' + item[1] + '</span><span class="t-val">' + (Number(item[2]) > 0 ? esc(item[2]) : '—') + '</span><span class="t-foot">View schedule</span></button>';
       }).join('') + '</div><div id="core-public-detail"' + (active ? '' : ' hidden') + '>' +
       (active ? '<h3 style="margin-top:14px">' + active[1] + '</h3>' +
         (selected === 'tuesday' ? '<blockquote class="cx-script" style="margin:8px 0">CCR script · ' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '<p class="cx-sub">Due and upcoming in the next 7 days</p>') +
         (schedule.length ? '<div class="cx-list">' + schedule.map(function (row) {
           return '<div class="cx-item"><span class="i-name">' + esc(fmtDate(row.due_date)) + '</span><span class="i-meta">' +
             (row.status === 'attempted' ? 'Attempted' : 'Open') + '</span><span class="i-right">' + esc(row.total) + '</span></div>';
-        }).join('') + '</div>' : '<div class="cx-empty">No open work in this period.</div>') +
+        }).join('') + '</div>' : '<div class="cx-empty">Open your private worklist to confirm what is due.</div>') +
         '<p class="cx-note" style="margin-top:10px">Open your shared team link for borrower records and call logging.</p>' : '') + '</div></div>';
   }
 
@@ -467,6 +484,12 @@
     if (supporting) supporting.hidden = !privateView;
     var builderShortcut = $('#core-builder-shortcut');
     if (builderShortcut) builderShortcut.hidden = !privateView;
+    if (!privateView && activeKey()) {
+      host.innerHTML = '<div class="cx-stack"><h2>' + esc(lp) + ' · LP Dashboard</h2><div class="cx-card" role="status">' +
+        (S.loading ? 'Loading your call worklist…' : 'Could not load your call worklist. <button type="button" class="cx-btn" data-cx="refresh">Retry</button>') + '</div></div>';
+      bindAccess(host);
+      return;
+    }
     if (!privateView) {
       var recovery = $('[data-team-recovery]', host);
       host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) +
@@ -495,23 +518,23 @@
     var att = B['tue-remaining'].filter(function (t) { return t.status === 'attempted'; }).length;
     var tue = '<div class="cx-card"><div class="cx-head"><div><div class="cx-kicker">Primary workflow</div><h3>Tuesday Updates</h3><div class="cx-sub">Borrower first, then the buyer agent. Service first, referral second.</div></div></div>' +
       '<div class="cx-tiles" style="margin-top:14px">' +
-      tileHtml('tue-assigned', 'Total assigned', tr ? String(B['tue-assigned'].length) : 'No data', tr ? 'This week plus carried forward' : 'Pipeline report not imported yet', tr ? '' : 'is-na', f === 'tue-assigned') +
+      tileHtml('tue-assigned', 'Total assigned', tr ? String(B['tue-assigned'].length) : 'No data', tr ? 'This week plus carried forward' : (S.error ? 'Live pipeline data unavailable' : 'Pipeline report not imported yet'), tr ? '' : 'is-na', f === 'tue-assigned') +
       tileHtml('tue-completed', 'Completed', tr ? String(B['tue-completed'].length) : 'No data', 'Conversation and CCR documented', tr ? '' : 'is-na', f === 'tue-completed') +
       tileHtml('tue-remaining', 'Remaining', countOrComplete(B['tue-remaining'].length, tr), tr && att ? att + ' attempted, not yet reached' : '', stateCls(B['tue-remaining'].length, tr), f === 'tue-remaining') +
       tileHtml('tue-overdue', 'Overdue', countOrComplete(B['tue-overdue'].length, tr), tr && B['tue-overdue'].length ? 'Carried forward until completed' : '', stateCls(B['tue-overdue'].length, tr, true), f === 'tue-overdue') +
       tileHtml('tue-ccr', 'CCR requests completed', tr ? String(B['tue-ccr'].length) : 'No data', tr ? 'of ' + B['tue-assigned'].length + ' assigned' : '', tr ? '' : 'is-na', f === 'tue-ccr') +
       tileHtml('tue-intros', 'CCR introductions', tr ? String(B['tue-intros'].length) : 'No data', 'Named introductions received', tr ? '' : 'is-na', f === 'tue-intros') +
-      '</div>' + (f && f.indexOf('tue-') === 0 ? worklistHtml(f, B) : (tr && B['tue-remaining'].length ? '<div style="margin-top:14px">' + listHtml(B['tue-remaining']) + '</div>' : '')) +
+      '</div>' + (tr && f && f.indexOf('tue-') === 0 ? worklistHtml(f, B) : (tr && B['tue-remaining'].length ? '<div style="margin-top:14px">' + listHtml(B['tue-remaining']) + '</div>' : '')) +
       '<div class="cx-row" style="margin-top:14px"><button type="button" class="cx-btn accent" data-cx="signoff-tuesday"' + (!tr || B['tue-remaining'].length || signed || !canWrite() ? ' disabled' : '') + '>' + (signed ? '✓ Tuesday Updates completed ' + esc(fmtTime(signed.signed_off_at)) : "Complete Today's Tuesday Updates") + '</button>' +
       (tr && B['tue-remaining'].length && !signed ? '<span class="cx-note">' + B['tue-remaining'].length + ' assigned ' + (B['tue-remaining'].length === 1 ? 'update is' : 'updates are') + ' not complete yet.</span>' : '') + '</div></div>';
     var pc = '<div class="cx-card"><div class="cx-head"><div><div class="cx-kicker">Primary workflow</div><h3>Post-Closing Calls</h3><div class="cx-sub">30, 60 and 90 days after closing. Service questions before the past-client referral ask.</div></div></div>' +
       '<div class="cx-tiles" style="margin-top:14px">' +
       ['pc30', 'pc60', 'pc90'].map(function (k) {
         var n = B[k].length, soon = B['soon' + k.slice(2)].length;
-        return tileHtml(k, k.slice(2) + '-day calls', countOrComplete(n, pr), pr ? (n ? 'Due now' : 'None due') + (soon ? ' · ' + soon + ' in next 7 days' : '') : 'Funded Units not imported yet', stateCls(n, pr), f === k);
+        return tileHtml(k, k.slice(2) + '-day calls', countOrComplete(n, pr), pr ? (n ? 'Due now' : 'None due') + (soon ? ' · ' + soon + ' in next 7 days' : '') : (S.error ? 'Live funded data unavailable' : 'Funded Units not imported yet'), stateCls(n, pr), f === k);
       }).join('') +
       tileHtml('pc-overdue', 'Overdue calls', countOrComplete(B['pc-overdue'].length, pr), pr && B['pc-overdue'].length ? 'Carried forward until completed' : '', stateCls(B['pc-overdue'].length, pr, true), f === 'pc-overdue') +
-      '</div>' + (f && f.indexOf('pc') === 0 ? worklistHtml(f, B) : (function () { var due = B.pc30.concat(B.pc60, B.pc90); return pr && due.length ? '<div style="margin-top:14px">' + listHtml(due) + '</div>' : ''; })()) + '</div>';
+      '</div>' + (pr && f && f.indexOf('pc') === 0 ? worklistHtml(f, B) : (function () { var due = B.pc30.concat(B.pc60, B.pc90); return pr && due.length ? '<div style="margin-top:14px">' + listHtml(due) + '</div>' : ''; })()) + '</div>';
     var issues = B.issues.length ? '<div class="cx-card"><div class="cx-head"><h3>Client concerns</h3><span class="cx-chip chip-overdue">' + B.issues.length + '</span></div><div style="margin-top:12px">' + listHtml(B.issues) + '</div></div>' : '';
     var journey = B.journey.length ? '<div class="cx-card"><div class="cx-head"><div><div class="cx-kicker">Client journey</div><h3>New contract and pre-closing calls</h3></div></div><div style="margin-top:12px">' + listHtml(B.journey) + '</div></div>' : '';
     var d = B.day;
@@ -528,8 +551,9 @@
       });
     });
     $all('[data-tile]', host).forEach(function (b) {
+      var k = b.getAttribute('data-tile');
+      b.disabled = k.indexOf('tue-') === 0 ? !tr : !pr;
       b.addEventListener('click', function () {
-        var k = b.getAttribute('data-tile');
         S.lpFilter = k && !(S.lpFilter && S.lpFilter.key === k && S.lpFilter.lp === lp) ? { lp: lp, key: k } : null;
         renderToday();
         var wl = $('#core-worklist'); if (wl && wl.scrollIntoView) wl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -900,7 +924,8 @@
     var host = $('#view-core-command'); if (!host) return;
     if (!activeKey() || !S.tier) {
       host.innerHTML = '<div class="cx-stack"><h2>Command Center</h2><div class="cx-empty">' +
-        (S.loading ? 'Loading team data…</div>' : 'Use your shared CORE team link to open the call worklist.</div>' + teamLinkRecovery()) + '</div>';
+        (activeKey() ? (S.loading ? 'Loading team data…' : 'Could not load team data. <button type="button" class="cx-btn" data-cx="refresh">Retry</button>') + '</div>' :
+          'Use your shared CORE team link to open the call worklist.</div>' + teamLinkRecovery()) + '</div>';
       bindAccess(host);
       return;
     }
