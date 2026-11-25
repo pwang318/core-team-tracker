@@ -1355,12 +1355,13 @@
         return;
       }
       // 2. Borrower gone quiet: 2+ unanswered weeks, or no live conversation in 14+ days on a file we have been calling.
-      var misses = tasks.filter(function (t) { return t.status !== 'completed' && t.status !== 'cancelled' && ATTEMPT_OUTCOMES.indexOf(t.borrower_outcome) >= 0; }).length;
+      // Counts open attempts and texted-update completions: neither is a live conversation.
+      var misses = tasks.filter(function (t) { return t.status !== 'cancelled' && ATTEMPT_OUTCOMES.indexOf(t.borrower_outcome) >= 0; }).length;
       var firstDue = tasks.map(function (t) { return t.due_date; }).filter(Boolean).sort()[0];
       var silentFor = lastTalk ? L.daysBetween(lastTalk, t0) : firstDue ? L.daysBetween(firstDue, t0) : 0;
-      if ((misses >= 2 && silentFor >= 7) || (open.length && silentFor >= 14)) {
+      if ((misses >= 2 && silentFor >= 7) || ((open.length || misses) && silentFor >= 14)) {
         out.quiet.push({ sev: 1, sort: String(1000 - silentFor).padStart(4, '0'), lp: lp, who: b, task: open[0] || null, loan: loan,
-          why: (misses >= 2 ? misses + ' calls without reaching them · ' : '') + (lastTalk ? 'last live conversation ' + silentFor + ' days ago' : 'no live conversation logged yet'),
+          why: (misses >= 2 ? misses + ' calls with only a voicemail or text · ' : '') + (lastTalk ? 'last live conversation ' + silentFor + ' days ago' : 'no live conversation logged yet'),
           note: 'Hi ' + lp + ', we have not had a live conversation with ' + firstName(b) + (lastTalk ? ' since ' + fmtDate(lastTalk) : ' yet') + '. Can you try a different time of day, and text to set up a quick call?' });
       }
     });
