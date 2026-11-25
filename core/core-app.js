@@ -935,7 +935,7 @@
       '<label class="cx-f" for="cx-bo">' + (simple ? 'How did the call go?' : 'Borrower contact outcome') + '</label><select id="cx-bo" name="borrower_outcome"' + (simple ? ' class="cx-hide" aria-hidden="true" tabindex="-1"' : '') + dis + '>' + borrowerOutcomeOptions(t) + '</select>' +
       (simple ? '<div id="cx-bo-btns" class="cx-row" role="group" aria-label="How did the call go?" style="gap:8px;margin-top:6px">' + outcomeButtons.map(function (o) {
         return '<button type="button" class="cx-check" data-bo="' + o[0] + '" aria-pressed="false" style="flex:1;min-width:150px;justify-content:center;padding:12px;font-weight:700"' + dis + '>' + esc(o[1]) + '</button>';
-      }).join('') + '</div>' + (isTue && L.tuesdayUpdateTextConfirmed(t) ? '<p class="cx-note" style="margin-top:6px">Update text already sent. Pick <b>Talked with borrower</b> once you reach them.</p>' : '') : '') +
+      }).join('') + '</div>' + (isTue && L.tuesdayUpdateTextConfirmed(t) ? '<p class="cx-note" style="margin-top:6px">Update text already sent. Click <b>Done</b> to finish this week\'s update.</p>' : '') : '') +
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
       (isTue ? '<label class="cx-f" for="cx-bn">Update notes</label><textarea id="cx-bn" name="borrower_notes" rows="2" placeholder="e.g. Appraisal in, on track to close 12/12"' + dis + '>' +
         esc([t.service_update, t.borrower_notes].filter(function (note, i, notes) { return note && notes.indexOf(note) === i; }).join('\n\n')) + '</textarea>' :
@@ -1037,6 +1037,7 @@
       return ['vm_update', 'no_answer_update'].includes($('#cx-bo', ov).value);
     }
     function suggestAttemptDate() {
+      return; // Tuesday: a texted update now completes the week's update, so no retry date is suggested.
       if (!compact || !followUpDate) return;
       if (dateEdited) return;
       if (!updateTextSelected()) {
@@ -1062,29 +1063,30 @@
       if (simple) {
         var textUpdate = updateTextSelected();
         var attempted = textUpdate || ['voicemail', 'text_sent'].includes(p.borrower_outcome);
+        var texted = compact && (textUpdate || L.tuesdayUpdateTextConfirmed(t));
         $('#cx-tuesday-ccr', ov).classList.toggle('cx-hide', attempted);
         $('#cx-ccr-note', ov).classList.toggle('cx-hide', !attempted);
         var hint = $('#cx-complete-hint', ov);
         if (hint.textContent) hint.textContent = !attempted && errs.length ? L.friendlyError(errs[0]) : '';
-        cb.classList.toggle('cx-hide', attempted);
-        $('[data-cx="save"]', ov).textContent = textUpdate ? 'Save update text' : !compact && attempted ? 'Save attempt' : 'Save';
+        cb.classList.toggle('cx-hide', attempted && !texted);
+        $('[data-cx="save"]', ov).classList.toggle('cx-hide', !!texted);
+        $('[data-cx="save"]', ov).textContent = !compact && attempted ? 'Save attempt' : 'Save';
       }
       var bo = p.borrower_outcome, ar = $('#cx-attempt-row', ov);
       if (ar) {
         ar.innerHTML = !simple && bo && bo !== 'conversation' ? '<button type="button" class="cx-btn sm" data-cx="log-attempt">Log this attempt</button><span class="cx-note">Attempts are saved with the time.</span>' : '';
-        if (compact && updateTextSelected() && p.next_action_date) {
+        if (false && compact && updateTextSelected() && p.next_action_date) {
           ar.textContent = 'Follow-up ' + fmtDate(p.next_action_date);
           var changeDate = document.createElement('button');
           changeDate.type = 'button'; changeDate.className = 'cx-btn sm'; changeDate.textContent = 'Change date';
           changeDate.onclick = function () { $('#cx-follow-up', ov).open = true; followUpDate.focus(); };
           ar.appendChild(changeDate);
         }
-        if (compact && !bo) ar.textContent = 'Call first. If they don’t answer, leave a voicemail and text them the update, then pick Left vmail / sent text update.';
+        if (compact && !bo) ar.textContent = 'Call first. If they don’t answer, leave a voicemail and text them the update, then pick Left vmail / sent text update and click Done.';
         if (simple && !compact && !bo) ar.textContent = 'Call first. If they don’t answer, leave a voicemail or send a text, then pick Left vmail / sent text and save. The call stays on your list until you talk with them.';
       }
       var followUp = $('#cx-follow-up', ov);
-      if (compact && followUp) followUp.classList.toggle('cx-hide', !updateTextSelected());
-      if (compact && followUp && updateTextSelected() && !p.next_action_date) followUp.open = true;
+      if (compact && followUp) followUp.classList.add('cx-hide');
       var exBtn = $('[data-cx="show-exception"]', ov);
       if (simple && exBtn) exBtn.classList.toggle('cx-hide', p.concern_status !== 'unresolved');
       var la = $('[data-cx="log-attempt"]', ov); if (la) la.onclick = function () { logAttempt(bo); };

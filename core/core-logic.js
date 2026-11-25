@@ -343,6 +343,15 @@
     // Every LP call (Tuesday, new contract, pre-closing, 30/60/90) uses the simple form: a short note, the referral
     // answer, no required checklist, no CRM reference and no next action (the next call is scheduled).
     var simple = ['tuesday', 'pc30', 'pc60', 'pc90', 'contract', 'preclose'].indexOf(t.task_type) >= 0;
+    // Tuesday Update: a voicemail plus a texted loan update completes the week's update.
+    var texted = t.task_type === 'tuesday' && (t.borrower_outcome === 'vm_update' || (t.borrower_outcome === 'text_sent' && checks.update_text_sent === true));
+    if (texted) {
+      if (len(t.borrower_notes) < 1) e.push('Update notes required');
+      if (t.concern_status === 'unresolved') e.push('Unresolved client concern: record service recovery instead of completing');
+      if (t.concern_status === 'resolved' && len(t.concern_notes) < 10) e.push('Describe the concern and how it was resolved');
+      if (loan && hasBuyerAgent(loan.buyer_agent_name) && (!t.agent_outcome || ['attempted', 'no_buyer_agent'].includes(t.agent_outcome))) e.push('Buyer agent update required');
+      return e;
+    }
     if (t.borrower_outcome !== 'conversation') e.push('Borrower conversation required (voicemail, text or no answer is an attempt, not a completed conversation)');
     if (!t.conversation_at) e.push('Conversation date and time required');
     else if (new Date(t.conversation_at).getTime() > Date.now() + 5 * 60000) e.push('Conversation time cannot be in the future');
@@ -546,6 +555,7 @@
   function outcomeLabel(t, today) {
     if (!t) return '';
     if (t.status === 'needs_review') return 'Needs Review';
+    if (t.status === 'completed' && t.task_type === 'tuesday' && t.borrower_outcome === 'text_sent') return 'Completed — update texted';
     if (t.status === 'completed') return t.referral_response === 'named_introduction' ? 'Completed — referral received' : 'Completed — no referral received';
     if (t.status === 'exception' && t.exception_kind === 'service_recovery') return 'Client concern — resolution required';
     if (t.status === 'exception') return 'Exception — ' + (t.exception_kind === 'unreachable' ? 'borrower unreachable' : 'documented circumstance');
