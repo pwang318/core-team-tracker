@@ -109,3 +109,8 @@ details.cx-supporting[open]>summary{margin-bottom:16px}
 details.cx-supporting>summary{display:flex;flex-direction:column;gap:2px}
 .cx .cx-tile .t-foot{line-height:1.35}
 .cx-drawer{scroll-padding-bottom:150px;scroll-padding-top:20px}
+
+.cx .cx-lp-shortcuts .cx-tile{min-height:0;gap:4px;padding:9px 12px}
+.cx .cx-lp-shortcuts .t-label{color:var(--cx-navy)}
+.cx .cx-lp-shortcuts strong{font-size:12px;color:var(--cx-sub);font-weight:500}
+#view-lp [id^="core-lp-"],#core-supporting{scroll-margin-top:90px}

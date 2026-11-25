@@ -1325,7 +1325,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-page-head"><div><div class="ct-eyebrow">LOAN PARTNER</div><h1 id="lp-hero-name">Weekly Execution</h1><div class="ct-page-sub" id="lp-hero-sub">Loading current work…</div></div><div class="ct-role-pill" id="lp-v2-role-pill">LP2 · Client + transaction execution</div></div>
 <section class="ct-card ct-scorecard-card"><div class="ct-section-head"><div><div class="ct-kicker">PERFORMANCE SCORECARD</div><h2>My current position</h2></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="ct-link-btn" onclick="lpv4OpenMyScorecard(currentUser)" type="button">Update my scorecard</button><div class="ct-model-chips"><span><b>60%</b> Production</span><span><b>25%</b> Conversion</span><span><b>15%</b> Execution</span></div></div></div><div class="ct-velocify-notice" style="padding:11px 13px;border:1px solid #d4dce6;border-radius:10px;background:#f4f7fa;color:#27445c;font-size:12px;line-height:1.5;margin:10px 0"><strong>Referral lead data notice:</strong> Referral lead data updates daily and may not reflect the most recent activity. <strong>Check Velocify for the most up-to-date lead information, status, and activity.</strong></div><div id="lp-v2-scorecard"><div class="ct-loading">Loading scorecard…</div></div></section>
 <section class="ct-card ct-focus-card"><div class="ct-section-head"><div><div class="ct-kicker">RELATIONSHIP MOMENT</div><h2>Face Time priorities</h2></div><button class="ct-link-btn" onclick="lpv2Route('facetime',this)" type="button">Open Face Time</button></div><div class="ct-embedded-block" id="lp-facetime-focus"><div class="ct-loading">Loading Face Time priorities…</div></div></section>
-<section class="ct-card ct-execution-card" hidden><div id="lp-weekly-execution-host"></div></section>
+<section class="ct-card ct-execution-card" id="core-lp-builder" tabindex="-1"><div id="lp-weekly-execution-host"></div></section>
 <section class="ct-card ct-handoff-card"><div class="ct-section-head"><div><div class="ct-kicker">TEAM HANDOFFS</div><h2>RM → LP actions</h2></div></div>
 <div class="ct-embedded-block" id="lp-rm-flags-for-you"><div id="lp-rm-flags-for-you-list"></div><span id="lp-rm-flag-badge" style="display:none"></span></div>
 <div class="lp-rm-response-panel" id="lp-rm-responses"><details id="lp-rm-responses-details"><summary><b>Recent RM responses</b><span id="lp-rm-response-badge" style="display:none">NEW</span><span id="lp-rm-response-open-label">View ▾</span></summary><button id="lp-rm-response-clear-all" type="button">Clear alert</button><div id="lp-rm-response-summary"></div><div id="lp-rm-responses-list">Loading…</div></details></div>
@@ -2894,7 +2894,8 @@ function selectUser(btn,u){
     if(heroName)heroName.textContent=u+"'s calls this week";
     if(heroSub)heroSub.textContent="Syncing shared RM + LP activity before building the call list…";
     if(lpList)lpList.innerHTML='<div class="no-data">Checking the latest team touches and follow-up ownership…</div>';
-    Promise.all([loadCallLogs().catch(function(){}),loadRmActivity().catch(function(){}),loadFaceTime().catch(function(){}),loadInactiveRosterNames().catch(function(){})]).then(function(){renderLP(u);if(typeof window.v310LoadPlan==='function'){Promise.resolve(window.v310LoadPlan(u,true)).catch(function(e){console.warn('transaction/pipeline work refresh failed',e);});}});
+    if(typeof window.v310LoadPlan==='function')window.v310LoadPlan(u).catch(function(e){console.warn('Builder worklist refresh failed',e);});
+    Promise.all([loadCallLogs().catch(function(){}),loadRmActivity().catch(function(){}),loadFaceTime().catch(function(){}),loadInactiveRosterNames().catch(function(){})]).then(function(){if(currentUser===u)renderLP(u);});
     lpStartPolling(u);
   }
 }
@@ -13992,10 +13993,9 @@ async function planState(lp){
     if(!isCurrent&&cls!=='NEW_BUILD'&&doneRecord(r,matchState))return;
     carry.push(Object.assign({},r,{_carryoverWeek:isCurrent?'':pw,_builderScheduled:scheduled,_builderNextDue:nextDue,_builderMilestoneChanged:milestoneChanged}));
   });
-  // Keep the LP queue actionable: logged Tuesday updates and future builder
-  // check-ins are not outstanding work. The buyer consultation queue below is
-  // independent and continues to surface until its own task is completed.
-  const rows=carry.filter(r=>!r._builderScheduled&&!doneRecord(r,matchState)),buildReviews=[],seenBuildReviewKeys=new Set();
+  // Upcoming builder check-ins stay visible as scheduled. The borrower
+  // consultation and weekly check-ins below follow their own schedule.
+  const rows=carry.filter(r=>r._builderScheduled||!doneRecord(r,matchState)),buildReviews=[],seenBuildReviewKeys=new Set();
   const addDays=(value,n)=>{const d=new Date(String(value||'')+'T12:00:00');if(isNaN(d))return'';d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
   carry.forEach(r=>{
     const key=rowClassKey(r),cls=classMap[key]||classMap[rowMatchKey(r)]||'';if(cls!=='NEW_BUILD'||!key||seenBuildReviewKeys.has(key))return;seenBuildReviewKeys.add(key);
@@ -14062,20 +14062,40 @@ function renderLpState(s,lp){
   if(rowsEl)rowsEl.innerHTML=html+buildReviewMarkup;
   const dueCount=builderRows.filter(r=>!r._builderScheduled&&!doneRecord(r,s)).length+buildDue;
   const scheduledCount=builderRows.length+buildReviews.length;
-  showBuilderWork(scheduledCount ? (dueCount ? 'Builder follow-ups · '+dueCount+' due' : 'Builder follow-ups · scheduled') : '');
+  showBuilderWork(lp, dueCount ? dueCount+' due' : scheduledCount ? scheduledCount+' scheduled' : s.header ? 'None due' : 'No plan');
+  if(rowsEl&&!scheduledCount)rowsEl.innerHTML='<div class="v56-empty">'+(s.header?'No builder follow-ups on the current plan.':'No active contracts plan has been loaded for this week.')+'</div>';
 }
-function showBuilderWork(label){
-  const section=document.querySelector('#view-lp .ct-execution-card');
-  const shortcut=document.getElementById('lp-builder-shortcut');
+function showBuilderWork(lp,status){
+  const section=document.getElementById('core-lp-builder');
   const summary=document.getElementById('v56Summary');
-  if(section)section.hidden=!label;
-  if(shortcut){shortcut.hidden=!label;shortcut.textContent=label;}
+  if(section){section.dataset.lp=lp;section.dataset.status=status;}
   if(summary){summary.hidden=true;summary.textContent='';}
+  if(window.CoreApp)window.CoreApp.refreshBuilderTile();
 }
 
 async function loadLp(lp){
-  lp=lpShort(lp||window.currentUser||'');if(!LPS.includes(lp))return;if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();if(!ensureExec())return;showBuilderWork('');state.lp=lp;try{const s=await planState(lp);if(state.lp===lp)renderLpState(s,lp)}catch(e){if(state.lp!==lp)return;showBuilderWork('Builder follow-ups unavailable');console.error('Builder follow-up data could not be loaded',e);const rowsEl=document.getElementById('v56Rows'),sumEl=document.getElementById('v56Summary');if(sumEl)sumEl.textContent='Builder data unavailable';if(rowsEl)rowsEl.innerHTML='<div class="v56-empty">Builder follow-ups could not be loaded. Refresh the tracker to retry.</div>'}
+  lp=lpShort(lp||window.currentUser||'');
+  if(!LPS.includes(lp)||lp!==window.currentUser)return;
+  if(!document.getElementById('ctWeeklyOpsHub'))installHub();else v63RefreshHubStatuses();
+  if(!ensureExec())return;
+  const request={};
+  state.request=request;
+  state.lp=lp;
+  state.data=null;
+  const rowsEl=document.getElementById('v56Rows');
+  rowsEl.innerHTML='<div class="v56-empty">Loading builder follow-ups…</div>';
+  showBuilderWork(lp,'Loading…');
+  try{
+    const data=await planState(lp);
+    if(state.request===request&&window.currentUser===lp)renderLpState(data,lp);
+  }catch(e){
+    if(state.request!==request||window.currentUser!==lp)return;
+    showBuilderWork(lp,'Unavailable');
+    console.error('Builder follow-up data could not be loaded',e);
+    rowsEl.innerHTML='<div class="v56-empty">Builder follow-ups could not be loaded. Refresh the tracker to retry.</div>';
+  }
 }
+
 window.v310LoadPlan=loadLp;window.ctV56LoadLpTuesday=loadLp;
 window.v57BuyerClassDirty=function(sel){const wrap=sel&&sel.closest('.v56-actions'),btn=wrap&&wrap.querySelector('.v57-save-class');if(btn){btn.classList.remove('saved');btn.disabled=false;btn.textContent='Save status'}};
 window.v57SaveBuyerClass=async function(enc,btn){
@@ -14495,7 +14515,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261124g"></script><script defer src="./core/core-app.js?v=20261125c"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261124g"></script><script defer src="./core/core-app.js?v=20261125d"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
