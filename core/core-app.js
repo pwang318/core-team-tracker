@@ -823,11 +823,10 @@
   function borrowerOutcomeOptions(task) {
     if (task.task_type !== 'tuesday') return opts(L.BORROWER_OUTCOMES, task.borrower_outcome, 'Select outcome');
     var confirmed = L.tuesdayUpdateTextConfirmed(task);
-    var selected = !task.borrower_outcome || task.borrower_outcome === 'conversation' ? task.borrower_outcome : 'no_answer';
+    var selected = task.borrower_outcome === 'conversation' ? 'conversation' : null;
     return (confirmed ? '<option value="text_sent" selected hidden>Update text sent (saved)</option>' : '') + opts([
       ['conversation', 'Spoke with borrower'],
-      ['no_answer_update', 'Called + sent update text'],
-      ['no_answer', 'Called · text still due']
+      ['no_answer_update', 'No answer · sent update text']
     ], confirmed ? null : selected, confirmed ? undefined : 'Select outcome');
   }
   function renderDrawer(id) {
@@ -918,8 +917,6 @@
     var p = {};
     PATCH_FIELDS.forEach(function (n) { var el = form.querySelector('[name="' + n + '"]'); if (el) p[n] = el.value === '' ? null : el.value; });
     if (t.task_type === 'tuesday') {
-      if (p.borrower_outcome === 'no_answer' && t.borrower_outcome && t.borrower_outcome !== 'conversation' &&
-          !L.tuesdayUpdateTextConfirmed(t)) p.borrower_outcome = t.borrower_outcome;
       var notes = form.querySelector('[name="borrower_notes"]');
       if (notes.value === notes.defaultValue && t.borrower_notes && t.service_update) {
         p.borrower_notes = t.borrower_notes;
@@ -990,7 +987,7 @@
           changeDate.onclick = function () { $('#cx-follow-up', ov).open = true; followUpDate.focus(); };
           ar.appendChild(changeDate);
         }
-        if (compact && $('#cx-bo', ov).value === 'no_answer') ar.textContent = 'Leave a voicemail if available, then send the loan update by text.';
+        if (compact && !bo) ar.textContent = 'Call first. If they don’t answer, leave a voicemail if available and text the loan update before saving.';
       }
       var followUp = $('#cx-follow-up', ov);
       if (compact && followUp && updateTextSelected() && !p.next_action_date) followUp.open = true;
@@ -1069,7 +1066,14 @@
         .catch(function (e) { setState('Not saved', true); busy(false); toast(friendlyServerError(e), true); });
     }
     var on = function (sel, fn) { var b = $('[data-cx="' + sel + '"]', ov); if (b) b.addEventListener('click', fn); };
-    on('save', function () { save(null).then(function () { renderDrawer(t.id); refreshEvents(t.id); renderAll(); }).catch(function () {}); });
+    on('save', function () {
+      if (compact && !$('#cx-bo', ov).value) {
+        toast('Choose the borrower contact outcome before saving.', true);
+        $('#cx-bo', ov).focus();
+        return;
+      }
+      save(null).then(function () { renderDrawer(t.id); refreshEvents(t.id); renderAll(); }).catch(function () {});
+    });
     on('complete', function () {
       var errs = valid();
       if (errs.length) {
