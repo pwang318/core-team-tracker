@@ -252,7 +252,7 @@
     pc60: { label: '60-Day Call', group: 'post_closing', referral: 'PCR' },
     pc90: { label: '90-Day Call', group: 'post_closing', referral: 'PCR' },
     contract: { label: 'New Contract Call', group: 'journey', referral: 'CCR' },
-    preclose: { label: 'Pre-Closing Review', group: 'journey', referral: 'PCR' }
+    preclose: { label: 'Pre-Closing Review', group: 'journey', referral: 'CCR' }
   };
   var CHECKS = {
     tuesday: [
