@@ -891,7 +891,7 @@
       '<div id="cx-na-other"' + (selectedNextAction === 'other' ? '' : ' class="cx-hide"') + '><label class="cx-f" for="cx-na">Describe the next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(selectedNextAction === 'other' ? t.next_action : '') + '"' + dis + '></div></div>' +
 
       '<div><label class="cx-f" for="cx-nd">Follow-up date</label><input id="cx-nd" type="date" name="next_action_date" value="' + esc(t.next_action_date || '') + '"' + dis + '></div></div></details>' +
-      (editable ? '<details id="cx-reqs" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"></summary><div style="margin-top:8px"></div></details>' : '') +
+      (editable && !isTue ? '<details id="cx-reqs" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"></summary><div style="margin-top:8px"></div></details>' : '') +
       '<div id="cx-exception" class="cx-card cx-hide" style="margin-top:14px;padding:14px"><h3>Client concern or exception</h3><p class="cx-note">Use when a concern needs resolution or the required conversation could not happen. It is not counted as completed.</p>' +
       '<label class="cx-f" for="cx-ek">Type</label><select id="cx-ek" name="exception_kind">' + opts([['service_recovery', 'Client concern: resolution required'], ['unreachable', 'Borrower unreachable after attempts'], ['other', 'Other documented circumstance']], t.exception_kind || 'service_recovery') + '</select>' +
       '<label class="cx-f" for="cx-er">Circumstance and recovery action</label><textarea id="cx-er" name="exception_reason">' + esc(t.exception_reason || '') + '</textarea>' +
@@ -899,6 +899,7 @@
       (isManager() ? managerBlock(t) : '') +
       (isTue ? '<details class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"><b>Activity history</b></summary>' : '<h3 style="margin-top:22px">Conversation and activity history</h3>') + '<div id="cx-history" style="margin-top:8px">' + historyHtml(id) + '</div>' + (isTue ? '</details>' : '') +
       '<div class="cx-drawer-foot"><span id="cx-save-state" class="cx-note" aria-live="polite"></span>' +
+      (editable && isTue ? '<span id="cx-complete-hint" class="cx-note" role="status" tabindex="-1"></span>' : '') +
       (editable ? '<button type="button" class="cx-btn" data-cx="save">Save progress</button><button type="button" class="cx-btn accent" data-cx="complete">Complete ' + esc(typeLabel(type)) + '</button><button type="button" class="cx-btn ghost" data-cx="show-exception">Concern or exception</button>' : '') +
       '<button type="button" class="cx-btn ghost" data-cx="close">Close</button></div></form>';
     wireDrawer(ov, t, editable);
@@ -968,15 +969,17 @@
       if (!editable) return;
       suggestAttemptDate();
       var p = Object.assign({}, t, collect(form, t)), errs = L.validateTask(p, loan), box = $('#cx-reqs', ov);
-      var checklist = errs;
-      box.querySelector('summary').textContent = errs.length ? 'Completion checklist (' + checklist.length + ' remaining)' : 'Ready to complete';
-      box.querySelector('div').innerHTML = errs.length ? '<ul class="cx-req">' + checklist.map(function (e) { return '<li>' + esc(L.friendlyError(e)) + '</li>'; }).join('') + '</ul>'
-        : '<div class="cx-ok">✓ Every required conversation and referral step is documented.</div>';
+      if (box) {
+        box.querySelector('summary').textContent = errs.length ? 'Completion checklist (' + errs.length + ' remaining)' : 'Ready to complete';
+        box.querySelector('div').innerHTML = errs.length ? '<ul class="cx-req">' + errs.map(function (e) { return '<li>' + esc(L.friendlyError(e)) + '</li>'; }).join('') + '</ul>'
+          : '<div class="cx-ok">✓ Every required conversation and referral step is documented.</div>';
+      }
       var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = saving || (!compact && errs.length > 0);
       if (compact) {
         var textUpdate = updateTextSelected();
         $('#cx-tuesday-ccr', ov).classList.toggle('cx-hide', textUpdate);
-        box.classList.toggle('cx-hide', textUpdate);
+        var hint = $('#cx-complete-hint', ov);
+        if (hint.textContent) hint.textContent = !textUpdate && errs.length ? L.friendlyError(errs[0]) : '';
         cb.classList.toggle('cx-hide', textUpdate);
         $('[data-cx="save"]', ov).textContent = textUpdate ? 'Save update text' : 'Save progress';
       }
@@ -1077,11 +1080,11 @@
       var errs = valid();
       if (errs.length) {
         if (compact) {
-          var checklist = $('#cx-reqs', ov);
-          checklist.open = true;
+          var hint = $('#cx-complete-hint', ov);
+          hint.textContent = L.friendlyError(errs[0]);
           if (errs.some(function (e) { return /^Conversation /.test(e); })) $('#cx-borrower-details', ov).open = true;
           if (errs.some(function (e) { return /^(Next action|Follow-up date)/.test(e); })) $('#cx-follow-up', ov).open = true;
-          $('summary', checklist).focus();
+          hint.focus();
         } else toast('Not complete yet: ' + L.friendlyError(errs[0]), true);
         return;
       }
