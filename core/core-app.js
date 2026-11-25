@@ -902,10 +902,13 @@
     var box = ov.querySelector('.cx-drawer');
     if (!t) { box.innerHTML = '<div class="cx-err">This record is no longer available.</div><button class="cx-btn" type="button" data-cx="close">Close</button>'; box.querySelector('[data-cx="close"]').onclick = closeDrawer; return; }
     var loan = S.loans[t.loan_number] || {}, editable = canEdit(t), ck = t.script_checks || {}, type = t.task_type;
-    var isTue = type === 'tuesday', isPc = /^pc/.test(type), simple = isTue || isPc, dis = editable ? '' : ' disabled';
-    var outcomeButtons = isTue ? [['conversation', 'Talked with borrower'], ['vm_update', 'Left vmail / sent text update']] : [['conversation', 'Talked with client'], ['voicemail', 'Left vmail / sent text']];
-    var guide = isPc ? '<details style="margin-top:8px"><summary class="cx-note" style="cursor:pointer">Call guide: what to cover</summary><p class="cx-note" style="margin:6px 0">' + esc(L.SCRIPT_NOTES[type] || '') + '</p><ul style="margin:4px 0 0 18px">' +
-      (L.CHECKS[type] || []).filter(function (c) { return c[0] !== 'referral_ask'; }).map(function (c) { return '<li>' + esc(c[1]) + '</li>'; }).join('') + '</ul></details>' : '';
+    var isTue = type === 'tuesday', isPc = /^pc/.test(type), simple = true, dis = editable ? '' : ' disabled';
+    var isJourney = type === 'contract' || type === 'preclose';
+    var outcomeButtons = isTue ? [['conversation', 'Talked with borrower'], ['vm_update', 'Left vmail / sent text update']] : [['conversation', isPc ? 'Talked with client' : 'Talked with borrower'], ['voicemail', 'Left vmail / sent text']];
+    var refItem = (L.CHECKS[type] || []).find(function (c) { return /referral_ask|request_no_secret/.test(c[0]); });
+    var refScript = isTue ? L.REFERRAL_7_DAYS : isPc ? L.REFERRAL_12_MONTHS : refItem ? refItem[1].replace(/^Request 2: /, '').replace(/^"|"$/g, '') : '';
+    var guide = !isTue ? '<details style="margin-top:8px"><summary class="cx-note" style="cursor:pointer">Call guide: what to cover</summary><p class="cx-note" style="margin:6px 0">' + esc(L.SCRIPT_NOTES[type] || '') + '</p><ul style="margin:4px 0 0 18px">' +
+      (L.CHECKS[type] || []).filter(function (c) { return !/referral_ask|request_no_secret/.test(c[0]); }).map(function (c) { return '<li>' + esc(c[1]) + '</li>'; }).join('') + '</ul></details>' : '';
     var nextActions = [NEXT_ACTION_BY_CALL[type], 'Send the information we discussed', 'Follow up on a borrower concern', 'Call the borrower back'];
     var selectedNextAction = nextActions.includes(t.next_action) ? t.next_action : t.next_action ? 'other' : '';
     var checks = (L.CHECKS[type] || []).filter(function (c) { return !isTue || c[0] !== 'referral_ask'; }).map(function (c) {
@@ -927,7 +930,7 @@
       (t.status === 'completed' ? '<div class="cx-complete-banner" style="margin-top:12px">✓ ' + esc(out) + ' · ' + esc(fmtTime(t.completed_at)) + ' by ' + esc(t.completed_by || '') + '. Completed records are locked.</div>' : '') +
       (!editable && isTue && t.status !== 'completed' ? '<p class="cx-note">This record is read-only. Ask Mack to check its status or your team access if it still needs an update.</p>' : '') +
       '<form data-cx="task" novalidate>' +
-      '<h3 style="margin-top:18px">' + (isTue ? 'Step 1 · Borrower call' : isPc ? 'Client call' : 'Borrower call') + '</h3>' +
+      '<h3 style="margin-top:18px">' + (isTue ? 'Step 1 · Borrower call' : isPc ? 'Client call' : type === 'contract' ? 'New contract call' : 'Pre-closing call') + '</h3>' +
       (simple ? guide : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
       '<label class="cx-f" for="cx-bo">' + (simple ? 'How did the call go?' : 'Borrower contact outcome') + '</label><select id="cx-bo" name="borrower_outcome"' + (simple ? ' class="cx-hide" aria-hidden="true" tabindex="-1"' : '') + dis + '>' + borrowerOutcomeOptions(t) + '</select>' +
       (simple ? '<div id="cx-bo-btns" class="cx-row" role="group" aria-label="How did the call go?" style="gap:8px;margin-top:6px">' + outcomeButtons.map(function (o) {
@@ -936,13 +939,13 @@
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
       (isTue ? '<label class="cx-f" for="cx-bn">Update notes</label><textarea id="cx-bn" name="borrower_notes" rows="2" placeholder="e.g. Appraisal in, on track to close 12/12"' + dis + '>' +
         esc([t.service_update, t.borrower_notes].filter(function (note, i, notes) { return note && notes.indexOf(note) === i; }).join('\n\n')) + '</textarea>' :
-        isPc ? '<label class="cx-f" for="cx-bn">Call notes</label><textarea id="cx-bn" name="borrower_notes" rows="2" placeholder="e.g. Settled in, first payment set up, no questions"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>' : '') +
+        !isTue ? '<label class="cx-f" for="cx-bn">Call notes</label><textarea id="cx-bn" name="borrower_notes" rows="2" placeholder="' + (isPc ? 'e.g. Settled in, first payment set up, no questions' : type === 'contract' ? 'e.g. Reviewed the 3 promises, closing 12/20 confirmed' : 'e.g. Reviewed CD, cash to close matched, no concerns') + '"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>' : '') +
       (simple ? '<input id="cx-cat" type="hidden" name="conversation_at" value="' + esc(toLocalInput(t.conversation_at)) + '">' :
       '<label class="cx-f" for="cx-cat">Conversation date and time</label><input id="cx-cat" type="datetime-local" name="conversation_at" value="' + esc(toLocalInput(t.conversation_at)) + '"' + dis + '>' +
       '<div style="margin-top:12px"><div class="cx-f" style="margin:0 0 4px">Conversation steps</div>' + checks + '</div>' +
       '<label class="cx-f" for="cx-bn">Borrower conversation notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="What was discussed, in your own words"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>') +
-      (simple ? '<p id="cx-ccr-note" class="cx-note cx-hide" style="margin-top:10px">' + (isTue ? 'No referral (CCR) question on this one. It appears when you pick <b>Talked with borrower</b>.' : 'No referral (PCR) question on this one. It appears when you pick <b>Talked with client</b>.') + '</p><section id="cx-tuesday-ccr">' : '') + '<h3 style="margin-top:18px">' + (isTue ? 'Ask for a referral (CCR)' : isPc ? 'Ask for a referral (PCR)' : type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
-      (simple ? '<blockquote id="cx-ccr-script" class="cx-script" style="margin:8px 0 0">' + esc(isTue ? L.REFERRAL_7_DAYS : L.REFERRAL_12_MONTHS) + '</blockquote>' : '') +
+      (simple ? '<p id="cx-ccr-note" class="cx-note cx-hide" style="margin-top:10px">' + (isPc ? 'No referral (PCR) question on this one. It appears when you pick <b>Talked with client</b>.' : 'No referral question on this one. It appears when you pick <b>Talked with borrower</b>.') + '</p><section id="cx-tuesday-ccr">' : '') + '<h3 style="margin-top:18px">' + (isTue ? 'Ask for a referral (CCR)' : isPc ? 'Ask for a referral (PCR)' : isJourney ? 'Ask for a referral (CCR)' : type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
+      (simple ? '<blockquote id="cx-ccr-script" class="cx-script" style="margin:8px 0 0">' + esc(refScript) + '</blockquote>' : '') +
       (simple ? '' : '<label class="cx-check' + (referralAsked ? ' done' : '') + '" style="margin-top:8px"><input type="checkbox" name="referral_requested"' + (referralAsked ? ' checked' : '') + dis + '><span><b>I asked the referral question on this call.</b></span></label>') +
       (simple ? '<fieldset id="cx-rr" class="cx-row" style="border:0;padding:0;margin:10px 0 0;min-width:0;gap:8px"' + dis + '><legend class="cx-f">Their answer</legend>' +
         [['asked_no_referral', 'No referral']].concat(['potential_opportunity', 'own_financing'].includes(t.referral_response) ? [L.REFERRAL_RESPONSES.find(function (r) { return r[0] === t.referral_response; })] : [], [['named_introduction', 'Got a referral']]).map(function (r) {
@@ -965,7 +968,7 @@
           return '<label class="cx-check"><input type="radio" name="agent_outcome" value="' + esc(outcome[0]) + '"' + (outcome[0] === t.agent_outcome ? ' checked' : '') + '><span>' + esc(outcome[1]) + '</span></label>';
         }).join('') + '</fieldset>' +
         '<details id="cx-agent-notes"' + (t.agent_notes || ['spoke', 'update_sent'].includes(t.agent_outcome) ? '' : ' class="cx-hide"') + '><summary>Optional buyer-agent notes</summary><label class="cx-f" for="cx-an">Buyer-agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></details></section>' : isTue ? '<p class="cx-note">No buyer-agent update required. No agent is on file.</p><input type="hidden" name="agent_outcome" value="' + esc(t.agent_outcome || (editable ? 'no_buyer_agent' : '')) + '">' : '') +
-      '<details id="cx-follow-up" class="cx-card' + (isPc ? ' cx-hide' : '') + '" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>' + (isTue ? 'Try again on' : 'Follow-up') + '</b></summary><div class="cx-split"><div' + (isTue ? ' class="cx-hide"' : '') + '>' +
+      '<details id="cx-follow-up" class="cx-card' + (!isTue ? ' cx-hide' : '') + '" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>' + (isTue ? 'Try again on' : 'Follow-up') + '</b></summary><div class="cx-split"><div' + (isTue ? ' class="cx-hide"' : '') + '>' +
       '<label class="cx-f" for="cx-na-choice">Next action</label><select id="cx-na-choice"' + dis + '>' +
       opts(nextActions.map(function (action) { return [action, action]; }).concat([['other', 'Other next action']]), selectedNextAction, 'Select next action') + '</select>' +
       '<div id="cx-na-other"' + (selectedNextAction === 'other' ? '' : ' class="cx-hide"') + '><label class="cx-f" for="cx-na">Describe the next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(selectedNextAction === 'other' ? t.next_action : '') + '"' + dis + '></div></div>' +
@@ -1010,15 +1013,14 @@
     }
     var nextChoice = $('#cx-na-choice', form);
     if (nextChoice && nextChoice.value !== 'other') p.next_action = nextChoice.value || null;
-    if (t.task_type === 'tuesday' || /^pc/.test(t.task_type)) p.next_action = p.next_action_date ? (t.next_action && t.next_action.length >= 3 ? t.next_action : 'Call the borrower back') : null;
+    p.next_action = p.next_action_date ? (t.next_action && t.next_action.length >= 3 ? t.next_action : 'Call the borrower back') : null;
     var ca = form.querySelector('[name="conversation_at"]'); if (ca) p.conversation_at = fromLocalInput(ca.value);
     var rq = form.querySelector('[name="referral_requested"]');
-    if (t.task_type === 'tuesday' || /^pc/.test(t.task_type)) p.referral_requested = p.borrower_outcome === 'conversation' && !!p.referral_response;
-    else if (rq) p.referral_requested = rq.checked;
+    p.referral_requested = p.borrower_outcome === 'conversation' && !!p.referral_response;
     var es = form.querySelector('[name="escalated"]'); if (es) p.escalated = es.checked;
     var checks = Object.assign({}, t.script_checks || {});
     $all('[data-check]', form).forEach(function (c) { checks[c.getAttribute('data-check')] = c.checked; });
-    if (t.task_type === 'tuesday' || /^pc/.test(t.task_type)) checks.referral_ask = p.referral_requested;
+    checks.referral_ask = p.referral_requested;
     p.script_checks = checks;
     if (!p.concern_status) p.concern_status = 'none';
     return p;
@@ -1029,7 +1031,7 @@
     var state = $('#cx-save-state', ov);
     function setState(txt, bad) { if (state) { state.textContent = txt; state.style.color = bad ? 'var(--cx-bad)' : ''; } }
     function valid() { return L.validateTask(Object.assign({}, t, collect(form, t)), loan); }
-    var compact = t.task_type === 'tuesday', simple = compact || /^pc/.test(t.task_type), saving = false;
+    var compact = t.task_type === 'tuesday', simple = true, saving = false;
     var followUpDate = $('#cx-nd', ov), suggestedDate = '', dateEdited = false;
     function updateTextSelected() {
       return ['vm_update', 'no_answer_update'].includes($('#cx-bo', ov).value);

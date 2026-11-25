@@ -106,10 +106,10 @@ t('Tuesday notes are required but have no minimum length', () => {
   assert.deepEqual(L.validateTask({ ...base, borrower_notes: 'On track' }), []);
   assert.ok(L.validateTask({ ...base, borrower_notes: '' }).some(x => x.includes('Update notes required')));
 });
-t('Contract and pre-closing calls: named introduction still requires a CRM reference', () => {
-  const pc = { ...base, task_type: 'preclose', script_checks: Object.fromEntries(L.CHECKS.preclose.map(c => [c[0], true])), next_action: '30-day call', next_action_date: '2027-01-01', referral_response: 'named_introduction', referral_name: 'Pat Example' };
-  assert.ok(L.validateTask(pc).some(x => x.includes('CRM')));
-  assert.deepEqual(L.validateTask({ ...pc, crm_reference: 'VEL-123' }).filter(x => x.includes('CRM')), []);
+t('Contract and pre-closing calls use the simple rules', () => {
+  const pc = { ...base, task_type: 'preclose', script_checks: {}, next_action: null, next_action_date: null, borrower_notes: 'CD reviewed', referral_response: 'named_introduction', referral_name: 'Pat Example' };
+  assert.deepEqual(L.validateTask(pc), [], 'no checklist, CRM or next action needed');
+  assert.ok(L.validateTask({ ...pc, borrower_notes: '' }).some(x => x.includes('Call notes required')));
 });
 t('Tuesday validation: a buyer-agent outcome is required when an agent is on file', () => {
   for (const outcome of ['attempted','no_buyer_agent',null]) {

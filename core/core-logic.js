@@ -336,9 +336,9 @@
   function validateTask(t, loan) {
     var e = [];
     t = t || {}; var checks = t.script_checks || {};
-    // Tuesday Updates and 30/60/90-day calls use the simple form: a short note, the referral
+    // Every LP call (Tuesday, new contract, pre-closing, 30/60/90) uses the simple form: a short note, the referral
     // answer, no required checklist, no CRM reference and no next action (the next call is scheduled).
-    var simple = t.task_type === 'tuesday' || /^pc/.test(t.task_type || '');
+    var simple = ['tuesday', 'pc30', 'pc60', 'pc90', 'contract', 'preclose'].indexOf(t.task_type) >= 0;
     if (t.borrower_outcome !== 'conversation') e.push('Borrower conversation required (voicemail, text or no answer is an attempt, not a completed conversation)');
     if (!t.conversation_at) e.push('Conversation date and time required');
     else if (new Date(t.conversation_at).getTime() > Date.now() + 5 * 60000) e.push('Conversation time cannot be in the future');

@@ -1588,12 +1588,12 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ref-stat-card ref-stat-clickable" onclick="ctOpenLeadMetric('rate')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ctOpenLeadMetric('rate')}" role="button" tabindex="0" title="Click to audit the Lead to App calculation"><div class="ref-stat-label">Lead → App</div><div class="ref-stat-value" id="ref-ltf-v2">--</div><div id="ref-ltf-formula-v2" style="font-size:10px;color:var(--text-3);margin-top:2px">--</div></div>
 <div class="ref-stat-card urgent ref-stat-clickable" onclick="ctOpenLeadMetric('needs')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ctOpenLeadMetric('needs')}" role="button" tabindex="0" title="Click to view every lead currently counted as Needs Touch"><div class="ref-stat-label">Needs Touch</div><div class="ref-stat-value warn" id="ref-needs-touch-v2">--</div></div>
 </div>
-<div style="font-size:11px;color:#405565;background:#F4FAFC;border:1px solid #DCEAF0;border-radius:8px;padding:8px 10px;margin:-2px 0 .55rem;line-height:1.45">
+<details style="background:#fff;border:1px solid #DCE7EC;border-radius:9px;padding:8px 10px;margin:0 0 .6rem"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:#405565">How these numbers work (data timing and Lead → App)</summary><div style="margin-top:8px"><div style="font-size:11px;color:#405565;background:#F4FAFC;border:1px solid #DCEAF0;border-radius:8px;padding:8px 10px;margin:-2px 0 .55rem;line-height:1.45">
 <b>Data timing:</b> Velocify sends this tracker one scheduled update per day. <b>Refresh tracker</b> only reloads the latest data already synced to Supabase; it does not force a new Velocify update. Lead counts and statuses can therefore lag changes made later in the day until the next daily sync.
   </div>
 <div style="font-size:11px;color:var(--text-2);background:#F8FBFC;border:1px solid #E4EBEF;border-radius:8px;padding:8px 10px;margin:0 0 .75rem">
 <b>Lead → App:</b> Converted to App ÷ MTD Leads. A conversion requires a confirmed file/application: Started, Application Withdrawn/Denied, or a later Encompass-synced loan milestone (for example Approval, RFPO, Submittal, Funding). Does Not Qualify by itself does <b>not</b> count as an app.
-  </div>
+  </div></div></details>
 <details style="background:#fff;border:1px solid #DCE7EC;border-radius:9px;padding:8px 10px;margin:0 0 .8rem">
 <summary style="cursor:pointer;font-size:11px;font-weight:700;color:#405565">Why this conversion number? View source status audit</summary>
 <div id="ref-status-audit-v2" style="margin-top:8px;font-size:11px;color:var(--text-2)">Loading current status breakdown...</div>
@@ -14659,7 +14659,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261126o"></script><script defer src="./core/core-app.js?v=20261126o"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261126p"></script><script defer src="./core/core-app.js?v=20261126p"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
