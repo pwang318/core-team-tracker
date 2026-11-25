@@ -10749,8 +10749,9 @@ async function pfrLoad(){
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div style="font-size:10px;font-weight:800;color:#35657C;letter-spacing:.09em">30-MINUTE TEAM PORTFOLIO MEETING</div><div style="font-size:19px;font-weight:800;color:#071B37;margin-top:3px">The results, the people, the decisions</div><div style="font-size:11px;color:#536B78;margin-top:4px">Power BI ${escHtml(sourceDate)} · Velocify ${meetingLeadsMTD} leads MTD${meetingLeadsMTD>leadsMTD?' · latest tracker checkpoint':' · through '+escHtml(latestLeadDate||'latest sync')} · tracker relationship history</div></div><button class="btn btn-sm" type="button" onclick="pfrExportMeetingBrief(this)">Download Word meeting record</button></div>
       ${pbSource.syncNote?'<p style="background:#fff7e7;padding:10px;border-radius:8px">'+escHtml(pbSource.syncNote)+'</p>':''}
       <div style="background:#fff;border:1px solid #DCE7EC;border-radius:10px;padding:13px;margin-top:14px"><b>Weighted result: ${(tierPoints+referralPoints+activePoints).toFixed(1)} / 100</b><div style="font-size:12px;color:#526575;margin-top:4px">Outcome measures: partner tiers /50 · completed-month referrals /30 · active partners /20. Activities guide the work; they do not add points by themselves.</div></div>
+      <section data-weekly-actions class="cx cx-card" style="margin-top:14px"></section>
       ${agenda.map(function(section,i){return `<section style="background:#fff;border:1px solid #DCE7EC;border-radius:10px;padding:14px;margin-top:10px"><h3 style="font-size:14px;margin:0 0 6px">${i+1}. ${escHtml(section.title)} <span style="font-weight:400;color:#536B78">· ${section.minutes} min</span></h3>${section.result?'<div style="font-weight:700;font-size:12px">'+escHtml(section.result)+'</div>':''}<p style="font-size:12px;line-height:1.5;margin:7px 0">${escHtml(section.context)}</p>${section.people.length?`<div style="font-size:11px;font-weight:700;margin:10px 0 4px">Partners to review</div><ul style="margin:0 0 9px;padding-left:19px;font-size:12px;line-height:1.65">${section.people.map(function(person){return `<li>${escHtml(person)}</li>`;}).join('')}</ul>`:''}${section.talkingPoints.length?`<div style="font-size:11px;font-weight:700;margin:8px 0 4px">Talk through</div><ol style="margin:0 0 9px;padding-left:19px;font-size:12px;line-height:1.65">${section.talkingPoints.map(function(point){return `<li>${escHtml(point)}</li>`;}).join('')}</ol>`:''}<p style="font-size:12px;line-height:1.5;margin:6px 0"><b>Decide:</b> ${escHtml(section.question)}</p><label style="display:block;font-size:11px;font-weight:700;margin-top:9px">Decision · owner · due date</label><textarea data-portfolio-decision="${section.key}" oninput="pfrSaveMeetingDecisions()" rows="2" placeholder="Record the action, owner and due date" style="display:block;width:100%;box-sizing:border-box;border:1px solid #CBD8E3;border-radius:8px;padding:9px;font:inherit;margin-top:4px"></textarea></section>`;}).join('')}
-      <p style="font-size:11px;color:#526575;margin-bottom:0">Decisions save in this browser. Download the Word document after the meeting to share the completed handoff.</p>
+      <p style="font-size:11px;color:#526575;margin-bottom:0">Meeting notes save in this browser. Record team commitments under Shared weekly actions.</p>
     </div>`;
 
     html+=referralWatchMarkup;
@@ -10989,6 +10990,8 @@ function pfrCompactOverview(body,summaries,directorRows){
       body._portfolioDetail.replaceChildren(card);
       if(tile.dataset.priority!==undefined)tile.closest('section').after(body._portfolioDetail);
       else tile.after(body._portfolioDetail);
+      var actions=card.querySelector('[data-weekly-actions]');
+      if(actions&&window.CoreApp)window.CoreApp.renderWeeklyActions(actions);
       body.querySelectorAll('[data-portfolio-topic]').forEach(function(b){b.classList.toggle('active',b===tile);b.setAttribute('aria-expanded',b===tile?'true':'false');});
     });
     body.dataset.portfolioNavInstalled='1';
@@ -14576,7 +14579,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125j"></script><script defer src="./core/core-app.js?v=20261125k"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125j"></script><script defer src="./core/core-app.js?v=20261125m"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];

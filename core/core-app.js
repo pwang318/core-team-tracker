@@ -304,6 +304,8 @@
     return (v && v.classList.contains('active') && typeof window.currentUser === 'string' && LPS.indexOf(window.currentUser) >= 0) ? window.currentUser : null;
   }
   function renderAll() {
+    var weeklyActions = $('[data-weekly-actions]');
+    if (weeklyActions && weeklyActions.weeklyActionsAccess && !weeklyActions.weeklyActionsAccess()) renderWeeklyActions(weeklyActions);
     if ($('#view-lp') && $('#view-lp').classList.contains('active')) renderToday();
     if ($('#view-core-command') && $('#view-core-command').classList.contains('active')) renderCommand();
     if ($('#view-core-plan') && $('#view-core-plan').classList.contains('active')) renderPlan();
@@ -345,10 +347,77 @@
   }
   function managerSignIn() {
     var code = window.prompt('Manager passcode'); if (!code) return;
-    rpc('core_api_session', { p_key: code.trim() }).then(function (r) {
+    return rpc('core_api_session', { p_key: code.trim() }).then(function (r) {
       if (!r || (r.tier !== 'manager' && r.tier !== 'admin')) throw new Error('CORE_FORBIDDEN: That passcode does not unlock manager actions.');
       setMgrKey(code.trim()); toast('Manager actions unlocked on this device.'); S.loadedAt = null; return loadAll();
     }).catch(function (e) { toast(friendlyServerError(e), true); });
+  }
+
+  function renderWeeklyActions(host) {
+    var key = activeKey();
+    var tier = S.tier;
+    var writable = tier === 'manager' || tier === 'admin';
+    function sameAccess() { return activeKey() === key && S.tier === tier; }
+    function current() { return host.isConnected && host.weeklyActionsAccess === sameAccess && sameAccess(); }
+    host.weeklyActionsAccess = sameAccess;
+    if (!key || !['manager', 'leader', 'admin'].includes(tier)) {
+      host.innerHTML = '<h3>Shared weekly actions</h3><p class="cx-note">Use manager access to record and review shared commitments.</p><button type="button" class="cx-btn">Manager sign-in</button>';
+      $('button', host).onclick = function () {
+        var signIn = managerSignIn();
+        if (signIn) signIn.then(function () { if (current()) renderWeeklyActions(host); });
+      };
+      return;
+    }
+    function actionRow(row) {
+      return '<article class="cx-card"><h3>' + esc(row.next_action) + '</h3><p class="cx-note">' +
+        esc(row.area + ' · ' + row.owner_name + ' · Due ' + fmtDate(row.due_date)) +
+        (!row.completed_at && row.due_date < today() ? ' · Overdue' : '') +
+        '</p><p><b>Success measure</b> ' + esc(row.success_measure) + '</p>' +
+        (row.completed_at ? '<p><b>Result</b> ' + esc(row.result) + '</p>' :
+          writable ? '<form data-complete-action="' + esc(row.id) + '" class="cx-row"><label>Result <input required name="result" maxlength="500"></label><button class="cx-btn">Mark complete</button></form>' : '') + '</article>';
+    }
+    function bindSave(form, mode, extra) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var button = $('button', form);
+        if (button.disabled) return;
+        var fields = Object.assign(Object.fromEntries(new FormData(form)), extra);
+        if (Object.values(fields).some(function (value) { return !String(value).trim(); })) {
+          toast('Complete each field before saving.', true); return;
+        }
+        if (!current()) { renderWeeklyActions(host); return; }
+        button.disabled = true;
+        apiAct('core_api_weekly_actions', { p_action: mode, p: fields }).then(function (result) {
+          if (!result || result.id !== fields.id) throw new Error('The server did not confirm the action.');
+          if (current()) renderWeeklyActions(host);
+        }).catch(function (error) {
+          if (current()) { button.disabled = false; toast(friendlyServerError(error), true); }
+        });
+      });
+    }
+    host.innerHTML = '<h3>Shared weekly actions</h3><p class="cx-note" role="status">Loading commitments…</p>';
+    apiAct('core_api_weekly_actions', { p_action: 'list', p: {} }).then(function (rows) {
+      if (!current()) return;
+      var open = rows.filter(function (row) { return !row.completed_at; });
+      var completed = rows.filter(function (row) { return row.completed_at; });
+      host.innerHTML = '<h3>Shared weekly actions</h3><p class="cx-note">Review open commitments first. Add one priority per area and record the result when it’s done.</p>' +
+        (open.length ? open.map(actionRow).join('') : '<p>No open commitments.</p>') +
+        (writable ? '<details><summary>Add a commitment</summary><form data-add-action class="cx-stack">' +
+          '<label class="cx-f">Area <select name="area"><option>Production</option><option>Relationships</option><option>Leadership</option></select></label>' +
+          '<label class="cx-f">Owner <input name="owner_name" required maxlength="80"></label>' +
+          '<label class="cx-f">Next action <input name="next_action" required maxlength="500"></label>' +
+          '<label class="cx-f">Due date <input type="date" name="due_date" required></label>' +
+          '<label class="cx-f">Success measure <input name="success_measure" required maxlength="500"></label>' +
+          '<button class="cx-btn primary">Save commitment</button></form></details>' : '') +
+        (completed.length ? '<details><summary>Recently completed (' + completed.length + ')</summary>' + completed.map(actionRow).join('') + '</details>' : '');
+      var add = $('[data-add-action]', host);
+      if (add) bindSave(add, 'create', { id: crypto.randomUUID() });
+      $all('[data-complete-action]', host).forEach(function (form) { bindSave(form, 'complete', { id: form.dataset.completeAction }); });
+    }).catch(function (error) {
+      if (!current()) return;
+      host.innerHTML = '<h3>Shared weekly actions</h3><p class="cx-note">' + esc(friendlyServerError(error)) + '</p><button type="button" class="cx-btn">Retry</button>';
+      $('button', host).onclick = function () { renderWeeklyActions(host); };
+    });
   }
 
   // ================================================================ LP homepage
@@ -1627,6 +1696,6 @@
     window.addEventListener('hashchange', function () { var k = readHashKey(); if (k) { setKey(k); loadAll(); } });
     window.addEventListener('storage', function (e) { if (e.key === KEY_STORE) { teamKey = e.newValue; loadAll(); } });
   }
-  window.CoreApp = { open: openView, openTuesdayWorklist: openTuesdayWorklist, renderCoaching: renderCoaching, managerSignIn: managerSignIn, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, refreshBuilderTile: refreshBuilderTile, _rpc: function (fn, args) { return apiAct(fn, args); } };
+  window.CoreApp = { open: openView, openTuesdayWorklist: openTuesdayWorklist, renderCoaching: renderCoaching, managerSignIn: managerSignIn, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, refreshBuilderTile: refreshBuilderTile, renderWeeklyActions: renderWeeklyActions, _rpc: function (fn, args) { return apiAct(fn, args); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
