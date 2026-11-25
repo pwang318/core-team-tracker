@@ -10926,11 +10926,16 @@ function pfrCompactOverview(body,summaries){
     {label:'Leadership escalations',find:'Required Leadership Escalations',group:'activity'}
   ];
   var nav=document.createElement('div');nav.className='pfr-overview';
-  var groups={};
-  [['Start here','Meeting preparation'],['numbers','Portfolio performance'],['relationships','Partner follow-up'],['activity','Actions and feedback']].forEach(function(pair){
+  var priorities=document.createElement('section'), heading=document.createElement('h3'), priorityGrid=document.createElement('div');
+  heading.textContent='Start here';priorityGrid.className='pfr-overview-grid';
+  priorities.append(heading,priorityGrid);nav.append(priorities);
+  var reports=document.createElement('details'), summary=document.createElement('summary');
+  summary.textContent='More portfolio reports';reports.append(summary);nav.append(reports);
+  var groups={priority:priorityGrid};
+  [['numbers','Portfolio performance'],['relationships','Partner follow-up'],['activity','Actions and feedback']].forEach(function(pair){
     var section=document.createElement('section'), title=document.createElement('h3'), grid=document.createElement('div');
     title.textContent=pair[1];grid.className='pfr-overview-grid';
-    section.append(title,grid);nav.append(section);groups[pair[0]]=grid;
+    section.append(title,grid);reports.append(section);groups[pair[0]]=grid;
   });
   var detail=document.createElement('section');detail.className='lp-portfolio-active-detail';
   cards.forEach(function(card,i){
@@ -10941,7 +10946,10 @@ function pfrCompactOverview(body,summaries){
     var tile=document.createElement('button');tile.type='button';tile.className='lp-portfolio-topic-tile';tile.dataset.portfolioTopic=String(i);tile.setAttribute('aria-expanded','false');
     var label=document.createElement('strong'),metric=document.createElement('span'),arrow=document.createElement('span');
     label.textContent=entry.label;metric.textContent=summaries[entry.label]||'View details';arrow.textContent='›';arrow.setAttribute('aria-hidden','true');arrow.className='pfr-arrow';
-    tile.append(label,metric,arrow);groups[entry.group].append(tile);
+    tile.append(label,metric,arrow);
+    var primary=['90-day referral watch','Proactive watch','Meeting brief'].indexOf(entry.label);
+    if(primary>=0){tile.dataset.priority=primary;var next=Array.from(priorityGrid.children).find(function(b){return Number(b.dataset.priority)>primary;});priorityGrid.insertBefore(tile,next||null);}
+    else groups[entry.group].append(tile);
     card.querySelectorAll('[onclick]').forEach(function(control){
       if(control.matches('a,button,[role="button"]'))return;
       control.setAttribute('role','button');control.setAttribute('tabindex','0');
@@ -10958,7 +10966,8 @@ function pfrCompactOverview(body,summaries){
         body._portfolioDetail.remove();tile.classList.remove('active');tile.setAttribute('aria-expanded','false');return;
       }
       body._portfolioDetail.replaceChildren(card);
-      tile.after(body._portfolioDetail);
+      if(tile.dataset.priority!==undefined)tile.closest('section').after(body._portfolioDetail);
+      else tile.after(body._portfolioDetail);
       body.querySelectorAll('[data-portfolio-topic]').forEach(function(b){b.classList.toggle('active',b===tile);b.setAttribute('aria-expanded',b===tile?'true':'false');});
     });
     body.dataset.portfolioNavInstalled='1';
@@ -14546,7 +14555,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125j"></script><script defer src="./core/core-app.js?v=20261125j"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125j"></script><script defer src="./core/core-app.js?v=20261125k"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];

@@ -1467,6 +1467,30 @@
       lpShortcut('execution-coaching', 'Weekly scorecards & coaching', missing === null ? 'Unavailable' : missing + ' scorecards missing') +
       '</div></section>';
   }
+  function fundingForecast(range, date, actual, target) {
+    if (!S.tier || !S.loadedAt || S.error || !hasImport('pipeline') || actual === null) {
+      return '<section class="cx-card"><h3>Funding forecast</h3><p class="cx-note">Requires current pipeline and verified funding data.</p></section>';
+    }
+    var loans = Object.values(S.loans).filter(function (loan) {
+      return loan.pipeline_status === 'active' && !loan.funding_verified;
+    });
+    var scheduled = loans.filter(function (loan) {
+      return L.inRange(loan.est_closing_date, range) && loan.est_closing_date >= date;
+    }).sort(function (a, b) { return a.est_closing_date.localeCompare(b.est_closing_date); });
+    var past = date <= range.end ? loans.filter(function (loan) {
+      return loan.est_closing_date && loan.est_closing_date < date;
+    }) : [];
+    var forecast = actual + scheduled.length, gap = Math.max(0, target - forecast);
+    S._rec['forecast-scheduled'] = { title: 'Scheduled closings in the forecast', loans: scheduled };
+    S._rec['forecast-past'] = { title: 'Active loans with past estimated closing dates', loans: past };
+    return '<section class="cx-card"><h3>Funding forecast</h3><div class="cx-sub">Through ' + esc(fmtDate(range.end)) + '</div>' +
+      '<div class="cx-tiles" style="margin-top:12px">' +
+      planTile('Verified funded', String(actual), 'Recorded through today') +
+      planTile('Scheduled to close', String(scheduled.length), 'Open pipeline loans with an estimated date in this period', '', 'forecast-scheduled') +
+      planTile('If all scheduled loans fund', forecast + ' / ' + target, gap ? gap + ' more fundings needed' : 'Scheduled volume covers the target') +
+      '</div><p class="cx-note">Daniel reviews the gap at the weekly meeting. Mack confirms closing dates and gives each blocker an owner and due date.</p>' +
+      (past.length ? '<button type="button" class="cx-btn" data-plan-rec="forecast-past">Review ' + past.length + ' past closing dates</button>' : '') + '</section>';
+  }
   function renderPlan() {
     var host = $('#view-core-plan'); if (!host) return;
     var P = L.PLAN, t0 = today(), y = P.year;
@@ -1536,7 +1560,7 @@
     host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Leadership</div><h2>Growth &amp; Execution Plan</h2><div class="cx-sub">' + esc(periodLabel) + ' · Targets from the final CORE Team 2027 Business Plan</div></div>' +
       '<div class="cx-tabs">' + [['month', 'Month'], ['quarter', 'Quarter'], ['year', 'Year']].map(function (p) { return '<button type="button" class="cx-tab' + (per === p[0] ? ' on' : '') + '" data-per="' + p[0] + '">' + p[1] + '</button>'; }).join('') + '</div></div>' +
       (S.tier ? syncLine() : accessCard('Unlock funded loans, referrals and team execution')) +
-      weeklyFocus + executionThisWeek(t0) +
+      weeklyFocus + fundingForecast(range, t0, funded ? funded.filter(function (loan) { return loan.closed_date <= t0; }).length : null, fundTarget) + executionThisWeek(t0) +
       (baseline ? '<p class="cx-note">Velocify · last 30 days · ' + baseline.relationship.length + ' relationship leads · ' +
         baseline.advertising.length + ' recorded advertising leads · ' + baseline.unclassified.length + ' need source review</p>' : '') +
       '<div class="cx-note">LPs work their call lists and log referrals. Mack reviews overdue work and scorecards each week. Daniel reviews pipeline, referrals, and production pace at the weekly meeting.</div>' +
