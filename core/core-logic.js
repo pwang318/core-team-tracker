@@ -339,7 +339,7 @@
     if (t.borrower_outcome !== 'conversation') e.push('Borrower conversation required (voicemail, text or no answer is an attempt, not a completed conversation)');
     if (!t.conversation_at) e.push('Conversation date and time required');
     else if (new Date(t.conversation_at).getTime() > Date.now() + 5 * 60000) e.push('Conversation time cannot be in the future');
-    if (len(t.borrower_notes) < 20) e.push('Borrower conversation notes required (20+ characters)');
+    if (t.task_type === 'tuesday' ? len(t.borrower_notes) < 1 : len(t.borrower_notes) < 20) e.push(t.task_type === 'tuesday' ? 'Update notes required' : 'Borrower conversation notes required (20+ characters)');
     (t.task_type === 'tuesday' ? [] : CHECKS[t.task_type] || []).forEach(function (c) {
       var k = c[0];
       if (!(checks[k] === true || (k === 'rate_drop_pledge' && checks.rate_drop_na === true))) e.push('Conversation step not confirmed: ' + k);
@@ -348,7 +348,7 @@
     if (t.task_type !== 'contract' && !t.referral_response) e.push('Referral response required');
     if (t.referral_response === 'named_introduction') {
       if (len(t.referral_name) < 2) e.push('Named introduction requires the referral name');
-      if (len(t.crm_reference) < 3) e.push('Named introduction requires the CRM (Velocify) reference');
+      if (t.task_type !== 'tuesday' && len(t.crm_reference) < 3) e.push('Named introduction requires the CRM (Velocify) reference');
     }
     if (t.concern_status === 'unresolved') e.push('Unresolved client concern: record service recovery instead of completing');
     if (t.concern_status === 'resolved' && len(t.concern_notes) < 10) e.push('Describe the concern and how it was resolved');

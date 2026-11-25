@@ -124,7 +124,8 @@ async function fillTuesday(page, opts) {
   await page.fill('#cx-bn', 'Reviewed approval conditions and the appraisal timeline with the borrower');
   if (await page.$('#cx-su')) await page.fill('#cx-su', 'Approval received; appraisal at value; on track for closing');
   await page.check('.cx-overlay input[name="referral_requested"]');
-  await page.selectOption('#cx-rr', opts.referral || 'asked_no_referral');
+  if (await page.$('#cx-rr input[type="radio"]')) await page.check('#cx-rr input[value="' + (opts.referral || 'asked_no_referral') + '"]');
+  else await page.selectOption('#cx-rr', opts.referral || 'asked_no_referral');
   if (await page.$('#cx-agent') && opts.agent !== 'no_buyer_agent') {
     await page.check('#cx-agent input[value="' + (opts.agent || 'spoke') + '"]');
     if (await page.$('#cx-agent-notes:not(.cx-hide)')) {

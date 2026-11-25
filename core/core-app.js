@@ -840,24 +840,26 @@
       (isTue ? '' : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
       '<label class="cx-f" for="cx-bo">Borrower contact outcome</label><select id="cx-bo" name="borrower_outcome"' + dis + '>' + borrowerOutcomeOptions(t) + '</select>' +
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
-      (isTue ? '<label class="cx-f" for="cx-bn">Borrower update notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="Summarize the loan status, what you discussed, and any borrower questions."' + dis + '>' +
+      (isTue ? '<label class="cx-f" for="cx-bn">Update notes</label><textarea id="cx-bn" name="borrower_notes" rows="2" placeholder="e.g. Appraisal in, on track to close 12/12"' + dis + '>' +
         esc([t.service_update, t.borrower_notes].filter(function (note, i, notes) { return note && notes.indexOf(note) === i; }).join('\n\n')) + '</textarea>' : '') +
-      (isTue ? '<details id="cx-borrower-details" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"><b>Call script and time</b></summary><p class="cx-note">' + esc(L.SCRIPT_NOTES[type]) + '</p>' : '') +
+      (isTue ? '<input id="cx-cat" type="hidden" name="conversation_at" value="' + esc(toLocalInput(t.conversation_at)) + '">' :
       '<label class="cx-f" for="cx-cat">Conversation date and time</label><input id="cx-cat" type="datetime-local" name="conversation_at" value="' + esc(toLocalInput(t.conversation_at)) + '"' + dis + '>' +
-      (isTue ? '<ul>' + L.CHECKS.tuesday.map(function (step) { return '<li>' + esc(step[1]) + '</li>'; }).join('') + '</ul>' :
-      '<div style="margin-top:12px"><div class="cx-f" style="margin:0 0 4px">Conversation steps</div>' + checks + '</div>') +
-      (isTue ? '' : '<label class="cx-f" for="cx-bn">Borrower conversation notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="What was discussed, in your own words"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>') +
-      (isTue ? '</details>' : '') +
-      (isTue ? '<section id="cx-tuesday-ccr">' : '') + '<h3 style="margin-top:18px">' + (type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
+      '<div style="margin-top:12px"><div class="cx-f" style="margin:0 0 4px">Conversation steps</div>' + checks + '</div>' +
+      '<label class="cx-f" for="cx-bn">Borrower conversation notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="What was discussed, in your own words"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>') +
+      (isTue ? '<section id="cx-tuesday-ccr">' : '') + '<h3 style="margin-top:18px">' + (isTue ? 'Ask for a referral (CCR)' : type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
       (isTue ? '<blockquote id="cx-ccr-script" class="cx-script" style="margin:8px 0 0">' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '') +
       (isTue ? '' : '<label class="cx-check' + (referralAsked ? ' done' : '') + '" style="margin-top:8px"><input type="checkbox" name="referral_requested"' + (referralAsked ? ' checked' : '') + dis + '><span><b>I asked the referral question on this call.</b></span></label>') +
-      '<label class="cx-f" for="cx-rr">' + (isTue ? 'CCR response after asking' : 'Client response') + '</label><select id="cx-rr" name="referral_response"' + dis + '>' + opts(L.REFERRAL_RESPONSES, t.referral_response, 'Select response') + '</select>' +
+      (isTue ? '<fieldset id="cx-rr" class="cx-row" style="border:0;padding:0;margin:10px 0 0;min-width:0;gap:8px"' + dis + '><legend class="cx-f">Their answer</legend>' +
+        [['asked_no_referral', 'No one']].concat(['potential_opportunity', 'own_financing'].includes(t.referral_response) ? [L.REFERRAL_RESPONSES.find(function (r) { return r[0] === t.referral_response; })] : [], [['named_introduction', 'Gave a name']]).map(function (r) {
+          return '<label class="cx-check" style="flex:1;min-width:130px;justify-content:center;padding:12px;font-weight:700"><input type="radio" name="referral_response" value="' + esc(r[0]) + '"' + (r[0] === t.referral_response ? ' checked' : '') + '><span>' + esc(r[1]) + '</span></label>';
+        }).join('') + '</fieldset>' :
+      '<label class="cx-f" for="cx-rr">Client response</label><select id="cx-rr" name="referral_response"' + dis + '>' + opts(L.REFERRAL_RESPONSES, t.referral_response, 'Select response') + '</select>') +
       '<div id="cx-named"' + (t.referral_response === 'named_introduction' ? '' : ' class="cx-hide"') + '><div class="cx-split"><div><label class="cx-f" for="cx-rn">Referral name</label><input id="cx-rn" type="text" name="referral_name" value="' + esc(t.referral_name || '') + '"' + dis + '></div>' +
       '<div><label class="cx-f" for="cx-rc">Referral phone or email</label><input id="cx-rc" type="text" name="referral_contact" value="' + esc(t.referral_contact || '') + '"' + dis + '></div></div>' +
-      '<div class="cx-split"><div><label class="cx-f" for="cx-crm">CRM (Velocify) reference · required</label><input id="cx-crm" type="text" name="crm_reference" value="' + esc(t.crm_reference || '') + '"' + dis + '></div>' +
+      '<div class="cx-split' + (isTue ? ' cx-hide' : '') + '"><div><label class="cx-f" for="cx-crm">CRM (Velocify) reference · required</label><input id="cx-crm" type="text" name="crm_reference" value="' + esc(t.crm_reference || '') + '"' + dis + '></div>' +
       '<div><label class="cx-f" for="cx-rs">Referral status</label><select id="cx-rs" name="referral_status"' + dis + '>' + opts([['open', 'Open'], ['in_process', 'Application in process'], ['funded', 'Funded'], ['lost', 'Did not proceed']], t.referral_status, 'Select') + '</select></div></div>' +
-      '<label class="cx-f" for="cx-ft">Follow-through notes</label><textarea id="cx-ft" name="followthrough_note"' + dis + '>' + esc(t.followthrough_note || '') + '</textarea></div>' +
-      (isTue ? '</section>' : '') + (isTue ? '<details class="cx-card" style="margin-top:12px;padding:14px"' + (t.concern_status && t.concern_status !== 'none' ? ' open' : '') + '><summary style="cursor:pointer"><b>Client concern</b></summary>' : '<h3 style="margin-top:18px">Client experience</h3>') +
+      '<label class="cx-f' + (isTue ? ' cx-hide' : '') + '" for="cx-ft">Follow-through notes</label><textarea id="cx-ft" name="followthrough_note"' + (isTue ? ' class="cx-hide"' : '') + dis + '>' + esc(t.followthrough_note || '') + '</textarea></div>' +
+      (isTue ? '</section>' : '') + (isTue ? '<details style="margin-top:12px"' + (t.concern_status && t.concern_status !== 'none' ? ' open' : '') + '><summary class="cx-note" style="cursor:pointer">Client had a concern?</summary>' : '<h3 style="margin-top:18px">Client experience</h3>') +
       '<label class="cx-f" for="cx-cs">Any concern raised?</label><select id="cx-cs" name="concern_status"' + dis + '>' + opts([['none', 'No concern'], ['resolved', 'Concern raised and resolved on this call'], ['unresolved', 'Unresolved concern: resolution required']], t.concern_status || 'none') + '</select>' +
       '<div id="cx-concern"' + ((t.concern_status || 'none') === 'none' ? ' class="cx-hide"' : '') + '><label class="cx-f" for="cx-cn">Concern details and what was done</label><textarea id="cx-cn" name="concern_notes"' + dis + '>' + esc(t.concern_notes || '') + '</textarea>' +
       '<label class="cx-check" style="margin-top:8px"><input type="checkbox" name="escalated"' + (t.escalated ? ' checked' : '') + dis + '><span>Escalate to the Production Manager</span></label></div>' +
@@ -868,23 +870,23 @@
           return '<label class="cx-check"><input type="radio" name="agent_outcome" value="' + esc(outcome[0]) + '"' + (outcome[0] === t.agent_outcome ? ' checked' : '') + '><span>' + esc(outcome[1]) + '</span></label>';
         }).join('') + '</fieldset>' +
         '<details id="cx-agent-notes"' + (t.agent_notes || ['spoke', 'update_sent'].includes(t.agent_outcome) ? '' : ' class="cx-hide"') + '><summary>Optional buyer-agent notes</summary><label class="cx-f" for="cx-an">Buyer-agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></details></section>' : isTue ? '<p class="cx-note">No buyer-agent update required. No agent is on file.</p><input type="hidden" name="agent_outcome" value="' + esc(t.agent_outcome || (editable ? 'no_buyer_agent' : '')) + '">' : '') +
-      '<details id="cx-follow-up" class="cx-card" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>Follow-up</b></summary><div class="cx-split"><div>' +
+      '<details id="cx-follow-up" class="cx-card" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>' + (isTue ? 'Try again on' : 'Follow-up') + '</b></summary><div class="cx-split"><div' + (isTue ? ' class="cx-hide"' : '') + '>' +
       '<label class="cx-f" for="cx-na-choice">Next action</label><select id="cx-na-choice"' + dis + '>' +
       opts(nextActions.map(function (action) { return [action, action]; }).concat([['other', 'Other next action']]), selectedNextAction, 'Select next action') + '</select>' +
       '<div id="cx-na-other"' + (selectedNextAction === 'other' ? '' : ' class="cx-hide"') + '><label class="cx-f" for="cx-na">Describe the next action</label><input id="cx-na" type="text" name="next_action" value="' + esc(selectedNextAction === 'other' ? t.next_action : '') + '"' + dis + '></div></div>' +
 
-      '<div><label class="cx-f" for="cx-nd">Follow-up date</label><input id="cx-nd" type="date" name="next_action_date" value="' + esc(t.next_action_date || '') + '"' + dis + '></div></div></details>' +
+      '<div><label class="cx-f" for="cx-nd">' + (isTue ? 'Next attempt date' : 'Follow-up date') + '</label><input id="cx-nd" type="date" name="next_action_date" value="' + esc(t.next_action_date || '') + '"' + dis + '></div></div></details>' +
       (editable && !isTue ? '<details id="cx-reqs" class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"></summary><div style="margin-top:8px"></div></details>' : '') +
       '<div id="cx-exception" class="cx-card cx-hide" style="margin-top:14px;padding:14px"><h3>Client concern or exception</h3><p class="cx-note">Use when a concern needs resolution or the required conversation could not happen. It is not counted as completed.</p>' +
       '<label class="cx-f" for="cx-ek">Type</label><select id="cx-ek" name="exception_kind">' + opts([['service_recovery', 'Client concern: resolution required'], ['unreachable', 'Borrower unreachable after attempts'], ['other', 'Other documented circumstance']], t.exception_kind || 'service_recovery') + '</select>' +
       '<label class="cx-f" for="cx-er">Circumstance and recovery action</label><textarea id="cx-er" name="exception_reason">' + esc(t.exception_reason || '') + '</textarea>' +
       '<div class="cx-row" style="margin-top:10px"><button type="button" class="cx-btn primary" data-cx="save-exception">Save</button><button type="button" class="cx-btn ghost" data-cx="cancel-exception">Cancel</button></div></div>' +
       (isManager() ? managerBlock(t) : '') +
-      (isTue ? '<details class="cx-card" style="margin-top:12px;padding:14px"><summary style="cursor:pointer"><b>Activity history</b></summary>' : '<h3 style="margin-top:22px">Conversation and activity history</h3>') + '<div id="cx-history" style="margin-top:8px">' + historyHtml(id) + '</div>' + (isTue ? '</details>' : '') +
+      (isTue ? '' : '<h3 style="margin-top:22px">Conversation and activity history</h3><div id="cx-history" style="margin-top:8px">' + historyHtml(id) + '</div>') +
       '<div class="cx-drawer-foot"><span id="cx-save-state" class="cx-note" aria-live="polite"></span>' +
       (editable && isTue ? '<span id="cx-complete-hint" class="cx-note" role="status" tabindex="-1"></span>' : '') +
-      (editable ? '<button type="button" class="cx-btn" data-cx="save">Save progress</button><button type="button" class="cx-btn accent" data-cx="complete">Complete ' + esc(typeLabel(type)) + '</button><button type="button" class="cx-btn ghost" data-cx="show-exception">Concern or exception</button>' : '') +
-      '<button type="button" class="cx-btn ghost" data-cx="close">Close</button></div></form>';
+      (editable ? '<button type="button" class="cx-btn" data-cx="save">' + (isTue ? 'Save' : 'Save progress') + '</button><button type="button" class="cx-btn accent" data-cx="complete">' + (isTue ? 'Done' : 'Complete ' + esc(typeLabel(type))) + '</button><button type="button" class="cx-btn ghost" data-cx="show-exception">Concern or exception</button>' : '') +
+      (isTue ? '' : '<button type="button" class="cx-btn ghost" data-cx="close">Close</button>') + '</div></form>';
     wireDrawer(ov, t, editable);
   }
   function managerBlock(t) {
@@ -913,6 +915,7 @@
     }
     var nextChoice = $('#cx-na-choice', form);
     if (nextChoice && nextChoice.value !== 'other') p.next_action = nextChoice.value || null;
+    if (t.task_type === 'tuesday') p.next_action = p.next_action_date ? (t.next_action && t.next_action.length >= 3 ? t.next_action : 'Call the borrower back') : null;
     var ca = form.querySelector('[name="conversation_at"]'); if (ca) p.conversation_at = fromLocalInput(ca.value);
     var rq = form.querySelector('[name="referral_requested"]');
     if (t.task_type === 'tuesday') p.referral_requested = p.borrower_outcome === 'conversation' && !!p.referral_response;
@@ -966,7 +969,7 @@
         var hint = $('#cx-complete-hint', ov);
         if (hint.textContent) hint.textContent = !attempted && errs.length ? L.friendlyError(errs[0]) : '';
         cb.classList.toggle('cx-hide', attempted);
-        $('[data-cx="save"]', ov).textContent = textUpdate ? 'Save update text' : 'Save progress';
+        $('[data-cx="save"]', ov).textContent = textUpdate ? 'Save update text' : 'Save';
       }
       var bo = p.borrower_outcome, ar = $('#cx-attempt-row', ov);
       if (ar) {
@@ -981,7 +984,10 @@
         if (compact && !bo) ar.textContent = 'Call first. If they don’t answer, leave a voicemail if available and text the loan update before saving.';
       }
       var followUp = $('#cx-follow-up', ov);
+      if (compact && followUp) followUp.classList.toggle('cx-hide', !updateTextSelected());
       if (compact && followUp && updateTextSelected() && !p.next_action_date) followUp.open = true;
+      var exBtn = $('[data-cx="show-exception"]', ov);
+      if (compact && exBtn) exBtn.classList.toggle('cx-hide', p.concern_status !== 'unresolved');
       var la = $('[data-cx="log-attempt"]', ov); if (la) la.onclick = function () { logAttempt(bo); };
       var named = $('#cx-named', ov); if (named) named.classList.toggle('cx-hide', p.referral_response !== 'named_introduction');
       var cc = $('#cx-concern', ov); if (cc) cc.classList.toggle('cx-hide', (p.concern_status || 'none') === 'none');
@@ -1062,12 +1068,13 @@
       save(patch, agentOnly ? 'Buyer-agent update saved.' : null).then(function () { renderDrawer(t.id); refreshEvents(t.id); renderAll(); }).catch(function () {});
     });
     on('complete', function () {
+      var cat = $('#cx-cat', ov);
+      if (compact && cat && !cat.value && $('#cx-bo', ov).value === 'conversation') cat.value = localInputNow();
       var errs = valid();
       if (errs.length) {
         if (compact) {
           var hint = $('#cx-complete-hint', ov);
           hint.textContent = L.friendlyError(errs[0]);
-          if (errs.some(function (e) { return /^Conversation /.test(e); })) $('#cx-borrower-details', ov).open = true;
           if (errs.some(function (e) { return /^(Next action|Follow-up date)/.test(e); })) $('#cx-follow-up', ov).open = true;
           var agentChoice = errs[0] === 'Buyer agent update required' && $('#cx-agent input', ov);
           (agentChoice || hint).focus();

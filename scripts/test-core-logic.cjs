@@ -97,11 +97,19 @@ t('Tuesday validation: a recorded CCR response needs no duplicate checklist', ()
   assert.ok(L.validateTask({ ...call, referral_requested: false }).some(x => x.includes('referral was requested')));
   assert.ok(L.validateTask({ ...call, next_action: 'Call back' }).some(x => x.includes('Follow-up date')));
 });
-t('Named introduction requires a CRM reference', () => {
+t('Tuesday named introduction needs only the name', () => {
   const nt = { ...base, referral_response: 'named_introduction', referral_name: 'Pat Example' };
-  assert.ok(L.validateTask(nt).some(x => x.includes('CRM')));
-  assert.ok(L.validateTask({ ...nt, followthrough_note: 'Called Pat, 1003 set Thursday' }).some(x => x.includes('CRM')), 'follow-through alone is not enough');
-  assert.deepEqual(L.validateTask({ ...nt, crm_reference: 'VEL-123' }), []);
+  assert.deepEqual(L.validateTask(nt), []);
+  assert.ok(L.validateTask({ ...nt, referral_name: '' }).some(x => x.includes('referral name')));
+});
+t('Tuesday notes are required but have no minimum length', () => {
+  assert.deepEqual(L.validateTask({ ...base, borrower_notes: 'On track' }), []);
+  assert.ok(L.validateTask({ ...base, borrower_notes: '' }).some(x => x.includes('Update notes required')));
+});
+t('Other calls: named introduction still requires a CRM reference', () => {
+  const pc = { ...base, task_type: 'pc30', script_checks: Object.fromEntries(L.CHECKS.pc30.map(c => [c[0], true])), next_action: '60-day call', next_action_date: '2027-01-01', referral_response: 'named_introduction', referral_name: 'Pat Example' };
+  assert.ok(L.validateTask(pc).some(x => x.includes('CRM')));
+  assert.deepEqual(L.validateTask({ ...pc, crm_reference: 'VEL-123' }).filter(x => x.includes('CRM')), []);
 });
 t('Tuesday validation: a buyer-agent outcome is required when an agent is on file', () => {
   for (const outcome of ['attempted','no_buyer_agent',null]) {
