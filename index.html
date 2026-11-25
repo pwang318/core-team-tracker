@@ -10885,7 +10885,7 @@ async function pfrLoad(){
       'Power BI agent tiers':powerBiActiveCount+' active agents · '+totalActive+' managed 90d',
       'Referral pace':meetingLeadsMTD+' partner referrals MTD',
       'Tier movement':(migCtoB+migBtoA+migAtoChannel+migOther)+' changes · '+range.label,
-      'Who needs outreach':referralApproaching.length+' nearing 90 days · '+proactiveWatch.length+' contact or referral reminders',
+      'Relationship risks':referralApproaching.length+' nearing 90 days · '+proactiveWatch.length+' contact or referral reminders',
       'Contact and referral reminders':proactiveWatch.length+' partners on watch',
       'Partner satisfaction':rated.length?avgSatisfaction+' / 5 · '+rated.length+'/'+powerBiActiveCount+' active agents rated':'0 of '+powerBiActiveCount+' active agents rated',
       'High-potential partners':highPotential.length+' documented · '+highPotentialNeedsReason.length+' needs reason',
@@ -10895,7 +10895,11 @@ async function pfrLoad(){
       'Service recovery':periodActs.filter(function(a){return a.act_type==='Service Recovery'}).length+' logged · '+range.label,
       'Partner feedback':periodActs.filter(function(a){return a.act_type==='Partner Feedback'}).length+' logged · '+range.label,
       'Leadership escalations':escalations.length+' flagged · '+range.label
-    });
+    },[
+      ['Production',pbSnapshot?pbPipeline.pipelineTotal+' in pipeline · '+pbPipeline.prequalsTotal+' active prequals':'Pipeline data unavailable','Mack reviews files that may slip and assigns next steps.'],
+      ['Relationships',referralApproaching.length+' nearing the 90-day referral mark','The RM owns outreach before the cutoff.'],
+      ['Leadership decisions',escalations.length+' escalations logged · '+range.label,'Review escalations and decide what needs leadership help.']
+    ]);
     body._portfolioCards[0]._portfolioExportData=meetingExportData;
     pfrRestoreMeetingDecisions(body._portfolioCards[0]);
   }catch(e){
@@ -10905,7 +10909,7 @@ async function pfrLoad(){
 }
 window.pfrLoad=pfrLoad;
 window.pfrGetHealthRows=function(){return Array.isArray(pfrDrill.rows)?pfrDrill.rows:null;};
-function pfrCompactOverview(body,summaries){
+function pfrCompactOverview(body,summaries,directorRows){
   var outreach=body.querySelector('#portfolio-referral-watch');
   var reminders=body.querySelector('#portfolio-contact-watch');
   if(outreach&&reminders){
@@ -10919,7 +10923,7 @@ function pfrCompactOverview(body,summaries){
     {label:'Power BI agent tiers',find:'Power BI Agent Levels',group:'numbers'},
     {label:'Referral pace',find:'Active Agent-to-Lead Ratio',group:'numbers'},
     {label:'Tier movement',find:'Tier Migration Progress',group:'numbers'},
-    {label:'Who needs outreach',find:'90-day referral watch',group:'relationships'},
+    {label:'Relationship risks',find:'90-day referral watch',group:'relationships'},
     {label:'Contact and referral reminders',find:'Contact and referral reminders',group:'relationships'},
     {label:'Partner health',find:'Partner Health',group:'relationships'},
     {label:'Partner satisfaction',find:'Partner Satisfaction',group:'relationships'},
@@ -10932,8 +10936,18 @@ function pfrCompactOverview(body,summaries){
     {label:'Leadership escalations',find:'Required Leadership Escalations',group:'activity'}
   ];
   var nav=document.createElement('div');nav.className='pfr-overview';
+  if(directorRows){
+    var overview=document.createElement('section'), overviewTitle=document.createElement('h3');
+    overviewTitle.textContent='Director overview';overview.append(overviewTitle);
+    directorRows.forEach(function(row){
+      var item=document.createElement('p'), title=document.createElement('strong');
+      title.textContent=row[0]+' · '+row[1];
+      item.append(title,document.createElement('br'),document.createTextNode(row[2]));overview.append(item);
+    });
+    nav.append(overview);
+  }
   var priorities=document.createElement('section'), heading=document.createElement('h3'), priorityGrid=document.createElement('div');
-  heading.textContent='Start here';priorityGrid.className='pfr-overview-grid';
+  heading.textContent='Weekly review';priorityGrid.className='pfr-overview-grid';
   priorityGrid.style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
   priorities.append(heading,priorityGrid);nav.append(priorities);
   var reports=document.createElement('details'), summary=document.createElement('summary');
@@ -10954,7 +10968,7 @@ function pfrCompactOverview(body,summaries){
     var label=document.createElement('strong'),metric=document.createElement('span'),arrow=document.createElement('span');
     label.textContent=entry.label;metric.textContent=summaries[entry.label]||'View details';arrow.textContent='›';arrow.setAttribute('aria-hidden','true');arrow.className='pfr-arrow';
     tile.append(label,metric,arrow);
-    var primary=['Who needs outreach','Meeting brief'].indexOf(entry.label);
+    var primary=['Meeting brief','Relationship risks'].indexOf(entry.label);
     if(primary>=0){tile.dataset.priority=primary;var next=Array.from(priorityGrid.children).find(function(b){return Number(b.dataset.priority)>primary;});priorityGrid.insertBefore(tile,next||null);}
     else groups[entry.group].append(tile);
     card.querySelectorAll('[onclick]').forEach(function(control){
