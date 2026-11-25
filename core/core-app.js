@@ -58,7 +58,7 @@
     return m;
   }
   function typeLabel(t) { return (L.TASK_TYPES[t] || {}).label || t; }
-  function borrowerOf(task) { var l = S.loans[task.loan_number]; return (l && l.borrower_name) || 'Loan ' + task.loan_number; }
+  function borrowerOf(task) { var l = S.loans[task.loan_number]; return (l && l.borrower_name) || 'Borrower name unavailable'; }
   function owner(task) { return L.effectiveOwner(task); }
   function lpLabel(lp) { return lp || 'Unassigned'; }
   function sortWork(a, b) { return String(L.workDueDate(a) || '').localeCompare(String(L.workDueDate(b) || '')) || borrowerOf(a).localeCompare(borrowerOf(b)); }
@@ -347,28 +347,7 @@
     var d = $('.cx-overlay[data-task]'); if (d && !d.__dirty) renderDrawer(d.dataset.task);
   }
 
-  // ================================================================ team access card
-  function accessCard(purpose) {
-    return '<div class="cx-card cx-signin"><div class="cx-kicker">Private team access</div><h3 style="margin-top:4px">' + esc(purpose) + '</h3>' +
-      (S.error ? '<div class="cx-err" style="margin-top:12px">' + esc(S.error) + '</div>' : '') +
-      '<p class="cx-note" style="margin-top:8px">Open the CORE team link, or paste it here once on this device. Borrower information is never shown without it.</p>' +
-      '<form data-cx="access"><label class="cx-f" for="cx-key">Team link or access key</label><input id="cx-key" type="password" autocomplete="off" spellcheck="false" required>' +
-      '<div class="cx-row" style="margin-top:14px"><button class="cx-btn primary" type="submit">Unlock</button></div></form></div>';
-  }
-  function teamLinkRecovery() {
-    return '<details class="cx-supporting" data-team-recovery' + (S.error ? ' open' : '') +
-      '><summary>Use shared team link</summary>' + accessCard('Open call worklists') + '</details>';
-  }
   function bindAccess(root) {
-    var f = root.querySelector('form[data-cx="access"]');
-    if (f) f.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var v = f.querySelector('#cx-key').value.trim(), m = v.match(/[#&]team=([^&\s]+)/);
-      var k = m ? new URLSearchParams('team=' + m[1]).get('team') : v;
-      var btn = f.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Checking…';
-      rpc('core_api_session', { p_key: k }).then(function () { setKey(k); S.error = null; return loadAll(); })
-        .catch(function (err) { S.error = friendlyServerError(err); renderAll(); });
-    });
     $all('[data-cx="forget"]', root).forEach(function (b) { b.addEventListener('click', function () { if (window.confirm('Remove the team access link from this device?')) forgetDevice(); }); });
     $all('[data-open-task]', root).forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input')) return; openDrawer(b.getAttribute('data-open-task')); }); });
     $all('[data-cx="refresh"]', root).forEach(function (b) { b.addEventListener('click', function () { S.scorecards = null; S.ext = null; loadAll(); }); });
@@ -493,7 +472,6 @@
     var meta = [typeLabel(t.task_type), (due !== t.due_date ? 'Follow up ' : 'Due ') + fmtDate(due)];
     if (['tuesday', 'contract', 'preclose'].includes(t.task_type)) {
       if (loan.loan_type) meta.push(loan.loan_type);
-      if (t.loan_number) meta.push('Loan ending ' + String(t.loan_number).slice(-4));
     }
     if (t.task_type === 'tuesday' && loan.est_closing_date) meta.push('Closing ' + fmtDate(loan.est_closing_date));
     if (/^pc/.test(t.task_type) && loan.closed_date) meta.push('Closed ' + fmtDate(loan.closed_date));
@@ -534,7 +512,7 @@
     if (!host) return;
     if (!activeKey() || !S.tier || !S.loadedAt || S.error) {
       host.innerHTML = '<div class="cx-empty" role="status">' + (S.error ? 'Live coaching totals are unavailable. Refresh to retry.' :
-        S.loading || activeKey() ? 'Loading live coaching totals…' : 'Open your shared CORE team link to see live coaching totals.') + '</div>';
+        S.loading || activeKey() ? 'Loading live coaching totals…' : 'Live coaching totals are unavailable in this view.') + '</div>';
       return;
     }
     var t0 = today(), closeBy = L.addDays(t0, 7), week = L.weekMonday(t0);
@@ -613,8 +591,7 @@
         (schedule.length ? '<div class="cx-list">' + schedule.map(function (row) {
           return '<div class="cx-item"><span class="i-name">' + esc(fmtDate(row.due_date)) + '</span><span class="i-meta">' +
             (row.status === 'attempted' ? 'Attempted' : 'Open') + '</span><span class="i-right">' + esc(row.total) + '</span></div>';
-        }).join('') + '</div>' : '<div class="cx-empty">Open your private worklist to confirm what is due.</div>') +
-        '<p class="cx-note" style="margin-top:10px">Open your shared team link for borrower records and call logging.</p>' : '') + '</div></div>';
+        }).join('') + '</div>' : '<div class="cx-empty">No schedule entries for this period.</div>') : '') + '</div></div>';
   }
 
   var renderedLp = null, lpPanel = null;
@@ -652,16 +629,7 @@
       return;
     }
     if (!privateView) {
-      var recovery = $('[data-team-recovery]', host);
-      host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) +
-        (S.loading ? '<div class="cx-note" role="status">Loading team access…</div>' : teamLinkRecovery()) + '</div>';
-      if (recovery && !S.loading) {
-        var newRecovery = $('[data-team-recovery]', host);
-        newRecovery.open = recovery.open || !!S.error;
-        var newInput = $('#cx-key', newRecovery);
-        newInput.value = $('#cx-key', recovery).value;
-      }
-      bindAccess(host);
+      host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) + '</div>';
       $all('[data-public-tile]', host).forEach(function (button) {
         button.addEventListener('click', function () {
           var key = button.dataset.publicTile;
@@ -846,7 +814,7 @@
     var chipCls = t.status === 'completed' ? 'chip-done' : (t.status === 'attempted' || t.status === 'exception') ? 'chip-attempt' : L.bucket(t, today()) === 'overdue' ? 'chip-overdue' : 'chip-open';
     box.innerHTML =
       '<div class="cx-head"><div><div class="cx-kicker">' + esc(typeLabel(type)) + ' · Due ' + esc(fmtDate(t.due_date)) + '</div><h2>' + esc(borrowerOf(t)) + '</h2>' +
-      '<div class="cx-sub">Loan ' + esc(t.loan_number) + ' · ' + esc(lpLabel(t.owner_lp)) + (t.coverage_lp ? ' (covered by ' + esc(t.coverage_lp) + ')' : '') + '</div></div>' +
+      '<div class="cx-sub">' + esc(lpLabel(t.owner_lp)) + (t.coverage_lp ? ' (covered by ' + esc(t.coverage_lp) + ')' : '') + '</div></div>' +
       '<div class="cx-row"><span class="cx-chip ' + chipCls + '">' + esc(out) + '</span><button type="button" class="cx-btn sm" data-cx="close">Close</button></div></div>' +
       '<div class="cx-card" style="margin-top:14px;padding:14px"><div class="cx-split cx-small">' +
       '<div><b>Milestone</b><br>' + esc(loan.last_milestone || '—') + '</div>' +
@@ -1186,7 +1154,7 @@
     if (!activeKey() || !S.tier) {
       host.innerHTML = '<div class="cx-stack"><h2>Command Center</h2><div class="cx-empty">' +
         (activeKey() ? (S.loading ? 'Loading team data…' : 'Could not load team data. <button type="button" class="cx-btn" data-cx="refresh">Retry</button>') + '</div>' :
-          'Use your shared CORE team link to open the call worklist.</div>' + teamLinkRecovery()) + '</div>';
+          'Select a loan partner in the tracker navigation to view their schedule.</div>') + '</div>';
       bindAccess(host);
       return;
     }
@@ -1431,17 +1399,17 @@
       (isManager() && ts.length ? '<div class="cx-row"><select data-bulk="owner" style="width:auto">' + opts(LPS.map(function (x) { return [x, x]; }), '', 'Assign owner…') + '</select><select data-bulk="coverage" style="width:auto">' + opts([['__none', 'Remove coverage']].concat(LPS.map(function (x) { return [x, 'Cover: ' + x]; })), '', 'Coverage…') + '</select>' +
         '<button type="button" class="cx-btn sm" data-bulk-go="1">Apply to selected</button><button type="button" class="cx-btn sm" data-bulk-review="1">Close selected Needs Review</button></div>' : '') + '</div>';
     if (!ts.length) return '<div class="cx-card">' + head + '<div class="cx-empty" style="margin-top:12px">No records.</div></div>';
-    return '<div class="cx-card">' + head + '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr>' + (isManager() ? '<th><input type="checkbox" data-selall aria-label="Select all"></th>' : '') + '<th>Borrower</th><th class="cx-hide-sm">Loan</th><th>Type</th><th>Owner</th><th>Due</th><th>Outcome</th><th class="cx-hide-sm">Referral</th><th class="cx-hide-sm">Agent</th><th class="cx-hide-sm">Next action</th></tr></thead><tbody>' +
+    return '<div class="cx-card">' + head + '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr>' + (isManager() ? '<th><input type="checkbox" data-selall aria-label="Select all"></th>' : '') + '<th>Borrower</th><th>Type</th><th>Owner</th><th>Due</th><th>Outcome</th><th class="cx-hide-sm">Referral</th><th class="cx-hide-sm">Agent</th><th class="cx-hide-sm">Next action</th></tr></thead><tbody>' +
       ts.map(function (t) {
-        return '<tr class="click" data-open-task="' + esc(t.id) + '">' + (isManager() ? '<td><input type="checkbox" data-sel="' + esc(t.id) + '" aria-label="Select"></td>' : '') + '<td><b>' + esc(borrowerOf(t)) + '</b></td><td class="cx-hide-sm">' + esc(t.loan_number) + '</td><td>' + esc(typeLabel(t.task_type)) + '</td><td>' + esc(lpLabel(t.owner_lp)) + (t.coverage_lp ? ' → ' + esc(t.coverage_lp) : '') + '</td><td>' + esc(fmtDate(t.due_date)) + '</td><td>' + esc(L.outcomeLabel(t, t0)) + '</td>' +
+        return '<tr class="click" data-open-task="' + esc(t.id) + '">' + (isManager() ? '<td><input type="checkbox" data-sel="' + esc(t.id) + '" aria-label="Select"></td>' : '') + '<td><b>' + esc(borrowerOf(t)) + '</b></td><td>' + esc(typeLabel(t.task_type)) + '</td><td>' + esc(lpLabel(t.owner_lp)) + (t.coverage_lp ? ' → ' + esc(t.coverage_lp) : '') + '</td><td>' + esc(fmtDate(t.due_date)) + '</td><td>' + esc(L.outcomeLabel(t, t0)) + '</td>' +
           '<td class="cx-hide-sm">' + (t.referral_requested ? 'Asked · ' : 'Not asked · ') + esc((L.REFERRAL_RESPONSES.find(function (x) { return x[0] === t.referral_response; }) || [0, '—'])[1]) + (t.referral_name ? ': ' + esc(t.referral_name) : '') + '</td><td class="cx-hide-sm">' + esc(((L.AGENT_OUTCOMES.find(function (x) { return x[0] === t.agent_outcome; }) || [0, '—'])[1])) + '</td><td class="cx-hide-sm">' + esc(t.next_action || '') + (t.next_action_date ? ' · ' + esc(fmtDate(t.next_action_date)) : '') + '</td></tr>';
       }).join('') + '</tbody></table></div></div>';
   }
   var SOURCE_OPTS = L.PLAN.sources.map(function (s) { return [s[0], s[1]]; }).concat([['other', 'Other']]);
   function loansTable(loans, selectable, classify) {
-    return '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr>' + (selectable ? '<th><input type="checkbox" data-selall aria-label="Select all"></th>' : '') + '<th>Borrower</th><th>Loan</th><th>Status</th><th>Milestone</th><th>Closing</th><th class="cx-hide-sm">Buyer agent</th><th class="cx-hide-sm">Referral source</th><th>Owner</th>' + (classify ? '<th>Funding source</th>' : '') + '</tr></thead><tbody>' +
+    return '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr>' + (selectable ? '<th><input type="checkbox" data-selall aria-label="Select all"></th>' : '') + '<th>Borrower</th><th>Status</th><th>Milestone</th><th>Closing</th><th class="cx-hide-sm">Buyer agent</th><th class="cx-hide-sm">Referral source</th><th>Owner</th>' + (classify ? '<th>Funding source</th>' : '') + '</tr></thead><tbody>' +
       loans.map(function (l) {
-        return '<tr>' + (selectable ? '<td><input type="checkbox" data-sel-loan="' + esc(l.loan_number) + '" aria-label="Select"></td>' : '') + '<td><b>' + esc(l.borrower_name || '—') + '</b></td><td>' + esc(l.loan_number) + '</td><td>' + esc(String(l.pipeline_status).replace('_', ' ')) + '</td><td>' + esc(l.last_milestone || '—') + '</td><td>' + esc(fmtDate(l.closed_date || l.est_closing_date)) + '</td><td class="cx-hide-sm">' + esc(l.buyer_agent_name || '—') + '</td><td class="cx-hide-sm">' + esc(l.referral_source_name || '—') + '</td><td>' + esc(l.lp_owner || (l.ownership_status === 'conflict' ? 'Conflict' : 'Unassigned')) + '</td>' +
+        return '<tr>' + (selectable ? '<td><input type="checkbox" data-sel-loan="' + esc(l.loan_number) + '" aria-label="Select"></td>' : '') + '<td><b>' + esc(l.borrower_name || '—') + '</b></td><td>' + esc(String(l.pipeline_status).replace('_', ' ')) + '</td><td>' + esc(l.last_milestone || '—') + '</td><td>' + esc(fmtDate(l.closed_date || l.est_closing_date)) + '</td><td class="cx-hide-sm">' + esc(l.buyer_agent_name || '—') + '</td><td class="cx-hide-sm">' + esc(l.referral_source_name || '—') + '</td><td>' + esc(l.lp_owner || (l.ownership_status === 'conflict' ? 'Conflict' : 'Unassigned')) + '</td>' +
           (classify ? '<td><select data-src-loan="' + esc(l.loan_number) + '" data-ver="' + l.row_version + '" style="min-width:150px">' + opts(SOURCE_OPTS, l.funding_source_category, 'Not classified') + '</select></td>' : '') + '</tr>';
       }).join('') + '</tbody></table></div>';
   }
@@ -1456,7 +1424,7 @@
     var ex = Object.keys(S.loans).map(function (k) { return S.loans[k]; }).filter(function (l) { return l.pipeline_status === 'funding_exception'; });
     return '<div class="cx-card"><h3>Funding review</h3><div class="cx-note">Loans in the Funded Units report whose last milestone is not Funding. They get no post-closing calls until verified.</div>' +
       (ex.length ? '<div class="cx-list" style="margin-top:12px">' + ex.map(function (l) {
-        return '<div class="cx-item" style="cursor:default"><span class="i-name">' + esc(l.borrower_name || l.loan_number) + ' · ' + esc(l.loan_number) + '</span><span class="i-meta">' + esc(l.funding_note || '') + ' · Closed ' + esc(fmtDate(l.closed_date)) + '</span><span class="i-right">' +
+        return '<div class="cx-item" style="cursor:default"><span class="i-name">' + esc(l.borrower_name || 'Borrower name unavailable') + '</span><span class="i-meta">' + esc(l.funding_note || '') + ' · Closed ' + esc(fmtDate(l.closed_date)) + '</span><span class="i-right">' +
           (isManager() ? '<button type="button" class="cx-btn sm" data-fund="' + esc(l.loan_number) + '|1">Verified funded</button><button type="button" class="cx-btn sm danger" data-fund="' + esc(l.loan_number) + '|0">Not funded</button>' : '') + '</span></div>';
       }).join('') + '</div>' : '<div class="cx-complete-banner" style="margin-top:12px">✓ Complete. Nothing to review.</div>') + '</div>';
   }
@@ -1629,11 +1597,11 @@
           Overdue: r.overdue.length, 'Client concerns': r.concerns.length, 'Scorecard this week': r.sc === null ? 'Unavailable' : r.sc ? 'Entered' : 'Missing', 'Open corrective actions': r.corr.length };
       })), 'Team Summary');
       var taskRows = S.tasks.filter(function (t) { return L.inRange(t.due_date, range); }).map(function (t) {
-        return { Borrower: borrowerOf(t), 'Loan Number': t.loan_number, Type: typeLabel(t.task_type), Owner: t.owner_lp || 'Unassigned', Coverage: t.coverage_lp || '', Due: t.due_date, Outcome: L.outcomeLabel(t, today()), 'Borrower contact': t.borrower_outcome || '', 'Conversation at': t.conversation_at || '',
+        return { Borrower: borrowerOf(t), Type: typeLabel(t.task_type), Owner: t.owner_lp || 'Unassigned', Coverage: t.coverage_lp || '', Due: t.due_date, Outcome: L.outcomeLabel(t, today()), 'Borrower contact': t.borrower_outcome || '', 'Conversation at': t.conversation_at || '',
           'Referral asked': t.referral_requested ? 'Yes' : 'No', 'Client response': t.referral_response || '', 'Referral name': t.referral_name || '', 'CRM reference': t.crm_reference || '', 'Buyer agent': t.agent_outcome || '', Concern: t.concern_status, Escalated: t.escalated ? 'Yes' : 'No', 'Next action': t.next_action || '', 'Follow-up': t.next_action_date || '', 'Completed at': t.completed_at || '', 'Completed by': t.completed_by || '' };
       });
       X.utils.book_append_sheet(wb, X.utils.json_to_sheet(taskRows.length ? taskRows : [{ Note: 'No records in period' }]), 'Activity');
-      var un = Object.keys(S.loans).map(function (k) { return S.loans[k]; }).filter(function (l) { return l.ownership_status !== 'verified'; }).map(function (l) { return { Borrower: l.borrower_name, 'Loan Number': l.loan_number, Status: l.pipeline_status, Milestone: l.last_milestone, Closed: l.closed_date || '', 'Est closing': l.est_closing_date || '' }; });
+      var un = Object.keys(S.loans).map(function (k) { return S.loans[k]; }).filter(function (l) { return l.ownership_status !== 'verified'; }).map(function (l) { return { Borrower: l.borrower_name, Status: l.pipeline_status, Milestone: l.last_milestone, Closed: l.closed_date || '', 'Est closing': l.est_closing_date || '' }; });
       X.utils.book_append_sheet(wb, X.utils.json_to_sheet(un.length ? un : [{ Note: 'None' }]), 'Unassigned');
       X.utils.book_append_sheet(wb, X.utils.json_to_sheet(S.corrections.length ? S.corrections.map(function (c) { return { LP: c.lp, Issue: c.issue, Expected: c.expected_behavior || '', Due: c.due_date, Status: c.status, Resolution: c.resolution_note || '', 'Verified by': c.verified_by || '' }; }) : [{ Note: 'None' }]), 'Corrective Actions');
       X.writeFile(wb, 'CORE_Activity_' + period + '_' + today() + '.xlsx');
@@ -1730,9 +1698,9 @@
       (scheduled.length ? '<details data-forecast-list><summary>Review closing risk</summary><div class="cx-scroll"><table class="cx-t"><thead><tr><th>Loan</th><th>Estimated closing</th><th>Review</th></tr></thead><tbody>' +
         scheduled.map(function (loan) {
           var value = status(loan);
-          return '<tr><td>' + esc(loan.borrower_name || loan.loan_number) + '</td><td>' + esc(fmtDate(loan.est_closing_date)) + '</td><td>' +
+          return '<tr><td>' + esc(loan.borrower_name || 'Borrower name unavailable') + '</td><td>' + esc(fmtDate(loan.est_closing_date)) + '</td><td>' +
             (writable ? '<form class="cx-row" data-forecast-loan="' + esc(loan.loan_number) + '" data-date="' + esc(loan.est_closing_date) + '">' +
-              '<select required aria-label="Closing risk for ' + esc(loan.borrower_name || loan.loan_number) + '">' +
+              '<select required aria-label="Closing risk for ' + esc(loan.borrower_name || 'Borrower name unavailable') + '">' +
               opts(Object.keys(forecastLabels).map(function (label) { return [label, forecastLabels[label]]; }), value, 'Unreviewed') +
               '</select><button type="submit" class="cx-btn sm">Save</button></form>' : esc(forecastLabels[value] || 'Unreviewed')) + '</td></tr>';
         }).join('') + '</tbody></table></div></details>' : '');
@@ -1835,7 +1803,7 @@
       '</p><p class="cx-note">Daniel reviews progress at the next weekly meeting.</p><button type="button" class="cx-btn primary" data-plan-focus>' + focusLabel + '</button></section>';
     host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Leadership</div><h2>Growth &amp; Execution Plan</h2><div class="cx-sub">' + esc(periodLabel) + ' · Targets from the final CORE Team 2027 Business Plan</div></div>' +
       '<div class="cx-tabs">' + [['month', 'Month'], ['quarter', 'Quarter'], ['year', 'Year']].map(function (p) { return '<button type="button" class="cx-tab' + (per === p[0] ? ' on' : '') + '" data-per="' + p[0] + '">' + p[1] + '</button>'; }).join('') + '</div></div>' +
-      (S.tier ? syncLine() : accessCard('Unlock funded loans, referrals and team execution')) +
+      (S.tier ? syncLine() : '') +
       weeklyFocus +
       '<details class="cx-supporting" data-plan-forecast' + (forecastOpen ? ' open' : '') + '><summary>Funding forecast</summary>' +
       fundingForecast(range, t0, funded ? funded.filter(function (loan) { return loan.closed_date <= t0; }).length : null, fundTarget) + '</details>' +
