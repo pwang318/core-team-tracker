@@ -310,7 +310,7 @@
     function sameAccess() { return activeKey() === key && S.tier === tier; }
     host.portfolioChangesAccess = sameAccess;
     function present(risk, overdue) {
-      host.innerHTML = '<h3>What changed since last week?</h3><ul>' +
+      host.innerHTML = '<ul>' +
         '<li>' + esc(risk) + '</li><li>' + Number(host.dataset.portfolioChanges) + ' partners entered the 90-day referral warning window</li>' +
         '<li>' + esc(overdue) + '</li></ul>';
     }
@@ -558,14 +558,18 @@
         count: rank < 0 ? 0 : priority[rank][0], open: b['tue-remaining'].length, post: due,
         scorecard: missing === null ? 'Unavailable' : missing === false ? 'Missing' : 'Entered' };
     }).sort(function (a, b) { return a.rank - b.rank || b.count - a.count; });
-    host.innerHTML = '<div class="cx-card"><div class="cx-head"><div><h2>Who to coach today</h2><div class="cx-sub">' + (hasImport('pipeline') ? rows.reduce(function (n, row) { return n + row.open; }, 0) + ' live Tuesday updates open' : 'Live Tuesday count unavailable') + '</div></div><button type="button" class="cx-btn" data-execution-plan>Growth &amp; Execution Plan</button></div>' +
+    var first = rows[0], breakdownOpen = !!($('[data-coaching-details]', host) || {}).open;
+    host.innerHTML = '<div class="cx-card"><h2>Who to coach today</h2>' +
+      (first.count ? '<p><b>' + esc(first.lp) + '</b> · ' + esc(first.action) + '</p><button type="button" class="cx-btn primary" data-coach-lp="' + esc(first.lp) + '">Open ' + esc(first.lp) + '’s dashboard</button>' :
+        '<p>No urgent items in the loaded coaching data.</p>') +
+      '<p class="cx-note">' + (hasImport('pipeline') ? rows.reduce(function (n, row) { return n + row.open; }, 0) + ' live Tuesday updates open' : 'Live Tuesday count unavailable') + '</p>' +
+      '<details class="cx-supporting" data-coaching-details' + (breakdownOpen ? ' open' : '') + '><summary>All LPs and scorecards</summary>' +
       '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>LP</th><th>Start here</th><th>Tuesday open</th><th>Post-closing due</th><th>Scorecard</th></tr></thead><tbody>' +
       rows.map(function (row) {
         return '<tr><td><button type="button" class="cx-link" data-coach-lp="' + esc(row.lp) + '">' + esc(row.lp) + '</button></td>' +
           '<td><b>' + esc(row.action) + '</b>' + (row.count && row.rank < 6 ? ' · ' + row.count : '') + '</td><td>' +
           (hasImport('pipeline') ? row.open : '—') + '</td><td>' + row.post + '</td><td>' + esc(row.scorecard) + '</td></tr>';
-      }).join('') + '</tbody></table></div></div>';
-    $('[data-execution-plan]', host).addEventListener('click', function () { openView('core-plan'); });
+      }).join('') + '</tbody></table></div></details></div>';
     $all('[data-coach-lp]', host).forEach(function (button) {
       button.addEventListener('click', function () {
         var link = $('.ct-nav-btn[data-lp="' + button.dataset.coachLp + '"]');
@@ -1105,17 +1109,22 @@
       bindAccess(host);
       return;
     }
-    var tabs = [['overview', 'Call overview'], ['tuesday', 'Tuesday worklist'], ['records', 'Call records'], ['data', 'Weekly imports']];
-    var more = [['scorecards', 'Scorecards'], ['production', 'Production metrics'], ['unassigned', 'Assign loans'], ['funding', 'Funding review'], ['coverage', 'Coverage'], ['corrections', 'Corrective actions']];
+    var tabs = [['overview', 'Priorities'], ['tuesday', 'Tuesday worklist']];
+    var more = [['records', 'Call records'], ['data', 'Weekly imports'], ['scorecards', 'Scorecards'], ['production', 'Production metrics'], ['unassigned', 'Assign loans'], ['funding', 'Funding review'], ['coverage', 'Coverage'], ['corrections', 'Corrective actions']];
     var p = S.cmdPeriod;
-    host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><h2>Command Center</h2><div class="cx-sub">' + freshnessLine() + '</div></div>' +
-      '<div class="cx-row"><select data-cx="period" aria-label="Period" style="width:auto">' + opts(Object.keys(PERIODS).map(function (k) { return [k, PERIODS[k]]; }), p) + '</select>' +
-      '<button type="button" class="cx-btn" data-cx="export">Export to Excel</button></div></div>' + syncLine() +
+    var toolsOpen = !!($('[data-command-tools]', host) || {}).open || more.some(function (tool) { return tool[0] === S.cmdTab; });
+    var numbersOpen = !!($('[data-command-breakdown]', host) || {}).open;
+    host.innerHTML = '<div class="cx-stack"><h2>Command Center</h2>' +
       (S.error ? '<div class="cx-err">' + esc(S.error) + '</div>' : '') +
       '<div class="cx-tabs" role="tablist">' + tabs.map(function (t) { return '<button type="button" role="tab" class="cx-tab' + (S.cmdTab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '">' + esc(t[1]) + '</button>'; }).join('') + '</div>' +
-      '<button type="button" class="cx-btn" data-execution-plan>Growth &amp; Execution Plan</button>' +
-      '<label class="cx-f">More manager tools <select data-cx="manager-tool" aria-label="More manager tools">' + opts(more, S.cmdTab, 'Choose a tool') + '</select></label>' +
+      '<details class="cx-supporting" data-command-tools' + (toolsOpen ? ' open' : '') + '><summary>Tools and reporting</summary>' +
+      '<div class="cx-row"><select data-cx="manager-tool" aria-label="Manager tool">' + opts(more, S.cmdTab, 'Choose a tool') + '</select>' +
+      '<select data-cx="period" aria-label="Period" style="width:auto">' + opts(Object.keys(PERIODS).map(function (k) { return [k, PERIODS[k]]; }), p) + '</select>' +
+      '<button type="button" class="cx-btn" data-cx="export">Export to Excel</button><button type="button" class="cx-btn" data-execution-plan>Growth &amp; Execution Plan</button></div>' +
+      '<p class="cx-note">' + freshnessLine() + '</p>' + syncLine() + '</details>' +
       '<div id="cx-cmd-body">' + (S.loadedAt ? commandBody(S.cmdTab, p) : '<div class="cx-empty">Loading shared data…</div>') + '</div></div>';
+    var breakdown = $('[data-command-breakdown]', host);
+    if (breakdown) breakdown.open = numbersOpen;
     bindAccess(host);
     $('[data-execution-plan]', host).addEventListener('click', function () { openView('core-plan'); });
     $all('[data-tab]', host).forEach(function (b) { b.addEventListener('click', function () { S.cmdTab = b.dataset.tab; renderCommand(); }); });
@@ -1233,7 +1242,17 @@
           '<td class="cx-num">' + numCell(att.length, reg(k + '-pca', k + ' · attempted calls', att)) + '</td><td class="cx-num">' + numCell(r.pc.asked.length, reg(k + '-pcr', k + ' · PCR requests', r.pc.asked)) + '</td><td class="cx-num">' + numCell(r.pc.named.length, reg(k + '-pci', k + ' · PCR introductions', r.pc.named.map(function (n) { return n.task; }))) + '</td></tr>';
       }).join('') + '</tbody></table></div>' +
       '<p class="cx-note" style="margin-top:8px">Calls due in the period. An attempted call is never counted as completed. Historical calls without evidence sit in Needs Review and are excluded.</p></div>';
-    return '<div class="cx-stack"><div class="cx-tiles">' + tiles + '</div>' + daily + tueTbl + pcTbl + coachingCard(rows) + '</div>';
+    var next;
+    if (concerns.length) next = ['Resolve client concerns', concerns.length, 'data-rec="concerns"'];
+    else if (overdueAll.length) next = ['Clear overdue calls', overdueAll.length, 'data-rec="overdue"'];
+    else if (unLoans.length) next = ['Assign borrowers without an owner', unLoans.length, 'data-tab-go="unassigned"'];
+    else if (team.remaining.length) next = ['Finish today’s calls', team.remaining.length, 'data-rec="' + reg('team-rem', 'Team calls still due today', team.remaining) + '"'];
+    return '<div class="cx-stack"><section class="cx-card"><h3>Start here</h3>' +
+      (S.error || !hasImport('pipeline') || !hasImport('funded_units') ? '<p class="cx-note">Check report availability under Tools and reporting. Priorities use the records currently available.</p>' : '') +
+      (next ? '<p><b>' + esc(next[0]) + '</b> · ' + next[1] + '</p><button type="button" class="cx-btn primary" ' + next[2] + '>Open worklist</button>' :
+        '<p>No urgent items in the loaded records.</p>') +
+      '</section><details class="cx-supporting" data-command-breakdown><summary>Team breakdown and accountability</summary><div class="cx-tiles">' + tiles + '</div>' +
+      daily + tueTbl + pcTbl + coachingCard(rows) + '</details></div>';
   }
   function coachingCard(rows) {
     var items = [], t0 = today();
@@ -1664,6 +1683,8 @@
     var P = L.PLAN, t0 = today(), y = P.year;
     loadForecastReviews(false);
     var reviewsOpen = !!($('[data-forecast-list]', host) || {}).open;
+    var planDetailsOpen = !!($('[data-plan-details]', host) || {}).open;
+    var forecastOpen = !!($('[data-plan-forecast]', host) || {}).open;
     if (!S.ext) loadExternal();
     if (!S.scorecards) loadScorecards().then(function () { renderAll(); });
     var signed = !!S.tier, per = S.planPeriod || 'year';
@@ -1725,16 +1746,19 @@
       od ? od + ' overdue client calls. Mack: confirm each owner and next contact date in Command Center.' :
       un ? un + ' active loans need an LP owner. Mack: confirm ownership in Command Center.' :
       'Mack and the RM: review the 90-day referral watch and agree on the next move for each partner nearing the cutoff.';
+    var focusLabel = gap ? 'Open Production Manager' : fp.status === 'behind' ? 'Review funding forecast' : od || un ? 'Open Command Center' : 'Open Team Portfolio';
     var weeklyFocus = '<section class="cx-card"><h3>What to do this week</h3><p>' + esc(focus) +
-      '</p><p class="cx-note">Daniel reviews progress at the next weekly meeting.</p><button type="button" class="cx-btn" data-referral-watch>Open Team Portfolio</button></section>';
+      '</p><p class="cx-note">Daniel reviews progress at the next weekly meeting.</p><button type="button" class="cx-btn primary" data-plan-focus>' + focusLabel + '</button></section>';
     host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Leadership</div><h2>Growth &amp; Execution Plan</h2><div class="cx-sub">' + esc(periodLabel) + ' · Targets from the final CORE Team 2027 Business Plan</div></div>' +
       '<div class="cx-tabs">' + [['month', 'Month'], ['quarter', 'Quarter'], ['year', 'Year']].map(function (p) { return '<button type="button" class="cx-tab' + (per === p[0] ? ' on' : '') + '" data-per="' + p[0] + '">' + p[1] + '</button>'; }).join('') + '</div></div>' +
       (S.tier ? syncLine() : accessCard('Unlock funded loans, referrals and team execution')) +
-      weeklyFocus + fundingForecast(range, t0, funded ? funded.filter(function (loan) { return loan.closed_date <= t0; }).length : null, fundTarget) + executionThisWeek(t0) +
+      weeklyFocus +
+      '<details class="cx-supporting" data-plan-forecast' + (forecastOpen ? ' open' : '') + '><summary>Funding forecast</summary>' +
+      fundingForecast(range, t0, funded ? funded.filter(function (loan) { return loan.closed_date <= t0; }).length : null, fundTarget) + '</details>' +
+      '<details class="cx-supporting" data-plan-details' + (planDetailsOpen ? ' open' : '') + '><summary>Goals, worklists, and reporting</summary>' + executionThisWeek(t0) +
       (baseline ? '<p class="cx-note">Velocify · last 30 days · ' + baseline.relationship.length + ' relationship leads · ' +
         baseline.advertising.length + ' recorded advertising leads · ' + baseline.unclassified.length + ' need source review</p>' : '') +
-      '<div class="cx-note">LPs work their call lists and log referrals. Mack reviews overdue work and scorecards each week. Daniel reviews pipeline, referrals, and production pace at the weekly meeting.</div>' +
-      (t0 < y + '-01-01' ? '<p class="cx-note">2027 target reporting starts January 1. The weekly work above is live now.</p>' : '') +
+      (t0 < y + '-01-01' ? '<p class="cx-note">2027 target reporting starts January 1.</p>' : '') +
       '<div class="cx-tiles">' +
       planTile('Funded loans', ns(funded ? funded.length : null), paceFoot(fp, 'fundings') + (per === 'year' ? ' · stretch ' + P.fundings.stretch : ''), nsCls(!!funded, 'hero'), signed ? 'plan-funded' : null) +
       planTile('Unique relationship leads', sources ? ns(sources.relationship.length) : 'Data unavailable', 'Target ' + leadTarget + ' · Classified Velocify leads', nsCls(!!sources)) +
@@ -1762,11 +1786,23 @@
       '<div class="cx-card"><h3>Key operational bottlenecks</h3><div class="cx-list cx-small" style="margin-top:12px">' + (bott.length ? bott.map(function (b) { return '<div>• ' + esc(b) + '</div>'; }).join('') : '<div class="cx-muted">' + (signed ? 'None flagged from verified data.' : 'Unlock to see team bottlenecks.') + '</div>') + '</div>' +
       '<h3 style="margin-top:16px">Data freshness</h3><div class="cx-list cx-small" style="margin-top:8px">' +
       '<div>Pipeline report: ' + (signed ? freshImport('pipeline') : 'Locked') + '</div><div>Funded Units: ' + (signed ? freshImport('funded_units') : 'Locked') + '</div>' +
-      '<div>Power BI profiles: ' + (S.ext && S.ext.pbi ? esc(fmtTime(S.ext.pbi.imported_at)) : 'Unavailable') + '</div><div>Velocify: ' + (S.ext && S.ext.vel ? 'latest lead ' + esc(fmtTime(S.ext.vel.created_at)) : 'Unavailable') + '</div></div></div></div></details></div>';
+      '<div>Power BI profiles: ' + (S.ext && S.ext.pbi ? esc(fmtTime(S.ext.pbi.imported_at)) : 'Unavailable') + '</div><div>Velocify: ' + (S.ext && S.ext.vel ? 'latest lead ' + esc(fmtTime(S.ext.vel.created_at)) : 'Unavailable') + '</div></div></div></div></details></details></div>';
     bindAccess(host);
-    $('[data-referral-watch]', host).addEventListener('click', function () {
-      var portfolio = $('.ct-nav-btn[data-route="portfolio"]');
-      if (portfolio) portfolio.click();
+    $('[data-plan-focus]', host).addEventListener('click', function () {
+      if (!gap && fp.status === 'behind') {
+        var forecast = $('[data-plan-forecast]', host);
+        forecast.open = true;
+        $('summary', forecast).focus();
+        return;
+      }
+      if (!gap && (od || un)) {
+        S.cmdTab = od ? 'overview' : 'unassigned';
+        openView('core-command');
+        return;
+      }
+      var route = gap ? 'production-manager' : 'portfolio';
+      var link = $('.ct-nav-btn[data-route="' + route + '"]');
+      if (link) link.click();
     });
     $('[data-lp-jump="execution-tuesday"]', host).addEventListener('click', openTuesdayWorklist);
     $('[data-lp-jump="execution-calls"]', host).addEventListener('click', function () { S.cmdTab = 'overview'; S.cmdPeriod = 'week'; openView('core-command'); });
