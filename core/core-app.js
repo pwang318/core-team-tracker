@@ -368,13 +368,28 @@
       };
       return;
     }
+    function editAction(row) {
+      return '<details><summary>Edit owner or due date</summary><form data-edit-action="' + esc(row.id) + '" data-version="' + row.edit_history.length + '" class="cx-row">' +
+        '<label>Owner <input name="owner_name" required maxlength="80" value="' + esc(row.owner_name) + '"></label>' +
+        '<label>Due date <input name="due_date" type="date" required value="' + esc(row.due_date) + '"></label>' +
+        '<button class="cx-btn">Save changes</button></form></details>';
+    }
+    function editHistory(row) {
+      return row.edit_history.length ? '<details><summary>Change history</summary><ul>' +
+        row.edit_history.slice().reverse().map(function (entry) {
+          return '<li>' + esc(fmtTime(entry.at) + ' · ' + entry.actor + ' · ' +
+            entry.previous_owner + ' (' + fmtDate(entry.previous_due_date) + ') → ' +
+            entry.owner + ' (' + fmtDate(entry.due_date) + ')') + '</li>';
+        }).join('') + '</ul></details>' : '';
+    }
     function actionRow(row) {
+      row.edit_history = row.edit_history || [];
       return '<article class="cx-card"><h3>' + esc(row.next_action) + '</h3><p class="cx-note">' +
         esc(row.area + ' · ' + row.owner_name + ' · Due ' + fmtDate(row.due_date)) +
         (!row.completed_at && row.due_date < today() ? ' · Overdue' : '') +
         '</p><p><b>Success measure</b> ' + esc(row.success_measure) + '</p>' +
         (row.completed_at ? '<p><b>Result</b> ' + esc(row.result) + '</p>' :
-          writable ? '<form data-complete-action="' + esc(row.id) + '" class="cx-row"><label>Result <input required name="result" maxlength="500"></label><button class="cx-btn">Mark complete</button></form>' : '') + '</article>';
+          writable ? '<form data-complete-action="' + esc(row.id) + '" class="cx-row"><label>Result <input required name="result" maxlength="500"></label><button class="cx-btn">Mark complete</button></form>' + editAction(row) : '') + editHistory(row) + '</article>';
     }
     function bindSave(form, mode, extra) {
       form.addEventListener('submit', function (event) {
@@ -412,6 +427,9 @@
         (completed.length ? '<details><summary>Recently completed (' + completed.length + ')</summary>' + completed.map(actionRow).join('') + '</details>' : '');
       var add = $('[data-add-action]', host);
       if (add) bindSave(add, 'create', { id: crypto.randomUUID() });
+      $all('[data-edit-action]', host).forEach(function (form) {
+        bindSave(form, 'edit', { id: form.dataset.editAction, version: form.dataset.version });
+      });
       $all('[data-complete-action]', host).forEach(function (form) { bindSave(form, 'complete', { id: form.dataset.completeAction }); });
     }).catch(function (error) {
       if (!current()) return;
@@ -1536,6 +1554,48 @@
       lpShortcut('execution-coaching', 'Weekly scorecards & coaching', missing === null ? 'Unavailable' : missing + ' scorecards missing') +
       '</div></section>';
   }
+  var forecastReviews = null;
+  var forecastLabels = { on_track: 'On track', at_risk: 'At risk', confirm_date: 'Date needs confirmation' };
+  function loadForecastReviews(force) {
+    var key = activeKey();
+    if (!key || !['manager','leader','admin'].includes(S.tier)) { forecastReviews = null; return; }
+    if (!force && forecastReviews && forecastReviews.key === key &&
+        (forecastReviews.loading || Date.now() - forecastReviews.at < 60000)) return;
+    var run = { key: key, loading: true, at: Date.now(), rows: null };
+    forecastReviews = run;
+    apiAct('core_api_forecast_reviews', { p_action: 'list', p: {} }).then(function (rows) {
+      if (forecastReviews === run && activeKey() === key) run.rows = rows;
+    }).catch(function () { /* The forecast labels unavailable review data. */ }).finally(function () {
+      run.loading = false;
+      if (forecastReviews === run && activeKey() === key && $('#view-core-plan.active')) renderPlan();
+    });
+  }
+  function forecastReviewSection(scheduled, actual, target) {
+    if (!['manager','leader','admin'].includes(S.tier)) return '';
+    var data = forecastReviews;
+    if (!data || !data.rows) return '<p class="cx-note">' + (data && data.loading ? 'Loading closing reviews…' :
+      'Closing reviews unavailable. <button class="cx-btn sm" type="button" data-forecast-retry>Retry</button>') + '</p>';
+    var reviews = new Map(data.rows.map(function (row) { return [row.loan_number, row]; }));
+    function status(loan) {
+      var review = reviews.get(loan.loan_number);
+      return review && review.estimated_date === loan.est_closing_date ? review.status : '';
+    }
+    var onTrack = scheduled.filter(function (loan) { return status(loan) === 'on_track'; }).length;
+    var atRisk = scheduled.filter(function (loan) { return status(loan) === 'at_risk'; }).length;
+    var total = actual + onTrack, gap = Math.max(0, target - total);
+    var writable = S.tier !== 'leader';
+    return '<p><b>Funded plus on track</b> ' + total + ' / ' + target + ' · ' + gap + ' to goal · ' +
+      atRisk + ' at risk · ' + (scheduled.length - onTrack - atRisk) + ' to confirm</p>' +
+      (scheduled.length ? '<details data-forecast-list><summary>Review closing risk</summary><div class="cx-scroll"><table class="cx-t"><thead><tr><th>Loan</th><th>Estimated closing</th><th>Review</th></tr></thead><tbody>' +
+        scheduled.map(function (loan) {
+          var value = status(loan);
+          return '<tr><td>' + esc(loan.borrower_name || loan.loan_number) + '</td><td>' + esc(fmtDate(loan.est_closing_date)) + '</td><td>' +
+            (writable ? '<form class="cx-row" data-forecast-loan="' + esc(loan.loan_number) + '" data-date="' + esc(loan.est_closing_date) + '">' +
+              '<select required aria-label="Closing risk for ' + esc(loan.borrower_name || loan.loan_number) + '">' +
+              opts(Object.keys(forecastLabels).map(function (label) { return [label, forecastLabels[label]]; }), value, 'Unreviewed') +
+              '</select><button type="submit" class="cx-btn sm">Save</button></form>' : esc(forecastLabels[value] || 'Unreviewed')) + '</td></tr>';
+        }).join('') + '</tbody></table></div></details>' : '');
+  }
   function fundingForecast(range, date, actual, target) {
     if (!S.tier || !S.loadedAt || S.error || !hasImport('pipeline') || actual === null) {
       return '<section class="cx-card"><h3>Funding forecast</h3><p class="cx-note">Requires current pipeline and verified funding data.</p></section>';
@@ -1558,11 +1618,14 @@
       planTile('Scheduled to close', String(scheduled.length), 'Open pipeline loans with an estimated date in this period', '', 'forecast-scheduled') +
       planTile('If all scheduled loans fund', forecast + ' / ' + target, gap ? gap + ' more fundings needed' : 'Scheduled volume covers the target') +
       '</div><p class="cx-note">Daniel reviews the gap at the weekly meeting. Mack confirms closing dates and gives each blocker an owner and due date.</p>' +
+      forecastReviewSection(scheduled, actual, target) +
       (past.length ? '<button type="button" class="cx-btn" data-plan-rec="forecast-past">Review ' + past.length + ' past closing dates</button>' : '') + '</section>';
   }
   function renderPlan() {
     var host = $('#view-core-plan'); if (!host) return;
     var P = L.PLAN, t0 = today(), y = P.year;
+    loadForecastReviews(false);
+    var reviewsOpen = !!($('[data-forecast-list]', host) || {}).open;
     if (!S.ext) loadExternal();
     if (!S.scorecards) loadScorecards().then(function () { renderAll(); });
     var signed = !!S.tier, per = S.planPeriod || 'year';
@@ -1674,6 +1737,27 @@
       if (link) link.click();
     });
     $all('[data-per]', host).forEach(function (b) { b.addEventListener('click', function () { S.planPeriod = b.dataset.per; renderPlan(); }); });
+    var reviewList = $('[data-forecast-list]', host);
+    if (reviewList) reviewList.open = reviewsOpen;
+    var retryReviews = $('[data-forecast-retry]', host);
+    if (retryReviews) retryReviews.onclick = function () { loadForecastReviews(true); renderPlan(); };
+    $all('[data-forecast-loan]', host).forEach(function (form) {
+      form.onsubmit = function (event) {
+        event.preventDefault();
+        var status = $('select', form).value, button = $('button', form);
+        if (!forecastLabels[status] || button.disabled) return;
+        button.disabled = true;
+        var key = activeKey();
+        apiAct('core_api_forecast_reviews', { p_action: 'save', p: {
+          loan_number: form.dataset.forecastLoan, estimated_date: form.dataset.date, status: status
+        }}).then(function () {
+          if (key === activeKey()) loadForecastReviews(true);
+        }).catch(function (error) {
+          button.disabled = false;
+          toast(friendlyServerError(error), true);
+        });
+      };
+    });
     $all('[data-plan-rec]', host).forEach(function (b) { b.addEventListener('click', function () { openRec(b.dataset.planRec); }); });
   }
   function freshImport(kind) {
