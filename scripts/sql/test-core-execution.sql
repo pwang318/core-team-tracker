@@ -56,7 +56,7 @@ select pg_temp.expect_error('select * from public.core_loans', 'permission denie
 select pg_temp.expect_error('select * from public.core_access_keys', 'permission denied');
 select pg_temp.expect_error($q$select public.core_i_import_funded('[]','x')$q$, 'permission denied');
 select pg_temp.expect_error($q$select public.core_set_access_key('admin','attacker-key-123456789012345')$q$, 'permission denied');
-select pg_temp.expect_error($q$select public.core_api_load('')$q$, 'Team access link required');
+-- Open LP access: a blank key now loads team data (see 20261125190000_core_open_lp_access.sql).
 select pg_temp.expect_error($q$select public.core_api_load('wrong-key-0123456789abcdef')$q$, 'not valid');
 select pg_temp.eq('team key loads through API as anon', (public.core_api_load(:T)->>'tier'), 'team');
 select pg_temp.eq('anon still reads existing call_logs', (select count(*) from public.call_logs) >= 1, true);

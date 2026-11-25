@@ -21,7 +21,11 @@ co-marketing, income, data hub, Production Manager and admin views are unchanged
 
 ## Access model
 
-* Everyone uses one shared team link: `https://pwang318.github.io/core-team-tracker/#team=<team key>`.
+* **Open LP access (2026-11-25):** the plain link `https://pwang318.github.io/core-team-tracker/`
+  gives every LP their full call list with nothing to enter
+  (`supabase/migrations/20261125190000_core_open_lp_access.sql`). Old `#team=` links still work.
+  The original shared-team-link model is described below for reference.
+* Previously, everyone used one shared team link: `https://pwang318.github.io/core-team-tracker/#team=<team key>`.
   The key is read from the link, kept on that device, and removed from the address bar.
   People keep selecting their name in the menu; the name is recorded on every call
   (attribution, not authentication).
@@ -31,7 +35,7 @@ co-marketing, income, data hub, Production Manager and admin views are unchanged
 * Manager actions (imports, assignment, coverage, bulk review, verifying corrective
   actions, funding review) need Mack's passcode, entered once per device under
   Command Center → Manager sign-in. The database enforces this, not the browser.
-* Without the link, the tracker shows no borrower data.
+* With open LP access on, anyone with the URL can see LP call lists (borrower names, closing dates).
 
 ## Database setup (Supabase SQL editor, project uclucbdkjqyqdvifyptx)
 
