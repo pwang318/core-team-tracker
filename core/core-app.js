@@ -290,12 +290,16 @@
       '<form data-cx="access"><label class="cx-f" for="cx-key">Team link or access key</label><input id="cx-key" type="password" autocomplete="off" spellcheck="false" required>' +
       '<div class="cx-row" style="margin-top:14px"><button class="cx-btn primary" type="submit">Unlock</button></div></form></div>';
   }
+  function teamLinkRecovery() {
+    return '<details class="cx-supporting" data-team-recovery' + (S.error ? ' open' : '') +
+      '><summary>Use shared team link</summary>' + accessCard('Open call worklists') + '</details>';
+  }
   function bindAccess(root) {
     var f = root.querySelector('form[data-cx="access"]');
     if (f) f.addEventListener('submit', function (e) {
       e.preventDefault();
       var v = f.querySelector('#cx-key').value.trim(), m = v.match(/[#&]team=([^&\s]+)/);
-      var k = m ? decodeURIComponent(m[1]) : v;
+      var k = m ? new URLSearchParams('team=' + m[1]).get('team') : v;
       var btn = f.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Checking…';
       rpc('core_api_session', { p_key: k }).then(function () { setKey(k); S.error = null; return loadAll(); })
         .catch(function (err) { S.error = friendlyServerError(err); renderAll(); });
@@ -464,7 +468,16 @@
     var builderShortcut = $('#core-builder-shortcut');
     if (builderShortcut) builderShortcut.hidden = !privateView;
     if (!privateView) {
-      host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) + '</div>';
+      var recovery = $('[data-team-recovery]', host);
+      host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) +
+        (S.loading ? '<div class="cx-note" role="status">Loading team access…</div>' : teamLinkRecovery()) + '</div>';
+      if (recovery && !S.loading) {
+        var newRecovery = $('[data-team-recovery]', host);
+        newRecovery.open = recovery.open || !!S.error;
+        var newInput = $('#cx-key', newRecovery);
+        newInput.value = $('#cx-key', recovery).value;
+      }
+      bindAccess(host);
       $all('[data-public-tile]', host).forEach(function (button) {
         button.addEventListener('click', function () {
           var key = button.dataset.publicTile;
@@ -887,7 +900,8 @@
     var host = $('#view-core-command'); if (!host) return;
     if (!activeKey() || !S.tier) {
       host.innerHTML = '<div class="cx-stack"><h2>Command Center</h2><div class="cx-empty">' +
-        (S.loading ? 'Loading team data…' : 'Open Command Center from your shared CORE team link.') + '</div></div>';
+        (S.loading ? 'Loading team data…</div>' : 'Use your shared CORE team link to open the call worklist.</div>' + teamLinkRecovery()) + '</div>';
+      bindAccess(host);
       return;
     }
     var tabs = [['overview', 'Call overview'], ['tuesday', 'Tuesday worklist'], ['records', 'Call records'], ['data', 'Weekly imports']];
@@ -1437,7 +1451,12 @@
   // ================================================================ boot
   function boot() {
     try { injectShell(); } catch (e) { console.error('CORE module shell', e); }
-    if (new URLSearchParams(location.search).get('view') === 'tuesday') openTuesdayWorklist();
+    var view = new URLSearchParams(location.search).get('view');
+    if (view === 'tuesday') openTuesdayWorklist();
+    if (view === 'snapshot' && typeof window.lpv2Route === 'function') {
+      var snapshotButton = $('.ct-nav-btn[data-route="snapshot"]');
+      if (snapshotButton) window.lpv2Route('snapshot', snapshotButton);
+    }
     if (activeKey()) loadAll(); else { loadScorecards(); renderAll(); }
     setInterval(function () { if (!document.hidden && activeKey() && S.tier && !$('.cx-overlay')) loadAll(); }, 60000);
     document.addEventListener('visibilitychange', function () { if (!document.hidden && activeKey() && S.loadedAt && Date.now() - S.loadedAt > 20000 && !$('.cx-overlay')) loadAll(); });

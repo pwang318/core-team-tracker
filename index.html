@@ -12266,7 +12266,7 @@ function openOperatingStandardView(btn){
   if(typeof window.refreshSnapshotFresh==='function'&&!window.refreshSnapshotFresh.__ctv2){const old=window.refreshSnapshotFresh;const wrapped=async function(btn){const r=await old.apply(this,arguments);await lpv2RenderSnapshot();return r};wrapped.__ctv2=true;window.refreshSnapshotFresh=wrapped;}
 
   // Default to the leadership/team scorecard instead of a random LP worklist.
-  const start=()=>{if(new URLSearchParams(location.search).get('view')==='tuesday')return;const b=document.querySelector('.ct-nav-btn[data-route="snapshot"]');if(b){setTimeout(()=>lpv2Route('snapshot',b),120)}};
+  const start=()=>{if(['tuesday','snapshot'].includes(new URLSearchParams(location.search).get('view')))return;const b=document.querySelector('.ct-nav-btn[data-route="snapshot"]');if(b){setTimeout(()=>lpv2Route('snapshot',b),120)}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
 </script>
@@ -14495,7 +14495,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261124g"></script><script defer src="./core/core-app.js?v=20261124r"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261124g"></script><script defer src="./core/core-app.js?v=20261125a"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
