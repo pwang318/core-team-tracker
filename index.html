@@ -4502,7 +4502,11 @@ async function loadLeadPipeline(){
     var lpMap={"Dill":"Gavin","Gavin":"Gavin","De La Riva":"Karen","Karen":"Karen",
                "McMahon":"Osgood","Osgood":"Osgood","Johnston":"Jordan","Jordan":"Jordan",
                "Saleh":"Said","Said":"Said","Caldwell":"Isaak","Isaak":"Isaak"};
-    
+    function getLp(lp_user){
+      if(!lp_user)return null;
+      for(var k in lpMap){if(String(lp_user).toLowerCase().indexOf(k.toLowerCase())>=0)return lpMap[k];}
+      return null;
+    }
 
     var today=new Date();today.setHours(0,0,0,0);
     var todayS=localDateStr(today);
