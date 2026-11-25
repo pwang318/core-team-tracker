@@ -62,7 +62,8 @@ assert.equal(oneThousand.status,'On track MTD','November 5 should use elapsed-mo
 assert.equal(paceContext.coMktPaceMetrics(1000,4,onNov5).status,'Monthly goal met','Four leads must satisfy monthly goal');
 assert.equal(paceContext.coMktPaceMetrics(1000,0,onNov5).status,'Behind MTD pace','Zero leads should be behind pace');
 assert(html.includes('if(lp==="Isaak")return [];'), 'LP1 must not receive realtor FaceTime tasks');
-assert(html.includes('id="lp-source-freshness"'), 'Team snapshot must show Power BI and Velocify freshness');
+assert(!/lp-source-freshness|ct-snapshot-freshness|snapshot-live-status|Live Snapshot synced from current server data/.test(html), 'Team Snapshot must not render freshness or redundant sync notices');
+assert(html.includes('id="snapshot-live-refresh" onclick="refreshSnapshotFresh(this)"'), 'Team Snapshot must keep the manual refresh button');
 assert(html.includes("if(owner!==lp)return false;"), 'Tuesday exports must match completions only to their actual LP owner');
 assert(html.includes("meta(a.notes,'TUE_PLAN_LANE')==='LP_TXN'"), 'LP Tuesday export must not include RM listing-agent plan rows');
 
