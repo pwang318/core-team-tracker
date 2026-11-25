@@ -46,7 +46,7 @@ assert.equal(billing.perAgent[1].leads, 1, 'Shared lead must not be double-count
 assert.equal(billing.closed, 3, 'Aliases must not double-count closings');
 assert(html.includes('co_marketing_partners?status=eq.active&select=partner_name,agent_roster'), 'Verified billing roster must feed co-marketing flags');
 assert(html.includes('Edit partner spend · expand only when needed'), 'Co-marketing quick spend table should not dominate the default view');
-assert(html.includes('Blank allocations do not mean $0 spent.'), 'Co-marketing should distinguish partner billing from unallocated agent spend');
+assert(html.includes('Leave it blank if you only track the partner total.'), 'Co-marketing should distinguish partner billing from unallocated agent spend');
 const paceFn = html.match(/function coMktPaceMetrics\(spend,leads,asOf\)\{[\s\S]*?\n\}/)?.[0];
 assert(paceFn, 'Co-marketing pacing calculator missing');
 const paceContext={};
@@ -99,7 +99,7 @@ assert(html.includes('var total=live&&(live.verified||live.acknowledged_excluded
 assert(html.includes("(total===null?'—':total)"),'LP summary must visibly withhold unverified active count');
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
 // CORE execution module (Tuesday Updates, 30/60/90 calls, Command Center, 2027 Plan)
-const coreTag = '<script defer src="./core/core-logic.js?v=20261126p"></script><script defer src="./core/core-app.js?v=20261126q"></script>';
+const coreTag = '<script defer src="./core/core-logic.js?v=20261126r"></script><script defer src="./core/core-app.js?v=20261126r"></script>';
 if (!html.includes(coreTag)) {
   // The install-core-execution workflow adds the tag right after a push; allow that one window only.
   assert(fs.existsSync('.github/workflows/install-core-execution.yml'), 'CORE module scripts must load after the tracker, logic first');

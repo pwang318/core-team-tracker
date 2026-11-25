@@ -1813,12 +1813,12 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
 <div><div style="font-size:9px;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:#0C7699;margin-bottom:3px">SHARED WORK · CO-MARKETING</div>
 <div style="font-size:22px;font-weight:800;color:#102A43">Co-Marketing Relationships</div>
-<div style="font-size:12px;color:#607582;margin-top:3px">Track partner spend, opportunities, leads, closings and relationship performance.</div></div>
+<div style="font-size:12px;color:#607582;margin-top:3px">Is each co-marketing partner sending enough business for what we spend?</div></div>
 </div>
 <div style="background:#FAF7F2;border:1px solid #E8DDD0;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:600;color:#5C4A35">
     Target: 1 opportunity per $250 spent each month — either a buddy intro or warm lead. Goal: 80%
   </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+<details style="margin-bottom:14px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:#405565">What counts as a lead or a Realtor introduction?</summary><div style="margin-top:10px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px">
 <div style="font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Lead Definition</div>
 <ol style="font-size:12px;color:var(--text-2);line-height:1.7;padding-left:18px;margin:0">
@@ -1832,6 +1832,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div style="font-size:12px;color:var(--text-2);line-height:1.7">Realtor sends group text with another agent and the LO with the following script: "Meet (LO), he is my preferred lender and he is awesome. I figured you two should meet at some point. I'll let you take it from here..."</div>
 </div>
 </div>
+</div></details>
 <div id="director-cards"></div>
 </div>
 <div class="view" id="view-agent-search">
@@ -8547,7 +8548,7 @@ function loadCoMktPartners(){
     coMktPartners=res[0]||[];
     var rawLeads=res[1]||[];
     coMktLeadCounts={};coMktLeadKeysByName={};
-    coMktLeadCountsSource="Live Velocify referrals · month-to-date · unique lead keys";
+    coMktLeadCountsSource="Velocify referrals this month";
     rawLeads.forEach(function(r,i){
       var name=(r.referral_partner_name||"").trim().toUpperCase();if(!name)return;
       var key=String(r.lead_key||"").trim().toUpperCase()||"UNKEYED:"+name+":"+i;
@@ -8565,7 +8566,7 @@ function loadCoMktPartners(){
     });
     renderDirectorView();
   }).catch(function(){
-    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--red);font-size:13px">Could not load — check connection or run the setup SQL</div>';
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--red);font-size:13px">Could not load co-marketing partners. Refresh to try again.</div>';
   });
 }
 
@@ -8699,10 +8700,10 @@ function renderDirectorView(){
 
   // ── Verify lead counts against a fresh Velocify export instead of trusting the live sync blindly ──
   var csvHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">';
-  csvHtml+='<div><div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">Lead count source</div>';
+  csvHtml+='<div><div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">Where lead counts come from</div>';
   csvHtml+='<div style="font-size:12px;margin-top:2px">'+escHtml(coMktLeadCountsSource)+'</div>';
   csvHtml+='<div id="velocify-csv-result" style="font-size:11px;margin-top:4px"></div></div>';
-  csvHtml+='<div><label style="font-size:11px;border:1px solid var(--border);background:var(--bg);border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:600">Sync Velocify leads CSV to database<input type="file" accept=".csv" style="display:none" onchange="loadVelocifyLeadsCsv(this)"></label></div>';
+  csvHtml+='<div><label style="font-size:11px;border:1px solid var(--border);background:var(--bg);border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:600">Upload a Velocify leads file (.csv)<input type="file" accept=".csv" style="display:none" onchange="loadVelocifyLeadsCsv(this)"></label></div>';
   csvHtml+='</div>';
 
   // ── Bulk spend editor — update several partners' verified monthly spend without opening each card ──
@@ -8727,7 +8728,7 @@ function renderDirectorView(){
   });
   bulkHtml+='</tbody></table></details>';
 
-  var html=csvHtml+bulkHtml+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
+  var html='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;margin-bottom:16px">';
   var summaryRows=[];
 
   coMktPartners.forEach(function(p,idx){
@@ -8762,7 +8763,7 @@ function renderDirectorView(){
     html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">';
     html+='<div><div style="font-size:14px;font-weight:700">'+escHtml(p.partner_name)+'</div>';
     html+='<div style="font-size:11px;color:var(--text-3)">'+escHtml(p.brokerage||"")+(p.since_date?" · Since "+fmt(p.since_date):"")+'</div><div style="font-size:10px;color:var(--text-3);margin-top:4px">$'+combinedYourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'/mo · '+rawReq.toFixed(1)+' expected · '+req+' minimum at 80% · '+lc.total+' MTD · '+pace.remaining+' to goal</div></div>';
-    html+='<div style="text-align:right">'+platTag(p.platform)+'<div style="font-size:11px;font-weight:700;color:'+goalColor+';margin-top:4px">'+statusLabel+'</div><div style="font-size:11px;font-weight:700;color:'+pb_cta_color+';margin-top:2px">CTA: '+pb_cta+'</div></div>';
+    html+='<div style="text-align:right">'+platTag(p.platform)+'<div style="font-size:11px;font-weight:700;color:'+goalColor+';margin-top:4px">'+statusLabel+'</div><div style="font-size:11px;font-weight:700;color:'+pb_cta_color+';margin-top:2px">Cost to acquire: '+pb_cta+'</div></div>';
     html+='</div></div>';
 
     html+='<div id="dmcard-'+idx+'" style="display:none;padding:12px 14px">';
@@ -8793,7 +8794,7 @@ function renderDirectorView(){
     }
 
     // ── Power BI synced metrics ──
-    var pb_synced=p.pb_synced_at?"Last Power BI sync: "+p.pb_synced_at:"Not yet synced — upload Power BI export in Admin";
+    var pb_synced=p.pb_synced_at?"12-month numbers from Power BI, updated "+String(p.pb_synced_at).slice(0,10):"12-month numbers appear after the next Power BI upload.";
     var cleanDate=function(d){return(!d||d==="1970-01-01"||d.indexOf("1970")==0)?(p.pb_synced_at?"No closes yet":"—"):d;};
     var pb12Goal=(combinedYourSpend/250)*12;
     var pb12Pct=pb12Goal>0?Math.round(pb_leads/pb12Goal*100):0;
@@ -8824,7 +8825,7 @@ function renderDirectorView(){
     html+='<span style="display:flex;gap:6px">';
     html+='<button onclick="dmAddAgent('+idx+')" style="font-size:10px;border:1px solid var(--border);background:var(--bg);border-radius:6px;padding:2px 8px;cursor:pointer">+ Add agent</button>';
     html+='</span></div>';
-    html+='<div style="font-size:10px;color:var(--text-3);padding-bottom:7px">Partner billing totals above are authoritative. Blank allocations do not mean $0 spent.</div>';
+    html+='<div style="font-size:10px;color:var(--text-3);padding-bottom:7px">Per-agent spend is optional. Leave it blank if you only track the partner total.</div>';
     html+='<div style="display:flex;gap:6px;padding:2px 0 4px;font-size:9px;color:var(--text-3);text-transform:uppercase;font-weight:700"><span style="flex:1">Agent</span><span style="width:90px">Alias</span><span style="width:78px;text-align:right">Allocated $</span><span style="min-width:44px;text-align:right">Leads</span><span style="min-width:44px;text-align:right">Closed</span><span style="width:14px"></span></div>';
     html+='<div id="dmroster-'+idx+'">';
     lc.perAgent.forEach(function(a,ai){
@@ -8844,6 +8845,7 @@ function renderDirectorView(){
   });
   html+='</div>';
 
+  var cardsHtml=html;html='';
   var totalYourSpend=summaryRows.reduce(function(s,r){return s+r.yourSpend;},0);
   var totalLeads=summaryRows.reduce(function(s,r){return s+r.leads;},0);
   var totalClosed12=summaryRows.reduce(function(s,r){return s+Number(r.pbClosed||0);},0);
@@ -8856,8 +8858,8 @@ function renderDirectorView(){
   var watchCount=summaryRows.filter(function(r){return r.pct!==null&&r.pct>=50&&r.pct<80;}).length;
 
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px">';
-  html+='<div style="font-size:13px;font-weight:700;margin-bottom:4px">Platform Performance</div>';
-  html+='<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">MTD pace adjusts for days elapsed: $250 lender spend = 1 expected lead per month; 80% is the full-month minimum (rounded up). Annual cost to acquire and funded closings are separate. Only verified Velocify buyer leads are counted automatically.</div>';
+  html+='<div style="font-size:15px;font-weight:800;margin-bottom:4px">This month at a glance</div>';
+  html+='<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">Goal: 1 lead for every $250 we spend each month (80% of that is the minimum). Pace adjusts for how far into the month we are.</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">Total spend</div><div style="font-size:18px;font-weight:800">$'+totalYourSpend.toLocaleString(undefined,{maximumFractionDigits:0})+'</div></div>';
   html+='<div style="background:var(--surface-2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text-3);text-transform:uppercase">MTD referred leads</div><div style="font-size:18px;font-weight:800">'+totalLeads+'</div></div>';
@@ -8868,7 +8870,7 @@ function renderDirectorView(){
 
   html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
   html+='<thead><tr>';
-  ["Partner","Platform","NFM spend/mo","80% goal/mo","MTD leads","12mo closes","Annual CTA","MTD status"].forEach(function(h){
+  ["Partner","Platform","Our spend/mo","Lead goal/mo","Leads this month","Closings (12 mo)","Cost to acquire","Status"].forEach(function(h){
     html+='<th style="background:var(--bg);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border)">'+h+'</th>';
   });
   html+='</tr></thead><tbody>';
@@ -8884,8 +8886,9 @@ function renderDirectorView(){
     html+='<td style="padding:9px 10px;border-bottom:1px solid var(--border);color:'+r.color+';font-weight:600">'+r.status+'</td>';
     html+='</tr>';
   });
-  html+='</tbody></table></div>';
-  el.innerHTML=html;
+  html+='</tbody></table><div style="font-size:11px;color:var(--text-3);margin-top:8px">Click a partner to open its details below.</div></div>';
+  el.innerHTML=html+'<div style="font-size:14px;font-weight:800;margin:18px 0 8px">Partners</div>'+cardsHtml+
+    '<details style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-top:8px"><summary style="cursor:pointer;font-weight:800;font-size:13px">Update spend and lead data</summary><div style="margin-top:12px">'+csvHtml+bulkHtml+'</div></details>';
 }
 
 function dmToggleCard(idx){
@@ -14645,7 +14648,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261126p"></script><script defer src="./core/core-app.js?v=20261126q"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261126r"></script><script defer src="./core/core-app.js?v=20261126r"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];

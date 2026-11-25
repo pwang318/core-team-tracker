@@ -103,6 +103,10 @@
     if (/^isaak( |$)/.test(n)) return 'Isaak';
     return null;
   }
+  // The Funded Units report's "Buyers Agent Name" often holds the brokerage, not the person.
+  function isBrokerageName(name) {
+    return /\b(realty|real estate|realtors?|properties|property group|brokerage|llc|inc|group|homes|keller williams|coldwell|re\/?max|century 21|exp realty|howard hanna|sotheby|berkshire|compass|e-merge)\b/i.test(clean(name));
+  }
   function hasBuyerAgent(name) {
     var n = clean(name).toLowerCase();
     return !!n && !/^(none none|none|n\/?a|na|jane doe|john doe|-|fsbo|fsbo fsbo|for sale by owner)$/.test(n);
@@ -146,7 +150,7 @@
     property_state: [/^subject property state$/],
     est_closing_date: [/^est closing date$/],
     loan_type: [/^loan type$/],
-    buyer_agent_name: [/^buyers? agent name$/],
+    buyer_agent_name: [/^buyers? agent contact name$/, /^buyers? agent name$/],
     closed_date: [/^closed date$/, /^funded date$/, /^funding date$/, /^closing date$/],
     loan_processor: [/^loan processor$/],
     referral_source_name: [/^referral source name$/]
@@ -655,7 +659,7 @@
     todayIso: todayIso, isoOfInstant: isoOfInstant, addDays: addDays, daysBetween: daysBetween, tuesdayOf: tuesdayOf,
     toIsoDate: toIsoDate, toIsoTimestamp: toIsoTimestamp, postCloseDue: postCloseDue, quarterOf: quarterOf,
     quarterRange: quarterRange, monthRange: monthRange, dow: dow,
-    clean: clean, lpShort: lpShort, hasBuyerAgent: hasBuyerAgent, normKey: normKey,
+    clean: clean, lpShort: lpShort, hasBuyerAgent: hasBuyerAgent, isBrokerageName: isBrokerageName, normKey: normKey,
     parsePipeline: parsePipeline, parseFunded: parseFunded,
     validateTask: validateTask, validateException: validateException, friendlyError: friendlyError,
     effectiveOwner: effectiveOwner, workDueDate: workDueDate, suggestTuesdayRetry: suggestTuesdayRetry, currentTuesdayWork: currentTuesdayWork, tuesdayFollowupScheduled: tuesdayFollowupScheduled, tuesdayUpdateTextConfirmed: tuesdayUpdateTextConfirmed, bucket: bucket, isIssue: isIssue, daySummary: daySummary, resolvedOn: resolvedOn,
