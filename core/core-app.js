@@ -588,7 +588,7 @@
       }).join('') + '</div><div id="core-public-detail"' + (active ? '' : ' hidden') + '>' +
       (active ? '<h3 style="margin-top:14px">' + active[1] + '</h3>' +
         (selected === 'tuesday' ? '<blockquote class="cx-script" style="margin:8px 0">CCR script · ' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '<p class="cx-sub">Due and upcoming in the next 7 days</p>') +
-        (schedule.length ? '<p class="cx-sub">This schedule shows totals. Open your team tracker link to see individual calls and log an outcome.</p><ul>' + schedule.map(function (row) {
+        (schedule.length ? '<p class="cx-sub">This public schedule shows call counts by date. Individual calls and outcome logging require team access.</p><ul>' + schedule.map(function (row) {
           var total = Number(row.total);
           var status = row.status === 'attempted' ? ' attempted' : ' outstanding';
           return '<li><strong>' + esc(fmtDate(row.due_date)) + '</strong> · ' + esc(row.total) +
