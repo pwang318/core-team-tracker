@@ -10718,6 +10718,33 @@ async function pfrLoad(){
       activePoints:activePoints,powerBiActiveCount:powerBiActiveCount,totalActive:totalActive,redCount:redRows.length,yellowCount:healthCounts.Yellow,redNoTouch:redNoTouch,
       missingNextMove:missingNextMove,riskNames:riskNames}).sections;
     var meetingExportData={date:localDateStr(now),source:'Power BI '+sourceDate+' · Velocify '+meetingLeadsMTD+' leads MTD'+(meetingLeadsMTD>leadsMTD?' (latest tracker checkpoint; individual rows pending nightly sync)':' through '+(latestLeadDate||'latest sync'))+' · tracker relationship history',score:(tierPoints+referralPoints+activePoints).toFixed(1)+' / 100',note:pbSource.syncNote||'',sections:agenda};
+    var watchDate=window.CoreLogic.todayIso();
+    var referralWatch=rows.map(function(row){
+      var nameKey=ctAgentNameKey(row.name), plainKey=row.name.toLowerCase();
+      var lastLead=[lastLeadDateByAgent[nameKey]||lastLeadDateByAgent[plainKey],row.agent.latest_lead_date]
+        .map(window.CoreLogic.toIsoDate).filter(function(date){return date&&date<=watchDate;}).sort().pop();
+      return {row:row,lead:lastLead,watch:window.CoreLogic.referralWatch(lastLead,watchDate)};
+    });
+    var referralHistoryMissing=referralWatch.filter(function(item){return item.watch.status==='unknown';}).length;
+    var referralApproaching=referralWatch.filter(function(item){return item.watch.status==='approaching';});
+    var referralPast=referralWatch.filter(function(item){return item.watch.status==='past';});
+    function referralWatchList(items){
+      return items.sort(function(a,b){return a.watch.remaining-b.watch.remaining;}).map(function(item,i){
+        var row=item.row,key=ctAgentNameKey(row.name),plainKey=row.name.toLowerCase();
+        var rm=(typeof agentRmOwners!=='undefined'&&(agentRmOwners[key]||agentRmOwners[plainKey]))||row.agent.rm_owner||row.agent.rm;
+        var close=window.CoreLogic.toIsoDate(row.agent.latest_close_date);
+        var recentClose=close&&close<=watchDate&&close>=window.CoreLogic.addDays(watchDate,-90);
+        var timing=item.watch.status==='past'?'90+ days without a lead':item.watch.remaining+' days until the 90-day mark';
+        var next=item.watch.status==='past'?'Reconnect this week and agree on a next step.':'Reach out before '+item.watch.threshold+' and ask about their buyer pipeline.';
+        return pfrListRow(i+1,row.name,escHtml(timing+' · Last lead '+item.lead+' · '+(rm?'RM '+rm:'Assign an RM owner')+(recentClose?' · Recent closing keeps the relationship active':''))+'<br>'+escHtml(next));
+      }).join('');
+    }
+    var referralWatchMarkup='<section id="portfolio-referral-watch" style="background:var(--surface);border:1px solid #B9D8E1;border-radius:12px;padding:16px;margin-bottom:14px">'+
+      '<h3 style="font-size:15px;margin:0 0 6px">90-day referral watch</h3>'+
+      '<p style="font-size:12px;margin:0 0 8px">Managed partners approaching 90 days without a lead. Review with the RM each week.</p>'+
+      (referralApproaching.length?referralWatchList(referralApproaching):'<p style="font-size:12px">No managed partners with a known lead date are within the 14-day warning window.</p>')+
+      (referralPast.length?'<details><summary>'+referralPast.length+' at 90+ days · Review recovery list</summary>'+referralWatchList(referralPast)+'</details>':'')+
+      (referralHistoryMissing?'<p style="font-size:12px">'+referralHistoryMissing+' managed partners need a last-lead date verified.</p>':'')+'</section>';
     var html=`<div class="lp-portfolio-meeting-brief" style="background:#F5FAFB;border:1px solid #B9D8E1;border-radius:12px;padding:18px;margin-bottom:14px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div style="font-size:10px;font-weight:800;color:#35657C;letter-spacing:.09em">30-MINUTE TEAM PORTFOLIO MEETING</div><div style="font-size:19px;font-weight:800;color:#071B37;margin-top:3px">The results, the people, the decisions</div><div style="font-size:11px;color:#536B78;margin-top:4px">Power BI ${escHtml(sourceDate)} · Velocify ${meetingLeadsMTD} leads MTD${meetingLeadsMTD>leadsMTD?' · latest tracker checkpoint':' · through '+escHtml(latestLeadDate||'latest sync')} · tracker relationship history</div></div><button class="btn btn-sm" type="button" onclick="pfrExportMeetingBrief(this)">Download Word meeting record</button></div>
       ${pbSource.syncNote?'<p style="background:#fff7e7;padding:10px;border-radius:8px">'+escHtml(pbSource.syncNote)+'</p>':''}
@@ -10725,6 +10752,8 @@ async function pfrLoad(){
       ${agenda.map(function(section,i){return `<section style="background:#fff;border:1px solid #DCE7EC;border-radius:10px;padding:14px;margin-top:10px"><h3 style="font-size:14px;margin:0 0 6px">${i+1}. ${escHtml(section.title)} <span style="font-weight:400;color:#536B78">· ${section.minutes} min</span></h3>${section.result?'<div style="font-weight:700;font-size:12px">'+escHtml(section.result)+'</div>':''}<p style="font-size:12px;line-height:1.5;margin:7px 0">${escHtml(section.context)}</p>${section.people.length?`<div style="font-size:11px;font-weight:700;margin:10px 0 4px">Partners to review</div><ul style="margin:0 0 9px;padding-left:19px;font-size:12px;line-height:1.65">${section.people.map(function(person){return `<li>${escHtml(person)}</li>`;}).join('')}</ul>`:''}${section.talkingPoints.length?`<div style="font-size:11px;font-weight:700;margin:8px 0 4px">Talk through</div><ol style="margin:0 0 9px;padding-left:19px;font-size:12px;line-height:1.65">${section.talkingPoints.map(function(point){return `<li>${escHtml(point)}</li>`;}).join('')}</ol>`:''}<p style="font-size:12px;line-height:1.5;margin:6px 0"><b>Decide:</b> ${escHtml(section.question)}</p><label style="display:block;font-size:11px;font-weight:700;margin-top:9px">Decision · owner · due date</label><textarea data-portfolio-decision="${section.key}" oninput="pfrSaveMeetingDecisions()" rows="2" placeholder="Record the action, owner and due date" style="display:block;width:100%;box-sizing:border-box;border:1px solid #CBD8E3;border-radius:8px;padding:9px;font:inherit;margin-top:4px"></textarea></section>`;}).join('')}
       <p style="font-size:11px;color:#526575;margin-bottom:0">Decisions save in this browser. Download the Word document after the meeting to share the completed handoff.</p>
     </div>`;
+
+    html+=referralWatchMarkup;
 
     html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Power BI → Tracker Reconciliation</div>'
@@ -10856,6 +10885,7 @@ async function pfrLoad(){
       'Power BI agent tiers':powerBiActiveCount+' active agents · '+totalActive+' managed 90d',
       'Referral pace':meetingLeadsMTD+' partner referrals MTD',
       'Tier movement':(migCtoB+migBtoA+migAtoChannel+migOther)+' changes · '+range.label,
+      '90-day referral watch':referralApproaching.length+' approaching · '+referralPast.length+' at 90+ days',
       'Proactive watch':proactiveWatch.length+' partners on watch',
       'Partner satisfaction':rated.length?avgSatisfaction+' / 5 · '+rated.length+'/'+powerBiActiveCount+' active agents rated':'0 of '+powerBiActiveCount+' active agents rated',
       'High-potential partners':highPotential.length+' documented · '+highPotentialNeedsReason.length+' needs reason',
@@ -10883,6 +10913,7 @@ function pfrCompactOverview(body,summaries){
     {label:'Power BI agent tiers',find:'Power BI Agent Levels',group:'numbers'},
     {label:'Referral pace',find:'Active Agent-to-Lead Ratio',group:'numbers'},
     {label:'Tier movement',find:'Tier Migration Progress',group:'numbers'},
+    {label:'90-day referral watch',find:'90-day referral watch',group:'relationships'},
     {label:'Proactive watch',find:'Proactive Watch',group:'relationships'},
     {label:'Partner health',find:'Partner Health',group:'relationships'},
     {label:'Partner satisfaction',find:'Partner Satisfaction',group:'relationships'},
@@ -14515,7 +14546,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125h"></script><script defer src="./core/core-app.js?v=20261125h"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125j"></script><script defer src="./core/core-app.js?v=20261125j"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];

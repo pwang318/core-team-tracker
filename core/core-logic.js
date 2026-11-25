@@ -538,6 +538,13 @@
     o.leadToApp = pct(o.apps, o.leads); o.appToPre = pct(o.pre, o.apps); o.preToContract = pct(o.contracts, o.pre); o.contractToFunded = pct(o.funded, o.contracts);
     return o;
   }
+  function referralWatch(lastLead, date) {
+    var lead = toIsoDate(lastLead);
+    if (!lead || lead > date) return { status: 'unknown' };
+    var threshold = addDays(lead, 90);
+    var remaining = daysBetween(date, threshold);
+    return { status: remaining <= 0 ? 'past' : remaining <= 14 ? 'approaching' : 'current', remaining: remaining, threshold: threshold };
+  }
   function velocifySources(rows) {
     var categories = { relationship: [], advertising: [], unclassified: [] };
     var sourceByLead = new Map();
@@ -587,7 +594,7 @@
     effectiveOwner: effectiveOwner, bucket: bucket, isIssue: isIssue, daySummary: daySummary, resolvedOn: resolvedOn,
     referralMetrics: referralMetrics, uniqueReferrals: uniqueReferrals, duplicateNotes: duplicateNotes,
     pace: pace, tierFromCloses: tierFromCloses, inRange: inRange, outcomeLabel: outcomeLabel,
-    velocifyStage: velocifyStage, velocifyFunnel: velocifyFunnel, velocifySources: velocifySources, SCORECARD: SCORECARD, scorecardMetrics: scorecardMetrics,
+    velocifyStage: velocifyStage, velocifyFunnel: velocifyFunnel, velocifySources: velocifySources, referralWatch: referralWatch, SCORECARD: SCORECARD, scorecardMetrics: scorecardMetrics,
     scorecardSummary: scorecardSummary, weekMonday: weekMonday
   };
 });

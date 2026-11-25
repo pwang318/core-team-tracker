@@ -1518,10 +1518,25 @@
       var un = unassignedActiveLoans().length; if (un) bott.push(un + ' active loans need an LP owner');
     }
     if (sc && sc.some(function (x) { return !x; })) bott.push(sc.filter(function (x) { return !x; }).length + ' LP scorecards not entered this week');
+    var stages = started && fun ? [
+      ['Relationship lead to 1003', relationshipFunnel.leadToApp, 80, 'Review relationship leads without an application and assign each a next contact date.'],
+      ['Application to preapproval', fun.appToPre, 55, 'Review applications awaiting preapproval and assign owners for missing items.'],
+      ['Preapproval to contract', fun.preToContract, curQ === 1 && per !== 'year' ? 60 : 65, 'Review preapproved buyers and assign one concrete follow-up per buyer.'],
+      ['Contract to funding', fun.contractToFunded, 75, 'Review open contracts and assign next actions for closing blockers.']
+    ] : [];
+    var gap = stages.filter(function (stage) { return stage[1] !== null && stage[1] < stage[2]; })
+      .sort(function (a, b) { return (b[2] - b[1]) - (a[2] - a[1]); })[0];
+    var focus = gap ? gap[0] + ' is at ' + gap[1] + '% against ' + gap[2] + '%. Mack: ' + gap[3] :
+      fp.status === 'behind' ? 'Funding is behind pace. Daniel: review closing blockers and plan for ' + fp.requiredPerWeek + ' fundings per week.' :
+      od ? od + ' overdue client calls. Mack: confirm each owner and next contact date in Command Center.' :
+      un ? un + ' active loans need an LP owner. Mack: confirm ownership in Command Center.' :
+      'Mack and the RM: review the 90-day referral watch and agree on the next move for each partner nearing the cutoff.';
+    var weeklyFocus = '<section class="cx-card"><h3>What to do this week</h3><p>' + esc(focus) +
+      '</p><p class="cx-note">Daniel reviews progress at the next weekly meeting.</p><button type="button" class="cx-btn" data-referral-watch>Open Team Portfolio</button></section>';
     host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Leadership</div><h2>Growth &amp; Execution Plan</h2><div class="cx-sub">' + esc(periodLabel) + ' · Targets from the final CORE Team 2027 Business Plan</div></div>' +
       '<div class="cx-tabs">' + [['month', 'Month'], ['quarter', 'Quarter'], ['year', 'Year']].map(function (p) { return '<button type="button" class="cx-tab' + (per === p[0] ? ' on' : '') + '" data-per="' + p[0] + '">' + p[1] + '</button>'; }).join('') + '</div></div>' +
       (S.tier ? syncLine() : accessCard('Unlock funded loans, referrals and team execution')) +
-      executionThisWeek(t0) +
+      weeklyFocus + executionThisWeek(t0) +
       (baseline ? '<p class="cx-note">Velocify · last 30 days · ' + baseline.relationship.length + ' relationship leads · ' +
         baseline.advertising.length + ' recorded advertising leads · ' + baseline.unclassified.length + ' need source review</p>' : '') +
       '<div class="cx-note">LPs work their call lists and log referrals. Mack reviews overdue work and scorecards each week. Daniel reviews pipeline, referrals, and production pace at the weekly meeting.</div>' +
@@ -1555,6 +1570,10 @@
       '<div>Pipeline report: ' + (signed ? freshImport('pipeline') : 'Locked') + '</div><div>Funded Units: ' + (signed ? freshImport('funded_units') : 'Locked') + '</div>' +
       '<div>Power BI profiles: ' + (S.ext && S.ext.pbi ? esc(fmtTime(S.ext.pbi.imported_at)) : 'Unavailable') + '</div><div>Velocify: ' + (S.ext && S.ext.vel ? 'latest lead ' + esc(fmtTime(S.ext.vel.created_at)) : 'Unavailable') + '</div></div></div></div></details></div>';
     bindAccess(host);
+    $('[data-referral-watch]', host).addEventListener('click', function () {
+      var portfolio = $('.ct-nav-btn[data-route="portfolio"]');
+      if (portfolio) portfolio.click();
+    });
     $('[data-lp-jump="execution-tuesday"]', host).addEventListener('click', openTuesdayWorklist);
     $('[data-lp-jump="execution-calls"]', host).addEventListener('click', function () { S.cmdTab = 'overview'; S.cmdPeriod = 'week'; openView('core-command'); });
     $('[data-lp-jump="execution-coaching"]', host).addEventListener('click', function () {
