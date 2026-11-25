@@ -99,7 +99,7 @@ assert(html.includes('var total=live&&(live.verified||live.acknowledged_excluded
 assert(html.includes("(total===null?'—':total)"),'LP summary must visibly withhold unverified active count');
 assert(html.length > 100000, 'Tracker file unexpectedly truncated');
 // CORE execution module (Tuesday Updates, 30/60/90 calls, Command Center, 2027 Plan)
-const coreTag = '<script defer src="./core/core-logic.js?v=20261125f"></script><script defer src="./core/core-app.js?v=20261125e"></script>';
+const coreTag = '<script defer src="./core/core-logic.js?v=20261125f"></script><script defer src="./core/core-app.js?v=20261125g"></script>';
 if (!html.includes(coreTag)) {
   // The install-core-execution workflow adds the tag right after a push; allow that one window only.
   assert(fs.existsSync('.github/workflows/install-core-execution.yml'), 'CORE module scripts must load after the tracker, logic first');

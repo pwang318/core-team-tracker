@@ -221,7 +221,7 @@
     var label = function (s) { return ((s.querySelector('.ct-nav-label') || {}).textContent || ''); };
     var team = sections.find(function (s) { return /TEAM/.test(label(s)); });
     if (team && !$('[data-route="core-command"]')) {
-      var b1 = navBtn('core-command', '◆', 'Command Center'), b2 = navBtn('core-plan', '◇', 'Daniel’s 2027 Plan');
+      var b1 = navBtn('core-command', '◆', 'Command Center'), b2 = navBtn('core-plan', '◇', 'Growth & Execution Plan');
       var pm = team.querySelector('[data-route="production-manager"]');
       team.insertBefore(b1, pm || null); team.insertBefore(b2, b1.nextSibling);
     }
@@ -425,6 +425,7 @@
         [b['tue-overdue'].length + b['pc-overdue'].length, 'Clear overdue calls'],
         [b['tue-remaining'].length, 'Finish Tuesday updates'],
         [due, 'Complete due post-closing calls'],
+        [b.journey.length, 'Complete contract and pre-closing calls'],
         [missing === false ? 1 : 0, 'Enter this week’s scorecard']
       ];
       var rank = priority.findIndex(function (item) { return item[0] > 0; });
@@ -432,13 +433,14 @@
         count: rank < 0 ? 0 : priority[rank][0], open: b['tue-remaining'].length, post: due,
         scorecard: missing === null ? 'Unavailable' : missing === false ? 'Missing' : 'Entered' };
     }).sort(function (a, b) { return a.rank - b.rank || b.count - a.count; });
-    host.innerHTML = '<div class="cx-card"><div class="cx-head"><h2>Who to coach today</h2></div>' +
+    host.innerHTML = '<div class="cx-card"><div class="cx-head"><h2>Who to coach today</h2><button type="button" class="cx-btn" data-execution-plan>Growth &amp; Execution Plan</button></div>' +
       '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>LP</th><th>Start here</th><th>Tuesday open</th><th>Post-closing due</th><th>Scorecard</th></tr></thead><tbody>' +
       rows.map(function (row) {
         return '<tr><td><button type="button" class="cx-link" data-coach-lp="' + esc(row.lp) + '">' + esc(row.lp) + '</button></td>' +
-          '<td><b>' + esc(row.action) + '</b>' + (row.count && row.rank < 5 ? ' · ' + row.count : '') + '</td><td>' +
+          '<td><b>' + esc(row.action) + '</b>' + (row.count && row.rank < 6 ? ' · ' + row.count : '') + '</td><td>' +
           row.open + '</td><td>' + row.post + '</td><td>' + esc(row.scorecard) + '</td></tr>';
       }).join('') + '</tbody></table></div></div>';
+    $('[data-execution-plan]', host).addEventListener('click', function () { openView('core-plan'); });
     $all('[data-coach-lp]', host).forEach(function (button) {
       button.addEventListener('click', function () {
         var link = $('.ct-nav-btn[data-lp="' + button.dataset.coachLp + '"]');
@@ -986,9 +988,11 @@
       '<button type="button" class="cx-btn" data-cx="export">Export to Excel</button></div></div>' + syncLine() +
       (S.error ? '<div class="cx-err">' + esc(S.error) + '</div>' : '') +
       '<div class="cx-tabs" role="tablist">' + tabs.map(function (t) { return '<button type="button" role="tab" class="cx-tab' + (S.cmdTab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '">' + esc(t[1]) + '</button>'; }).join('') + '</div>' +
+      '<button type="button" class="cx-btn" data-execution-plan>Growth &amp; Execution Plan</button>' +
       '<label class="cx-f">More manager tools <select data-cx="manager-tool" aria-label="More manager tools">' + opts(more, S.cmdTab, 'Choose a tool') + '</select></label>' +
       '<div id="cx-cmd-body">' + (S.loadedAt ? commandBody(S.cmdTab, p) : '<div class="cx-empty">Loading shared data…</div>') + '</div></div>';
     bindAccess(host);
+    $('[data-execution-plan]', host).addEventListener('click', function () { openView('core-plan'); });
     $all('[data-tab]', host).forEach(function (b) { b.addEventListener('click', function () { S.cmdTab = b.dataset.tab; renderCommand(); }); });
     $('[data-cx="manager-tool"]', host).addEventListener('change', function (event) { if (event.target.value) { S.cmdTab = event.target.value; renderCommand(); } });
     $all('[data-tuesday-status]', host).forEach(function (b) { b.addEventListener('click', function () {
@@ -1438,6 +1442,20 @@
     if (p.status === 'not_started') return 'Target ' + p.target + ' · starts Jan 1, 2027 · needs ' + p.requiredPerWeek + ' ' + unit + '/week';
     return p.pct + '% of ' + p.target + ' · ' + p.gap + ' remaining' + (p.gap ? ' · need ' + p.requiredPerWeek + '/week' : '') + (p.status === 'behind' ? ' · behind pace' : p.status === 'on_pace' ? ' · on pace' : ' · met');
   }
+  function executionThisWeek(date) {
+    var available = S.tier && S.loadedAt && !S.error;
+    var counts = available ? LPS.map(lpBuckets) : [];
+    var tuesday = available && hasImport('pipeline') ? counts.reduce(function (n, b) { return n + b['tue-remaining'].length; }, 0) : null;
+    var postClosing = available && hasImport('funded_units') ? counts.reduce(function (n, b) { return n + b.pc30.length + b.pc60.length + b.pc90.length; }, 0) : null;
+    var scorecards = available ? LPS.map(function (lp) { return scorecardFor(lp, L.weekMonday(date)); }) : [];
+    var missing = scorecards.length && scorecards.every(function (row) { return row !== null; }) ? scorecards.filter(function (row) { return row === false; }).length : null;
+    return '<section class="cx-card"><div class="cx-head"><div><h3>Start this week</h3><div class="cx-sub">Week of ' + esc(fmtDate(L.weekMonday(date))) + ' · Current team work</div></div></div>' +
+      '<div class="cx-tiles" style="margin-top:12px">' +
+      lpShortcut('execution-tuesday', 'Tuesday updates', tuesday === null ? 'Unavailable' : tuesday + ' open') +
+      lpShortcut('execution-calls', '30/60/90-day calls', postClosing === null ? 'Unavailable' : postClosing + ' due now') +
+      lpShortcut('execution-coaching', 'Weekly scorecards & coaching', missing === null ? 'Unavailable' : missing + ' scorecards missing') +
+      '</div></section>';
+  }
   function renderPlan() {
     var host = $('#view-core-plan'); if (!host) return;
     var P = L.PLAN, t0 = today(), y = P.year;
@@ -1482,10 +1500,11 @@
       var un = unassignedActiveLoans().length; if (un) bott.push(un + ' active loans need an LP owner');
     }
     if (sc && sc.some(function (x) { return !x; })) bott.push(sc.filter(function (x) { return !x; }).length + ' LP scorecards not entered this week');
-    host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Leadership</div><h2>2027 Business Plan</h2><div class="cx-sub">' + esc(periodLabel) + ' · Targets from the final CORE Team 2027 Business Plan</div></div>' +
+    host.innerHTML = '<div class="cx-stack"><div class="cx-head"><div><div class="cx-kicker">Leadership</div><h2>Growth &amp; Execution Plan</h2><div class="cx-sub">' + esc(periodLabel) + ' · Targets from the final CORE Team 2027 Business Plan</div></div>' +
       '<div class="cx-tabs">' + [['month', 'Month'], ['quarter', 'Quarter'], ['year', 'Year']].map(function (p) { return '<button type="button" class="cx-tab' + (per === p[0] ? ' on' : '') + '" data-per="' + p[0] + '">' + p[1] + '</button>'; }).join('') + '</div></div>' +
       (S.tier ? syncLine() : accessCard('Unlock funded loans, referrals and team execution')) +
-      (t0 < y + '-01-01' ? '<div class="cx-warn">The 2027 plan year begins January 1, 2027. Until then, actuals read "Not started" and required pace shows what each week will need.</div>' : '') +
+      executionThisWeek(t0) +
+      (t0 < y + '-01-01' ? '<p class="cx-note">2027 target reporting starts January 1. The weekly work above is live now.</p>' : '') +
       '<div class="cx-tiles">' +
       planTile('Funded loans', ns(funded ? funded.length : null), paceFoot(fp, 'fundings') + (per === 'year' ? ' · stretch ' + P.fundings.stretch : ''), nsCls(!!funded, 'hero'), signed ? 'plan-funded' : null) +
       planTile('Unique relationship leads', fun ? ns(fun.leads) : 'Data unavailable', 'Target ' + leadTarget + (fun ? ' · Velocify unique leads, all sources; relationship vs. advertising split needs reconciliation' : ''), nsCls(!!fun)) +
@@ -1514,6 +1533,12 @@
       '<div>Pipeline report: ' + (signed ? freshImport('pipeline') : 'Locked') + '</div><div>Funded Units: ' + (signed ? freshImport('funded_units') : 'Locked') + '</div>' +
       '<div>Power BI profiles: ' + (S.ext && S.ext.pbi ? esc(fmtTime(S.ext.pbi.imported_at)) : 'Unavailable') + '</div><div>Velocify: ' + (S.ext && S.ext.vel ? 'latest lead ' + esc(fmtTime(S.ext.vel.created_at)) : 'Unavailable') + '</div></div></div></div></details></div>';
     bindAccess(host);
+    $('[data-lp-jump="execution-tuesday"]', host).addEventListener('click', openTuesdayWorklist);
+    $('[data-lp-jump="execution-calls"]', host).addEventListener('click', function () { S.cmdTab = 'overview'; S.cmdPeriod = 'week'; openView('core-command'); });
+    $('[data-lp-jump="execution-coaching"]', host).addEventListener('click', function () {
+      var link = $('.ct-nav-btn[data-route="production-manager"]');
+      if (link) link.click();
+    });
     $all('[data-per]', host).forEach(function (b) { b.addEventListener('click', function () { S.planPeriod = b.dataset.per; renderPlan(); }); });
     $all('[data-plan-rec]', host).forEach(function (b) { b.addEventListener('click', function () { openRec(b.dataset.planRec); }); });
   }
