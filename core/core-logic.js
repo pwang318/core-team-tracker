@@ -385,22 +385,22 @@
     if (t.status === 'exception') return isoOfInstant(t.exception_at || t.updated_at);
     return null;
   }
-  function suggestTuesdayRetry(date, closingDate, urgent, sentUpdate) {
+  function suggestTuesdayRetry(date, closingDate, urgent) {
     if (urgent || (closingDate && closingDate <= date)) return date;
     if (closingDate && closingDate <= addDays(date, 2)) return addDays(date, 1);
     var day = dow(date);
-    var proposed = addDays(date, !sentUpdate && (day === 2 || day === 3) ? 4 - day : ((2 - day + 7) % 7 || 7));
+    var proposed = addDays(date, (2 - day + 7) % 7 || 7);
     return closingDate && closingDate <= proposed ? addDays(closingDate, -1) : proposed;
   }
+  function tuesdayUpdateTextConfirmed(t) {
+    return t.task_type === 'tuesday' && t.status === 'attempted' && t.borrower_outcome === 'text_sent' &&
+      !!(t.script_checks && t.script_checks.update_text_sent === true);
+  }
   function workDueDate(t) {
-    if (t.task_type === 'tuesday' && t.status === 'attempted' &&
-        t.borrower_outcome && t.borrower_outcome !== 'conversation' && t.next_action_date) return t.next_action_date;
-    return t.due_date;
+    return tuesdayUpdateTextConfirmed(t) && t.next_action_date ? t.next_action_date : t.due_date;
   }
   function tuesdayFollowupScheduled(t, today) {
-    return t.task_type === 'tuesday' && t.status === 'attempted' &&
-      !!t.next_action_date && workDueDate(t) === t.next_action_date &&
-      !!t.borrower_outcome && t.borrower_outcome !== 'conversation' && t.next_action_date > today;
+    return tuesdayUpdateTextConfirmed(t) && !!t.next_action_date && t.next_action_date > today;
   }
   function currentTuesdayWork(tasks, today) {
     var activePlans = new Set();
@@ -411,8 +411,7 @@
       }
     });
     return (tasks || []).filter(function (task) {
-      return !(task.task_type === 'tuesday' && task.status === 'attempted' &&
-        task.script_checks && task.script_checks.update_text_sent && task.borrower_outcome === 'text_sent' &&
+      return !(tuesdayUpdateTextConfirmed(task) &&
         task.plan_week < task.next_action_date && !isIssue(task) &&
         activePlans.has(task.loan_number + ':' + task.next_action_date));
     });
@@ -546,7 +545,8 @@
     if (t.status === 'exception' && t.exception_kind === 'service_recovery') return 'Client concern — resolution required';
     if (t.status === 'exception') return 'Exception — ' + (t.exception_kind === 'unreachable' ? 'borrower unreachable' : 'documented circumstance');
     if (t.concern_status === 'unresolved') return 'Client concern — resolution required';
-    if (today && tuesdayFollowupScheduled(t, today)) return t.script_checks && t.script_checks.update_text_sent && t.borrower_outcome === 'text_sent' ? 'Update text sent · follow-up scheduled' : 'Attempted · follow-up scheduled';
+    if (today && tuesdayFollowupScheduled(t, today)) return 'Update text sent · follow-up scheduled';
+    if (t.task_type === 'tuesday' && t.status === 'attempted' && !tuesdayUpdateTextConfirmed(t)) return 'Follow-up text required';
     if (today && workDueDate(t) > today) return 'Not yet due';
     if (t.status === 'attempted') return 'Attempted — follow-up required';
     return today && t.due_date < today ? 'Overdue' : 'Due';
@@ -657,7 +657,7 @@
     clean: clean, lpShort: lpShort, hasBuyerAgent: hasBuyerAgent, normKey: normKey,
     parsePipeline: parsePipeline, parseFunded: parseFunded,
     validateTask: validateTask, validateException: validateException, friendlyError: friendlyError,
-    effectiveOwner: effectiveOwner, workDueDate: workDueDate, suggestTuesdayRetry: suggestTuesdayRetry, currentTuesdayWork: currentTuesdayWork, tuesdayFollowupScheduled: tuesdayFollowupScheduled, bucket: bucket, isIssue: isIssue, daySummary: daySummary, resolvedOn: resolvedOn,
+    effectiveOwner: effectiveOwner, workDueDate: workDueDate, suggestTuesdayRetry: suggestTuesdayRetry, currentTuesdayWork: currentTuesdayWork, tuesdayFollowupScheduled: tuesdayFollowupScheduled, tuesdayUpdateTextConfirmed: tuesdayUpdateTextConfirmed, bucket: bucket, isIssue: isIssue, daySummary: daySummary, resolvedOn: resolvedOn,
     referralMetrics: referralMetrics, uniqueReferrals: uniqueReferrals, duplicateNotes: duplicateNotes,
     pace: pace, tierFromCloses: tierFromCloses, inRange: inRange, outcomeLabel: outcomeLabel,
     velocifyStage: velocifyStage, velocifyFunnel: velocifyFunnel, velocifySources: velocifySources, realtorReferralPace: realtorReferralPace, referralWatch: referralWatch, SCORECARD: SCORECARD, scorecardMetrics: scorecardMetrics,

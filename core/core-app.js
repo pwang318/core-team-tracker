@@ -850,7 +850,7 @@
       '<h3 style="margin-top:18px">' + (isTue ? 'Step 1 · Borrower call' : 'Borrower call') + '</h3>' +
       (isTue ? '' : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
       '<label class="cx-f" for="cx-bo">Borrower contact outcome</label><select id="cx-bo" name="borrower_outcome"' + dis + '>' + opts(L.BORROWER_OUTCOMES, t.borrower_outcome, 'Select outcome') + '</select>' +
-      (isTue && editable ? '<label id="cx-update-text-label" class="cx-check cx-hide"><input type="checkbox" id="cx-update-text"> I texted the borrower their loan update</label>' : '') +
+      (isTue && editable ? '<label id="cx-update-text-label" class="cx-check cx-hide"><input type="checkbox" id="cx-update-text"> I sent the follow-up text with the loan update</label>' : '') +
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
       (isTue ? '<label class="cx-f" for="cx-bn">Borrower update notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="Summarize the loan status, what you discussed, and any borrower questions."' + dis + '>' +
         esc([t.service_update, t.borrower_notes].filter(function (note, i, notes) { return note && notes.indexOf(note) === i; }).join('\n\n')) + '</textarea>' : '') +
@@ -944,15 +944,14 @@
       var outcome = $('#cx-bo', ov).value, label = $('#cx-update-text-label', ov);
       if (label) label.classList.toggle('cx-hide', !['voicemail', 'no_answer'].includes(outcome));
       if (dateEdited) return;
-      if (!['voicemail', 'no_answer'].includes(outcome)) {
+      if (!updateTextSelected()) {
         if (suggestedDate) followUpDate.value = t.next_action_date || '';
         suggestedDate = '';
         return;
       }
       var date = today();
-      if (!suggestedDate && followUpDate.value > date && !updateTextSelected()) return;
       var urgent = L.isIssue(Object.assign({}, t, collect(form, t)));
-      suggestedDate = L.suggestTuesdayRetry(date, loan.est_closing_date, urgent, updateTextSelected());
+      suggestedDate = L.suggestTuesdayRetry(date, loan.est_closing_date, urgent);
       followUpDate.value = suggestedDate;
       $('#cx-follow-up', ov).open = true;
     }
@@ -974,9 +973,9 @@
         : '<div class="cx-ok">✓ Every required conversation and referral step is documented.</div>';
       var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = saving || (!compact && errs.length > 0);
       var bo = p.borrower_outcome, ar = $('#cx-attempt-row', ov);
-      if (ar) ar.innerHTML = bo && bo !== 'conversation' ? '<button type="button" class="cx-btn sm" data-cx="log-attempt">Log this attempt</button><span class="cx-note">' + (compact ? 'Review the follow-up date before saving. Choose an earlier date for urgent files.' : 'Attempts are saved with the time. They do not complete the call.') + '</span>' : '';
+      if (ar) ar.innerHTML = bo && bo !== 'conversation' ? '<button type="button" class="cx-btn sm" data-cx="log-attempt">Log this attempt</button><span class="cx-note">' + (compact ? (updateTextSelected() || L.tuesdayUpdateTextConfirmed(t) && bo === 'text_sent' ? 'Review the follow-up date before saving.' : 'Call first, leave a voicemail if available, then send the borrower their update by text. Confirm the text above to clear this from Still to call.') : 'Attempts are saved with the time. They do not complete the call.') + '</span>' : '';
       var followUp = $('#cx-follow-up', ov);
-      if (compact && followUp && bo && bo !== 'conversation' && !p.next_action_date) followUp.open = true;
+      if (compact && followUp && updateTextSelected() && !p.next_action_date) followUp.open = true;
       var la = $('[data-cx="log-attempt"]', ov); if (la) la.onclick = function () { logAttempt(bo); };
       var named = $('#cx-named', ov); if (named) named.classList.toggle('cx-hide', p.referral_response !== 'named_introduction');
       var cc = $('#cx-concern', ov); if (cc) cc.classList.toggle('cx-hide', (p.concern_status || 'none') === 'none');
@@ -1004,11 +1003,23 @@
     refreshReqs();
     function busy(on) { saving = on; $all('.cx-drawer-foot .cx-btn', ov).forEach(function (b) { if (b.dataset.cx !== 'close') b.disabled = on || (!compact && b.dataset.cx === 'complete' && valid().length > 0); }); }
     function applyTextDelivery(patch) {
-      if (!compact || !updateTextSelected()) return null;
+      if (!compact) return null;
+      if (!updateTextSelected()) {
+        if (patch.borrower_outcome !== t.borrower_outcome && t.script_checks && t.script_checks.update_text_sent) {
+          patch.script_checks = Object.assign({}, patch.script_checks || t.script_checks, { update_text_sent: false });
+        }
+        return null;
+      }
       var channel = patch.borrower_outcome;
       patch.borrower_outcome = 'text_sent';
       patch.script_checks = Object.assign({}, patch.script_checks || t.script_checks, { update_text_sent: true });
       return { event_type: 'attempt', party: 'borrower', channel: channel };
+    }
+    function attemptMessage(row) {
+      if (!compact) return 'Attempt saved. The call stays open until you reach the borrower.';
+      if (L.tuesdayFollowupScheduled(row, today())) return 'Update text recorded. Follow-up scheduled for ' + fmtDate(row.next_action_date) + '.';
+      if (L.tuesdayUpdateTextConfirmed(row)) return 'Update text recorded. Review the follow-up date.';
+      return 'Attempt saved. Send the follow-up text and confirm it to clear this update from Still to call.';
     }
     function save(extra, okMsg) {
       var p = Object.assign(collect(form, t), extra || {});
@@ -1022,7 +1033,7 @@
         if (p.agent_outcome && p.agent_outcome !== prev.agent_outcome) evs.push({ event_type: p.agent_outcome === 'no_buyer_agent' ? 'status' : p.agent_outcome === 'attempted' ? 'attempt' : 'conversation', party: 'buyer_agent', channel: p.agent_outcome, detail: (p.agent_notes || '').slice(0, 500) });
         if (p.status && p.status !== prev.status) evs.push({ event_type: 'status', party: 'system', channel: p.status, detail: p.status === 'exception' ? p.exception_reason : null });
         if (p.escalated && !prev.escalated) evs.push({ event_type: 'escalation', party: 'borrower', detail: p.concern_notes });
-        return logEvents(row, evs).then(function () { ov.__dirty = false; setState('Saved'); toast(okMsg || (L.tuesdayFollowupScheduled(row, today()) ? 'Attempt saved. Follow-up scheduled for ' + fmtDate(row.next_action_date) + '.' : 'Progress saved. Complete the call when all required items are entered.')); return row; });
+        return logEvents(row, evs).then(function () { ov.__dirty = false; setState('Saved'); toast(okMsg || (row.status === 'attempted' && row.borrower_outcome !== 'conversation' ? attemptMessage(row) : 'Progress saved. Complete the call when all required items are entered.')); return row; });
       }).catch(function (e) {
         setState('Not saved', true); busy(false); toast(friendlyServerError(e), true);
         if (/another device/.test(String(e.message))) { ov.__dirty = false; renderDrawer(t.id); }
@@ -1042,9 +1053,8 @@
       events.push({ event_type: 'attempt', party: 'borrower', channel: patch.borrower_outcome,
         detail: callBeforeText ? 'Borrower loan update sent by text.' : ((form.querySelector('[name="borrower_notes"]') || {}).value || '').slice(0, 500) || null });
       saveTask(t, patch)
-        .then(function (row) { return logEvents(row, events); })
-        .then(function () { ov.__dirty = false; toast(compact && patch.next_action_date > today() ? 'Attempt saved. Follow-up scheduled for ' + fmtDate(patch.next_action_date) + '.' :
-          (compact ? 'Attempt saved. Set a future follow-up date to move this update off today’s list.' : 'Attempt saved. The call stays open until you reach the borrower.')); renderDrawer(t.id); refreshEvents(t.id); renderAll(); })
+        .then(function (row) { return logEvents(row, events).then(function () { return row; }); })
+        .then(function (row) { ov.__dirty = false; toast(attemptMessage(row)); renderDrawer(t.id); refreshEvents(t.id); renderAll(); })
         .catch(function (e) { setState('Not saved', true); busy(false); toast(friendlyServerError(e), true); });
     }
     var on = function (sel, fn) { var b = $('[data-cx="' + sel + '"]', ov); if (b) b.addEventListener('click', fn); };
