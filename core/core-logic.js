@@ -538,6 +538,22 @@
     o.leadToApp = pct(o.apps, o.leads); o.appToPre = pct(o.pre, o.apps); o.preToContract = pct(o.contracts, o.pre); o.contractToFunded = pct(o.funded, o.contracts);
     return o;
   }
+  function velocifySources(rows) {
+    var categories = { relationship: [], advertising: [], unclassified: [] };
+    var sourceByLead = new Map();
+    (rows || []).forEach(function (row) {
+      var source = clean(row.lead_source).toLowerCase();
+      var category = /^(realtor|builder|past client|current client|personal friend) referral$/.test(source) ? 'relationship' :
+        /^(advertising|paid advertising|paid search|paid social)$/.test(source) ? 'advertising' : 'unclassified';
+      var key = row.lead_key || row.id;
+      if (!key) { categories.unclassified.push(row); return; }
+      var previous = sourceByLead.get(key);
+      if (!previous) sourceByLead.set(key, { row: row, category: category });
+      else if (previous.category !== category) previous.category = 'unclassified';
+    });
+    sourceByLead.forEach(function (entry) { categories[entry.category].push(entry.row); });
+    return categories;
+  }
   // Existing LP scorecard methodology (unchanged): weekly rows in lp_scorecards keyed by
   // person + Monday week_key; data holds <metric>_<Day> counts; goals per LP role.
   var SCORECARD = {
@@ -571,7 +587,7 @@
     effectiveOwner: effectiveOwner, bucket: bucket, isIssue: isIssue, daySummary: daySummary, resolvedOn: resolvedOn,
     referralMetrics: referralMetrics, uniqueReferrals: uniqueReferrals, duplicateNotes: duplicateNotes,
     pace: pace, tierFromCloses: tierFromCloses, inRange: inRange, outcomeLabel: outcomeLabel,
-    velocifyStage: velocifyStage, velocifyFunnel: velocifyFunnel, SCORECARD: SCORECARD, scorecardMetrics: scorecardMetrics,
+    velocifyStage: velocifyStage, velocifyFunnel: velocifyFunnel, velocifySources: velocifySources, SCORECARD: SCORECARD, scorecardMetrics: scorecardMetrics,
     scorecardSummary: scorecardSummary, weekMonday: weekMonday
   };
 });

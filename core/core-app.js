@@ -1421,13 +1421,24 @@
   }
 
   // ================================================================ Daniel: 2027 plan
+  function loadVelocifyCohort(since) {
+    var query = 'velocify_leads?select=lead_key,date_added,status,lead_source&date_added=gte.' + since + '&order=lead_key.asc&limit=1000';
+    var rows = [];
+    function page(offset) {
+      return anonGet(query + '&offset=' + offset).then(function (batch) {
+        rows = rows.concat(batch);
+        return batch.length === 1000 ? page(offset + batch.length) : rows;
+      });
+    }
+    return page(0);
+  }
   function loadExternal() {
     if (S.ext && Date.now() - S.ext.at < 5 * 60000) return Promise.resolve(S.ext);
     if (S._extLoading) return S._extLoading;
     var y0 = +today().slice(0, 4);
     S._extLoading = Promise.all([
       anonGet('agent_profiles?select=agent_name,closes_past_year,latest_lead_date,latest_close_date,relationship_status,powerbi_last_seen_at').catch(function () { return null; }),
-      anonGet('velocify_leads?select=lead_key,date_added,status&date_added=gte.' + Math.min(y0, L.PLAN.year) + '-01-01&limit=20000').catch(function () { return null; }),
+      loadVelocifyCohort([Math.min(y0, L.PLAN.year) + '-01-01', L.addDays(today(), -29)].sort()[0]).catch(function () { return null; }),
       anonGet('powerbi_import_log?select=imported_at&order=imported_at.desc&limit=1').catch(function () { return null; }),
       anonGet('velocify_leads?select=created_at&order=created_at.desc&limit=1').catch(function () { return null; })
     ]).then(function (r) { S.ext = { at: Date.now(), profiles: r[0], leadsAll: r[1], pbi: r[2] && r[2][0], vel: r[3] && r[3][0] }; S._extLoading = null; renderAll(); return S.ext; });
@@ -1470,6 +1481,13 @@
     var fp = L.pace(funded ? funded.length : null, fundTarget, range, t0);
     var vel = S.ext && S.ext.leadsAll ? S.ext.leadsAll.filter(function (l) { return L.inRange(L.toIsoDate(l.date_added), range); }) : null;
     var fun = vel ? L.velocifyFunnel(vel) : null;
+    var sources = vel ? L.velocifySources(vel) : null;
+    var relationshipFunnel = sources ? L.velocifyFunnel(sources.relationship) : null;
+    var recentStart = L.addDays(t0, -29);
+    var recentLeads = S.ext && S.ext.leadsAll ? S.ext.leadsAll.filter(function (lead) {
+      return L.inRange(L.toIsoDate(lead.date_added), { start: recentStart, end: t0 });
+    }) : null;
+    var baseline = recentLeads && recentLeads.length ? L.velocifySources(recentLeads) : null;
     var leadTarget = per === 'year' ? P.relationshipLeads : per === 'quarter' ? (curQ === 1 ? P.q1.leads : Math.round(P.relationshipLeads / 4)) : Math.round(P.relationshipLeads / 12);
     var startTarget = per === 'year' ? P.fileStarts : per === 'quarter' ? (curQ === 1 ? P.q1.starts : Math.round(P.fileStarts / 4)) : Math.round(P.fileStarts / 12);
     var ccr = signed ? L.referralMetrics(S.tasks, ['tuesday', 'contract', 'preclose'], range, asOf) : null;
@@ -1504,11 +1522,15 @@
       '<div class="cx-tabs">' + [['month', 'Month'], ['quarter', 'Quarter'], ['year', 'Year']].map(function (p) { return '<button type="button" class="cx-tab' + (per === p[0] ? ' on' : '') + '" data-per="' + p[0] + '">' + p[1] + '</button>'; }).join('') + '</div></div>' +
       (S.tier ? syncLine() : accessCard('Unlock funded loans, referrals and team execution')) +
       executionThisWeek(t0) +
+      (baseline ? '<p class="cx-note">Velocify · last 30 days · ' + baseline.relationship.length + ' relationship leads · ' +
+        baseline.advertising.length + ' recorded advertising leads · ' + baseline.unclassified.length + ' need source review</p>' : '') +
+      '<div class="cx-note">LPs work their call lists and log referrals. Mack reviews overdue work and scorecards each week. Daniel reviews pipeline, referrals, and production pace at the weekly meeting.</div>' +
       (t0 < y + '-01-01' ? '<p class="cx-note">2027 target reporting starts January 1. The weekly work above is live now.</p>' : '') +
       '<div class="cx-tiles">' +
       planTile('Funded loans', ns(funded ? funded.length : null), paceFoot(fp, 'fundings') + (per === 'year' ? ' · stretch ' + P.fundings.stretch : ''), nsCls(!!funded, 'hero'), signed ? 'plan-funded' : null) +
-      planTile('Unique relationship leads', fun ? ns(fun.leads) : 'Data unavailable', 'Target ' + leadTarget + (fun ? ' · Velocify unique leads, all sources; relationship vs. advertising split needs reconciliation' : ''), nsCls(!!fun)) +
-      planTile('Application starts', fun ? ns(fun.apps) : 'Data unavailable', 'Target ' + startTarget + ' · Velocify application conversions; Encompass file starts are not connected', nsCls(!!fun)) +
+      planTile('Unique relationship leads', sources ? ns(sources.relationship.length) : 'Data unavailable', 'Target ' + leadTarget + ' · Classified Velocify leads', nsCls(!!sources)) +
+      planTile('Advertising leads', sources ? ns(sources.advertising.length) : 'Data unavailable', 'Recorded advertising sources' + (sources && started ? ' · ' + sources.unclassified.length + ' leads need source review' : ''), nsCls(!!sources)) +
+      planTile('Encompass file starts', 'Source needed', 'Target ' + startTarget + ' · Needs an Encompass export with loan number and file-start date', 'is-na') +
       planTile('CCR introductions', ns(ccr ? ccr.named.length : null), 'Target ' + refTarget + ' unique' + (refFunded ? ' · ' + refFunded + ' funded' : '') + (ccr ? ' · ' + ccr.asked.length + ' requests' : ''), nsCls(!!ccr), signed ? 'plan-ccr' : null) +
       planTile('PCR introductions', ns(pcr ? pcr.named.length : null), 'Target ' + refTarget + ' unique' + (refFunded ? ' · ' + refFunded + ' funded' : '') + (pcr ? ' · ' + pcr.asked.length + ' requests' : ''), nsCls(!!pcr), signed ? 'plan-pcr' : null) +
       '</div>' +
@@ -1518,7 +1540,7 @@
       (funded && unclassified && started ? '<div class="cx-warn" style="margin-top:8px">Needs reconciliation: ' + unclassified + ' funded loans have no source category yet.</div>' : '') +
       '<p class="cx-note" style="margin-top:8px">Returning past clients (own financing) and past-client referrals (introducing someone else) are separate sources.</p></div>' +
       '<div class="cx-card"><h3>Conversion funnel</h3><div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>Stage</th><th class="cx-num">Plan</th><th class="cx-num">Actual</th><th>Source</th></tr></thead><tbody>' +
-      cvRow('Referred lead to 1003', fun ? fun.leadToApp : null, '80%+', 'Velocify cohort') + cvRow('Application start to preapproval', fun ? fun.appToPre : null, '55%', 'Velocify cohort') +
+      cvRow('Relationship lead to 1003', relationshipFunnel ? relationshipFunnel.leadToApp : null, '80%+', 'Velocify relationship cohort') + cvRow('Application start to preapproval', fun ? fun.appToPre : null, '55%', 'Velocify cohort') +
       cvRow('Preapproval to contract', fun ? fun.preToContract : null, per === 'quarter' && curQ === 1 ? '60% (Q1)' : '65%', 'Velocify cohort') + cvRow('Contract to funding', fun ? fun.contractToFunded : null, '75%', 'Velocify cohort') +
       cvRow('Referral introduction to funding', ccr && (ccr.named.length + pcr.named.length) ? Math.round(100 * (ccr.namedFunded.length + pcr.namedFunded.length) / (ccr.named.length + pcr.named.length)) : null, '25% modeled', 'LP referral status') +
       '</tbody></table></div><p class="cx-note" style="margin-top:8px">Cohort rates use each lead\'s current Velocify status (actual, not projected). Daniel\'s goal of 30%+ of clients generating referrals is a separate measure from the 25% modeled yield.</p></div></div></details>' +
