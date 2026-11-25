@@ -1177,6 +1177,7 @@
     return '';
   }
   function tuesdayWorklist() {
+    if (!hasImport('pipeline') || S.error) return '<div class="cx-empty">Live Tuesday updates are unavailable. Check the pipeline report under Tools and reporting.</div>';
     var completed = S.tuesdayStatus === 'completed';
     var sections = LPS.map(function (lp) {
       var tasks = lpBuckets(lp)[completed ? 'tue-completed' : 'tue-remaining'];

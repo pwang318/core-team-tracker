@@ -216,11 +216,18 @@ t('Post-closing outcome vocabulary', () => {
 t('Velocify funnel matches the existing LP Conversion stage rules and dedupes leads', () => {
   const f = L.velocifyFunnel([
     { lead_key: 'a', status: 'New' }, { lead_key: 'b', status: 'Started' }, { lead_key: 'c', status: 'Pre-Approved' },
-    { lead_key: 'd', status: 'Under Contract' }, { lead_key: 'e', status: 'Funded' }, { lead_key: 'e', status: 'Funded' }
+    { lead_key: 'd', status: 'Under Contract' }, { lead_key: 'e', status: 'New' }, { lead_key: 'e', status: 'Funded' }
   ]);
   assert.deepEqual([f.leads, f.apps, f.pre, f.shopping, f.contracts, f.funded], [5, 4, 3, 1, 2, 1]);
   assert.equal(f.leadToApp, 80); assert.equal(f.contractToFunded, 50);
   assert.equal(L.velocifyFunnel([]).leadToApp, null, 'no data is not 0%');
+  const relationship = L.velocifySources([
+    { lead_key: 'x', lead_source: 'Realtor Referral', status: 'New' },
+    { lead_key: 'x', lead_source: 'Realtor Referral', status: 'Under Contract' }
+  ]).relationship;
+  assert.equal(relationship.length, 1);
+  assert.equal(L.velocifyFunnel(relationship).contracts, 1);
+
 });
 t('Scorecard summary uses the existing metrics, goals and totals', () => {
   const s = L.scorecardSummary('Gavin', { past_client_talks_Mon: 3, past_client_talks_Tue: 2, apps_1003_Wed: 4, contracts_Fri: 1 });

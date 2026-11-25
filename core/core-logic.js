@@ -528,10 +528,15 @@
     return rank;
   }
   function velocifyFunnel(rows) {
-    var seen = {}, o = { leads: 0, apps: 0, pre: 0, shopping: 0, contracts: 0, funded: 0 };
-    (rows || []).forEach(function (r) {
-      var k = r.lead_key || r.id; if (k && seen[k]) return; if (k) seen[k] = 1;
-      var x = velocifyStage(r); o.leads++;
+    var stages = new Map(), unkeyed = [];
+    (rows || []).forEach(function (row) {
+      var key = row.lead_key || row.id, stage = velocifyStage(row);
+      if (key) stages.set(key, Math.max(stages.get(key) || 0, stage));
+      else unkeyed.push(stage);
+    });
+    var o = { leads: 0, apps: 0, pre: 0, shopping: 0, contracts: 0, funded: 0 };
+    Array.from(stages.values()).concat(unkeyed).forEach(function (x) {
+      o.leads++;
       if (x >= 1) o.apps++; if (x >= 2) o.pre++; if (x === 2) o.shopping++; if (x >= 3) o.contracts++; if (x >= 4) o.funded++;
     });
     function pct(a, b) { return b ? Math.round(100 * a / b) : null; }
@@ -583,6 +588,7 @@
       var previous = sourceByLead.get(key);
       if (!previous) sourceByLead.set(key, { row: row, category: category });
       else if (previous.category !== category) previous.category = 'unclassified';
+      else if (velocifyStage(row) > velocifyStage(previous.row)) previous.row = row;
     });
     sourceByLead.forEach(function (entry) { categories[entry.category].push(entry.row); });
     return categories;

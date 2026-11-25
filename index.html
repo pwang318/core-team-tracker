@@ -12261,6 +12261,10 @@ function openOperatingStandardView(btn){
     return (map[lp]||[String(lp||'').toLowerCase()]).some(x=>s.indexOf(x)>=0);
   }
   function ctVelocifyStage(row){
+    if(window.CoreLogic){
+      const rank=window.CoreLogic.velocifyStage(row);
+      return {app:rank>=1,pre:rank>=2,contract:rank>=3,funded:rank>=4};
+    }
     const s=String((row&&row.status)||'').toLowerCase().trim();
     const app=typeof ctIsLeadAppConverted==='function'
       ? ctIsLeadAppConverted(row)
@@ -12273,7 +12277,7 @@ function openOperatingStandardView(btn){
   async function ctLpVelocifyFunnel(lp){
     const y=new Date().getFullYear()+'-01-01';
     try{
-      const rows=await sbFetch('GET','velocify_leads?date_added=gte.'+y+'&select=date_added,lp_user,status,converted_to_app,app_started_at,file_started_at,started_at&order=date_added.desc&limit=20000');
+      const rows=await sbFetch('GET','velocify_leads?date_added=gte.'+y+'&select=date_added,lp_user,status&order=date_added.desc&limit=20000');
       const mine=(rows||[]).filter(r=>ctLpUserMatches(lp,r.lp_user));
       let apps=0,pre=0,contracts=0,funded=0;
       mine.forEach(r=>{
@@ -12316,7 +12320,7 @@ function openOperatingStandardView(btn){
 
     host.innerHTML=
       '<div class="ct-score-grid">'+metrics.map(m=>'<div class="ct-score-metric"><div class="num">'+m[1]+'</div><div class="lbl">'+esc(m[0])+' · this week</div></div>').join('')+'</div>'+
-      '<div style="font-size:10px;color:#6B7E8A;margin:8px 0 5px"><b>Conversion:</b> live YTD Velocify funnel. Weekly boxes above are LP-entered scorecard activity.</div>'+
+      '<div style="font-size:10px;color:#6B7E8A;margin:8px 0 5px"><b>LP coaching benchmarks:</b> YTD Velocify records. The Growth &amp; Execution Plan tracks team targets separately.</div>'+
       '<div class="ct-gates-inline">'+conversionHtml+'</div>';
   }
   window.lpv2PrimeLp=function(lp){
@@ -14621,7 +14625,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125q"></script><script defer src="./core/core-app.js?v=20261125r"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125s"></script><script defer src="./core/core-app.js?v=20261125s"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];
