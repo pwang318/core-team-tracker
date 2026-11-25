@@ -10885,7 +10885,7 @@ async function pfrLoad(){
       ['Relationships',referralApproaching.length+' nearing the 90-day referral mark','The RM owns outreach before the cutoff.'],
       ['Tier growth',nearTierCount===null?'Count unavailable':nearTierCount+' one closing away','Review the owners and active buyers in Partner Growth.','partner-growth'],
       ['Leadership decisions',escalations.length+' escalations logged · '+range.label,'Review escalations and decide what needs leadership help.']
-    ]);
+    ],referralApproaching.filter(function(item){return item.watch.remaining>=8;}).length);
     body._portfolioCards[0]._portfolioExportData=meetingExportData;
     pfrRestoreMeetingDecisions(body._portfolioCards[0]);
   }catch(e){
@@ -10895,7 +10895,7 @@ async function pfrLoad(){
 }
 window.pfrLoad=pfrLoad;
 window.pfrGetHealthRows=function(){return Array.isArray(pfrDrill.rows)?pfrDrill.rows:null;};
-function pfrCompactOverview(body,summaries,directorRows){
+function pfrCompactOverview(body,summaries,directorRows,newWarnings){
   var outreach=body.querySelector('#portfolio-referral-watch');
   var reminders=body.querySelector('#portfolio-contact-watch');
   if(outreach&&reminders){
@@ -10922,8 +10922,11 @@ function pfrCompactOverview(body,summaries,directorRows){
     {label:'Leadership escalations',find:'Required Leadership Escalations',group:'activity'}
   ];
   var nav=document.createElement('div');nav.className='pfr-overview';
+  var changes=document.createElement('section');
+  changes.dataset.portfolioChanges=String(newWarnings||0);
+  nav.append(changes);
   if(directorRows){
-    var overview=document.createElement('section'), overviewTitle=document.createElement('h3');
+    var overview=document.createElement('details'), overviewTitle=document.createElement('summary');
     overviewTitle.textContent='Director overview';overview.append(overviewTitle);
     directorRows.forEach(function(row){
       var item=document.createElement('p'), title=document.createElement('strong');
@@ -10938,17 +10941,17 @@ function pfrCompactOverview(body,summaries,directorRows){
     });
     nav.append(overview);
   }
-  var priorities=document.createElement('section'), heading=document.createElement('h3'), priorityGrid=document.createElement('div');
-  heading.textContent='Weekly review';priorityGrid.className='pfr-overview-grid';
-  priorityGrid.style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
-  priorities.append(heading,priorityGrid);nav.append(priorities);
-  var reports=document.createElement('details'), summary=document.createElement('summary');
-  summary.textContent='More portfolio reports';reports.append(summary);nav.append(reports);
-  var groups={priority:priorityGrid};
+  var priorities=document.createElement('section'), priorityLinks=document.createElement('div');
+  priorityLinks.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+  priorities.append(priorityLinks);nav.append(priorities);
+  var reportLabel=document.createElement('label'), reportSelect=document.createElement('select');
+  reportLabel.append(document.createTextNode('Portfolio reports '),reportSelect);
+  reportSelect.className='ct-link-btn';
+  reportSelect.add(new Option('Choose a report',''));
+  priorities.append(reportLabel);
+  var groups={};
   [['numbers','Portfolio performance'],['relationships','Partner follow-up'],['activity','Actions and feedback']].forEach(function(pair){
-    var section=document.createElement('section'), title=document.createElement('h3'), grid=document.createElement('div');
-    title.textContent=pair[1];grid.className='pfr-overview-grid';
-    section.append(title,grid);reports.append(section);groups[pair[0]]=grid;
+    var group=document.createElement('optgroup');group.label=pair[1];reportSelect.append(group);groups[pair[0]]=group;
   });
   var detail=document.createElement('section');detail.className='lp-portfolio-active-detail';
   cards.forEach(function(card,i){
@@ -10956,13 +10959,16 @@ function pfrCompactOverview(body,summaries,directorRows){
     var entry=i===0?{label:'Meeting brief',group:'Start here'}:titles.find(function(t){return heading.indexOf(t.find)===0;})||{label:heading.slice(0,50)||'More detail',group:'activity'};
     // v90: Health scoring is temporarily removed from Portfolio until its source logic is rebuilt.
     if(entry.label==='Partner health'){ card.style.display='none'; return; }
-    var tile=document.createElement('button');tile.type='button';tile.className='lp-portfolio-topic-tile';tile.dataset.portfolioTopic=String(i);tile.setAttribute('aria-expanded','false');
-    var label=document.createElement('strong'),metric=document.createElement('span'),arrow=document.createElement('span');
-    label.textContent=entry.label;metric.textContent=summaries[entry.label]||'View details';arrow.textContent='›';arrow.setAttribute('aria-hidden','true');arrow.className='pfr-arrow';
-    tile.append(label,metric,arrow);
     var primary=['Meeting brief','Relationship risks'].indexOf(entry.label);
-    if(primary>=0){tile.dataset.priority=primary;var next=Array.from(priorityGrid.children).find(function(b){return Number(b.dataset.priority)>primary;});priorityGrid.insertBefore(tile,next||null);}
-    else groups[entry.group].append(tile);
+    if(primary>=0){
+      var button=document.createElement('button');
+      button.type='button';button.className='ct-link-btn';button.dataset.portfolioTopic=String(i);
+      button.setAttribute('aria-expanded','false');button.textContent=entry.label;
+      if(summaries[entry.label])button.title=summaries[entry.label];
+      priorityLinks.append(button);
+    }else{
+      groups[entry.group].append(new Option(entry.label,String(i)));
+    }
     card.querySelectorAll('[onclick]').forEach(function(control){
       if(control.matches('a,button,[role="button"]'))return;
       control.setAttribute('role','button');control.setAttribute('tabindex','0');
@@ -10971,23 +10977,30 @@ function pfrCompactOverview(body,summaries,directorRows){
   body.replaceChildren(nav);
   body._portfolioCards=cards;
   body._portfolioDetail=detail;
-  if(!body.dataset.portfolioNavInstalled){
-    body.addEventListener('click',function(ev){
-      var tile=ev.target.closest('[data-portfolio-topic]');if(!tile||!body.contains(tile))return;
-      var card=body._portfolioCards[Number(tile.dataset.portfolioTopic)];if(!card)return;
-      if(tile.classList.contains('active')){
-        body._portfolioDetail.remove();tile.classList.remove('active');tile.setAttribute('aria-expanded','false');return;
-      }
-      body._portfolioDetail.replaceChildren(card);
-      if(tile.dataset.priority!==undefined)tile.closest('section').after(body._portfolioDetail);
-      else tile.after(body._portfolioDetail);
-      var actions=card.querySelector('[data-weekly-actions]');
-      if(actions&&window.CoreApp)window.CoreApp.renderWeeklyActions(actions);
-      body.querySelectorAll('[data-portfolio-topic]').forEach(function(b){b.classList.toggle('active',b===tile);b.setAttribute('aria-expanded',b===tile?'true':'false');});
-    });
-    body.dataset.portfolioNavInstalled='1';
+  function openReport(index){
+    var card=cards[index];
+    if(!card)return;
+    detail.replaceChildren(card);
+    priorities.after(detail);
+    var actions=card.querySelector('[data-weekly-actions]');
+    if(actions&&window.CoreApp)window.CoreApp.renderWeeklyActions(actions);
   }
-  // A closed initial state makes the first click visibly open the meeting outline.
+  priorityLinks.addEventListener('click',function(event){
+    var button=event.target.closest('[data-portfolio-topic]');
+    if(!button)return;
+    var expanded=button.getAttribute('aria-expanded')==='true';
+    priorityLinks.querySelectorAll('button').forEach(function(link){link.setAttribute('aria-expanded','false');});
+    reportSelect.value='';
+    if(expanded){detail.remove();return;}
+    button.setAttribute('aria-expanded','true');
+    openReport(button.dataset.portfolioTopic);
+  });
+  reportSelect.addEventListener('change',function(){
+    priorityLinks.querySelectorAll('button').forEach(function(link){link.setAttribute('aria-expanded','false');});
+    if(reportSelect.value===''){detail.remove();return;}
+    openReport(reportSelect.value);
+  });
+  if(window.CoreApp)window.CoreApp.renderPortfolioChanges(changes);
 }
 document.addEventListener('keydown',function(event){
   if((event.key==='Enter'||event.key===' ')&&event.target.matches('#pfr-body [role="button"][onclick]')){event.preventDefault();event.target.click();}
@@ -14582,7 +14595,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <!-- Velocify ownership safety: source records are retained pending Velocify confirmation. Never silently remove a disputed application row or reassign its original LP. -->
-<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125j"></script><script defer src="./core/core-app.js?v=20261125o"></script></body>
+<script defer src="./ui/director-only-warnings.js?v=20261110"></script><script defer src="./core/core-logic.js?v=20261125j"></script><script defer src="./core/core-app.js?v=20261125p"></script></body>
 <script id="v313-all-call-export">
 (function(){
   const LPS=['Gavin','Karen','Osgood','Jordan','Said','Isaak'];

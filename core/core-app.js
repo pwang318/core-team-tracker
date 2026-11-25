@@ -303,7 +303,41 @@
     var v = $('#view-lp');
     return (v && v.classList.contains('active') && typeof window.currentUser === 'string' && LPS.indexOf(window.currentUser) >= 0) ? window.currentUser : null;
   }
+  function renderPortfolioChanges(host) {
+    var key = activeKey(), tier = S.tier;
+    var allowed = key && ['manager','leader','admin'].includes(tier);
+    var date = today(), since = L.addDays(date, -6);
+    function sameAccess() { return activeKey() === key && S.tier === tier; }
+    host.portfolioChangesAccess = sameAccess;
+    function present(risk, overdue) {
+      host.innerHTML = '<h3>What changed since last week?</h3><ul>' +
+        '<li>' + esc(risk) + '</li><li>' + Number(host.dataset.portfolioChanges) + ' partners entered the 90-day referral warning window</li>' +
+        '<li>' + esc(overdue) + '</li></ul>';
+    }
+    if (!allowed) {
+      present('Closing-risk changes require leadership access.', 'Overdue commitments require leadership access.');
+      return;
+    }
+    present('Loading closing-risk changes…', 'Loading newly overdue commitments…');
+    Promise.allSettled([
+      apiAct('core_api_forecast_reviews', { p_action: 'list', p: {} }),
+      apiAct('core_api_weekly_actions', { p_action: 'list', p: {} })
+    ]).then(function (results) {
+      if (!host.isConnected || host.portfolioChangesAccess !== sameAccess || !sameAccess()) return;
+      var risks = results[0].value, actions = results[1].value;
+      var riskCount = Array.isArray(risks) ? risks.filter(function (row) {
+        return row.status === 'at_risk' && L.inRange(L.isoOfInstant(row.status_since), { start: since, end: date });
+      }).length : null;
+      var overdueCount = Array.isArray(actions) ? actions.filter(function (row) {
+        return !row.completed_at && row.due_date < date && row.due_date >= L.addDays(since, -1);
+      }).length : null;
+      present(riskCount === null ? 'Closing-risk changes unavailable.' : riskCount + ' active closings newly flagged at risk',
+        overdueCount === null ? 'Overdue commitments unavailable.' : overdueCount + ' open commitments became overdue');
+    });
+  }
   function renderAll() {
+    var portfolioChanges = $('[data-portfolio-changes]');
+    if (portfolioChanges && portfolioChanges.portfolioChangesAccess && !portfolioChanges.portfolioChangesAccess()) renderPortfolioChanges(portfolioChanges);
     var weeklyActions = $('[data-weekly-actions]');
     if (weeklyActions && weeklyActions.weeklyActionsAccess && !weeklyActions.weeklyActionsAccess()) renderWeeklyActions(weeklyActions);
     if ($('#view-lp') && $('#view-lp').classList.contains('active')) renderToday();
@@ -404,7 +438,11 @@
         button.disabled = true;
         apiAct('core_api_weekly_actions', { p_action: mode, p: fields }).then(function (result) {
           if (!result || result.id !== fields.id) throw new Error('The server did not confirm the action.');
-          if (current()) renderWeeklyActions(host);
+          if (current()) {
+            renderWeeklyActions(host);
+            var changes = $('[data-portfolio-changes]');
+            if (changes) renderPortfolioChanges(changes);
+          }
         }).catch(function (error) {
           if (current()) { button.disabled = false; toast(friendlyServerError(error), true); }
         });
@@ -1780,6 +1818,6 @@
     window.addEventListener('hashchange', function () { var k = readHashKey(); if (k) { setKey(k); loadAll(); } });
     window.addEventListener('storage', function (e) { if (e.key === KEY_STORE) { teamKey = e.newValue; loadAll(); } });
   }
-  window.CoreApp = { open: openView, openTuesdayWorklist: openTuesdayWorklist, renderCoaching: renderCoaching, managerSignIn: managerSignIn, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, refreshBuilderTile: refreshBuilderTile, renderWeeklyActions: renderWeeklyActions, _rpc: function (fn, args) { return apiAct(fn, args); } };
+  window.CoreApp = { open: openView, openTuesdayWorklist: openTuesdayWorklist, renderCoaching: renderCoaching, managerSignIn: managerSignIn, openImports: function () { S.cmdTab = 'data'; openView('core-command'); }, reload: loadAll, state: S, renderToday: renderToday, refreshBuilderTile: refreshBuilderTile, renderWeeklyActions: renderWeeklyActions, renderPortfolioChanges: renderPortfolioChanges, _rpc: function (fn, args) { return apiAct(fn, args); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
