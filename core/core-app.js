@@ -820,22 +820,15 @@
     pc60: 'Make the 90-day follow-up call',
     pc90: 'Schedule a future client check-in'
   };
-  var TUESDAY_TEXT_OUTCOMES = { voicemail_update: 'voicemail', no_answer_update: 'no_answer' };
   function borrowerOutcomeOptions(task) {
-    if (task.task_type !== 'tuesday') return L.BORROWER_OUTCOMES;
-    var savedText = L.tuesdayUpdateTextConfirmed(task);
-    var choices = [
+    if (task.task_type !== 'tuesday') return opts(L.BORROWER_OUTCOMES, task.borrower_outcome, 'Select outcome');
+    var confirmed = L.tuesdayUpdateTextConfirmed(task);
+    var selected = !task.borrower_outcome || task.borrower_outcome === 'conversation' ? task.borrower_outcome : 'no_answer';
+    return (confirmed ? '<option value="text_sent" selected hidden>Update text sent (saved)</option>' : '') + opts([
       ['conversation', 'Spoke with borrower'],
-      ['voicemail_update', 'Left voicemail + sent update text'],
-      ['no_answer_update', 'No answer + sent update text'],
-      ['voicemail', 'Left voicemail · text still due'],
-      ['no_answer', 'No answer · text still due'],
-      ['wrong_number', 'Wrong or disconnected number']
-    ];
-    if (savedText) choices.push(['text_sent', 'Update text sent (saved)']);
-    return choices.concat(L.BORROWER_OUTCOMES.filter(function (option) {
-      return option[0] === task.borrower_outcome && !choices.some(function (choice) { return choice[0] === option[0]; });
-    }));
+      ['no_answer_update', 'Called + sent update text'],
+      ['no_answer', 'Called · text still due']
+    ], confirmed ? null : selected, confirmed ? undefined : 'Select outcome');
   }
   function renderDrawer(id) {
     var ov = $('.cx-overlay[data-task="' + id + '"]'); if (!ov) return;
@@ -866,7 +859,7 @@
       '<form data-cx="task" novalidate>' +
       '<h3 style="margin-top:18px">' + (isTue ? 'Step 1 · Borrower call' : 'Borrower call') + '</h3>' +
       (isTue ? '' : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
-      '<label class="cx-f" for="cx-bo">Borrower contact outcome</label><select id="cx-bo" name="borrower_outcome"' + dis + '>' + opts(borrowerOutcomeOptions(t), t.borrower_outcome, 'Select outcome') + '</select>' +
+      '<label class="cx-f" for="cx-bo">Borrower contact outcome</label><select id="cx-bo" name="borrower_outcome"' + dis + '>' + borrowerOutcomeOptions(t) + '</select>' +
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
       (isTue ? '<label class="cx-f" for="cx-bn">Borrower update notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="Summarize the loan status, what you discussed, and any borrower questions."' + dis + '>' +
         esc([t.service_update, t.borrower_notes].filter(function (note, i, notes) { return note && notes.indexOf(note) === i; }).join('\n\n')) + '</textarea>' : '') +
@@ -925,6 +918,8 @@
     var p = {};
     PATCH_FIELDS.forEach(function (n) { var el = form.querySelector('[name="' + n + '"]'); if (el) p[n] = el.value === '' ? null : el.value; });
     if (t.task_type === 'tuesday') {
+      if (p.borrower_outcome === 'no_answer' && t.borrower_outcome && t.borrower_outcome !== 'conversation' &&
+          !L.tuesdayUpdateTextConfirmed(t)) p.borrower_outcome = t.borrower_outcome;
       var notes = form.querySelector('[name="borrower_notes"]');
       if (notes.value === notes.defaultValue && t.borrower_notes && t.service_update) {
         p.borrower_notes = t.borrower_notes;
@@ -953,7 +948,7 @@
     var compact = t.task_type === 'tuesday', saving = false;
     var followUpDate = $('#cx-nd', ov), suggestedDate = '', dateEdited = false;
     function updateTextSelected() {
-      return !!TUESDAY_TEXT_OUTCOMES[$('#cx-bo', ov).value];
+      return $('#cx-bo', ov).value === 'no_answer_update';
     }
     function suggestAttemptDate() {
       if (!compact || !followUpDate) return;
@@ -995,7 +990,7 @@
           changeDate.onclick = function () { $('#cx-follow-up', ov).open = true; followUpDate.focus(); };
           ar.appendChild(changeDate);
         }
-        if (compact && ['voicemail','no_answer'].includes(bo)) ar.textContent = 'Send the loan update by text, then choose the matching outcome above.';
+        if (compact && $('#cx-bo', ov).value === 'no_answer') ar.textContent = 'Leave a voicemail if available, then send the loan update by text.';
       }
       var followUp = $('#cx-follow-up', ov);
       if (compact && followUp && updateTextSelected() && !p.next_action_date) followUp.open = true;
@@ -1033,7 +1028,7 @@
         }
         return null;
       }
-      var channel = TUESDAY_TEXT_OUTCOMES[patch.borrower_outcome];
+      var channel = t.borrower_outcome === 'voicemail' ? 'voicemail' : 'no_answer';
       patch.borrower_outcome = 'text_sent';
       patch.script_checks = Object.assign({}, patch.script_checks || t.script_checks, { update_text_sent: true });
       return { event_type: 'attempt', party: 'borrower', channel: channel };
