@@ -588,10 +588,12 @@
       }).join('') + '</div><div id="core-public-detail"' + (active ? '' : ' hidden') + '>' +
       (active ? '<h3 style="margin-top:14px">' + active[1] + '</h3>' +
         (selected === 'tuesday' ? '<blockquote class="cx-script" style="margin:8px 0">CCR script · ' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '<p class="cx-sub">Due and upcoming in the next 7 days</p>') +
-        (schedule.length ? '<div class="cx-list">' + schedule.map(function (row) {
-          return '<div class="cx-item"><span class="i-name">' + esc(fmtDate(row.due_date)) + '</span><span class="i-meta">' +
-            (row.status === 'attempted' ? 'Attempted' : 'Open') + '</span><span class="i-right">' + esc(row.total) + '</span></div>';
-        }).join('') + '</div>' : '<div class="cx-empty">No schedule entries for this period.</div>') : '') + '</div></div>';
+        (schedule.length ? '<p class="cx-sub">This schedule shows totals. Open your team tracker link to see individual calls and log an outcome.</p><ul>' + schedule.map(function (row) {
+          var total = Number(row.total);
+          var status = row.status === 'attempted' ? ' attempted' : ' outstanding';
+          return '<li><strong>' + esc(fmtDate(row.due_date)) + '</strong> · ' + esc(row.total) +
+            (total === 1 ? ' call' : ' calls') + status + '</li>';
+        }).join('') + '</ul>' : '<div class="cx-empty">No schedule entries for this period.</div>') : '') + '</div></div>';
   }
 
   var renderedLp = null, lpPanel = null;
