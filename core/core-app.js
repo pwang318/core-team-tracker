@@ -882,7 +882,7 @@
       '<div id="cx-concern"' + ((t.concern_status || 'none') === 'none' ? ' class="cx-hide"' : '') + '><label class="cx-f" for="cx-cn">Concern details and what was done</label><textarea id="cx-cn" name="concern_notes"' + dis + '>' + esc(t.concern_notes || '') + '</textarea>' +
       '<label class="cx-check" style="margin-top:8px"><input type="checkbox" name="escalated"' + (t.escalated ? ' checked' : '') + dis + '><span>Escalate to the Production Manager</span></label></div>' +
       (isTue ? '</details>' : '') + (isTue && agentPresent ? '<section id="cx-agent-section" class="cx-card" style="margin-top:12px;padding:14px"><h3>Step 2 · Buyer agent update</h3>' +
-        '<div id="cx-agent-help" class="cx-note" style="margin-top:8px">' + ('Update ' + esc(loan.buyer_agent_name) + ' after the borrower call.') + '</div>' +
+        '<div id="cx-agent-help" class="cx-note" style="margin-top:8px">' + ('Record the update to ' + esc(loan.buyer_agent_name) + '.') + '</div>' +
         '<fieldset id="cx-agent" aria-describedby="cx-agent-help" style="border:0;padding:0;margin:0"><label class="cx-f" for="cx-ao">Buyer agent contact outcome</label><select id="cx-ao" name="agent_outcome"' + dis + '>' + opts(L.AGENT_OUTCOMES, t.agent_outcome, 'Select outcome') + '</select>' +
         '<details id="cx-agent-notes"' + (t.agent_notes || ['spoke', 'update_sent'].includes(t.agent_outcome) ? '' : ' class="cx-hide"') + '><summary>Optional buyer-agent notes</summary><label class="cx-f" for="cx-an">Buyer-agent notes</label><textarea id="cx-an" name="agent_notes"' + dis + '>' + esc(t.agent_notes || '') + '</textarea></details></fieldset></section>' : isTue ? '<input type="hidden" name="agent_outcome" value="' + esc(t.agent_outcome || (editable ? 'no_buyer_agent' : '')) + '">' : '') +
       '<details id="cx-follow-up" class="cx-card" style="margin-top:12px;padding:14px"' + (t.next_action || t.next_action_date ? ' open' : '') + '><summary style="cursor:pointer"><b>Follow-up</b></summary><div class="cx-split"><div>' +
@@ -992,13 +992,6 @@
       var cc = $('#cx-concern', ov); if (cc) cc.classList.toggle('cx-hide', (p.concern_status || 'none') === 'none');
       var agentNotes = $('#cx-agent-notes', ov);
       if (agentNotes) agentNotes.classList.toggle('cx-hide', !p.agent_notes && !['spoke', 'update_sent'].includes(p.agent_outcome));
-      var ag = $('#cx-agent', ov);
-      if (ag && L.hasBuyerAgent(loan.buyer_agent_name)) {
-        ag.disabled = bo !== 'conversation';
-        $('#cx-agent-help', ov).textContent = ag.disabled
-          ? 'Select Spoke with borrower in the borrower conversation above to enable these fields.'
-          : 'Update ' + loan.buyer_agent_name + ' after the borrower call.';
-      }
       $all('.cx-check', ov).forEach(function (l) { var i = l.querySelector('input'); if (i) l.classList.toggle('done', i.checked); });
     }
     if (editable) {
@@ -1064,12 +1057,14 @@
     }
     var on = function (sel, fn) { var b = $('[data-cx="' + sel + '"]', ov); if (b) b.addEventListener('click', fn); };
     on('save', function () {
-      if (compact && !$('#cx-bo', ov).value) {
-        toast('Choose the borrower contact outcome before saving.', true);
+      var agentOnly = compact && !$('#cx-bo', ov).value && !!($('#cx-ao', ov) || {}).value;
+      if (compact && !$('#cx-bo', ov).value && !agentOnly) {
+        toast('Choose a borrower or buyer-agent outcome before saving.', true);
         $('#cx-bo', ov).focus();
         return;
       }
-      save(null).then(function () { renderDrawer(t.id); refreshEvents(t.id); renderAll(); }).catch(function () {});
+      var patch = agentOnly ? { borrower_outcome: t.borrower_outcome || null } : null;
+      save(patch, agentOnly ? 'Buyer-agent update saved.' : null).then(function () { renderDrawer(t.id); refreshEvents(t.id); renderAll(); }).catch(function () {});
     });
     on('complete', function () {
       var errs = valid();
