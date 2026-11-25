@@ -873,7 +873,7 @@
       (isTue ? '<blockquote id="cx-ccr-script" class="cx-script" style="margin:8px 0 0">' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '') +
       (isTue ? '' : '<label class="cx-check' + (referralAsked ? ' done' : '') + '" style="margin-top:8px"><input type="checkbox" name="referral_requested"' + (referralAsked ? ' checked' : '') + dis + '><span><b>I asked the referral question on this call.</b></span></label>') +
       (isTue ? '<fieldset id="cx-rr" class="cx-row" style="border:0;padding:0;margin:10px 0 0;min-width:0;gap:8px"' + dis + '><legend class="cx-f">Their answer</legend>' +
-        [['asked_no_referral', 'No one']].concat(['potential_opportunity', 'own_financing'].includes(t.referral_response) ? [L.REFERRAL_RESPONSES.find(function (r) { return r[0] === t.referral_response; })] : [], [['named_introduction', 'Gave a name']]).map(function (r) {
+        [['asked_no_referral', 'No referral']].concat(['potential_opportunity', 'own_financing'].includes(t.referral_response) ? [L.REFERRAL_RESPONSES.find(function (r) { return r[0] === t.referral_response; })] : [], [['named_introduction', 'Got a referral']]).map(function (r) {
           return '<label class="cx-check" style="flex:1;min-width:130px;justify-content:center;padding:12px;font-weight:700"><input type="radio" name="referral_response" value="' + esc(r[0]) + '"' + (r[0] === t.referral_response ? ' checked' : '') + '><span>' + esc(r[1]) + '</span></label>';
         }).join('') + '</fieldset>' :
       '<label class="cx-f" for="cx-rr">Client response</label><select id="cx-rr" name="referral_response"' + dis + '>' + opts(L.REFERRAL_RESPONSES, t.referral_response, 'Select response') + '</select>') +
