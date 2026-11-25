@@ -229,6 +229,18 @@ t('Velocify funnel matches the existing LP Conversion stage rules and dedupes le
   assert.equal(L.velocifyFunnel(relationship).contracts, 1);
 
 });
+t('Tuesday attempts return on the scheduled date without counting as complete', () => {
+  const call = {task_type:'tuesday',status:'attempted',borrower_outcome:'voicemail',due_date:'2026-11-24',next_action_date:'2026-11-26'};
+  assert.equal(L.tuesdayFollowupScheduled(call,'2026-11-25'),true);
+  assert.equal(L.bucket(call,'2026-11-25'),'upcoming');
+  assert.equal(L.daySummary([call],'2026-11-25').remaining.length,0);
+  assert.equal(L.daySummary([call],'2026-11-25').completed.length,0);
+  assert.equal(L.bucket(call,'2026-11-26'),'due_today');
+  assert.equal(L.bucket(call,'2026-11-27'),'overdue');
+  assert.equal(L.bucket({...call,next_action_date:null},'2026-11-25'),'overdue');
+  assert.equal(L.bucket({...call,task_type:'pc60'},'2026-11-25'),'overdue');
+  assert.equal(L.bucket({...call,borrower_outcome:'conversation'},'2026-11-25'),'overdue');
+});
 t('Scorecard summary uses the existing metrics, goals and totals', () => {
   const s = L.scorecardSummary('Gavin', { past_client_talks_Mon: 3, past_client_talks_Tue: 2, apps_1003_Wed: 4, contracts_Fri: 1 });
   assert.equal(s.goal, 32); assert.equal(s.total, 10); assert.equal(s.pct, 31);

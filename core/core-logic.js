@@ -385,13 +385,24 @@
     if (t.status === 'exception') return isoOfInstant(t.exception_at || t.updated_at);
     return null;
   }
+  function workDueDate(t) {
+    if (t.task_type === 'tuesday' && t.status === 'attempted' &&
+        t.borrower_outcome && t.borrower_outcome !== 'conversation' && t.next_action_date) return t.next_action_date;
+    return t.due_date;
+  }
+  function tuesdayFollowupScheduled(t, today) {
+    return t.task_type === 'tuesday' && t.status === 'attempted' &&
+      !!t.next_action_date && workDueDate(t) === t.next_action_date &&
+      !!t.borrower_outcome && t.borrower_outcome !== 'conversation' && t.next_action_date > today;
+  }
   function bucket(t, today) {
     if (t.status === 'cancelled') return 'cancelled';
     if (t.status === 'needs_review') return 'needs_review';
     if (t.status === 'completed' || t.status === 'exception') return resolvedOn(t) === today ? 'resolved_today' : 'resolved';
-    if (t.due_date < today) return 'overdue';
-    if (t.due_date === today) return 'due_today';
-    if (t.due_date <= addDays(today, 7)) return 'upcoming';
+    var due = workDueDate(t);
+    if (due < today) return 'overdue';
+    if (due === today) return 'due_today';
+    if (due <= addDays(today, 7)) return 'upcoming';
     return 'later';
   }
   function isIssue(t) { return t.status !== 'cancelled' && (t.concern_status === 'unresolved' || (t.escalated && t.status !== 'completed')); }
@@ -513,7 +524,8 @@
     if (t.status === 'exception' && t.exception_kind === 'service_recovery') return 'Client concern — resolution required';
     if (t.status === 'exception') return 'Exception — ' + (t.exception_kind === 'unreachable' ? 'borrower unreachable' : 'documented circumstance');
     if (t.concern_status === 'unresolved') return 'Client concern — resolution required';
-    if (today && t.due_date > today) return 'Not yet due';
+    if (today && tuesdayFollowupScheduled(t, today)) return 'Attempted · follow-up scheduled';
+    if (today && workDueDate(t) > today) return 'Not yet due';
     if (t.status === 'attempted') return 'Attempted — follow-up required';
     return today && t.due_date < today ? 'Overdue' : 'Due';
   }
@@ -623,7 +635,7 @@
     clean: clean, lpShort: lpShort, hasBuyerAgent: hasBuyerAgent, normKey: normKey,
     parsePipeline: parsePipeline, parseFunded: parseFunded,
     validateTask: validateTask, validateException: validateException, friendlyError: friendlyError,
-    effectiveOwner: effectiveOwner, bucket: bucket, isIssue: isIssue, daySummary: daySummary, resolvedOn: resolvedOn,
+    effectiveOwner: effectiveOwner, workDueDate: workDueDate, tuesdayFollowupScheduled: tuesdayFollowupScheduled, bucket: bucket, isIssue: isIssue, daySummary: daySummary, resolvedOn: resolvedOn,
     referralMetrics: referralMetrics, uniqueReferrals: uniqueReferrals, duplicateNotes: duplicateNotes,
     pace: pace, tierFromCloses: tierFromCloses, inRange: inRange, outcomeLabel: outcomeLabel,
     velocifyStage: velocifyStage, velocifyFunnel: velocifyFunnel, velocifySources: velocifySources, realtorReferralPace: realtorReferralPace, referralWatch: referralWatch, SCORECARD: SCORECARD, scorecardMetrics: scorecardMetrics,

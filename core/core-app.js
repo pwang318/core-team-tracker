@@ -61,7 +61,7 @@
   function borrowerOf(task) { var l = S.loans[task.loan_number]; return (l && l.borrower_name) || 'Loan ' + task.loan_number; }
   function owner(task) { return L.effectiveOwner(task); }
   function lpLabel(lp) { return lp || 'Unassigned'; }
-  function sortWork(a, b) { return a.due_date < b.due_date ? -1 : a.due_date > b.due_date ? 1 : borrowerOf(a).localeCompare(borrowerOf(b)); }
+  function sortWork(a, b) { return String(L.workDueDate(a) || '').localeCompare(String(L.workDueDate(b) || '')) || borrowerOf(a).localeCompare(borrowerOf(b)); }
   function opts(list, val, blank) {
     return (blank !== undefined ? '<option value="">' + esc(blank) + '</option>' : '') + list.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === val ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('');
   }
@@ -489,7 +489,8 @@
     var saved = t.status === 'open' && (t.borrower_notes || t.service_update || t.agent_outcome || t.referral_response)
       ? '<span class="cx-chip chip-attempt">Progress saved</span>' : '';
     var issue = L.isIssue(t) && t.status !== 'exception' ? '<span class="cx-chip chip-overdue">Client concern</span>' : '';
-    var meta = [typeLabel(t.task_type), 'Due ' + fmtDate(t.due_date)];
+    var due = L.workDueDate(t);
+    var meta = [typeLabel(t.task_type), (due !== t.due_date ? 'Follow up ' : 'Due ') + fmtDate(due)];
     if (['tuesday', 'contract', 'preclose'].includes(t.task_type)) {
       if (loan.loan_type) meta.push(loan.loan_type);
       if (t.loan_number) meta.push('Loan ending ' + String(t.loan_number).slice(-4));
@@ -516,12 +517,13 @@
     return {
       'tue-assigned': tueAssigned,
       'tue-completed': tueAssigned.filter(function (t) { return t.status === 'completed'; }),
-      'tue-remaining': tueAssigned.filter(isOpen),
-      'tue-overdue': tueAssigned.filter(function (t) { return isOpen(t) && t.due_date < t0; }),
+      'tue-remaining': tueAssigned.filter(function (t) { return isOpen(t) && !L.tuesdayFollowupScheduled(t, t0); }),
+      'tue-scheduled': tueAssigned.filter(function (t) { return L.tuesdayFollowupScheduled(t, t0); }),
+      'tue-overdue': tueAssigned.filter(function (t) { return isOpen(t) && L.workDueDate(t) < t0; }),
       'tue-ccr': tueAssigned.filter(function (t) { return t.borrower_outcome === 'conversation' && t.referral_requested; }),
       'tue-intros': tueAssigned.filter(function (t) { return t.referral_response === 'named_introduction'; }),
       pc30: pcDue('pc30'), pc60: pcDue('pc60'), pc90: pcDue('pc90'), soon30: pcSoon('pc30'), soon60: pcSoon('pc60'), soon90: pcSoon('pc90'),
-      'pc-overdue': mine.filter(function (t) { return /^pc/.test(t.task_type) && isOpen(t) && t.due_date < t0; }),
+      'pc-overdue': mine.filter(function (t) { return /^pc/.test(t.task_type) && isOpen(t) && L.workDueDate(t) < t0; }),
       issues: mine.filter(L.isIssue),
       journey: mine.filter(function (t) { return (t.task_type === 'contract' || t.task_type === 'preclose') && isOpen(t) && t.due_date <= L.addDays(t0, 7); }),
       day: L.daySummary(mine, t0)
@@ -562,9 +564,9 @@
     host.innerHTML = '<div class="cx-card"><h2>Who to coach today</h2>' +
       (first.count ? '<p><b>' + esc(first.lp) + '</b> · ' + esc(first.action) + '</p><button type="button" class="cx-btn primary" data-coach-lp="' + esc(first.lp) + '">Open ' + esc(first.lp) + '’s dashboard</button>' :
         '<p>No urgent items in the loaded coaching data.</p>') +
-      '<p class="cx-note">' + (hasImport('pipeline') ? rows.reduce(function (n, row) { return n + row.open; }, 0) + ' live Tuesday updates open' : 'Live Tuesday count unavailable') + '</p>' +
+      '<p class="cx-note">' + (hasImport('pipeline') ? rows.reduce(function (n, row) { return n + row.open; }, 0) + ' Tuesday updates still to call' : 'Live Tuesday count unavailable') + '</p>' +
       '<details class="cx-supporting" data-coaching-details' + (breakdownOpen ? ' open' : '') + '><summary>All LPs and scorecards</summary>' +
-      '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>LP</th><th>Start here</th><th>Tuesday open</th><th>Post-closing due</th><th>Scorecard</th></tr></thead><tbody>' +
+      '<div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>LP</th><th>Start here</th><th>Tuesday still to call</th><th>Post-closing due</th><th>Scorecard</th></tr></thead><tbody>' +
       rows.map(function (row) {
         return '<tr><td><button type="button" class="cx-link" data-coach-lp="' + esc(row.lp) + '">' + esc(row.lp) + '</button></td>' +
           '<td><b>' + esc(row.action) + '</b>' + (row.count && row.rank < 6 ? ' · ' + row.count : '') + '</td><td>' +
@@ -578,7 +580,7 @@
     });
   }
 
-  var TILE_TITLES = { 'tue-assigned': 'Tuesday Updates assigned', 'tue-completed': 'Tuesday Updates completed', 'tue-remaining': 'Tuesday Updates remaining', 'tue-overdue': 'Overdue Tuesday Updates',
+  var TILE_TITLES = { 'tue-assigned': 'Tuesday Updates assigned', 'tue-completed': 'Tuesday Updates completed', 'tue-remaining': 'Tuesday Updates remaining', 'tue-overdue': 'Overdue Tuesday Updates', 'tue-scheduled': 'Scheduled Tuesday follow-ups',
     'tue-ccr': 'CCR requests completed', 'tue-intros': 'CCR introductions received', pc30: '30-day calls', pc60: '60-day calls', pc90: '90-day calls', 'pc-overdue': 'Overdue post-closing calls' };
 
   var publicLpSummary = null, publicLpLoading = null, publicLpFetchedAt = 0, publicLpTile = null;
@@ -679,13 +681,14 @@
       '<div class="cx-tiles" style="margin-top:14px">' +
       tileHtml('tue-assigned', 'Total assigned', tr ? String(B['tue-assigned'].length) : 'No data', tr ? 'This week plus carried forward' : (S.error ? 'Live pipeline data unavailable' : 'Pipeline report not imported yet'), tr ? '' : 'is-na', f === 'tue-assigned') +
       tileHtml('tue-completed', 'Completed', tr ? String(B['tue-completed'].length) : 'No data', 'Conversation and CCR documented', tr ? '' : 'is-na', f === 'tue-completed') +
-      tileHtml('tue-remaining', 'Remaining', countOrComplete(B['tue-remaining'].length, tr), tr && att ? att + ' attempted, not yet reached' : '', stateCls(B['tue-remaining'].length, tr), f === 'tue-remaining') +
+      tileHtml('tue-remaining', 'Still to call', tr ? String(B['tue-remaining'].length) : 'No data', tr && att ? att + ' attempted, not yet reached' : '', stateCls(B['tue-remaining'].length, tr), f === 'tue-remaining') +
+      tileHtml('tue-scheduled', 'Follow-up scheduled', tr ? String(B['tue-scheduled'].length) : 'No data', '', tr ? '' : 'is-na', f === 'tue-scheduled') +
       tileHtml('tue-overdue', 'Overdue', countOrComplete(B['tue-overdue'].length, tr), tr && B['tue-overdue'].length ? 'Carried forward until completed' : '', stateCls(B['tue-overdue'].length, tr, true), f === 'tue-overdue') +
       tileHtml('tue-ccr', 'CCR requests completed', tr ? String(B['tue-ccr'].length) : 'No data', tr ? 'of ' + B['tue-assigned'].length + ' assigned' : '', tr ? '' : 'is-na', f === 'tue-ccr') +
       tileHtml('tue-intros', 'CCR introductions', tr ? String(B['tue-intros'].length) : 'No data', 'Named introductions received', tr ? '' : 'is-na', f === 'tue-intros') +
       '</div>' + (tr && f && f.indexOf('tue-') === 0 ? worklistHtml(f, B) : (tr && B['tue-remaining'].length ? '<div style="margin-top:14px">' + listHtml(B['tue-remaining']) + '</div>' : '')) +
-      '<div class="cx-row" style="margin-top:14px"><button type="button" class="cx-btn accent" data-cx="signoff-tuesday"' + (!tr || B['tue-remaining'].length || signed || !canWrite() ? ' disabled' : '') + '>' + (signed ? '✓ Tuesday Updates completed ' + esc(fmtTime(signed.signed_off_at)) : "Complete Today's Tuesday Updates") + '</button>' +
-      (tr && B['tue-remaining'].length && !signed ? '<span class="cx-note">' + B['tue-remaining'].length + ' assigned ' + (B['tue-remaining'].length === 1 ? 'update is' : 'updates are') + ' not complete yet.</span>' : '') + '</div></div>' : '';
+      '<div class="cx-row" style="margin-top:14px"><button type="button" class="cx-btn accent" data-cx="signoff-tuesday"' + (!tr || B['tue-remaining'].length || B['tue-scheduled'].length || signed || !canWrite() ? ' disabled' : '') + '>' + (signed ? '✓ Tuesday Updates completed ' + esc(fmtTime(signed.signed_off_at)) : "Complete Today's Tuesday Updates") + '</button>' +
+      (tr && B['tue-scheduled'].length ? '<span class="cx-note">' + B['tue-scheduled'].length + ' scheduled for a later date.</span>' : '') + '</div></div>' : '';
     var pc = panel === 'core-lp-postclosing' ? '<div class="cx-card" id="core-lp-postclosing" tabindex="-1"><div class="cx-head"><div><div class="cx-kicker">Primary workflow</div><h3>Post-Closing Calls</h3><div class="cx-sub">30, 60 and 90 days after closing. Service questions before the past-client referral ask.</div></div></div>' +
       '<div class="cx-tiles" style="margin-top:14px">' +
       ['pc30', 'pc60', 'pc90'].map(function (k) {
@@ -700,7 +703,7 @@
     var corrections = panel === 'core-supporting' ? correctionsCard(lp) : '';
     var otherOpen = B.issues.length || S.corrections.some(function (c) { return c.lp === lp && (c.status === 'open' || c.status === 'reopened'); });
     var shortcuts = '<nav aria-label="Your work" class="cx-tiles cx-lp-shortcuts">' +
-      lpShortcut('core-lp-tuesday', 'Tuesday updates', tr ? B['tue-remaining'].length + ' open' : 'Unavailable') +
+      lpShortcut('core-lp-tuesday', 'Tuesday updates', tr ? B['tue-remaining'].length + ' to call · ' + B['tue-scheduled'].length + ' scheduled' : 'Unavailable') +
       lpShortcut('core-lp-builder', 'Builder follow-ups', builderStatus(lp)) +
       lpShortcut('core-lp-postclosing', '30/60/90-day calls', pr ? due + ' due' : 'Unavailable') +
       lpShortcut('core-lp-journey', 'Contract & pre-closing', tr ? B.journey.length + ' due' : 'Unavailable') +
@@ -949,6 +952,8 @@
       var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = saving || (!compact && errs.length > 0);
       var bo = p.borrower_outcome, ar = $('#cx-attempt-row', ov);
       if (ar) ar.innerHTML = bo && bo !== 'conversation' ? '<button type="button" class="cx-btn sm" data-cx="log-attempt">Log this attempt</button><span class="cx-note">Attempts are saved with the time. They do not complete the call.</span>' : '';
+      var followUp = $('#cx-follow-up', ov);
+      if (compact && followUp && bo && bo !== 'conversation' && !p.next_action_date) followUp.open = true;
       var la = $('[data-cx="log-attempt"]', ov); if (la) la.onclick = function () { logAttempt(bo); };
       var named = $('#cx-named', ov); if (named) named.classList.toggle('cx-hide', p.referral_response !== 'named_introduction');
       var cc = $('#cx-concern', ov); if (cc) cc.classList.toggle('cx-hide', (p.concern_status || 'none') === 'none');
@@ -985,7 +990,7 @@
         if (p.agent_outcome && p.agent_outcome !== prev.agent_outcome) evs.push({ event_type: p.agent_outcome === 'no_buyer_agent' ? 'status' : p.agent_outcome === 'attempted' ? 'attempt' : 'conversation', party: 'buyer_agent', channel: p.agent_outcome, detail: (p.agent_notes || '').slice(0, 500) });
         if (p.status && p.status !== prev.status) evs.push({ event_type: 'status', party: 'system', channel: p.status, detail: p.status === 'exception' ? p.exception_reason : null });
         if (p.escalated && !prev.escalated) evs.push({ event_type: 'escalation', party: 'borrower', detail: p.concern_notes });
-        return logEvents(row, evs).then(function () { ov.__dirty = false; setState('Saved'); toast(okMsg || 'Progress saved. Complete the call when all required items are entered.'); return row; });
+        return logEvents(row, evs).then(function () { ov.__dirty = false; setState('Saved'); toast(okMsg || (L.tuesdayFollowupScheduled(row, today()) ? 'Attempt saved. Follow-up scheduled for ' + fmtDate(row.next_action_date) + '.' : 'Progress saved. Complete the call when all required items are entered.')); return row; });
       }).catch(function (e) {
         setState('Not saved', true); busy(false); toast(friendlyServerError(e), true);
         if (/another device/.test(String(e.message))) { ov.__dirty = false; renderDrawer(t.id); }
@@ -994,9 +999,16 @@
     }
     function logAttempt(channel) {
       setState('Saving attempt…'); busy(true);
-      saveTask(t, { status: t.status === 'open' ? 'attempted' : t.status, borrower_outcome: channel })
+      var patch = { status: t.status === 'open' ? 'attempted' : t.status, borrower_outcome: channel };
+      if (compact) {
+        var followUp = collect(form, t);
+        patch.next_action_date = followUp.next_action_date;
+        patch.next_action = followUp.next_action;
+      }
+      saveTask(t, patch)
         .then(function (row) { return logEvents(row, [{ event_type: 'attempt', party: 'borrower', channel: channel, detail: ((form.querySelector('[name="borrower_notes"]') || {}).value || '').slice(0, 500) || null }]); })
-        .then(function () { ov.__dirty = false; toast('Attempt saved. The call stays open until you reach the borrower.'); renderDrawer(t.id); refreshEvents(t.id); renderAll(); })
+        .then(function () { ov.__dirty = false; toast(compact && patch.next_action_date > today() ? 'Attempt saved. Follow-up scheduled for ' + fmtDate(patch.next_action_date) + '.' :
+          (compact ? 'Attempt saved. Set a future follow-up date to move this update off today’s list.' : 'Attempt saved. The call stays open until you reach the borrower.')); renderDrawer(t.id); refreshEvents(t.id); renderAll(); })
         .catch(function (e) { setState('Not saved', true); busy(false); toast(friendlyServerError(e), true); });
     }
     var on = function (sel, fn) { var b = $('[data-cx="' + sel + '"]', ov); if (b) b.addEventListener('click', fn); };
@@ -1155,7 +1167,7 @@
         tue: L.referralMetrics(mine, ['tuesday'], range, t0), pc: L.referralMetrics(mine, ['pc30', 'pc60', 'pc90'], range, t0),
         day: L.daySummary(mine, t0), sc: scorecardFor(lp, wk),
         cover: S.coverage.filter(function (c) { return c.start_date <= t0 && c.end_date >= t0 && (c.from_lp === lp || c.to_lp === lp); }),
-        overdue: mine.filter(function (t) { return isOpen(t) && t.due_date < t0; }),
+        overdue: mine.filter(function (t) { return isOpen(t) && L.workDueDate(t) < t0; }),
         upcoming: mine.filter(function (t) { return isOpen(t) && t.due_date > t0 && t.due_date <= L.addDays(t0, 7); }),
         concerns: mine.filter(L.isIssue),
         corr: S.corrections.filter(function (c) { return c.lp === lp && c.status !== 'verified'; }),
@@ -1178,17 +1190,18 @@
   }
   function tuesdayWorklist() {
     if (!hasImport('pipeline') || S.error) return '<div class="cx-empty">Live Tuesday updates are unavailable. Check the pipeline report under Tools and reporting.</div>';
-    var completed = S.tuesdayStatus === 'completed';
+    var view = { open: ['tue-remaining', 'No Tuesday updates to call.'], scheduled: ['tue-scheduled', 'No Tuesday follow-ups scheduled.'],
+      completed: ['tue-completed', 'No completed updates this week.'] }[S.tuesdayStatus];
     var sections = LPS.map(function (lp) {
-      var tasks = lpBuckets(lp)[completed ? 'tue-completed' : 'tue-remaining'];
+      var tasks = lpBuckets(lp)[view[0]];
       return tasks.length ? '<section class="cx-card"><h3>' + esc(lp) + ' · ' + tasks.length + '</h3>' + listHtml(tasks) + '</section>' : '';
     }).join('');
     return '<div class="cx-stack"><div class="cx-head"><h3>Tuesday updates</h3><div class="cx-row">' +
-      [['open', 'Still open'], ['completed', 'Completed']].map(function (option) {
+      [['open', 'Still to call'], ['scheduled', 'Follow-up scheduled'], ['completed', 'Completed']].map(function (option) {
         var selected = option[0] === S.tuesdayStatus;
         return '<button type="button" class="cx-btn' + (selected ? ' primary' : '') + '" data-tuesday-status="' + option[0] + '" aria-pressed="' + selected + '">' + option[1] + '</button>';
       }).join('') + '</div></div>' +
-      (sections || '<div class="cx-empty">' + (completed ? 'No completed updates this week.' : 'No open updates for the loan partners.') + '</div>') + '</div>';
+      (sections || '<div class="cx-empty">' + esc(view[1]) + '</div>') + '</div>';
   }
   function openTuesdayWorklist() {
     S.cmdTab = 'tuesday';
@@ -1201,9 +1214,9 @@
     var team = L.daySummary(S.tasks, t0, function (t) { return !!owner(t); });
     var unLoans = unassignedActiveLoans();
     var concerns = S.tasks.filter(L.isIssue), review = S.tasks.filter(function (t) { return t.status === 'needs_review' && t.due_date >= L.addDays(t0, -59); });
-    var overdueAll = S.tasks.filter(function (t) { return owner(t) && isOpen(t) && t.due_date < t0; });
+    var overdueAll = S.tasks.filter(function (t) { return owner(t) && isOpen(t) && L.workDueDate(t) < t0; });
     var wk = L.weekMonday(t0), missingSc = S.scorecards && S.scorecards.ok ? LPS.filter(function (lp) { return !scorecardFor(lp, wk); }) : null;
-    var tueOd = tue.outstanding.filter(function (t) { return t.due_date < t0; });
+    var tueOd = tue.outstanding.filter(function (t) { return L.workDueDate(t) < t0; });
     var tiles =
       tileHtml('rec:' + reg('team-req', 'Team required work today', team.required), 'Team execution today', team.pct === null ? 'No calls due' : team.pct + '%', team.completed.length + ' done · ' + team.remaining.length + ' outstanding', 'hero') +
       tileHtml('rec:' + reg('overdue', 'All overdue work', overdueAll), 'Overdue', countOrComplete(overdueAll.length, true), 'Carried forward', stateCls(overdueAll.length, true, true)) +
@@ -1237,7 +1250,7 @@
     var pcTbl = '<div class="cx-card"><div class="cx-head"><h3>Post-closing accountability · ' + esc(PERIODS[period]) + '</h3><button type="button" class="cx-link" data-tab-go="unassigned">' + unLoans.length + ' unassigned borrowers</button></div><div class="cx-scroll" style="margin-top:12px"><table class="cx-t"><thead><tr><th>LP</th><th class="cx-num">30-day</th><th class="cx-num">60-day</th><th class="cx-num">90-day</th><th class="cx-num">Completion</th><th class="cx-num">Overdue</th><th class="cx-num">Attempted</th><th class="cx-num">PCR requests</th><th class="cx-num">PCR introductions</th></tr></thead><tbody>' +
       rows.map(function (r) {
         var k = r.lp, by = function (ty) { return r.pc.required.filter(function (t) { return t.task_type === ty; }); };
-        var od = r.mine.filter(function (t) { return /^pc/.test(t.task_type) && isOpen(t) && t.due_date < t0; }), att = r.pc.attempted.filter(function (t) { return t.status !== 'completed'; });
+        var od = r.mine.filter(function (t) { return /^pc/.test(t.task_type) && isOpen(t) && L.workDueDate(t) < t0; }), att = r.pc.attempted.filter(function (t) { return t.status !== 'completed'; });
         return '<tr><td><b>' + esc(k) + '</b></td>' + ['pc30', 'pc60', 'pc90'].map(function (ty) { return '<td class="cx-num">' + numCell(by(ty).length, reg(k + '-' + ty, k + ' · ' + typeLabel(ty) + 's', by(ty))) + '</td>'; }).join('') +
           '<td class="cx-num">' + pctCell(r.pc.completed.length, r.pc.required.length, reg(k + '-pcd', k + ' · post-closing completed', r.pc.completed)) + '</td><td class="cx-num">' + numCell(od.length, reg(k + '-pco', k + ' · overdue calls', od)) + '</td>' +
           '<td class="cx-num">' + numCell(att.length, reg(k + '-pca', k + ' · attempted calls', att)) + '</td><td class="cx-num">' + numCell(r.pc.asked.length, reg(k + '-pcr', k + ' · PCR requests', r.pc.asked)) + '</td><td class="cx-num">' + numCell(r.pc.named.length, reg(k + '-pci', k + ' · PCR introductions', r.pc.named.map(function (n) { return n.task; }))) + '</td></tr>';
@@ -1262,7 +1275,7 @@
       if (r.tue.required.length >= 3 && pctOf(r.tue.asked.length, r.tue.required.length) < 80) items.push([lp, 'CCR ask documented on ' + pctOf(r.tue.asked.length, r.tue.required.length) + '% of assigned Tuesday Updates.', 'Role-play the 7-day referral question; recheck next Tuesday.', r.tue.missing]);
       var att = r.tue.attempted.filter(function (t) { return t.status !== 'completed'; });
       if (att.length >= 3) items.push([lp, att.length + ' Tuesday Updates reached only voicemail or text.', 'Agree a second call window and text to schedule a time.', att]);
-      var pcO = r.mine.filter(function (t) { return /^pc/.test(t.task_type) && isOpen(t) && t.due_date < t0; });
+      var pcO = r.mine.filter(function (t) { return /^pc/.test(t.task_type) && isOpen(t) && L.workDueDate(t) < t0; });
       if (pcO.length) items.push([lp, pcO.length + ' post-closing calls overdue.', 'Block a weekly post-closing call hour and clear the oldest first.', pcO]);
       if (r.dupes.length) items.push([lp, r.dupes.length + ' set(s) of identical notes across different borrowers.', 'Review together; notes must describe the actual conversation.', [].concat.apply([], r.dupes)]);
       if (r.sc === false) items.push([lp, 'Scorecard not entered this week.', 'Enter this week\'s scorecard before the week closes.', []]);
@@ -1730,7 +1743,7 @@
     var bott = [];
     if (fun && started) [['Lead to application', fun.leadToApp, 80], ['Application to preapproval', fun.appToPre, 55], ['Preapproval to contract', fun.preToContract, per === 'quarter' && curQ === 1 ? 60 : 65], ['Contract to funded', fun.contractToFunded, 75]].forEach(function (s) { if (s[1] !== null && s[1] < s[2]) bott.push(s[0] + ': ' + s[1] + '% against ' + s[2] + '% plan'); });
     if (signed) {
-      var od = S.tasks.filter(function (t) { return owner(t) && isOpen(t) && t.due_date < t0; }).length; if (od) bott.push(od + ' overdue client calls across the team');
+      var od = S.tasks.filter(function (t) { return owner(t) && isOpen(t) && L.workDueDate(t) < t0; }).length; if (od) bott.push(od + ' overdue client calls across the team');
       var un = unassignedActiveLoans().length; if (un) bott.push(un + ' active loans need an LP owner');
     }
     if (sc && sc.some(function (x) { return !x; })) bott.push(sc.filter(function (x) { return !x; }).length + ' LP scorecards not entered this week');
