@@ -579,12 +579,12 @@
       ['tuesday', 'Tuesday updates', counts.tuesday_open], ['pc30', '30-day calls due', counts.pc30_due],
       ['pc60', '60-day calls due', counts.pc60_due], ['pc90', '90-day calls due', counts.pc90_due]
     ];
-    var selected = publicLpTile && publicLpTile.lp === lp ? publicLpTile.key : null;
+    var selected = publicLpTile && publicLpTile.lp === lp ? publicLpTile.key : Number(counts.tuesday_open) > 0 ? 'tuesday' : null;
     var active = tiles.find(function (item) { return item[0] === selected; });
     var schedule = (counts.schedule || []).filter(function (row) { return row.task_type === selected; });
     return '<div class="cx-card"><h3>Workload summary</h3><div class="cx-tiles" style="margin-top:14px">' +
       tiles.map(function (item) {
-        return '<button type="button" class="cx-tile" data-public-tile="' + item[0] + '" aria-expanded="' + (selected === item[0]) + '" aria-controls="core-public-detail"><span class="t-label">' + item[1] + '</span><span class="t-val">' + (Number(item[2]) > 0 ? esc(item[2]) : '—') + '</span><span class="t-foot">View schedule</span></button>';
+        return '<button type="button" class="cx-tile" data-public-tile="' + item[0] + '" aria-expanded="' + (selected === item[0]) + '" aria-controls="core-public-detail"><span class="t-label">' + item[1] + '</span><span class="t-val">' + (item[2] == null ? 'Unavailable' : esc(item[2])) + '</span><span class="t-foot">View schedule</span></button>';
       }).join('') + '</div><div id="core-public-detail"' + (active ? '' : ' hidden') + '>' +
       (active ? '<h3 style="margin-top:14px">' + active[1] + '</h3>' +
         (selected === 'tuesday' ? '<blockquote class="cx-script" style="margin:8px 0">CCR script · ' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '<p class="cx-sub">Due and upcoming in the next 7 days</p>') +
@@ -633,7 +633,7 @@
       $all('[data-public-tile]', host).forEach(function (button) {
         button.addEventListener('click', function () {
           var key = button.dataset.publicTile;
-          publicLpTile = button.getAttribute('aria-expanded') === 'true' ? null : { lp: lp, key: key };
+          publicLpTile = { lp: lp, key: button.getAttribute('aria-expanded') === 'true' ? null : key };
           renderToday();
           $('[data-public-tile="' + key + '"]', host).focus();
         });
@@ -646,6 +646,8 @@
     var signed = S.signoffs.find(function (s) { return s.lp === lp && s.work_date === t0 && s.task_group === 'tuesday'; });
     var att = B['tue-remaining'].filter(function (t) { return t.status === 'attempted'; }).length;
     var tue = panel === 'core-lp-tuesday' ? '<div class="cx-card" id="core-lp-tuesday" tabindex="-1"><div class="cx-head"><div><div class="cx-kicker">Primary workflow</div><h3>Tuesday Updates</h3><div class="cx-sub">Borrower first, then the buyer agent. Service first, referral second.</div></div></div>' +
+      (tr ? (f && f.indexOf('tue-') === 0 ? worklistHtml(f, B) : '<h4>Still to call · ' + B['tue-remaining'].length + '</h4>' + listHtml(B['tue-remaining'], 'No calls remaining in this list.')) : '<div class="cx-empty">Pipeline data unavailable.</div>') +
+      '<details' + (f ? ' open' : '') + '><summary>Tuesday counts and filters</summary>' +
       '<div class="cx-tiles" style="margin-top:14px">' +
       tileHtml('tue-assigned', 'Total assigned', tr ? String(B['tue-assigned'].length) : 'No data', tr ? 'This week plus carried forward' : (S.error ? 'Live pipeline data unavailable' : 'Pipeline report not imported yet'), tr ? '' : 'is-na', f === 'tue-assigned') +
       tileHtml('tue-completed', 'Completed', tr ? String(B['tue-completed'].length) : 'No data', 'Conversation and CCR documented', tr ? '' : 'is-na', f === 'tue-completed') +
@@ -654,7 +656,7 @@
       tileHtml('tue-overdue', 'Overdue', countOrComplete(B['tue-overdue'].length, tr), tr && B['tue-overdue'].length ? 'Carried forward until completed' : '', stateCls(B['tue-overdue'].length, tr, true), f === 'tue-overdue') +
       tileHtml('tue-ccr', 'CCR requests completed', tr ? String(B['tue-ccr'].length) : 'No data', tr ? 'of ' + B['tue-assigned'].length + ' assigned' : '', tr ? '' : 'is-na', f === 'tue-ccr') +
       tileHtml('tue-intros', 'CCR introductions', tr ? String(B['tue-intros'].length) : 'No data', 'Named introductions received', tr ? '' : 'is-na', f === 'tue-intros') +
-      '</div>' + (tr && f && f.indexOf('tue-') === 0 ? worklistHtml(f, B) : (tr && B['tue-remaining'].length ? '<div style="margin-top:14px">' + listHtml(B['tue-remaining']) + '</div>' : '')) +
+      '</div></details>' +
       '<div class="cx-row" style="margin-top:14px"><button type="button" class="cx-btn accent" data-cx="signoff-tuesday"' + (!tr || B['tue-remaining'].length || B['tue-scheduled'].length || signed || !canWrite() ? ' disabled' : '') + '>' + (signed ? '✓ Tuesday Updates completed ' + esc(fmtTime(signed.signed_off_at)) : "Complete Today's Tuesday Updates") + '</button>' +
       (tr && B['tue-scheduled'].length ? '<span class="cx-note">' + B['tue-scheduled'].length + ' scheduled for a later date.</span>' : '') + '</div></div>' : '';
     var pc = panel === 'core-lp-postclosing' ? '<div class="cx-card" id="core-lp-postclosing" tabindex="-1"><div class="cx-head"><div><div class="cx-kicker">Primary workflow</div><h3>Post-Closing Calls</h3><div class="cx-sub">30, 60 and 90 days after closing. Service questions before the past-client referral ask.</div></div></div>' +
