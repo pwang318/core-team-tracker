@@ -745,6 +745,7 @@
         var id = button.dataset.lpJump;
         if (id === 'core-scorecard-card') { openScorecardFromWork(lp); return; }
         lpPanel = id;
+        S.lpFilter = id === 'core-lp-tuesday' ? 'tue-remaining' : null;
         renderToday();
         $('[data-lp-back]', host).focus({ preventScroll: true });
         if (host.scrollIntoView) host.scrollIntoView({ block: 'start' });
@@ -839,10 +840,11 @@
   function borrowerOutcomeOptions(task) {
     if (task.task_type !== 'tuesday') return opts(L.BORROWER_OUTCOMES, task.borrower_outcome, 'Select outcome');
     var confirmed = L.tuesdayUpdateTextConfirmed(task);
-    var selected = task.borrower_outcome === 'conversation' ? 'conversation' : null;
+    var selected = ['conversation', 'voicemail'].includes(task.borrower_outcome) ? task.borrower_outcome : null;
     return (confirmed ? '<option value="text_sent" selected hidden>Update text sent (saved)</option>' : '') + opts([
-      ['conversation', 'Spoke with borrower'],
-      ['no_answer_update', 'No answer · sent update text']
+      ['conversation', 'Talked with borrower'],
+      ['voicemail', 'Left voicemail'],
+      ['no_answer_update', 'Texted the update after calling']
     ], confirmed ? null : selected, confirmed ? undefined : 'Select outcome');
   }
   function renderDrawer(id) {
@@ -998,10 +1000,11 @@
       var cb = $('[data-cx="complete"]', ov); if (cb) cb.disabled = saving || (!compact && errs.length > 0);
       if (compact) {
         var textUpdate = updateTextSelected();
-        $('#cx-tuesday-ccr', ov).classList.toggle('cx-hide', textUpdate);
+        var attempted = textUpdate || ['voicemail', 'text_sent'].includes(p.borrower_outcome);
+        $('#cx-tuesday-ccr', ov).classList.toggle('cx-hide', attempted);
         var hint = $('#cx-complete-hint', ov);
-        if (hint.textContent) hint.textContent = !textUpdate && errs.length ? L.friendlyError(errs[0]) : '';
-        cb.classList.toggle('cx-hide', textUpdate);
+        if (hint.textContent) hint.textContent = !attempted && errs.length ? L.friendlyError(errs[0]) : '';
+        cb.classList.toggle('cx-hide', attempted);
         $('[data-cx="save"]', ov).textContent = textUpdate ? 'Save update text' : 'Save progress';
       }
       var bo = p.borrower_outcome, ar = $('#cx-attempt-row', ov);
