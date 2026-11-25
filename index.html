@@ -970,7 +970,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ct-nav-section"><div class="ct-nav-label">TEAM</div><button class="who-btn ct-nav-btn wb-Snapshot" data-route="snapshot" onclick="lpv2Route('snapshot',this)" type="button"><span class="ct-nav-icon">▦</span><span>Team Snapshot</span></button><button class="who-btn ct-nav-btn" data-route="portfolio" onclick="lpv2Route('portfolio',this)" type="button"><span class="ct-nav-icon">▤</span><span>Team Portfolio</span></button><button class="who-btn ct-nav-btn wb-ProductionManager" data-route="production-manager" onclick="lpv2Route('production-manager',this)" type="button"><span class="ct-nav-icon">◈</span><span>Production Manager</span></button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LOAN PARTNERS</div>
 <button class="who-btn ct-nav-btn wb-Gavin" data-lp="Gavin" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Gavin</button><button class="who-btn ct-nav-btn wb-Karen" data-lp="Karen" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Karen</button><button class="who-btn ct-nav-btn wb-Osgood" data-lp="Osgood" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Osgood</button><button class="who-btn ct-nav-btn wb-Jordan" data-lp="Jordan" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Jordan</button><button class="who-btn ct-nav-btn wb-Said" data-lp="Said" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Said</button><button class="who-btn ct-nav-btn wb-Isaak" data-lp="Isaak" data-route="lp" onclick="lpv2Route('lp',this)" type="button">Isaak</button></div>
-<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Realtor / Builder Leads</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Quality</button></div>
+<div class="ct-nav-section"><div class="ct-nav-label">SHARED WORK</div><button class="who-btn ct-nav-btn wb-FaceTime" data-route="facetime" onclick="lpv2Route('facetime',this)" type="button">Face Time</button><button class="who-btn ct-nav-btn wb-Leads" data-route="leads" onclick="lpv2Route('leads',this)" type="button">Referral Leads</button><button class="who-btn ct-nav-btn" data-route="agent-health" onclick="lpv2Route('agent-health',this)" type="button">Agent Health / Roster</button><button class="who-btn ct-nav-btn" data-route="co-marketing" onclick="lpv2Route('co-marketing',this)" type="button"><span class="ct-nav-icon">◎</span><span>Co-Marketing</span></button><button class="who-btn ct-nav-btn wb-FileIntegrity" data-route="file-integrity" onclick="lpv2Route('file-integrity',this)" type="button">File Quality</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">DATA</div><button class="who-btn ct-nav-btn" data-route="data-hub" onclick="lpv2Route('data-hub',this)" type="button">Weekly Data Hub</button></div>
 <div class="ct-nav-section"><div class="ct-nav-label">LEARN + TOOLS</div><button class="who-btn ct-nav-btn wb-OperatingStandard" data-route="standard" onclick="lpv2Route('standard',this)" type="button">Operating Standard</button><button class="who-btn ct-nav-btn ct-action-btn" data-route="scripts" onclick="lpv2Route('scripts',this)" type="button">Scripts + Training</button><button class="who-btn ct-nav-btn wb-Admin" data-route="admin" onclick="lpv2Route('admin',this)" type="button">Admin</button></div>
 </div>
@@ -1379,7 +1379,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="fi-head">
 <div>
 <div class="fi-kicker">CORE TEAM PROCESS</div>
-<div class="fi-title">File Integrity</div>
+<div class="fi-title">File Quality</div>
 </div>
 </div>
 <div class="fi-process-card">
@@ -1618,7 +1618,6 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <div id="ref-filter-results-table-v2"></div>
 </div>
-<div id="lp-conversion-boxes-v2" style="margin-bottom:1rem"></div>
 <div class="ref-section urgent" id="ref-needs-touch-section-v2" style="display:none">
 <div class="ref-section-header">
 <div><div class="ref-section-title">Needs contact today</div><div class="ref-section-subtitle">No touch in 24+ hours</div></div>
@@ -1626,6 +1625,9 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 </div>
 <div id="ref-needs-touch-table-v2"></div>
 </div>
+<details id="leads-by-lp" style="margin:0 0 1rem"><summary style="cursor:pointer;font-weight:800;font-size:13px;padding:6px 0">Leads and conversion by LP (this month)</summary>
+<div id="lp-conversion-boxes-v2" style="margin-bottom:1rem"></div>
+</details>
 <div class="ref-section">
 <div class="ref-section-header">
 <div><div class="ref-section-title">Today — <span id="ref-today-label-v2"></span></div></div>
@@ -1785,17 +1787,9 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div class="ft-stat"><div class="ft-stat-num" id="ft-s-dueweek" style="color:#B45309">—</div><div class="ft-stat-label">Due next 7 days</div></div>
 <div class="ft-stat"><div class="ft-stat-num" id="ft-s-ok" style="color:#0A6B4C">—</div><div class="ft-stat-label">On track</div></div>
 </div>
-<details id="ft-all-agents" style="background:#fff;border:1px solid #dce5ed;border-radius:12px;margin-bottom:14px"><summary style="cursor:pointer;padding:13px 17px;font-size:13px;font-weight:800;color:#102a43">All agents needing a visit (search, filter, book or log)</summary><section id="ft-action-worklist" style="padding:4px 17px 15px">
-<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px"><div><strong style="font-size:14px;color:#102a43">Face Time follow-up worklist</strong><div style="font-size:11px;color:#607582;margin-top:3px">Find every agent who needs a visit, not just this week's top three. Select an agent to open their full record.</div></div><span id="ft-action-count" style="font-size:11px;color:#4b6477"></span></div>
-<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
-<input id="ft-action-search" aria-label="Search agents" type="search" placeholder="Search agent name…" oninput="renderFtActionWorklist()" style="flex:1 1 180px;min-width:140px;border:1px solid #cdd9e4;border-radius:7px;padding:9px;font-size:12px">
-<select id="ft-action-status" aria-label="Visit due status" onchange="renderFtActionWorklist()" style="border:1px solid #cdd9e4;border-radius:7px;padding:9px;font-size:12px;background:white"><option value="due14">Due in next 14 days</option><option value="due7">Due in next 7 days</option><option value="overdue">Overdue / no first visit</option><option value="booked">Visits booked</option><option value="all">All agents</option><option value="ontrack">On track</option></select>
-<select id="ft-action-lp" aria-label="Filter by LP" onchange="renderFtActionWorklist()" style="border:1px solid #cdd9e4;border-radius:7px;padding:9px;font-size:12px;background:white"><option value="all">All LPs</option><option>Gavin</option><option>Karen</option><option>Osgood</option><option>Jordan</option><option>Said</option><option>Unassigned</option></select>
-<select id="ft-action-sort" aria-label="Sort agents" onchange="renderFtActionWorklist()" style="border:1px solid #cdd9e4;border-radius:7px;padding:9px;font-size:12px;background:white"><option value="due">Sort: most urgent</option><option value="name">Name A–Z</option><option value="tier">Tier / urgency</option><option value="lp">LP / urgency</option></select>
-</div><div id="ft-action-results" aria-live="polite"><div style="color:#64748b;font-size:12px">Loading current roster…</div></div>
-</section></details>
+
 <details id="ft-full-details" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-<summary style="cursor:pointer;padding:13px 16px;font-size:13px;font-weight:800;color:var(--text-1);background:#F8F9FB">View full Face Time coverage &amp; filters</summary>
+<summary style="cursor:pointer;padding:13px 16px;font-size:13px;font-weight:800;color:var(--text-1);background:#F8F9FB">All agents · filter by LP, tier or status</summary>
 <div style="padding:14px 16px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
 <select id="ft-lp-filter" onchange="renderFaceTime()" style="border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit;color:var(--text-1);background:var(--surface)">
 <option value="all">All LPs</option><option value="Gavin">Gavin</option><option value="Karen">Karen</option><option value="Osgood">Osgood</option><option value="Jordan">Jordan</option><option value="Said">Said</option><option value="Isaak">Isaak</option>
@@ -1820,7 +1814,7 @@ body{background:var(--ct-bg)!important;color:var(--ct-ink)!important;font-family
 <div><div style="font-size:9px;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:#0C7699;margin-bottom:3px">SHARED WORK · CO-MARKETING</div>
 <div style="font-size:22px;font-weight:800;color:#102A43">Co-Marketing Relationships</div>
 <div style="font-size:12px;color:#607582;margin-top:3px">Track partner spend, opportunities, leads, closings and relationship performance.</div></div>
-<button class="btn btn-sm" id="ct-comkt-back" type="button">← Team Snapshot</button></div>
+</div>
 <div style="background:#FAF7F2;border:1px solid #E8DDD0;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:600;color:#5C4A35">
     Target: 1 opportunity per $250 spent each month — either a buddy intro or warm lead. Goal: 80%
   </div>
@@ -8696,7 +8690,7 @@ function platTag(p){
 
 function renderDirectorView(){
   var el=document.getElementById("director-cards");
-  if(!coMktPartners.length){el.innerHTML='<div style="padding:20px;color:var(--text-3);font-size:13px">No partners yet — run the setup SQL to seed them.</div>';return;}
+  if(!coMktPartners.length){el.innerHTML='<div style="padding:20px;color:var(--text-3);font-size:13px">No co-marketing partners have been added yet.</div>';return;}
 
   // Do not use stale July 2026 annual spend constants. Monthly spend is verified
   // from the latest billing workbook; 12-month spend must be independently sourced.
@@ -13351,7 +13345,7 @@ function renderRemoved(){
 function render(){
  const host=document.getElementById('lpv3-health-table'),sum=document.getElementById('lpv3-health-summary');if(!host)return;const all=(window.__CT_HEALTH_ROWS||[]).slice(),totals=window.__CT_HEALTH_TOTALS||{active:all.length,pre:0,pipe:0,managed:all.length,removed:0},q=key((document.getElementById('lpv3-health-q')||{}).value),hf=(document.getElementById('lpv3-health-filter')||{}).value||'',lf=(document.getElementById('lpv3-health-lp')||{}).value||'';let rows=all.slice();if(hf==='action')rows=rows.filter(r=>r.health==='red'||r.health==='yellow');else if(['red','yellow','green'].includes(hf))rows=rows.filter(r=>r.health===hf);if(q)rows=rows.filter(r=>key(r.name).includes(q));if(lf)rows=rows.filter(r=>r.lp===lf);const rank={red:0,yellow:1,green:2};rows.sort((a,b)=>(rank[a.health]??9)-(rank[b.health]??9)||((b.daysLead??999)-(a.daysLead??999))||String(a.name).localeCompare(String(b.name)));const cnt=h=>all.filter(r=>r.health===h).length,follow=cnt('red')+cnt('yellow');
  if(sum)sum.innerHTML='<div class="ct-health-summary-grid"><div class="ct-health-summary"><b>'+totals.active+'</b><span>Power BI Active</span><small>Latest uploaded A/B/C population</small></div><div class="ct-health-summary"><b>'+(totals.pre===null?'—':totals.pre)+'</b><span>Current Prequal Buyers</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+(totals.pipe===null?'—':totals.pipe)+'</b><span>Current Buyers in Pipeline</span><small>Latest Power BI buyer count</small></div><div class="ct-health-summary"><b>'+totals.managed+'</b><span>Managed Roster</span><small>'+totals.removed+' removed · '+follow+' need follow-up</small></div></div><div class="ct-health-chip-row"><span class="ct-health-chip green">Green · lead in last 30 days · '+cnt('green')+'</span><span class="ct-health-chip yellow">Yellow · 31–60 days since last lead · '+cnt('yellow')+'</span><span class="ct-health-chip red">Red · 61+ days since last lead · '+cnt('red')+'</span></div>';
- host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>RM Owner</th><th>LP Owner</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last File Started</th><th>Last Contract</th><th>Last Close</th></tr></thead><tbody>'+(rows.length?rows.map(r=>'<tr data-health-agent="'+esc(r.name)+'"><td><b>'+esc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+esc(r.action)+'</small></td><td><button type="button" class="ct-health-agent-link" onclick="return ctV42OpenContact(this)">'+esc(r.name)+'</button><small>'+esc(r.why)+'</small></td><td>'+esc(r.tier)+'</td><td>'+esc(r.rm||'Unassigned')+'</td><td>'+esc(r.lp||'Unassigned')+'</td><td>'+r.pre+'</td><td>'+r.pipe+'</td><td>'+fmt(r.last)+'</td><td>'+fmt(r.lastStart)+'</td><td>'+fmt(r.lastContract)+'</td><td>'+fmt(r.lastClose)+'</td></tr>').join(''):'<tr><td colspan="11" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+'</tbody></table></div>';renderRemoved()
+ host.innerHTML='<div class="ct-health-table-wrap"><table class="ct-health-table"><thead><tr><th>Health</th><th>Agent / Action</th><th>Tier</th><th>RM Owner</th><th>LP Owner</th><th>Active Prequals</th><th>Current Pipeline</th><th>Last Lead</th><th>Last Close</th></tr></thead><tbody>'+(rows.length?rows.map(r=>'<tr data-health-agent="'+esc(r.name)+'"><td><b>'+esc(r.health==='green'?'Green':r.health==='yellow'?'Yellow':'Red')+'</b><small>'+esc(r.action)+'</small></td><td><button type="button" class="ct-health-agent-link" onclick="return ctV42OpenContact(this)">'+esc(r.name)+'</button><small>'+esc(r.why)+'</small></td><td>'+esc(r.tier)+'</td><td>'+esc(r.rm||'Unassigned')+'</td><td>'+esc(r.lp||'Unassigned')+'</td><td>'+(r.pre==null||r.pre==='null'?'—':r.pre)+'</td><td>'+(r.pipe==null||r.pipe==='null'?'—':r.pipe)+'</td><td>'+fmt(r.last)+'</td><td>'+fmt(r.lastClose)+'</td></tr>').join(''):'<tr><td colspan="9" style="padding:24px;text-align:center;color:#718391">No agents match this filter.</td></tr>')+'</tbody></table></div>';renderRemoved()
 }
 async function refresh(){const host=document.getElementById('lpv3-health-table');if(host)host.innerHTML='<div style="padding:20px;color:#718391">Loading current Power BI roster…</div>';window.__CT_HEALTH_ROWS=await buildRows();render()}
 window.ctLoadAgentHealthFresh=refresh;window.ctRenderHealthRows=render;window.lpv3RenderAgentHealth=render;
@@ -13405,7 +13399,7 @@ window.ctV42ExportSelected=function(){
 };
 window.ctExportActiveAgentOwnership=window.ctV42Export;
 function openHealth(btn){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));const view=document.getElementById('view-agent-health');if(view)view.classList.add('active');document.querySelectorAll('.ct-nav-btn,.who-btn').forEach(b=>b.classList.remove('active'));if(btn&&btn.classList)btn.classList.add('active');refresh();window.scrollTo(0,0)}window.lpv3OpenAgentHealth=openHealth;const priorRoute=window.lpv2Route;window.lpv2Route=function(route,btn){if(route==='agent-health'){openHealth(btn);return}return priorRoute?priorRoute(route,btn):undefined};
-async function boot(){const title=document.querySelector('#view-agent-health .ct-page-title');if(title){const old=document.getElementById('ctHealthBuildBadge');if(old)old.remove();title.insertAdjacentHTML('beforeend',' <span id="ctHealthBuildBadge">Agent Health v43</span>')}const sub=document.querySelector('#view-agent-health .ct-page-sub');if(sub)sub.textContent='Power BI totals match the latest upload. The table shows the managed roster after reversible removals.';const exp=document.getElementById('ctExportActiveOwnershipBtn');if(exp){exp.setAttribute('onclick','return ctV42Export()');exp.onclick=window.ctV42Export}['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=render;el.onchange=render}});if(document.getElementById('view-agent-health')?.classList.contains('active'))await refresh()}
+async function boot(){const title=document.querySelector('#view-agent-health .ct-page-title');if(title){const old=document.getElementById('ctHealthBuildBadge');if(old)old.remove();title.insertAdjacentHTML('beforeend',' <span id="ctHealthBuildBadge">Agent Health v43</span>')}const sub=document.querySelector('#view-agent-health .ct-page-sub');if(sub)sub.textContent='Who to call first. Red = no recent leads, call today. Yellow = check in soon. Green = sending leads.';const exp=document.getElementById('ctExportActiveOwnershipBtn');if(exp){exp.setAttribute('onclick','return ctV42Export()');exp.onclick=window.ctV42Export}['lpv3-health-q','lpv3-health-filter','lpv3-health-lp'].forEach(id=>{const el=document.getElementById(id);if(el){el.oninput=render;el.onchange=render}});if(document.getElementById('view-agent-health')?.classList.contains('active'))await refresh()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,50),{once:true});else setTimeout(boot,50);
 })();
 </script>
