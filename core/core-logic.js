@@ -105,7 +105,7 @@
   }
   function hasBuyerAgent(name) {
     var n = clean(name).toLowerCase();
-    return !!n && !/^(none none|none|n\/?a|na|jane doe|john doe|-)$/.test(n);
+    return !!n && !/^(none none|none|n\/?a|na|jane doe|john doe|-|fsbo|fsbo fsbo|for sale by owner)$/.test(n);
   }
   function normKey(s) { return clean(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
 

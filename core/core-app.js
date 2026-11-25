@@ -801,11 +801,11 @@
   function borrowerOutcomeOptions(task) {
     if (task.task_type !== 'tuesday') return opts(L.BORROWER_OUTCOMES, task.borrower_outcome, 'Select outcome');
     var confirmed = L.tuesdayUpdateTextConfirmed(task);
-    var selected = ['conversation', 'voicemail'].includes(task.borrower_outcome) ? task.borrower_outcome : null;
+    var selected = task.borrower_outcome === 'conversation' ? 'conversation' : null;
     return (confirmed ? '<option value="text_sent" selected hidden>Update text sent (saved)</option>' : '') + opts([
       ['conversation', 'Talked with borrower'],
-      ['voicemail', 'Left voicemail'],
-      ['no_answer_update', 'Texted the update after calling']
+      ['vm_update', 'Left voicemail + texted the update'],
+      ['no_answer_update', 'No answer + texted the update']
     ], confirmed ? null : selected, confirmed ? undefined : 'Select outcome');
   }
   function renderDrawer(id) {
@@ -846,7 +846,7 @@
       '<label class="cx-f" for="cx-cat">Conversation date and time</label><input id="cx-cat" type="datetime-local" name="conversation_at" value="' + esc(toLocalInput(t.conversation_at)) + '"' + dis + '>' +
       '<div style="margin-top:12px"><div class="cx-f" style="margin:0 0 4px">Conversation steps</div>' + checks + '</div>' +
       '<label class="cx-f" for="cx-bn">Borrower conversation notes</label><textarea id="cx-bn" name="borrower_notes" placeholder="What was discussed, in your own words"' + dis + '>' + esc(t.borrower_notes || '') + '</textarea>') +
-      (isTue ? '<section id="cx-tuesday-ccr">' : '') + '<h3 style="margin-top:18px">' + (isTue ? 'Ask for a referral (CCR)' : type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
+      (isTue ? '<p id="cx-ccr-note" class="cx-note cx-hide" style="margin-top:10px">No referral (CCR) question on this one. It appears when you pick <b>Talked with borrower</b>.</p><section id="cx-tuesday-ccr">' : '') + '<h3 style="margin-top:18px">' + (isTue ? 'Ask for a referral (CCR)' : type === 'contract' ? 'Referral expectation' : (L.TASK_TYPES[type].referral === 'CCR' ? 'Current-client referral (CCR)' : 'Past-client referral (PCR)')) + '</h3>' +
       (isTue ? '<blockquote id="cx-ccr-script" class="cx-script" style="margin:8px 0 0">' + esc(L.REFERRAL_7_DAYS) + '</blockquote>' : '') +
       (isTue ? '' : '<label class="cx-check' + (referralAsked ? ' done' : '') + '" style="margin-top:8px"><input type="checkbox" name="referral_requested"' + (referralAsked ? ' checked' : '') + dis + '><span><b>I asked the referral question on this call.</b></span></label>') +
       (isTue ? '<fieldset id="cx-rr" class="cx-row" style="border:0;padding:0;margin:10px 0 0;min-width:0;gap:8px"' + dis + '><legend class="cx-f">Their answer</legend>' +
@@ -937,7 +937,7 @@
     var compact = t.task_type === 'tuesday', saving = false;
     var followUpDate = $('#cx-nd', ov), suggestedDate = '', dateEdited = false;
     function updateTextSelected() {
-      return $('#cx-bo', ov).value === 'no_answer_update';
+      return ['vm_update', 'no_answer_update'].includes($('#cx-bo', ov).value);
     }
     function suggestAttemptDate() {
       if (!compact || !followUpDate) return;
@@ -966,6 +966,7 @@
         var textUpdate = updateTextSelected();
         var attempted = textUpdate || ['voicemail', 'text_sent'].includes(p.borrower_outcome);
         $('#cx-tuesday-ccr', ov).classList.toggle('cx-hide', attempted);
+        $('#cx-ccr-note', ov).classList.toggle('cx-hide', !attempted);
         var hint = $('#cx-complete-hint', ov);
         if (hint.textContent) hint.textContent = !attempted && errs.length ? L.friendlyError(errs[0]) : '';
         cb.classList.toggle('cx-hide', attempted);
@@ -981,7 +982,7 @@
           changeDate.onclick = function () { $('#cx-follow-up', ov).open = true; followUpDate.focus(); };
           ar.appendChild(changeDate);
         }
-        if (compact && !bo) ar.textContent = 'Call first. If they don’t answer, leave a voicemail if available and text the loan update before saving.';
+        if (compact && !bo) ar.textContent = 'Call first. If they don’t answer, leave a voicemail and text them the update, then pick that option.';
       }
       var followUp = $('#cx-follow-up', ov);
       if (compact && followUp) followUp.classList.toggle('cx-hide', !updateTextSelected());
@@ -1016,7 +1017,7 @@
         }
         return null;
       }
-      var channel = t.borrower_outcome === 'voicemail' ? 'voicemail' : 'no_answer';
+      var channel = $('#cx-bo', ov).value === 'vm_update' || t.borrower_outcome === 'voicemail' ? 'voicemail' : 'no_answer';
       patch.borrower_outcome = 'text_sent';
       patch.script_checks = Object.assign({}, patch.script_checks || t.script_checks, { update_text_sent: true });
       return { event_type: 'attempt', party: 'borrower', channel: channel };
