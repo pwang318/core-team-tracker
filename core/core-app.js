@@ -996,7 +996,9 @@
       if (agentNotes) agentNotes.classList.toggle('cx-hide', !p.agent_notes && !['spoke', 'update_sent'].includes(p.agent_outcome));
       $all('.cx-check', ov).forEach(function (l) { var i = l.querySelector('input'); if (i) l.classList.toggle('done', i.checked); });
     }
+    function clearMissing() { $all('.cx-missing', ov).forEach(function (el) { el.classList.remove('cx-missing'); el.style.removeProperty('box-shadow'); el.style.removeProperty('border-color'); }); }
     if (editable) {
+      form.addEventListener('input', clearMissing); form.addEventListener('change', clearMissing);
       form.addEventListener('input', function (e) { if (e.target === followUpDate) dateEdited = true; ov.__dirty = true; setState('Unsaved changes'); refreshReqs(); });
       form.addEventListener('change', function (e) {
         if (e.target === followUpDate) dateEdited = true;
@@ -1078,7 +1080,17 @@
           hint.textContent = L.friendlyError(errs[0]);
           if (errs.some(function (e) { return /^(Next action|Follow-up date)/.test(e); })) $('#cx-follow-up', ov).open = true;
           var agentChoice = errs[0] === 'Buyer agent update required' && $('#cx-agent input', ov);
-          (agentChoice || hint).focus();
+          var field = /^Update notes/.test(errs[0]) ? $('#cx-bn', ov) : /^Referral response/.test(errs[0]) ? $('#cx-rr input', ov) :
+            /referral name/.test(errs[0]) ? $('#cx-rn', ov) : agentChoice;
+          clearMissing();
+          if (field) {
+            var mark = field.matches('textarea, input[type="text"]') ? field : field.closest('fieldset') || field;
+            mark.classList.add('cx-missing'); mark.style.setProperty('box-shadow', '0 0 0 3px #C0392B', 'important'); mark.style.setProperty('border-color', '#C0392B', 'important');
+            hint.style.color = '#C0392B'; hint.style.fontWeight = '700';
+            if (mark.scrollIntoView) mark.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            if (field === $('#cx-bn', ov)) field.placeholder = 'Type a quick update here to finish (e.g. Approved, on track to close)';
+            field.focus();
+          } else hint.focus();
         } else toast('Not complete yet: ' + L.friendlyError(errs[0]), true);
         return;
       }
