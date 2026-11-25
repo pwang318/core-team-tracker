@@ -9755,10 +9755,14 @@ if(typeof window.renderReferralLeadsDirect==="function"){
    ══════════════════════════════════════════════════════════ */
 (function(){
 
+var dismissedBellAlerts={};
+
 function ctLoadNotifications(){
   var badge=document.getElementById("ct-notif-badge"),list=document.getElementById("ct-notif-list");
   if(!badge||!list)return;
   var isLp=["Gavin","Karen","Osgood","Jordan","Said","Isaak"].indexOf(currentUser)>=0;
+  var notificationUser=currentUser||"team";
+  var dismissKey="ct-bell-dismissed:"+notificationUser;
   var lpFilter=isLp?"&lp=eq."+encodeURIComponent(currentUser):"";
   var openLpFlags="lp_flags?resolved=eq.false"+lpFilter+"&select=*&order=created_at.desc&limit=5";
   var rmToLpPath="rm_lp_flags?resolved=eq.false"+lpFilter+"&select=*&order=created_at.desc&limit=5";
@@ -9766,7 +9770,7 @@ function ctLoadNotifications(){
   var callReplies=isLp?"call_logs?lp=eq."+encodeURIComponent(currentUser)+"&rm_note=not.is.null&select=id,agent_name,lp,rm_note,rm_note_at,flag_rm,call_date&order=rm_note_at.desc&limit=10":null;
   Promise.all([
     sbFetch("GET",openLpFlags).catch(function(){return[];}),
-    sbFetch("GET","lead_notes?notify_rm_gesture=eq.true&gesture_sent=eq.false&select=lead_buyer_name,lead_agent_name,lp,created_at&order=created_at.desc&limit=5").catch(function(){return[];}),
+    sbFetch("GET","lead_notes?notify_rm_gesture=eq.true&gesture_sent=eq.false&select=id,lead_buyer_name,lead_agent_name,lp,created_at&order=created_at.desc&limit=5").catch(function(){return[];}),
     sbFetch("GET",rmToLpPath).catch(function(){return[];}),
     directReplies?sbFetch("GET",directReplies).catch(function(){return[]}):Promise.resolve([]),
     callReplies?sbFetch("GET",callReplies).catch(function(){return[]}):Promise.resolve([])
@@ -9777,10 +9781,30 @@ function ctLoadNotifications(){
     var seen={};responseRows=responseRows.filter(function(r){var k=r.source+"|"+r.id+"|"+r.rm_note_at+"|"+r.rm_note;if(seen[k])return false;seen[k]=1;return !ctRmHiddenRow(r)&&!!String(r.rm_note||"").trim();});
     responseRows.sort(function(a,b){return String(b.rm_note_at||"").localeCompare(String(a.rm_note_at||""));});
     var unreadResponses=isLp?responseRows.filter(function(r){return !ctRmResponseIsRead(currentUser,r)}).slice(0,5):[];
+    if((currentUser||"team")!==notificationUser)return;
+    var dismissed=dismissedBellAlerts[dismissKey];
+    if(!dismissed){
+      try{dismissed=new Set(JSON.parse(localStorage.getItem(dismissKey)||"[]"));}
+      catch(error){dismissed=new Set();}
+      dismissedBellAlerts[dismissKey]=dismissed;
+    }
+    var visibleKeys=[];
+    function visibleAlerts(source,rows){
+      return rows.filter(function(row){
+        var key=JSON.stringify([source,row.id,row.rm_note_at||row.created_at||""]);
+        if(dismissed.has(key))return false;
+        visibleKeys.push(key);
+        return true;
+      });
+    }
+    flags=visibleAlerts("flag",flags);
+    gestures=visibleAlerts("gesture",gestures);
+    rmFlags=visibleAlerts("handoff",rmFlags);
+    unreadResponses=visibleAlerts("response",unreadResponses);
     var total=flags.length+gestures.length+rmFlags.length+unreadResponses.length;
     if(total>0){badge.textContent=total>9?"9+":total;badge.style.display="flex";}else badge.style.display="none";
     if(total===0){list.innerHTML='<div style="padding:8px 0;color:var(--text-3)">Nothing new right now</div>';return;}
-    var html="";
+    var html='<button type="button" data-clear-bell-alerts>Clear alerts</button>';
     unreadResponses.forEach(function(r){
       html+='<button type="button" onclick="ctOpenRmResponses('+JSON.stringify(currentUser)+')" style="display:block;width:100%;text-align:left;padding:8px 7px;border:0;border-bottom:1px solid var(--border-light);background:#FFF7F7;cursor:pointer;font:inherit">'
         +'<div style="font-weight:850;color:#A12727">💬 NEW RM RESPONSE · '+escHtml(r.agent_name?displayName(r.agent_name):"General")+'</div>'
@@ -9793,6 +9817,13 @@ function ctLoadNotifications(){
     rmFlags.forEach(function(f){html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light);background:#FFFDF7"><div style="font-weight:700;color:#6F4E00">📥 RM → '+escHtml(f.lp||"LP")+' · '+escHtml(f.agent_name?displayName(f.agent_name):"General")+'</div><div style="color:#6C6252;font-size:11px">from '+escHtml(f.created_by||"RM")+' — “'+escHtml(String(f.note||"").substring(0,80))+'”</div></div>';});
     gestures.forEach(function(g){html+='<div style="padding:7px 0;border-bottom:1px solid var(--border-light)"><div style="font-weight:700;color:var(--text)">🎁 '+escHtml(g.lead_buyer_name||g.lead_agent_name)+'</div><div style="color:var(--text-2);font-size:11px">via '+escHtml(g.lp||"")+' — gesture opportunity</div></div>';});
     list.innerHTML=html;
+    list.querySelector("[data-clear-bell-alerts]").onclick=function(){
+      visibleKeys.forEach(function(key){dismissed.add(key);});
+      try{localStorage.setItem(dismissKey,JSON.stringify(Array.from(dismissed)));}
+      catch(error){}
+      badge.style.display="none";
+      list.innerHTML='<div style="padding:8px 0;color:var(--text-3)">Nothing new right now</div>';
+    };
   }).catch(function(){list.innerHTML='<div style="color:var(--text-3)">Could not load</div>';});
 }
 window.ctLoadNotifications=ctLoadNotifications;
