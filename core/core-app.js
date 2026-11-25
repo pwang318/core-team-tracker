@@ -84,13 +84,54 @@
   try { mgrKey = localStorage.getItem(MGR_STORE) || null; } catch (e) {}
   function setKey(k) { teamKey = k || null; try { if (k) localStorage.setItem(KEY_STORE, k); else localStorage.removeItem(KEY_STORE); } catch (e) {} }
   function setMgrKey(k) { mgrKey = k || null; try { if (k) localStorage.setItem(MGR_STORE, k); else localStorage.removeItem(MGR_STORE); } catch (e) {} }
-  function activeKey() { return mgrKey || teamKey; }
-  function forgetDevice() { setKey(null); setMgrKey(null); clearCallAccess(); S.error = null; renderAll(); }
+  var emailSession = null, emailClientPromise = null;
+  var EMAIL_KEY = 'verified-email-session', EMAIL_STORE = 'core.lp.email.v1';
+  function activeKey() { return mgrKey || teamKey || (emailSession ? EMAIL_KEY : null); }
+  function emailClient() {
+    if (!emailClientPromise) emailClientPromise = import('https://esm.sh/@supabase/supabase-js@2.49.8?bundle').then(function (sdk) {
+      return sdk.createClient(SB_URL, SB_KEY, { auth: { storageKey: EMAIL_STORE, flowType: 'pkce', detectSessionInUrl: false } });
+    }).catch(function (e) { emailClientPromise = null; throw e; });
+    return emailClientPromise;
+  }
+  async function startEmailSignIn() {
+    var email = window.prompt('Enter your assigned work email');
+    if (!email || !email.trim()) return;
+    try {
+      var client = await emailClient();
+      var result = await client.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: location.origin + location.pathname } });
+      if (result.error) throw result.error;
+      toast('Check your work email. Open the sign-in message in this browser.');
+    } catch (e) { toast(friendlyServerError(e), true); }
+  }
+  async function restoreEmailSignIn() {
+    var url = new URL(location.href), code = url.searchParams.get('code');
+    try {
+      if (!localStorage.getItem(EMAIL_STORE) && !(code && localStorage.getItem(EMAIL_STORE + '-code-verifier'))) return;
+      var client = await emailClient();
+      var response = code ? await client.auth.exchangeCodeForSession(code) : await client.auth.getSession();
+      if (code) { url.searchParams.delete('code'); history.replaceState(null, '', url.pathname + url.search + url.hash); }
+      if (response.error) throw response.error;
+      emailSession = response.data.session;
+      client.auth.onAuthStateChange(function (event, session) {
+        emailSession = session;
+        if (event === 'SIGNED_OUT' && !activeKey()) { clearCallAccess(); renderAll(); }
+      });
+      if (emailSession) {
+        await loadAll();
+        if (code && S.tier === 'team') {
+          var button = $('.ct-nav-btn[data-lp="Jordan"]');
+          if (button && typeof window.lpv2Route === 'function') await window.lpv2Route('lp', button);
+          lpPanel = 'core-lp-tuesday'; renderToday();
+        }
+      }
+    } catch (e) { toast(friendlyServerError(e), true); }
+  }
+  function forgetDevice() { if (emailClientPromise) emailClientPromise.then(function (c) { return c.auth.signOut({ scope: 'local' }); }).catch(function () {}); emailSession = null; setKey(null); setMgrKey(null); clearCallAccess(); S.error = null; renderAll(); }
 
   function rpc(fn, args, timeoutMs) {
     var ctl = new AbortController(); var timer = setTimeout(function () { ctl.abort(); }, timeoutMs || 30000);
     return fetch(SB_URL + '/rest/v1/rpc/' + fn, { method: 'POST', cache: 'no-store', signal: ctl.signal,
-      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) })
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + (args && args.p_key === EMAIL_KEY && emailSession ? emailSession.access_token : SB_KEY), 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) })
       .then(function (r) {
         return r.text().then(function (t) {
           var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { j = t; }
@@ -149,7 +190,8 @@
     }).catch(function (e) {
       if (key !== activeKey()) return;
       S.error = friendlyServerError(e);
-      if (/CORE_FORBIDDEN:.*(?:not valid|access link required)/i.test(String(e.message))) {
+      if (key === EMAIL_KEY && /CORE_FORBIDDEN:/.test(String(e.message))) { toast(S.error, true); forgetDevice(); }
+      else if (/CORE_FORBIDDEN:.*(?:not valid|access link required)/i.test(String(e.message))) {
         clearCallAccess();
         if (mgrKey) setMgrKey(null);
         else setKey(null);
@@ -631,7 +673,9 @@
       return;
     }
     if (!privateView) {
-      host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) + '</div>';
+      host.innerHTML = '<div class="cx-stack"><div class="cx-head"><h2>' + esc(lp) + ' · LP Dashboard</h2></div>' + publicLpCard(lp) + (lp === 'Jordan' ? '<button type="button" class="cx-btn accent" data-email-work>Open my call list with work email</button>' : '') + '</div>';
+      var emailButton = $('[data-email-work]', host);
+      if (emailButton) emailButton.addEventListener('click', startEmailSignIn);
       $all('[data-public-tile]', host).forEach(function (button) {
         button.addEventListener('click', function () {
           var key = button.dataset.publicTile;
@@ -1898,6 +1942,7 @@
   // ================================================================ boot
   function boot() {
     try { injectShell(); } catch (e) { console.error('CORE module shell', e); }
+    restoreEmailSignIn();
     var view = new URLSearchParams(location.search).get('view');
     if (view === 'tuesday') openTuesdayWorklist();
     if (view === 'snapshot' && typeof window.lpv2Route === 'function') {
