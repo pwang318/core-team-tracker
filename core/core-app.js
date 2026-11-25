@@ -85,7 +85,7 @@
   function setKey(k) { teamKey = k || null; try { if (k) localStorage.setItem(KEY_STORE, k); else localStorage.removeItem(KEY_STORE); } catch (e) {} }
   function setMgrKey(k) { mgrKey = k || null; try { if (k) localStorage.setItem(MGR_STORE, k); else localStorage.removeItem(MGR_STORE); } catch (e) {} }
   function activeKey() { return mgrKey || teamKey; }
-  function forgetDevice() { setKey(null); setMgrKey(null); S.tier = null; S.tasks = []; S.loans = {}; S.loadedAt = null; S.error = null; renderAll(); }
+  function forgetDevice() { setKey(null); setMgrKey(null); clearCallAccess(); S.error = null; renderAll(); }
 
   function rpc(fn, args, timeoutMs) {
     var ctl = new AbortController(); var timer = setTimeout(function () { ctl.abort(); }, timeoutMs || 30000);
@@ -156,7 +156,7 @@
       }
     }).then(function () { return loadScorecards(); }).finally(function () {
       S.loading = null;
-      if (key !== activeKey() && activeKey()) return loadAll();
+      if (key !== activeKey()) return loadAll();
       renderAll();
     });
     return S.loading;
