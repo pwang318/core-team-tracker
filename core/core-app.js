@@ -745,7 +745,7 @@
         var id = button.dataset.lpJump;
         if (id === 'core-scorecard-card') { openScorecardFromWork(lp); return; }
         lpPanel = id;
-        S.lpFilter = id === 'core-lp-tuesday' ? 'tue-remaining' : null;
+        S.lpFilter = id === 'core-lp-tuesday' ? { lp: lp, key: 'tue-remaining' } : null;
         renderToday();
         $('[data-lp-back]', host).focus({ preventScroll: true });
         if (host.scrollIntoView) host.scrollIntoView({ block: 'start' });
