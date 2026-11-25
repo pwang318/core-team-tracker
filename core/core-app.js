@@ -872,8 +872,7 @@
     var selected = task.borrower_outcome === 'conversation' ? 'conversation' : null;
     return (confirmed ? '<option value="text_sent" selected hidden>Update text sent (saved)</option>' : '') + opts([
       ['conversation', 'Talked with borrower'],
-      ['vm_update', 'Left voicemail + texted the update'],
-      ['no_answer_update', 'No answer + texted the update']
+      ['vm_update', 'Left vmail / sent text update']
     ], confirmed ? null : selected, confirmed ? undefined : 'Select outcome');
   }
   function renderDrawer(id) {
@@ -907,7 +906,7 @@
       '<h3 style="margin-top:18px">' + (isTue ? 'Step 1 · Borrower call' : 'Borrower call') + '</h3>' +
       (isTue ? '' : '<div class="cx-script" style="margin-top:8px">' + esc(L.SCRIPT_NOTES[type] || '') + '</div>') +
       '<label class="cx-f" for="cx-bo">' + (isTue ? 'How did the call go?' : 'Borrower contact outcome') + '</label><select id="cx-bo" name="borrower_outcome"' + (isTue ? ' class="cx-hide" aria-hidden="true" tabindex="-1"' : '') + dis + '>' + borrowerOutcomeOptions(t) + '</select>' +
-      (isTue ? '<div id="cx-bo-btns" class="cx-row" role="group" aria-label="How did the call go?" style="gap:8px;margin-top:6px">' + [['conversation', 'Talked with borrower'], ['vm_update', 'Left voicemail + texted update'], ['no_answer_update', 'No answer + texted update']].map(function (o) {
+      (isTue ? '<div id="cx-bo-btns" class="cx-row" role="group" aria-label="How did the call go?" style="gap:8px;margin-top:6px">' + [['conversation', 'Talked with borrower'], ['vm_update', 'Left vmail / sent text update']].map(function (o) {
         return '<button type="button" class="cx-check" data-bo="' + o[0] + '" aria-pressed="false" style="flex:1;min-width:150px;justify-content:center;padding:12px;font-weight:700"' + dis + '>' + esc(o[1]) + '</button>';
       }).join('') + '</div>' + (L.tuesdayUpdateTextConfirmed(t) ? '<p class="cx-note" style="margin-top:6px">Update text already sent. Pick <b>Talked with borrower</b> once you reach them.</p>' : '') : '') +
       '<div id="cx-attempt-row" class="cx-row" style="margin-top:8px"></div>' +
@@ -1053,7 +1052,7 @@
           changeDate.onclick = function () { $('#cx-follow-up', ov).open = true; followUpDate.focus(); };
           ar.appendChild(changeDate);
         }
-        if (compact && !bo) ar.textContent = 'Call first. If they don’t answer, leave a voicemail and text them the update, then pick that option.';
+        if (compact && !bo) ar.textContent = 'Call first. If they don’t answer, leave a voicemail and text them the update, then pick Left vmail / sent text update.';
       }
       var followUp = $('#cx-follow-up', ov);
       if (compact && followUp) followUp.classList.toggle('cx-hide', !updateTextSelected());
